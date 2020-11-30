@@ -1,0 +1,13 @@
+#ignore build folders
+cmake-build-debug/
+sdk-cpp-workspace/
+out/
+
+# Intellij
+.idea/
+
+# Vscode
+.vscode/
+
+# Mac
+.DS_Store
