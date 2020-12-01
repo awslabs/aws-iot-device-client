@@ -1,11 +1,10 @@
-## My Project
+#AWS IoT Device Client
 
-TODO: Fill this README out!
+#### To install the AWS IoT v2 SDK
+`./run-install.sh` 
 
-Be sure to:
-
-* Change the title in this README
-* Edit your repository description on GitHub
+#### To build the AWS IoT AWS IoT AWS IoT Device Client
+`./run-build.sh`
 
 ## Security
 
@@ -14,4 +13,3 @@ See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more inform
 ## License
 
 This project is licensed under the Apache-2.0 License.
-

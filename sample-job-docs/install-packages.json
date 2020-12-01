@@ -1,0 +1,5 @@
+{
+    "operation": "install-packages.sh",
+    "args": "cmatrix lolcat",
+    "path": "default"
+}
