@@ -31,7 +31,7 @@ namespace Aws
                 int SecureTunnelingFeature::init(
                     shared_ptr<SharedCrtResourceManager> sharedCrtResourceManager,
                     shared_ptr<ClientBaseNotifier> notifier,
-                    Aws::Crt::JsonView dcConfig)
+                    const PlainConfig &config)
                 {
                     // TODO: UA-5774 - Move SDK initialization to application level
                     aws_http_library_init(sharedCrtResourceManager->getAllocator());
@@ -41,12 +41,7 @@ namespace Aws
                         new Aws::Iotdevicecommon::DeviceApiHandle(sharedCrtResourceManager->getAllocator()));
                     mClientBaseNotifier = notifier;
 
-                    mThingName = dcConfig.GetString(Config::THING_NAME).c_str();
-                    // TODO: Get from config
-                    mAccessToken = "";
-                    mRegion = "us-west-2";
-                    mPort = 22;
-                    mSubscribeTunnelNotification = true;
+                    LoadFromConfig(config);
 
                     return 0;
                 }
@@ -72,11 +67,38 @@ namespace Aws
                     return 0;
                 }
 
+                uint16_t SecureTunnelingFeature::GetPortFromService(const std::string &service)
+                {
+                    if (mServiceToPortMap.empty())
+                    {
+                        mServiceToPortMap["SSH"] = 22;
+                        mServiceToPortMap["VNC"] = 5900;
+                    }
+
+                    auto result = mServiceToPortMap.find(service);
+                    if (result == mServiceToPortMap.end())
+                    {
+                        LOGM_ERROR(TAG, "Requested unsupported service. service=%s", service.c_str());
+                        return 0; // TODO: Consider throw
+                    }
+
+                    return result->second;
+                }
+
+                void SecureTunnelingFeature::LoadFromConfig(const PlainConfig &config)
+                {
+                    mThingName = config.thingName->c_str();
+                    mAccessToken = config.tunneling->destinationAccessToken->c_str();
+                    mRegion = config.tunneling->region->c_str();
+                    mPort = static_cast<uint16_t>(config.tunneling->port.value()); // TODO: Check range!!!!!
+                    mSubscribeNotification = config.tunneling->subscribeNotification.value();
+                }
+
                 void SecureTunnelingFeature::runSecureTunneling()
                 {
                     LOGM_INFO(TAG, "Running %s!", get_name().c_str());
 
-                    if (mSubscribeTunnelNotification)
+                    if (mSubscribeNotification)
                     {
                         SubscribeToTunnelsNotifyRequest request;
                         request.ThingName = mThingName.c_str();
@@ -192,28 +214,7 @@ namespace Aws
                     return endpoint;
                 }
 
-                uint16_t SecureTunnelingFeature::GetPortFromService(const std::string &service)
-                {
-                    if (mServiceToPortMap.empty())
-                    {
-                        mServiceToPortMap["SSH"] = 22;
-                        mServiceToPortMap["VNC"] = 5900;
-                    }
-
-                    auto result = mServiceToPortMap.find(service);
-                    if (result == mServiceToPortMap.end())
-                    {
-                        LOGM_ERROR(TAG, "Requested unsupported service. service=%s", service.c_str());
-                        return 0; // TODO: Consider throw
-                    }
-
-                    return result->second;
-                }
-
-                bool SecureTunnelingFeature::IsValidPort(int port)
-                {
-                    return 1 <= port && port <= 65535;
-                }
+                bool SecureTunnelingFeature::IsValidPort(int port) { return 1 <= port && port <= 65535; }
 
                 void SecureTunnelingFeature::OnConnectionComplete()
                 {

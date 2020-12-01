@@ -13,33 +13,33 @@ using namespace Aws::Crt::Mqtt;
 using namespace Aws::Iot;
 using namespace Aws::Iot::DeviceClient;
 
-bool SharedCrtResourceManager::initialize(Aws::Crt::JsonView dcConfig) {
-    if(!locateCredentials(dcConfig)) {
+bool SharedCrtResourceManager::initialize(const PlainConfig &config) {
+    if(!locateCredentials(config)) {
         LOG_ERROR(TAG, "Failed to find file(s) required for initializing the MQTT connection");
         return false;
     }
 
     initializeAllocator();
-    initialized = buildClient() == SharedCrtResourceManager::SUCCESS && establishConnection(dcConfig) == SharedCrtResourceManager::SUCCESS;
+    initialized = buildClient() == SharedCrtResourceManager::SUCCESS && establishConnection(config) == SharedCrtResourceManager::SUCCESS;
 
     return initialized;
 }
 
-bool SharedCrtResourceManager::locateCredentials(Aws::Crt::JsonView dcConfig) {
+bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config) {
     struct stat fileInfo;
     bool locatedAll = true;
-    if(stat(dcConfig.GetString(Config::PRIVATE_KEY).c_str(), &fileInfo) != 0) {
-        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", dcConfig.GetString(Config::PRIVATE_KEY).c_str());
+    if(stat(config.key->c_str(), &fileInfo) != 0) {
+        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.key->c_str());
         locatedAll = false;
     }
 
-    if(stat(dcConfig.GetString(Config::CERTIFICATE).c_str(), &fileInfo) != 0) {
-        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", dcConfig.GetString(Config::CERTIFICATE).c_str());
+    if(stat(config.cert->c_str(), &fileInfo) != 0) {
+        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.cert->c_str());
         locatedAll = false;
     }
 
-    if(stat(dcConfig.GetString(Config::ROOT_CA).c_str(), &fileInfo) != 0) {
-        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", dcConfig.GetString(Config::ROOT_CA).c_str());
+    if(stat(config.rootCa->c_str(), &fileInfo) != 0) {
+        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.rootCa->c_str());
         locatedAll = false;
     }
 
@@ -82,10 +82,10 @@ int SharedCrtResourceManager::buildClient() {
     return SharedCrtResourceManager::SUCCESS;
 }
 
-int SharedCrtResourceManager::establishConnection(Aws::Crt::JsonView dcConfig) {
-    auto clientConfigBuilder = MqttClientConnectionConfigBuilder(dcConfig.GetString(Config::CERTIFICATE).c_str(), dcConfig.GetString(Config::PRIVATE_KEY).c_str());
-    clientConfigBuilder.WithEndpoint(dcConfig.GetString(Config::ENDPOINT).c_str());
-    clientConfigBuilder.WithCertificateAuthority(dcConfig.GetString(Config::ROOT_CA).c_str());
+int SharedCrtResourceManager::establishConnection(const PlainConfig &config) {
+    auto clientConfigBuilder = MqttClientConnectionConfigBuilder(config.cert->c_str(), config.key->c_str());
+    clientConfigBuilder.WithEndpoint(config.endpoint->c_str());
+    clientConfigBuilder.WithCertificateAuthority(config.rootCa->c_str());
     auto clientConfig = clientConfigBuilder.Build();
 
     if (!clientConfig)
@@ -104,7 +104,7 @@ int SharedCrtResourceManager::establishConnection(Aws::Crt::JsonView dcConfig) {
 
     /*
      * TODO: Look into if anything needs changed with this synchronous behavior
-     * 
+     *
      * In a real world application you probably don't want to enforce synchronous behavior
      * but this is a sample console application, so we'll just do that with a condition variable.
      */
@@ -147,8 +147,8 @@ int SharedCrtResourceManager::establishConnection(Aws::Crt::JsonView dcConfig) {
     /*
      * Actually perform the connect dance.
      */
-    LOGM_INFO(TAG, "Establishing MQTT connection with client id %s...", dcConfig.GetString(Config::THING_NAME).c_str());
-    if (!connection->Connect(dcConfig.GetString(Config::THING_NAME).c_str(), true, 0))
+    LOGM_INFO(TAG, "Establishing MQTT connection with client id %s...", config.thingName->c_str());
+    if (!connection->Connect(config.thingName->c_str(), true, 0))
     {
         LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(connection->LastError()));
         return connection->LastError();

@@ -5,188 +5,476 @@
 #include "../jobs/JobsFeature.h"
 #include "../logging/LoggerFactory.h"
 #include "../tunneling/SecureTunnelingFeature.h"
-
 #include <aws/crt/JsonObject.h>
-
 #include <iostream>
 #include <map>
 
 using namespace std;
 using namespace Aws::Iot;
 using namespace Aws::Iot::DeviceClient;
+using namespace Aws::Iot::DeviceClient::SecureTunneling;
 
-const char *Config::DEFAULT_CONFIG_FILE = "/etc/aws-iot-device-client.conf";
-const char *Config::CONFIG_FILE = "config-file";
-const char *Config::JOBS_FEATURE = "jobs";
-const char *Config::JOBS_HANDLER_DIR = "handler_directory";
-const char *Config::TUNNELING_FEATURE = "tunneling";
-const char *Config::THING_NAME = "thing_name";
-const char *Config::ENDPOINT = "endpoint";
-const char *Config::CERTIFICATE = "cert";
-const char *Config::PRIVATE_KEY = "key";
-const char *Config::ROOT_CA = "root-ca";
-const char *Config::FEATURE_ENABLED = "enabled";
-/**
- * Store settings passed via JSON config file in @jsonObj JsonObject.
- */
-bool Config::ParseConfigFile(string file)
+constexpr char PlainConfig::CLI_ENDPOINT[];
+constexpr char PlainConfig::CLI_CERT[];
+constexpr char PlainConfig::CLI_KEY[];
+constexpr char PlainConfig::CLI_ROOT_CA[];
+constexpr char PlainConfig::CLI_THING_NAME[];
+constexpr char PlainConfig::JSON_KEY_ENDPOINT[];
+constexpr char PlainConfig::JSON_KEY_CERT[];
+constexpr char PlainConfig::JSON_KEY_KEY[];
+constexpr char PlainConfig::JSON_KEY_ROOT_CA[];
+constexpr char PlainConfig::JSON_KEY_THING_NAME[];
+constexpr char PlainConfig::JSON_KEY_JOBS[];
+constexpr char PlainConfig::JSON_KEY_TUNNELING[];
+
+bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
 {
-    ifstream dcSetting(file);
-    if (!dcSetting.is_open())
+    const char *jsonKey = JSON_KEY_ENDPOINT;
+    if (json.ValueExists(jsonKey))
     {
-        LOGM_ERROR(TAG, "*** DC FATAL ERROR: Unable to open file: '%s' ***", file.c_str());
+        endpoint = json.GetString(jsonKey).c_str();
+    }
+
+    jsonKey = JSON_KEY_CERT;
+    if (json.ValueExists(jsonKey))
+    {
+        cert = json.GetString(jsonKey).c_str();
+    }
+
+    jsonKey = JSON_KEY_KEY;
+    if (json.ValueExists(jsonKey))
+    {
+        key = json.GetString(jsonKey).c_str();
+    }
+
+    jsonKey = JSON_KEY_ROOT_CA;
+    if (json.ValueExists(jsonKey))
+    {
+        rootCa = json.GetString(jsonKey).c_str();
+    }
+
+    jsonKey = JSON_KEY_THING_NAME;
+    if (json.ValueExists(jsonKey))
+    {
+        thingName = json.GetString(jsonKey).c_str();
+    }
+
+    jsonKey = JSON_KEY_JOBS;
+    if (json.ValueExists(jsonKey))
+    {
+        Jobs temp;
+        temp.LoadFromJson(json.GetJsonObject(jsonKey));
+        jobs = temp;
+    }
+
+    jsonKey = JSON_KEY_TUNNELING;
+    if (json.ValueExists(jsonKey))
+    {
+        Tunneling temp;
+        temp.LoadFromJson(json.GetJsonObject(jsonKey));
+        tunneling = temp;
+    }
+
+    return true;
+}
+
+bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
+{
+    if (cliArgs.count(PlainConfig::CLI_ENDPOINT))
+    {
+        endpoint = cliArgs.at(PlainConfig::CLI_ENDPOINT).c_str();
+    }
+    if (cliArgs.count(PlainConfig::CLI_CERT))
+    {
+        cert = cliArgs.at(PlainConfig::CLI_CERT).c_str();
+    }
+    if (cliArgs.count(PlainConfig::CLI_KEY))
+    {
+        key = cliArgs.at(PlainConfig::CLI_KEY).c_str();
+    }
+    if (cliArgs.count(PlainConfig::CLI_ROOT_CA))
+    {
+        rootCa = cliArgs.at(PlainConfig::CLI_ROOT_CA).c_str();
+    }
+    if (cliArgs.count(PlainConfig::CLI_THING_NAME))
+    {
+        thingName = cliArgs.at(PlainConfig::CLI_THING_NAME).c_str();
+    }
+
+    return jobs->LoadFromCliArgs(cliArgs) && tunneling->LoadFromCliArgs(cliArgs);
+}
+
+bool PlainConfig::Validate() const
+{
+    if (!endpoint || endpoint->empty())
+    {
+        LOG_ERROR(Config::TAG, "*** UA FATAL ERROR: Endpoint is missing ***");
+        return false;
+    }
+    if (!cert || cert->empty())
+    {
+        LOG_ERROR(Config::TAG, "*** UA FATAL ERROR: Certificate is missing ***");
+        return false;
+    }
+    if (!key || key->empty())
+    {
+        LOG_ERROR(Config::TAG, "*** UA FATAL ERROR: Private Key is missing ***");
+        return false;
+    }
+    if (!rootCa || rootCa->empty())
+    {
+        LOG_ERROR(Config::TAG, "*** UA FATAL ERROR: Root CA is missing ***");
+        return false;
+    }
+    if (!thingName || thingName->empty())
+    {
+        LOG_ERROR(Config::TAG, "*** UA FATAL ERROR: Thing name is missing ***");
+        return false;
+    }
+    if (jobs && !jobs->Validate())
+    {
+        return false;
+    }
+    if (tunneling && !tunneling->Validate())
+    {
         return false;
     }
 
-    std::string contents((std::istreambuf_iterator<char>(dcSetting)), std::istreambuf_iterator<char>());
-    Aws::Crt::String jsonConfigFile = contents.c_str();
-    jsonObj = Aws::Crt::JsonObject(jsonConfigFile);
-    if (!jsonObj.WasParseSuccessful())
-    {
-        LOGM_ERROR(
-            TAG, "Couldn't parse JSON config file. GetErrorMessage returns: %s", jsonObj.GetErrorMessage().c_str());
-        return false;
-    }
-
-    LOGM_INFO(TAG, "Successfully fetched JSON config file: %s", contents.c_str());
-    dcSetting.close();
     return true;
 }
 
-/**
- * Store settings passed via command line argument in @jsonObj JsonObject and validates if all required  settings are
- * passed either via command line or JSON Config file. Converts final @jsonObj JsonObject into @dcConfig JsonView. This
- * JsonView object will be passed across the DC program to fetch settings.
- */
-int Config::StoreAndValidate(map<string, string> *cliArgs)
+constexpr char PlainConfig::Jobs::CLI_ENABLE_JOBS[];
+constexpr char PlainConfig::Jobs::JSON_KEY_ENABLED[];
+
+bool PlainConfig::Jobs::LoadFromJson(const Crt::JsonView &json)
 {
-    if (cliArgs->count(Config::ENDPOINT))
+    const char *jsonKey = JSON_KEY_ENABLED;
+    if (json.ValueExists(jsonKey))
     {
-        jsonObj.WithString(Config::ENDPOINT, cliArgs->at(Config::ENDPOINT).c_str());
-    }
-    if (cliArgs->count(Config::CERTIFICATE))
-    {
-        jsonObj.WithString(Config::CERTIFICATE, cliArgs->at(Config::CERTIFICATE).c_str());
-    }
-    if (cliArgs->count(Config::PRIVATE_KEY))
-    {
-        jsonObj.WithString(Config::PRIVATE_KEY, cliArgs->at(Config::PRIVATE_KEY).c_str());
-    }
-    if (cliArgs->count(Config::ROOT_CA))
-    {
-        jsonObj.WithString(Config::ROOT_CA, cliArgs->at(Config::ROOT_CA).c_str());
-    }
-    if (cliArgs->count(Config::THING_NAME))
-    {
-        jsonObj.WithString(Config::THING_NAME, cliArgs->at(Config::THING_NAME).c_str());
-    }
-    if (!ValidateJobs(cliArgs))
-    {
-        return Config::ABORT;
-    }
-    if (!ValidateTunneling(cliArgs))
-    {
-        return Config::ABORT;
+        enabled = json.GetBool(jsonKey);
     }
 
-    dcConfig = Aws::Crt::JsonView(jsonObj);
-
-    if (!dcConfig.KeyExists(Config::ENDPOINT)  || dcConfig.GetString(Config::ENDPOINT).empty())
-    {
-        LOG_ERROR(TAG, "*** DC FATAL ERROR: Endpoint is missing ***");
-        return Config::ABORT;
-    }
-    if (!dcConfig.KeyExists(Config::CERTIFICATE)  || dcConfig.GetString(Config::CERTIFICATE).empty())
-    {
-        LOG_ERROR(TAG, "*** DC FATAL ERROR: Certificate is missing ***");
-        return Config::ABORT;
-    }
-    if (!dcConfig.KeyExists(Config::PRIVATE_KEY)  || dcConfig.GetString(Config::PRIVATE_KEY).empty())
-    {
-        LOG_ERROR(TAG, "*** DC FATAL ERROR: Private Key is missing ***");
-        return Config::ABORT;
-    }
-    if (!dcConfig.KeyExists(Config::ROOT_CA) || dcConfig.GetString(Config::ROOT_CA).empty())
-    {
-        LOG_ERROR(TAG, "*** DC FATAL ERROR: Root CA is missing ***");
-        return Config::ABORT;
-    }
-    if (!dcConfig.KeyExists(Config::THING_NAME) || dcConfig.GetString(Config::THING_NAME).empty())
-    {
-        LOG_ERROR(TAG, "*** DC FATAL ERROR: Thing name is missing ***");
-        return Config::ABORT;
-    }
-    return Config::SUCCESS;
-}
-
-/**
- * Validate and store settings used for starting Jobs feature
- */
-bool Config::ValidateJobs(map<string, string> *cliArgs)
-{
-    dcConfig = Aws::Crt::JsonView(jsonObj);
-    if ((cliArgs->count(Config::JOBS_FEATURE)) ||
-        dcConfig.GetJsonObject(Config::JOBS_FEATURE).GetString(Config::FEATURE_ENABLED) == "true")
-    {
-        /**
-        TODO: Delete this Comment block before making the project public.
-        For Future reference. This way we can validate feature specific required setting.
-
-        if(!dcConfig.GetJsonObject(Config::JOBS_FEATURE).KeyExists(Config::SOME_REQUIRED_FEATURE)){
-             LOG_ERROR(TAG, "*** DC FATAL ERROR: SOME_REQUIRED_FEATURE for Jobs feature is missing ***");
-             return false;
-         }
-         */
-        jsonObj.WithString(Config::JOBS_FEATURE, "true");
-    }
     return true;
 }
 
-/**
- * Validate and store settings used for starting Tunneling feature
- */
-bool Config::ValidateTunneling(map<string, string> *cliArgs)
+bool PlainConfig::Jobs::LoadFromCliArgs(const CliArgs &cliArgs)
 {
-    dcConfig = Aws::Crt::JsonView(jsonObj);
-    if ((cliArgs->count(Config::TUNNELING_FEATURE)) ||
-        dcConfig.GetJsonObject(Config::TUNNELING_FEATURE).GetString(Config::FEATURE_ENABLED) == "true")
+    if (cliArgs.count(PlainConfig::Jobs::CLI_ENABLE_JOBS))
     {
-        // TODO: Validate required config for Tunneling features. Currently no required Config is present for Tunneling
-        // feature.
-        jsonObj.WithString(Config::TUNNELING_FEATURE, "true");
+        enabled = true;
     }
+
     return true;
 }
 
-/**
- * This method is responsible for initializing Config object. It parses configurations/settings from JSON Config file
- * and Command Line argument and validates it. After validation it stores it in an JsonObject. @dcConfig JsonView object
- * will be passed across the DC program to fetch settings.
- */
-int Config::init(map<string, string> *cliArgs)
+bool PlainConfig::Jobs::Validate() const
 {
-    if (cliArgs->count(Config::CONFIG_FILE))
+    return true;
+}
+
+constexpr char PlainConfig::Tunneling::CLI_ENABLE_TUNNELING[];
+constexpr char PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN[];
+constexpr char PlainConfig::Tunneling::CLI_TUNNELING_REGION[];
+constexpr char PlainConfig::Tunneling::CLI_TUNNELING_SERVICE[];
+constexpr char PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION[];
+
+constexpr char PlainConfig::Tunneling::JSON_KEY_ENABLED[];
+constexpr char PlainConfig::Tunneling::JSON_KEY_DESTINATION_ACCESS_TOKEN[];
+constexpr char PlainConfig::Tunneling::JSON_KEY_REGION[];
+constexpr char PlainConfig::Tunneling::JSON_KEY_PORT[];
+constexpr char PlainConfig::Tunneling::JSON_KEY_SUBSCRIBE_NOTIFICATION[];
+
+bool PlainConfig::Tunneling::LoadFromJson(const Crt::JsonView &json)
+{
+    const char *jsonKey = JSON_KEY_ENABLED;
+    if (json.ValueExists(jsonKey))
     {
-        if (!ParseConfigFile(cliArgs->at(Config::CONFIG_FILE)))
+        enabled = json.GetBool(jsonKey);
+    }
+
+    jsonKey = JSON_KEY_DESTINATION_ACCESS_TOKEN;
+    if (json.ValueExists(jsonKey))
+    {
+        destinationAccessToken = json.GetString(jsonKey).c_str();
+    }
+
+    jsonKey = JSON_KEY_REGION;
+    if (json.ValueExists(jsonKey))
+    {
+        region = json.GetString(jsonKey).c_str();
+    }
+
+    jsonKey = JSON_KEY_PORT;
+    if (json.ValueExists(jsonKey))
+    {
+        // TODO: Check if port is within valid range
+        port = json.GetInteger(jsonKey);
+    }
+
+    jsonKey = JSON_KEY_SUBSCRIBE_NOTIFICATION;
+    if (json.ValueExists(jsonKey))
+    {
+        subscribeNotification = json.GetBool(jsonKey);
+    }
+
+    return true;
+}
+
+bool PlainConfig::Tunneling::LoadFromCliArgs(const CliArgs &cliArgs)
+{
+    if (cliArgs.count(PlainConfig::Tunneling::CLI_ENABLE_TUNNELING))
+    {
+        enabled = true;
+    }
+    if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN))
+    {
+        destinationAccessToken = cliArgs.at(PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN).c_str();
+    }
+    if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_REGION))
+    {
+        region = cliArgs.at(PlainConfig::Tunneling::CLI_TUNNELING_REGION).c_str();
+    }
+    if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_SERVICE))
+    {
+        auto service = cliArgs.at(PlainConfig::Tunneling::CLI_TUNNELING_SERVICE);
+        port = SecureTunnelingFeature::GetPortFromService(service);
+    }
+    if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION))
+    {
+        subscribeNotification = false;
+    }
+
+    return true;
+}
+
+bool PlainConfig::Tunneling::Validate() const
+{
+    // TODO: Validate port is within valid range
+    return true;
+}
+
+constexpr char Config::TAG[];
+constexpr char Config::DEFAULT_CONFIG_FILE[];
+constexpr char Config::JOBS_HANDLER_DIR[];
+constexpr char Config::CLI_HELP[];
+constexpr char Config::CLI_EXPORT_DEFAULT_SETTINGS[];
+constexpr char Config::CLI_CONFIG_FILE[];
+
+bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
+{
+    struct ArgumentDefinition
+    {
+        string cliFlag;     // Cli flag to look for
+        bool additionalArg; // Does this take an addition argument?
+        bool stopIfFound;   // Should we stop processing more arguments if this is found?
+        std::function<void(const string &additionalArg)> extraSteps; // Function to call if this is found
+    };
+    ArgumentDefinition argumentDefinitions[] = {
+        {CLI_HELP, false, true, [](const string &additionalArg) { PrintHelpMessage(); }},
+        {CLI_EXPORT_DEFAULT_SETTINGS,
+         true,
+         true,
+         [](const string &additionalArg) { ExportDefaultSetting(additionalArg); }},
+        {CLI_CONFIG_FILE, true, false, nullptr},
+
+        {PlainConfig::CLI_ENDPOINT, true, false, nullptr},
+        {PlainConfig::CLI_CERT, true, false, nullptr},
+        {PlainConfig::CLI_KEY, true, false, nullptr},
+        {PlainConfig::CLI_ROOT_CA, true, false, nullptr},
+        {PlainConfig::CLI_THING_NAME, true, false, nullptr},
+
+        {PlainConfig::Jobs::CLI_ENABLE_JOBS, false, false, nullptr},
+
+        {PlainConfig::Tunneling::CLI_ENABLE_TUNNELING, false, false, nullptr},
+        {PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN, true, false, nullptr},
+        {PlainConfig::Tunneling::CLI_TUNNELING_REGION, true, false, nullptr},
+        {PlainConfig::Tunneling::CLI_TUNNELING_SERVICE, true, false, nullptr},
+        {PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION, false, false, nullptr},
+    };
+
+    map<string, ArgumentDefinition> argumentDefinitionMap;
+    for (auto &i : argumentDefinitions)
+    {
+        argumentDefinitionMap[i.cliFlag] = i;
+    }
+
+    cliArgs.clear();
+    for (int i = 1; i < argc; i++)
+    {
+        std::string currentArg = argv[i];
+        auto search = argumentDefinitionMap.find(currentArg);
+        if (search == argumentDefinitionMap.end())
         {
-            return Config::ABORT;
+            LOGM_ERROR(TAG, "*** UA FATAL ERROR: Unrecognised command line argument: %s ***", currentArg.c_str());
+            return false;
+        }
+
+        if (cliArgs.find(currentArg) != cliArgs.end())
+        {
+            LOGM_ERROR(
+                TAG,
+                "*** UA FATAL ERROR: Command Line argument '%s' cannot be specified more than once ***",
+                currentArg.c_str());
+            return false;
+        }
+
+        string additionalArg = "";
+        if (search->second.additionalArg)
+        {
+            if (i + 1 >= argc)
+            {
+                LOGM_ERROR(
+                    TAG,
+                    "*** UA FATAL ERROR: Command Line argument '%s' was passed without specifying addition argument "
+                    "***",
+                    currentArg.c_str());
+                return false;
+            }
+
+            additionalArg = argv[++i];
+        }
+        cliArgs[currentArg] = additionalArg; // Saving the argument here
+
+        if (search->second.extraSteps)
+        {
+            search->second.extraSteps(additionalArg);
+        }
+
+        if (search->second.stopIfFound)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Config::init(const CliArgs &cliArgs)
+{
+    if (cliArgs.count(Config::CLI_CONFIG_FILE))
+    {
+        if (!ParseConfigFile(cliArgs.at(Config::CLI_CONFIG_FILE)))
+        {
+            return false;
         }
     }
     else
     {
         if (!ParseConfigFile(Config::DEFAULT_CONFIG_FILE))
         {
-            return Config::ABORT;
+            return false;
         }
     }
-    return StoreAndValidate(cliArgs);
+
+    return config.LoadFromCliArgs(cliArgs) && config.Validate();
 }
 
-/**
- * Helper methods
- */
-
-bool Config::isFeatureEnabled(Aws::Crt::String featureName)
+bool Config::ParseConfigFile(const string &file)
 {
-    return dcConfig.KeyExists(featureName) && dcConfig.GetString(featureName) == "true";
+    ifstream uaSetting(file);
+    if (!uaSetting.is_open())
+    {
+        LOGM_ERROR(TAG, "*** UA FATAL ERROR: Unable to open file: '%s' ***", file.c_str());
+        return false;
+    }
+
+    std::string contents((std::istreambuf_iterator<char>(uaSetting)), std::istreambuf_iterator<char>());
+    Crt::JsonObject jsonObj = Aws::Crt::JsonObject(contents.c_str());
+    if (!jsonObj.WasParseSuccessful())
+    {
+        LOGM_ERROR(
+            TAG, "Couldn't parse JSON config file. GetErrorMessage returns: %s", jsonObj.GetErrorMessage().c_str());
+        return false;
+    }
+    Aws::Crt::JsonView uaConfig = Aws::Crt::JsonView(jsonObj);
+    config.LoadFromJson(uaConfig);
+
+    LOGM_INFO(TAG, "Successfully fetched JSON config file: %s", contents.c_str());
+    uaSetting.close();
+    return true;
+}
+
+void Config::PrintHelpMessage()
+{
+    const char *helpMessageTemplate =
+        "\n\n\tAWS IoT Device Client BINARY\n"
+        "\n"
+        "For more documentation, see <Replace with GitHUB repo Link>\n"
+        "\n"
+        "Available sub-commands:\n"
+        "\n"
+        "%s:\t\t\t\t\t\t\t\t\tGet more help on commands\n"
+        "%s <JSON-File-Location>:\t\t\t\tExport default settings for the Unified Agent binary to the specified file "
+        "and exit "
+        "program\n"
+        "%s <JSON-File-Location>:\t\t\t\t\tTake settings defined in the specified JSON file and start the binary\n"
+        "%s:\t\t\t\t\t\t\t\tEnables Jobs feature\n"
+        "%s:\t\t\t\t\t\t\tEnables Tunneling feature\n"
+        "%s <endpoint-value>:\t\t\t\t\t\tUse Specified Endpoint\n"
+        "%s <Cert-Location>:\t\t\t\t\t\t\tUse Specified Cert file\n"
+        "%s <Key-Location>:\t\t\t\t\t\t\tUse Specified Key file\n"
+        "%s <Root-CA-Location>:\t\t\t\t\t\tUse Specified Root-CA file\n"
+        "%s <thing-name-value>:\t\t\t\t\tUse Specified Thing Name\n"
+        "%s <destination-access-token>:\tUse Specified Destination Access Token\n"
+        "%s <region>:\t\t\t\t\t\tUse Specified AWS Region\n"
+        "%s <service>:\t\t\t\t\t\tConnect secure tunnel to specific service\n"
+        "%s:\t\t\t\t\tDisable MQTT new tunnel notification\n";
+
+    cout << FormatMessage(
+        helpMessageTemplate,
+        CLI_HELP,
+        CLI_EXPORT_DEFAULT_SETTINGS,
+        CLI_CONFIG_FILE,
+        PlainConfig::Jobs::CLI_ENABLE_JOBS,
+        PlainConfig::Tunneling::CLI_ENABLE_TUNNELING,
+        PlainConfig::CLI_ENDPOINT,
+        PlainConfig::CLI_CERT,
+        PlainConfig::CLI_KEY,
+        PlainConfig::CLI_ROOT_CA,
+        PlainConfig::CLI_THING_NAME,
+        PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN,
+        PlainConfig::Tunneling::CLI_TUNNELING_REGION,
+        PlainConfig::Tunneling::CLI_TUNNELING_SERVICE,
+        PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION);
+}
+
+void Config::ExportDefaultSetting(const string &file)
+{
+    string jsonTemplate = R"({
+    "%s": "<replace_with_endpoint_value>",
+    "%s": "<replace_with_certificate_file_location>",
+    "%s": "<replace_with_private_key_file_location>",
+    "%s": "<replace_with_root_ca_file_location>",
+    "%s": "<replace_with_thing_name>",
+    "%s": {
+        "%s": true
+    },
+    "%s": {
+        "%s": true,
+        "%s": "<replace_with_destination_access_token>",
+        "%s": "<replace_with_region>",
+        "%s": <replace_with_port>,
+        "%s": true
+    }
+}
+)";
+    ofstream uaSetting;
+    uaSetting.open(file);
+    uaSetting << FormatMessage(
+        jsonTemplate.c_str(),
+        PlainConfig::JSON_KEY_ENDPOINT,
+        PlainConfig::JSON_KEY_CERT,
+        PlainConfig::JSON_KEY_KEY,
+        PlainConfig::JSON_KEY_ROOT_CA,
+        PlainConfig::JSON_KEY_THING_NAME,
+        PlainConfig::JSON_KEY_JOBS,
+        PlainConfig::Jobs::JSON_KEY_ENABLED,
+        PlainConfig::JSON_KEY_TUNNELING,
+        PlainConfig::Tunneling::JSON_KEY_ENABLED,
+        PlainConfig::Tunneling::JSON_KEY_DESTINATION_ACCESS_TOKEN,
+        PlainConfig::Tunneling::JSON_KEY_REGION,
+        PlainConfig::Tunneling::JSON_KEY_PORT,
+        PlainConfig::Tunneling::JSON_KEY_SUBSCRIBE_NOTIFICATION);
+    uaSetting.close();
+    LOGM_INFO(TAG, "Exported settings to: %s", file.c_str());
 }
