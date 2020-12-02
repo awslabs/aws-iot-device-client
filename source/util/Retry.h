@@ -8,25 +8,69 @@
 #include <functional>
 #include <future>
 
-struct RetryConfig {
-    long startingBackoffMillis;
-    long maxBackoffMillis;
-    long maxRetries;
-    std::mutex& stopMutex;
-    bool& needStopFlag;
-};
+namespace Aws
+{
+    namespace Iot
+    {
+        namespace DeviceClient
+        {
+            namespace Util
+            {
+                /**
+                 * \brief Provides utility methods for retrying a function
+                 */
+                class Retry
+                {
+                  private:
+                    static const char *TAG;
 
-namespace Aws {
-    namespace Iot {
-        namespace DeviceClient {
-            class Retry {
-            private:
-                static const char * TAG;
-            public:
-                static bool exponentialBackoff(std::function<bool()> retryableFunction, RetryConfig config);
-            };
-        }
-    }
-}
+                  public:
+                    /**
+                     * \brief Used for passing an exponential retry configuration to the exponentialBackoff function
+                     */
+                    struct ExponentialRetryConfig
+                    {
+                        /**
+                         * \brief The initial amount of time between retries in milliseconds
+                         */
+                        long startingBackoffMillis;
+                        /**
+                         * \brief The maximum amount of time between retries in milliseconds
+                         */
+                        long maxBackoffMillis;
+                        /**
+                         * \brief The maximum number of retries to perform. *NOTE* if the specified number is
+                         * negative, the exponentialBackoff function will retry the provided function an infinite
+                         * number of times until it returns successfully or is shut down.
+                         */
+                        long maxRetries;
+                        /**
+                         * \brief Whether the retry attempt must be terminated so that the application and/or
+                         * other threads can be safely shut down.
+                         */
+                        std::mutex &stopMutex;
+                        bool &needStopFlag;
+                    };
+                    /**
+                     * \brief Performs an exponential backoff of the provided function based on the specified
+                     * ExponentialRetryConfig
+                     *
+                     * In the event of throttling by IoT Core APIs, such as when we perform UpdateJobExecution
+                     * within the Jobs feature, it is necessary to perform an exponential backoff to improve the
+                     * chances of receiving a success response.
+                     * @param retryableFunction the function to retry. This function should return a bool indicating
+                     * whether it is successful or not, since this indicator is what will determine whether the
+                     * function is retried or not.
+                     * @param config the ExponentialRetryConfig specifying whether the function should be retried
+                     * @return a bool representing whether the retryableFunction was successful or not
+                     */
+                    static bool exponentialBackoff(
+                        std::function<bool()> retryableFunction,
+                        ExponentialRetryConfig config);
+                };
+            } // namespace Util
+        }     // namespace DeviceClient
+    }         // namespace Iot
+} // namespace Aws
 
-#endif //DEVICE_CLIENT_RETRY_H
+#endif // DEVICE_CLIENT_RETRY_H

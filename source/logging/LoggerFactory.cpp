@@ -4,7 +4,7 @@
 #include "LoggerFactory.h"
 
 using namespace std;
-using namespace Aws::Iot::DeviceClient;
+using namespace Aws::Iot::DeviceClient::Logging;
 
 unique_ptr<Logger> fileLogger = unique_ptr<FileLogger>(new FileLogger());
 unique_ptr<Logger> stdOutLogger = unique_ptr<StdOutLogger>(new StdOutLogger());
@@ -16,9 +16,10 @@ bool initFileLogger = fileLogger->start();
 bool initStdOutLogger = stdOutLogger->start();
 
 // Fall back to the StdOutLogger if we can't write to the log file
-shared_ptr<Logger> LoggerFactory::logger = initFileLogger ?
-        shared_ptr<Logger>(fileLogger.release()) : shared_ptr<Logger>(stdOutLogger.release());
+shared_ptr<Logger> LoggerFactory::logger =
+    initFileLogger ? shared_ptr<Logger>(fileLogger.release()) : shared_ptr<Logger>(stdOutLogger.release());
 
-shared_ptr<Logger> LoggerFactory::getLoggerInstance() {
+shared_ptr<Logger> LoggerFactory::getLoggerInstance()
+{
     return LoggerFactory::logger;
 }

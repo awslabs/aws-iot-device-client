@@ -11,6 +11,8 @@
 
 using namespace std;
 using namespace Aws::Iotsecuretunneling;
+using namespace Aws::Iot::DeviceClient::Logging;
+using namespace Aws::Iot::DeviceClient::Util;
 
 namespace Aws
 {
@@ -51,7 +53,7 @@ namespace Aws
                     return 0;
                 }
 
-                string SecureTunnelingFeature::get_name() { return "Secure Tunneling"; }
+                string SecureTunnelingFeature::getName() { return "Secure Tunneling"; }
 
                 int SecureTunnelingFeature::start()
                 {
@@ -74,7 +76,7 @@ namespace Aws
 
                 void SecureTunnelingFeature::runSecureTunneling()
                 {
-                    LOGM_INFO(TAG, "Running %s!", get_name().c_str());
+                    LOGM_INFO(TAG, "Running %s!", getName().c_str());
 
                     if (mSubscribeTunnelNotification)
                     {
@@ -210,10 +212,7 @@ namespace Aws
                     return result->second;
                 }
 
-                bool SecureTunnelingFeature::IsValidPort(int port)
-                {
-                    return 1 <= port && port <= 65535;
-                }
+                bool SecureTunnelingFeature::IsValidPort(int port) { return 1 <= port && port <= 65535; }
 
                 void SecureTunnelingFeature::OnConnectionComplete()
                 {
