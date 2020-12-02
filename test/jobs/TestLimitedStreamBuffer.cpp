@@ -1,11 +1,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "gtest/gtest.h"
 #include "../../source/jobs/LimitedStreamBuffer.h"
+#include "gtest/gtest.h"
 
 using namespace std;
-using namespace Aws::Iot::DeviceClient;
+using namespace Aws::Iot::DeviceClient::Jobs;
 
 TEST(LimitedStreamBuffer, returnsEmptyString)
 {
@@ -46,7 +46,6 @@ TEST(LimitedStreamBuffer, removesExistingEntries)
 
     // Test one more time to make sure the buffer still holds the value
     ASSERT_STREQ("elevenChars", buffer.toString().c_str());
-
 }
 
 TEST(LimitedStreamBuffer, clipsLengthyEntry)
@@ -62,5 +61,3 @@ TEST(LimitedStreamBuffer, allowsSameLengthEntry)
     buffer.addString("testentry");
     ASSERT_STREQ("testentry", buffer.toString().c_str());
 }
-
-

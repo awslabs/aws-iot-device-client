@@ -14,6 +14,7 @@
 using namespace std;
 using namespace Aws::Iot;
 using namespace Aws::Iot::DeviceClient;
+using namespace Aws::Iot::DeviceClient::Logging;
 
 const char *Config::DEFAULT_CONFIG_FILE = "/etc/aws-iot-device-client.conf";
 const char *Config::CONFIG_FILE = "config-file";
@@ -91,17 +92,17 @@ int Config::StoreAndValidate(map<string, string> *cliArgs)
 
     dcConfig = Aws::Crt::JsonView(jsonObj);
 
-    if (!dcConfig.KeyExists(Config::ENDPOINT)  || dcConfig.GetString(Config::ENDPOINT).empty())
+    if (!dcConfig.KeyExists(Config::ENDPOINT) || dcConfig.GetString(Config::ENDPOINT).empty())
     {
         LOG_ERROR(TAG, "*** DC FATAL ERROR: Endpoint is missing ***");
         return Config::ABORT;
     }
-    if (!dcConfig.KeyExists(Config::CERTIFICATE)  || dcConfig.GetString(Config::CERTIFICATE).empty())
+    if (!dcConfig.KeyExists(Config::CERTIFICATE) || dcConfig.GetString(Config::CERTIFICATE).empty())
     {
         LOG_ERROR(TAG, "*** DC FATAL ERROR: Certificate is missing ***");
         return Config::ABORT;
     }
-    if (!dcConfig.KeyExists(Config::PRIVATE_KEY)  || dcConfig.GetString(Config::PRIVATE_KEY).empty())
+    if (!dcConfig.KeyExists(Config::PRIVATE_KEY) || dcConfig.GetString(Config::PRIVATE_KEY).empty())
     {
         LOG_ERROR(TAG, "*** DC FATAL ERROR: Private Key is missing ***");
         return Config::ABORT;

@@ -3,8 +3,8 @@
 
 #include "UniqueString.h"
 
-#include <random>
 #include <iostream>
+#include <random>
 #include <sstream>
 
 using namespace std;
@@ -13,7 +13,7 @@ using namespace Aws::Iot::DeviceClient::Util;
 string UniqueString::getRandomToken(size_t len)
 {
     size_t length = len > UniqueString::MAX_CLIENT_TOKEN_SIZE ? UniqueString::MAX_CLIENT_TOKEN_SIZE : len;
-    static auto& chrs = "0123456789"
+    static auto &chrs = "0123456789"
                         "abcdefghijklmnopqrstuvwxyz"
                         "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -21,7 +21,8 @@ string UniqueString::getRandomToken(size_t len)
     thread_local static std::uniform_int_distribution<std::string::size_type> pick(0, sizeof(chrs) - 2);
 
     ostringstream stream;
-    while(length--) {
+    while (length--)
+    {
         stream << chrs[pick(rg)];
     }
 

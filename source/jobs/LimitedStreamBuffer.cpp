@@ -6,12 +6,14 @@
 #include <sstream>
 
 using namespace std;
-using namespace Aws::Iot::DeviceClient;
+using namespace Aws::Iot::DeviceClient::Jobs;
 
-void LimitedStreamBuffer::addString(string value) {
+void LimitedStreamBuffer::addString(string value)
+{
     unique_lock<mutex> addLock(bufferLock);
 
-    if(value.size() > contentsSizeLimit) {
+    if (value.size() > contentsSizeLimit)
+    {
         // Can't add a value that is greater than the buffer size
         buffer.clear();
         buffer.push_back(value.substr(value.size() - contentsSizeLimit, value.size()));
@@ -19,7 +21,8 @@ void LimitedStreamBuffer::addString(string value) {
         return;
     }
 
-    while(contentsSize + value.size() > contentsSizeLimit) {
+    while (contentsSize + value.size() > contentsSizeLimit)
+    {
         int frontSize = buffer.front().size();
         buffer.pop_front();
         contentsSize = contentsSize - frontSize;
@@ -29,10 +32,12 @@ void LimitedStreamBuffer::addString(string value) {
     contentsSize += value.size();
 }
 
-string LimitedStreamBuffer::toString() {
+string LimitedStreamBuffer::toString()
+{
     unique_lock<mutex> toStringLock(bufferLock);
     ostringstream output;
-    for(string s : buffer) {
+    for (string s : buffer)
+    {
         output << s;
     }
 

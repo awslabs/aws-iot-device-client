@@ -1,7 +1,11 @@
-#ignore build folders
+# Ignore build folders
 cmake-build-debug/
 sdk-cpp-workspace/
 out/
+
+# Ignore compiled documentation folders
+doc/html/
+doc/latex/
 
 # Intellij
 .idea/

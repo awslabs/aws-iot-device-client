@@ -3,6 +3,7 @@
 #include <aws/crt/io/SocketOptions.h>
 
 using namespace std;
+using namespace Aws::Iot::DeviceClient::Logging;
 
 namespace Aws
 {
