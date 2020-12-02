@@ -108,27 +108,27 @@ bool PlainConfig::Validate() const
 {
     if (!endpoint || endpoint->empty())
     {
-        LOG_ERROR(Config::TAG, "*** UA FATAL ERROR: Endpoint is missing ***");
+        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Endpoint is missing ***");
         return false;
     }
     if (!cert || cert->empty())
     {
-        LOG_ERROR(Config::TAG, "*** UA FATAL ERROR: Certificate is missing ***");
+        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Certificate is missing ***");
         return false;
     }
     if (!key || key->empty())
     {
-        LOG_ERROR(Config::TAG, "*** UA FATAL ERROR: Private Key is missing ***");
+        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Private Key is missing ***");
         return false;
     }
     if (!rootCa || rootCa->empty())
     {
-        LOG_ERROR(Config::TAG, "*** UA FATAL ERROR: Root CA is missing ***");
+        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Root CA is missing ***");
         return false;
     }
     if (!thingName || thingName->empty())
     {
-        LOG_ERROR(Config::TAG, "*** UA FATAL ERROR: Thing name is missing ***");
+        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Thing name is missing ***");
         return false;
     }
     if (jobs && !jobs->Validate())
@@ -309,7 +309,7 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         auto search = argumentDefinitionMap.find(currentArg);
         if (search == argumentDefinitionMap.end())
         {
-            LOGM_ERROR(TAG, "*** UA FATAL ERROR: Unrecognised command line argument: %s ***", currentArg.c_str());
+            LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unrecognised command line argument: %s ***", currentArg.c_str());
             return false;
         }
 
@@ -317,7 +317,7 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {
             LOGM_ERROR(
                 TAG,
-                "*** UA FATAL ERROR: Command Line argument '%s' cannot be specified more than once ***",
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Command Line argument '%s' cannot be specified more than once ***",
                 currentArg.c_str());
             return false;
         }
@@ -329,7 +329,7 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
             {
                 LOGM_ERROR(
                     TAG,
-                    "*** UA FATAL ERROR: Command Line argument '%s' was passed without specifying addition argument "
+                    "*** AWS IOT DEVICE CLIENT FATAL ERROR: Command Line argument '%s' was passed without specifying addition argument "
                     "***",
                     currentArg.c_str());
                 return false;
@@ -375,14 +375,14 @@ bool Config::init(const CliArgs &cliArgs)
 
 bool Config::ParseConfigFile(const string &file)
 {
-    ifstream uaSetting(file);
-    if (!uaSetting.is_open())
+    ifstream setting(file);
+    if (!setting.is_open())
     {
-        LOGM_ERROR(TAG, "*** UA FATAL ERROR: Unable to open file: '%s' ***", file.c_str());
+        LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to open file: '%s' ***", file.c_str());
         return false;
     }
 
-    std::string contents((std::istreambuf_iterator<char>(uaSetting)), std::istreambuf_iterator<char>());
+    std::string contents((std::istreambuf_iterator<char>(setting)), std::istreambuf_iterator<char>());
     Crt::JsonObject jsonObj = Aws::Crt::JsonObject(contents.c_str());
     if (!jsonObj.WasParseSuccessful())
     {
@@ -390,11 +390,11 @@ bool Config::ParseConfigFile(const string &file)
             TAG, "Couldn't parse JSON config file. GetErrorMessage returns: %s", jsonObj.GetErrorMessage().c_str());
         return false;
     }
-    Aws::Crt::JsonView uaConfig = Aws::Crt::JsonView(jsonObj);
-    config.LoadFromJson(uaConfig);
+    Aws::Crt::JsonView jsonView = Aws::Crt::JsonView(jsonObj);
+    config.LoadFromJson(jsonView);
 
     LOGM_INFO(TAG, "Successfully fetched JSON config file: %s", contents.c_str());
-    uaSetting.close();
+    setting.close();
     return true;
 }
 
@@ -408,7 +408,7 @@ void Config::PrintHelpMessage()
         "Available sub-commands:\n"
         "\n"
         "%s:\t\t\t\t\t\t\t\t\tGet more help on commands\n"
-        "%s <JSON-File-Location>:\t\t\t\tExport default settings for the Unified Agent binary to the specified file "
+        "%s <JSON-File-Location>:\t\t\t\tExport default settings for the AWS IoT Device Client binary to the specified file "
         "and exit "
         "program\n"
         "%s <JSON-File-Location>:\t\t\t\t\tTake settings defined in the specified JSON file and start the binary\n"
@@ -462,9 +462,9 @@ void Config::ExportDefaultSetting(const string &file)
     }
 }
 )";
-    ofstream uaSetting;
-    uaSetting.open(file);
-    uaSetting << FormatMessage(
+    ofstream clientConfig;
+    clientConfig.open(file);
+    clientConfig << FormatMessage(
         jsonTemplate.c_str(),
         PlainConfig::JSON_KEY_ENDPOINT,
         PlainConfig::JSON_KEY_CERT,
@@ -479,6 +479,6 @@ void Config::ExportDefaultSetting(const string &file)
         PlainConfig::Tunneling::JSON_KEY_REGION,
         PlainConfig::Tunneling::JSON_KEY_PORT,
         PlainConfig::Tunneling::JSON_KEY_SUBSCRIBE_NOTIFICATION);
-    uaSetting.close();
+    clientConfig.close();
     LOGM_INFO(TAG, "Exported settings to: %s", file.c_str());
 }

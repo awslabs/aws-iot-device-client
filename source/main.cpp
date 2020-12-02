@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
     {
         LOG_ERROR(
             TAG,
-            "*** UA FATAL ERROR: Failed to initialize the MQTT Client. Please verify your AWS IoT credentials and/or "
+            "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to initialize the MQTT Client. Please verify your AWS IoT credentials and/or "
             "configuration. ***");
         LoggerFactory::getLoggerInstance()->shutdown();
         abort();

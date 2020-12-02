@@ -99,7 +99,7 @@ namespace Aws
                 ~Config() = default;
 
                 static constexpr char TAG[] = "Config.cpp";
-                static constexpr char DEFAULT_CONFIG_FILE[] = "/etc/unified-agent.conf";
+                static constexpr char DEFAULT_CONFIG_FILE[] = "/etc/aws-iot-device-client.conf";
                 static constexpr char JOBS_HANDLER_DIR[] = "handler_directory";
 
                 static constexpr char CLI_HELP[] = "--help";
