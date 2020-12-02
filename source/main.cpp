@@ -120,7 +120,6 @@ int main(int argc, char *argv[])
     CliArgs cliArgs;
     if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
     {
-        LOG_ERROR(TAG, "Error occurred while parsing the configuration and Cli arguments");
         LoggerFactory::getLoggerInstance()->shutdown();
         return 0;
     }

@@ -36,6 +36,7 @@ namespace Aws
                     int stop() override;
 
                     static uint16_t GetPortFromService(const std::string &service);
+                    static bool IsValidPort(int port);
 
                   private:
                     void LoadFromConfig(const PlainConfig &config);
@@ -53,8 +54,6 @@ namespace Aws
                     void connectToTcpForward(uint16_t port);
 
                     static std::string GetEndpoint(const std::string &region);
-
-                    static bool IsValidPort(int port);
 
                     // Secure tunneling protocol client callbacks
                     void OnConnectionComplete();

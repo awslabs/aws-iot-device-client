@@ -85,12 +85,14 @@ namespace Aws
                     return result->second;
                 }
 
+                bool SecureTunnelingFeature::IsValidPort(int port) { return 1 <= port && port <= 65535; }
+
                 void SecureTunnelingFeature::LoadFromConfig(const PlainConfig &config)
                 {
-                    mThingName = config.thingName->c_str();
-                    mAccessToken = config.tunneling->destinationAccessToken->c_str();
-                    mRegion = config.tunneling->region->c_str();
-                    mPort = static_cast<uint16_t>(config.tunneling->port.value()); // TODO: Check range!!!!!
+                    mThingName = *config.thingName;
+                    mAccessToken = *config.tunneling->destinationAccessToken;
+                    mRegion = *config.tunneling->region;
+                    mPort = static_cast<uint16_t>(config.tunneling->port.value()); // The range is already checked
                     mSubscribeNotification = config.tunneling->subscribeNotification.value();
                 }
 
@@ -213,8 +215,6 @@ namespace Aws
 
                     return endpoint;
                 }
-
-                bool SecureTunnelingFeature::IsValidPort(int port) { return 1 <= port && port <= 65535; }
 
                 void SecureTunnelingFeature::OnConnectionComplete()
                 {

@@ -207,7 +207,6 @@ bool PlainConfig::Tunneling::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_PORT;
     if (json.ValueExists(jsonKey))
     {
-        // TODO: Check if port is within valid range
         port = json.GetInteger(jsonKey);
     }
 
@@ -249,8 +248,13 @@ bool PlainConfig::Tunneling::LoadFromCliArgs(const CliArgs &cliArgs)
 
 bool PlainConfig::Tunneling::Validate() const
 {
-    // TODO: Validate port is within valid range
-    return true;
+    if (!enabled)
+    {
+        return true;
+    }
+
+    return destinationAccessToken.has_value() && region.has_value() && port.has_value() &&
+           SecureTunnelingFeature::IsValidPort(port.value()) && subscribeNotification.has_value();
 }
 
 constexpr char Config::TAG[];
@@ -318,7 +322,7 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
             return false;
         }
 
-        string additionalArg = "";
+        string additionalArg;
         if (search->second.additionalArg)
         {
             if (i + 1 >= argc)
@@ -399,7 +403,7 @@ void Config::PrintHelpMessage()
     const char *helpMessageTemplate =
         "\n\n\tAWS IoT Device Client BINARY\n"
         "\n"
-        "For more documentation, see <Replace with GitHUB repo Link>\n"
+        "For more documentation, see https://github.com/awslabs/aws-iot-device-client\n"
         "\n"
         "Available sub-commands:\n"
         "\n"
