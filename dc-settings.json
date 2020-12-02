@@ -3,11 +3,15 @@
 	"cert": "<replace_with_certificate_file_location>",
 	"key": "<replace_with_private_key_file_location>",
 	"root-ca": "<replace_with_root_ca_file_location>",
-	"thing_name": "<replace_with_thing_name>",
+	"thing-name": "<replace_with_thing_name>",
 	"jobs": {
-		"enabled": "true"
+		"enabled": true
 	},
 	"tunneling": {
-		"enabled": "true"
+		"enabled": true,
+		"destination-access-token": "<replace_with_destination_access_token>",
+		"region": "<replace_with_region>",
+		"port": <replace_with_port>,
+		"subscribe-notification": true
 	}
 }

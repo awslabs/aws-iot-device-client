@@ -430,10 +430,10 @@ void JobsFeature::runJobs() {
     publishStartNextPendingJobExecutionRequest();
 }
 
-int JobsFeature::init(shared_ptr<SharedCrtResourceManager> manager, shared_ptr<ClientBaseNotifier> notifier, Aws::Crt::JsonView dcConfig) {
+int JobsFeature::init(shared_ptr<SharedCrtResourceManager> manager, shared_ptr<ClientBaseNotifier> notifier, const PlainConfig &config) {
     mqttManager = manager;
     baseNotifier = notifier;
-    thingName = dcConfig.GetString(Config::THING_NAME).c_str();
+    thingName = config.thingName->c_str();
 
     return 0;
 }

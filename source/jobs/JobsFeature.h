@@ -80,7 +80,7 @@ namespace Aws {
                     void runJobs();
                 public:
                     virtual std::string get_name();
-                    virtual int init(std::shared_ptr<SharedCrtResourceManager> manager, std::shared_ptr<ClientBaseNotifier> notifier, Aws::Crt::JsonView dcConfig);
+                    virtual int init(std::shared_ptr<SharedCrtResourceManager> manager, std::shared_ptr<ClientBaseNotifier> notifier, const PlainConfig &config);
 
                     // Interface methods defined in Feature.h
                     virtual int start();

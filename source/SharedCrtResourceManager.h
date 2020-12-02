@@ -27,14 +27,14 @@ namespace Aws {
                     std::shared_ptr<Crt::Mqtt::MqttConnection> connection;
                     struct aws_allocator* allocator;
 
-                    bool locateCredentials(Aws::Crt::JsonView dcConfig);
+                    bool locateCredentials(const PlainConfig &config);
                     int buildClient();
                     void initializeAllocator();
-                    int establishConnection(Aws::Crt::JsonView dcConfig);
+                    int establishConnection(const PlainConfig &config);
                 public:
                     static const int SUCCESS = 0;
                     static const int ABORT = 2;
-                    bool initialize(Aws::Crt::JsonView dcConfig);
+                    bool initialize(const PlainConfig &config);
                     std::shared_ptr<Crt::Mqtt::MqttConnection> getConnection();
                     Aws::Crt::Io::EventLoopGroup* getEventLoopGroup();
                     struct aws_allocator* getAllocator();

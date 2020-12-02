@@ -28,14 +28,19 @@ namespace Aws
                     int init(
                         std::shared_ptr<SharedCrtResourceManager> manager,
                         std::shared_ptr<ClientBaseNotifier> notifier,
-                        Aws::Crt::JsonView uaConfig);
+                        const PlainConfig &config);
 
                     // Interface methods defined in Feature.h
                     std::string get_name() override;
                     int start() override;
                     int stop() override;
 
+                    static uint16_t GetPortFromService(const std::string &service);
+                    static bool IsValidPort(int port);
+
                   private:
+                    void LoadFromConfig(const PlainConfig &config);
+
                     void runSecureTunneling();
 
                     // MQTT Tunnel Notification
@@ -49,10 +54,6 @@ namespace Aws
                     void connectToTcpForward(uint16_t port);
 
                     static std::string GetEndpoint(const std::string &region);
-
-                    static uint16_t GetPortFromService(const std::string &service);
-
-                    static bool IsValidPort(int port);
 
                     // Secure tunneling protocol client callbacks
                     void OnConnectionComplete();
@@ -79,7 +80,7 @@ namespace Aws
                     std::string mAccessToken;
                     std::string mRegion;
                     uint16_t mPort{22};
-                    bool mSubscribeTunnelNotification{true};
+                    bool mSubscribeNotification{true};
 
                     // On demand
                     std::unique_ptr<Aws::Iotsecuretunneling::SecureTunnel> mSecureTunnel;
