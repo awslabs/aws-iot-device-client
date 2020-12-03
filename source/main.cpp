@@ -148,9 +148,9 @@ namespace Aws
 #endif
                 }
             };
-        }
-    }
-}
+        } // namespace DeviceClient
+    }     // namespace Iot
+} // namespace Aws
 
 int main(int argc, char *argv[])
 {
@@ -169,14 +169,16 @@ int main(int argc, char *argv[])
     sigprocmask(SIG_BLOCK, &sigset, 0);
 
     // Initialize features
-    shared_ptr<DefaultClientBaseNotifier> listener = shared_ptr<DefaultClientBaseNotifier>(new DefaultClientBaseNotifier);
+    shared_ptr<DefaultClientBaseNotifier> listener =
+        shared_ptr<DefaultClientBaseNotifier>(new DefaultClientBaseNotifier);
     shared_ptr<SharedCrtResourceManager> resourceManager =
         shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager);
     if (!resourceManager.get()->initialize(config.config))
     {
         LOG_ERROR(
             TAG,
-            "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to initialize the MQTT Client. Please verify your AWS IoT credentials and/or "
+            "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to initialize the MQTT Client. Please verify your AWS IoT "
+            "credentials and/or "
             "configuration. ***");
         LoggerFactory::getLoggerInstance()->shutdown();
         abort();

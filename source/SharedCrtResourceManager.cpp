@@ -15,32 +15,39 @@ using namespace Aws::Iot;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Logging;
 
-bool SharedCrtResourceManager::initialize(const PlainConfig &config) {
-    if(!locateCredentials(config)) {
+bool SharedCrtResourceManager::initialize(const PlainConfig &config)
+{
+    if (!locateCredentials(config))
+    {
         LOG_ERROR(TAG, "Failed to find file(s) required for initializing the MQTT connection");
         return false;
     }
 
     initializeAllocator();
-    initialized = buildClient() == SharedCrtResourceManager::SUCCESS && establishConnection(config) == SharedCrtResourceManager::SUCCESS;
+    initialized = buildClient() == SharedCrtResourceManager::SUCCESS &&
+                  establishConnection(config) == SharedCrtResourceManager::SUCCESS;
 
     return initialized;
 }
 
-bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config) {
+bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
+{
     struct stat fileInfo;
     bool locatedAll = true;
-    if(stat(config.key->c_str(), &fileInfo) != 0) {
+    if (stat(config.key->c_str(), &fileInfo) != 0)
+    {
         LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.key->c_str());
         locatedAll = false;
     }
 
-    if(stat(config.cert->c_str(), &fileInfo) != 0) {
+    if (stat(config.cert->c_str(), &fileInfo) != 0)
+    {
         LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.cert->c_str());
         locatedAll = false;
     }
 
-    if(stat(config.rootCa->c_str(), &fileInfo) != 0) {
+    if (stat(config.rootCa->c_str(), &fileInfo) != 0)
+    {
         LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.rootCa->c_str());
         locatedAll = false;
     }
@@ -88,7 +95,8 @@ int SharedCrtResourceManager::buildClient()
     return SharedCrtResourceManager::SUCCESS;
 }
 
-int SharedCrtResourceManager::establishConnection(const PlainConfig &config) {
+int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
+{
     auto clientConfigBuilder = MqttClientConnectionConfigBuilder(config.cert->c_str(), config.key->c_str());
     clientConfigBuilder.WithEndpoint(config.endpoint->c_str());
     clientConfigBuilder.WithCertificateAuthority(config.rootCa->c_str());

@@ -549,7 +549,11 @@ void JobsFeature::runJobs()
     publishStartNextPendingJobExecutionRequest();
 }
 
-int JobsFeature::init(shared_ptr<SharedCrtResourceManager> manager, shared_ptr<ClientBaseNotifier> notifier, const PlainConfig &config) {
+int JobsFeature::init(
+    shared_ptr<SharedCrtResourceManager> manager,
+    shared_ptr<ClientBaseNotifier> notifier,
+    const PlainConfig &config)
+{
     resourceManager = manager;
     baseNotifier = notifier;
     thingName = config.thingName->c_str();
