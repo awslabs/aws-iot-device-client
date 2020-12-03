@@ -101,41 +101,41 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
         thingName = cliArgs.at(PlainConfig::CLI_THING_NAME).c_str();
     }
 
-    return jobs->LoadFromCliArgs(cliArgs) && tunneling->LoadFromCliArgs(cliArgs);
+    return jobs.LoadFromCliArgs(cliArgs) && tunneling.LoadFromCliArgs(cliArgs);
 }
 
 bool PlainConfig::Validate() const
 {
-    if (!endpoint || endpoint->empty())
+    if (!endpoint.has_value() || endpoint->empty())
     {
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Endpoint is missing ***");
         return false;
     }
-    if (!cert || cert->empty())
+    if (!cert.has_value() || cert->empty())
     {
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Certificate is missing ***");
         return false;
     }
-    if (!key || key->empty())
+    if (!key.has_value() || key->empty())
     {
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Private Key is missing ***");
         return false;
     }
-    if (!rootCa || rootCa->empty())
+    if (!rootCa.has_value() || rootCa->empty())
     {
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Root CA is missing ***");
         return false;
     }
-    if (!thingName || thingName->empty())
+    if (!thingName.has_value() || thingName->empty())
     {
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Thing name is missing ***");
         return false;
     }
-    if (jobs && !jobs->Validate())
+    if (!jobs.Validate())
     {
         return false;
     }
-    if (tunneling && !tunneling->Validate())
+    if (!tunneling.Validate())
     {
         return false;
     }
@@ -252,9 +252,28 @@ bool PlainConfig::Tunneling::Validate() const
     {
         return true;
     }
+    if (subscribeNotification)
+    {
+        return true;
+    }
 
-    return destinationAccessToken.has_value() && region.has_value() && port.has_value() &&
-           SecureTunnelingFeature::IsValidPort(port.value()) && subscribeNotification.has_value();
+    if (!destinationAccessToken.has_value() || destinationAccessToken->empty())
+    {
+        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: destination-access-token is missing ***");
+        return false;
+    }
+    if (!region.has_value() || region->empty())
+    {
+        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: region is missing ***");
+        return false;
+    }
+    if (!port.has_value() || !SecureTunnelingFeature::IsValidPort(port.value()))
+    {
+        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: port is missing or invalid ***");
+        return false;
+    }
+
+    return true;
 }
 
 constexpr char Config::TAG[];
@@ -309,7 +328,10 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         auto search = argumentDefinitionMap.find(currentArg);
         if (search == argumentDefinitionMap.end())
         {
-            LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unrecognised command line argument: %s ***", currentArg.c_str());
+            LOGM_ERROR(
+                TAG,
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unrecognised command line argument: %s ***",
+                currentArg.c_str());
             return false;
         }
 
@@ -317,7 +339,8 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Command Line argument '%s' cannot be specified more than once ***",
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Command Line argument '%s' cannot be specified more than once "
+                "***",
                 currentArg.c_str());
             return false;
         }
@@ -329,7 +352,8 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
             {
                 LOGM_ERROR(
                     TAG,
-                    "*** AWS IOT DEVICE CLIENT FATAL ERROR: Command Line argument '%s' was passed without specifying addition argument "
+                    "*** AWS IOT DEVICE CLIENT FATAL ERROR: Command Line argument '%s' was passed without specifying "
+                    "addition argument "
                     "***",
                     currentArg.c_str());
                 return false;
@@ -408,7 +432,8 @@ void Config::PrintHelpMessage()
         "Available sub-commands:\n"
         "\n"
         "%s:\t\t\t\t\t\t\t\t\tGet more help on commands\n"
-        "%s <JSON-File-Location>:\t\t\t\tExport default settings for the AWS IoT Device Client binary to the specified file "
+        "%s <JSON-File-Location>:\t\t\t\tExport default settings for the AWS IoT Device Client binary to the specified "
+        "file "
         "and exit "
         "program\n"
         "%s <JSON-File-Location>:\t\t\t\t\tTake settings defined in the specified JSON file and start the binary\n"
