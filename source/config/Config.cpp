@@ -26,6 +26,7 @@ constexpr char PlainConfig::JSON_KEY_ROOT_CA[];
 constexpr char PlainConfig::JSON_KEY_THING_NAME[];
 constexpr char PlainConfig::JSON_KEY_JOBS[];
 constexpr char PlainConfig::JSON_KEY_TUNNELING[];
+constexpr char PlainConfig::JSON_KEY_DEVICE_DEFENDER[];
 
 bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
 {
@@ -75,6 +76,14 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
         tunneling = temp;
     }
 
+    jsonKey = JSON_KEY_DEVICE_DEFENDER;
+    if (json.ValueExists(jsonKey))
+    {
+        DeviceDefender temp;
+        temp.LoadFromJson(json.GetJsonObject(jsonKey));
+        deviceDefender = temp;
+    }
+
     return true;
 }
 
@@ -101,7 +110,8 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
         thingName = cliArgs.at(PlainConfig::CLI_THING_NAME).c_str();
     }
 
-    return jobs->LoadFromCliArgs(cliArgs) && tunneling->LoadFromCliArgs(cliArgs);
+    return jobs->LoadFromCliArgs(cliArgs) && tunneling->LoadFromCliArgs(cliArgs) &&
+           deviceDefender->LoadFromCliArgs(cliArgs);
 }
 
 bool PlainConfig::Validate() const
@@ -139,7 +149,10 @@ bool PlainConfig::Validate() const
     {
         return false;
     }
-
+    if (deviceDefender && !deviceDefender->Validate())
+    {
+        return false;
+    }
     return true;
 }
 
@@ -248,13 +261,66 @@ bool PlainConfig::Tunneling::LoadFromCliArgs(const CliArgs &cliArgs)
 
 bool PlainConfig::Tunneling::Validate() const
 {
-    if (!enabled)
+    if (!enabled.value())
     {
         return true;
     }
 
     return destinationAccessToken.has_value() && region.has_value() && port.has_value() &&
            SecureTunnelingFeature::IsValidPort(port.value()) && subscribeNotification.has_value();
+}
+
+constexpr char PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER[];
+constexpr char PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL[];
+
+constexpr char PlainConfig::DeviceDefender::JSON_KEY_ENABLED[];
+constexpr char PlainConfig::DeviceDefender::JSON_KEY_INTERVAL[];
+
+bool PlainConfig::DeviceDefender::LoadFromJson(const Crt::JsonView &json)
+{
+    const char *jsonKey = JSON_KEY_ENABLED;
+    if (json.ValueExists(jsonKey))
+    {
+        enabled = json.GetBool(jsonKey);
+    }
+
+    jsonKey = JSON_KEY_INTERVAL;
+    if (json.ValueExists(jsonKey))
+    {
+        interval = json.GetInteger(jsonKey);
+    }
+
+    return true;
+}
+
+bool PlainConfig::DeviceDefender::LoadFromCliArgs(const CliArgs &cliArgs)
+{
+    if (cliArgs.count(PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER))
+    {
+        enabled = true;
+    }
+    if (cliArgs.count(PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL))
+    {
+        try
+        {
+            interval = stoi(cliArgs.at(PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL).c_str());
+        }
+        catch (invalid_argument)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool PlainConfig::DeviceDefender::Validate() const
+{
+    if (!enabled)
+    {
+        return true;
+    }
+
+    return interval.has_value() && (interval.value() > 0);
 }
 
 constexpr char Config::TAG[];
@@ -294,6 +360,9 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {PlainConfig::Tunneling::CLI_TUNNELING_REGION, true, false, nullptr},
         {PlainConfig::Tunneling::CLI_TUNNELING_SERVICE, true, false, nullptr},
         {PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION, false, false, nullptr},
+
+        {PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER, false, false, nullptr},
+        {PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL, true, false, nullptr},
     };
 
     map<string, ArgumentDefinition> argumentDefinitionMap;
@@ -301,7 +370,6 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
     {
         argumentDefinitionMap[i.cliFlag] = i;
     }
-
     cliArgs.clear();
     for (int i = 1; i < argc; i++)
     {
@@ -309,7 +377,10 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         auto search = argumentDefinitionMap.find(currentArg);
         if (search == argumentDefinitionMap.end())
         {
-            LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unrecognised command line argument: %s ***", currentArg.c_str());
+            LOGM_ERROR(
+                TAG,
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unrecognised command line argument: %s ***",
+                currentArg.c_str());
             return false;
         }
 
@@ -317,7 +388,8 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Command Line argument '%s' cannot be specified more than once ***",
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Command Line argument '%s' cannot be specified more than once "
+                "***",
                 currentArg.c_str());
             return false;
         }
@@ -329,7 +401,8 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
             {
                 LOGM_ERROR(
                     TAG,
-                    "*** AWS IOT DEVICE CLIENT FATAL ERROR: Command Line argument '%s' was passed without specifying addition argument "
+                    "*** AWS IOT DEVICE CLIENT FATAL ERROR: Command Line argument '%s' was passed without specifying "
+                    "addition argument "
                     "***",
                     currentArg.c_str());
                 return false;
@@ -349,7 +422,6 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
             return false;
         }
     }
-
     return true;
 }
 
@@ -369,7 +441,6 @@ bool Config::init(const CliArgs &cliArgs)
             return false;
         }
     }
-
     return config.LoadFromCliArgs(cliArgs) && config.Validate();
 }
 
@@ -408,7 +479,8 @@ void Config::PrintHelpMessage()
         "Available sub-commands:\n"
         "\n"
         "%s:\t\t\t\t\t\t\t\t\tGet more help on commands\n"
-        "%s <JSON-File-Location>:\t\t\t\tExport default settings for the AWS IoT Device Client binary to the specified file "
+        "%s <JSON-File-Location>:\t\t\t\tExport default settings for the AWS IoT Device Client binary to the specified "
+        "file "
         "and exit "
         "program\n"
         "%s <JSON-File-Location>:\t\t\t\t\tTake settings defined in the specified JSON file and start the binary\n"
@@ -422,7 +494,8 @@ void Config::PrintHelpMessage()
         "%s <destination-access-token>:\tUse Specified Destination Access Token\n"
         "%s <region>:\t\t\t\t\t\tUse Specified AWS Region\n"
         "%s <service>:\t\t\t\t\t\tConnect secure tunnel to specific service\n"
-        "%s:\t\t\t\t\tDisable MQTT new tunnel notification\n";
+        "%s:\t\t\t\t\tDisable MQTT new tunnel notification\n"
+        "%s <interval-in-seconds>:\t\t\t\t\tPositive integer to publish Device Defender metrics";
 
     cout << FormatMessage(
         helpMessageTemplate,
@@ -439,7 +512,8 @@ void Config::PrintHelpMessage()
         PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN,
         PlainConfig::Tunneling::CLI_TUNNELING_REGION,
         PlainConfig::Tunneling::CLI_TUNNELING_SERVICE,
-        PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION);
+        PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION,
+        PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL);
 }
 
 void Config::ExportDefaultSetting(const string &file)
@@ -459,6 +533,10 @@ void Config::ExportDefaultSetting(const string &file)
         "%s": "<replace_with_region>",
         "%s": <replace_with_port>,
         "%s": true
+    },
+    "%s": {
+        "%s": true,
+        "%s": <replace_with_interval>
     }
 }
 )";
@@ -478,7 +556,11 @@ void Config::ExportDefaultSetting(const string &file)
         PlainConfig::Tunneling::JSON_KEY_DESTINATION_ACCESS_TOKEN,
         PlainConfig::Tunneling::JSON_KEY_REGION,
         PlainConfig::Tunneling::JSON_KEY_PORT,
-        PlainConfig::Tunneling::JSON_KEY_SUBSCRIBE_NOTIFICATION);
+        PlainConfig::Tunneling::JSON_KEY_SUBSCRIBE_NOTIFICATION,
+        PlainConfig::JSON_KEY_DEVICE_DEFENDER,
+        PlainConfig::DeviceDefender::JSON_KEY_ENABLED,
+        PlainConfig::DeviceDefender::JSON_KEY_INTERVAL);
+
     clientConfig.close();
     LOGM_INFO(TAG, "Exported settings to: %s", file.c_str());
 }
