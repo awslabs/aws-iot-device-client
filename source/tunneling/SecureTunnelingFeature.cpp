@@ -90,10 +90,13 @@ namespace Aws
                 void SecureTunnelingFeature::LoadFromConfig(const PlainConfig &config)
                 {
                     mThingName = *config.thingName;
-                    mAccessToken = *config.tunneling->destinationAccessToken;
-                    mRegion = *config.tunneling->region;
-                    mPort = static_cast<uint16_t>(config.tunneling->port.value()); // The range is already checked
-                    mSubscribeNotification = config.tunneling->subscribeNotification.value();
+                    mSubscribeNotification = config.tunneling.subscribeNotification;
+                    if (!config.tunneling.subscribeNotification)
+                    {
+                        mAccessToken = *config.tunneling.destinationAccessToken;
+                        mRegion = *config.tunneling.region;
+                        mPort = static_cast<uint16_t>(config.tunneling.port.value()); // The range is already checked
+                    }
                 }
 
                 void SecureTunnelingFeature::runSecureTunneling()
