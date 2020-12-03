@@ -5,6 +5,7 @@
 #include "Feature.h"
 #include "SharedCrtResourceManager.h"
 #include "config/Config.h"
+#include "devicedefender/DeviceDefenderFeature.h"
 #include "jobs/JobsFeature.h"
 #include "logging/LoggerFactory.h"
 #include "tunneling/SecureTunnelingFeature.h"
@@ -186,6 +187,7 @@ int main(int argc, char *argv[])
 
     unique_ptr<JobsFeature> jobs;
     unique_ptr<SecureTunnelingFeature> tunneling;
+    unique_ptr<DeviceDefenderFeature> deviceDefender;
 
     featuresReadWriteLock.lock(); // LOCK
     if (config.config.jobs.enabled)
@@ -199,6 +201,12 @@ int main(int argc, char *argv[])
         tunneling = unique_ptr<SecureTunnelingFeature>(new SecureTunnelingFeature());
         tunneling->init(resourceManager, listener, config.config);
         features.push_back(tunneling.get());
+    }
+    if (config.config.deviceDefender.enabled)
+    {
+        deviceDefender = unique_ptr<DeviceDefenderFeature>(new DeviceDefenderFeature());
+        deviceDefender->init(resourceManager, listener, config.config);
+        features.push_back(deviceDefender.get());
     }
     for (auto &feature : features)
     {
