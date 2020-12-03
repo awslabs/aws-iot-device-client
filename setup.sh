@@ -4,24 +4,8 @@ set -e
 # Prompt color constants
 PMPT='\033[95;1m'
 GREEN='\033[92m'
+RED='\033[91m'
 NC='\033[0m'
-
-### Compile ###
-
-if [ ! -d "./cmake-build-debug" ]; then
-  mkdir cmake-build-debug
-fi
-cd cmake-build-debug/
-
-cmake ../
-cmake --build . --target aws-iot-device-client -- -j 8
-make
-
-echo "${PMPT}Build complete!${NC}"
-
-### Run Tests ###
-
-../cmake-build-debug/test/test-aws-iot-device-client
 
 ### Build Configuration File ###
 
@@ -95,6 +79,33 @@ echo -e "${PMPT}Do you want to install AWS IoT Device Client as a service? y/n${
 read -r INSTALL_SERVICE
 
 if [ "$INSTALL_SERVICE" = "y" ]; then
+
+  ### Get DeviceClient Artifact Location ###
+  FOUND_DEVICE_CLIENT=false
+  DEVICE_CLIENT_ARTIFACT=""
+  while [ "$FOUND_DEVICE_CLIENT" != true ]; do
+    echo -e "${PMPT}Enter the complete directory path for the aws-iot-device-client.${NC}"
+    read -r DEVICE_CLIENT_ARTIFACT
+    if [ ! -f "$DEVICE_CLIENT_ARTIFACT" ]; then
+      echo "${RED}File: $DEVICE_CLIENT_ARTIFACT does not exist.${NC}"
+    else
+      FOUND_DEVICE_CLIENT=true
+    fi
+  done
+
+  ### Get DeviceClient Service File Location ###
+  FOUND_SERVICE_FILE=false
+  SERVICE_FILE=""
+  while [ "$FOUND_SERVICE_FILE" != true ]; do
+    echo -e "${PMPT}Enter the complete directory path for the aws-iot-device-client service file.${NC}"
+    read -r SERVICE_FILE
+    if [ ! -f "$SERVICE_FILE" ]; then
+      echo "${RED}File: $SERVICE_FILE does not exist.${NC}"
+    else
+      FOUND_SERVICE_FILE=true
+    fi
+  done
+
   echo -e "${PMPT}Do you want to run the AWS IoT Device Client service via Valgrind for debugging? y/n${NC}"
   read -r SERVICE_DEBUG
   if [ "$SERVICE_DEBUG" = "y" ]; then
@@ -113,28 +124,28 @@ if [ "$INSTALL_SERVICE" = "y" ]; then
   if command -v "systemctl" &> /dev/null;
   then
       sudo -n systemctl stop aws-iot-device-client.service
-      sudo -n cp ../setup/aws-iot-device-client.service /etc/systemd/system/aws-iot-device-client.service
+      sudo -n cp "$SERVICE_FILE" /etc/systemd/system/aws-iot-device-client.service
       if [ "$SERVICE_DEBUG" = "y" ]; then
         echo "$DEBUG_SCRIPT" | sudo tee /sbin/aws-iot-device-client > /dev/null
       else
         # In case we previously ran in debug, make sure to delete the old binary
         sudo -n rm -f /sbin/aws-iot-device-client-bin
       fi
-      sudo -n cp aws-iot-device-client "$BINARY_DESTINATION"
+      sudo -n cp "$DEVICE_CLIENT_ARTIFACT" "$BINARY_DESTINATION"
       sudo -n systemctl enable aws-iot-device-client.service
       sudo -n systemctl start aws-iot-device-client.service
       sudo -n systemctl status aws-iot-device-client.service
   elif command -v "service" &> /dev/null;
   then
       sudo -n service stop aws-iot-device-client.service
-      sudo -n cp ../setup/aws-iot-device-client.service /etc/systemd/system/aws-iot-device-client.service
+      sudo -n cp "$SERVICE_FILE" /etc/systemd/system/aws-iot-device-client.service
       if [ "$SERVICE_DEBUG" = "y" ]; then
         echo "$DEBUG_SCRIPT" | sudo tee /sbin/aws-iot-device-client > /dev/null
       else
         # In case we previously ran in debug, make sure to delete the old binary
         sudo -n rm -f /sbin/aws-iot-device-client-bin
       fi
-      sudo -n cp aws-iot-device-client "$BINARY_DESTINATION"
+      sudo -n cp "$DEVICE_CLIENT_ARTIFACT" "$BINARY_DESTINATION"
       sudo -n service enable aws-iot-device-client.service
       sudo -n service start aws-iot-device-client.service
       sudo -n service status aws-iot-device-client.service
