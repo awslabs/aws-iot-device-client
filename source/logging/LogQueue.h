@@ -5,47 +5,77 @@
 #define DEVICE_CLIENT_LOGQUEUE_H
 
 #include "LogMessage.h"
-#include <queue>
 #include <condition_variable>
 #include <mutex>
+#include <queue>
 
-namespace Aws {
-    namespace Iot {
-        namespace DeviceClient {
-            class LogQueue {
-            private:
-                bool isShutdown = false;
-                std::mutex queueLock;
-                std::condition_variable newLogNotifier;
-                std::queue<std::unique_ptr<LogMessage>> logQueue;
-            public:
+namespace Aws
+{
+    namespace Iot
+    {
+        namespace DeviceClient
+        {
+            namespace Logging
+            {
                 /**
-                  * Adds a single log to the LogQueue.
-                  * @param log the log to add to the LogQueue
-                  */
-                void addLog(std::unique_ptr<LogMessage> log);
-                /**
-                 * Gets the next log message.
-                 * @return the next log message in the LogQueue
+                 * \brief A thread-safe queue used by our Logger implementations to queue incoming messages
+                 * from multiple threads and process them in order
                  */
-                std::unique_ptr<LogMessage> getNextLog();
+                class LogQueue
+                {
+                  private:
+                    /**
+                     * \brief Whether the LogQueue has been shutdown or not.
+                     */
+                    bool isShutdown = false;
+                    /**
+                     * \brief a Mutex used to control multi-threaded access to the LogQueue
+                     */
+                    std::mutex queueLock;
+                    /**
+                     * \brief Used to wake up waiting threads when new data arrives, or when
+                     * the LogQueue has shut down
+                     */
+                    std::condition_variable newLogNotifier;
+                    /**
+                     * \brief Responsible for queuing the LogMessages upon arrival for processing
+                     */
+                    std::queue<std::unique_ptr<LogMessage>> logQueue;
 
-                /**
-                 * Determine whether the LogQueue has a message available
-                 * @return true if there is a message present, false otherwise
-                 */
-                bool hasNextLog();
+                  public:
+                    /**
+                     * \brief Adds a single log to the LogQueue.
+                     *
+                     * @param log the log to add to the LogQueue
+                     */
+                    void addLog(std::unique_ptr<LogMessage> log);
+                    /**
+                     * \brief Gets the next log message.
+                     *
+                     * @return the next log message in the LogQueue
+                     */
+                    std::unique_ptr<LogMessage> getNextLog();
 
-                /**
-                 * This function essentially shuts off any of the 'waiting' behavior when it comes to
-                 * getting the next event in the LogQueue. It will force the getNextEvent() to return
-                 * whether there is a log message or not
-                 */
-                void shutdown();
-            };
-        }
-    }
-}
+                    /**
+                     * \brief Determine whether the LogQueue has a message available
+                     *
+                     * @return true if there is a message present, false otherwise
+                     */
+                    bool hasNextLog();
 
+                    /**
+                     * \brief Force all consumers to stop waiting so that they can flush the queue
+                     * and end any waiting behavior that might prevent the thread from shutting down.
+                     *
+                     * This function essentially shuts off any of the 'waiting' behavior when it comes to
+                     * getting the next message in the LogQueue. It will force the getNextLog() method to return
+                     * whether there is a log message or not
+                     */
+                    void shutdown();
+                };
+            } // namespace Logging
+        }     // namespace DeviceClient
+    }         // namespace Iot
+} // namespace Aws
 
-#endif //DEVICE_CLIENT_LOGQUEUE_H
+#endif // DEVICE_CLIENT_LOGQUEUE_H

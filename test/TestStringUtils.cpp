@@ -5,7 +5,7 @@
 #include "gtest/gtest.h"
 
 using namespace std;
-using namespace Aws::Iot::DeviceClient;
+using namespace Aws::Iot::DeviceClient::Util;
 
 TEST(StringUtils, FormatStringNoArg)
 {

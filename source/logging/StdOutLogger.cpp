@@ -3,41 +3,47 @@
 
 #include "StdOutLogger.h"
 
-#include <thread>
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <thread>
 
 #define TIMESTAMP_BUFFER_SIZE 25
 
 using namespace std;
-using namespace Aws::Iot::DeviceClient;
+using namespace Aws::Iot::DeviceClient::Logging;
 
-void StdOutLogger::writeLogMessage(unique_ptr<LogMessage> message) {
+void StdOutLogger::writeLogMessage(unique_ptr<LogMessage> message)
+{
     char time_buffer[TIMESTAMP_BUFFER_SIZE];
     LogUtil::generateTimestamp(message->getTime(), TIMESTAMP_BUFFER_SIZE, time_buffer);
 
-    cout << time_buffer << " " << LogLevelMarshaller::ToString(message->getLevel()) << " {"
-         << message->getTag() << "}: " << message->getMessage() << endl;
+    cout << time_buffer << " " << LogLevelMarshaller::ToString(message->getLevel()) << " {" << message->getTag()
+         << "}: " << message->getMessage() << endl;
 }
 
-void StdOutLogger::run() {
-    while(!needsShutdown) {
+void StdOutLogger::run()
+{
+    while (!needsShutdown)
+    {
         unique_ptr<LogMessage> message = logQueue->getNextLog();
 
-        if(NULL != message) {
+        if (NULL != message)
+        {
             writeLogMessage(std::move(message));
         }
     }
 }
 
-bool StdOutLogger::start() {
+bool StdOutLogger::start()
+{
     thread log_thread(&StdOutLogger::run, this);
     log_thread.detach();
 
     return true;
 }
 
-void StdOutLogger::shutdown() {
+void StdOutLogger::shutdown()
+{
     needsShutdown = true;
     logQueue->shutdown();
 
@@ -45,13 +51,20 @@ void StdOutLogger::shutdown() {
     flush();
 }
 
-void StdOutLogger::flush() {
-    while(logQueue->hasNextLog()) {
+void StdOutLogger::flush()
+{
+    while (logQueue->hasNextLog())
+    {
         unique_ptr<LogMessage> message = logQueue->getNextLog();
         writeLogMessage(std::move(message));
     }
 }
 
-void StdOutLogger::queueLog(LogLevel level, const char * tag, std::chrono::time_point<std::chrono::system_clock> t, std::string message) {
+void StdOutLogger::queueLog(
+    LogLevel level,
+    const char *tag,
+    std::chrono::time_point<std::chrono::system_clock> t,
+    std::string message)
+{
     logQueue.get()->addLog(unique_ptr<LogMessage>(new LogMessage(level, tag, t, message)));
 }
