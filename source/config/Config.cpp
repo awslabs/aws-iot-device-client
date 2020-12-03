@@ -110,46 +110,46 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
         thingName = cliArgs.at(PlainConfig::CLI_THING_NAME).c_str();
     }
 
-    return jobs->LoadFromCliArgs(cliArgs) && tunneling->LoadFromCliArgs(cliArgs) &&
-           deviceDefender->LoadFromCliArgs(cliArgs);
+    return jobs.LoadFromCliArgs(cliArgs) && tunneling.LoadFromCliArgs(cliArgs) &&
+          deviceDefender.LoadFromCliArgs(cliArgs);
 }
 
 bool PlainConfig::Validate() const
 {
-    if (!endpoint || endpoint->empty())
+    if (!endpoint.has_value() || endpoint->empty())
     {
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Endpoint is missing ***");
         return false;
     }
-    if (!cert || cert->empty())
+    if (!cert.has_value() || cert->empty())
     {
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Certificate is missing ***");
         return false;
     }
-    if (!key || key->empty())
+    if (!key.has_value() || key->empty())
     {
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Private Key is missing ***");
         return false;
     }
-    if (!rootCa || rootCa->empty())
+    if (!rootCa.has_value() || rootCa->empty())
     {
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Root CA is missing ***");
         return false;
     }
-    if (!thingName || thingName->empty())
+    if (!thingName.has_value() || thingName->empty())
     {
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Thing name is missing ***");
         return false;
     }
-    if (jobs && !jobs->Validate())
+    if (!jobs.Validate())
     {
         return false;
     }
-    if (tunneling && !tunneling->Validate())
+    if (!tunneling.Validate())
     {
         return false;
     }
-    if (deviceDefender && !deviceDefender->Validate())
+    if (!deviceDefender.Validate())
     {
         return false;
     }
@@ -261,13 +261,32 @@ bool PlainConfig::Tunneling::LoadFromCliArgs(const CliArgs &cliArgs)
 
 bool PlainConfig::Tunneling::Validate() const
 {
-    if (!enabled.value())
+    if (!enabled)
+    {
+        return true;
+    }
+    if (subscribeNotification)
     {
         return true;
     }
 
-    return destinationAccessToken.has_value() && region.has_value() && port.has_value() &&
-           SecureTunnelingFeature::IsValidPort(port.value()) && subscribeNotification.has_value();
+    if (!destinationAccessToken.has_value() || destinationAccessToken->empty())
+    {
+        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: destination-access-token is missing ***");
+        return false;
+    }
+    if (!region.has_value() || region->empty())
+    {
+        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: region is missing ***");
+        return false;
+    }
+    if (!port.has_value() || !SecureTunnelingFeature::IsValidPort(port.value()))
+    {
+        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: port is missing or invalid ***");
+        return false;
+    }
+
+    return true;
 }
 
 constexpr char PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER[];
@@ -319,8 +338,12 @@ bool PlainConfig::DeviceDefender::Validate() const
     {
         return true;
     }
+    if (!interval.has_value() || (interval.value() <= 0)) {
+        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: interval value <= 0 ***");
+        return false;
+    }
 
-    return interval.has_value() && (interval.value() > 0);
+    return true;
 }
 
 constexpr char Config::TAG[];

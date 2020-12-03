@@ -18,6 +18,12 @@ using namespace Aws::Crt;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Crt::Mqtt;
 
+constexpr char DeviceDefenderFeature::TAG[];
+constexpr char DeviceDefenderFeature::TOPIC_PRE[];
+constexpr char DeviceDefenderFeature::TOPIC_POST[];
+constexpr char DeviceDefenderFeature::TOPIC_ACCEPTED[];
+constexpr char DeviceDefenderFeature::TOPIC_REJECTED[];
+
 struct passableUserData
 {
     const char *tag;
@@ -65,14 +71,14 @@ void DeviceDefenderFeature::startDeviceDefender()
         [&](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void {
         LOGM_DEBUG(TAG, "SubAck: PacketId:(%s), ErrorCode:%i", get_name().c_str(), errorCode);
     };
-
+    char *messageFormat = "%s%s%s%s";
     resourceManager->getConnection()->Subscribe(
-        (TOPIC_PRE + thingName + TOPIC_POST + TOPIC_ACCEPTED).c_str(),
+        FormatMessage(messageFormat,TOPIC_PRE,thingName.c_str(),TOPIC_POST,TOPIC_ACCEPTED).c_str(),
         AWS_MQTT_QOS_AT_LEAST_ONCE,
         onRecvData,
         onSubAck);
     resourceManager->getConnection()->Subscribe(
-        (TOPIC_PRE + thingName + TOPIC_POST + TOPIC_REJECTED).c_str(),
+        FormatMessage(messageFormat,TOPIC_PRE,thingName.c_str(),TOPIC_POST,TOPIC_ACCEPTED).c_str(),
         AWS_MQTT_QOS_AT_LEAST_ONCE,
         onRecvData,
         onSubAck);
@@ -85,10 +91,11 @@ void DeviceDefenderFeature::stopDeviceDefender()
     auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void {
         LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%i, ErrorCode:%i", packetId, errorCode);
     };
+    char *messageFormat = "%s%s%s%s";
     resourceManager->getConnection()->Unsubscribe(
-        (TOPIC_PRE + thingName + TOPIC_POST + TOPIC_ACCEPTED).c_str(), onUnsubscribe);
+        FormatMessage(messageFormat,TOPIC_PRE,thingName.c_str(),TOPIC_POST,TOPIC_ACCEPTED).c_str(), onUnsubscribe);
     resourceManager->getConnection()->Unsubscribe(
-        (TOPIC_PRE + thingName + TOPIC_POST + TOPIC_REJECTED).c_str(), onUnsubscribe);
+        FormatMessage(messageFormat,TOPIC_PRE,thingName.c_str(),TOPIC_POST,TOPIC_ACCEPTED).c_str(), onUnsubscribe);
     LOGM_DEBUG(TAG, "%s StopTask() async called", get_name().c_str());
 }
 
@@ -99,7 +106,7 @@ int DeviceDefenderFeature::init(
 {
     resourceManager = manager;
     baseNotifier = notifier;
-    interval = *config.deviceDefender->interval;
+    interval = *config.deviceDefender.interval;
     thingName = *config.thingName;
     return 0;
 }
