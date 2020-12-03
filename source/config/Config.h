@@ -60,9 +60,9 @@ namespace Aws
                     static constexpr char CLI_ENABLE_JOBS[] = "--enable-jobs";
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
 
-                    Aws::Crt::Optional<bool> enabled;
+                    bool enabled{false};
                 };
-                Aws::Crt::Optional<Jobs> jobs;
+                Jobs jobs;
 
                 struct Tunneling : public LoadableFromJsonAndCli
                 {
@@ -83,13 +83,13 @@ namespace Aws
                     static constexpr char JSON_KEY_PORT[] = "port";
                     static constexpr char JSON_KEY_SUBSCRIBE_NOTIFICATION[] = "subscribe-notification";
 
-                    Aws::Crt::Optional<bool> enabled;
+                    bool enabled{false};
                     Aws::Crt::Optional<std::string> destinationAccessToken;
                     Aws::Crt::Optional<std::string> region;
                     Aws::Crt::Optional<int> port;
-                    Aws::Crt::Optional<bool> subscribeNotification;
+                    bool subscribeNotification{true};
                 };
-                Aws::Crt::Optional<Tunneling> tunneling;
+                Tunneling tunneling;
             };
 
             class Config

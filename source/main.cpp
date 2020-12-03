@@ -149,13 +149,13 @@ int main(int argc, char *argv[])
     unique_ptr<SecureTunnelingFeature> tunneling;
 
     featuresReadWriteLock.lock(); // LOCK
-    if (config.config.jobs->enabled.has_value() && config.config.jobs->enabled.value())
+    if (config.config.jobs.enabled)
     {
         jobs = unique_ptr<JobsFeature>(new JobsFeature());
         jobs->init(resourceManager, listener, config.config);
         features.push_back(jobs.get());
     }
-    if (config.config.tunneling->enabled.has_value() && config.config.tunneling->enabled.value())
+    if (config.config.tunneling.enabled)
     {
         tunneling = unique_ptr<SecureTunnelingFeature>(new SecureTunnelingFeature());
         tunneling->init(resourceManager, listener, config.config);
