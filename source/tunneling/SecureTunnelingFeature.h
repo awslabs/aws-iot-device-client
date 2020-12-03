@@ -31,7 +31,7 @@ namespace Aws
                         const PlainConfig &config);
 
                     // Interface methods defined in Feature.h
-                    std::string get_name() override;
+                    std::string getName() override;
                     int start() override;
                     int stop() override;
 

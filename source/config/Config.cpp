@@ -13,6 +13,8 @@ using namespace std;
 using namespace Aws::Iot;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::SecureTunneling;
+using namespace Aws::Iot::DeviceClient::Logging;
+using namespace Aws::Iot::DeviceClient::Util;
 
 constexpr char PlainConfig::CLI_ENDPOINT[];
 constexpr char PlainConfig::CLI_CERT[];

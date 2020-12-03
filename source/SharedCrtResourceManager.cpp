@@ -5,6 +5,7 @@
 #include "logging/LoggerFactory.h"
 
 #include <aws/crt/Api.h>
+#include <sys/stat.h>
 
 using namespace std;
 using namespace Aws::Crt;
@@ -12,6 +13,7 @@ using namespace Aws::Crt::Io;
 using namespace Aws::Crt::Mqtt;
 using namespace Aws::Iot;
 using namespace Aws::Iot::DeviceClient;
+using namespace Aws::Iot::DeviceClient::Logging;
 
 bool SharedCrtResourceManager::initialize(const PlainConfig &config) {
     if(!locateCredentials(config)) {
@@ -46,11 +48,13 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config) {
     return locatedAll;
 }
 
-void SharedCrtResourceManager::initializeAllocator() {
+void SharedCrtResourceManager::initializeAllocator()
+{
     allocator = aws_mem_tracer_new(aws_default_allocator(), nullptr, AWS_MEMTRACE_BYTES, 0);
 }
 
-int SharedCrtResourceManager::buildClient() {
+int SharedCrtResourceManager::buildClient()
+{
     // We MUST declare an instance of the ApiHandle to perform global initialization
     // of the SDK libraries
     apiHandle = unique_ptr<ApiHandle>(new ApiHandle());
@@ -59,8 +63,10 @@ int SharedCrtResourceManager::buildClient() {
         new EventLoopGroup(1 // The number of threads used depends on your use-case. IF you have a maximum of less than
                              // a few hundred connections 1 thread is the ideal threadCount.
                            ));
-    if (!eventLoopGroup) {
-        LOGM_ERROR(TAG, "MQTT Event Loop Group Creation failed with error: %s", ErrorDebugString(eventLoopGroup->LastError()));
+    if (!eventLoopGroup)
+    {
+        LOGM_ERROR(
+            TAG, "MQTT Event Loop Group Creation failed with error: %s", ErrorDebugString(eventLoopGroup->LastError()));
         return eventLoopGroup->LastError();
     }
 
@@ -90,7 +96,10 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config) {
 
     if (!clientConfig)
     {
-        LOGM_ERROR(TAG, "MQTT Client Configuration initialization failed with error: %s", ErrorDebugString(clientConfig.LastError()));
+        LOGM_ERROR(
+            TAG,
+            "MQTT Client Configuration initialization failed with error: %s",
+            ErrorDebugString(clientConfig.LastError()));
         return clientConfig.LastError();
     }
 
@@ -118,7 +127,8 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config) {
         if (errorCode)
         {
             LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(errorCode));
-            if(AWS_ERROR_MQTT_UNEXPECTED_HANGUP == errorCode) {
+            if (AWS_ERROR_MQTT_UNEXPECTED_HANGUP == errorCode)
+            {
                 LOG_ERROR(TAG, "*** Did you make sure to attach iot:* to your policy for this thing?");
                 LOG_ERROR(TAG, "*** AWS Console -> IoT Core -> Secure -> Certificates");
             }
@@ -158,7 +168,8 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config) {
     {
         LOG_INFO(TAG, "Shared MQTT connection is ready!");
     }
-    else{
+    else
+    {
         LOG_ERROR(TAG, "Failed to establish shared MQTT connection! ***");
         return SharedCrtResourceManager::ABORT;
     }
@@ -166,8 +177,10 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config) {
     return SharedCrtResourceManager::SUCCESS;
 }
 
-shared_ptr<MqttConnection> SharedCrtResourceManager::getConnection() {
-    if(!initialized) {
+shared_ptr<MqttConnection> SharedCrtResourceManager::getConnection()
+{
+    if (!initialized)
+    {
         LOG_WARN(TAG, "Tried to get connection but the SharedCrtResourceManager has not yet been initialized!");
         return nullptr;
     }
@@ -175,8 +188,10 @@ shared_ptr<MqttConnection> SharedCrtResourceManager::getConnection() {
     return connection;
 }
 
-EventLoopGroup* SharedCrtResourceManager::getEventLoopGroup() {
-    if(!initialized) {
+EventLoopGroup *SharedCrtResourceManager::getEventLoopGroup()
+{
+    if (!initialized)
+    {
         LOG_WARN(TAG, "Tried to get eventLoopGroup but the SharedCrtResourceManager has not yet been initialized!");
         return nullptr;
     }
@@ -184,8 +199,10 @@ EventLoopGroup* SharedCrtResourceManager::getEventLoopGroup() {
     return eventLoopGroup.get();
 }
 
-struct aws_allocator* SharedCrtResourceManager::getAllocator() {
-    if(!initialized) {
+struct aws_allocator *SharedCrtResourceManager::getAllocator()
+{
+    if (!initialized)
+    {
         LOG_WARN(TAG, "Tried to get allocator but the SharedCrtResourceManager has not yet been initialized!");
         return nullptr;
     }
@@ -204,10 +221,14 @@ Aws::Crt::Io::ClientBootstrap *SharedCrtResourceManager::getClientBootstrap()
     return clientBootstrap.get();
 }
 
-void SharedCrtResourceManager::disconnect(){
-    if(connection->Disconnect()){
+void SharedCrtResourceManager::disconnect()
+{
+    if (connection->Disconnect())
+    {
         initialized = false;
-    } else{
+    }
+    else
+    {
         LOG_ERROR(TAG, "MQTT Connection failed to disconnect");
     }
 }

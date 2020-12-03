@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+#include "ClientBaseNotification.h"
 #include "Feature.h"
 #include "SharedCrtResourceManager.h"
 #include "config/Config.h"
@@ -14,11 +15,13 @@
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient;
+using namespace Aws::Iot::DeviceClient::Jobs;
+using namespace Aws::Iot::DeviceClient::Logging;
 using namespace Aws::Iot::DeviceClient::SecureTunneling;
 
-const char * TAG = "Main.cpp";
+const char *TAG = "Main.cpp";
 
-vector<Feature*> features;
+vector<Feature *> features;
 mutex featuresReadWriteLock;
 bool attemptingShutdown;
 Config config;
@@ -27,32 +30,40 @@ Config config;
  * Attempts to perform a graceful shutdown of each running feature. If this function is
  * executed more than once, it will terminate immediately.
  */
-void shutdown() {
-    if(!attemptingShutdown) {
+void shutdown()
+{
+    if (!attemptingShutdown)
+    {
         attemptingShutdown = true;
 
-        featuresReadWriteLock.lock();   // LOCK
+        featuresReadWriteLock.lock(); // LOCK
         // Make a copy of the features vector for thread safety
-        vector<Feature*> featuresCopy = features;
+        vector<Feature *> featuresCopy = features;
         featuresReadWriteLock.unlock(); // UNLOCK
 
-        for(auto & feature : featuresCopy) {
-            LOGM_DEBUG(TAG, "Attempting shutdown of %s", feature->get_name().c_str());
+        for (auto &feature : featuresCopy)
+        {
+            LOGM_DEBUG(TAG, "Attempting shutdown of %s", feature->getName().c_str());
             feature->stop();
         }
         LoggerFactory::getLoggerInstance().get()->shutdown();
-    } else {
+    }
+    else
+    {
         // terminate program
         LoggerFactory::getLoggerInstance().get()->shutdown();
         exit(0);
     }
 }
 
-void handle_feature_stopped(Feature * feature) {
+void handle_feature_stopped(Feature *feature)
+{
     featuresReadWriteLock.lock(); // LOCK
 
-    for(int i = 0; (unsigned)i < features.size(); i++) {
-        if(features.at(i) == feature) {
+    for (int i = 0; (unsigned)i < features.size(); i++)
+    {
+        if (features.at(i) == feature)
+        {
             // Performing bookkeeping so we know when all features have stopped
             // and the entire program can be shutdown
             features.erase(features.begin() + i);
@@ -62,58 +73,84 @@ void handle_feature_stopped(Feature * feature) {
     const int size = features.size();
     featuresReadWriteLock.unlock(); // UNLOCK
 
-    if(0 == size) {
+    if (0 == size)
+    {
         LOG_INFO(TAG, "All features have stopped");
         shutdown();
     }
 }
 
-/**
- * DefaultClientBaseNotifier represents the default set of behavior we expect
- * to exhibit when receiving events from a feature. We may want to extend this
- * behavior further for particular features or replace it entirely.
- */
-class DefaultClientBaseNotifier final : public ClientBaseNotifier {
-    void onEvent(Feature* feature, ClientBaseEventNotification notification) {
-        switch(notification) {
-            case ClientBaseEventNotification::FEATURE_STARTED: {
-                LOGM_INFO(TAG, "Client base has been notified that %s has started", feature->get_name().c_str());
-                break;
-            }
-            case ClientBaseEventNotification::FEATURE_STOPPED: {
-                LOGM_INFO(TAG, "%s has stopped", feature->get_name().c_str());
-                handle_feature_stopped(feature);
-                break;
-            }
-            default: {
-                LOGM_WARN(TAG, "DefaultClientBaseNotifier hit default switch case for feature: %s", feature->get_name().c_str());
-            }
-        }
-    }
+namespace Aws
+{
+    namespace Iot
+    {
+        namespace DeviceClient
+        {
+            /**
+             * \brief Represents the default set of behavior we expect to exhibit when receiving events from a feature.
+             */
+            class DefaultClientBaseNotifier final : public ClientBaseNotifier
+            {
+                void onEvent(Feature *feature, ClientBaseEventNotification notification)
+                {
+                    switch (notification)
+                    {
+                        case ClientBaseEventNotification::FEATURE_STARTED:
+                        {
+                            LOGM_INFO(
+                                TAG, "Client base has been notified that %s has started", feature->getName().c_str());
+                            break;
+                        }
+                        case ClientBaseEventNotification::FEATURE_STOPPED:
+                        {
+                            LOGM_INFO(TAG, "%s has stopped", feature->getName().c_str());
+                            handle_feature_stopped(feature);
+                            break;
+                        }
+                        default:
+                        {
+                            LOGM_WARN(
+                                TAG,
+                                "DefaultClientBaseNotifier hit default switch case for feature: %s",
+                                feature->getName().c_str());
+                        }
+                    }
+                }
 
-    void onError(Feature* feature, ClientBaseErrorNotification error, string msg) {
-        switch(error) {
-            case ClientBaseErrorNotification::SUBSCRIPTION_REJECTED: {
-                LOGM_ERROR(TAG, "Subscription rejected: %s", msg.c_str());
-                break;
-            }
-            case ClientBaseErrorNotification::MESSAGE_RECEIVED_AFTER_SHUTDOWN: {
-                LOGM_ERROR(TAG, "Received message after feature shutdown: %s", msg.c_str());
-            }
-            default: {
-                LOGM_ERROR(TAG, "DefaultClientBaseNotifier hit default ERROR switch case for feature: ", feature->get_name().c_str());
-            }
+                void onError(Feature *feature, ClientBaseErrorNotification error, string msg)
+                {
+                    switch (error)
+                    {
+                        case ClientBaseErrorNotification::SUBSCRIPTION_REJECTED:
+                        {
+                            LOGM_ERROR(TAG, "Subscription rejected: %s", msg.c_str());
+                            break;
+                        }
+                        case ClientBaseErrorNotification::MESSAGE_RECEIVED_AFTER_SHUTDOWN:
+                        {
+                            LOGM_ERROR(TAG, "Received message after feature shutdown: %s", msg.c_str());
+                        }
+                        default:
+                        {
+                            LOGM_ERROR(
+                                TAG,
+                                "DefaultClientBaseNotifier hit default ERROR switch case for feature: ",
+                                feature->getName().c_str());
+                        }
+                    }
+#ifdef NDEBUG
+                        // DC in release mode - we should decide how we want to behave in this scenario
+#else
+                    // DC in debug mode
+                    LOG_ERROR(TAG, "*** DC FATAL ERROR: Aborting program due to unrecoverable feature error! ***");
+                    LoggerFactory::getLoggerInstance()->shutdown();
+                    abort();
+#endif
+                }
+            };
         }
-        #ifdef NDEBUG
-            // DC in release mode - we should decide how we want to behave in this scenario
-        #else
-            // DC in debug mode
-            LOG_ERROR(TAG, "*** DC FATAL ERROR: Aborting program due to unrecoverable feature error! ***");
-            LoggerFactory::getLoggerInstance()->shutdown();
-            abort();
-        #endif
     }
-};
+}
 
 int main(int argc, char *argv[])
 {
