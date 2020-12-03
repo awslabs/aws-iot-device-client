@@ -44,6 +44,7 @@ namespace Aws
                 static constexpr char JSON_KEY_THING_NAME[] = "thing-name";
                 static constexpr char JSON_KEY_JOBS[] = "jobs";
                 static constexpr char JSON_KEY_TUNNELING[] = "tunneling";
+                static constexpr char JSON_KEY_DEVICE_DEFENDER[] = "device-defender";
 
                 Aws::Crt::Optional<std::string> endpoint;
                 Aws::Crt::Optional<std::string> cert;
@@ -90,6 +91,23 @@ namespace Aws
                     bool subscribeNotification{true};
                 };
                 Tunneling tunneling;
+
+                struct DeviceDefender : public LoadableFromJsonAndCli
+                {
+                    bool LoadFromJson(const Crt::JsonView &json) override;
+                    bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool Validate() const override;
+
+                    static constexpr char CLI_ENABLE_DEVICE_DEFENDER[] = "--enable-device-defender";
+                    static constexpr char CLI_DEVICE_DEFENDER_INTERVAL[] = "--device-defender-interval";
+
+                    static constexpr char JSON_KEY_ENABLED[] = "enabled";
+                    static constexpr char JSON_KEY_INTERVAL[] = "interval-in-seconds";
+
+                    bool enabled{false};
+                    Aws::Crt::Optional<int> interval;
+                };
+                DeviceDefender deviceDefender;
             };
 
             class Config

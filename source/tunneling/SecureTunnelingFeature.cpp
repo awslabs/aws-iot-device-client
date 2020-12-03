@@ -11,6 +11,8 @@
 
 using namespace std;
 using namespace Aws::Iotsecuretunneling;
+using namespace Aws::Iot::DeviceClient::Logging;
+using namespace Aws::Iot::DeviceClient::Util;
 
 namespace Aws
 {
@@ -46,7 +48,7 @@ namespace Aws
                     return 0;
                 }
 
-                string SecureTunnelingFeature::get_name() { return "Secure Tunneling"; }
+                string SecureTunnelingFeature::getName() { return "Secure Tunneling"; }
 
                 int SecureTunnelingFeature::start()
                 {
@@ -67,26 +69,6 @@ namespace Aws
                     return 0;
                 }
 
-                uint16_t SecureTunnelingFeature::GetPortFromService(const std::string &service)
-                {
-                    if (mServiceToPortMap.empty())
-                    {
-                        mServiceToPortMap["SSH"] = 22;
-                        mServiceToPortMap["VNC"] = 5900;
-                    }
-
-                    auto result = mServiceToPortMap.find(service);
-                    if (result == mServiceToPortMap.end())
-                    {
-                        LOGM_ERROR(TAG, "Requested unsupported service. service=%s", service.c_str());
-                        return 0; // TODO: Consider throw
-                    }
-
-                    return result->second;
-                }
-
-                bool SecureTunnelingFeature::IsValidPort(int port) { return 1 <= port && port <= 65535; }
-
                 void SecureTunnelingFeature::LoadFromConfig(const PlainConfig &config)
                 {
                     mThingName = *config.thingName;
@@ -101,7 +83,7 @@ namespace Aws
 
                 void SecureTunnelingFeature::runSecureTunneling()
                 {
-                    LOGM_INFO(TAG, "Running %s!", get_name().c_str());
+                    LOGM_INFO(TAG, "Running %s!", getName().c_str());
 
                     if (mSubscribeNotification)
                     {
@@ -218,6 +200,26 @@ namespace Aws
 
                     return endpoint;
                 }
+
+                uint16_t SecureTunnelingFeature::GetPortFromService(const std::string &service)
+                {
+                    if (mServiceToPortMap.empty())
+                    {
+                        mServiceToPortMap["SSH"] = 22;
+                        mServiceToPortMap["VNC"] = 5900;
+                    }
+
+                    auto result = mServiceToPortMap.find(service);
+                    if (result == mServiceToPortMap.end())
+                    {
+                        LOGM_ERROR(TAG, "Requested unsupported service. service=%s", service.c_str());
+                        return 0; // TODO: Consider throw
+                    }
+
+                    return result->second;
+                }
+
+                bool SecureTunnelingFeature::IsValidPort(int port) { return 1 <= port && port <= 65535; }
 
                 void SecureTunnelingFeature::OnConnectionComplete()
                 {

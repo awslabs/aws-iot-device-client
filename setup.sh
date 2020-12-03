@@ -123,7 +123,7 @@ if [ "$INSTALL_SERVICE" = "y" ]; then
   echo -e "${PMPT}Installing AWS IoT Device Client...${NC}"
   if command -v "systemctl" &> /dev/null;
   then
-      sudo -n systemctl stop aws-iot-device-client.service
+      sudo -n systemctl stop aws-iot-device-client.service || true
       sudo -n cp "$SERVICE_FILE" /etc/systemd/system/aws-iot-device-client.service
       if [ "$SERVICE_DEBUG" = "y" ]; then
         echo "$DEBUG_SCRIPT" | sudo tee /sbin/aws-iot-device-client > /dev/null
@@ -137,7 +137,7 @@ if [ "$INSTALL_SERVICE" = "y" ]; then
       sudo -n systemctl status aws-iot-device-client.service
   elif command -v "service" &> /dev/null;
   then
-      sudo -n service stop aws-iot-device-client.service
+      sudo -n service stop aws-iot-device-client.service || true
       sudo -n cp "$SERVICE_FILE" /etc/systemd/system/aws-iot-device-client.service
       if [ "$SERVICE_DEBUG" = "y" ]; then
         echo "$DEBUG_SCRIPT" | sudo tee /sbin/aws-iot-device-client > /dev/null

@@ -4,35 +4,43 @@
 #include "LogQueue.h"
 
 using namespace std;
-using namespace Aws::Iot::DeviceClient;
+using namespace Aws::Iot::DeviceClient::Logging;
 
-void LogQueue::addLog(unique_ptr<LogMessage> log) {
+void LogQueue::addLog(unique_ptr<LogMessage> log)
+{
     unique_lock<mutex> addLock(queueLock);
     logQueue.push(std::move(log));
     addLock.unlock();
     newLogNotifier.notify_one();
 }
 
-bool LogQueue::hasNextLog() {
+bool LogQueue::hasNextLog()
+{
     unique_lock<mutex> readLock(queueLock);
     return !logQueue.empty();
 }
 
-std::unique_ptr<LogMessage> LogQueue::getNextLog() {
+std::unique_ptr<LogMessage> LogQueue::getNextLog()
+{
     unique_lock<mutex> readLock(queueLock);
-    while(logQueue.empty() && !isShutdown) {
+    while (logQueue.empty() && !isShutdown)
+    {
         newLogNotifier.wait(readLock);
     }
-    if(logQueue.empty()) {
+    if (logQueue.empty())
+    {
         return NULL;
-    } else {
+    }
+    else
+    {
         unique_ptr<LogMessage> message = std::move(logQueue.front());
         logQueue.pop();
         return message;
     }
 }
 
-void LogQueue::shutdown() {
+void LogQueue::shutdown()
+{
     // Grab the lock in case there's active logging while we attempt to shutdown
     unique_lock<mutex> shutdownLock(queueLock);
     isShutdown = true;
