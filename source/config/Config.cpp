@@ -326,7 +326,7 @@ bool PlainConfig::DeviceDefender::LoadFromCliArgs(const CliArgs &cliArgs)
         {
             interval = stoi(cliArgs.at(PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL).c_str());
         }
-        catch (invalid_argument)
+        catch (const invalid_argument &)
         {
             return false;
         }
