@@ -113,7 +113,7 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     }
 
     return jobs.LoadFromCliArgs(cliArgs) && tunneling.LoadFromCliArgs(cliArgs) &&
-          deviceDefender.LoadFromCliArgs(cliArgs);
+           deviceDefender.LoadFromCliArgs(cliArgs);
 }
 
 bool PlainConfig::Validate() const
@@ -328,6 +328,11 @@ bool PlainConfig::DeviceDefender::LoadFromCliArgs(const CliArgs &cliArgs)
         }
         catch (const invalid_argument &)
         {
+            LOGM_ERROR(
+                Config::TAG,
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to convert CLI argument {%s} to integer, please use a "
+                "valid integer between 1 and MAX_INT ***",
+                PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL);
             return false;
         }
     }
@@ -340,8 +345,9 @@ bool PlainConfig::DeviceDefender::Validate() const
     {
         return true;
     }
-    if (!interval.has_value() || (interval.value() <= 0)) {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: interval value <= 0 ***");
+    if (!interval.has_value() || (interval.value() <= 0))
+    {
+        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Interval value <= 0 ***");
         return false;
     }
 
