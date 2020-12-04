@@ -33,6 +33,7 @@ TEST(Config, HappyCaseMinimumConfig)
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_FALSE(config.jobs.enabled);
     ASSERT_FALSE(config.tunneling.enabled);
+    ASSERT_FALSE(config.deviceDefender.enabled);
 }
 
 TEST(Config, HappyCaseMinimumCli)
@@ -55,6 +56,7 @@ TEST(Config, HappyCaseMinimumCli)
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_FALSE(config.jobs.enabled);
     ASSERT_FALSE(config.tunneling.enabled);
+    ASSERT_FALSE(config.deviceDefender.enabled);
 }
 
 TEST(Config, MissingSomeSettings)
