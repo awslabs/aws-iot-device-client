@@ -25,9 +25,9 @@ namespace Aws
                 void LoadFromConfig(const PlainConfig &config);
 
                 // Interface methods defined in Feature.h
-                virtual std::string get_name() override;
-                virtual int start();
-                virtual int stop();
+                std::string getName() override;
+                int start() override;
+                int stop() override;
               private:
                 static constexpr char TAG[]= "DeviceDefender.cpp";
                 int interval;
