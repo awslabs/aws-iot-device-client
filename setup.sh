@@ -82,10 +82,13 @@ if [ "$INSTALL_SERVICE" = "y" ]; then
 
   ### Get DeviceClient Artifact Location ###
   FOUND_DEVICE_CLIENT=false
-  DEVICE_CLIENT_ARTIFACT=""
+  DEVICE_CLIENT_ARTIFACT_DEFAULT="./build/aws-iot-device-client"
   while [ "$FOUND_DEVICE_CLIENT" != true ]; do
-    echo -e "${PMPT}Enter the complete directory path for the aws-iot-device-client.${NC}"
+    echo -e "${PMPT}Enter the complete directory path for the aws-iot-device-client. (Empty for default: ${DEVICE_CLIENT_ARTIFACT_DEFAULT})${NC}"
     read -r DEVICE_CLIENT_ARTIFACT
+    if [ -z "$DEVICE_CLIENT_ARTIFACT" ]; then
+      DEVICE_CLIENT_ARTIFACT="$DEVICE_CLIENT_ARTIFACT_DEFAULT"
+    fi
     if [ ! -f "$DEVICE_CLIENT_ARTIFACT" ]; then
       echo "${RED}File: $DEVICE_CLIENT_ARTIFACT does not exist.${NC}"
     else
@@ -95,10 +98,13 @@ if [ "$INSTALL_SERVICE" = "y" ]; then
 
   ### Get DeviceClient Service File Location ###
   FOUND_SERVICE_FILE=false
-  SERVICE_FILE=""
+  SERVICE_FILE_DEFAULT="./setup/aws-iot-device-client.service"
   while [ "$FOUND_SERVICE_FILE" != true ]; do
-    echo -e "${PMPT}Enter the complete directory path for the aws-iot-device-client service file.${NC}"
+    echo -e "${PMPT}Enter the complete directory path for the aws-iot-device-client service file. (Empty for default: ${SERVICE_FILE_DEFAULT})${NC}"
     read -r SERVICE_FILE
+    if [ -z "$SERVICE_FILE" ]; then
+      SERVICE_FILE="$SERVICE_FILE_DEFAULT"
+    fi
     if [ ! -f "$SERVICE_FILE" ]; then
       echo "${RED}File: $SERVICE_FILE does not exist.${NC}"
     else

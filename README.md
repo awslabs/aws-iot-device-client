@@ -23,8 +23,8 @@ Options:
 Use the following `cmake` commands to build the AWS IoT Device Client with dependencies and tests.
 
 ```bash
-cmake -DCMAKE_PREFIX_PATH=<> -DCMAKE_INSTALL_PREFIX=<> -S aws-iot-device-client -B aws-iot-device-client/build
-cmake --build aws-iot-device-client/build --target aws-iot-device-client -- -j 8
+cmake -S aws-iot-device-client -B aws-iot-device-client/build
+cmake --build aws-iot-device-client/build --target aws-iot-device-client
 ```
 
 ##### Build With Dependencies Already Installed
@@ -40,8 +40,8 @@ applicable if you already have the aws-iot-device-sdk-cpp-v2 installed on your d
 Use the following `cmake` commands to build the AWS IoT Device Client with already existing and installed dependencies.
 
 ```bash
-cmake -DCMAKE_PREFIX_PATH=<> -DCMAKE_INSTALL_PREFIX=<> -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -S aws-iot-device-client -B aws-iot-device-client/build
-cmake --build aws-iot-device-client/build --target aws-iot-device-client -- -j 8
+cmake -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -S aws-iot-device-client -B aws-iot-device-client/build
+cmake --build aws-iot-device-client/build --target aws-iot-device-client
 ```
 
 ### Setting Up The Device Client
