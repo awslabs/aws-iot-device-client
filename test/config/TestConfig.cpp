@@ -9,6 +9,44 @@ using namespace std;
 using namespace Aws::Crt;
 using namespace Aws::Iot::DeviceClient;
 
+TEST(Config, AllFeaturesEnabled)
+{
+    constexpr char jsonString[] = R"(
+{
+	"endpoint": "endpoint value",
+	"cert": "cert value",
+	"key": "key value",
+	"root-ca": "root-ca value",
+	"thing-name": "thing-name value",
+    "jobs": {
+        "enabled": true
+    },
+    "tunneling": {
+        "enabled": true
+    },
+    "device-defender": {
+        "enabled": true,
+        "interval-in-seconds": 300
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ("cert value", config.cert->c_str());
+    ASSERT_STREQ("key value", config.key->c_str());
+    ASSERT_STREQ("root-ca value", config.rootCa->c_str());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    ASSERT_TRUE(config.jobs.enabled);
+    ASSERT_TRUE(config.tunneling.enabled);
+    ASSERT_TRUE(config.deviceDefender.enabled);
+    ASSERT_EQ(300, config.deviceDefender.interval.value());
+}
+
 TEST(Config, HappyCaseMinimumConfig)
 {
     constexpr char jsonString[] = R"(
@@ -167,28 +205,65 @@ TEST(Config, SecureTunnelingDisableSubscription)
     ASSERT_EQ(65535, config.tunneling.port.value());
 }
 
-TEST(Config, SecureTunnelingInvalidPort)
+TEST(Config, SecureTunnelingPortRange)
 {
-    constexpr char jsonString[] = R"(
+    // Too small
+    const char* jsonString = R"(
 {
-	"endpoint": "endpoint value",
-	"cert": "cert value",
-	"key": "key value",
-	"root-ca": "root-ca value",
-	"thing-name": "thing-name value",
-    "tunneling": {
-        "enabled": true,
-        "subscribe-notification": false,
-        "destination-access-token": "destination access token value",
-        "region": "region value",
-        "port": 65536
-    }
+    "enabled": true,
+    "subscribe-notification": false,
+    "destination-access-token": "destination access token value",
+    "region": "region value",
+    "port": 0
 })";
-    JsonObject jsonObject(jsonString);
-    JsonView jsonView = jsonObject.View();
+    unique_ptr<JsonObject> jsonObject = unique_ptr<JsonObject>(new JsonObject(jsonString));
+    JsonView jsonView = jsonObject->View();
+    unique_ptr<PlainConfig> config = unique_ptr<PlainConfig>(new PlainConfig());
+    config->tunneling.LoadFromJson(jsonView);
+    ASSERT_FALSE(config->tunneling.Validate());
 
-    PlainConfig config;
-    config.LoadFromJson(jsonView);
+    // Negative port
+    jsonString = R"(
+{
+    "enabled": true,
+    "subscribe-notification": false,
+    "destination-access-token": "destination access token value",
+    "region": "region value",
+    "port": -1
+})";
+    jsonObject = unique_ptr<JsonObject>(new JsonObject(jsonString));
+    jsonView = jsonObject->View();
+    config = unique_ptr<PlainConfig>(new PlainConfig());
+    config->tunneling.LoadFromJson(jsonView);
+    ASSERT_FALSE(config->tunneling.Validate());
 
-    ASSERT_FALSE(config.Validate());
+    // Too large
+    jsonString = R"(
+{
+    "enabled": true,
+    "subscribe-notification": false,
+    "destination-access-token": "destination access token value",
+    "region": "region value",
+    "port": 65536
+})";
+    jsonObject = unique_ptr<JsonObject>(new JsonObject(jsonString));
+    jsonView = jsonObject->View();
+    config = unique_ptr<PlainConfig>(new PlainConfig());
+    config->tunneling.LoadFromJson(jsonView);
+    ASSERT_FALSE(config->tunneling.Validate());
+
+    // Within range
+    jsonString = R"(
+{
+    "enabled": true,
+    "subscribe-notification": false,
+    "destination-access-token": "destination access token value",
+    "region": "region value",
+    "port": 22
+})";
+    jsonObject = unique_ptr<JsonObject>(new JsonObject(jsonString));
+    jsonView = jsonObject->View();
+    config = unique_ptr<PlainConfig>(new PlainConfig());
+    config->tunneling.LoadFromJson(jsonView);
+    ASSERT_TRUE(config->tunneling.Validate());
 }
