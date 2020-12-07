@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "FileLogger.h"
+#include "../util/FileUtils.h"
 
-#include <errno.h>
 #include <iostream>
-#include <limits.h> /* PATH_MAX */
-#include <string.h>
 #include <sys/stat.h> /* mkdir(2) */
 #include <thread>
 
@@ -14,46 +12,52 @@
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Logging;
+using namespace Aws::Iot::DeviceClient::Util;
 
-bool FileLogger::start()
+bool FileLogger::start(const PlainConfig &config)
 {
-    struct stat info;
-    bool initialized = false;
-
-    if (stat(DEFAULT_LOG_DIR.c_str(), &info) != 0)
+    setLogLevel(config.logConfig.logLevel);
+    if (!config.logConfig.file.empty())
     {
-        cout << LOGGER_TAG << ": Cannot access " << DEFAULT_LOG_DIR
-             << "to write logs, attempting to create log directory" << endl;
-        mkdirs(DEFAULT_LOG_DIR.c_str());
-        if (stat(DEFAULT_LOG_DIR.c_str(), &info) != 0)
+        logFile = config.logConfig.file;
+    }
+
+    struct stat info;
+    string logFileDir = FileUtils::extractParentDirectory(logFile);
+    if (stat(logFileDir.c_str(), &info) != 0)
+    {
+        cout << LOGGER_TAG << ": Cannot access " << logFileDir << "to write logs, attempting to create log directory"
+             << endl;
+        FileUtils::mkdirs(logFileDir.c_str());
+        if (stat(logFileDir.c_str(), &info) != 0)
         {
             cout << LOGGER_TAG << ": Failed to create log directories necessary for file-based logging" << endl;
+            return false;
         }
         else
         {
-            cout << LOGGER_TAG << ": Successfully created log directory! Now logging to " << DEFAULT_LOG_FILE << endl;
-            initialized = true;
+            cout << LOGGER_TAG << ": Successfully created log directory! Now logging to " << logFile << endl;
         }
     }
     else if (info.st_mode & S_IFDIR)
     {
         // Log directory already exists, nothing to do here
-        initialized = true;
     }
     else
     {
         cout << LOGGER_TAG << ": Unknown condition encountered while trying to create log directory" << endl;
+        return false;
     }
 
-    if (initialized)
+    outputStream = unique_ptr<ofstream>(new ofstream(logFile, std::fstream::app));
+    if (!outputStream->fail())
     {
-        outputStream = unique_ptr<ofstream>(new ofstream(DEFAULT_LOG_FILE, std::fstream::app));
-
         thread log_thread(&FileLogger::run, this);
         log_thread.detach();
         return true;
     }
 
+    cout << LOGGER_TAG << FormatMessage(": Failed to open %s for logging", logFile.c_str()) << endl;
     return false;
 }
 
@@ -69,6 +73,10 @@ void FileLogger::writeLogMessage(unique_ptr<LogMessage> message)
 
 void FileLogger::run()
 {
+    unique_lock<mutex> runLock(isRunningLock);
+    isRunning = true;
+    runLock.unlock();
+
     while (!needsShutdown)
     {
         unique_ptr<LogMessage> message = logQueue->getNextLog();
@@ -96,52 +104,23 @@ void FileLogger::shutdown()
 
     // If we've gotten here, we must be shutting down so we should dump the remaining messages and exit
     flush();
+
+    unique_lock<mutex> runLock(isRunningLock);
+    isRunning = false;
 }
 
 void FileLogger::flush()
 {
+    unique_lock<mutex> runLock(isRunningLock);
+    if (!isRunning)
+    {
+        return;
+    }
+    runLock.unlock();
+
     while (logQueue->hasNextLog())
     {
         unique_ptr<LogMessage> message = logQueue->getNextLog();
         writeLogMessage(std::move(message));
     }
-}
-
-int FileLogger::mkdirs(const char *path)
-{
-    const size_t len = strlen(path);
-    char path_buffer[PATH_MAX];
-    char *p;
-
-    errno = 0;
-
-    /* Copy string so its mutable */
-    if (len > sizeof(path_buffer) - 1)
-    {
-        errno = ENAMETOOLONG;
-        return -1;
-    }
-    strcpy(path_buffer, path);
-
-    for (p = path_buffer + 1; *p; p++)
-    {
-        if (*p == '/')
-        {
-            /* Temporarily truncate */
-            *p = '\0';
-            if (mkdir(path_buffer, S_IRWXU) != 0)
-            {
-                if (errno != EEXIST)
-                    return -1;
-            }
-            *p = '/';
-        }
-    }
-    if (mkdir(path_buffer, S_IRWXU) != 0)
-    {
-        if (errno != EEXIST)
-            return -1;
-    }
-
-    return 0;
 }

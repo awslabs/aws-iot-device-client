@@ -5,9 +5,11 @@
 #include "../jobs/JobsFeature.h"
 #include "../logging/LoggerFactory.h"
 #include "../tunneling/SecureTunnelingFeature.h"
+#include <algorithm>
 #include <aws/crt/JsonObject.h>
 #include <iostream>
 #include <map>
+#include <stdexcept>
 
 using namespace std;
 using namespace Aws::Iot;
@@ -26,6 +28,7 @@ constexpr char PlainConfig::JSON_KEY_CERT[];
 constexpr char PlainConfig::JSON_KEY_KEY[];
 constexpr char PlainConfig::JSON_KEY_ROOT_CA[];
 constexpr char PlainConfig::JSON_KEY_THING_NAME[];
+constexpr char PlainConfig::JSON_KEY_LOGGING[];
 constexpr char PlainConfig::JSON_KEY_JOBS[];
 constexpr char PlainConfig::JSON_KEY_TUNNELING[];
 constexpr char PlainConfig::JSON_KEY_DEVICE_DEFENDER[];
@@ -86,6 +89,14 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
         deviceDefender = temp;
     }
 
+    jsonKey = JSON_KEY_LOGGING;
+    if (json.ValueExists(jsonKey))
+    {
+        LogConfig temp;
+        temp.LoadFromJson(json.GetJsonObject(jsonKey));
+        logConfig = temp;
+    }
+
     return true;
 }
 
@@ -112,7 +123,7 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
         thingName = cliArgs.at(PlainConfig::CLI_THING_NAME).c_str();
     }
 
-    return jobs.LoadFromCliArgs(cliArgs) && tunneling.LoadFromCliArgs(cliArgs) &&
+    return logConfig.LoadFromCliArgs(cliArgs) && jobs.LoadFromCliArgs(cliArgs) && tunneling.LoadFromCliArgs(cliArgs) &&
            deviceDefender.LoadFromCliArgs(cliArgs);
 }
 
@@ -143,6 +154,10 @@ bool PlainConfig::Validate() const
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Thing name is missing ***");
         return false;
     }
+    if (!logConfig.Validate())
+    {
+        return false;
+    }
     if (!jobs.Validate())
     {
         return false;
@@ -155,6 +170,147 @@ bool PlainConfig::Validate() const
     {
         return false;
     }
+    return true;
+}
+
+constexpr char PlainConfig::LogConfig::LOG_TYPE_FILE[];
+constexpr char PlainConfig::LogConfig::LOG_TYPE_STDOUT[];
+
+constexpr char PlainConfig::LogConfig::CLI_LOG_LEVEL[];
+constexpr char PlainConfig::LogConfig::CLI_LOG_TYPE[];
+constexpr char PlainConfig::LogConfig::CLI_LOG_FILE[];
+
+constexpr char PlainConfig::LogConfig::JSON_KEY_LOG_LEVEL[];
+constexpr char PlainConfig::LogConfig::JSON_KEY_LOG_TYPE[];
+constexpr char PlainConfig::LogConfig::JSON_KEY_LOG_FILE[];
+
+int PlainConfig::LogConfig::ParseLogLevel(string level)
+{
+    string temp = level;
+    std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c) { return std::toupper(c); });
+
+    if ("DEBUG" == temp)
+    {
+        return (int)LogLevel::DEBUG;
+    }
+    else if ("INFO" == temp)
+    {
+        return (int)LogLevel::INFO;
+    }
+    else if ("WARN" == temp)
+    {
+        return (int)LogLevel::WARN;
+    }
+    else if ("ERROR" == temp)
+    {
+        return (int)LogLevel::ERROR;
+    }
+    else
+    {
+        throw std::invalid_argument(FormatMessage("Provided log level %s is not a known log level", level.c_str()));
+    }
+}
+
+string PlainConfig::LogConfig::ParseLogType(string value)
+{
+    string temp = value;
+    // Convert to lowercase for comparisons
+    std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c) { return std::tolower(c); });
+    if (LOG_TYPE_FILE == temp)
+    {
+        return LOG_TYPE_FILE;
+    }
+    else if (LOG_TYPE_STDOUT == temp)
+    {
+        return LOG_TYPE_STDOUT;
+    }
+    else
+    {
+        throw std::invalid_argument(FormatMessage(
+            "Provided log type %s is not a known log type. Acceptable values are: [%s, %s]",
+            value.c_str(),
+            LOG_TYPE_FILE,
+            LOG_TYPE_STDOUT));
+    }
+}
+
+bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
+{
+    const char *jsonKey = JSON_KEY_LOG_LEVEL;
+    if (json.ValueExists(jsonKey))
+    {
+        try
+        {
+            logLevel = ParseLogLevel(json.GetString(jsonKey).c_str());
+        }
+        catch (const std::invalid_argument &e)
+        {
+            LOGM_ERROR(Config::TAG, "Unable to parse incoming log level value passed via JSON: %s", e.what());
+            return false;
+        }
+    }
+
+    jsonKey = JSON_KEY_LOG_TYPE;
+    if (json.ValueExists(jsonKey))
+    {
+        try
+        {
+            type = ParseLogType(json.GetString(jsonKey).c_str());
+        }
+        catch (const std::invalid_argument &e)
+        {
+            LOGM_ERROR(Config::TAG, "Unable to parse incoming log type value passed via JSON: %s", e.what());
+            return false;
+        }
+    }
+
+    jsonKey = JSON_KEY_LOG_FILE;
+    if (json.ValueExists(jsonKey))
+    {
+        file = json.GetString(jsonKey).c_str();
+    }
+
+    return true;
+}
+
+bool PlainConfig::LogConfig::LoadFromCliArgs(const CliArgs &cliArgs)
+{
+    if (cliArgs.count(CLI_LOG_LEVEL))
+    {
+        try
+        {
+            logLevel = ParseLogLevel(cliArgs.at(CLI_LOG_LEVEL));
+        }
+        catch (const std::invalid_argument &e)
+        {
+            LOGM_ERROR(Config::TAG, "Unable to parse incoming log level value passed via command line: %s", e.what());
+            return false;
+        }
+    }
+
+    if (cliArgs.count(CLI_LOG_TYPE))
+    {
+        try
+        {
+            type = ParseLogType(cliArgs.at(CLI_LOG_TYPE));
+        }
+        catch (const std::invalid_argument &e)
+        {
+            LOGM_ERROR(Config::TAG, "Unable to parse incoming log type value passed via command line: %s", e.what());
+            return false;
+        }
+    }
+
+    if (cliArgs.count(CLI_LOG_FILE))
+    {
+        file = cliArgs.at(CLI_LOG_FILE);
+    }
+
+    return true;
+}
+
+bool PlainConfig::LogConfig::Validate() const
+{
     return true;
 }
 
@@ -356,7 +512,6 @@ bool PlainConfig::DeviceDefender::Validate() const
 
 constexpr char Config::TAG[];
 constexpr char Config::DEFAULT_CONFIG_FILE[];
-constexpr char Config::JOBS_HANDLER_DIR[];
 constexpr char Config::CLI_HELP[];
 constexpr char Config::CLI_EXPORT_DEFAULT_SETTINGS[];
 constexpr char Config::CLI_CONFIG_FILE[];
@@ -383,6 +538,10 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {PlainConfig::CLI_KEY, true, false, nullptr},
         {PlainConfig::CLI_ROOT_CA, true, false, nullptr},
         {PlainConfig::CLI_THING_NAME, true, false, nullptr},
+
+        {PlainConfig::LogConfig::CLI_LOG_LEVEL, true, false, nullptr},
+        {PlainConfig::LogConfig::CLI_LOG_TYPE, true, false, nullptr},
+        {PlainConfig::LogConfig::CLI_LOG_FILE, true, false, nullptr},
 
         {PlainConfig::Jobs::CLI_ENABLE_JOBS, false, false, nullptr},
 
@@ -515,6 +674,9 @@ void Config::PrintHelpMessage()
         "and exit "
         "program\n"
         "%s <JSON-File-Location>:\t\t\t\t\tTake settings defined in the specified JSON file and start the binary\n"
+        "%s <[DEBUG, INFO, WARN, ERROR]>:\t Specify the log level for the AWS IoT Device Client\n"
+        "%s <[STDOUT, FILE]>:\t\t\t Specify the logger implementation to use.\n"
+        "%s <File-Location>:\t\t\t Write logs to specified log file when using the file logger.\n"
         "%s:\t\t\t\t\t\t\t\tEnables Jobs feature\n"
         "%s:\t\t\t\t\t\t\tEnables Tunneling feature\n"
         "%s <endpoint-value>:\t\t\t\t\t\tUse Specified Endpoint\n"
@@ -533,6 +695,9 @@ void Config::PrintHelpMessage()
         CLI_HELP,
         CLI_EXPORT_DEFAULT_SETTINGS,
         CLI_CONFIG_FILE,
+        PlainConfig::LogConfig::CLI_LOG_LEVEL,
+        PlainConfig::LogConfig::CLI_LOG_TYPE,
+        PlainConfig::LogConfig::CLI_LOG_FILE,
         PlainConfig::Jobs::CLI_ENABLE_JOBS,
         PlainConfig::Tunneling::CLI_ENABLE_TUNNELING,
         PlainConfig::CLI_ENDPOINT,

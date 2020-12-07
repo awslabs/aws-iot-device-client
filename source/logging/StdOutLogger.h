@@ -55,14 +55,14 @@ namespace Aws
                         LogLevel level,
                         const char *tag,
                         std::chrono::time_point<std::chrono::system_clock> t,
-                        std::string message);
+                        std::string message) override;
 
                   public:
-                    virtual bool start();
+                    virtual bool start(const PlainConfig &config) override;
 
-                    virtual void shutdown();
+                    virtual void shutdown() override;
 
-                    virtual void flush();
+                    virtual void flush() override;
                 };
             } // namespace Logging
         }     // namespace DeviceClient

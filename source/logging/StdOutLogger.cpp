@@ -34,8 +34,10 @@ void StdOutLogger::run()
     }
 }
 
-bool StdOutLogger::start()
+bool StdOutLogger::start(const PlainConfig &config)
 {
+    setLogLevel(config.logConfig.logLevel);
+
     thread log_thread(&StdOutLogger::run, this);
     log_thread.detach();
 

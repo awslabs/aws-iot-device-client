@@ -162,6 +162,14 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    if (!LoggerFactory::reconfigure(config.config) &&
+        dynamic_cast<StdOutLogger *>(LoggerFactory::getLoggerInstance().get()) == nullptr)
+    {
+        // We attempted to start a non-stdout logger and failed, so we should fall back to STDOUT
+        config.config.logConfig.type = config.config.logConfig.LOG_TYPE_STDOUT;
+        LoggerFactory::reconfigure(config.config);
+    }
+
     // Register for listening to interrupt signals
     sigset_t sigset;
     memset(&sigset, 0, sizeof(sigset_t));

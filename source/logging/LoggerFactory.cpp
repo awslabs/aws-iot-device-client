@@ -4,22 +4,29 @@
 #include "LoggerFactory.h"
 
 using namespace std;
+using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Logging;
 
-unique_ptr<Logger> fileLogger = unique_ptr<FileLogger>(new FileLogger());
-unique_ptr<Logger> stdOutLogger = unique_ptr<StdOutLogger>(new StdOutLogger());
-
-// These assignments allow us to make function calls to perform initial object creation
-// for the factory without having to perform that work in the getInstance() method,
-// which would happen for every function call
-bool initFileLogger = fileLogger->start();
-bool initStdOutLogger = stdOutLogger->start();
-
-// Fall back to the StdOutLogger if we can't write to the log file
-shared_ptr<Logger> LoggerFactory::logger =
-    initFileLogger ? shared_ptr<Logger>(fileLogger.release()) : shared_ptr<Logger>(stdOutLogger.release());
+shared_ptr<Logger> LoggerFactory::logger = shared_ptr<Logger>(new StdOutLogger());
 
 shared_ptr<Logger> LoggerFactory::getLoggerInstance()
 {
     return LoggerFactory::logger;
+}
+
+bool LoggerFactory::reconfigure(const PlainConfig &config)
+{
+    logger->flush();
+
+    if (config.logConfig.type == config.logConfig.LOG_TYPE_FILE && dynamic_cast<FileLogger *>(logger.get()) == nullptr)
+    {
+        logger.reset(new FileLogger);
+    }
+    else if (
+        config.logConfig.type == config.logConfig.LOG_TYPE_STDOUT &&
+        dynamic_cast<StdOutLogger *>(logger.get()) == nullptr)
+    {
+        logger.reset(new StdOutLogger);
+    }
+    return logger->start(config);
 }

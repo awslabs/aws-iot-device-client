@@ -4,6 +4,7 @@
 #ifndef DEVICE_CLIENT_LOGGER_H
 #define DEVICE_CLIENT_LOGGER_H
 
+#include "../config/Config.h"
 #include "../util/StringUtils.h"
 #include "LogLevel.h"
 #include <chrono>
@@ -46,9 +47,11 @@ namespace Aws
                 class Logger
                 {
                   protected:
-                    // This value is currently set for testing, but we'll want this to be configurable
-                    const int DC_LOG_LEVEL = 3;
                     const char *LOGGER_TAG = "AWS IoT Device Client Logger";
+                    /**
+                     * \brief The runtime log level for the IoT Device Client
+                     */
+                    int logLevel = (int)LogLevel::DEBUG;
                     /**
                      * \brief Implemented by the underlying logger implementation to pass responsibility for managing
                      * the log message from the Logger interface to the logger implementation
@@ -67,6 +70,13 @@ namespace Aws
                         const char *tag,
                         std::chrono::time_point<std::chrono::system_clock> t,
                         std::string message) = 0;
+
+                    /**
+                     * \brief Sets the level of the Logger implementation (DEBUG, INFO, WARN, ERROR)
+                     *
+                     * @param level the level to set the logger to
+                     */
+                    void setLogLevel(int level) { logLevel = level; }
 
                   public:
                     /**
@@ -109,7 +119,7 @@ namespace Aws
                     {
                         va_list args;
                         va_start(args, message);
-                        if (DC_LOG_LEVEL >= (int)LogLevel::ERROR)
+                        if (logLevel >= (int)LogLevel::ERROR)
                         {
                             vlog(LogLevel::ERROR, tag, t, message, args);
                         }
@@ -136,7 +146,7 @@ namespace Aws
                     {
                         va_list args;
                         va_start(args, message);
-                        if (DC_LOG_LEVEL >= (int)LogLevel::WARN)
+                        if (logLevel >= (int)LogLevel::WARN)
                         {
                             vlog(LogLevel::WARN, tag, t, message, args);
                         }
@@ -163,7 +173,7 @@ namespace Aws
                     {
                         va_list args;
                         va_start(args, message);
-                        if (DC_LOG_LEVEL >= (int)LogLevel::INFO)
+                        if (logLevel >= (int)LogLevel::INFO)
                         {
                             vlog(LogLevel::INFO, tag, t, message, args);
                         }
@@ -190,7 +200,7 @@ namespace Aws
                     {
                         va_list args;
                         va_start(args, message);
-                        if (DC_LOG_LEVEL >= (int)LogLevel::DEBUG)
+                        if (logLevel >= (int)LogLevel::DEBUG)
                         {
                             vlog(LogLevel::DEBUG, tag, t, message, args);
                         }
@@ -199,9 +209,11 @@ namespace Aws
 
                     /**
                      * \brief Starts the underlying logger implementation's logging behavior
+                     *
+                     * @param config the config data passed in from the CLI and JSON
                      * @return true if it is able to start successfully, false otherwise
                      */
-                    virtual bool start() = 0;
+                    virtual bool start(const PlainConfig &config) = 0;
                     /**
                      * \brief Notifies the Logger implementation that any queued logs should be dumped to output and the
                      * logger should shut itself down

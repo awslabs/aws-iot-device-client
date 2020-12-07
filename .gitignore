@@ -2,6 +2,7 @@
 cmake-build-debug/
 sdk-cpp-workspace/
 out/
+build/
 
 # Ignore compiled documentation folders
 doc/html/
