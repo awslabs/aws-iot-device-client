@@ -61,7 +61,7 @@ else ()
     target_compile_options(${DC_PROJECT_NAME} PRIVATE -Wall -Wno-long-long -pedantic -Werror)
 endif ()
 
-target_link_libraries(${DC_PROJECT_NAME} IotJobs-cpp IotDeviceCommon-cpp IotDeviceDefender-cpp IotSecureTunneling-cpp aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io s2n aws-c-cal aws-c-http aws-c-compression aws-c-common aws-c-iot)
+target_link_libraries(${DC_PROJECT_NAME} IotIdentity-cpp IotJobs-cpp IotDeviceCommon-cpp IotDeviceDefender-cpp IotSecureTunneling-cpp aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io s2n aws-c-cal aws-c-http aws-c-compression aws-c-common aws-c-iot)
 target_link_libraries(${DC_PROJECT_NAME} OpenSSL::SSL)
 target_link_libraries(${DC_PROJECT_NAME} OpenSSL::Crypto)
 

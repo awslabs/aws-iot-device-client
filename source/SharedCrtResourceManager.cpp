@@ -17,15 +17,9 @@ using namespace Aws::Iot::DeviceClient::Logging;
 
 bool SharedCrtResourceManager::initialize(const PlainConfig &config)
 {
-    if (!locateCredentials(config))
-    {
-        LOG_ERROR(TAG, "Failed to find file(s) required for initializing the MQTT connection");
-        return false;
-    }
 
     initializeAllocator();
-    initialized = buildClient() == SharedCrtResourceManager::SUCCESS &&
-                  establishConnection(config) == SharedCrtResourceManager::SUCCESS;
+    initialized = buildClient() == SharedCrtResourceManager::SUCCESS;
 
     return initialized;
 }
@@ -97,6 +91,11 @@ int SharedCrtResourceManager::buildClient()
 
 int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
 {
+    if (!locateCredentials(config))
+    {
+        LOG_ERROR(TAG, "Failed to find file(s) required for establishing the MQTT connection");
+        return false;
+    }
     auto clientConfigBuilder = MqttClientConnectionConfigBuilder(config.cert->c_str(), config.key->c_str());
     clientConfigBuilder.WithEndpoint(config.endpoint->c_str());
     clientConfigBuilder.WithCertificateAuthority(config.rootCa->c_str());
@@ -126,7 +125,6 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
      * but this is a sample console application, so we'll just do that with a condition variable.
      */
     promise<bool> connectionCompletedPromise;
-    promise<void> connectionClosedPromise;
 
     /*
      * This will execute when an mqtt connect has completed or failed.
@@ -154,7 +152,6 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
      */
     auto onDisconnect = [&](Mqtt::MqttConnection & /*conn*/) {
         {
-            LOG_INFO(TAG, "MQTT Connection is now disconnected");
             connectionClosedPromise.set_value();
         }
     };
@@ -233,7 +230,8 @@ void SharedCrtResourceManager::disconnect()
 {
     if (connection->Disconnect())
     {
-        initialized = false;
+        connectionClosedPromise.get_future().wait();
+        LOG_INFO(TAG, "MQTT Connection is now disconnected");
     }
     else
     {

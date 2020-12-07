@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 #ifndef DEVICE_CLIENT_DEVICEDEFENDERFEATURE_H
 #define DEVICE_CLIENT_DEVICEDEFENDERFEATURE_H
 
@@ -17,7 +20,7 @@ namespace Aws
         {
             class DeviceDefenderFeature : public Feature
             {
-            public:
+              public:
                 int init(
                     std::shared_ptr<SharedCrtResourceManager> manager,
                     std::shared_ptr<ClientBaseNotifier> notifier,
@@ -28,17 +31,18 @@ namespace Aws
                 std::string getName() override;
                 int start() override;
                 int stop() override;
+
               private:
-                static constexpr char TAG[]= "DeviceDefender.cpp";
+                static constexpr char TAG[] = "DeviceDefender.cpp";
                 int interval;
                 std::string thingName = "";
                 std::shared_ptr<SharedCrtResourceManager> resourceManager;
                 std::shared_ptr<ClientBaseNotifier> baseNotifier;
 
-                static constexpr char TOPIC_PRE[]= "$aws/things/";
-                static constexpr char TOPIC_POST[]= "/defender/metrics/json";
-                static constexpr char TOPIC_ACCEPTED[]= "/accepted";
-                static constexpr char TOPIC_REJECTED[]= "/rejected";
+                static constexpr char TOPIC_PRE[] = "$aws/things/";
+                static constexpr char TOPIC_POST[] = "/defender/metrics/json";
+                static constexpr char TOPIC_ACCEPTED[] = "/accepted";
+                static constexpr char TOPIC_REJECTED[] = "/rejected";
 
                 std::unique_ptr<Aws::Iotdevicedefenderv1::ReportTask> task;
 

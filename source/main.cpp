@@ -6,6 +6,7 @@
 #include "SharedCrtResourceManager.h"
 #include "config/Config.h"
 #include "devicedefender/DeviceDefenderFeature.h"
+#include "fleetprovisioning/FleetProvisioning.h"
 #include "jobs/JobsFeature.h"
 #include "logging/LoggerFactory.h"
 #include "tunneling/SecureTunnelingFeature.h"
@@ -169,7 +170,6 @@ int main(int argc, char *argv[])
     sigaddset(&sigset, SIGINT);
     sigprocmask(SIG_BLOCK, &sigset, 0);
 
-    // Initialize features
     shared_ptr<DefaultClientBaseNotifier> listener =
         shared_ptr<DefaultClientBaseNotifier>(new DefaultClientBaseNotifier);
     shared_ptr<SharedCrtResourceManager> resourceManager =
@@ -185,6 +185,58 @@ int main(int argc, char *argv[])
         abort();
     }
 
+    if (config.config.fleetProvisioning->enabled.has_value() && config.config.fleetProvisioning->enabled.value() &&
+        !(config.config.runtimeConfig.has_value() &&
+          config.config.runtimeConfig->completedFleetProvisioning.has_value() &&
+          config.config.runtimeConfig->completedFleetProvisioning.value()))
+    {
+
+        /*
+         * Establish MQTT connection using claim certificates and private key to provision device/thing.
+         */
+        if (resourceManager.get()->establishConnection(config.config) != SharedCrtResourceManager::SUCCESS)
+        {
+            LOG_ERROR(
+                TAG,
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to establish the MQTT Client. Please verify your AWS "
+                "IoT credentials, "
+                "configuration and/or certificate policy. ***");
+            LoggerFactory::getLoggerInstance()->shutdown();
+            abort();
+        }
+
+        /*
+         * Provision Device, parse new runtime conf file and validate its content.
+         */
+        if (!FleetProvisioning::ProvisionDevice(resourceManager, config.config) ||
+            !config.ParseConfigFile(Config::DEFAULT_RUNTIME_CONFIG_FILE) || !config.ValidateAndStoreRuntimeConfig())
+        {
+            LOG_ERROR(
+                TAG,
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to Provision thing or Validate newly created resources. "
+                "Please verify your AWS IoT credentials, "
+                "configuration, Fleet Provisioning Template, claim certificate and policy used. ***");
+            LoggerFactory::getLoggerInstance()->shutdown();
+            abort();
+        }
+        resourceManager->disconnect();
+    }
+    /*
+     * Establish MQTT connection using permanent certificate and private key to start and run AWS IoT Device Client
+     * features.
+     */
+    if (resourceManager.get()->establishConnection(config.config) != SharedCrtResourceManager::SUCCESS)
+    {
+        LOG_ERROR(
+            TAG,
+            "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to initialize the MQTT Client. Please verify your AWS IoT "
+            "credentials and/or "
+            "configuration. ***");
+        LoggerFactory::getLoggerInstance()->shutdown();
+        abort();
+    }
+
+    // Initialize features
     unique_ptr<JobsFeature> jobs;
     unique_ptr<SecureTunnelingFeature> tunneling;
     unique_ptr<DeviceDefenderFeature> deviceDefender;
