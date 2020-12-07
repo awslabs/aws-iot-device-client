@@ -47,7 +47,7 @@ int FileUtils::mkdirs(const char *path)
     return 0;
 }
 
-string FileUtils::extractParentDirectory(string filePath)
+string FileUtils::extractParentDirectory(const string &filePath)
 {
     const size_t rightMostSlash = filePath.rfind("/");
     if (std::string::npos != rightMostSlash)

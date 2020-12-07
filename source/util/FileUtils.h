@@ -31,7 +31,7 @@ namespace Aws
                      * @param filePath a path to a file
                      * @return the parent directory of the file
                      */
-                    static std::string extractParentDirectory(std::string filePath);
+                    static std::string extractParentDirectory(const std::string &filePath);
                 };
             } // namespace Util
         }     // namespace DeviceClient

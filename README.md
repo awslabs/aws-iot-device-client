@@ -29,7 +29,7 @@ mkdir aws-iot-device-client/build
 cd aws-iot-device-client/build
 cmake ../
 cmake --build . --target aws-iot-device-client
-make # This line builds the test executable 
+cmake --build . --target test-aws-iot-device-client # This line builds the test executable
 ```
 
 ##### Build With Dependencies Already Installed
@@ -51,7 +51,7 @@ mkdir aws-iot-device-client/build
 cd aws-iot-device-client/build
 cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF
 cmake --build . --target aws-iot-device-client
-make # This line builds the test executable
+cmake --build . --target test-aws-iot-device-client # This line builds the test executable
 ```
 
 ### Running the tests
