@@ -69,6 +69,26 @@ namespace Aws
                     return 0;
                 }
 
+                uint16_t SecureTunnelingFeature::GetPortFromService(const std::string &service)
+                {
+                    if (mServiceToPortMap.empty())
+                    {
+                        mServiceToPortMap["SSH"] = 22;
+                        mServiceToPortMap["VNC"] = 5900;
+                    }
+
+                    auto result = mServiceToPortMap.find(service);
+                    if (result == mServiceToPortMap.end())
+                    {
+                        LOGM_ERROR(TAG, "Requested unsupported service. service=%s", service.c_str());
+                        return 0; // TODO: Consider throw
+                    }
+
+                    return result->second;
+                }
+
+                bool SecureTunnelingFeature::IsValidPort(int port) { return 1 <= port && port <= 65535; }
+
                 void SecureTunnelingFeature::LoadFromConfig(const PlainConfig &config)
                 {
                     mThingName = *config.thingName;
@@ -102,11 +122,36 @@ namespace Aws
                             bind(&SecureTunnelingFeature::OnSubscribeComplete, this, placeholders::_1));
                     }
 
-                    if (!mAccessToken.empty() && !mRegion.empty() && IsValidPort(mPort))
+                    if (!mSubscribeNotification && !mAccessToken.empty() && !mRegion.empty() && IsValidPort(mPort))
                     {
                         connectToSecureTunnel(mAccessToken, mRegion);
                         connectToTcpForward(mPort);
                     }
+                }
+
+                template <typename T>
+                static bool operator==(const Aws::Crt::Optional<T> &lhs, const Aws::Crt::Optional<T> &rhs)
+                {
+                    if (!lhs.has_value() && !rhs.has_value())
+                    {
+                        return true;
+                    }
+                    else if (lhs.has_value() && rhs.has_value())
+                    {
+                        return lhs.value() == rhs.value();
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+
+                static bool operator==(
+                    const SecureTunnelingNotifyResponse &lhs,
+                    const SecureTunnelingNotifyResponse &rhs)
+                {
+                    return lhs.Region == rhs.Region && lhs.ClientMode == rhs.ClientMode &&
+                           lhs.Services == rhs.Services && lhs.ClientAccessToken == rhs.ClientAccessToken;
                 }
 
                 void SecureTunnelingFeature::onSubscribeToTunnelsNotifyResponse(
@@ -114,6 +159,13 @@ namespace Aws
                     int ioErr)
                 {
                     LOG_DEBUG(TAG, "Received MQTT Tunnel Notification");
+
+                    if (mLastSeenNotifyResponse.has_value() && mLastSeenNotifyResponse.value() == *response)
+                    {
+                        LOG_INFO(TAG, "Received duplicate MQTT Tunnel Notification. Ignoring...");
+                        return;
+                    }
+                    mLastSeenNotifyResponse = *response;
 
                     if (ioErr || !response)
                     {
@@ -148,6 +200,8 @@ namespace Aws
 
                 void SecureTunnelingFeature::OnSubscribeComplete(int ioErr)
                 {
+                    LOG_DEBUG(TAG, "Subscribed to tunnel notification topic");
+
                     if (ioErr)
                     {
                         LOGM_ERROR(TAG, "Couldn't subscribe to tunnel notification topic. ioErr=%d", ioErr);
@@ -200,26 +254,6 @@ namespace Aws
 
                     return endpoint;
                 }
-
-                uint16_t SecureTunnelingFeature::GetPortFromService(const std::string &service)
-                {
-                    if (mServiceToPortMap.empty())
-                    {
-                        mServiceToPortMap["SSH"] = 22;
-                        mServiceToPortMap["VNC"] = 5900;
-                    }
-
-                    auto result = mServiceToPortMap.find(service);
-                    if (result == mServiceToPortMap.end())
-                    {
-                        LOGM_ERROR(TAG, "Requested unsupported service. service=%s", service.c_str());
-                        return 0; // TODO: Consider throw
-                    }
-
-                    return result->second;
-                }
-
-                bool SecureTunnelingFeature::IsValidPort(int port) { return 1 <= port && port <= 65535; }
 
                 void SecureTunnelingFeature::OnConnectionComplete()
                 {
