@@ -28,13 +28,6 @@ namespace Aws
                 {
                   private:
                     /**
-                     * \brief The default directory for storage of the log file
-                     *
-                     * If the user does not specify a desired log location in either the command line arguments
-                     * or the Json configuration file, this is the default log directory that will be used
-                     */
-                    std::string DEFAULT_LOG_DIR = "/var/log/";
-                    /**
                      * \brief The full path to the default log file for the Device Client
                      *
                      * If the user does not specify a desired log location in either the command line arguments
@@ -43,10 +36,18 @@ namespace Aws
                     std::string DEFAULT_LOG_FILE = "/var/log/aws-iot-device-client.log";
 
                     /**
+                     * \brief Runtime configuration for which log file to log to.
+                     */
+                    std::string logFile = DEFAULT_LOG_FILE;
+
+                    /**
                      * \brief Flag used to notify underlying threads that they should discontinue any processing
                      * so that the application can safely shutdown
                      */
                     bool needsShutdown = false;
+
+                    std::mutex isRunningLock;
+                    bool isRunning = false;
                     /**
                      * \brief a LogQueue instance used to queue incoming log messages for processing
                      */
@@ -56,13 +57,6 @@ namespace Aws
                      * \brief an std::ofstream representing an underlying file that is used to write log output to disk
                      */
                     std::unique_ptr<std::ofstream> outputStream;
-
-                    /**
-                     * \brief Creates each of the directories in the provided path if they do not exist
-                     * @param path the full path to assess
-                     * @return 0 upon success, some other number indicating an error otherwise
-                     */
-                    static int mkdirs(const char *path);
 
                     /**
                      * \brief Write the log message to the log file
@@ -94,12 +88,12 @@ namespace Aws
                         LogLevel level,
                         const char *tag,
                         std::chrono::time_point<std::chrono::system_clock> t,
-                        std::string message);
+                        std::string message) override;
 
                   public:
-                    virtual bool start();
-                    virtual void shutdown();
-                    virtual void flush();
+                    virtual bool start(const PlainConfig &config) override;
+                    virtual void shutdown() override;
+                    virtual void flush() override;
                 };
             } // namespace Logging
         }     // namespace DeviceClient

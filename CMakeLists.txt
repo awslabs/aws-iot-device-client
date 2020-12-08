@@ -8,7 +8,6 @@ list(APPEND CMAKE_MODULE_PATH "./sdk-cpp-workspace/lib/cmake")
 
 file(GLOB DC_SRC "source/*.cpp" /
         "source/*.c" /
-        "source/external/cJSON/*.c" /
         "source/**/*.cpp" /
         "source/**/*.c")
 
