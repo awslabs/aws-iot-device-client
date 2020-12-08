@@ -105,6 +105,8 @@ TEST(Config, HappyCaseMinimumCli)
     ASSERT_FALSE(config.deviceDefender.enabled);
 }
 
+#if !defined(ST_COMPONENT_MODE)
+// ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
 TEST(Config, MissingSomeSettings)
 {
     constexpr char jsonString[] = R"(
@@ -123,6 +125,7 @@ TEST(Config, MissingSomeSettings)
 
     ASSERT_FALSE(config.Validate());
 }
+#endif
 
 TEST(Config, SecureTunnelingMinimumConfig)
 {

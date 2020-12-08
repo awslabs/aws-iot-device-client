@@ -5,8 +5,10 @@
 #include "Feature.h"
 #include "SharedCrtResourceManager.h"
 #include "config/Config.h"
-#include "devicedefender/DeviceDefenderFeature.h"
-#include "jobs/JobsFeature.h"
+#if !defined(ST_COMPONENT_MODE)
+#    include "devicedefender/DeviceDefenderFeature.h"
+#    include "jobs/JobsFeature.h"
+#endif
 #include "logging/LoggerFactory.h"
 #include "tunneling/SecureTunnelingFeature.h"
 #include <csignal>
@@ -16,7 +18,10 @@
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient;
+#if !defined(ST_COMPONENT_MODE)
+using namespace Aws::Iot::DeviceClient::DeviceDefender;
 using namespace Aws::Iot::DeviceClient::Jobs;
+#endif
 using namespace Aws::Iot::DeviceClient::Logging;
 using namespace Aws::Iot::DeviceClient::SecureTunneling;
 
@@ -193,29 +198,35 @@ int main(int argc, char *argv[])
         abort();
     }
 
-    unique_ptr<JobsFeature> jobs;
-    unique_ptr<SecureTunnelingFeature> tunneling;
-    unique_ptr<DeviceDefenderFeature> deviceDefender;
-
     featuresReadWriteLock.lock(); // LOCK
+
+#if !defined(ST_COMPONENT_MODE)
+    unique_ptr<JobsFeature> jobs;
     if (config.config.jobs.enabled)
     {
         jobs = unique_ptr<JobsFeature>(new JobsFeature());
         jobs->init(resourceManager, listener, config.config);
         features.push_back(jobs.get());
     }
+#endif
+    unique_ptr<SecureTunnelingFeature> tunneling;
     if (config.config.tunneling.enabled)
     {
         tunneling = unique_ptr<SecureTunnelingFeature>(new SecureTunnelingFeature());
         tunneling->init(resourceManager, listener, config.config);
         features.push_back(tunneling.get());
     }
+
+#if !defined(ST_COMPONENT_MODE)
+    unique_ptr<DeviceDefenderFeature> deviceDefender;
     if (config.config.deviceDefender.enabled)
     {
         deviceDefender = unique_ptr<DeviceDefenderFeature>(new DeviceDefenderFeature());
         deviceDefender->init(resourceManager, listener, config.config);
         features.push_back(deviceDefender.get());
     }
+#endif
+
     for (auto &feature : features)
     {
         feature->start();
@@ -229,7 +240,9 @@ int main(int argc, char *argv[])
         LOGM_INFO(TAG, "Received signal: (%d)", received_signal);
         if (SIGINT == received_signal)
         {
+#if !defined(ST_COMPONENT_MODE)
             resourceManager.get()->disconnect();
+#endif
             shutdown();
         }
     }

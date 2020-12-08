@@ -3,14 +3,32 @@ project(aws-iot-device-client)
 
 option(BUILD_SDK "Builds the aws-iot-device-sdk-cpp-v2 as part of build. Only do this if the SDK is not installed." ON)
 option(BUILD_TEST_DEPS "Builds the device client test dependencies as part of build. Only do this if you do not have gtest installed and you wish to run the tests." ON)
+option(SECURE_TUNNEL_COMPONENT "Builds the device client with only Secure Tunneling enabled. The Tunnel token should be provided via config, as the client will not listen for Tunnel notifications." OFF)
+
+if (SECURE_TUNNEL_COMPONENT)
+    add_definitions(-DST_COMPONENT_MODE)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH "./sdk-cpp-workspace/lib/cmake")
 
+file(GLOB CONFIG_SRC "source/config/*.cpp")
+file(GLOB LOG_SRC "source/logging/*.cpp")
+file(GLOB UTIL_SRC "source/util/*.cpp")
+
 file(GLOB DC_SRC "source/*.cpp" /
         "source/*.c" /
-        "source/**/*.cpp" /
-        "source/**/*.c")
+        ${CONFIG_SRC}
+        ${LOG_SRC}
+        ${UTIL_SRC})
 
+file(GLOB DD_SRC "source/devicedefender/*.cpp")
+file(GLOB JOBS_SRC "source/jobs/*.cpp")
+file(GLOB ST_SRC "source/tunneling/*.cpp")
+
+if (NOT SECURE_TUNNEL_COMPONENT)
+    list(APPEND DC_SRC ${DD_SRC} ${JOBS_SRC})
+endif()
+list(APPEND DC_SRC ${ST_SRC})
 
 set(DC_PROJECT_NAME aws-iot-device-client)
 set(CMAKE_CXX_STANDARD 11)
@@ -60,7 +78,15 @@ else ()
     target_compile_options(${DC_PROJECT_NAME} PRIVATE -Wall -Wno-long-long -pedantic -Werror)
 endif ()
 
-target_link_libraries(${DC_PROJECT_NAME} IotJobs-cpp IotDeviceCommon-cpp IotDeviceDefender-cpp IotSecureTunneling-cpp aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io s2n aws-c-cal aws-c-http aws-c-compression aws-c-common aws-c-iot)
+set(DEP_DC_LIBS ${DEP_DC_LIBS} aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io s2n aws-c-cal aws-c-http aws-c-compression aws-c-common)
+
+if (SECURE_TUNNEL_COMPONENT)
+    set(DEP_DC_LIBS ${DEP_DC_LIBS} IotDeviceCommon-cpp IotSecureTunneling-cpp aws-c-iot)
+else()
+    set(DEP_DC_LIBS ${DEP_DC_LIBS} IotJobs-cpp IotDeviceCommon-cpp IotDeviceDefender-cpp IotSecureTunneling-cpp aws-c-iot)
+endif()
+
+target_link_libraries(${DC_PROJECT_NAME} ${DEP_DC_LIBS})
 target_link_libraries(${DC_PROJECT_NAME} OpenSSL::SSL)
 target_link_libraries(${DC_PROJECT_NAME} OpenSSL::Crypto)
 

@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "Config.h"
-#include "../jobs/JobsFeature.h"
+#if !defined(ST_COMPONENT_MODE)
+    #include "../jobs/JobsFeature.h"
+#endif
 #include "../logging/LoggerFactory.h"
 #include "../tunneling/SecureTunnelingFeature.h"
 #include <algorithm>
@@ -129,6 +131,7 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
 
 bool PlainConfig::Validate() const
 {
+#if !defined(ST_COMPONENT_MODE)
     if (!endpoint.has_value() || endpoint->empty())
     {
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Endpoint is missing ***");
@@ -162,11 +165,12 @@ bool PlainConfig::Validate() const
     {
         return false;
     }
-    if (!tunneling.Validate())
+    if (!deviceDefender.Validate())
     {
         return false;
     }
-    if (!deviceDefender.Validate())
+#endif
+    if (!tunneling.Validate())
     {
         return false;
     }

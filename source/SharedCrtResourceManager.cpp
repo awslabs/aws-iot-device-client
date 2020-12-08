@@ -17,15 +17,20 @@ using namespace Aws::Iot::DeviceClient::Logging;
 
 bool SharedCrtResourceManager::initialize(const PlainConfig &config)
 {
+#if !defined(ST_COMPONENT_MODE)
     if (!locateCredentials(config))
     {
         LOG_ERROR(TAG, "Failed to find file(s) required for initializing the MQTT connection");
         return false;
     }
+#endif
 
     initializeAllocator();
-    initialized = buildClient() == SharedCrtResourceManager::SUCCESS &&
-                  establishConnection(config) == SharedCrtResourceManager::SUCCESS;
+    initialized = buildClient() == SharedCrtResourceManager::SUCCESS;
+
+#if !defined(ST_COMPONENT_MODE)
+    initialized = initialized && establishConnection(config) == SharedCrtResourceManager::SUCCESS;
+#endif
 
     return initialized;
 }
