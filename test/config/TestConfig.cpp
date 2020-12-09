@@ -105,7 +105,7 @@ TEST(Config, HappyCaseMinimumCli)
     ASSERT_FALSE(config.deviceDefender.enabled);
 }
 
-#if !defined(ST_COMPONENT_MODE)
+#if !defined(DISABLE_MQTT)
 // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
 TEST(Config, MissingSomeSettings)
 {

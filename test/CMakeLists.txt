@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.10)
 
 set(GTEST_PROJECT test-aws-iot-device-client)
 
@@ -8,11 +8,6 @@ if (NOT BUILD_TEST_DEPS)
     message("Gtest Cmake")
     find_package(GTest REQUIRED)
 endif()
-
-#file(GLOB DC_SRC "../source/*.cpp" /
-#        "../source/*.c" /
-#        "../source/**/*.cpp" /
-#        "../source/**/*.c")
 
 #########################################
 # Source Files                          #
@@ -32,10 +27,17 @@ file(GLOB DD_SRC "../source/devicedefender/*.cpp")
 file(GLOB JOBS_SRC "../source/jobs/*.cpp")
 file(GLOB ST_SRC "../source/tunneling/*.cpp")
 
-if (NOT SECURE_TUNNEL_COMPONENT)
-    list(APPEND DC_SRC ${DD_SRC} ${JOBS_SRC})
+if (NOT EXCLUDE_DD)
+    list(APPEND DC_SRC ${DD_SRC})
 endif()
-list(APPEND DC_SRC ${ST_SRC})
+
+if (NOT EXCLUDE_JOBS)
+    list(APPEND DC_SRC ${JOBS_SRC})
+endif()
+
+if (NOT EXCLUDE_ST)
+    list(APPEND DC_SRC ${ST_SRC})
+endif()
 
 #########################################
 # Test Files                            #
@@ -49,7 +51,7 @@ file(GLOB DC_TST "./*.cpp" /
 
 file(GLOB JOBS_TST "./jobs/*.cpp")
 
-if (NOT SECURE_TUNNEL_COMPONENT)
+if (NOT EXCLUDE_JOBS)
     list(APPEND DC_TST ${JOBS_TST})
 endif()
 

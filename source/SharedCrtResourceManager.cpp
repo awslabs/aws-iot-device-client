@@ -17,7 +17,7 @@ using namespace Aws::Iot::DeviceClient::Logging;
 
 bool SharedCrtResourceManager::initialize(const PlainConfig &config)
 {
-#if !defined(ST_COMPONENT_MODE)
+#if !defined(DISABLE_MQTT)
     if (!locateCredentials(config))
     {
         LOG_ERROR(TAG, "Failed to find file(s) required for initializing the MQTT connection");
@@ -28,7 +28,7 @@ bool SharedCrtResourceManager::initialize(const PlainConfig &config)
     initializeAllocator();
     initialized = buildClient() == SharedCrtResourceManager::SUCCESS;
 
-#if !defined(ST_COMPONENT_MODE)
+#if !defined(DISABLE_MQTT)
     initialized = initialized && establishConnection(config) == SharedCrtResourceManager::SUCCESS;
 #endif
 

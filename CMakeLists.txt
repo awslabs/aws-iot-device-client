@@ -3,10 +3,30 @@ project(aws-iot-device-client)
 
 option(BUILD_SDK "Builds the aws-iot-device-sdk-cpp-v2 as part of build. Only do this if the SDK is not installed." ON)
 option(BUILD_TEST_DEPS "Builds the device client test dependencies as part of build. Only do this if you do not have gtest installed and you wish to run the tests." ON)
-option(SECURE_TUNNEL_COMPONENT "Builds the device client with only Secure Tunneling enabled. The Tunnel token should be provided via config, as the client will not listen for Tunnel notifications." OFF)
+option(EXCLUDE_JOBS "Builds the device client without the IoT Jobs Feature." OFF)
+option(EXCLUDE_DD "Builds the device client without the IoT Device Defender Feature." OFF)
+option(EXCLUDE_ST "Builds the device client without the IoT Secure Tunneling Feature." OFF)
+option(EXCLUDE_FP "Builds the device client without the IoT Fleet Provisioning Feature." OFF)
+option(DISABLE_MQTT "WARNING: This flag is meant for internal use cases and will prevent Device Client features from operating. Builds the device client without MQTT Connection Management." OFF)
 
-if (SECURE_TUNNEL_COMPONENT)
-    add_definitions(-DST_COMPONENT_MODE)
+if (EXCLUDE_JOBS)
+    add_definitions(-DEXCLUDE_JOBS)
+endif()
+
+if (EXCLUDE_DD)
+    add_definitions(-DEXCLUDE_DD)
+endif()
+
+if (EXCLUDE_ST)
+    add_definitions(-DEXCLUDE_ST)
+endif()
+
+if (EXCLUDE_FP)
+    add_definitions(-DEXCLUDE_FP)
+endif()
+
+if (DISABLE_MQTT)
+    add_definitions(-DDISABLE_MQTT)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "./sdk-cpp-workspace/lib/cmake")
@@ -25,10 +45,17 @@ file(GLOB DD_SRC "source/devicedefender/*.cpp")
 file(GLOB JOBS_SRC "source/jobs/*.cpp")
 file(GLOB ST_SRC "source/tunneling/*.cpp")
 
-if (NOT SECURE_TUNNEL_COMPONENT)
-    list(APPEND DC_SRC ${DD_SRC} ${JOBS_SRC})
+if (NOT EXCLUDE_DD)
+    list(APPEND DC_SRC ${DD_SRC})
 endif()
-list(APPEND DC_SRC ${ST_SRC})
+
+if (NOT EXCLUDE_JOBS)
+    list(APPEND DC_SRC ${JOBS_SRC})
+endif()
+
+if (NOT EXCLUDE_ST)
+    list(APPEND DC_SRC ${ST_SRC})
+endif()
 
 set(DC_PROJECT_NAME aws-iot-device-client)
 set(CMAKE_CXX_STANDARD 11)
@@ -62,9 +89,11 @@ else()
     include_directories(/include)
     link_directories(/lib)
 
-    ### These next two lines are just a test to verify the Jobs SDK lib is available for sanity check
-    find_library(jobs_lib IotJobs-cpp)
-    message("-- *STATUS* Found jobs_lib: ${jobs_lib}")
+    if (NOT EXCLUDE_JOBS)
+        ### These next two lines are just a test to verify the Jobs SDK lib is available for sanity check
+        find_library(jobs_lib IotJobs-cpp)
+        message("-- *STATUS* Found jobs_lib: ${jobs_lib}")
+    endif()
 endif()
 
 ### Now build the DC executable
@@ -80,10 +109,18 @@ endif ()
 
 set(DEP_DC_LIBS ${DEP_DC_LIBS} aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io s2n aws-c-cal aws-c-http aws-c-compression aws-c-common)
 
-if (SECURE_TUNNEL_COMPONENT)
+# Set SDK dependency libraries as needed
+
+if (NOT EXCLUDE_DD)
+    set(DEP_DC_LIBS ${DEP_DC_LIBS} IotDeviceCommon-cpp IotDeviceDefender-cpp aws-c-iot)
+endif()
+
+if (NOT EXCLUDE_JOBS)
+    set(DEP_DC_LIBS ${DEP_DC_LIBS} IotJobs-cpp)
+endif()
+
+if (NOT EXCLUDE_ST)
     set(DEP_DC_LIBS ${DEP_DC_LIBS} IotDeviceCommon-cpp IotSecureTunneling-cpp aws-c-iot)
-else()
-    set(DEP_DC_LIBS ${DEP_DC_LIBS} IotJobs-cpp IotDeviceCommon-cpp IotDeviceDefender-cpp IotSecureTunneling-cpp aws-c-iot)
 endif()
 
 target_link_libraries(${DC_PROJECT_NAME} ${DEP_DC_LIBS})
