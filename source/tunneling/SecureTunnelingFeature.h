@@ -52,6 +52,7 @@ namespace Aws
                     void connectToSecureTunnel(const std::string &accessToken, const std::string &region);
 
                     void connectToTcpForward(uint16_t port);
+                    void disconnectFromTcpForward();
 
                     static std::string GetEndpoint(const std::string &region);
 
