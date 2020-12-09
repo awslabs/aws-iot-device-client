@@ -185,10 +185,8 @@ int main(int argc, char *argv[])
         abort();
     }
 
-    if (config.config.fleetProvisioning->enabled.has_value() && config.config.fleetProvisioning->enabled.value() &&
-        !(config.config.runtimeConfig.has_value() &&
-          config.config.runtimeConfig->completedFleetProvisioning.has_value() &&
-          config.config.runtimeConfig->completedFleetProvisioning.value()))
+    if (config.config.fleetProvisioning.enabled &&
+        !config.config.runtimeConfig.completedFleetProvisioning)
     {
 
         /*
@@ -208,7 +206,8 @@ int main(int argc, char *argv[])
         /*
          * Provision Device, parse new runtime conf file and validate its content.
          */
-        if (!FleetProvisioning::ProvisionDevice(resourceManager, config.config) ||
+        FleetProvisioning fleetProvisioning;
+        if (!fleetProvisioning.ProvisionDevice(resourceManager, config.config) ||
             !config.ParseConfigFile(Config::DEFAULT_RUNTIME_CONFIG_FILE) || !config.ValidateAndStoreRuntimeConfig())
         {
             LOG_ERROR(

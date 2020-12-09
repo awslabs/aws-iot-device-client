@@ -123,10 +123,10 @@ namespace Aws
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
                     static constexpr char JSON_KEY_TEMPLATE_NAME[] = "template-name";
 
-                    Aws::Crt::Optional<bool> enabled;
+                    bool enabled{false};
                     Aws::Crt::Optional<std::string> templateName;
                 };
-                Aws::Crt::Optional<FleetProvisioning> fleetProvisioning;
+                FleetProvisioning fleetProvisioning;
 
                 struct RuntimeConfig : public LoadableFromJsonAndCli
                 {
@@ -139,12 +139,12 @@ namespace Aws
                     static constexpr char JSON_KEY_KEY[] = "key";
                     static constexpr char JSON_KEY_THING_NAME[] = "thing-name";
 
-                    Aws::Crt::Optional<bool> completedFleetProvisioning;
+                    bool completedFleetProvisioning{false};
                     Aws::Crt::Optional<std::string> cert;
                     Aws::Crt::Optional<std::string> key;
                     Aws::Crt::Optional<std::string> thingName;
                 };
-                Aws::Crt::Optional<RuntimeConfig> runtimeConfig;
+                RuntimeConfig runtimeConfig;
             };
 
             class Config

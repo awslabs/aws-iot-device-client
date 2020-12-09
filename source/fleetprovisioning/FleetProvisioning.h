@@ -12,17 +12,43 @@ namespace Aws
     {
         namespace DeviceClient
         {
-            namespace FleetProvisioning
+            class FleetProvisioning
             {
+              public:
                 bool ProvisionDevice(std::shared_ptr<SharedCrtResourceManager> fpConnection, PlainConfig &config);
-                void Sleep(int sleeptime);
+                std::string getName();
+
+              private:
+                static constexpr char TAG[] = "FleetProvisioning.cpp";
+                static constexpr int DEFAULT_WAIT_TIME = 10;
+                std::promise<bool> keysPublishCompletedPromise;
+                std::promise<bool> keysAcceptedCompletedPromise;
+                std::promise<bool> keysRejectedCompletedPromise;
+                std::promise<bool> keysCreationCompletedPromise;
+                std::promise<void> keysCreationFailedPromise;
+
+                std::promise<bool> registerPublishCompletedPromise;
+                std::promise<bool> registerAcceptedCompletedPromise;
+                std::promise<bool> registerRejectedCompletedPromise;
+                std::promise<bool> registerThingCompletedPromise;
+                std::promise<void> registerThingFailedPromise;
+
+                Aws::Crt::String certificateOwnershipToken;
+                Aws::Crt::String certificateID;
+                Aws::Crt::String certPath;
+                Aws::Crt::String keyPath;
+                Aws::Crt::String thingName;
+                Aws::Crt::String templateName;
+
+                bool RegisterThing(Iotidentity::IotIdentityClient identityClient);
+                bool CreateCertificateAndKeys(Iotidentity::IotIdentityClient identityClient);
                 std::string StoreValueInFile(std::string value, std::string fileName);
                 void ExportRuntimeConfig(
                     const std::string &file,
                     const std::string &certPath,
                     const std::string &keyPath,
                     const std::string &thingName);
-            } // namespace FleetProvisioning
+            };
         }     // namespace DeviceClient
     }         // namespace Iot
 } // namespace Aws

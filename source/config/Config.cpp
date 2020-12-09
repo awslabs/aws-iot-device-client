@@ -131,7 +131,7 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     }
 
     return jobs.LoadFromCliArgs(cliArgs) && tunneling.LoadFromCliArgs(cliArgs) &&
-           deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning->LoadFromCliArgs(cliArgs);
+           deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs);
 }
 
 bool PlainConfig::Validate() const
@@ -173,7 +173,7 @@ bool PlainConfig::Validate() const
     {
         return false;
     }
-    if (fleetProvisioning && !fleetProvisioning->Validate())
+    if (!fleetProvisioning.Validate())
     {
         return false;
     }
@@ -466,7 +466,7 @@ bool PlainConfig::RuntimeConfig::LoadFromCliArgs(const CliArgs &cliArgs)
 
 bool PlainConfig::RuntimeConfig::Validate() const
 {
-    if (!completedFleetProvisioning.has_value() || !completedFleetProvisioning.value())
+    if (!completedFleetProvisioning)
     {
         return false;
     }
@@ -596,7 +596,10 @@ bool Config::init(const CliArgs &cliArgs)
         }
     }
 
-    config.LoadFromCliArgs(cliArgs);
+    if(!config.LoadFromCliArgs(cliArgs))
+    {
+        return false;
+    }
 
     if (ParseConfigFile(Config::DEFAULT_RUNTIME_CONFIG_FILE) && ValidateAndStoreRuntimeConfig())
     {
@@ -613,16 +616,17 @@ bool Config::ValidateAndStoreRuntimeConfig()
 {
     // check if all values are present and also check if the files are present then only overwrite values
 
-    if (config.runtimeConfig->Validate())
+    if (!config.runtimeConfig.Validate())
     {
-        config.cert = config.runtimeConfig->cert.value().c_str();
-        config.key = config.runtimeConfig->key.value().c_str();
-        config.thingName = config.runtimeConfig->thingName.value().c_str();
-        return true;
+        LOGM_WARN(
+            TAG, "Failed to Validate runtime configurations. Please check '%s' file", Config::DEFAULT_RUNTIME_CONFIG_FILE);
+        return false;
     }
-    LOGM_WARN(
-        TAG, "Failed to Validate runtime configurations. Please check '%s' file", Config::DEFAULT_RUNTIME_CONFIG_FILE);
-    return false;
+    config.cert = config.runtimeConfig.cert.value().c_str();
+    config.key = config.runtimeConfig.key.value().c_str();
+    config.thingName = config.runtimeConfig.thingName.value().c_str();
+    return true;
+
 }
 
 bool Config::ParseConfigFile(const string &file)

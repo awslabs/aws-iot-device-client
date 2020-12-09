@@ -15,6 +15,8 @@ using namespace Aws::Iot;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Logging;
 
+constexpr int SharedCrtResourceManager::DEFAULT_WAIT_TIME;
+
 bool SharedCrtResourceManager::initialize(const PlainConfig &config)
 {
 
@@ -152,6 +154,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
      */
     auto onDisconnect = [&](Mqtt::MqttConnection & /*conn*/) {
         {
+            LOG_INFO(TAG, "MQTT Connection is now disconnected");
             connectionClosedPromise.set_value();
         }
     };
@@ -230,8 +233,12 @@ void SharedCrtResourceManager::disconnect()
 {
     if (connection->Disconnect())
     {
-        connectionClosedPromise.get_future().wait();
-        LOG_INFO(TAG, "MQTT Connection is now disconnected");
+        if(connectionClosedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME)) == future_status::timeout)
+        {
+            LOG_ERROR(
+                TAG,
+                "MQTT Connection timed out to disconnect.");
+        }
     }
     else
     {

@@ -27,6 +27,7 @@ namespace Aws
               private:
                 const char *TAG = "SharedCrtResourceManager.cpp";
 
+                static constexpr int DEFAULT_WAIT_TIME = 10;
                 bool initialized = false;
                 std::promise<void> connectionClosedPromise;
                 std::unique_ptr<Aws::Crt::ApiHandle> apiHandle;
