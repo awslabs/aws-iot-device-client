@@ -85,6 +85,8 @@ namespace Aws
                     // On demand
                     std::unique_ptr<Aws::Iotsecuretunneling::SecureTunnel> mSecureTunnel;
                     std::unique_ptr<TcpForward> mTcpForward;
+
+                    Aws::Crt::Optional<Aws::Iotsecuretunneling::SecureTunnelingNotifyResponse> mLastSeenNotifyResponse;
                 };
             } // namespace SecureTunneling
         }     // namespace DeviceClient
