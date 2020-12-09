@@ -66,6 +66,18 @@ set(CMAKE_C_FLAGS_DEBUGOPT "")
 set(CMAKE_BUILD_TYPE Debug) # Switch to Release for the "Release" build
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
+option(GIT_VERSION "Updates the version number using the Git commit history" ON)
+option(BUILD_SDK "Builds the aws-iot-device-sdk-cpp-v2 as part of build. Only do this if the SDK is not installed." ON)
+option(BUILD_TEST_DEPS "Builds the device client test dependencies as part of build. Only do this if you do not have gtest installed and you wish to run the tests." ON)
+
+#########################################
+# Generate Version Information from Git #
+#########################################
+find_package(Git)
+include(CMakeLists.txt.versioning)
+# Now we inject the version information into a header that is accessible from the device client executable
+configure_file("source/Version.h.in" "${PROJECT_BINARY_DIR}/Version.h")
+
 #########################################
 # OpenSSL dependency                    #
 #########################################
@@ -93,10 +105,19 @@ else()
     link_directories(/lib)
 endif()
 
-### Now build the DC executable
+##############################################
+# Build the AWS IoT Device Client Executable #
+##############################################
+file(GLOB DC_SRC "source/*.cpp" /
+        "source/*.c" /
+        "source/**/*.cpp" /
+        "source/**/*.c")
 add_executable(${DC_PROJECT_NAME} ${DC_SRC})
 set_target_properties(${DC_PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_definitions(${DC_PROJECT_NAME} PRIVATE "-DDEBUG_BUILD")
+# We need to add the project binary directory to the list of include directories
+# for passing the version information down to the executable
+include_directories("${PROJECT_BINARY_DIR}")
 
 if (MSVC)
     target_compile_options(${DC_PROJECT_NAME} PRIVATE /W4 /WX)
