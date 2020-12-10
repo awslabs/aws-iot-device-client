@@ -121,7 +121,12 @@ TEST(Config, MissingSomeSettings)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if !defined(DISABLE_MQTT)
+// ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
     ASSERT_FALSE(config.Validate());
+#else
+    ASSERT_TRUE(config.Validate());
+#endif
 }
 
 TEST(Config, SecureTunnelingMinimumConfig)
@@ -178,7 +183,10 @@ TEST(Config, SecureTunnelingCli)
     ASSERT_TRUE(config.tunneling.enabled);
     ASSERT_STREQ("destination access token value", config.tunneling.destinationAccessToken->c_str());
     ASSERT_STREQ("region value", config.tunneling.region->c_str());
+#if !defined(EXCLUDE_ST)
+    // Do not test against ST GetPortFromService if ST code is excluded
     ASSERT_EQ(22, config.tunneling.port.value());
+#endif
     ASSERT_FALSE(config.tunneling.subscribeNotification);
 }
 
@@ -228,7 +236,9 @@ TEST(Config, SecureTunnelingPortRange)
     JsonView jsonView = jsonObject->View();
     unique_ptr<PlainConfig> config = unique_ptr<PlainConfig>(new PlainConfig());
     config->tunneling.LoadFromJson(jsonView);
+#if !defined(EXCLUDE_ST)
     ASSERT_FALSE(config->tunneling.Validate());
+#endif
 
     // Negative port
     jsonString = R"(
@@ -243,7 +253,9 @@ TEST(Config, SecureTunnelingPortRange)
     jsonView = jsonObject->View();
     config = unique_ptr<PlainConfig>(new PlainConfig());
     config->tunneling.LoadFromJson(jsonView);
+#if !defined(EXCLUDE_ST)
     ASSERT_FALSE(config->tunneling.Validate());
+#endif
 
     // Too large
     jsonString = R"(
@@ -258,7 +270,9 @@ TEST(Config, SecureTunnelingPortRange)
     jsonView = jsonObject->View();
     config = unique_ptr<PlainConfig>(new PlainConfig());
     config->tunneling.LoadFromJson(jsonView);
+#if !defined(EXCLUDE_ST)
     ASSERT_FALSE(config->tunneling.Validate());
+#endif
 
     // Within range
     jsonString = R"(

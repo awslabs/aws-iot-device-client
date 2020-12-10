@@ -2,9 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "Config.h"
-#include "../jobs/JobsFeature.h"
+#if !defined(EXCLUDE_JOBS)
+#    include "../jobs/JobsFeature.h"
+#endif
 #include "../logging/LoggerFactory.h"
-#include "../tunneling/SecureTunnelingFeature.h"
+#if !defined(EXCLUDE_ST)
+#    include "../tunneling/SecureTunnelingFeature.h"
+#endif
 #include <algorithm>
 #include <aws/crt/JsonObject.h>
 #include <iostream>
@@ -14,7 +18,9 @@
 using namespace std;
 using namespace Aws::Iot;
 using namespace Aws::Iot::DeviceClient;
+#if !defined(EXCLUDE_ST)
 using namespace Aws::Iot::DeviceClient::SecureTunneling;
+#endif
 using namespace Aws::Iot::DeviceClient::Logging;
 using namespace Aws::Iot::DeviceClient::Util;
 
@@ -129,6 +135,7 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
 
 bool PlainConfig::Validate() const
 {
+#if !defined(DISABLE_MQTT)
     if (!endpoint.has_value() || endpoint->empty())
     {
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Endpoint is missing ***");
@@ -154,22 +161,29 @@ bool PlainConfig::Validate() const
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Thing name is missing ***");
         return false;
     }
+#endif
     if (!logConfig.Validate())
     {
         return false;
     }
+#if !defined(EXCLUDE_JOBS)
     if (!jobs.Validate())
     {
         return false;
     }
-    if (!tunneling.Validate())
-    {
-        return false;
-    }
+#endif
+#if !defined(EXCLUDE_DD)
     if (!deviceDefender.Validate())
     {
         return false;
     }
+#endif
+#if !defined(EXCLUDE_ST)
+    if (!tunneling.Validate())
+    {
+        return false;
+    }
+#endif
     return true;
 }
 
@@ -407,7 +421,11 @@ bool PlainConfig::Tunneling::LoadFromCliArgs(const CliArgs &cliArgs)
     if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_SERVICE))
     {
         auto service = cliArgs.at(PlainConfig::Tunneling::CLI_TUNNELING_SERVICE);
+#if !defined(EXCLUDE_ST)
         port = SecureTunnelingFeature::GetPortFromService(service);
+#else
+        port = 0;
+#endif
     }
     if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION))
     {
@@ -438,7 +456,12 @@ bool PlainConfig::Tunneling::Validate() const
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: region is missing ***");
         return false;
     }
-    if (!port.has_value() || !SecureTunnelingFeature::IsValidPort(port.value()))
+    if (!port.has_value()
+#if !defined(EXCLUDE_ST)
+        || !SecureTunnelingFeature::IsValidPort(port.value()))
+#else
+    )
+#endif
     {
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: port is missing or invalid ***");
         return false;
