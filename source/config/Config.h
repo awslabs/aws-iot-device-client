@@ -47,12 +47,38 @@ namespace Aws
                 static constexpr char JSON_KEY_DEVICE_DEFENDER[] = "device-defender";
                 static constexpr char JSON_KEY_FLEET_PROVISIONING[] = "fleet-provisioning";
                 static constexpr char JSON_KEY_RUNTIME_CONFIG[] = "runtime-config";
+                static constexpr char JSON_KEY_LOGGING[] = "logging";
 
                 Aws::Crt::Optional<std::string> endpoint;
                 Aws::Crt::Optional<std::string> cert;
                 Aws::Crt::Optional<std::string> key;
                 Aws::Crt::Optional<std::string> rootCa;
                 Aws::Crt::Optional<std::string> thingName;
+
+                struct LogConfig : public LoadableFromJsonAndCli
+                {
+                    bool LoadFromJson(const Crt::JsonView &json) override;
+                    bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool Validate() const override;
+                    int ParseLogLevel(std::string value);
+                    std::string ParseLogType(std::string value);
+
+                    static constexpr char LOG_TYPE_FILE[] = "file";
+                    static constexpr char LOG_TYPE_STDOUT[] = "stdout";
+
+                    static constexpr char CLI_LOG_LEVEL[] = "--log-level";
+                    static constexpr char CLI_LOG_TYPE[] = "--log-type";
+                    static constexpr char CLI_LOG_FILE[] = "--log-file";
+
+                    static constexpr char JSON_KEY_LOG_LEVEL[] = "level";
+                    static constexpr char JSON_KEY_LOG_TYPE[] = "type";
+                    static constexpr char JSON_KEY_LOG_FILE[] = "file";
+
+                    int logLevel{3};
+                    std::string type;
+                    std::string file;
+                };
+                LogConfig logConfig;
 
                 struct Jobs : public LoadableFromJsonAndCli
                 {
@@ -62,6 +88,7 @@ namespace Aws
 
                     static constexpr char CLI_ENABLE_JOBS[] = "--enable-jobs";
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
+                    static constexpr char JSON_KEY_HANDLER_DIR[] = "handler_directory";
 
                     bool enabled{false};
                 };
@@ -156,7 +183,6 @@ namespace Aws
                 static constexpr char TAG[] = "Config.cpp";
                 static constexpr char DEFAULT_CONFIG_FILE[] = "/etc/aws-iot-device-client.conf";
                 static constexpr char DEFAULT_RUNTIME_CONFIG_FILE[] = "./aws-iot-device-client-runtime.conf";
-                static constexpr char JOBS_HANDLER_DIR[] = "handler_directory";
 
                 static constexpr char CLI_HELP[] = "--help";
                 static constexpr char CLI_EXPORT_DEFAULT_SETTINGS[] = "--export-default-settings";

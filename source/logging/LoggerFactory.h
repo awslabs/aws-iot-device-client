@@ -22,6 +22,7 @@
 #define LOGM_ERROR(tag, message, ...)                                                                                  \
     LoggerFactory::getLoggerInstance().get()->error(tag, std::chrono::system_clock::now(), message, __VA_ARGS__)
 
+#include "../config/Config.h"
 #include "FileLogger.h"
 #include "Logger.h"
 #include "StdOutLogger.h"
@@ -46,6 +47,7 @@ namespace Aws
                 class LoggerFactory
                 {
                   private:
+                    static constexpr char TAG[] = "LoggerFactory.cpp";
                     /**
                      * \brief The logger implementation
                      */
@@ -58,6 +60,15 @@ namespace Aws
                      * @return an instance of Logger
                      */
                     static std::shared_ptr<Logger> getLoggerInstance();
+
+                    /**
+                     * \brief Reconfigure the logger to use a new set of settings. This may include changing the
+                     * log level or switching between logger implementations.
+                     *
+                     * @param config
+                     * @return
+                     */
+                    static bool reconfigure(const PlainConfig &config);
                 };
             } // namespace Logging
         }     // namespace DeviceClient

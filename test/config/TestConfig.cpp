@@ -18,6 +18,11 @@ TEST(Config, AllFeaturesEnabled)
 	"key": "key value",
 	"root-ca": "root-ca value",
 	"thing-name": "thing-name value",
+    "logging": {
+        "level": "debug",
+        "type": "file",
+        "file": "./aws-iot-device-client.log"
+    },
     "jobs": {
         "enabled": true
     },
@@ -41,6 +46,9 @@ TEST(Config, AllFeaturesEnabled)
     ASSERT_STREQ("key value", config.key->c_str());
     ASSERT_STREQ("root-ca value", config.rootCa->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    ASSERT_STREQ("file", config.logConfig.type.c_str());
+    ASSERT_STREQ("./aws-iot-device-client.log", config.logConfig.file.c_str());
+    ASSERT_EQ(3, config.logConfig.logLevel); // Expect DEBUG log level, which is 3
     ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
     ASSERT_TRUE(config.deviceDefender.enabled);
@@ -208,7 +216,7 @@ TEST(Config, SecureTunnelingDisableSubscription)
 TEST(Config, SecureTunnelingPortRange)
 {
     // Too small
-    const char* jsonString = R"(
+    const char *jsonString = R"(
 {
     "enabled": true,
     "subscribe-notification": false,
@@ -266,4 +274,36 @@ TEST(Config, SecureTunnelingPortRange)
     config = unique_ptr<PlainConfig>(new PlainConfig());
     config->tunneling.LoadFromJson(jsonView);
     ASSERT_TRUE(config->tunneling.Validate());
+}
+
+TEST(Config, LoggingConfigurationCLI)
+{
+    constexpr char jsonString[] = R"(
+{
+	"endpoint": "endpoint value",
+	"cert": "cert value",
+	"key": "key value",
+	"root-ca": "root-ca value",
+	"thing-name": "thing-name value",
+    "logging": {
+        "level": "DEBUG",
+        "type": "STDOUT",
+        "file": "old-json-log.log"
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    CliArgs cliArgs;
+    cliArgs[PlainConfig::LogConfig::CLI_LOG_LEVEL] = "warn";
+    cliArgs[PlainConfig::LogConfig::CLI_LOG_TYPE] = "FILE";
+    cliArgs[PlainConfig::LogConfig::CLI_LOG_FILE] = "./client.log";
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_EQ(1, config.logConfig.logLevel); // Expect WARN log level, which is 1
+    ASSERT_STREQ("file", config.logConfig.type.c_str());
+    ASSERT_STREQ("./client.log", config.logConfig.file.c_str());
 }

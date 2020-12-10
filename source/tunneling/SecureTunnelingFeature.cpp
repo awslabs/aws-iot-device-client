@@ -69,6 +69,26 @@ namespace Aws
                     return 0;
                 }
 
+                uint16_t SecureTunnelingFeature::GetPortFromService(const std::string &service)
+                {
+                    if (mServiceToPortMap.empty())
+                    {
+                        mServiceToPortMap["SSH"] = 22;
+                        mServiceToPortMap["VNC"] = 5900;
+                    }
+
+                    auto result = mServiceToPortMap.find(service);
+                    if (result == mServiceToPortMap.end())
+                    {
+                        LOGM_ERROR(TAG, "Requested unsupported service. service=%s", service.c_str());
+                        return 0; // TODO: Consider throw
+                    }
+
+                    return result->second;
+                }
+
+                bool SecureTunnelingFeature::IsValidPort(int port) { return 1 <= port && port <= 65535; }
+
                 void SecureTunnelingFeature::LoadFromConfig(const PlainConfig &config)
                 {
                     mThingName = *config.thingName;
@@ -101,12 +121,36 @@ namespace Aws
                                 placeholders::_2),
                             bind(&SecureTunnelingFeature::OnSubscribeComplete, this, placeholders::_1));
                     }
-
-                    if (!mAccessToken.empty() && !mRegion.empty() && IsValidPort(mPort))
+                    else
                     {
+                        // Access token and region were loaded from config and have already been validated
                         connectToSecureTunnel(mAccessToken, mRegion);
-                        connectToTcpForward(mPort);
                     }
+                }
+
+                template <typename T>
+                static bool operator==(const Aws::Crt::Optional<T> &lhs, const Aws::Crt::Optional<T> &rhs)
+                {
+                    if (!lhs.has_value() && !rhs.has_value())
+                    {
+                        return true;
+                    }
+                    else if (lhs.has_value() && rhs.has_value())
+                    {
+                        return lhs.value() == rhs.value();
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+
+                static bool operator==(
+                    const SecureTunnelingNotifyResponse &lhs,
+                    const SecureTunnelingNotifyResponse &rhs)
+                {
+                    return lhs.Region == rhs.Region && lhs.ClientMode == rhs.ClientMode &&
+                           lhs.Services == rhs.Services && lhs.ClientAccessToken == rhs.ClientAccessToken;
                 }
 
                 void SecureTunnelingFeature::onSubscribeToTunnelsNotifyResponse(
@@ -115,15 +159,25 @@ namespace Aws
                 {
                     LOG_DEBUG(TAG, "Received MQTT Tunnel Notification");
 
+                    if (mLastSeenNotifyResponse.has_value() && mLastSeenNotifyResponse.value() == *response)
+                    {
+                        LOG_INFO(TAG, "Received duplicate MQTT Tunnel Notification. Ignoring...");
+                        return;
+                    }
+                    mLastSeenNotifyResponse = *response;
+
                     if (ioErr || !response)
                     {
                         LOGM_ERROR(TAG, "onSubscribeToTunnelsNotifyResponse received error. ioErr=%d", ioErr);
                         return;
                     }
 
-                    string clientAccessToken = response->ClientAccessToken->c_str();
                     string clientMode = response->ClientMode->c_str();
-                    string region = response->Region->c_str();
+                    if (clientMode != "destination")
+                    {
+                        LOGM_ERROR(TAG, "Unexpected client mode: %s", clientMode.c_str());
+                        return;
+                    }
 
                     size_t nServices = response->Services->size();
                     if (nServices == 0)
@@ -140,14 +194,36 @@ namespace Aws
                         return;
                     }
 
+                    mAccessToken = response->ClientAccessToken->c_str();
+                    if (mAccessToken.empty())
+                    {
+                        LOG_ERROR(TAG, "access token cannot be empty");
+                        return;
+                    }
+
+                    mRegion = response->Region->c_str();
+                    if (mRegion.empty())
+                    {
+                        LOG_ERROR(TAG, "region cannot be empty");
+                        return;
+                    }
+
                     string service = response->Services->at(0).c_str();
-                    LOGM_DEBUG(TAG, "Requested service=%s", service.c_str());
-                    connectToSecureTunnel(clientAccessToken, region);
-                    connectToTcpForward(GetPortFromService(service));
+                    mPort = GetPortFromService(service);
+                    if (!IsValidPort(mPort))
+                    {
+                        LOGM_ERROR(TAG, "Requested service is not supported: %s", service.c_str());
+                        return;
+                    }
+
+                    LOGM_DEBUG(TAG, "Region=%s, Service=%s", mRegion.c_str(), service.c_str());
+                    connectToSecureTunnel(mAccessToken, mRegion);
                 }
 
                 void SecureTunnelingFeature::OnSubscribeComplete(int ioErr)
                 {
+                    LOG_DEBUG(TAG, "Subscribed to tunnel notification topic");
+
                     if (ioErr)
                     {
                         LOGM_ERROR(TAG, "Couldn't subscribe to tunnel notification topic. ioErr=%d", ioErr);
@@ -159,6 +235,12 @@ namespace Aws
 
                 void SecureTunnelingFeature::connectToSecureTunnel(const string &accessToken, const string &region)
                 {
+                    if (accessToken.empty() || region.empty())
+                    {
+                        LOG_ERROR(TAG, "Cannot connect to secure tunnel. Either access token or region is empty");
+                        return;
+                    }
+
                     mSecureTunnel = unique_ptr<SecureTunnel>(new SecureTunnel(
                         mSharedCrtResourceManager->getAllocator(),
                         mSharedCrtResourceManager->getClientBootstrap(),
@@ -179,11 +261,23 @@ namespace Aws
 
                 void SecureTunnelingFeature::connectToTcpForward(uint16_t port)
                 {
+                    if (!IsValidPort(port))
+                    {
+                        LOGM_ERROR(TAG, "Cannot connect to invalid local port. port=%d", port);
+                        return;
+                    }
+
                     mTcpForward = unique_ptr<TcpForward>(new TcpForward(
                         mSharedCrtResourceManager,
                         port,
                         bind(&SecureTunnelingFeature::OnTcpForwardDataReceive, this, placeholders::_1)));
                     mTcpForward->Connect();
+                }
+
+                void SecureTunnelingFeature::disconnectFromTcpForward()
+                {
+                    mTcpForward->Close();
+                    mTcpForward.reset();
                 }
 
                 string SecureTunnelingFeature::GetEndpoint(const string &region)
@@ -200,26 +294,6 @@ namespace Aws
 
                     return endpoint;
                 }
-
-                uint16_t SecureTunnelingFeature::GetPortFromService(const std::string &service)
-                {
-                    if (mServiceToPortMap.empty())
-                    {
-                        mServiceToPortMap["SSH"] = 22;
-                        mServiceToPortMap["VNC"] = 5900;
-                    }
-
-                    auto result = mServiceToPortMap.find(service);
-                    if (result == mServiceToPortMap.end())
-                    {
-                        LOGM_ERROR(TAG, "Requested unsupported service. service=%s", service.c_str());
-                        return 0; // TODO: Consider throw
-                    }
-
-                    return result->second;
-                }
-
-                bool SecureTunnelingFeature::IsValidPort(int port) { return 1 <= port && port <= 65535; }
 
                 void SecureTunnelingFeature::OnConnectionComplete()
                 {
@@ -244,16 +318,19 @@ namespace Aws
                 void SecureTunnelingFeature::OnStreamStart()
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingFeature::OnStreamStart");
+                    connectToTcpForward(mPort);
                 }
 
                 void SecureTunnelingFeature::OnStreamReset()
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingFeature::OnStreamReset");
+                    disconnectFromTcpForward();
                 }
 
                 void SecureTunnelingFeature::OnSessionReset()
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingFeature::OnSessionReset");
+                    disconnectFromTcpForward();
                 }
 
                 void SecureTunnelingFeature::OnTcpForwardDataReceive(const Crt::ByteBuf &data)
