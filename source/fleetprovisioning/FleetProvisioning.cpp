@@ -45,10 +45,8 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
               "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to CreateKeysAndCertificate "
               "accepted: %s. ***",
               ErrorDebugString(ioErr));
-          keysAcceptedCompletedPromise.set_value(false);
       }
-
-      keysAcceptedCompletedPromise.set_value(true);
+      keysAcceptedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
     auto onKeysRejectedSubAck = [&](int ioErr) {
@@ -59,9 +57,8 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
               "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to CreateKeysAndCertificate "
               "rejected: %s. ***",
               ErrorDebugString(ioErr));
-          keysRejectedCompletedPromise.set_value(false);
       }
-      keysRejectedCompletedPromise.set_value(true);
+      keysRejectedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
     auto onKeysPublishSubAck = [&](int ioErr) {
@@ -72,10 +69,8 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
               "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error publishing to CreateKeysAndCertificate: "
               "%s. ***",
               ErrorDebugString(ioErr));
-          keysPublishCompletedPromise.set_value(false);
       }
-
-      keysPublishCompletedPromise.set_value(true);
+      keysPublishCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
     auto onKeysAccepted = [&](CreateKeysAndCertificateResponse *response, int ioErr) {
@@ -91,7 +86,6 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
           FleetProvisioning::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str());
           StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str());
           certificateOwnershipToken = *response->CertificateOwnershipToken;
-          keysCreationCompletedPromise.set_value(true);
       }
       else
       {
@@ -99,8 +93,8 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
               TAG,
               "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on subscription: %s. ***",
               ErrorDebugString(ioErr));
-          keysCreationCompletedPromise.set_value(false);
       }
+      keysCreationCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
     auto onKeysRejected = [&](ErrorResponse *error, int ioErr) {
@@ -188,10 +182,8 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
               "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to RegisterThing accepted: "
               "%s. ***",
               ErrorDebugString(ioErr));
-          registerAcceptedCompletedPromise.set_value(false);
       }
-
-      registerAcceptedCompletedPromise.set_value(true);
+      registerAcceptedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
     auto onRegisterRejectedSubAck = [&](int ioErr) {
@@ -202,9 +194,8 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
               "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to RegisterThing rejected: "
               "%s. ***",
               ErrorDebugString(ioErr));
-          registerRejectedCompletedPromise.set_value(false);
       }
-      registerRejectedCompletedPromise.set_value(true);
+      registerRejectedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
     auto onRegisterPublishSubAck = [&](int ioErr) {
@@ -214,10 +205,8 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
               TAG,
               "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error publishing to RegisterThing: %s. ***",
               ErrorDebugString(ioErr));
-          registerPublishCompletedPromise.set_value(false);
       }
-
-      registerPublishCompletedPromise.set_value(true);
+      registerPublishCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
     auto onRegisterAccepted = [&](RegisterThingResponse *response, int ioErr) {
@@ -228,7 +217,6 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
               "RegisterThingResponse ThingName: %s.",
               response->ThingName->c_str());
           thingName = response->ThingName->c_str();
-          registerThingCompletedPromise.set_value(true);
       }
       else
       {
@@ -236,8 +224,8 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
               TAG,
               "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on subscription: %s. ***",
               ErrorDebugString(ioErr));
-          registerThingCompletedPromise.set_value(false);
       }
+      registerThingCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
     auto onRegisterRejected = [&](ErrorResponse *error, int ioErr) {

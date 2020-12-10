@@ -420,7 +420,12 @@ bool PlainConfig::FleetProvisioning::Validate() const
         return true;
     }
 
-    return templateName.has_value();
+    if (!templateName.has_value() || templateName->empty())
+    {
+        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Template Name is missing ***");
+        return false;
+    }
+    return true;
 }
 
 constexpr char PlainConfig::RuntimeConfig::JSON_KEY_COMPLETED_FLEET_PROVISIONING[];
@@ -470,7 +475,8 @@ bool PlainConfig::RuntimeConfig::Validate() const
     {
         return false;
     }
-    return cert.has_value() && key.has_value() && thingName.has_value();
+    return cert.has_value() && key.has_value() && thingName.has_value() &&
+        !cert->empty() && !key->empty() && !thingName->empty();
 }
 
 constexpr char Config::TAG[];
@@ -585,6 +591,7 @@ bool Config::init(const CliArgs &cliArgs)
     {
         if (!ParseConfigFile(cliArgs.at(Config::CLI_CONFIG_FILE)))
         {
+            LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to Parse Config file: '%s' ***", Config::CLI_CONFIG_FILE);
             return false;
         }
     }
@@ -592,6 +599,7 @@ bool Config::init(const CliArgs &cliArgs)
     {
         if (!ParseConfigFile(Config::DEFAULT_CONFIG_FILE))
         {
+            LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to Parse Config file: '%s' ***", Config::DEFAULT_CONFIG_FILE);
             return false;
         }
     }
@@ -634,7 +642,7 @@ bool Config::ParseConfigFile(const string &file)
     ifstream setting(file);
     if (!setting.is_open())
     {
-        LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to open file: '%s' ***", file.c_str());
+        LOGM_ERROR(TAG, "Unable to open file: '%s'", file.c_str());
         return false;
     }
 
