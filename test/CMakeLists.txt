@@ -23,19 +23,18 @@ file(GLOB DC_SRC "../source/*.cpp" /
         ${LOG_SRC} /
         ${UTIL_SRC})
 
-file(GLOB DD_SRC "../source/devicedefender/*.cpp")
-file(GLOB JOBS_SRC "../source/jobs/*.cpp")
-file(GLOB ST_SRC "../source/tunneling/*.cpp")
-
 if (NOT EXCLUDE_DD)
+    file(GLOB DD_SRC "../source/devicedefender/*.cpp")
     list(APPEND DC_SRC ${DD_SRC})
 endif()
 
 if (NOT EXCLUDE_JOBS)
+    file(GLOB JOBS_SRC "../source/jobs/*.cpp")
     list(APPEND DC_SRC ${JOBS_SRC})
 endif()
 
 if (NOT EXCLUDE_ST)
+    file(GLOB ST_SRC "../source/tunneling/*.cpp")
     list(APPEND DC_SRC ${ST_SRC})
 endif()
 

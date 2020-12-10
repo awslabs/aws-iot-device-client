@@ -41,20 +41,23 @@ file(GLOB DC_SRC "source/*.cpp" /
         ${LOG_SRC}
         ${UTIL_SRC})
 
-file(GLOB DD_SRC "source/devicedefender/*.cpp")
-file(GLOB JOBS_SRC "source/jobs/*.cpp")
-file(GLOB ST_SRC "source/tunneling/*.cpp")
-
 if (NOT EXCLUDE_DD)
+    file(GLOB DD_SRC "source/devicedefender/*.cpp")
     list(APPEND DC_SRC ${DD_SRC})
 endif()
 
 if (NOT EXCLUDE_JOBS)
+    file(GLOB JOBS_SRC "source/jobs/*.cpp")
     list(APPEND DC_SRC ${JOBS_SRC})
 endif()
 
 if (NOT EXCLUDE_ST)
+    file(GLOB ST_SRC "source/tunneling/*.cpp")
     list(APPEND DC_SRC ${ST_SRC})
+endif()
+
+if (NOT EXCLUDE_FP)
+    #TODO: Append FP source files
 endif()
 
 set(DC_PROJECT_NAME aws-iot-device-client)
@@ -88,12 +91,6 @@ if (BUILD_SDK)
 else()
     include_directories(/include)
     link_directories(/lib)
-
-    if (NOT EXCLUDE_JOBS)
-        ### These next two lines are just a test to verify the Jobs SDK lib is available for sanity check
-        find_library(jobs_lib IotJobs-cpp)
-        message("-- *STATUS* Found jobs_lib: ${jobs_lib}")
-    endif()
 endif()
 
 ### Now build the DC executable
@@ -121,6 +118,10 @@ endif()
 
 if (NOT EXCLUDE_ST)
     set(DEP_DC_LIBS ${DEP_DC_LIBS} IotDeviceCommon-cpp IotSecureTunneling-cpp aws-c-iot)
+endif()
+
+if (NOT EXCLUDE_FP)
+    #TODO: Set FP required SDK libs
 endif()
 
 target_link_libraries(${DC_PROJECT_NAME} ${DEP_DC_LIBS})

@@ -54,11 +54,16 @@ cmake --build . --target aws-iot-device-client
 cmake --build . --target test-aws-iot-device-client # This line builds the test executable
 ```
 
-#### Custom Compilation
+#### Custom Compilation - Exclude Specific IoT Features to Reduce Executable Footprint
 
-The Device Client can be customized during build time to compile out certain IoT Features as desired. All features are
+**Description**:
+The Device Client can be customized during build time to exclude certain IoT features from compilation. All features are
 included by default. Use CMake variables in order to configure which features to exclude. See the project 
 `CMakeLists.txt` file for the options provided and their descriptions.
+
+**Use Case**:
+If there are certain IoT Features that you do not plan to use, then you can potentially minimize both on-disk and 
+runtime memory for your device client executable by excluding those features from compilation.
 
 Available CMake flags for feature exclusion:
 * `EXCLUDE_JOBS`

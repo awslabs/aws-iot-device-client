@@ -3,11 +3,11 @@
 
 #include "Config.h"
 #if !defined(EXCLUDE_JOBS)
-    #include "../jobs/JobsFeature.h"
+#    include "../jobs/JobsFeature.h"
 #endif
 #include "../logging/LoggerFactory.h"
 #if !defined(EXCLUDE_ST)
-    #include "../tunneling/SecureTunnelingFeature.h"
+#    include "../tunneling/SecureTunnelingFeature.h"
 #endif
 #include <algorithm>
 #include <aws/crt/JsonObject.h>
@@ -421,7 +421,11 @@ bool PlainConfig::Tunneling::LoadFromCliArgs(const CliArgs &cliArgs)
     if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_SERVICE))
     {
         auto service = cliArgs.at(PlainConfig::Tunneling::CLI_TUNNELING_SERVICE);
+#if !defined(EXCLUDE_ST)
         port = SecureTunnelingFeature::GetPortFromService(service);
+#else
+        port = 0;
+#endif
     }
     if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION))
     {
@@ -452,7 +456,12 @@ bool PlainConfig::Tunneling::Validate() const
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: region is missing ***");
         return false;
     }
-    if (!port.has_value() || !SecureTunnelingFeature::IsValidPort(port.value()))
+    if (!port.has_value()
+#if !defined(EXCLUDE_ST)
+        || !SecureTunnelingFeature::IsValidPort(port.value()))
+#else
+    )
+#endif
     {
         LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: port is missing or invalid ***");
         return false;
