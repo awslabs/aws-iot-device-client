@@ -44,6 +44,8 @@ namespace Aws
                     void OnWriteCompleted(struct aws_socket *socket, int error_code, size_t bytes_written);
                     void OnReadable(struct aws_socket *socket, int error_code);
 
+                    void FlushSendBuffer();
+
                     // Member data
                     static constexpr char TAG[] = "TcpForward.cpp";
 
@@ -55,6 +57,8 @@ namespace Aws
                     OnTcpForwardDataReceive mOnTcpForwardDataReceive;
 
                     aws_socket mSocket{};
+                    bool mConnected;
+                    Aws::Crt::ByteBuf mSendBuffer;
                 };
             } // namespace SecureTunneling
         }     // namespace DeviceClient
