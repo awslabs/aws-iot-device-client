@@ -122,7 +122,7 @@ TEST(Config, MissingSomeSettings)
     config.LoadFromJson(jsonView);
 
 #if !defined(DISABLE_MQTT)
-// ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
+    // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
     ASSERT_FALSE(config.Validate());
 #else
     ASSERT_TRUE(config.Validate());
