@@ -27,9 +27,15 @@ namespace Aws
                     AWS_ZERO_STRUCT(mSocket);
                     Aws::Crt::Io::SocketOptions socketOptions;
                     aws_socket_init(&mSocket, sharedCrtResourceManager->getAllocator(), &socketOptions.GetImpl());
+
+                    aws_byte_buf_init(&mSendBuffer, sharedCrtResourceManager->getAllocator(), 1);
                 }
 
-                TcpForward::~TcpForward() { aws_socket_clean_up(&mSocket); }
+                TcpForward::~TcpForward()
+                {
+                    aws_socket_clean_up(&mSocket);
+                    aws_byte_buf_clean_up(&mSendBuffer);
+                }
 
                 int TcpForward::Connect()
                 {
@@ -48,12 +54,21 @@ namespace Aws
 
                 int TcpForward::Close()
                 {
+                    FlushSendBuffer();
+                    mConnected = false;
                     aws_socket_close(&mSocket);
                     return 0;
                 }
 
                 int TcpForward::SendData(const Crt::ByteCursor &data)
                 {
+                    if (!mConnected)
+                    {
+                        LOG_DEBUG(TAG, "Not connected yet. Saving the data to send");
+                        aws_byte_buf_append_dynamic(&mSendBuffer, &data);
+                        return 0;
+                    }
+
                     aws_socket_write(&mSocket, &data, sOnWriteCompleted, this);
                     return 0;
                 }
@@ -90,6 +105,9 @@ namespace Aws
                     else
                     {
                         aws_socket_subscribe_to_readable_events(&mSocket, sOnReadable, this);
+
+                        mConnected = true;
+                        FlushSendBuffer();
                     }
                 }
 
@@ -131,6 +149,17 @@ namespace Aws
 
                     aws_byte_buf_clean_up(&chunk);
                     aws_byte_buf_clean_up(&everything);
+                }
+
+                void TcpForward::FlushSendBuffer()
+                {
+                    if (mConnected && mSendBuffer.len > 0)
+                    {
+                        LOG_DEBUG(TAG, "Flushing send buffer");
+                        aws_byte_cursor c = aws_byte_cursor_from_buf(&mSendBuffer);
+                        aws_socket_write(&mSocket, &c, sOnWriteCompleted, this);
+                        aws_byte_buf_reset(&mSendBuffer, false);
+                    }
                 }
 
             } // namespace SecureTunneling
