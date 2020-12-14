@@ -51,6 +51,10 @@ cd ./build/
 
 cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF
 cmake --build . --target aws-iot-device-client
+if [ $? != 0 ]
+then
+  exit 1
+fi
 cmake --build . --target test-aws-iot-device-client
 
 ### Run Tests ###
