@@ -104,9 +104,7 @@ namespace Aws
                         "--tunneling-destination-access-token";
                     static constexpr char CLI_TUNNELING_REGION[] = "--tunneling-region";
                     static constexpr char CLI_TUNNELING_SERVICE[] = "--tunneling-service";
-
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
-                    static constexpr char JSON_KEY_SUBSCRIBE_NOTIFICATION[] = "subscribe-notification";
 
                     bool enabled{false};
                     bool subscribeNotification{true};

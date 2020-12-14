@@ -8,8 +8,7 @@
 		"enabled": false
 	},
 	"tunneling": {
-		"enabled": false,
-		"subscribe-notification": true
+		"enabled": false
 	},
 	"device-defender":	{
 		"enabled":	false,

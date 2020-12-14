@@ -362,9 +362,7 @@ constexpr char PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION[];
 constexpr char PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN[];
 constexpr char PlainConfig::Tunneling::CLI_TUNNELING_REGION[];
 constexpr char PlainConfig::Tunneling::CLI_TUNNELING_SERVICE[];
-
 constexpr char PlainConfig::Tunneling::JSON_KEY_ENABLED[];
-constexpr char PlainConfig::Tunneling::JSON_KEY_SUBSCRIBE_NOTIFICATION[];
 
 bool PlainConfig::Tunneling::LoadFromJson(const Crt::JsonView &json)
 {
@@ -372,12 +370,6 @@ bool PlainConfig::Tunneling::LoadFromJson(const Crt::JsonView &json)
     if (json.ValueExists(jsonKey))
     {
         enabled = json.GetBool(jsonKey);
-    }
-
-    jsonKey = JSON_KEY_SUBSCRIBE_NOTIFICATION;
-    if (json.ValueExists(jsonKey))
-    {
-        subscribeNotification = json.GetBool(jsonKey);
     }
 
     return true;
@@ -726,7 +718,6 @@ void Config::ExportDefaultSetting(const string &file)
         "%s": true
     },
     "%s": {
-        "%s": true,
         "%s": true
     },
     "%s": {
@@ -748,7 +739,6 @@ void Config::ExportDefaultSetting(const string &file)
         PlainConfig::Jobs::JSON_KEY_ENABLED,
         PlainConfig::JSON_KEY_TUNNELING,
         PlainConfig::Tunneling::JSON_KEY_ENABLED,
-        PlainConfig::Tunneling::JSON_KEY_SUBSCRIBE_NOTIFICATION,
         PlainConfig::JSON_KEY_DEVICE_DEFENDER,
         PlainConfig::DeviceDefender::JSON_KEY_ENABLED,
         PlainConfig::DeviceDefender::JSON_KEY_INTERVAL);
