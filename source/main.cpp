@@ -13,7 +13,7 @@
 #endif
 #include "logging/LoggerFactory.h"
 #if !defined(EXCLUDE_ST)
-#   include "tunneling/SecureTunnelingFeature.h"
+#    include "tunneling/SecureTunnelingFeature.h"
 #endif
 #include <csignal>
 #include <memory>
