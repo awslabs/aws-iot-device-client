@@ -29,6 +29,8 @@ jobs:
         version: [5,6,7,8]
     steps:
       - uses: actions/checkout@v2
+      - with:
+          - fetch-depth: 0
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
@@ -43,6 +45,8 @@ jobs:
         version: [5.0, 6.0, 7, 8, 9]
     steps:
       - uses: actions/checkout@v2
+      - with:
+          - fetch-depth: 0
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
