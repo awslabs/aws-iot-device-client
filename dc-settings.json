@@ -9,9 +9,6 @@
 	},
 	"tunneling": {
 		"enabled": false,
-		"destination-access-token": "<replace_with_destination_access_token>",
-		"region": "<replace_with_region>",
-		"port": <replace_with_port>,
 		"subscribe-notification": true
 	},
 	"device-defender":	{
