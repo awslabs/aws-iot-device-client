@@ -184,8 +184,12 @@ int main(int argc, char *argv[])
         LoggerFactory::reconfigure(config.config);
     }
 
-
-    LOGM_INFO(TAG, "Now running AWS IoT Device Client version v%d.%d.%d", DEVICE_CLIENT_VERSION_MAJOR, DEVICE_CLIENT_VERSION_MINOR, DEVICE_CLIENT_VERSION_PATCH);
+    LOGM_INFO(
+        TAG,
+        "Now running AWS IoT Device Client version v%d.%d.%d",
+        DEVICE_CLIENT_VERSION_MAJOR,
+        DEVICE_CLIENT_VERSION_MINOR,
+        DEVICE_CLIENT_VERSION_PATCH);
 
     // Register for listening to interrupt signals
     sigset_t sigset;
