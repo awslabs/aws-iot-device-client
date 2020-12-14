@@ -114,6 +114,7 @@ endif()
 
 if (NOT EXCLUDE_JOBS)
     set(DEP_DC_LIBS ${DEP_DC_LIBS} IotJobs-cpp)
+    target_link_libraries(${DC_PROJECT_NAME} IotJobs-cpp)
 endif()
 
 if (NOT EXCLUDE_ST)
