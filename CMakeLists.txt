@@ -8,6 +8,7 @@ option(EXCLUDE_DD "Builds the device client without the IoT Device Defender Feat
 option(EXCLUDE_ST "Builds the device client without the IoT Secure Tunneling Feature." OFF)
 option(EXCLUDE_FP "Builds the device client without the IoT Fleet Provisioning Feature." OFF)
 option(DISABLE_MQTT "WARNING: This flag is meant for internal use cases and will prevent Device Client features from operating. Builds the device client without MQTT Connection Management." OFF)
+option(GIT_VERSION "Updates the version number using the Git commit history" ON)
 
 if (EXCLUDE_JOBS)
     add_definitions(-DEXCLUDE_JOBS)
@@ -66,10 +67,6 @@ set(CMAKE_C_FLAGS_DEBUGOPT "")
 set(CMAKE_BUILD_TYPE Debug) # Switch to Release for the "Release" build
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
-option(GIT_VERSION "Updates the version number using the Git commit history" ON)
-option(BUILD_SDK "Builds the aws-iot-device-sdk-cpp-v2 as part of build. Only do this if the SDK is not installed." ON)
-option(BUILD_TEST_DEPS "Builds the device client test dependencies as part of build. Only do this if you do not have gtest installed and you wish to run the tests." ON)
-
 #########################################
 # Generate Version Information from Git #
 #########################################
@@ -105,18 +102,14 @@ else()
     link_directories(/lib)
 endif()
 
-##############################################
-# Build the AWS IoT Device Client Executable #
-##############################################
-file(GLOB DC_SRC "source/*.cpp" /
-        "source/*.c" /
-        "source/**/*.cpp" /
-        "source/**/*.c")
+###############################################
+## Build the AWS IoT Device Client Executable #
+###############################################
 add_executable(${DC_PROJECT_NAME} ${DC_SRC})
 set_target_properties(${DC_PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_definitions(${DC_PROJECT_NAME} PRIVATE "-DDEBUG_BUILD")
-# We need to add the project binary directory to the list of include directories
-# for passing the version information down to the executable
+## We need to add the project binary directory to the list of include directories
+## for passing the version information down to the executable
 include_directories("${PROJECT_BINARY_DIR}")
 
 if (MSVC)

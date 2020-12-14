@@ -20,7 +20,7 @@ if (GIT_VERSION AND NOT ${GIT_INFO} STREQUAL "")
     message("-- Using Git to calculate AWS IoT Device Client version information...")
 
 	# Get last tag from git - this only matches tags starting with v, so we ignore non-versioning tags
-	execute_process(COMMAND ${GIT_EXECUTABLE} describe --abbrev=0 --tags --match "v*"
+	execute_process(COMMAND ${GIT_EXECUTABLE} describe --abbrev=0 --tags --match "v[0-9]*"
 		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 		OUTPUT_VARIABLE ${PROJECT_NAME}_VERSION_STRING
 		OUTPUT_STRIP_TRAILING_WHITESPACE)
