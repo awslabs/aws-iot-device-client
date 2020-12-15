@@ -57,7 +57,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
           export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
           docker pull $DOCKER_IMAGE
-          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --env ST_COMPONENT_MODE='ON'
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_component_mode
 #      - uses: actions/upload-artifact@v2
 #        # Run for main branch only
 #        if: github.ref == 'refs/heads/main'
