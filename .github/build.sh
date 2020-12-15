@@ -1,13 +1,14 @@
 #!/bin/sh
 
-cmakeArgs=""
+cmakeArgs="-DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF"
+
 # Check if first argument is compile mode
 compileModeArgument=$(echo "$1" | cut -c3-14)
 if [ "$compileModeArgument" = "compile-mode" ]; then
   compileMode=$(echo "$1" | cut -d "=" -f2-)
   case $compileMode in
     st_component_mode)
-    cmakeArgs="-DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON"
+    cmakeArgs="${cmakeArgs} -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON"
     ;;
     *)
     echo "No compile mode match found"
@@ -65,7 +66,7 @@ if [ ! -d "./build" ]; then
 fi
 cd ./build/
 
-cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF "$cmakeArgs"
+cmake ../ "$cmakeArgs"
 cmake --build . --target aws-iot-device-client
 if [ $? != 0 ]
 then
