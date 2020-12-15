@@ -57,7 +57,8 @@ if (NOT EXCLUDE_ST)
 endif()
 
 if (NOT EXCLUDE_FP)
-    #TODO: Append FP source files
+    file(GLOB FP_SRC "source/fleetprovisioning/*.cpp")
+    list(APPEND DC_SRC ${FP_SRC})
 endif()
 
 set(DC_PROJECT_NAME aws-iot-device-client)

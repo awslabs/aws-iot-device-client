@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
         abort();
     }
 
-  #if !defined(EXCLUDE_FP)
+#if !defined(EXCLUDE_FP)
     if (config.config.fleetProvisioning.enabled &&
         !config.config.fleetProvisioningRuntimeConfig.completedFleetProvisioning)
     {
@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
         }
         resourceManager->disconnect();
     }
-  #endif
+#endif
     /*
      * Establish MQTT connection using permanent certificate and private key to start and run AWS IoT Device Client
      * features.
