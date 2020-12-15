@@ -1,5 +1,9 @@
 #!/bin/sh
 
+cmakeConfigure() {
+  cmake ../ "$1"
+}
+
 cmakeArgs="-DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF"
 
 # Check if first argument is compile mode
@@ -66,7 +70,7 @@ if [ ! -d "./build" ]; then
 fi
 cd ./build/
 
-cmake ../ "$cmakeArgs"
+cmakeConfigure "$cmakeArgs"
 cmake --build . --target aws-iot-device-client
 if [ $? != 0 ]
 then
