@@ -19,10 +19,8 @@ constexpr int SharedCrtResourceManager::DEFAULT_WAIT_TIME_SECONDS;
 
 bool SharedCrtResourceManager::initialize(const PlainConfig &config)
 {
-
     initializeAllocator();
     initialized = buildClient() == SharedCrtResourceManager::SUCCESS;
-
     return initialized;
 }
 

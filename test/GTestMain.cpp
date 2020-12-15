@@ -1,8 +1,6 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "../source/Feature.h"
-#include "../source/jobs/JobsFeature.h"
 #include "gtest/gtest.h"
 
 int main(int argc, char **argv)

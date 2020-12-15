@@ -5,11 +5,19 @@
 #include "Feature.h"
 #include "SharedCrtResourceManager.h"
 #include "config/Config.h"
-#include "devicedefender/DeviceDefenderFeature.h"
+#if !defined(EXCLUDE_DD)
+#    include "devicedefender/DeviceDefenderFeature.h"
+#endif
+#if !defined(EXCLUDE_JOBS)
+#    include "jobs/JobsFeature.h"
+#endif
+#if !defined(EXCLUDE_FP)
 #include "fleetprovisioning/FleetProvisioning.h"
-#include "jobs/JobsFeature.h"
+#endif
 #include "logging/LoggerFactory.h"
-#include "tunneling/SecureTunnelingFeature.h"
+#if !defined(EXCLUDE_ST)
+#    include "tunneling/SecureTunnelingFeature.h"
+#endif
 #include <csignal>
 #include <memory>
 #include <thread>
@@ -17,9 +25,16 @@
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient;
+#if !defined(EXCLUDE_DD)
+using namespace Aws::Iot::DeviceClient::DeviceDefender;
+#endif
+#if !defined(EXCLUDE_JOBS)
 using namespace Aws::Iot::DeviceClient::Jobs;
+#endif
 using namespace Aws::Iot::DeviceClient::Logging;
+#if !defined(EXCLUDE_ST)
 using namespace Aws::Iot::DeviceClient::SecureTunneling;
+#endif
 
 const char *TAG = "Main.cpp";
 
@@ -193,6 +208,7 @@ int main(int argc, char *argv[])
         abort();
     }
 
+  #if !defined(EXCLUDE_FP)
     if (config.config.fleetProvisioning.enabled &&
         !config.config.fleetProvisioningRuntimeConfig.completedFleetProvisioning)
     {
@@ -200,6 +216,7 @@ int main(int argc, char *argv[])
         /*
          * Establish MQTT connection using claim certificates and private key to provision device/thing.
          */
+#if !defined(DISABLE_MQTT)  
         if (resourceManager.get()->establishConnection(config.config) != SharedCrtResourceManager::SUCCESS)
         {
             LOG_ERROR(
@@ -210,7 +227,8 @@ int main(int argc, char *argv[])
             LoggerFactory::getLoggerInstance()->shutdown();
             abort();
         }
-
+#endif
+      
         /*
          * Provision Device, parse new runtime conf file and validate its content.
          */
@@ -228,10 +246,12 @@ int main(int argc, char *argv[])
         }
         resourceManager->disconnect();
     }
+  #endif
     /*
      * Establish MQTT connection using permanent certificate and private key to start and run AWS IoT Device Client
      * features.
      */
+#if !defined(DISABLE_MQTT)  
     if (resourceManager.get()->establishConnection(config.config) != SharedCrtResourceManager::SUCCESS)
     {
         LOG_ERROR(
@@ -242,31 +262,39 @@ int main(int argc, char *argv[])
         LoggerFactory::getLoggerInstance()->shutdown();
         abort();
     }
-
-    // Initialize features
-    unique_ptr<JobsFeature> jobs;
-    unique_ptr<SecureTunnelingFeature> tunneling;
-    unique_ptr<DeviceDefenderFeature> deviceDefender;
-
+#endif
     featuresReadWriteLock.lock(); // LOCK
+
+#if !defined(EXCLUDE_JOBS)
+    unique_ptr<JobsFeature> jobs;
     if (config.config.jobs.enabled)
     {
         jobs = unique_ptr<JobsFeature>(new JobsFeature());
         jobs->init(resourceManager, listener, config.config);
         features.push_back(jobs.get());
     }
+#endif
+
+#if !defined(EXCLUDE_ST)
+    unique_ptr<SecureTunnelingFeature> tunneling;
     if (config.config.tunneling.enabled)
     {
         tunneling = unique_ptr<SecureTunnelingFeature>(new SecureTunnelingFeature());
         tunneling->init(resourceManager, listener, config.config);
         features.push_back(tunneling.get());
     }
+#endif
+
+#if !defined(EXCLUDE_DD)
+    unique_ptr<DeviceDefenderFeature> deviceDefender;
     if (config.config.deviceDefender.enabled)
     {
         deviceDefender = unique_ptr<DeviceDefenderFeature>(new DeviceDefenderFeature());
         deviceDefender->init(resourceManager, listener, config.config);
         features.push_back(deviceDefender.get());
     }
+#endif
+
     for (auto &feature : features)
     {
         feature->start();
@@ -280,7 +308,9 @@ int main(int argc, char *argv[])
         LOGM_INFO(TAG, "Received signal: (%d)", received_signal);
         if (SIGINT == received_signal)
         {
+#if !defined(DISABLE_MQTT)
             resourceManager.get()->disconnect();
+#endif
             shutdown();
         }
     }
