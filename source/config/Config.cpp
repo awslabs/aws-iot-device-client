@@ -382,16 +382,11 @@ bool PlainConfig::Jobs::Validate() const
 }
 
 constexpr char PlainConfig::Tunneling::CLI_ENABLE_TUNNELING[];
+constexpr char PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION[];
 constexpr char PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN[];
 constexpr char PlainConfig::Tunneling::CLI_TUNNELING_REGION[];
 constexpr char PlainConfig::Tunneling::CLI_TUNNELING_SERVICE[];
-constexpr char PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION[];
-
 constexpr char PlainConfig::Tunneling::JSON_KEY_ENABLED[];
-constexpr char PlainConfig::Tunneling::JSON_KEY_DESTINATION_ACCESS_TOKEN[];
-constexpr char PlainConfig::Tunneling::JSON_KEY_REGION[];
-constexpr char PlainConfig::Tunneling::JSON_KEY_PORT[];
-constexpr char PlainConfig::Tunneling::JSON_KEY_SUBSCRIBE_NOTIFICATION[];
 
 bool PlainConfig::Tunneling::LoadFromJson(const Crt::JsonView &json)
 {
@@ -399,30 +394,6 @@ bool PlainConfig::Tunneling::LoadFromJson(const Crt::JsonView &json)
     if (json.ValueExists(jsonKey))
     {
         enabled = json.GetBool(jsonKey);
-    }
-
-    jsonKey = JSON_KEY_DESTINATION_ACCESS_TOKEN;
-    if (json.ValueExists(jsonKey))
-    {
-        destinationAccessToken = json.GetString(jsonKey).c_str();
-    }
-
-    jsonKey = JSON_KEY_REGION;
-    if (json.ValueExists(jsonKey))
-    {
-        region = json.GetString(jsonKey).c_str();
-    }
-
-    jsonKey = JSON_KEY_PORT;
-    if (json.ValueExists(jsonKey))
-    {
-        port = json.GetInteger(jsonKey);
-    }
-
-    jsonKey = JSON_KEY_SUBSCRIBE_NOTIFICATION;
-    if (json.ValueExists(jsonKey))
-    {
-        subscribeNotification = json.GetBool(jsonKey);
     }
 
     return true;
@@ -433,6 +404,10 @@ bool PlainConfig::Tunneling::LoadFromCliArgs(const CliArgs &cliArgs)
     if (cliArgs.count(PlainConfig::Tunneling::CLI_ENABLE_TUNNELING))
     {
         enabled = true;
+    }
+    if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION))
+    {
+        subscribeNotification = false;
     }
     if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN))
     {
@@ -450,10 +425,6 @@ bool PlainConfig::Tunneling::LoadFromCliArgs(const CliArgs &cliArgs)
 #else
         port = 0;
 #endif
-    }
-    if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION))
-    {
-        subscribeNotification = false;
     }
 
     return true;
@@ -914,10 +885,6 @@ void Config::ExportDefaultSetting(const string &file)
         "%s": true
     },
     "%s": {
-        "%s": true,
-        "%s": "<replace_with_destination_access_token>",
-        "%s": "<replace_with_region>",
-        "%s": <replace_with_port>,
         "%s": true
     },
     "%s": {
@@ -943,10 +910,6 @@ void Config::ExportDefaultSetting(const string &file)
         PlainConfig::Jobs::JSON_KEY_ENABLED,
         PlainConfig::JSON_KEY_TUNNELING,
         PlainConfig::Tunneling::JSON_KEY_ENABLED,
-        PlainConfig::Tunneling::JSON_KEY_DESTINATION_ACCESS_TOKEN,
-        PlainConfig::Tunneling::JSON_KEY_REGION,
-        PlainConfig::Tunneling::JSON_KEY_PORT,
-        PlainConfig::Tunneling::JSON_KEY_SUBSCRIBE_NOTIFICATION,
         PlainConfig::JSON_KEY_DEVICE_DEFENDER,
         PlainConfig::DeviceDefender::JSON_KEY_ENABLED,
         PlainConfig::DeviceDefender::JSON_KEY_INTERVAL,
