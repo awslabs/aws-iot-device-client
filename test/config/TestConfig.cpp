@@ -200,94 +200,27 @@ TEST(Config, SecureTunnelingDisableSubscription)
 	"root-ca": "root-ca value",
 	"thing-name": "thing-name value",
     "tunneling": {
-        "enabled": true,
-        "subscribe-notification": false,
-        "destination-access-token": "destination access token value",
-        "region": "region value",
-        "port": 65535
+        "enabled": true
     }
 })";
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
+    CliArgs cliArgs;
+    cliArgs["--tunneling-disable-notification"] = "";
+    cliArgs["--tunneling-destination-access-token"] = "destination access token value";
+    cliArgs["--tunneling-region"] = "region value";
+    cliArgs["--tunneling-service"] = "SSH";
 
     PlainConfig config;
     config.LoadFromJson(jsonView);
+    config.LoadFromCliArgs(cliArgs);
 
     ASSERT_TRUE(config.Validate());
     ASSERT_TRUE(config.tunneling.enabled);
     ASSERT_FALSE(config.tunneling.subscribeNotification);
     ASSERT_STREQ("destination access token value", config.tunneling.destinationAccessToken->c_str());
     ASSERT_STREQ("region value", config.tunneling.region->c_str());
-    ASSERT_EQ(65535, config.tunneling.port.value());
-}
-
-TEST(Config, SecureTunnelingPortRange)
-{
-    // Too small
-    const char *jsonString = R"(
-{
-    "enabled": true,
-    "subscribe-notification": false,
-    "destination-access-token": "destination access token value",
-    "region": "region value",
-    "port": 0
-})";
-    unique_ptr<JsonObject> jsonObject = unique_ptr<JsonObject>(new JsonObject(jsonString));
-    JsonView jsonView = jsonObject->View();
-    unique_ptr<PlainConfig> config = unique_ptr<PlainConfig>(new PlainConfig());
-    config->tunneling.LoadFromJson(jsonView);
-#if !defined(EXCLUDE_ST)
-    ASSERT_FALSE(config->tunneling.Validate());
-#endif
-
-    // Negative port
-    jsonString = R"(
-{
-    "enabled": true,
-    "subscribe-notification": false,
-    "destination-access-token": "destination access token value",
-    "region": "region value",
-    "port": -1
-})";
-    jsonObject = unique_ptr<JsonObject>(new JsonObject(jsonString));
-    jsonView = jsonObject->View();
-    config = unique_ptr<PlainConfig>(new PlainConfig());
-    config->tunneling.LoadFromJson(jsonView);
-#if !defined(EXCLUDE_ST)
-    ASSERT_FALSE(config->tunneling.Validate());
-#endif
-
-    // Too large
-    jsonString = R"(
-{
-    "enabled": true,
-    "subscribe-notification": false,
-    "destination-access-token": "destination access token value",
-    "region": "region value",
-    "port": 65536
-})";
-    jsonObject = unique_ptr<JsonObject>(new JsonObject(jsonString));
-    jsonView = jsonObject->View();
-    config = unique_ptr<PlainConfig>(new PlainConfig());
-    config->tunneling.LoadFromJson(jsonView);
-#if !defined(EXCLUDE_ST)
-    ASSERT_FALSE(config->tunneling.Validate());
-#endif
-
-    // Within range
-    jsonString = R"(
-{
-    "enabled": true,
-    "subscribe-notification": false,
-    "destination-access-token": "destination access token value",
-    "region": "region value",
-    "port": 22
-})";
-    jsonObject = unique_ptr<JsonObject>(new JsonObject(jsonString));
-    jsonView = jsonObject->View();
-    config = unique_ptr<PlainConfig>(new PlainConfig());
-    config->tunneling.LoadFromJson(jsonView);
-    ASSERT_TRUE(config->tunneling.Validate());
+    ASSERT_EQ(22, config.tunneling.port.value());
 }
 
 TEST(Config, LoggingConfigurationCLI)
