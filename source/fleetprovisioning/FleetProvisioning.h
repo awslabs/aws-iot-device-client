@@ -20,7 +20,7 @@ namespace Aws
 
               private:
                 static constexpr char TAG[] = "FleetProvisioning.cpp";
-                static constexpr int DEFAULT_WAIT_TIME = 10;
+                static constexpr int DEFAULT_WAIT_TIME_SECONDS = 10;
                 std::promise<bool> keysPublishCompletedPromise;
                 std::promise<bool> keysAcceptedCompletedPromise;
                 std::promise<bool> keysRejectedCompletedPromise;
@@ -42,7 +42,6 @@ namespace Aws
 
                 bool RegisterThing(Iotidentity::IotIdentityClient identityClient);
                 bool CreateCertificateAndKeys(Iotidentity::IotIdentityClient identityClient);
-                std::string StoreValueInFile(std::string value, std::string fileName);
                 void ExportRuntimeConfig(
                     const std::string &file,
                     const std::string &certPath,

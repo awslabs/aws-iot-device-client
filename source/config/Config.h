@@ -155,13 +155,13 @@ namespace Aws
                 };
                 FleetProvisioning fleetProvisioning;
 
-                struct RuntimeConfig : public LoadableFromJsonAndCli
+                struct FleetProvisioningRuntimeConfig : public LoadableFromJsonAndCli
                 {
                     bool LoadFromJson(const Crt::JsonView &json) override;
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool Validate() const override;
 
-                    static constexpr char JSON_KEY_COMPLETED_FLEET_PROVISIONING[] = "completed-fleet-provisioning";
+                    static constexpr char JSON_KEY_COMPLETED_FLEET_PROVISIONING[] = "completed-fp";
                     static constexpr char JSON_KEY_CERT[] = "cert";
                     static constexpr char JSON_KEY_KEY[] = "key";
                     static constexpr char JSON_KEY_THING_NAME[] = "thing-name";
@@ -171,7 +171,7 @@ namespace Aws
                     Aws::Crt::Optional<std::string> key;
                     Aws::Crt::Optional<std::string> thingName;
                 };
-                RuntimeConfig runtimeConfig;
+                FleetProvisioningRuntimeConfig fleetProvisioningRuntimeConfig;
             };
 
             class Config
@@ -181,8 +181,9 @@ namespace Aws
                 ~Config() = default;
 
                 static constexpr char TAG[] = "Config.cpp";
+                //TODO: Update the paths
                 static constexpr char DEFAULT_CONFIG_FILE[] = "/etc/aws-iot-device-client.conf";
-                static constexpr char DEFAULT_RUNTIME_CONFIG_FILE[] = "./aws-iot-device-client-runtime.conf";
+                static constexpr char DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] = "./aws-iot-device-client-runtime.conf";
 
                 static constexpr char CLI_HELP[] = "--help";
                 static constexpr char CLI_EXPORT_DEFAULT_SETTINGS[] = "--export-default-settings";

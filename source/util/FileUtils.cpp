@@ -1,6 +1,7 @@
 #include "FileUtils.h"
 
 #include <errno.h>
+#include <fstream>
 #include <limits.h> /* PATH_MAX */
 #include <string.h>
 #include <sys/stat.h>
@@ -58,4 +59,12 @@ string FileUtils::extractParentDirectory(const string &filePath)
     {
         return "";
     }
+}
+
+void FileUtils::StoreValueInFile(string value, string filePath)
+{
+    ofstream file;
+    file.open(filePath);
+    file << value;
+    file.close();
 }

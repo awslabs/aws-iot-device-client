@@ -103,10 +103,11 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_RUNTIME_CONFIG;
     if (json.ValueExists(jsonKey))
     {
-        RuntimeConfig temp;
+        FleetProvisioningRuntimeConfig temp;
         temp.LoadFromJson(json.GetJsonObject(jsonKey));
-        runtimeConfig = temp;
-      
+        fleetProvisioningRuntimeConfig = temp;
+    }
+
     jsonKey = JSON_KEY_LOGGING;
     if (json.ValueExists(jsonKey))
     {
@@ -584,12 +585,12 @@ bool PlainConfig::FleetProvisioning::Validate() const
     return true;
 }
 
-constexpr char PlainConfig::RuntimeConfig::JSON_KEY_COMPLETED_FLEET_PROVISIONING[];
-constexpr char PlainConfig::RuntimeConfig::JSON_KEY_CERT[];
-constexpr char PlainConfig::RuntimeConfig::JSON_KEY_KEY[];
-constexpr char PlainConfig::RuntimeConfig::JSON_KEY_THING_NAME[];
+constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_COMPLETED_FLEET_PROVISIONING[];
+constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_CERT[];
+constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_KEY[];
+constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_THING_NAME[];
 
-bool PlainConfig::RuntimeConfig::LoadFromJson(const Crt::JsonView &json)
+bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromJson(const Crt::JsonView &json)
 {
     const char *jsonKey = JSON_KEY_COMPLETED_FLEET_PROVISIONING;
     if (json.ValueExists(jsonKey))
@@ -617,15 +618,15 @@ bool PlainConfig::RuntimeConfig::LoadFromJson(const Crt::JsonView &json)
 
     return true;
 }
-bool PlainConfig::RuntimeConfig::LoadFromCliArgs(const CliArgs &cliArgs)
+bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromCliArgs(const CliArgs &cliArgs)
 {
     /*
-     * No Command line arguments for Runtime Config
+     * No Command line arguments for Fleet Provisioning Runtime Config
      */
     return true;
 }
 
-bool PlainConfig::RuntimeConfig::Validate() const
+bool PlainConfig::FleetProvisioningRuntimeConfig::Validate() const
 {
     if (!completedFleetProvisioning)
     {
@@ -640,7 +641,7 @@ constexpr char Config::DEFAULT_CONFIG_FILE[];
 constexpr char Config::CLI_HELP[];
 constexpr char Config::CLI_EXPORT_DEFAULT_SETTINGS[];
 constexpr char Config::CLI_CONFIG_FILE[];
-constexpr char Config::DEFAULT_RUNTIME_CONFIG_FILE[];
+constexpr char Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[];
 
 bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 {
@@ -746,21 +747,16 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 
 bool Config::init(const CliArgs &cliArgs)
 {
+    string filename = Config::DEFAULT_CONFIG_FILE;
     if (cliArgs.count(Config::CLI_CONFIG_FILE))
     {
-        if (!ParseConfigFile(cliArgs.at(Config::CLI_CONFIG_FILE)))
-        {
-            LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to Parse Config file: '%s' ***", Config::CLI_CONFIG_FILE);
-            return false;
-        }
+        filename = cliArgs.at(Config::CLI_CONFIG_FILE);
     }
-    else
+
+    if (!ParseConfigFile(filename))
     {
-        if (!ParseConfigFile(Config::DEFAULT_CONFIG_FILE))
-        {
-            LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to Parse Config file: '%s' ***", Config::DEFAULT_CONFIG_FILE);
-            return false;
-        }
+        LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to Parse Config file: '%s' ***", filename.c_str());
+        return false;
     }
 
     if(!config.LoadFromCliArgs(cliArgs))
@@ -768,12 +764,12 @@ bool Config::init(const CliArgs &cliArgs)
         return false;
     }
 
-    if (ParseConfigFile(Config::DEFAULT_RUNTIME_CONFIG_FILE) && ValidateAndStoreRuntimeConfig())
+    if (ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE) && ValidateAndStoreRuntimeConfig())
     {
         LOGM_INFO(
             TAG,
             "Successfully fetched Runtime config file '%s' and validated its content.",
-            Config::DEFAULT_RUNTIME_CONFIG_FILE);
+            Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
     }
 
     return config.Validate();
@@ -783,15 +779,15 @@ bool Config::ValidateAndStoreRuntimeConfig()
 {
     // check if all values are present and also check if the files are present then only overwrite values
 
-    if (!config.runtimeConfig.Validate())
+    if (!config.fleetProvisioningRuntimeConfig.Validate())
     {
         LOGM_WARN(
-            TAG, "Failed to Validate runtime configurations. Please check '%s' file", Config::DEFAULT_RUNTIME_CONFIG_FILE);
+            TAG, "Failed to Validate runtime configurations. Please check '%s' file", Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
         return false;
     }
-    config.cert = config.runtimeConfig.cert.value().c_str();
-    config.key = config.runtimeConfig.key.value().c_str();
-    config.thingName = config.runtimeConfig.thingName.value().c_str();
+    config.cert = config.fleetProvisioningRuntimeConfig.cert.value().c_str();
+    config.key = config.fleetProvisioningRuntimeConfig.key.value().c_str();
+    config.thingName = config.fleetProvisioningRuntimeConfig.thingName.value().c_str();
     return true;
 
 }

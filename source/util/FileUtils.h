@@ -32,6 +32,8 @@ namespace Aws
                      * @return the parent directory of the file
                      */
                     static std::string extractParentDirectory(const std::string &filePath);
+
+                    static void StoreValueInFile(std::string value, std::string filePath);
                 };
             } // namespace Util
         }     // namespace DeviceClient

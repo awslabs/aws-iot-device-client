@@ -3,6 +3,7 @@
 
 #include "FleetProvisioning.h"
 #include "../logging/LoggerFactory.h"
+#include "../util/FileUtils.h"
 
 #include <aws/iotidentity/CreateKeysAndCertificateRequest.h>
 #include <aws/iotidentity/CreateKeysAndCertificateResponse.h>
@@ -27,7 +28,7 @@ using namespace Aws::Iot::DeviceClient::Logging;
 using namespace Aws::Iot::DeviceClient::Util;
 
 constexpr char FleetProvisioning::TAG[];
-constexpr int FleetProvisioning::DEFAULT_WAIT_TIME;
+constexpr int FleetProvisioning::DEFAULT_WAIT_TIME_SECONDS;
 
 string FleetProvisioning::getName()
 {
@@ -83,8 +84,10 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
           certificateID = response->CertificateId->c_str();
           certPath = certificateID + ".cert.pem";
           keyPath = certificateID + ".private.pey";
-          FleetProvisioning::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str());
-          StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str());
+          FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str());
+          LOGM_INFO(TAG, "Stored certificate in %s file", certPath.c_str());
+          FileUtils::StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str());
+          LOGM_INFO(TAG, "Store value in %s file", keyPath.c_str());
           certificateOwnershipToken = *response->CertificateOwnershipToken;
       }
       else
@@ -132,7 +135,7 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
 
     auto futureValKeysAcceptedCompletedPromise = keysAcceptedCompletedPromise.get_future();
     auto futureValKeysRejectedCompletedPromise = keysRejectedCompletedPromise.get_future();
-    if(futureValKeysAcceptedCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME)) == future_status::timeout || futureValKeysRejectedCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME)) == future_status::timeout)
+    if(futureValKeysAcceptedCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) == future_status::timeout || futureValKeysRejectedCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) == future_status::timeout)
     {
         LOG_ERROR(
             TAG,
@@ -151,17 +154,17 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
 
     auto futureValKeysPublishCompletedPromise = keysPublishCompletedPromise.get_future();
     auto futureValKeysCreationCompletedPromise = keysCreationCompletedPromise.get_future();
-    if(futureValKeysPublishCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME)) == future_status::timeout)
+    if(futureValKeysPublishCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) == future_status::timeout)
     {
         LOG_ERROR(
             TAG,
             "*** AWS IOT DEVICE CLIENT FATAL ERROR: Publishing to CreateKeysAndCertificate topic timed out. ***");
         return false;
     }
-    if(keysCreationFailedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME)) != future_status::timeout){
+    if(keysCreationFailedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) != future_status::timeout){
         return false;
     }
-    if(futureValKeysCreationCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME)) == future_status::timeout)
+    if(futureValKeysCreationCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) == future_status::timeout)
     {
         LOG_ERROR(
             TAG,
@@ -267,7 +270,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
 
     auto futureValRegisterAcceptedCompletedPromise = registerAcceptedCompletedPromise.get_future();
     auto futureValRegisterRejectedCompletedPromise = registerRejectedCompletedPromise.get_future();
-    if(futureValRegisterAcceptedCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME)) == future_status::timeout || futureValRegisterRejectedCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME)) == future_status::timeout)
+    if(futureValRegisterAcceptedCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) == future_status::timeout || futureValRegisterRejectedCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) == future_status::timeout)
     {
         LOG_ERROR(
             TAG,
@@ -289,7 +292,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
 
     auto futureValRegisterPublishCompletedPromise = registerPublishCompletedPromise.get_future();
     auto futureValRegisterThingCompletedPromise = registerThingCompletedPromise.get_future();
-    if(futureValRegisterPublishCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME)) == future_status::timeout)
+    if(futureValRegisterPublishCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) == future_status::timeout)
     {
         LOG_ERROR(
             TAG,
@@ -297,10 +300,10 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         return false;
     }
 
-    if(registerThingFailedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME)) != future_status::timeout){
+    if(registerThingFailedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) != future_status::timeout){
         return false;
     }
-    if(futureValRegisterThingCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME)) == future_status::timeout)
+    if(futureValRegisterThingCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) == future_status::timeout)
     {
         LOG_ERROR(
             TAG,
@@ -313,6 +316,9 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
 
 bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpConnection, PlainConfig &config)
 {
+    //TODO: Add ClientBaseNotifier to log events
+    LOG_INFO(TAG, "Fleet Provisioning Feature has been started.");
+
     IotIdentityClient identityClient(fpConnection.get()->getConnection());
     templateName = config.fleetProvisioning.templateName.value().c_str();
 
@@ -322,28 +328,18 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
         * Store data in runtime conf file and update @config object.
         */
         ExportRuntimeConfig(
-            Config::DEFAULT_RUNTIME_CONFIG_FILE, certPath.c_str(), keyPath.c_str(), thingName.c_str());
+            Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, certPath.c_str(), keyPath.c_str(), thingName.c_str());
 
         LOGM_INFO(TAG, "Successfully provisioned thing: %s", thingName.c_str());
         return true;
     }
-
+    LOG_ERROR(TAG, "Fleet Provisioning Feature failed to provision device.");
     return false;
 }
 
 /*
 * Helper methods
 */
-
-string FleetProvisioning::StoreValueInFile(string value, string fileName)
-{
-    ofstream uaFile;
-    uaFile.open(fileName);
-    uaFile << value;
-    uaFile.close();
-    LOGM_INFO(TAG, "Store value in %s file", fileName.c_str());
-    return fileName;
-}
 
 void FleetProvisioning::ExportRuntimeConfig(
     const string &file,
@@ -364,12 +360,12 @@ void FleetProvisioning::ExportRuntimeConfig(
     clientConfig << FormatMessage(
         jsonTemplate.c_str(),
         PlainConfig::JSON_KEY_RUNTIME_CONFIG,
-        PlainConfig::RuntimeConfig::JSON_KEY_COMPLETED_FLEET_PROVISIONING,
-        PlainConfig::RuntimeConfig::JSON_KEY_CERT,
+        PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_COMPLETED_FLEET_PROVISIONING,
+        PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_CERT,
         certPath.c_str(),
-        PlainConfig::RuntimeConfig::JSON_KEY_KEY,
+        PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_KEY,
         keyPath.c_str(),
-        PlainConfig::RuntimeConfig::JSON_KEY_THING_NAME,
+        PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_THING_NAME,
         thingName.c_str());
     clientConfig.close();
     LOGM_INFO(TAG, "Exported runtime configurations to: %s", file.c_str());

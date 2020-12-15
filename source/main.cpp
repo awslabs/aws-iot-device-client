@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
     }
 
     if (config.config.fleetProvisioning.enabled &&
-        !config.config.runtimeConfig.completedFleetProvisioning)
+        !config.config.fleetProvisioningRuntimeConfig.completedFleetProvisioning)
     {
 
         /*
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
          */
         FleetProvisioning fleetProvisioning;
         if (!fleetProvisioning.ProvisionDevice(resourceManager, config.config) ||
-            !config.ParseConfigFile(Config::DEFAULT_RUNTIME_CONFIG_FILE) || !config.ValidateAndStoreRuntimeConfig())
+            !config.ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE) || !config.ValidateAndStoreRuntimeConfig())
         {
             LOG_ERROR(
                 TAG,

@@ -15,7 +15,7 @@ using namespace Aws::Iot;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Logging;
 
-constexpr int SharedCrtResourceManager::DEFAULT_WAIT_TIME;
+constexpr int SharedCrtResourceManager::DEFAULT_WAIT_TIME_SECONDS;
 
 bool SharedCrtResourceManager::initialize(const PlainConfig &config)
 {
@@ -233,7 +233,7 @@ void SharedCrtResourceManager::disconnect()
 {
     if (connection->Disconnect())
     {
-        if(connectionClosedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME)) == future_status::timeout)
+        if(connectionClosedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) == future_status::timeout)
         {
             LOG_ERROR(
                 TAG,
