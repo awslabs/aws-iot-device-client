@@ -49,7 +49,13 @@ if [ ! -d "./build" ]; then
 fi
 cd ./build/
 
-cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF
+### Decide build mode ###
+if [[ -z "${ST_COMPONENT_MODE}" || "${ST_COMPONENT_MODE}" != "ON" ]]; then
+  cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF
+else
+  cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON
+fi
+
 cmake --build . --target aws-iot-device-client
 if [ $? != 0 ]
 then
