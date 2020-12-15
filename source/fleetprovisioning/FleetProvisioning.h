@@ -48,6 +48,6 @@ namespace Aws
                     const std::string &keyPath,
                     const std::string &thingName);
             };
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    }     // namespace Iot
 } // namespace Aws

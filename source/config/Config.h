@@ -181,9 +181,10 @@ namespace Aws
                 ~Config() = default;
 
                 static constexpr char TAG[] = "Config.cpp";
-                //TODO: Update the paths
+                // TODO: Update the paths
                 static constexpr char DEFAULT_CONFIG_FILE[] = "/etc/aws-iot-device-client.conf";
-                static constexpr char DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] = "./aws-iot-device-client-runtime.conf";
+                static constexpr char DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] =
+                    "./aws-iot-device-client-runtime.conf";
 
                 static constexpr char CLI_HELP[] = "--help";
                 static constexpr char CLI_EXPORT_DEFAULT_SETTINGS[] = "--export-default-settings";

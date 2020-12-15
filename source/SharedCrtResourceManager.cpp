@@ -231,11 +231,10 @@ void SharedCrtResourceManager::disconnect()
 {
     if (connection->Disconnect())
     {
-        if(connectionClosedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) == future_status::timeout)
+        if (connectionClosedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
+            future_status::timeout)
         {
-            LOG_ERROR(
-                TAG,
-                "MQTT Connection timed out to disconnect.");
+            LOG_ERROR(TAG, "MQTT Connection timed out to disconnect.");
         }
     }
     else

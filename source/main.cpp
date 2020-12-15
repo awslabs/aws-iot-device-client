@@ -12,7 +12,7 @@
 #    include "jobs/JobsFeature.h"
 #endif
 #if !defined(EXCLUDE_FP)
-#include "fleetprovisioning/FleetProvisioning.h"
+#    include "fleetprovisioning/FleetProvisioning.h"
 #endif
 #include "logging/LoggerFactory.h"
 #if !defined(EXCLUDE_ST)
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
         /*
          * Establish MQTT connection using claim certificates and private key to provision device/thing.
          */
-#if !defined(DISABLE_MQTT)  
+#    if !defined(DISABLE_MQTT)
         if (resourceManager.get()->establishConnection(config.config) != SharedCrtResourceManager::SUCCESS)
         {
             LOG_ERROR(
@@ -227,14 +227,15 @@ int main(int argc, char *argv[])
             LoggerFactory::getLoggerInstance()->shutdown();
             abort();
         }
-#endif
-      
+#    endif
+
         /*
          * Provision Device, parse new runtime conf file and validate its content.
          */
         FleetProvisioning fleetProvisioning;
         if (!fleetProvisioning.ProvisionDevice(resourceManager, config.config) ||
-            !config.ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE) || !config.ValidateAndStoreRuntimeConfig())
+            !config.ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE) ||
+            !config.ValidateAndStoreRuntimeConfig())
         {
             LOG_ERROR(
                 TAG,
@@ -251,7 +252,7 @@ int main(int argc, char *argv[])
      * Establish MQTT connection using permanent certificate and private key to start and run AWS IoT Device Client
      * features.
      */
-#if !defined(DISABLE_MQTT)  
+#if !defined(DISABLE_MQTT)
     if (resourceManager.get()->establishConnection(config.config) != SharedCrtResourceManager::SUCCESS)
     {
         LOG_ERROR(

@@ -97,7 +97,6 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
         deviceDefender = temp;
     }
 
-
     jsonKey = JSON_KEY_FLEET_PROVISIONING;
     if (json.ValueExists(jsonKey))
     {
@@ -203,7 +202,7 @@ bool PlainConfig::Validate() const
         return false;
     }
 #endif
-#if !defined(EXCLUDE_FP)  
+#if !defined(EXCLUDE_FP)
     if (!fleetProvisioning.Validate())
     {
         return false;
@@ -657,8 +656,8 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::Validate() const
     {
         return false;
     }
-    return cert.has_value() && key.has_value() && thingName.has_value() &&
-        !cert->empty() && !key->empty() && !thingName->empty();
+    return cert.has_value() && key.has_value() && thingName.has_value() && !cert->empty() && !key->empty() &&
+           !thingName->empty();
 }
 
 constexpr char Config::TAG[];
@@ -780,11 +779,12 @@ bool Config::init(const CliArgs &cliArgs)
 
     if (!ParseConfigFile(filename))
     {
-        LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to Parse Config file: '%s' ***", filename.c_str());
+        LOGM_ERROR(
+            TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to Parse Config file: '%s' ***", filename.c_str());
         return false;
     }
 
-    if(!config.LoadFromCliArgs(cliArgs))
+    if (!config.LoadFromCliArgs(cliArgs))
     {
         return false;
     }
@@ -807,14 +807,15 @@ bool Config::ValidateAndStoreRuntimeConfig()
     if (!config.fleetProvisioningRuntimeConfig.Validate())
     {
         LOGM_WARN(
-            TAG, "Failed to Validate runtime configurations. Please check '%s' file", Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
+            TAG,
+            "Failed to Validate runtime configurations. Please check '%s' file",
+            Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
         return false;
     }
     config.cert = config.fleetProvisioningRuntimeConfig.cert.value().c_str();
     config.key = config.fleetProvisioningRuntimeConfig.key.value().c_str();
     config.thingName = config.fleetProvisioningRuntimeConfig.thingName.value().c_str();
     return true;
-
 }
 
 bool Config::ParseConfigFile(const string &file)
