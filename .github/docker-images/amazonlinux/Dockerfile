@@ -1,19 +1,20 @@
-FROM ubuntu:16.04
-
-ENV DEBIAN_FRONTEND=noninteractive
+FROM amazonlinux:latest
 
 ###############################################################################
 # Install prereqs
 ###############################################################################
-RUN apt-get update -qq \
-    && apt-get -y install \
+RUN yum -y update \
+    && yum -y install \
+    tar \
     git \
-    curl \
-    libssl-dev \
-    build-essential \
-    openssl \
     wget \
-    && apt-get clean
+    curl \
+    sudo \
+    make \
+    gcc \
+    gcc-c++ \
+    && yum clean all \
+    && rm -rf /var/cache/yum
 
 ###############################################################################
 # Install pre-built CMake
@@ -25,23 +26,34 @@ RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3
     && ./bootstrap \
     && make -j 4 \
     && make install
+    
+###############################################################################
+# Install pre-built libcrypto
+###############################################################################
+WORKDIR /tmp
+RUN curl -sSL https://d19elf31gohf1l.cloudfront.net/_binaries/libcrypto/libcrypto-1.1.1-manylinux1-x64.tar.gz -o libcrypto.tar.gz \
+    && mkdir /opt/openssl \
+    && tar xvzf libcrypto.tar.gz -C /usr/local \
+    # && LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/openssl/lib /opt/openssl/bin/openssl version \
+    && rm -f /tmp/libcrypto.tar.gz
 
 ###############################################################################
 # Clone and build Google Test
 ###############################################################################
 WORKDIR /tmp
-RUN wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz \
+RUN curl -sSL https://github.com/google/googletest/archive/release-1.10.0.tar.gz -o release-1.10.0.tar.gz \
     && tar xf release-1.10.0.tar.gz \
     && cd googletest-release-1.10.0 \
     && cmake -DBUILD_SHARED_LIBS=ON . \
     && make \
     && cp -a googletest/include/gtest /usr/include/ \
     && cp -a googlemock/include/gmock /usr/include/ \
-    && cp -a lib/* /usr/lib/
+    && cp -a lib/* /usr/lib64/ \
+    && rm -f /tmp/release-1.10.0.tar.gz
 
-###############################################################################
-# Install Aws Iot Device Sdk Cpp v2
-###############################################################################
+# ###############################################################################
+# # Install Aws Iot Device Sdk Cpp v2
+# ###############################################################################
 WORKDIR /home/aws-iot-device-client
 RUN mkdir sdk-cpp-workspace \
     && cd sdk-cpp-workspace \
