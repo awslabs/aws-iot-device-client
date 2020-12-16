@@ -8,6 +8,7 @@ option(EXCLUDE_DD "Builds the device client without the IoT Device Defender Feat
 option(EXCLUDE_ST "Builds the device client without the IoT Secure Tunneling Feature." OFF)
 option(EXCLUDE_FP "Builds the device client without the IoT Fleet Provisioning Feature." OFF)
 option(DISABLE_MQTT "WARNING: This flag is meant for internal use cases and will prevent Device Client features from operating. Builds the device client without MQTT Connection Management." OFF)
+option(GIT_VERSION "Updates the version number using the Git commit history" ON)
 
 if (EXCLUDE_JOBS)
     add_definitions(-DEXCLUDE_JOBS)
@@ -71,6 +72,14 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 #########################################
+# Generate Version Information from Git #
+#########################################
+find_package(Git)
+include(CMakeLists.txt.versioning)
+# Now we inject the version information into a header that is accessible from the device client executable
+configure_file("source/Version.h.in" "${PROJECT_BINARY_DIR}/Version.h")
+
+#########################################
 # OpenSSL dependency                    #
 #########################################
 find_package(OpenSSL REQUIRED)
@@ -97,10 +106,15 @@ else()
     link_directories(/lib)
 endif()
 
-### Now build the DC executable
+###############################################
+## Build the AWS IoT Device Client Executable #
+###############################################
 add_executable(${DC_PROJECT_NAME} ${DC_SRC})
 set_target_properties(${DC_PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_definitions(${DC_PROJECT_NAME} PRIVATE "-DDEBUG_BUILD")
+## We need to add the project binary directory to the list of include directories
+## for passing the version information down to the executable
+include_directories("${PROJECT_BINARY_DIR}")
 
 if (MSVC)
     target_compile_options(${DC_PROJECT_NAME} PRIVATE /W4 /WX)

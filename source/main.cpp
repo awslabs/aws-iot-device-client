@@ -4,6 +4,7 @@
 #include "ClientBaseNotification.h"
 #include "Feature.h"
 #include "SharedCrtResourceManager.h"
+#include "Version.h"
 #include "config/Config.h"
 #if !defined(EXCLUDE_DD)
 #    include "devicedefender/DeviceDefenderFeature.h"
@@ -182,6 +183,13 @@ int main(int argc, char *argv[])
         config.config.logConfig.type = config.config.logConfig.LOG_TYPE_STDOUT;
         LoggerFactory::reconfigure(config.config);
     }
+
+    LOGM_INFO(
+        TAG,
+        "Now running AWS IoT Device Client version v%d.%d.%d",
+        DEVICE_CLIENT_VERSION_MAJOR,
+        DEVICE_CLIENT_VERSION_MINOR,
+        DEVICE_CLIENT_VERSION_PATCH);
 
     // Register for listening to interrupt signals
     sigset_t sigset;
