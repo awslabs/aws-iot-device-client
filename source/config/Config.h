@@ -101,23 +101,18 @@ namespace Aws
                     bool Validate() const override;
 
                     static constexpr char CLI_ENABLE_TUNNELING[] = "--enable-tunneling";
+                    static constexpr char CLI_TUNNELING_DISABLE_NOTIFICATION[] = "--tunneling-disable-notification";
                     static constexpr char CLI_TUNNELING_DESTINATION_ACCESS_TOKEN[] =
                         "--tunneling-destination-access-token";
                     static constexpr char CLI_TUNNELING_REGION[] = "--tunneling-region";
                     static constexpr char CLI_TUNNELING_SERVICE[] = "--tunneling-service";
-                    static constexpr char CLI_TUNNELING_DISABLE_NOTIFICATION[] = "--tunneling-disable-notification";
-
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
-                    static constexpr char JSON_KEY_DESTINATION_ACCESS_TOKEN[] = "destination-access-token";
-                    static constexpr char JSON_KEY_REGION[] = "region";
-                    static constexpr char JSON_KEY_PORT[] = "port";
-                    static constexpr char JSON_KEY_SUBSCRIBE_NOTIFICATION[] = "subscribe-notification";
 
                     bool enabled{false};
+                    bool subscribeNotification{true};
                     Aws::Crt::Optional<std::string> destinationAccessToken;
                     Aws::Crt::Optional<std::string> region;
                     Aws::Crt::Optional<int> port;
-                    bool subscribeNotification{true};
                 };
                 Tunneling tunneling;
 
