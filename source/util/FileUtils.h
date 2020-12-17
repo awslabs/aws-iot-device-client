@@ -20,6 +20,7 @@ namespace Aws
                 {
                   private:
                     static const char *TAG;
+
                   public:
                     /**
                      * \brief Creates each of the directories in the provided path if they do not exist
