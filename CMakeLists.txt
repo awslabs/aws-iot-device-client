@@ -68,6 +68,10 @@ set(CMAKE_C_FLAGS_DEBUGOPT "")
 set(CMAKE_BUILD_TYPE Debug) # Switch to Release for the "Release" build
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ldl")
+endif()
+
 #########################################
 # Generate Version Information from Git #
 #########################################
