@@ -136,12 +136,12 @@ namespace Aws
                     size_t amountRead = 0;
                     do
                     {
+                        aws_byte_buf_reset(&chunk, false);
                         amountRead = 0;
                         if (aws_socket_read(&mSocket, &chunk, &amountRead) == AWS_OP_SUCCESS && amountRead > 0)
                         {
                             aws_byte_cursor chunkCursor = aws_byte_cursor_from_buf(&chunk);
                             aws_byte_buf_append_dynamic(&everything, &chunkCursor);
-                            aws_byte_buf_reset(&chunk, false);
                         }
                     } while (amountRead > 0);
 
