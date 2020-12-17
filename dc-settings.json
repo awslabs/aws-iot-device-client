@@ -13,5 +13,9 @@
 	"device-defender":	{
 		"enabled":	false,
 		"interval-in-seconds": <replace_with_interval>
+	},
+	"fleet-provisioning": {
+		"enabled": false,
+		"template-name": "<replace_with_template_name>"
 	}
 }
