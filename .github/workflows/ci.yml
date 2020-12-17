@@ -82,7 +82,7 @@ jobs:
       - name: Archive ST Component Mode Build Artifact
         uses: actions/upload-artifact@v2
         # Run for main branch only
-        # if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main'
         with:
           name: ${{ env.PACKAGE_NAME }}
           path: |
