@@ -38,6 +38,8 @@ constexpr char PlainConfig::JSON_KEY_LOGGING[];
 constexpr char PlainConfig::JSON_KEY_JOBS[];
 constexpr char PlainConfig::JSON_KEY_TUNNELING[];
 constexpr char PlainConfig::JSON_KEY_DEVICE_DEFENDER[];
+constexpr char PlainConfig::JSON_KEY_FLEET_PROVISIONING[];
+constexpr char PlainConfig::JSON_KEY_RUNTIME_CONFIG[];
 
 bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
 {
@@ -95,6 +97,22 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
         deviceDefender = temp;
     }
 
+    jsonKey = JSON_KEY_FLEET_PROVISIONING;
+    if (json.ValueExists(jsonKey))
+    {
+        FleetProvisioning temp;
+        temp.LoadFromJson(json.GetJsonObject(jsonKey));
+        fleetProvisioning = temp;
+    }
+
+    jsonKey = JSON_KEY_RUNTIME_CONFIG;
+    if (json.ValueExists(jsonKey))
+    {
+        FleetProvisioningRuntimeConfig temp;
+        temp.LoadFromJson(json.GetJsonObject(jsonKey));
+        fleetProvisioningRuntimeConfig = temp;
+    }
+
     jsonKey = JSON_KEY_LOGGING;
     if (json.ValueExists(jsonKey))
     {
@@ -130,7 +148,7 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     }
 
     return logConfig.LoadFromCliArgs(cliArgs) && jobs.LoadFromCliArgs(cliArgs) && tunneling.LoadFromCliArgs(cliArgs) &&
-           deviceDefender.LoadFromCliArgs(cliArgs);
+           deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs);
 }
 
 bool PlainConfig::Validate() const
@@ -180,6 +198,12 @@ bool PlainConfig::Validate() const
 #endif
 #if !defined(EXCLUDE_ST)
     if (!tunneling.Validate())
+    {
+        return false;
+    }
+#endif
+#if !defined(EXCLUDE_FP)
+    if (!fleetProvisioning.Validate())
     {
         return false;
     }
@@ -504,11 +528,118 @@ bool PlainConfig::DeviceDefender::Validate() const
     return true;
 }
 
+constexpr char PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING[];
+constexpr char PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME[];
+
+constexpr char PlainConfig::FleetProvisioning::JSON_KEY_ENABLED[];
+constexpr char PlainConfig::FleetProvisioning::JSON_KEY_TEMPLATE_NAME[];
+
+bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
+{
+    const char *jsonKey = JSON_KEY_ENABLED;
+    if (json.ValueExists(jsonKey))
+    {
+        enabled = json.GetBool(jsonKey);
+    }
+
+    jsonKey = JSON_KEY_TEMPLATE_NAME;
+    if (json.ValueExists(jsonKey))
+    {
+        templateName = json.GetString(jsonKey).c_str();
+    }
+
+    return true;
+}
+
+bool PlainConfig::FleetProvisioning::LoadFromCliArgs(const CliArgs &cliArgs)
+{
+    if (cliArgs.count(PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING))
+    {
+        enabled = true;
+    }
+    if (cliArgs.count(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME))
+    {
+        templateName = cliArgs.at(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME).c_str();
+    }
+
+    return true;
+}
+
+bool PlainConfig::FleetProvisioning::Validate() const
+{
+    if (!enabled)
+    {
+        return true;
+    }
+
+    if (!templateName.has_value() || templateName->empty())
+    {
+        LOG_ERROR(
+            Config::TAG,
+            "*** AWS IOT DEVICE CLIENT FATAL ERROR: A template name must be specified if Fleet Provisioning is enabled "
+            "***");
+        return false;
+    }
+    return true;
+}
+
+constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_COMPLETED_FLEET_PROVISIONING[];
+constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_CERT[];
+constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_KEY[];
+constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_THING_NAME[];
+
+bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromJson(const Crt::JsonView &json)
+{
+    const char *jsonKey = JSON_KEY_COMPLETED_FLEET_PROVISIONING;
+    if (json.ValueExists(jsonKey))
+    {
+        completedFleetProvisioning = json.GetBool(jsonKey);
+    }
+
+    jsonKey = JSON_KEY_CERT;
+    if (json.ValueExists(jsonKey))
+    {
+        cert = json.GetString(jsonKey).c_str();
+    }
+
+    jsonKey = JSON_KEY_KEY;
+    if (json.ValueExists(jsonKey))
+    {
+        key = json.GetString(jsonKey).c_str();
+    }
+
+    jsonKey = JSON_KEY_THING_NAME;
+    if (json.ValueExists(jsonKey))
+    {
+        thingName = json.GetString(jsonKey).c_str();
+    }
+
+    return true;
+}
+bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromCliArgs(const CliArgs &cliArgs)
+{
+    /*
+     * No Command line arguments for Fleet Provisioning Runtime Config
+     */
+    return true;
+}
+
+bool PlainConfig::FleetProvisioningRuntimeConfig::Validate() const
+{
+    if (!completedFleetProvisioning)
+    {
+        return false;
+    }
+    return cert.has_value() && key.has_value() && thingName.has_value() && !cert->empty() && !key->empty() &&
+           !thingName->empty();
+}
+
 constexpr char Config::TAG[];
 constexpr char Config::DEFAULT_CONFIG_FILE[];
 constexpr char Config::CLI_HELP[];
 constexpr char Config::CLI_EXPORT_DEFAULT_SETTINGS[];
 constexpr char Config::CLI_CONFIG_FILE[];
+constexpr char Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[];
 
 bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 {
@@ -547,6 +678,9 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 
         {PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER, false, false, nullptr},
         {PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL, true, false, nullptr},
+
+        {PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING, false, false, nullptr},
+        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME, true, false, nullptr},
     };
 
     map<string, ArgumentDefinition> argumentDefinitionMap;
@@ -611,21 +745,51 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 
 bool Config::init(const CliArgs &cliArgs)
 {
+    string filename = Config::DEFAULT_CONFIG_FILE;
     if (cliArgs.count(Config::CLI_CONFIG_FILE))
     {
-        if (!ParseConfigFile(cliArgs.at(Config::CLI_CONFIG_FILE)))
-        {
-            return false;
-        }
+        filename = cliArgs.at(Config::CLI_CONFIG_FILE);
     }
-    else
+
+    if (!ParseConfigFile(filename))
     {
-        if (!ParseConfigFile(Config::DEFAULT_CONFIG_FILE))
-        {
-            return false;
-        }
+        LOGM_ERROR(
+            TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to Parse Config file: '%s' ***", filename.c_str());
+        return false;
     }
-    return config.LoadFromCliArgs(cliArgs) && config.Validate();
+
+    if (!config.LoadFromCliArgs(cliArgs))
+    {
+        return false;
+    }
+
+    if (ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE) && ValidateAndStoreRuntimeConfig())
+    {
+        LOGM_INFO(
+            TAG,
+            "Successfully fetched Runtime config file '%s' and validated its content.",
+            Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
+    }
+
+    return config.Validate();
+}
+
+bool Config::ValidateAndStoreRuntimeConfig()
+{
+    // check if all values are present and also check if the files are present then only overwrite values
+
+    if (!config.fleetProvisioningRuntimeConfig.Validate())
+    {
+        LOGM_ERROR(
+            TAG,
+            "Failed to Validate runtime configurations. Please check '%s' file",
+            Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
+        return false;
+    }
+    config.cert = config.fleetProvisioningRuntimeConfig.cert.value().c_str();
+    config.key = config.fleetProvisioningRuntimeConfig.key.value().c_str();
+    config.thingName = config.fleetProvisioningRuntimeConfig.thingName.value().c_str();
+    return true;
 }
 
 bool Config::ParseConfigFile(const string &file)
@@ -633,7 +797,7 @@ bool Config::ParseConfigFile(const string &file)
     ifstream setting(file);
     if (!setting.is_open())
     {
-        LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to open file: '%s' ***", file.c_str());
+        LOGM_ERROR(TAG, "Unable to open file: '%s'", file.c_str());
         return false;
     }
 
@@ -673,6 +837,8 @@ void Config::PrintHelpMessage()
         "%s <File-Location>:\t\t\t Write logs to specified log file when using the file logger.\n"
         "%s:\t\t\t\t\t\t\t\tEnables Jobs feature\n"
         "%s:\t\t\t\t\t\t\tEnables Tunneling feature\n"
+        "%s:\t\t\t\t\t\tEnables Device Defender feature\n"
+        "%s:\t\t\t\t\t\tEnables Fleet Provisioning feature\n"
         "%s <endpoint-value>:\t\t\t\t\t\tUse Specified Endpoint\n"
         "%s <Cert-Location>:\t\t\t\t\t\t\tUse Specified Cert file\n"
         "%s <Key-Location>:\t\t\t\t\t\t\tUse Specified Key file\n"
@@ -682,7 +848,8 @@ void Config::PrintHelpMessage()
         "%s <region>:\t\t\t\t\t\tUse Specified AWS Region\n"
         "%s <service>:\t\t\t\t\t\tConnect secure tunnel to specific service\n"
         "%s:\t\t\t\t\tDisable MQTT new tunnel notification\n"
-        "%s <interval-in-seconds>:\t\t\t\t\tPositive integer to publish Device Defender metrics";
+        "%s <interval-in-seconds>:\t\t\tPositive integer to publish Device Defender metrics\n"
+        "%s <template-name>:\t\t\tUse specified Fleet Provisioning template name\n";
 
     cout << FormatMessage(
         helpMessageTemplate,
@@ -694,6 +861,8 @@ void Config::PrintHelpMessage()
         PlainConfig::LogConfig::CLI_LOG_FILE,
         PlainConfig::Jobs::CLI_ENABLE_JOBS,
         PlainConfig::Tunneling::CLI_ENABLE_TUNNELING,
+        PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER,
+        PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING,
         PlainConfig::CLI_ENDPOINT,
         PlainConfig::CLI_CERT,
         PlainConfig::CLI_KEY,
@@ -703,10 +872,11 @@ void Config::PrintHelpMessage()
         PlainConfig::Tunneling::CLI_TUNNELING_REGION,
         PlainConfig::Tunneling::CLI_TUNNELING_SERVICE,
         PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION,
-        PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL);
+        PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL,
+        PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME);
 }
 
-void Config::ExportDefaultSetting(const string &file)
+bool Config::ExportDefaultSetting(const string &file)
 {
     string jsonTemplate = R"({
     "%s": "<replace_with_endpoint_value>",
@@ -724,10 +894,18 @@ void Config::ExportDefaultSetting(const string &file)
         "%s": true,
         "%s": <replace_with_interval>
     }
+    "%s": {
+        "%s": true,
+        "%s": "<replace_with_template_name>"
+    }
 }
 )";
-    ofstream clientConfig;
-    clientConfig.open(file);
+    ofstream clientConfig(file);
+    if (!clientConfig.is_open())
+    {
+        LOGM_ERROR(TAG, "Unable to open file: '%s'", file.c_str());
+        return false;
+    }
     clientConfig << FormatMessage(
         jsonTemplate.c_str(),
         PlainConfig::JSON_KEY_ENDPOINT,
@@ -741,8 +919,12 @@ void Config::ExportDefaultSetting(const string &file)
         PlainConfig::Tunneling::JSON_KEY_ENABLED,
         PlainConfig::JSON_KEY_DEVICE_DEFENDER,
         PlainConfig::DeviceDefender::JSON_KEY_ENABLED,
-        PlainConfig::DeviceDefender::JSON_KEY_INTERVAL);
+        PlainConfig::DeviceDefender::JSON_KEY_INTERVAL,
+        PlainConfig::JSON_KEY_FLEET_PROVISIONING,
+        PlainConfig::FleetProvisioning::JSON_KEY_ENABLED,
+        PlainConfig::FleetProvisioning::JSON_KEY_TEMPLATE_NAME);
 
     clientConfig.close();
     LOGM_INFO(TAG, "Exported settings to: %s", file.c_str());
+    return true;
 }

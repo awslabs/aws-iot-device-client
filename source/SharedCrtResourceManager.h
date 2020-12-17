@@ -27,7 +27,9 @@ namespace Aws
               private:
                 const char *TAG = "SharedCrtResourceManager.cpp";
 
+                static constexpr int DEFAULT_WAIT_TIME_SECONDS = 10;
                 bool initialized = false;
+                std::promise<void> connectionClosedPromise;
                 std::unique_ptr<Aws::Crt::ApiHandle> apiHandle;
                 std::unique_ptr<Aws::Crt::Io::EventLoopGroup> eventLoopGroup;
                 std::unique_ptr<Aws::Crt::Io::DefaultHostResolver> defaultHostResolver;
@@ -39,12 +41,12 @@ namespace Aws
                 bool locateCredentials(const PlainConfig &config);
                 int buildClient();
                 void initializeAllocator();
-                int establishConnection(const PlainConfig &config);
 
               public:
                 static const int SUCCESS = 0;
                 static const int ABORT = 2;
                 bool initialize(const PlainConfig &config);
+                int establishConnection(const PlainConfig &config);
                 std::shared_ptr<Crt::Mqtt::MqttConnection> getConnection();
                 Aws::Crt::Io::EventLoopGroup *getEventLoopGroup();
                 struct aws_allocator *getAllocator();
