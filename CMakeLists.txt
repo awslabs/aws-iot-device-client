@@ -8,26 +8,27 @@ option(EXCLUDE_DD "Builds the device client without the IoT Device Defender Feat
 option(EXCLUDE_ST "Builds the device client without the IoT Secure Tunneling Feature." OFF)
 option(EXCLUDE_FP "Builds the device client without the IoT Fleet Provisioning Feature." OFF)
 option(DISABLE_MQTT "WARNING: This flag is meant for internal use cases and will prevent Device Client features from operating. Builds the device client without MQTT Connection Management." OFF)
+option(GIT_VERSION "Updates the version number using the Git commit history" ON)
 
 if (EXCLUDE_JOBS)
     add_definitions(-DEXCLUDE_JOBS)
-endif()
+endif ()
 
 if (EXCLUDE_DD)
     add_definitions(-DEXCLUDE_DD)
-endif()
+endif ()
 
 if (EXCLUDE_ST)
     add_definitions(-DEXCLUDE_ST)
-endif()
+endif ()
 
 if (EXCLUDE_FP)
     add_definitions(-DEXCLUDE_FP)
-endif()
+endif ()
 
 if (DISABLE_MQTT)
     add_definitions(-DDISABLE_MQTT)
-endif()
+endif ()
 
 list(APPEND CMAKE_MODULE_PATH "./sdk-cpp-workspace/lib/cmake")
 
@@ -44,27 +45,40 @@ file(GLOB DC_SRC "source/*.cpp" /
 if (NOT EXCLUDE_DD)
     file(GLOB DD_SRC "source/devicedefender/*.cpp")
     list(APPEND DC_SRC ${DD_SRC})
-endif()
+endif ()
 
 if (NOT EXCLUDE_JOBS)
     file(GLOB JOBS_SRC "source/jobs/*.cpp")
     list(APPEND DC_SRC ${JOBS_SRC})
-endif()
+endif ()
 
 if (NOT EXCLUDE_ST)
     file(GLOB ST_SRC "source/tunneling/*.cpp")
     list(APPEND DC_SRC ${ST_SRC})
-endif()
+endif ()
 
 if (NOT EXCLUDE_FP)
-    #TODO: Append FP source files
-endif()
+    file(GLOB FP_SRC "source/fleetprovisioning/*.cpp")
+    list(APPEND DC_SRC ${FP_SRC})
+endif ()
 
 set(DC_PROJECT_NAME aws-iot-device-client)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_FLAGS_DEBUGOPT "")
 set(CMAKE_BUILD_TYPE Debug) # Switch to Release for the "Release" build
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ldl")
+endif()
+
+#########################################
+# Generate Version Information from Git #
+#########################################
+find_package(Git)
+include(CMakeLists.txt.versioning)
+# Now we inject the version information into a header that is accessible from the device client executable
+configure_file("source/Version.h.in" "${PROJECT_BINARY_DIR}/Version.h")
 
 #########################################
 # OpenSSL dependency                    #
@@ -81,22 +95,27 @@ if (BUILD_SDK)
     configure_file(CMakeLists.txt.awssdk
             aws-iot-device-sdk-cpp-v2-download/CMakeLists.txt)
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/aws-iot-device-sdk-cpp-v2-download )
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/aws-iot-device-sdk-cpp-v2-download)
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/aws-iot-device-sdk-cpp-v2-download )
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/aws-iot-device-sdk-cpp-v2-download)
 
     # Add aws-iot-device-sdk-cpp-v2 directly to the build
     add_subdirectory(${CMAKE_BINARY_DIR}/aws-iot-device-sdk-cpp-v2-src
             ${CMAKE_BINARY_DIR}/aws-iot-device-sdk-cpp-v2-build)
-else()
+else ()
     include_directories(/include)
     link_directories(/lib)
-endif()
+endif ()
 
-### Now build the DC executable
+###############################################
+## Build the AWS IoT Device Client Executable #
+###############################################
 add_executable(${DC_PROJECT_NAME} ${DC_SRC})
 set_target_properties(${DC_PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_definitions(${DC_PROJECT_NAME} PRIVATE "-DDEBUG_BUILD")
+## We need to add the project binary directory to the list of include directories
+## for passing the version information down to the executable
+include_directories("${PROJECT_BINARY_DIR}")
 
 if (MSVC)
     target_compile_options(${DC_PROJECT_NAME} PRIVATE /W4 /WX)
@@ -110,20 +129,20 @@ set(DEP_DC_LIBS ${DEP_DC_LIBS} aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io s2n aw
 
 if (NOT EXCLUDE_DD)
     set(DEP_DC_LIBS ${DEP_DC_LIBS} IotDeviceCommon-cpp IotDeviceDefender-cpp aws-c-iot)
-endif()
+endif ()
 
 if (NOT EXCLUDE_JOBS)
     set(DEP_DC_LIBS ${DEP_DC_LIBS} IotJobs-cpp)
     target_link_libraries(${DC_PROJECT_NAME} IotJobs-cpp)
-endif()
+endif ()
 
 if (NOT EXCLUDE_ST)
     set(DEP_DC_LIBS ${DEP_DC_LIBS} IotDeviceCommon-cpp IotSecureTunneling-cpp aws-c-iot)
-endif()
+endif ()
 
 if (NOT EXCLUDE_FP)
-    #TODO: Set FP required SDK libs
-endif()
+    set(DEP_DC_LIBS ${DEP_DC_LIBS} IotIdentity-cpp)
+endif ()
 
 target_link_libraries(${DC_PROJECT_NAME} ${DEP_DC_LIBS})
 target_link_libraries(${DC_PROJECT_NAME} OpenSSL::SSL)
@@ -134,9 +153,9 @@ if (BUILD_TEST_DEPS)
     configure_file(CMakeLists.txt.gtest
             googletest-download/CMakeLists.txt)
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
 
     # Prevent GoogleTest from overriding our compiler/linker options
     # when building with Visual Studio
@@ -147,6 +166,6 @@ if (BUILD_TEST_DEPS)
     # and gmock_main
     add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
             ${CMAKE_BINARY_DIR}/googletest-build)
-endif()
+endif ()
 
 add_subdirectory(test)

@@ -1,12 +1,17 @@
 #include "FileUtils.h"
+#include "../logging/LoggerFactory.h"
 
 #include <errno.h>
+#include <fstream>
 #include <limits.h> /* PATH_MAX */
 #include <string.h>
 #include <sys/stat.h>
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Util;
+using namespace Aws::Iot::DeviceClient::Logging;
+
+const char *FileUtils::TAG = "FileUtils.cpp";
 
 int FileUtils::mkdirs(const char *path)
 {
@@ -58,4 +63,17 @@ string FileUtils::extractParentDirectory(const string &filePath)
     {
         return "";
     }
+}
+
+bool FileUtils::StoreValueInFile(string value, string filePath)
+{
+    ofstream file(filePath);
+    if (!file.is_open())
+    {
+        LOGM_ERROR(FileUtils::TAG, "Unable to open file: '%s'", filePath.c_str());
+        return false;
+    }
+    file << value;
+    file.close();
+    return true;
 }

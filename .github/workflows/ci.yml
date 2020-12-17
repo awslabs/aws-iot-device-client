@@ -12,21 +12,38 @@ jobs:
   build-ubuntu-16-x64:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Build ${{ env.PACKAGE_NAME }}
-      run : |
-        echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
-        export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
-        docker pull $DOCKER_IMAGE
-        docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Build ${{ env.PACKAGE_NAME }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
+          export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          docker pull $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
+
+  build-amazonlinux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Build ${{ env.PACKAGE_NAME }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
+          export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/amazonlinux:latest
+          docker pull $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
 
   gpp-compat:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [5,6,7,8]
+        version: [ 5,6,7,8 ]
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
@@ -38,9 +55,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [5.0, 6.0, 7, 8, 9]
+        version: [ 5.0, 6.0, 7, 8, 9 ]
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin

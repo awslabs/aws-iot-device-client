@@ -7,7 +7,7 @@ enable_testing()
 if (NOT BUILD_TEST_DEPS)
     message("Gtest Cmake")
     find_package(GTest REQUIRED)
-endif()
+endif ()
 
 #########################################
 # Source Files                          #
@@ -26,17 +26,22 @@ file(GLOB DC_SRC "../source/*.cpp" /
 if (NOT EXCLUDE_DD)
     file(GLOB DD_SRC "../source/devicedefender/*.cpp")
     list(APPEND DC_SRC ${DD_SRC})
-endif()
+endif ()
 
 if (NOT EXCLUDE_JOBS)
     file(GLOB JOBS_SRC "../source/jobs/*.cpp")
     list(APPEND DC_SRC ${JOBS_SRC})
-endif()
+endif ()
 
 if (NOT EXCLUDE_ST)
     file(GLOB ST_SRC "../source/tunneling/*.cpp")
     list(APPEND DC_SRC ${ST_SRC})
-endif()
+endif ()
+
+if (NOT EXCLUDE_FP)
+    file(GLOB FP_SRC "../source/fleetprovisioning/*.cpp")
+    list(APPEND DC_SRC ${FP_SRC})
+endif ()
 
 #########################################
 # Test Files                            #
@@ -52,7 +57,7 @@ file(GLOB JOBS_TST "./jobs/*.cpp")
 
 if (NOT EXCLUDE_JOBS)
     list(APPEND DC_TST ${JOBS_TST})
-endif()
+endif ()
 
 list(APPEND DC_SRC ${DC_TST})
 list(FILTER DC_SRC EXCLUDE REGEX ".*main.cpp$")
@@ -62,7 +67,7 @@ add_executable(${GTEST_PROJECT} ${DC_SRC})
 
 if (NOT EXCLUDE_JOBS)
     target_link_libraries(${GTEST_PROJECT} IotJobs-cpp)
-endif()
+endif ()
 
 target_link_libraries(${GTEST_PROJECT} gtest gtest_main)
 target_link_libraries(${GTEST_PROJECT} ${DEP_DC_LIBS})

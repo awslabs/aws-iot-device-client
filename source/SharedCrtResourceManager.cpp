@@ -15,23 +15,12 @@ using namespace Aws::Iot;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Logging;
 
+constexpr int SharedCrtResourceManager::DEFAULT_WAIT_TIME_SECONDS;
+
 bool SharedCrtResourceManager::initialize(const PlainConfig &config)
 {
-#if !defined(DISABLE_MQTT)
-    if (!locateCredentials(config))
-    {
-        LOG_ERROR(TAG, "Failed to find file(s) required for initializing the MQTT connection");
-        return false;
-    }
-#endif
-
     initializeAllocator();
     initialized = buildClient() == SharedCrtResourceManager::SUCCESS;
-
-#if !defined(DISABLE_MQTT)
-    initialized = initialized && establishConnection(config) == SharedCrtResourceManager::SUCCESS;
-#endif
-
     return initialized;
 }
 
@@ -102,6 +91,11 @@ int SharedCrtResourceManager::buildClient()
 
 int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
 {
+    if (!locateCredentials(config))
+    {
+        LOG_ERROR(TAG, "Failed to find file(s) required for establishing the MQTT connection");
+        return false;
+    }
     auto clientConfigBuilder = MqttClientConnectionConfigBuilder(config.cert->c_str(), config.key->c_str());
     clientConfigBuilder.WithEndpoint(config.endpoint->c_str());
     clientConfigBuilder.WithCertificateAuthority(config.rootCa->c_str());
@@ -131,7 +125,6 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
      * but this is a sample console application, so we'll just do that with a condition variable.
      */
     promise<bool> connectionCompletedPromise;
-    promise<void> connectionClosedPromise;
 
     /*
      * This will execute when an mqtt connect has completed or failed.
@@ -238,7 +231,11 @@ void SharedCrtResourceManager::disconnect()
 {
     if (connection->Disconnect())
     {
-        initialized = false;
+        if (connectionClosedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
+            future_status::timeout)
+        {
+            LOG_ERROR(TAG, "MQTT Connection timed out to disconnect.");
+        }
     }
     else
     {

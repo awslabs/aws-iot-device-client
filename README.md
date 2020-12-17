@@ -7,6 +7,9 @@
 * C++ 11 or higher
 * [CMake](https://cmake.org/) 3.10+
 
+##### Note
+* CI Build uses openssl 1.1.1 
+
 ### Building from source
 
 ##### Build and Install All Dependencies via CMake

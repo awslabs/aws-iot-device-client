@@ -45,6 +45,8 @@ namespace Aws
                 static constexpr char JSON_KEY_JOBS[] = "jobs";
                 static constexpr char JSON_KEY_TUNNELING[] = "tunneling";
                 static constexpr char JSON_KEY_DEVICE_DEFENDER[] = "device-defender";
+                static constexpr char JSON_KEY_FLEET_PROVISIONING[] = "fleet-provisioning";
+                static constexpr char JSON_KEY_RUNTIME_CONFIG[] = "runtime-config";
                 static constexpr char JSON_KEY_LOGGING[] = "logging";
 
                 Aws::Crt::Optional<std::string> endpoint;
@@ -99,23 +101,18 @@ namespace Aws
                     bool Validate() const override;
 
                     static constexpr char CLI_ENABLE_TUNNELING[] = "--enable-tunneling";
+                    static constexpr char CLI_TUNNELING_DISABLE_NOTIFICATION[] = "--tunneling-disable-notification";
                     static constexpr char CLI_TUNNELING_DESTINATION_ACCESS_TOKEN[] =
                         "--tunneling-destination-access-token";
                     static constexpr char CLI_TUNNELING_REGION[] = "--tunneling-region";
                     static constexpr char CLI_TUNNELING_SERVICE[] = "--tunneling-service";
-                    static constexpr char CLI_TUNNELING_DISABLE_NOTIFICATION[] = "--tunneling-disable-notification";
-
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
-                    static constexpr char JSON_KEY_DESTINATION_ACCESS_TOKEN[] = "destination-access-token";
-                    static constexpr char JSON_KEY_REGION[] = "region";
-                    static constexpr char JSON_KEY_PORT[] = "port";
-                    static constexpr char JSON_KEY_SUBSCRIBE_NOTIFICATION[] = "subscribe-notification";
 
                     bool enabled{false};
+                    bool subscribeNotification{true};
                     Aws::Crt::Optional<std::string> destinationAccessToken;
                     Aws::Crt::Optional<std::string> region;
                     Aws::Crt::Optional<int> port;
-                    bool subscribeNotification{true};
                 };
                 Tunneling tunneling;
 
@@ -135,6 +132,41 @@ namespace Aws
                     Aws::Crt::Optional<int> interval;
                 };
                 DeviceDefender deviceDefender;
+
+                struct FleetProvisioning : public LoadableFromJsonAndCli
+                {
+                    bool LoadFromJson(const Crt::JsonView &json) override;
+                    bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool Validate() const override;
+
+                    static constexpr char CLI_ENABLE_FLEET_PROVISIONING[] = "--enable-fleet-provisioning";
+                    static constexpr char CLI_FLEET_PROVISIONING_TEMPLATE_NAME[] = "--fleet-provisioning-template-name";
+
+                    static constexpr char JSON_KEY_ENABLED[] = "enabled";
+                    static constexpr char JSON_KEY_TEMPLATE_NAME[] = "template-name";
+
+                    bool enabled{false};
+                    Aws::Crt::Optional<std::string> templateName;
+                };
+                FleetProvisioning fleetProvisioning;
+
+                struct FleetProvisioningRuntimeConfig : public LoadableFromJsonAndCli
+                {
+                    bool LoadFromJson(const Crt::JsonView &json) override;
+                    bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool Validate() const override;
+
+                    static constexpr char JSON_KEY_COMPLETED_FLEET_PROVISIONING[] = "completed-fp";
+                    static constexpr char JSON_KEY_CERT[] = "cert";
+                    static constexpr char JSON_KEY_KEY[] = "key";
+                    static constexpr char JSON_KEY_THING_NAME[] = "thing-name";
+
+                    bool completedFleetProvisioning{false};
+                    Aws::Crt::Optional<std::string> cert;
+                    Aws::Crt::Optional<std::string> key;
+                    Aws::Crt::Optional<std::string> thingName;
+                };
+                FleetProvisioningRuntimeConfig fleetProvisioningRuntimeConfig;
             };
 
             class Config
@@ -144,22 +176,25 @@ namespace Aws
                 ~Config() = default;
 
                 static constexpr char TAG[] = "Config.cpp";
+                // TODO: Update the paths
                 static constexpr char DEFAULT_CONFIG_FILE[] = "/etc/aws-iot-device-client.conf";
+                static constexpr char DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] =
+                    "./aws-iot-device-client-runtime.conf";
 
                 static constexpr char CLI_HELP[] = "--help";
                 static constexpr char CLI_EXPORT_DEFAULT_SETTINGS[] = "--export-default-settings";
                 static constexpr char CLI_CONFIG_FILE[] = "--config-file";
 
                 static bool ParseCliArgs(int argc, char *argv[], CliArgs &cliArgs);
-
+                bool ValidateAndStoreRuntimeConfig();
+                bool ParseConfigFile(const std::string &file);
                 bool init(const CliArgs &cliArgs);
 
                 PlainConfig config;
 
               private:
-                bool ParseConfigFile(const std::string &file);
                 static void PrintHelpMessage();
-                static void ExportDefaultSetting(const std::string &file);
+                static bool ExportDefaultSetting(const std::string &file);
             };
         } // namespace DeviceClient
     }     // namespace Iot
