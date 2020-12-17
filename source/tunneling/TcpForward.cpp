@@ -141,6 +141,7 @@ namespace Aws
                         {
                             aws_byte_cursor chunkCursor = aws_byte_cursor_from_buf(&chunk);
                             aws_byte_buf_append_dynamic(&everything, &chunkCursor);
+                            aws_byte_buf_reset(&chunk, false);
                         }
                     } while (amountRead > 0);
 
