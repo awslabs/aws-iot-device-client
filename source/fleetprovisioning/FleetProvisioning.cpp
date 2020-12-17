@@ -14,7 +14,6 @@
 #include <aws/iotidentity/RegisterThingResponse.h>
 #include <aws/iotidentity/RegisterThingSubscriptionRequest.h>
 
-#include <algorithm>
 #include <chrono>
 #include <condition_variable>
 #include <string>
@@ -78,21 +77,28 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
         if (ioErr == AWS_OP_SUCCESS)
         {
             LOGM_INFO(TAG, "CreateKeysAndCertificateResponse certificateId: %s.", response->CertificateId->c_str());
-            certificateID = response->CertificateId->c_str();
-            certPath = certificateID + ".cert.pem";
-            keyPath = certificateID + ".private.pey";
-            FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str());
-            LOGM_INFO(TAG, "Stored certificate in %s file", certPath.c_str());
-            FileUtils::StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str());
-            LOGM_INFO(TAG, "Store value in %s file", keyPath.c_str());
+            Aws::Crt::String certificateID = response->CertificateId->c_str();
             certificateOwnershipToken = *response->CertificateOwnershipToken;
+            certPath = certificateID + "-certificate.pem.crt";
+            keyPath = certificateID + "-private.pem.key";
+            if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()) &&
+                FileUtils::StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str()))
+            {
+                LOGM_INFO(
+                    TAG, "Stored certificate and private key in %s and %s files", certPath.c_str(), keyPath.c_str());
+                keysCreationCompletedPromise.set_value(true);
+            }
+            else
+            {
+                keysCreationCompletedPromise.set_value(false);
+            }
         }
         else
         {
             LOGM_ERROR(
                 TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on subscription: %s. ***", ErrorDebugString(ioErr));
+            keysCreationCompletedPromise.set_value(false);
         }
-        keysCreationCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
     auto onKeysRejected = [&](ErrorResponse *error, int ioErr) {
@@ -314,11 +320,14 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
         /*
          * Store data in runtime conf file and update @config object.
          */
-        ExportRuntimeConfig(
-            Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
-            certPath.c_str(),
-            keyPath.c_str(),
-            thingName.c_str());
+        if (!ExportRuntimeConfig(
+                Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
+                certPath.c_str(),
+                keyPath.c_str(),
+                thingName.c_str()))
+        {
+            return false;
+        }
 
         LOGM_INFO(TAG, "Successfully provisioned thing: %s", thingName.c_str());
         return true;
@@ -331,7 +340,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
  * Helper methods
  */
 
-void FleetProvisioning::ExportRuntimeConfig(
+bool FleetProvisioning::ExportRuntimeConfig(
     const string &file,
     const string &certPath,
     const string &keyPath,
@@ -345,8 +354,12 @@ void FleetProvisioning::ExportRuntimeConfig(
     "%s": "%s"
     }
 })";
-    ofstream clientConfig;
-    clientConfig.open(file);
+    ofstream clientConfig(file);
+    if (!clientConfig.is_open())
+    {
+        LOGM_ERROR(TAG, "Unable to open file: '%s'", file.c_str());
+        return false;
+    }
     clientConfig << FormatMessage(
         jsonTemplate.c_str(),
         PlainConfig::JSON_KEY_RUNTIME_CONFIG,
@@ -359,4 +372,5 @@ void FleetProvisioning::ExportRuntimeConfig(
         thingName.c_str());
     clientConfig.close();
     LOGM_INFO(TAG, "Exported runtime configurations to: %s", file.c_str());
+    return true;
 }

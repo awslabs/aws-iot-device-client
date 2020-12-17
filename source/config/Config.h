@@ -199,7 +199,7 @@ namespace Aws
 
               private:
                 static void PrintHelpMessage();
-                static void ExportDefaultSetting(const std::string &file);
+                static bool ExportDefaultSetting(const std::string &file);
             };
         } // namespace DeviceClient
     }     // namespace Iot

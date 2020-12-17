@@ -603,7 +603,10 @@ bool PlainConfig::FleetProvisioning::Validate() const
 
     if (!templateName.has_value() || templateName->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Template Name is missing ***");
+        LOG_ERROR(
+            Config::TAG,
+            "*** AWS IOT DEVICE CLIENT FATAL ERROR: A template name must be specified if Fleet Provisioning is enabled "
+            "***");
         return false;
     }
     return true;
@@ -806,7 +809,7 @@ bool Config::ValidateAndStoreRuntimeConfig()
 
     if (!config.fleetProvisioningRuntimeConfig.Validate())
     {
-        LOGM_WARN(
+        LOGM_ERROR(
             TAG,
             "Failed to Validate runtime configurations. Please check '%s' file",
             Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
@@ -902,7 +905,7 @@ void Config::PrintHelpMessage()
         PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME);
 }
 
-void Config::ExportDefaultSetting(const string &file)
+bool Config::ExportDefaultSetting(const string &file)
 {
     string jsonTemplate = R"({
     "%s": "<replace_with_endpoint_value>",
@@ -930,8 +933,12 @@ void Config::ExportDefaultSetting(const string &file)
     }
 }
 )";
-    ofstream clientConfig;
-    clientConfig.open(file);
+    ofstream clientConfig(file);
+    if (!clientConfig.is_open())
+    {
+        LOGM_ERROR(TAG, "Unable to open file: '%s'", file.c_str());
+        return false;
+    }
     clientConfig << FormatMessage(
         jsonTemplate.c_str(),
         PlainConfig::JSON_KEY_ENDPOINT,
@@ -956,4 +963,5 @@ void Config::ExportDefaultSetting(const string &file)
 
     clientConfig.close();
     LOGM_INFO(TAG, "Exported settings to: %s", file.c_str());
+    return true;
 }

@@ -18,6 +18,8 @@ namespace Aws
                  */
                 class FileUtils
                 {
+                  private:
+                    static const char *TAG;
                   public:
                     /**
                      * \brief Creates each of the directories in the provided path if they do not exist
@@ -33,7 +35,13 @@ namespace Aws
                      */
                     static std::string extractParentDirectory(const std::string &filePath);
 
-                    static void StoreValueInFile(std::string value, std::string filePath);
+                    /**
+                     * \brief Stores string value in given file
+                     * @param value string value to be stored in given file
+                     * @param filePath a path to a file
+                     * @return true on success
+                     */
+                    static bool StoreValueInFile(std::string value, std::string filePath);
                 };
             } // namespace Util
         }     // namespace DeviceClient
