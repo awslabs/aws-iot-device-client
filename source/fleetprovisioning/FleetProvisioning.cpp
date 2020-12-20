@@ -100,7 +100,9 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
         else
         {
             LOGM_ERROR(
-                TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on CreateKeysAndCertificate subscription: %s. ***", ErrorDebugString(ioErr));
+                TAG,
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on CreateKeysAndCertificate subscription: %s. ***",
+                ErrorDebugString(ioErr));
             keysCreationCompletedPromise.set_value(false);
         }
     };
@@ -202,7 +204,8 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to CreateCertificateFromCsr rejected topic: %s. "
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to CreateCertificateFromCsr rejected topic: "
+                "%s. "
                 "***",
                 ErrorDebugString(ioErr));
         }
@@ -240,7 +243,9 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         else
         {
             LOGM_ERROR(
-                TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on CreateCertificateFromCsr subscription: %s. ***", ErrorDebugString(ioErr));
+                TAG,
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on CreateCertificateFromCsr subscription: %s. ***",
+                ErrorDebugString(ioErr));
             csrCreationCompletedPromise.set_value(false);
         }
     };
