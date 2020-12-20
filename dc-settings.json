@@ -16,6 +16,7 @@
 	},
 	"fleet-provisioning": {
 		"enabled": false,
-		"template-name": "<replace_with_template_name>"
+		"template-name": "<replace_with_template_name>",
+		"csr-file": "<replace_with_csr-file-path>"
 	}
 }

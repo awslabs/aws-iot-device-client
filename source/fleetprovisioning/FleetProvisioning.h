@@ -66,6 +66,30 @@ namespace Aws
                 /**
                  * \brief an promise variable to check if publish request for RegisterThing was received
                  */
+                std::promise<bool> csrPublishCompletedPromise;
+                /**
+                 * \brief an promise variable to check if subscription request to CreateCertificateFromCsr Accept topic
+                 * was executed
+                 */
+                std::promise<bool> csrAcceptedCompletedPromise;
+                /**
+                 * \brief an promise variable to check if subscription to CreateCertificateFromCsr Reject topic was
+                 * executed
+                 */
+                std::promise<bool> csrRejectedCompletedPromise;
+                /**
+                 * \brief an promise variable to check if publish request for CreateCertificateFromCsr was executed
+                 */
+                std::promise<bool> csrCreationCompletedPromise;
+                /**
+                 * \brief an promise variable to check if publish request for CreateCertificateFromCsr was executed.
+                 * Client would know if the request was rejected using this promise variable
+                 */
+                std::promise<void> csrCreationFailedPromise;
+
+                /**
+                 * \brief an promise variable to check if publish request for RegisterThing was received
+                 */
                 std::promise<bool> registerPublishCompletedPromise;
                 /**
                  * \brief an promise variable to check if subscription to RegisterThing Accept topic was
@@ -109,12 +133,27 @@ namespace Aws
                 Aws::Crt::String templateName;
 
                 /**
+                 * \brief stores CSR file content
+                 */
+                Aws::Crt::String csrFile;
+
+                /**
                  * \brief creates a new certificate and private key using the AWS certificate authority
                  *
                  * @param identityClient used for subscribing and publishing request for creating resources
                  * @return returns true if resources are created successfully
                  */
-                bool CreateCertificateAndKeys(Iotidentity::IotIdentityClient identityClient);
+                bool CreateCertificateAndKey(Iotidentity::IotIdentityClient identityClient);
+
+                /**
+                 * \brief generate a certificate from a certificate signing request (CSR) that keeps user private key
+                 * secure
+                 *
+                 * @param identityClient used for subscribing and publishing request for creating resources
+                 * @return returns true if resources are created successfully
+                 */
+                bool CreateCertificateUsingCSR(Iotidentity::IotIdentityClient identityClient);
+
                 /**
                  * \brief registers the device with AWS IoT and create cloud resources
                  *
@@ -123,6 +162,7 @@ namespace Aws
                  * @return returns true if resources are registered and created successfully
                  */
                 bool RegisterThing(Iotidentity::IotIdentityClient identityClient);
+
                 /**
                  * \brief exports config of newly created resources to runtime config file
                  *
@@ -137,6 +177,14 @@ namespace Aws
                     const std::string &certPath,
                     const std::string &keyPath,
                     const std::string &thingName);
+
+                /**
+                 * \brief gets CSR file content
+                 *
+                 * @param filePath CSR file location
+                 * @return returns false if client is not able to open the file or if file is empty
+                 */
+                bool GetCsrFileContent(const std::string filePath);
             };
         } // namespace DeviceClient
     }     // namespace Iot

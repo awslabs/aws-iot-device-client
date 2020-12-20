@@ -5,6 +5,9 @@
 #include "../logging/LoggerFactory.h"
 #include "../util/FileUtils.h"
 
+#include <aws/iotidentity/CreateCertificateFromCsrRequest.h>
+#include <aws/iotidentity/CreateCertificateFromCsrResponse.h>
+#include <aws/iotidentity/CreateCertificateFromCsrSubscriptionRequest.h>
 #include <aws/iotidentity/CreateKeysAndCertificateRequest.h>
 #include <aws/iotidentity/CreateKeysAndCertificateResponse.h>
 #include <aws/iotidentity/CreateKeysAndCertificateSubscriptionRequest.h>
@@ -17,6 +20,7 @@
 #include <chrono>
 #include <condition_variable>
 #include <string>
+#include <sys/stat.h>
 
 using namespace std;
 using namespace Aws::Crt;
@@ -34,7 +38,7 @@ string FleetProvisioning::getName()
     return "Fleet Provisioning";
 }
 
-bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient identityClient)
+bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient identityClient)
 {
 
     auto onKeysAcceptedSubAck = [&](int ioErr) {
@@ -43,7 +47,7 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
             LOGM_ERROR(
                 TAG,
                 "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to CreateKeysAndCertificate "
-                "accepted: %s. ***",
+                "accepted topic: %s. ***",
                 ErrorDebugString(ioErr));
         }
         keysAcceptedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
@@ -55,7 +59,7 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
             LOGM_ERROR(
                 TAG,
                 "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to CreateKeysAndCertificate "
-                "rejected: %s. ***",
+                "rejected topic: %s. ***",
                 ErrorDebugString(ioErr));
         }
         keysRejectedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
@@ -66,7 +70,7 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error publishing to CreateKeysAndCertificate: "
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error publishing to CreateKeysAndCertificate topic: "
                 "%s. ***",
                 ErrorDebugString(ioErr));
         }
@@ -96,7 +100,7 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
         else
         {
             LOGM_ERROR(
-                TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on subscription: %s. ***", ErrorDebugString(ioErr));
+                TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on CreateKeysAndCertificate subscription: %s. ***", ErrorDebugString(ioErr));
             keysCreationCompletedPromise.set_value(false);
         }
     };
@@ -178,6 +182,150 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
     return futureValKeysPublishCompletedPromise.get() && futureValKeysCreationCompletedPromise.get();
 }
 
+bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient identityClient)
+{
+    auto onCsrAcceptedSubAck = [&](int ioErr) {
+        if (ioErr != AWS_OP_SUCCESS)
+        {
+            LOGM_ERROR(
+                TAG,
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to CreateCertificateFromCsr accepted topic: "
+                "%s. "
+                "***",
+                ErrorDebugString(ioErr));
+        }
+        csrAcceptedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
+    };
+
+    auto onCsrRejectedSubAck = [&](int ioErr) {
+        if (ioErr != AWS_OP_SUCCESS)
+        {
+            LOGM_ERROR(
+                TAG,
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to CreateCertificateFromCsr rejected topic: %s. "
+                "***",
+                ErrorDebugString(ioErr));
+        }
+        csrRejectedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
+    };
+
+    auto onCsrPublishSubAck = [&](int ioErr) {
+        if (ioErr != AWS_OP_SUCCESS)
+        {
+            LOGM_ERROR(
+                TAG,
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error publishing to CreateCertificateFromCsr topic: %s. ***",
+                ErrorDebugString(ioErr));
+        }
+        csrPublishCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
+    };
+
+    auto onCsrAccepted = [&](CreateCertificateFromCsrResponse *response, int ioErr) {
+        if (ioErr == AWS_OP_SUCCESS)
+        {
+            LOGM_INFO(TAG, "CreateCertificateFromCsrResponse certificateId: %s. ***", response->CertificateId->c_str());
+            Aws::Crt::String certificateID = response->CertificateId->c_str();
+            certificateOwnershipToken = *response->CertificateOwnershipToken;
+            certPath = certificateID + "-certificate.pem.crt";
+            if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()))
+            {
+                LOGM_INFO(TAG, "Stored certificate in %s file", certPath.c_str());
+                csrCreationCompletedPromise.set_value(true);
+            }
+            else
+            {
+                csrCreationCompletedPromise.set_value(false);
+            }
+        }
+        else
+        {
+            LOGM_ERROR(
+                TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on CreateCertificateFromCsr subscription: %s. ***", ErrorDebugString(ioErr));
+            csrCreationCompletedPromise.set_value(false);
+        }
+    };
+
+    auto onCsrRejected = [&](ErrorResponse *error, int ioErr) {
+        if (ioErr == AWS_OP_SUCCESS)
+        {
+            LOGM_ERROR(
+                TAG,
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: CreateCertificateFromCsr failed with "
+                "statusCode %d, errorMessage %s and errorCode %s. ***",
+                *error->StatusCode,
+                error->ErrorMessage->c_str(),
+                error->ErrorCode->c_str());
+        }
+        else
+        {
+            LOGM_ERROR(
+                TAG,
+                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on subscription to CreateCertificateFromCsr Rejected "
+                "topic: %s. ***",
+                ErrorDebugString(ioErr));
+        }
+        csrCreationFailedPromise.set_value();
+    };
+
+    /*
+     * CreateCertificateFromCSR workflow
+     */
+
+    LOG_INFO(TAG, "Subscribing to CreateCertificateFromCsr Accepted and Rejected topics");
+    CreateCertificateFromCsrSubscriptionRequest csrSubscriptionRequest;
+    identityClient.SubscribeToCreateCertificateFromCsrAccepted(
+        csrSubscriptionRequest, AWS_MQTT_QOS_AT_LEAST_ONCE, onCsrAccepted, onCsrAcceptedSubAck);
+
+    identityClient.SubscribeToCreateCertificateFromCsrRejected(
+        csrSubscriptionRequest, AWS_MQTT_QOS_AT_LEAST_ONCE, onCsrRejected, onCsrRejectedSubAck);
+
+    auto futureValCsrAcceptedCompletedPromise = csrAcceptedCompletedPromise.get_future();
+    auto futureValCsrRejectedCompletedPromise = csrRejectedCompletedPromise.get_future();
+    if (futureValCsrAcceptedCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
+            future_status::timeout ||
+        futureValCsrRejectedCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
+            future_status::timeout)
+    {
+        LOG_ERROR(
+            TAG,
+            "*** AWS IOT DEVICE CLIENT FATAL ERROR: Subscribing to CreateCertificateFromCsr Accepted and Rejected "
+            "topics timed out. ***");
+        return false;
+    }
+    if (!futureValCsrAcceptedCompletedPromise.get() || !futureValCsrRejectedCompletedPromise.get())
+    {
+        return false;
+    }
+
+    LOG_INFO(TAG, "Publishing to CreateCertificateFromCsr topic");
+    CreateCertificateFromCsrRequest createCertificateFromCsrRequest;
+    createCertificateFromCsrRequest.CertificateSigningRequest = csrFile;
+    identityClient.PublishCreateCertificateFromCsr(
+        createCertificateFromCsrRequest, AWS_MQTT_QOS_AT_LEAST_ONCE, onCsrPublishSubAck);
+
+    auto futureValCsrPublishCompletedPromise = csrPublishCompletedPromise.get_future();
+    auto futureValCsrCreationCompletedPromise = csrCreationCompletedPromise.get_future();
+    if (futureValCsrPublishCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
+        future_status::timeout)
+    {
+        LOG_ERROR(
+            TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Publishing to CreateCertificateFromCsr topic timed out. ***");
+        return false;
+    }
+    if (csrCreationFailedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) !=
+        future_status::timeout)
+    {
+        return false;
+    }
+    if (futureValCsrCreationCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
+        future_status::timeout)
+    {
+        LOG_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: CreateCertificateFromCsr request timed out. ***");
+        return false;
+    }
+
+    return futureValCsrPublishCompletedPromise.get() && futureValCsrCreationCompletedPromise.get();
+}
 bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityClient)
 {
     auto onRegisterAcceptedSubAck = [&](int ioErr) {
@@ -315,7 +463,26 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
     IotIdentityClient identityClient(fpConnection.get()->getConnection());
     templateName = config.fleetProvisioning.templateName.value().c_str();
 
-    if (CreateCertificateAndKeys(identityClient) && RegisterThing(identityClient))
+    if (config.fleetProvisioning.csrFile.has_value())
+    {
+        if (!GetCsrFileContent(config.fleetProvisioning.csrFile->c_str()) || !CreateCertificateUsingCSR(identityClient))
+        {
+            LOG_ERROR(
+                TAG,
+                "Fleet Provisioning Feature failed to generate a certificate from a certificate signing request (CSR)");
+            return false;
+        }
+        keyPath = config.key->c_str();
+    }
+    else
+    {
+        if (!CreateCertificateAndKey(identityClient))
+        {
+            LOG_ERROR(TAG, "Fleet Provisioning Feature failed to create a new certificate and private key");
+            return false;
+        }
+    }
+    if (RegisterThing(identityClient))
     {
         /*
          * Store data in runtime conf file and update @config object.
@@ -339,6 +506,28 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
 /*
  * Helper methods
  */
+
+bool FleetProvisioning::GetCsrFileContent(const string filePath)
+{
+    ifstream setting(filePath);
+    if (!setting.is_open())
+    {
+        LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to open CSR file: '%s' ***", filePath.c_str());
+        return false;
+    }
+    if (setting.peek() == ifstream::traits_type::eof())
+    {
+        LOG_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Given CSR file is empty ***");
+        return false;
+    }
+
+    Aws::Crt::String fileContent((std::istreambuf_iterator<char>(setting)), std::istreambuf_iterator<char>());
+    csrFile = fileContent;
+
+    LOGM_INFO(TAG, "Successfully fetched CSR file '%s' and stored its content.", filePath.c_str());
+    setting.close();
+    return true;
+}
 
 bool FleetProvisioning::ExportRuntimeConfig(
     const string &file,
