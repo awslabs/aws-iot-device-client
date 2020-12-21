@@ -135,3 +135,17 @@ int FileUtils::getFilePermissions(const std::string &filePath)
 
     return (user * 100) + (group * 10) + world;
 }
+
+size_t FileUtils::getFileSize(const std::string &filePath)
+{
+    wordexp_t expandedPath;
+    wordexp(filePath.c_str(), &expandedPath, 0);
+
+    struct stat file_info;
+    if (stat(expandedPath.we_wordv[0], &file_info) == 0)
+    {
+        return file_info.st_size;
+    }
+
+    return 0;
+}

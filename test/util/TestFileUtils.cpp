@@ -80,3 +80,31 @@ TEST(FileUtils, assertsCorrectDirectoryPermissions)
 
     rmdir(dirPath.c_str());
 }
+
+TEST(FileUtils, getsCorrectFileSize) {
+    string filePath = "/tmp/" + UniqueString::getRandomToken(10);
+    ofstream file(filePath, std::fstream::app);
+    file << "test message" << endl;
+
+    size_t bytes = FileUtils::getFileSize(filePath);
+    ASSERT_EQ(13, bytes);
+
+    std::remove(filePath.c_str());
+}
+
+TEST(FileUtils, getsCorrectFileSizeForEmptyFile) {
+    string filePath = "/tmp/" + UniqueString::getRandomToken(10);
+    ofstream file(filePath, std::fstream::app);
+
+    size_t bytes = FileUtils::getFileSize(filePath);
+    ASSERT_EQ(0, bytes);
+
+    std::remove(filePath.c_str());
+}
+
+TEST(FileUtils, getsCorrectFileSizeForNonExistantFile) {
+    string filePath = "/tmp/" + UniqueString::getRandomToken(10);
+
+    size_t bytes = FileUtils::getFileSize(filePath);
+    ASSERT_EQ(0, bytes);
+}

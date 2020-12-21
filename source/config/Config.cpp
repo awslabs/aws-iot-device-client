@@ -842,6 +842,12 @@ bool Config::ParseConfigFile(const string &file)
         return false;
     }
 
+    size_t incomingFileSize = FileUtils::getFileSize(file);
+    if(5000 < incomingFileSize) {
+        LOGM_WARN(TAG, "Refusing to open config file %s, file size %zu bytes is greater than allowable limit of %zu bytes", file.c_str(), incomingFileSize, 5000);
+        return false;
+    }
+
     string configFileParentDir = FileUtils::extractParentDirectory(expandedPath.we_wordv[0]);
     int desiredConfigDirPermissions = 745;
     int desiredConfigFilePermissions = 644;

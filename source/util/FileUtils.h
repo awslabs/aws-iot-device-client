@@ -45,6 +45,13 @@ namespace Aws
                     static bool StoreValueInFile(std::string value, std::string filePath);
 
                     static int getFilePermissions(const std::string &filePath);
+
+                    /**
+                     * \brief Returns the size of the file in bytes
+                     * @param filePath the path to the file
+                     * @return the size of the file in bytes
+                     */
+                    static size_t getFileSize(const std::string &filePath);
                 };
             } // namespace Util
         }     // namespace DeviceClient
