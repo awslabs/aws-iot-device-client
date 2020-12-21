@@ -39,3 +39,16 @@ TEST(FileUtils, handlesEmptyPath)
     string parentDir = FileUtils::extractParentDirectory("");
     ASSERT_STREQ("", parentDir.c_str());
 }
+
+TEST(FileUtils, handlesEmptyPathForStoreValueInFile)
+{
+    ASSERT_FALSE(FileUtils::StoreValueInFile("", ""));
+}
+
+TEST(FileUtils, testStoreValueInFile)
+{
+    ASSERT_TRUE(FileUtils::StoreValueInFile(
+        "This file was created as part of testStoreValueInFile unit test. Make sure you run this test with root "
+        "permissions",
+        "./testStoreValueInFile.txt"));
+}
