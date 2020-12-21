@@ -13,9 +13,10 @@
 #include <aws/iotidentity/RegisterThingRequest.h>
 #include <aws/iotidentity/RegisterThingResponse.h>
 #include <aws/iotidentity/RegisterThingSubscriptionRequest.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include <chrono>
-#include <condition_variable>
 #include <string>
 
 using namespace std;
@@ -76,21 +77,67 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
     auto onKeysAccepted = [&](CreateKeysAndCertificateResponse *response, int ioErr) {
         if (ioErr == AWS_OP_SUCCESS)
         {
-            LOGM_INFO(TAG, "CreateKeysAndCertificateResponse certificateId: %s.", response->CertificateId->c_str());
-            Aws::Crt::String certificateID = response->CertificateId->c_str();
-            certificateOwnershipToken = *response->CertificateOwnershipToken;
-            certPath = certificateID + "-certificate.pem.crt";
-            keyPath = certificateID + "-private.pem.key";
-            if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()) &&
-                FileUtils::StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str()))
+            if (!FileUtils::mkdirs(keyDir.c_str()))
             {
-                LOGM_INFO(
-                    TAG, "Stored certificate and private key in %s and %s files", certPath.c_str(), keyPath.c_str());
-                keysCreationCompletedPromise.set_value(true);
-            }
-            else
-            {
-                keysCreationCompletedPromise.set_value(false);
+
+                // Now we need to establish/verify permissions for the log directory and file
+                int desiredLogDirPermissions = 700;
+                if (desiredLogDirPermissions != FileUtils::getFilePermissions(keyDir))
+                {
+                    chmod(keyDir.c_str(), S_IRWXU);
+                    if (desiredLogDirPermissions != FileUtils::getFilePermissions(keyDir))
+                    {
+                        LOGM_ERROR(
+                            "Failed to set appropriate permissions for log file directory %s, permissions should be "
+                            "set to %d",
+                            keyDir.c_str(),
+                            desiredLogDirPermissions);
+                        keysCreationCompletedPromise.set_value(false);
+                        return;
+                    }
+                }
+
+                LOGM_INFO(TAG, "CreateKeysAndCertificateResponse certificateId: %s.", response->CertificateId->c_str());
+                Aws::Crt::String certificateID = response->CertificateId->c_str();
+                certificateOwnershipToken = *response->CertificateOwnershipToken;
+                certPath = certificateID + "-certificate.pem.crt";
+                keyPath = certificateID + "-private.pem.key";
+                if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()) &&
+                    FileUtils::StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str()))
+                {
+                    LOGM_INFO(
+                        TAG,
+                        "Stored certificate and private key in %s and %s files",
+                        certPath.c_str(),
+                        keyPath.c_str());
+
+                    LOG_INFO(TAG, "Attempting to set permissions for certificate and private key...");
+                    chmod(certPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                    chmod(keyPath.c_str(), S_IRUSR | S_IWUSR);
+
+                    int desiredCertPermissions = 644;
+                    int desiredKeyPermissions = 600;
+                    int actualCertPermissions = FileUtils::getFilePermissions(certPath.c_str());
+                    int actualKeyPermissions = FileUtils::getFilePermissions(keyPath.c_str());
+                    if (desiredCertPermissions != actualCertPermissions ||
+                        desiredKeyPermissions != actualKeyPermissions)
+                    {
+                        LOGM_ERROR(
+                            TAG,
+                            "Failed to set permissions for provisioned cert and/or private key: {cert: {desired: %d, "
+                            "actual: %d}, key: {desired: %d, actual: %d}}",
+                            desiredCertPermissions);
+                        keysCreationCompletedPromise.set_value(false);
+                    }
+                    else
+                    {
+                        keysCreationCompletedPromise.set_value(true);
+                    }
+                }
+                else
+                {
+                    keysCreationCompletedPromise.set_value(false);
+                }
             }
         }
         else
@@ -320,6 +367,28 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
         /*
          * Store data in runtime conf file and update @config object.
          */
+        if (!FileUtils::mkdirs(Config::DEFAULT_CONFIG_DIR))
+        {
+            LOGM_WARN(
+                TAG, "Failed to create directory %s for storage of runtime configuration", Config::DEFAULT_CONFIG_DIR);
+        }
+
+        int desiredParentDirPermissions = 700;
+        if (desiredParentDirPermissions != FileUtils::getFilePermissions(Config::DEFAULT_CONFIG_DIR))
+        {
+            chmod(Config::DEFAULT_CONFIG_DIR, S_IRWXU);
+            int actual = FileUtils::getFilePermissions(Config::DEFAULT_CONFIG_DIR);
+            if (desiredParentDirPermissions != actual)
+            {
+                LOGM_WARN(
+                    TAG,
+                    "Failed to set appropriate permissions on configuration directory %s, desired %d but found %d",
+                    Config::DEFAULT_CONFIG_DIR,
+                    desiredParentDirPermissions,
+                    actual);
+            }
+        }
+
         if (!ExportRuntimeConfig(
                 Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
                 certPath.c_str(),
@@ -342,9 +411,9 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
 
 bool FleetProvisioning::ExportRuntimeConfig(
     const string &file,
-    const string &certPath,
-    const string &keyPath,
-    const string &thingName)
+    const string &runtimeCertPath,
+    const string &runtimeKeyPath,
+    const string &runtimeThingName)
 {
     string jsonTemplate = R"({
 "%s": {
@@ -365,12 +434,25 @@ bool FleetProvisioning::ExportRuntimeConfig(
         PlainConfig::JSON_KEY_RUNTIME_CONFIG,
         PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_COMPLETED_FLEET_PROVISIONING,
         PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_CERT,
-        certPath.c_str(),
+        runtimeCertPath.c_str(),
         PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_KEY,
-        keyPath.c_str(),
+        runtimeKeyPath.c_str(),
         PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_THING_NAME,
-        thingName.c_str());
+        runtimeThingName.c_str());
     clientConfig.close();
     LOGM_INFO(TAG, "Exported runtime configurations to: %s", file.c_str());
+
+    chmod(file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    const int desired = 644;
+    const int actual = FileUtils::getFilePermissions(file.c_str());
+    if (desired != actual)
+    {
+        LOGM_WARN(
+            TAG,
+            "Failed to set appropriate permissions on runtime config %s, desired %d but found %d",
+            file.c_str(),
+            desired,
+            actual);
+    }
     return true;
 }

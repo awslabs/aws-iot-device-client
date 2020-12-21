@@ -14,9 +14,9 @@ TEST(Config, AllFeaturesEnabled)
     constexpr char jsonString[] = R"(
 {
 	"endpoint": "endpoint value",
-	"cert": "cert value",
-	"key": "key value",
-	"root-ca": "root-ca value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
 	"thing-name": "thing-name value",
     "logging": {
         "level": "debug",
@@ -42,9 +42,9 @@ TEST(Config, AllFeaturesEnabled)
 
     ASSERT_TRUE(config.Validate());
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
-    ASSERT_STREQ("cert value", config.cert->c_str());
-    ASSERT_STREQ("key value", config.key->c_str());
-    ASSERT_STREQ("root-ca value", config.rootCa->c_str());
+    ASSERT_STREQ("cert", config.cert->c_str());
+    ASSERT_STREQ("key", config.key->c_str());
+    ASSERT_STREQ("root-ca", config.rootCa->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_STREQ("file", config.logConfig.type.c_str());
     ASSERT_STREQ("./aws-iot-device-client.log", config.logConfig.file.c_str());
@@ -60,9 +60,9 @@ TEST(Config, HappyCaseMinimumConfig)
     constexpr char jsonString[] = R"(
 {
 	"endpoint": "endpoint value",
-	"cert": "cert value",
-	"key": "key value",
-	"root-ca": "root-ca value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
 	"thing-name": "thing-name value"
 })";
     JsonObject jsonObject(jsonString);
@@ -73,9 +73,9 @@ TEST(Config, HappyCaseMinimumConfig)
 
     ASSERT_TRUE(config.Validate());
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
-    ASSERT_STREQ("cert value", config.cert->c_str());
-    ASSERT_STREQ("key value", config.key->c_str());
-    ASSERT_STREQ("root-ca value", config.rootCa->c_str());
+    ASSERT_STREQ("cert", config.cert->c_str());
+    ASSERT_STREQ("key", config.key->c_str());
+    ASSERT_STREQ("root-ca", config.rootCa->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_FALSE(config.jobs.enabled);
     ASSERT_FALSE(config.tunneling.enabled);
@@ -86,9 +86,9 @@ TEST(Config, HappyCaseMinimumCli)
 {
     CliArgs cliArgs;
     cliArgs[PlainConfig::CLI_ENDPOINT] = "endpoint value";
-    cliArgs[PlainConfig::CLI_CERT] = "cert value";
-    cliArgs[PlainConfig::CLI_KEY] = "key value";
-    cliArgs[PlainConfig::CLI_ROOT_CA] = "root-ca value";
+    cliArgs[PlainConfig::CLI_CERT] = "cert";
+    cliArgs[PlainConfig::CLI_KEY] = "key";
+    cliArgs[PlainConfig::CLI_ROOT_CA] = "root-ca";
     cliArgs[PlainConfig::CLI_THING_NAME] = "thing-name value";
 
     PlainConfig config;
@@ -96,9 +96,9 @@ TEST(Config, HappyCaseMinimumCli)
 
     ASSERT_TRUE(config.Validate());
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
-    ASSERT_STREQ("cert value", config.cert->c_str());
-    ASSERT_STREQ("key value", config.key->c_str());
-    ASSERT_STREQ("root-ca value", config.rootCa->c_str());
+    ASSERT_STREQ("cert", config.cert->c_str());
+    ASSERT_STREQ("key", config.key->c_str());
+    ASSERT_STREQ("root-ca", config.rootCa->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_FALSE(config.jobs.enabled);
     ASSERT_FALSE(config.tunneling.enabled);
@@ -110,9 +110,9 @@ TEST(Config, MissingSomeSettings)
     constexpr char jsonString[] = R"(
 {
     // endpoint is missing
-	"cert": "cert value",
-	"key": "key value",
-	"root-ca": "root-ca value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
 	"thing-name": "thing-name value"
 })";
     JsonObject jsonObject(jsonString);
@@ -134,9 +134,9 @@ TEST(Config, SecureTunnelingMinimumConfig)
     constexpr char jsonString[] = R"(
 {
 	"endpoint": "endpoint value",
-	"cert": "cert value",
-	"key": "key value",
-	"root-ca": "root-ca value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
 	"thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
@@ -158,9 +158,9 @@ TEST(Config, SecureTunnelingCli)
     constexpr char jsonString[] = R"(
 {
 	"endpoint": "endpoint value",
-	"cert": "cert value",
-	"key": "key value",
-	"root-ca": "root-ca value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
 	"thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
@@ -195,9 +195,9 @@ TEST(Config, SecureTunnelingDisableSubscription)
     constexpr char jsonString[] = R"(
 {
 	"endpoint": "endpoint value",
-	"cert": "cert value",
-	"key": "key value",
-	"root-ca": "root-ca value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
 	"thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
@@ -228,9 +228,9 @@ TEST(Config, LoggingConfigurationCLI)
     constexpr char jsonString[] = R"(
 {
 	"endpoint": "endpoint value",
-	"cert": "cert value",
-	"key": "key value",
-	"root-ca": "root-ca value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
 	"thing-name": "thing-name value",
     "logging": {
         "level": "DEBUG",

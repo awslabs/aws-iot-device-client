@@ -6,12 +6,13 @@
 #include <limits.h> /* PATH_MAX */
 #include <string.h>
 #include <sys/stat.h>
+#include <wordexp.h>
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
 
-const char *FileUtils::TAG = "FileUtils.cpp";
+constexpr char FileUtils::TAG[];
 
 int FileUtils::mkdirs(const char *path)
 {
@@ -76,4 +77,61 @@ bool FileUtils::StoreValueInFile(string value, string filePath)
     file << value;
     file.close();
     return true;
+}
+
+int FileUtils::getFilePermissions(const std::string &filePath)
+{
+    wordexp_t expandedPath;
+    wordexp(filePath.c_str(), &expandedPath, 0);
+
+    struct stat file_info;
+    if (stat(expandedPath.we_wordv[0], &file_info) == -1)
+    {
+        LOGM_ERROR(TAG, "Failed to stat %s", expandedPath.we_wordv[0]);
+        return false;
+    }
+
+    int user = 0;
+    if (file_info.st_mode & S_IRUSR)
+    {
+        user += 4;
+    }
+    if (file_info.st_mode & S_IWUSR)
+    {
+        user += 2;
+    }
+    if (file_info.st_mode & S_IXUSR)
+    {
+        user += 1;
+    }
+
+    int group = 0;
+    if (file_info.st_mode & S_IRGRP)
+    {
+        group += 4;
+    }
+    if (file_info.st_mode & S_IWGRP)
+    {
+        group += 2;
+    }
+    if (file_info.st_mode & S_IXGRP)
+    {
+        group += 1;
+    }
+
+    int world = 0;
+    if (file_info.st_mode & S_IROTH)
+    {
+        world += 4;
+    }
+    if (file_info.st_mode & S_IWOTH)
+    {
+        world += 2;
+    }
+    if (file_info.st_mode & S_IXOTH)
+    {
+        world += 1;
+    }
+
+    return (user * 100) + (group * 10) + world;
 }

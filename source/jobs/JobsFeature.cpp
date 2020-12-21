@@ -3,6 +3,7 @@
 
 #include "JobsFeature.h"
 #include "../logging/LoggerFactory.h"
+#include "../util/FileUtils.h"
 #include "../util/Retry.h"
 #include "../util/UniqueString.h"
 #include "EphemeralPromise.h"
@@ -18,6 +19,7 @@
 #include <aws/iotjobs/UpdateJobExecutionRequest.h>
 #include <aws/iotjobs/UpdateJobExecutionResponse.h>
 #include <aws/iotjobs/UpdateJobExecutionSubscriptionRequest.h>
+#include <wordexp.h>
 
 #include <thread>
 #include <utility>
@@ -295,7 +297,7 @@ void JobsFeature::updateJobExecutionStatusRejectedHandler(Iotjobs::RejectedError
         LOGM_ERROR(TAG, "Encountered ioError %d within updateJobExecutionStatusRejectedHandler", ioError);
     }
 
-    if (!rejectedError->ClientToken.has_value())
+    if (!rejectedError->ClientToken || !rejectedError->ClientToken.has_value())
     {
         LOG_WARN(TAG, "Received an UpdateJobExecution rejected error with no ClientToken! Unable to update promise");
         return;
@@ -451,12 +453,6 @@ void JobsFeature::executeJob(JobExecutionData job)
             TAG, "Did not find any arguments in the incoming job document. Value should be a JSON array of arguments");
     }
 
-    int allowStdErr = 0;
-    if (jobDoc.KeyExists(JOB_ATTR_ALLOW_STDERR))
-    {
-        allowStdErr = jobDoc.GetInteger(JOB_ATTR_ALLOW_STDERR);
-    }
-
     if (operation.empty())
     {
         LOG_ERROR(TAG, "Unable to execute job, no operation provided!");
@@ -465,9 +461,11 @@ void JobsFeature::executeJob(JobExecutionData job)
     }
 
     ostringstream command;
+    bool operationOwnedByDeviceClient = false;
     if (DEFAULT_PATH_KEYWORD == path)
     {
         LOGM_DEBUG(TAG, "Using DC default command path {%s} for command execution", jobHandlerDir.c_str());
+        operationOwnedByDeviceClient = true;
         command << jobHandlerDir;
     }
     else if (!path.empty())
@@ -480,6 +478,29 @@ void JobsFeature::executeJob(JobExecutionData job)
         LOG_DEBUG(TAG, "Assuming executable is in PATH");
     }
     command << operation;
+
+    if (operationOwnedByDeviceClient)
+    {
+        const int desiredPermissions = 700;
+        const int actualPermissions = FileUtils::getFilePermissions(command.str().c_str());
+        if (desiredPermissions != actualPermissions)
+        {
+            string message = FormatMessage(
+                "Unacceptable permissions found for job handler %s, permissions should be %d but found %d",
+                command.str().c_str(),
+                desiredPermissions,
+                actualPermissions);
+            LOG_ERROR(TAG, message.c_str());
+            publishUpdateJobExecutionStatus(job, {Iotjobs::JobStatus::FAILED, message, "", ""});
+            return;
+        }
+    }
+
+    int allowStdErr = 0;
+    if (jobDoc.KeyExists(JOB_ATTR_ALLOW_STDERR))
+    {
+        allowStdErr = jobDoc.GetInteger(JOB_ATTR_ALLOW_STDERR);
+    }
 
     LOGM_DEBUG(TAG, "About to execute: %s %s", command.str().c_str(), argsStringForLogging.str().c_str());
     unique_ptr<JobEngine> engine(new JobEngine);
@@ -557,6 +578,18 @@ int JobsFeature::init(
     resourceManager = manager;
     baseNotifier = notifier;
     thingName = config.thingName->c_str();
+
+    wordexp_t expandedPath;
+    if (!config.jobs.handlerDir.empty())
+    {
+        wordexp(config.jobs.handlerDir.c_str(), &expandedPath, 0);
+        jobHandlerDir = expandedPath.we_wordv[0];
+    }
+    else
+    {
+        wordexp(DEFAULT_JOBS_HANDLER_DIR.c_str(), &expandedPath, 0);
+        jobHandlerDir = expandedPath.we_wordv[0];
+    }
 
     return 0;
 }

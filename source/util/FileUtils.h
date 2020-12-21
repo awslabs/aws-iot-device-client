@@ -19,7 +19,7 @@ namespace Aws
                 class FileUtils
                 {
                   private:
-                    static const char *TAG;
+                    static constexpr char TAG[] = "FileUtils.cpp";
 
                   public:
                     /**
@@ -43,6 +43,8 @@ namespace Aws
                      * @return true on success
                      */
                     static bool StoreValueInFile(std::string value, std::string filePath);
+
+                    static int getFilePermissions(const std::string &filePath);
                 };
             } // namespace Util
         }     // namespace DeviceClient

@@ -87,10 +87,12 @@ namespace Aws
                     bool Validate() const override;
 
                     static constexpr char CLI_ENABLE_JOBS[] = "--enable-jobs";
+                    static constexpr char CLI_HANDLER_DIR[] = "--jobs-handler-dir";
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
-                    static constexpr char JSON_KEY_HANDLER_DIR[] = "handler_directory";
+                    static constexpr char JSON_KEY_HANDLER_DIR[] = "handler-directory";
 
                     bool enabled{false};
+                    std::string handlerDir;
                 };
                 Jobs jobs;
 
@@ -176,10 +178,11 @@ namespace Aws
                 ~Config() = default;
 
                 static constexpr char TAG[] = "Config.cpp";
-                // TODO: Update the paths
-                static constexpr char DEFAULT_CONFIG_FILE[] = "/etc/aws-iot-device-client.conf";
+                static constexpr char DEFAULT_CONFIG_DIR[] = "~/.aws-iot-device-client/";
+                static constexpr char DEFAULT_KEY_DIR[] = "~/.aws-iot-device-client/keys/";
+                static constexpr char DEFAULT_CONFIG_FILE[] = "~/.aws-iot-device-client/aws-iot-device-client.conf";
                 static constexpr char DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] =
-                    "./aws-iot-device-client-runtime.conf";
+                    "~/.aws-iot-device-client/aws-iot-device-client-runtime.conf";
 
                 static constexpr char CLI_HELP[] = "--help";
                 static constexpr char CLI_EXPORT_DEFAULT_SETTINGS[] = "--export-default-settings";

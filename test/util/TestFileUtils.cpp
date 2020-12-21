@@ -1,5 +1,12 @@
 #include "../../source/util/FileUtils.h"
+#include "../../source/util/StringUtils.h"
+#include "../../source/util/UniqueString.h"
 #include "gtest/gtest.h"
+
+#include <fcntl.h>
+#include <fstream>
+#include <iostream>
+#include <unistd.h>
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Util;
@@ -38,4 +45,38 @@ TEST(FileUtils, handlesEmptyPath)
 {
     string parentDir = FileUtils::extractParentDirectory("");
     ASSERT_STREQ("", parentDir.c_str());
+}
+
+TEST(FileUtils, handlesRootDir)
+{
+    string rootDir = FileUtils::extractParentDirectory("/");
+    ASSERT_STREQ("/", rootDir.c_str());
+}
+
+TEST(FileUtils, assertsCorrectFilePermissions)
+{
+    string filePath = "/tmp/" + UniqueString::getRandomToken(10);
+
+    ofstream file(filePath, std::fstream::app);
+    file << "test message" << endl;
+
+    chmod(filePath.c_str(), S_IRUSR | S_IWUSR);
+    int permissions = FileUtils::getFilePermissions(filePath);
+    int expectedPermissions = 600;
+    ASSERT_EQ(expectedPermissions, permissions);
+
+    std::remove(filePath.c_str());
+}
+
+TEST(FileUtils, assertsCorrectDirectoryPermissions)
+{
+    string dirPath = "/tmp/" + UniqueString::getRandomToken(10) + "/";
+    FileUtils::mkdirs(dirPath.c_str());
+
+    chmod(dirPath.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH);
+    int permissions = FileUtils::getFilePermissions(dirPath);
+    int expectedPermissions = 745;
+    ASSERT_EQ(expectedPermissions, permissions);
+
+    rmdir(dirPath.c_str());
 }
