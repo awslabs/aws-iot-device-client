@@ -79,19 +79,16 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
         {
             if (!FileUtils::mkdirs(keyDir.c_str()))
             {
-
-                // Now we need to establish/verify permissions for the log directory and file
-                int desiredLogDirPermissions = 700;
-                if (desiredLogDirPermissions != FileUtils::getFilePermissions(keyDir))
+                if (Permissions::KEY_DIR != FileUtils::getFilePermissions(keyDir))
                 {
                     chmod(keyDir.c_str(), S_IRWXU);
-                    if (desiredLogDirPermissions != FileUtils::getFilePermissions(keyDir))
+                    if (Permissions::KEY_DIR != FileUtils::getFilePermissions(keyDir))
                     {
                         LOGM_ERROR(
-                            "Failed to set appropriate permissions for log file directory %s, permissions should be "
+                            "Failed to set appropriate permissions for key file directory %s, permissions should be "
                             "set to %d",
                             keyDir.c_str(),
-                            desiredLogDirPermissions);
+                            Permissions::KEY_DIR);
                         keysCreationCompletedPromise.set_value(false);
                         return;
                     }
@@ -115,18 +112,19 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
                     chmod(certPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
                     chmod(keyPath.c_str(), S_IRUSR | S_IWUSR);
 
-                    int desiredCertPermissions = 644;
-                    int desiredKeyPermissions = 600;
                     int actualCertPermissions = FileUtils::getFilePermissions(certPath.c_str());
                     int actualKeyPermissions = FileUtils::getFilePermissions(keyPath.c_str());
-                    if (desiredCertPermissions != actualCertPermissions ||
-                        desiredKeyPermissions != actualKeyPermissions)
+                    if (Permissions::PUBLIC_CERT != actualCertPermissions ||
+                        Permissions::PRIVATE_KEY != actualKeyPermissions)
                     {
                         LOGM_ERROR(
                             TAG,
                             "Failed to set permissions for provisioned cert and/or private key: {cert: {desired: %d, "
                             "actual: %d}, key: {desired: %d, actual: %d}}",
-                            desiredCertPermissions);
+                            Permissions::PUBLIC_CERT,
+                            actualCertPermissions,
+                            Permissions::PRIVATE_KEY,
+                            actualKeyPermissions);
                         keysCreationCompletedPromise.set_value(false);
                     }
                     else
@@ -373,18 +371,17 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
                 TAG, "Failed to create directory %s for storage of runtime configuration", Config::DEFAULT_CONFIG_DIR);
         }
 
-        int desiredParentDirPermissions = 700;
-        if (desiredParentDirPermissions != FileUtils::getFilePermissions(Config::DEFAULT_CONFIG_DIR))
+        if (Permissions::CONFIG_DIR != FileUtils::getFilePermissions(Config::DEFAULT_CONFIG_DIR))
         {
             chmod(Config::DEFAULT_CONFIG_DIR, S_IRWXU);
             int actual = FileUtils::getFilePermissions(Config::DEFAULT_CONFIG_DIR);
-            if (desiredParentDirPermissions != actual)
+            if (Permissions::CONFIG_DIR != actual)
             {
                 LOGM_WARN(
                     TAG,
                     "Failed to set appropriate permissions on configuration directory %s, desired %d but found %d",
                     Config::DEFAULT_CONFIG_DIR,
-                    desiredParentDirPermissions,
+                    Permissions::CONFIG_DIR,
                     actual);
             }
         }
@@ -443,15 +440,14 @@ bool FleetProvisioning::ExportRuntimeConfig(
     LOGM_INFO(TAG, "Exported runtime configurations to: %s", file.c_str());
 
     chmod(file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    const int desired = 644;
     const int actual = FileUtils::getFilePermissions(file.c_str());
-    if (desired != actual)
+    if (Permissions::RUNTIME_CONFIG_FILE != actual)
     {
         LOGM_WARN(
             TAG,
             "Failed to set appropriate permissions on runtime config %s, desired %d but found %d",
             file.c_str(),
-            desired,
+            Permissions::RUNTIME_CONFIG_FILE,
             actual);
     }
     return true;

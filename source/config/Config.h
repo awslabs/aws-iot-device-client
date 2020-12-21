@@ -25,6 +25,28 @@ namespace Aws
                 virtual bool Validate() const = 0;
             };
 
+            /**
+             * \brief Default permission values
+             */
+            struct Permissions
+            {
+                /** Directories **/
+                static constexpr int KEY_DIR = 700;
+                static constexpr int ROOT_CA_DIR = 700;
+                static constexpr int CERT_DIR = 700;
+                static constexpr int CONFIG_DIR = 745;
+                static constexpr int LOG_DIR = 745;
+
+                /** Files **/
+                static constexpr int PRIVATE_KEY = 600;
+                static constexpr int PUBLIC_CERT = 644;
+                static constexpr int ROOT_CA = 644;
+                static constexpr int LOG_FILE = 600;
+                static constexpr int CONFIG_FILE = 644;
+                static constexpr int RUNTIME_CONFIG_FILE = 644;
+                static constexpr int JOB_HANDLER = 700;
+            };
+
             struct PlainConfig : public LoadableFromJsonAndCli
             {
                 bool LoadFromJson(const Crt::JsonView &json) override;

@@ -44,6 +44,21 @@ namespace Aws
                      */
                     static bool StoreValueInFile(std::string value, std::string filePath);
 
+                    /**
+                     * \brief Returns an integer representing the permissions of the specified file.
+                     *
+                     * This function will return a 3-digit integer representing the permissions of the specified file.
+                     * Each digit in the returned value will range from 0-7. The first digit is user, the second digit
+                     * is group, and the third digit is world (everyone). The digit is determined by adding the
+                     * permissions found from the following categories:
+                     *
+                     * 4 - has read privileges
+                     * 2 - has write privileges
+                     * 1 - has execute privileges
+                     *
+                     * @param filePath a path to a file
+                     * @return an integer representing the file permissions.
+                     */
                     static int getFilePermissions(const std::string &filePath);
 
                     /**

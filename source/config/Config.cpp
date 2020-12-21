@@ -855,27 +855,25 @@ bool Config::ParseConfigFile(const string &file)
     }
 
     string configFileParentDir = FileUtils::extractParentDirectory(expandedPath.we_wordv[0]);
-    int desiredConfigDirPermissions = 745;
-    int desiredConfigFilePermissions = 644;
     int actualConfigDirPermissions = FileUtils::getFilePermissions(configFileParentDir);
     int actualConfigFilePermissions = FileUtils::getFilePermissions(expandedPath.we_wordv[0]);
-    if (desiredConfigDirPermissions != actualConfigDirPermissions)
+    if (Permissions::CONFIG_DIR != actualConfigDirPermissions)
     {
         LOGM_WARN(
             TAG,
             "File permissions for configuration directory %s are not set to the recommended setting of %d, found %d "
             "instead",
             configFileParentDir.c_str(),
-            desiredConfigDirPermissions,
+            Permissions::CONFIG_DIR,
             actualConfigDirPermissions);
     }
-    if (desiredConfigFilePermissions != actualConfigFilePermissions)
+    if (Permissions::CONFIG_FILE != actualConfigFilePermissions)
     {
         LOGM_WARN(
             TAG,
             "File permissions for configuration file %s are not set to the recommended setting of %d, found %d instead",
             expandedPath.we_wordv[0],
-            desiredConfigFilePermissions,
+            Permissions::CONFIG_FILE,
             actualConfigFilePermissions);
     }
 
@@ -1018,15 +1016,14 @@ bool Config::ExportDefaultSetting(const string &file)
     LOGM_INFO(TAG, "Exported settings to: %s", file.c_str());
 
     chmod(file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    const int desired = 644;
     const int actual = FileUtils::getFilePermissions(file.c_str());
-    if (desired != actual)
+    if (Permissions::CONFIG_FILE != actual)
     {
         LOGM_WARN(
             TAG,
             "Failed to set appropriate permissions on configuration file %s, desired %d but found %d",
             file.c_str(),
-            desired,
+            Permissions::CONFIG_FILE,
             actual);
     }
     return true;

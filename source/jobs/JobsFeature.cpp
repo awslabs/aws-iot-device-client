@@ -481,14 +481,13 @@ void JobsFeature::executeJob(JobExecutionData job)
 
     if (operationOwnedByDeviceClient)
     {
-        const int desiredPermissions = 700;
         const int actualPermissions = FileUtils::getFilePermissions(command.str().c_str());
-        if (desiredPermissions != actualPermissions)
+        if (Permissions::JOB_HANDLER != actualPermissions)
         {
             string message = FormatMessage(
                 "Unacceptable permissions found for job handler %s, permissions should be %d but found %d",
                 command.str().c_str(),
-                desiredPermissions,
+                Permissions::JOB_HANDLER,
                 actualPermissions);
             LOG_ERROR(TAG, message.c_str());
             publishUpdateJobExecutionStatus(job, {Iotjobs::JobStatus::FAILED, message, "", ""});

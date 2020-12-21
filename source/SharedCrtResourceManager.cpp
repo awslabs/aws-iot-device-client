@@ -39,27 +39,25 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     {
         string parentDir = FileUtils::extractParentDirectory(config.key->c_str());
         int actualParentDirPermissions = FileUtils::getFilePermissions(parentDir);
-        int desiredParentDirPermissions = 700;
-        if (desiredParentDirPermissions != actualParentDirPermissions)
+        if (Permissions::KEY_DIR != actualParentDirPermissions)
         {
             LOGM_ERROR(
                 TAG,
                 "Permissions for private key parent directory %s should be %d but found %d instead",
                 parentDir.c_str(),
-                desiredParentDirPermissions,
+                Permissions::KEY_DIR,
                 actualParentDirPermissions);
             locatedAll = false;
         }
 
-        int desiredPrivateKeyPermissions = 600;
         int actualPrivateKeyPermissions = FileUtils::getFilePermissions(config.key->c_str());
-        if (desiredPrivateKeyPermissions != actualPrivateKeyPermissions)
+        if (Permissions::PRIVATE_KEY != actualPrivateKeyPermissions)
         {
             LOGM_ERROR(
                 TAG,
                 "Permissions for private key %s should be %d but found %d instead",
                 config.key->c_str(),
-                desiredPrivateKeyPermissions,
+                Permissions::PRIVATE_KEY,
                 actualPrivateKeyPermissions);
             locatedAll = false;
         }
@@ -74,27 +72,25 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     {
         string parentDir = FileUtils::extractParentDirectory(config.cert->c_str());
         int actualParentDirPermissions = FileUtils::getFilePermissions(parentDir);
-        int desiredParentDirPermissions = 700;
-        if (desiredParentDirPermissions != actualParentDirPermissions)
+        if (Permissions::CERT_DIR != actualParentDirPermissions)
         {
             LOGM_ERROR(
                 TAG,
                 "Permissions for public key parent directory %s should be %d but found %d instead",
                 parentDir.c_str(),
-                desiredParentDirPermissions,
+                Permissions::CERT_DIR,
                 actualParentDirPermissions);
             locatedAll = false;
         }
 
-        int desiredPublicKeyPermissions = 644;
         int actualPublicKeyPermissions = FileUtils::getFilePermissions(config.cert->c_str());
-        if (desiredPublicKeyPermissions != actualPublicKeyPermissions)
+        if (Permissions::PUBLIC_CERT != actualPublicKeyPermissions)
         {
             LOGM_ERROR(
                 TAG,
                 "Permissions for public key %s should be %d but found %d instead",
                 config.cert->c_str(),
-                desiredPublicKeyPermissions,
+                Permissions::PUBLIC_CERT,
                 actualPublicKeyPermissions);
             locatedAll = false;
         }
@@ -109,27 +105,25 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     {
         string parentDir = FileUtils::extractParentDirectory(config.rootCa->c_str());
         int actualParentDirPermissions = FileUtils::getFilePermissions(parentDir);
-        int desiredParentDirPermissions = 700;
-        if (desiredParentDirPermissions != actualParentDirPermissions)
+        if (Permissions::ROOT_CA_DIR != actualParentDirPermissions)
         {
             LOGM_ERROR(
                 TAG,
                 "Permissions for Root CA parent directory %s should be %d but found %d instead",
                 parentDir.c_str(),
-                desiredParentDirPermissions,
+                Permissions::ROOT_CA_DIR,
                 actualParentDirPermissions);
             locatedAll = false;
         }
 
-        int desiredRootCAPermissions = 644;
         int actualRootCAPermissions = FileUtils::getFilePermissions(config.rootCa->c_str());
-        if (desiredRootCAPermissions != actualRootCAPermissions)
+        if (Permissions::ROOT_CA != actualRootCAPermissions)
         {
             LOGM_ERROR(
                 TAG,
                 "Permissions for Root CA %s should be %d but found %d instead",
                 config.rootCa->c_str(),
-                desiredRootCAPermissions,
+                Permissions::ROOT_CA,
                 actualRootCAPermissions);
             locatedAll = false;
         }
