@@ -71,7 +71,7 @@ namespace Aws
                      */
                     const size_t MAX_STATUS_DETAIL_LENGTH = 1024;
                     const int UPDATE_JOB_EXECUTION_REJECTED_CODE = -1;
-                    const std::string DEFAULT_JOBS_HANDLER_DIR = "/etc/aws-iot-device-client/handlers/";
+                    const std::string DEFAULT_JOBS_HANDLER_DIR = "~/.aws-iot-device-client/jobs/";
 
                     /**
                      * \brief Whether the DeviceClient base has requested this feature to stop
@@ -118,7 +118,7 @@ namespace Aws
                      * \brief User provided handler directory passed either through command-line arguments or through
                      * the Json configuration file
                      */
-                    std::string jobHandlerDir = DEFAULT_JOBS_HANDLER_DIR;
+                    std::string jobHandlerDir;
                     /**
                      * \brief whether to include StdOut information when calling UpdateJobExecution
                      *

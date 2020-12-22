@@ -278,9 +278,14 @@ int main(int argc, char *argv[])
     unique_ptr<JobsFeature> jobs;
     if (config.config.jobs.enabled)
     {
+        LOG_INFO(TAG, "Jobs is enabled");
         jobs = unique_ptr<JobsFeature>(new JobsFeature());
         jobs->init(resourceManager, listener, config.config);
         features.push_back(jobs.get());
+    }
+    else
+    {
+        LOG_INFO(TAG, "Jobs is disabled");
     }
 #endif
 
@@ -288,9 +293,14 @@ int main(int argc, char *argv[])
     unique_ptr<SecureTunnelingFeature> tunneling;
     if (config.config.tunneling.enabled)
     {
+        LOG_INFO(TAG, "Secure Tunneling is enabled");
         tunneling = unique_ptr<SecureTunnelingFeature>(new SecureTunnelingFeature());
         tunneling->init(resourceManager, listener, config.config);
         features.push_back(tunneling.get());
+    }
+    else
+    {
+        LOG_INFO(TAG, "Secure Tunneling is disabled");
     }
 #endif
 
@@ -298,9 +308,14 @@ int main(int argc, char *argv[])
     unique_ptr<DeviceDefenderFeature> deviceDefender;
     if (config.config.deviceDefender.enabled)
     {
+        LOG_INFO(TAG, "Device Defender is enabled");
         deviceDefender = unique_ptr<DeviceDefenderFeature>(new DeviceDefenderFeature());
         deviceDefender->init(resourceManager, listener, config.config);
         features.push_back(deviceDefender.get());
+    }
+    else
+    {
+        LOG_INFO(TAG, "Device Defender is disabled");
     }
 #endif
 
