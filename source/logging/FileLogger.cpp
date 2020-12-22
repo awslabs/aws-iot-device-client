@@ -49,9 +49,37 @@ bool FileLogger::start(const PlainConfig &config)
         return false;
     }
 
+    // Now we need to establish/verify permissions for the log directory and file
+    if (Permissions::LOG_DIR != FileUtils::getFilePermissions(logFileDir))
+    {
+        chmod(logFileDir.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH);
+        if (Permissions::LOG_DIR != FileUtils::getFilePermissions(logFileDir))
+        {
+            cout << LOGGER_TAG
+                 << FormatMessage(
+                        "Failed to set appropriate permissions for log file directory %s, permissions should be set to "
+                        "%d",
+                        logFileDir.c_str(),
+                        Permissions::LOG_DIR);
+        }
+    }
+
     outputStream = unique_ptr<ofstream>(new ofstream(logFile, std::fstream::app));
     if (!outputStream->fail())
     {
+        if (Permissions::LOG_FILE != FileUtils::getFilePermissions(logFile))
+        {
+            chmod(logFile.c_str(), S_IRUSR | S_IWUSR);
+            if (Permissions::LOG_FILE != FileUtils::getFilePermissions(logFile))
+            {
+                cout << LOGGER_TAG
+                     << FormatMessage(
+                            "Failed to set appropriate permissions for log file %s, permissions should be set to %d",
+                            logFile.c_str(),
+                            Permissions::LOG_FILE);
+            }
+        }
+
         thread log_thread(&FileLogger::run, this);
         log_thread.detach();
         return true;

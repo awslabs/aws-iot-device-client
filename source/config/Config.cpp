@@ -9,6 +9,12 @@
 #if !defined(EXCLUDE_ST)
 #    include "../tunneling/SecureTunnelingFeature.h"
 #endif
+#include "../util/FileUtils.h"
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <wordexp.h>
+
 #include <algorithm>
 #include <aws/crt/JsonObject.h>
 #include <iostream>
@@ -41,6 +47,18 @@ constexpr char PlainConfig::JSON_KEY_DEVICE_DEFENDER[];
 constexpr char PlainConfig::JSON_KEY_FLEET_PROVISIONING[];
 constexpr char PlainConfig::JSON_KEY_RUNTIME_CONFIG[];
 
+constexpr int Permissions::KEY_DIR;
+constexpr int Permissions::ROOT_CA_DIR;
+constexpr int Permissions::CERT_DIR;
+constexpr int Permissions::CONFIG_DIR;
+constexpr int Permissions::LOG_DIR;
+constexpr int Permissions::PRIVATE_KEY;
+constexpr int Permissions::PUBLIC_CERT;
+constexpr int Permissions::LOG_FILE;
+constexpr int Permissions::CONFIG_FILE;
+constexpr int Permissions::RUNTIME_CONFIG_FILE;
+constexpr int Permissions::JOB_HANDLER;
+
 bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
 {
     const char *jsonKey = JSON_KEY_ENDPOINT;
@@ -52,19 +70,25 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_CERT;
     if (json.ValueExists(jsonKey))
     {
-        cert = json.GetString(jsonKey).c_str();
+        wordexp_t expandedPath;
+        wordexp(json.GetString(jsonKey).c_str(), &expandedPath, 0);
+        cert = expandedPath.we_wordv[0];
     }
 
     jsonKey = JSON_KEY_KEY;
     if (json.ValueExists(jsonKey))
     {
-        key = json.GetString(jsonKey).c_str();
+        wordexp_t expandedPath;
+        wordexp(json.GetString(jsonKey).c_str(), &expandedPath, 0);
+        key = expandedPath.we_wordv[0];
     }
 
     jsonKey = JSON_KEY_ROOT_CA;
     if (json.ValueExists(jsonKey))
     {
-        rootCa = json.GetString(jsonKey).c_str();
+        wordexp_t expandedPath;
+        wordexp(json.GetString(jsonKey).c_str(), &expandedPath, 0);
+        rootCa = expandedPath.we_wordv[0];
     }
 
     jsonKey = JSON_KEY_THING_NAME;
@@ -132,15 +156,21 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::CLI_CERT))
     {
-        cert = cliArgs.at(PlainConfig::CLI_CERT).c_str();
+        wordexp_t expandedPath;
+        wordexp(cliArgs.at(PlainConfig::CLI_CERT).c_str(), &expandedPath, 0);
+        cert = expandedPath.we_wordv[0];
     }
     if (cliArgs.count(PlainConfig::CLI_KEY))
     {
-        key = cliArgs.at(PlainConfig::CLI_KEY).c_str();
+        wordexp_t expandedPath;
+        wordexp(cliArgs.at(PlainConfig::CLI_KEY).c_str(), &expandedPath, 0);
+        key = expandedPath.we_wordv[0];
     }
     if (cliArgs.count(PlainConfig::CLI_ROOT_CA))
     {
-        rootCa = cliArgs.at(PlainConfig::CLI_ROOT_CA).c_str();
+        wordexp_t expandedPath;
+        wordexp(cliArgs.at(PlainConfig::CLI_ROOT_CA).c_str(), &expandedPath, 0);
+        rootCa = expandedPath.we_wordv[0];
     }
     if (cliArgs.count(PlainConfig::CLI_THING_NAME))
     {
@@ -305,7 +335,9 @@ bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_LOG_FILE;
     if (json.ValueExists(jsonKey))
     {
-        file = json.GetString(jsonKey).c_str();
+        wordexp_t expandedPath;
+        wordexp(json.GetString(jsonKey).c_str(), &expandedPath, 0);
+        file = expandedPath.we_wordv[0];
     }
 
     return true;
@@ -341,7 +373,9 @@ bool PlainConfig::LogConfig::LoadFromCliArgs(const CliArgs &cliArgs)
 
     if (cliArgs.count(CLI_LOG_FILE))
     {
-        file = cliArgs.at(CLI_LOG_FILE);
+        wordexp_t expandedPath;
+        wordexp(cliArgs.at(CLI_LOG_FILE).c_str(), &expandedPath, 0);
+        file = expandedPath.we_wordv[0];
     }
 
     return true;
@@ -353,7 +387,9 @@ bool PlainConfig::LogConfig::Validate() const
 }
 
 constexpr char PlainConfig::Jobs::CLI_ENABLE_JOBS[];
+constexpr char PlainConfig::Jobs::CLI_HANDLER_DIR[];
 constexpr char PlainConfig::Jobs::JSON_KEY_ENABLED[];
+constexpr char PlainConfig::Jobs::JSON_KEY_HANDLER_DIR[];
 
 bool PlainConfig::Jobs::LoadFromJson(const Crt::JsonView &json)
 {
@@ -371,6 +407,13 @@ bool PlainConfig::Jobs::LoadFromCliArgs(const CliArgs &cliArgs)
     if (cliArgs.count(PlainConfig::Jobs::CLI_ENABLE_JOBS))
     {
         enabled = true;
+    }
+
+    if (cliArgs.count(PlainConfig::Jobs::CLI_HANDLER_DIR))
+    {
+        wordexp_t expandedPath;
+        wordexp(cliArgs.at(PlainConfig::Jobs::CLI_HANDLER_DIR).c_str(), &expandedPath, 0);
+        handlerDir = expandedPath.we_wordv[0];
     }
 
     return true;
@@ -611,13 +654,17 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromJson(const Crt::JsonVi
     jsonKey = JSON_KEY_CERT;
     if (json.ValueExists(jsonKey))
     {
-        cert = json.GetString(jsonKey).c_str();
+        wordexp_t expandedPath;
+        wordexp(json.GetString(jsonKey).c_str(), &expandedPath, 0);
+        cert = expandedPath.we_wordv[0];
     }
 
     jsonKey = JSON_KEY_KEY;
     if (json.ValueExists(jsonKey))
     {
-        key = json.GetString(jsonKey).c_str();
+        wordexp_t expandedPath;
+        wordexp(json.GetString(jsonKey).c_str(), &expandedPath, 0);
+        key = expandedPath.we_wordv[0];
     }
 
     jsonKey = JSON_KEY_THING_NAME;
@@ -647,6 +694,8 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::Validate() const
 }
 
 constexpr char Config::TAG[];
+constexpr char Config::DEFAULT_CONFIG_DIR[];
+constexpr char Config::DEFAULT_KEY_DIR[];
 constexpr char Config::DEFAULT_CONFIG_FILE[];
 constexpr char Config::CLI_HELP[];
 constexpr char Config::CLI_EXPORT_DEFAULT_SETTINGS[];
@@ -681,6 +730,7 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {PlainConfig::LogConfig::CLI_LOG_FILE, true, false, nullptr},
 
         {PlainConfig::Jobs::CLI_ENABLE_JOBS, false, false, nullptr},
+        {PlainConfig::Jobs::CLI_HANDLER_DIR, true, false, nullptr},
 
         {PlainConfig::Tunneling::CLI_ENABLE_TUNNELING, false, false, nullptr},
         {PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN, true, false, nullptr},
@@ -807,10 +857,55 @@ bool Config::ValidateAndStoreRuntimeConfig()
 
 bool Config::ParseConfigFile(const string &file)
 {
-    ifstream setting(file);
+    wordexp_t expandedPath;
+    wordexp(file.c_str(), &expandedPath, 0);
+
+    struct stat info;
+    if (stat(expandedPath.we_wordv[0], &info) != 0)
+    {
+        LOGM_DEBUG(TAG, "Unable to open config file %s, file does not exist", expandedPath.we_wordv[0]);
+        return false;
+    }
+
+    size_t incomingFileSize = FileUtils::getFileSize(file);
+    if (5000 < incomingFileSize)
+    {
+        LOGM_WARN(
+            TAG,
+            "Refusing to open config file %s, file size %zu bytes is greater than allowable limit of %zu bytes",
+            file.c_str(),
+            incomingFileSize,
+            5000);
+        return false;
+    }
+
+    string configFileParentDir = FileUtils::extractParentDirectory(expandedPath.we_wordv[0]);
+    int actualConfigDirPermissions = FileUtils::getFilePermissions(configFileParentDir);
+    int actualConfigFilePermissions = FileUtils::getFilePermissions(expandedPath.we_wordv[0]);
+    if (Permissions::CONFIG_DIR != actualConfigDirPermissions)
+    {
+        LOGM_WARN(
+            TAG,
+            "File permissions for configuration directory %s are not set to the recommended setting of %d, found %d "
+            "instead",
+            configFileParentDir.c_str(),
+            Permissions::CONFIG_DIR,
+            actualConfigDirPermissions);
+    }
+    if (Permissions::CONFIG_FILE != actualConfigFilePermissions)
+    {
+        LOGM_WARN(
+            TAG,
+            "File permissions for configuration file %s are not set to the recommended setting of %d, found %d instead",
+            expandedPath.we_wordv[0],
+            Permissions::CONFIG_FILE,
+            actualConfigFilePermissions);
+    }
+
+    ifstream setting(expandedPath.we_wordv[0]);
     if (!setting.is_open())
     {
-        LOGM_ERROR(TAG, "Unable to open file: '%s'", file.c_str());
+        LOGM_ERROR(TAG, "Unable to open file: '%s'", expandedPath.we_wordv[0]);
         return false;
     }
 
@@ -827,6 +922,7 @@ bool Config::ParseConfigFile(const string &file)
 
     LOGM_INFO(TAG, "Successfully fetched JSON config file: %s", contents.c_str());
     setting.close();
+
     return true;
 }
 
@@ -857,10 +953,11 @@ void Config::PrintHelpMessage()
         "%s <Key-Location>:\t\t\t\t\t\t\tUse Specified Key file\n"
         "%s <Root-CA-Location>:\t\t\t\t\t\tUse Specified Root-CA file\n"
         "%s <thing-name-value>:\t\t\t\t\tUse Specified Thing Name\n"
-        "%s <destination-access-token>:\tUse Specified Destination Access Token\n"
-        "%s <region>:\t\t\t\t\t\tUse Specified AWS Region\n"
+        "%s <Jobs-handler-directory>:\t\tUse specified directory to find job handlers\n"
+        "%s <destination-access-token>:\tUse Specified Destination Access Token for Secure Tunneling\n"
+        "%s <region>:\t\t\t\t\t\tUse Specified AWS Region for Secure Tunneling\n"
         "%s <service>:\t\t\t\t\t\tConnect secure tunnel to specific service\n"
-        "%s:\t\t\t\t\tDisable MQTT new tunnel notification\n"
+        "%s:\t\t\t\t\tDisable MQTT new tunnel notification for Secure Tunneling\n"
         "%s <interval-in-seconds>:\t\t\tPositive integer to publish Device Defender metrics\n"
         "%s <template-name>:\t\t\tUse specified Fleet Provisioning template name\n"
         "%s <csr-file-path>:\t\t\t(Optional Field) Use specified CSR file for provisioning device\n";
@@ -882,6 +979,7 @@ void Config::PrintHelpMessage()
         PlainConfig::CLI_KEY,
         PlainConfig::CLI_ROOT_CA,
         PlainConfig::CLI_THING_NAME,
+        PlainConfig::Jobs::CLI_HANDLER_DIR,
         PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN,
         PlainConfig::Tunneling::CLI_TUNNELING_REGION,
         PlainConfig::Tunneling::CLI_TUNNELING_SERVICE,
@@ -895,12 +993,13 @@ bool Config::ExportDefaultSetting(const string &file)
 {
     string jsonTemplate = R"({
     "%s": "<replace_with_endpoint_value>",
-    "%s": "<replace_with_certificate_file_location>",
-    "%s": "<replace_with_private_key_file_location>",
-    "%s": "<replace_with_root_ca_file_location>",
+    "%s": "<replace_with_certificate_file_path>",
+    "%s": "<replace_with_private_key_file_path>",
+    "%s": "<replace_with_root_ca_file_path>",
     "%s": "<replace_with_thing_name>",
     "%s": {
-        "%s": true
+        "%s": true,
+        "%s": "<replace_with_job_handler-directory_path>"
     },
     "%s": {
         "%s": true
@@ -931,6 +1030,7 @@ bool Config::ExportDefaultSetting(const string &file)
         PlainConfig::JSON_KEY_THING_NAME,
         PlainConfig::JSON_KEY_JOBS,
         PlainConfig::Jobs::JSON_KEY_ENABLED,
+        PlainConfig::Jobs::JSON_KEY_HANDLER_DIR,
         PlainConfig::JSON_KEY_TUNNELING,
         PlainConfig::Tunneling::JSON_KEY_ENABLED,
         PlainConfig::JSON_KEY_DEVICE_DEFENDER,
@@ -943,5 +1043,17 @@ bool Config::ExportDefaultSetting(const string &file)
 
     clientConfig.close();
     LOGM_INFO(TAG, "Exported settings to: %s", file.c_str());
+
+    chmod(file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    const int actual = FileUtils::getFilePermissions(file.c_str());
+    if (Permissions::CONFIG_FILE != actual)
+    {
+        LOGM_WARN(
+            TAG,
+            "Failed to set appropriate permissions on configuration file %s, desired %d but found %d",
+            file.c_str(),
+            Permissions::CONFIG_FILE,
+            actual);
+    }
     return true;
 }

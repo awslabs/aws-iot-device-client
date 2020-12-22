@@ -1,5 +1,3 @@
-
-
 #ifndef AWS_IOT_DEVICE_CLIENT_FILEUTILS_H
 #define AWS_IOT_DEVICE_CLIENT_FILEUTILS_H
 
@@ -19,7 +17,7 @@ namespace Aws
                 class FileUtils
                 {
                   private:
-                    static const char *TAG;
+                    static constexpr char TAG[] = "FileUtils.cpp";
 
                   public:
                     /**
@@ -43,6 +41,47 @@ namespace Aws
                      * @return true on success
                      */
                     static bool StoreValueInFile(std::string value, std::string filePath);
+
+                    /**
+                     * \brief Returns an integer representing the permissions of the specified file.
+                     *
+                     * @param filePath a path to a file
+                     * @return an integer representing the file permissions.
+                     */
+                    static int getFilePermissions(const std::string &filePath);
+
+                    /**
+                     * Converts a file permissions mask into a human readable format
+                     *
+                     * This function will return a 3-digit integer representing the permissions set by the mask.
+                     * Each digit in the returned value will range from 0-7. The first digit is user, the second digit
+                     * is group, and the third digit is world (everyone). The digit is determined by adding the
+                     * permissions found from the following categories:
+                     *
+                     * 4 - has read privileges
+                     * 2 - has write privileges
+                     * 1 - has execute privileges
+                     *
+                     * @param mask the permissions mask
+                     * @return an integer representing a human readable format of the permissions mask
+                     */
+                    static int permissionsMaskToInt(mode_t mask);
+
+                    /**
+                     * \brief Returns the size of the file in bytes
+                     * @param filePath the path to the file
+                     * @return the size of the file in bytes
+                     */
+                    static size_t getFileSize(const std::string &filePath);
+
+                    /**
+                     * Attempts to create the provided directory with the given permissions
+                     * @param dirPath the path to the directory
+                     * @param permissions the permission mask that should be applied to the directory
+                     * @return true if the directory was successfully created with the given permissions, false
+                     * otherwise
+                     */
+                    static bool createDirectoryWithPermissions(const char *dirPath, mode_t permissions);
                 };
             } // namespace Util
         }     // namespace DeviceClient
