@@ -1,9 +1,10 @@
 #!/bin/sh
 set -e
 
-if ! [ $(id -u) = 0 ]; then
-  echo "WARNING: Please run this setup script as root (sudo), otherwise you may encounter problems installing the" \
-  "AWS IoT Device Client as a service and/or installing important files"
+if [ $(id -u) = 0 ]; then
+  echo "WARNING: Only run this setup script as root if you plan to run the AWS IoT Device Client as root,\
+  or if you plan to run the AWS IoT Device Client as a service. Otherwise, you should run this script as\
+  the user that will execute the client."
 fi
 
 # Prompt color constants
@@ -17,15 +18,29 @@ NC='\033[0m'
 echo "${PMPT}Do you want to interactively generate a configuration file for the AWS IoT Device Client? y/n${NC}"
 read -r BUILD_CONFIG
 
+if [ $(id -u) = 0 ]; then
+  OUTPUT_DIR=/root/.aws-iot-device-client/
+else
+  OUTPUT_DIR=/home/$(whoami)/.aws-iot-device-client/
+fi
+
+### Config Defaults ###
+CONF_OUTPUT_PATH=${OUTPUT_DIR}aws-iot-device-client.conf
+HANDLER_DIR=${OUTPUT_DIR}jobs
+DD_INTERVAL=300
+LOG_TYPE="STDOUT"
+LOG_LEVEL="DEBUG"
+LOG_LOCATION="/var/log/aws-iot-device-client/aws-iot-device-client.log"
+
 if [ "$BUILD_CONFIG" = "y" ]; then
   while [ "$CONFIGURED" != 1 ]; do
     echo "${PMPT}Specify AWS IoT endpoint to use:${NC}"
     read -r ENDPOINT
-    echo "${PMPT}Specify absolute path to public PEM certificate:${NC}"
+    echo "${PMPT}Specify path to public PEM certificate:${NC}"
     read -r CERT
-    echo "${PMPT}Specify absolute path to private key:${NC}"
+    echo "${PMPT}Specify path to private key:${NC}"
     read -r PRIVATE_KEY
-    echo "${PMPT}Specify absolute path to ROOT CA certificate:${NC}"
+    echo "${PMPT}Specify path to ROOT CA certificate:${NC}"
     read -r ROOT_CA
     echo "${PMPT}Specify thing name:${NC}"
     read -r THING_NAME
@@ -40,13 +55,23 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       echo "${PMPT}Specify log type: STDOUT for standard output, FILE for file${NC}"
       read -r LOG_TYPE
       if [ "$LOG_TYPE" = "FILE" ] || [ "$LOG_TYPE" = "file" ]; then
-        echo "${PMPT}Specify path to desired log file:${NC}"
-        read -r LOG_LEVEL
+        echo "${PMPT}Specify path to desired log file (if no path is provided, will default to ${LOG_LOCATION}:${NC}"
+        read -r LOG_LOCATION_TMP
+        if [ "${LOG_LOCATION_TMP}" ]; then
+          LOG_LOCATION=${LOG_LOCATION_TMP}
+        else
+          echo "Creating default log directory..."
+          if command -v "sudo" > /dev/null; then
+            sudo -n mkdir -p /var/log/aws-iot-device-client/ | true
+            CURRENT_USER=$(whoami)
+            sudo -n chown "$CURRENT_USER":"$CURRENT_USER" /var/log/aws-iot-device-client/
+          else
+            echo "WARNING: sudo command not found"
+            mkdir -p /var/log/aws-iot-device-client/ | true
+          fi
+          chmod 745 /var/log/aws-iot-device-client/
+        fi
       fi
-    else
-      LOG_LEVEL="DEBUG"
-      LOG_TYPE="FILE"
-      LOG_FILE="/var/log/aws-iot-device-client.log"
     fi
 
     ### Jobs Config ###
@@ -55,8 +80,11 @@ if [ "$BUILD_CONFIG" = "y" ]; then
     read -r ENABLE_JOBS
     if [ "$ENABLE_JOBS" = "y" ]; then
       JOBS_ENABLED="true"
-      echo "${PMPT}Specify absolute path to Job handler directory:${NC}"
-      read -r HANDLER_DIR
+      echo "${PMPT}Specify absolute path to Job handler directory (if no path is provided, will default to ${HANDLER_DIR}): ${NC}"
+      read -r HANDLER_DIR_TEMP
+      if [ "$HANDLER_DIR_TEMP" ]; then
+        HANDLER_DIR=$HANDLER_DIR_TEMP
+      fi
     else
       JOBS_ENABLED="false"
     fi
@@ -71,6 +99,21 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       ST_ENABLED="false"
     fi
 
+    ### DD Config ###
+    echo "${PMPT}Enable Device Defender feature? y/n${NC}"
+    DD_ENABLED=""
+    read -r ENABLE_DD
+    if [ "$ENABLE_DD" = "y" ]; then
+      DD_ENABLED="true"
+      echo "${PMPT}Specify an interval for Device Defender in seconds (default is 300): ${NC}"
+      read -r INTERVAL_TEMP
+      if [ "$INTERVAL_TEMP" ]; then
+        DD_INTERVAL=$INTERVAL_TEMP
+      fi
+    else
+      DD_ENABLED="false"
+    fi
+
     CONFIG_OUTPUT="
     {
       \"endpoint\":	\"$ENDPOINT\",
@@ -81,42 +124,54 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       \"logging\":	{
         \"level\":	\"$LOG_LEVEL\",
         \"type\":	\"$LOG_TYPE\",
-        \"file\": \"$LOG_FILE\"
+        \"file\": \"$LOG_LOCATION\"
       },
       \"jobs\":	{
-        \"enabled\":	\"$JOBS_ENABLED\",
-        \"handler_directory\": \"$HANDLER_DIR\"
+        \"enabled\":	$JOBS_ENABLED,
+        \"handler-directory\": \"$HANDLER_DIR\"
       },
       \"tunneling\":	{
-        \"enabled\":	\"$ST_ENABLED\"
+        \"enabled\":	$ST_ENABLED
+      },
+      \"device-defender\":	{
+        \"enabled\":	$DD_ENABLED,
+        \"interval-in-seconds\": $DD_INTERVAL
       }
     }"
 
-    echo "${PMPT}Does the following configuration appear correct? y/n${NC}"
+    echo "${PMPT}Does the following configuration appear correct? If yes, configuration will be written to ${CONF_OUTPUT_PATH}: y/n${NC}"
     echo "${GREEN}${CONFIG_OUTPUT}${NC}"
     read -r GOOD_TO_GO
     if [ "$GOOD_TO_GO" = "y" ]; then
       CONFIGURED=1
-      echo "$CONFIG_OUTPUT" | tee /etc/aws-iot-device-client.conf >/dev/null
+      mkdir "$OUTPUT_DIR" &>/dev/null | true
+      echo "$CONFIG_OUTPUT" | tee "$CONF_OUTPUT_PATH" >/dev/null
+      chmod 745 "$OUTPUT_DIR"
+      chmod 644 "$CONF_OUTPUT_PATH"
+      echo "Configuration has been successfully written to ${CONF_OUTPUT_PATH}"
     fi
     tput sgr0
   done
 fi
 
-echo "${PMPT}Do you want to copy the sample job handlers to the default handler directory? (/etc/aws-iot-device-client/handlers/) y/n${NC}"
+echo "${PMPT}Do you want to copy the sample job handlers to the specified handler directory (${HANDLER_DIR})? y/n${NC}"
 read -r COPY_HANDLERS
 
 if [ "$COPY_HANDLERS" = "y" ]; then
-  mkdir -p /etc/aws-iot-device-client/handlers/
-  cp ./sample-job-handlers/* /etc/aws-iot-device-client/handlers/
-  chmod +x /etc/aws-iot-device-client/handlers/*
+  mkdir -p ${HANDLER_DIR}
+  chmod 700 ${HANDLER_DIR}
+  cp ./sample-job-handlers/* ${HANDLER_DIR}
+  chmod 700 ${HANDLER_DIR}/*
 fi
 
 echo "${PMPT}Do you want to install AWS IoT Device Client as a service? y/n${NC}"
 read -r INSTALL_SERVICE
 
 if [ "$INSTALL_SERVICE" = "y" ]; then
-
+  if ! [ $(id -u) = 0 ]; then
+    echo "WARNING: You may need to rerun this setup script as root ('sudo ./setup.sh') \
+    to successfully install the AWS IoT Device Client as a service"
+  fi
   ### Get DeviceClient Artifact Location ###
   FOUND_DEVICE_CLIENT=false
   DEVICE_CLIENT_ARTIFACT_DEFAULT="./build/aws-iot-device-client"
@@ -152,7 +207,7 @@ if [ "$INSTALL_SERVICE" = "y" ]; then
   echo "${PMPT}Do you want to run the AWS IoT Device Client service via Valgrind for debugging? y/n${NC}"
   read -r SERVICE_DEBUG
   if [ "$SERVICE_DEBUG" = "y" ]; then
-    LOG_FILE="/var/log/aws-iot-device-client-debug"
+    LOG_FILE="/var/log/aws-iot-device-client/aws-iot-device-client-debug"
     echo "${GREEN}Valgrind output can be found at $LOG_FILE-{PID}.log. {PID} corresponds
     to the current process ID of the service, and will change if the system is rebooted${NC}"
     DEBUG_SCRIPT="#!/bin/sh
@@ -190,5 +245,5 @@ if [ "$INSTALL_SERVICE" = "y" ]; then
     service start aws-iot-device-client.service
     service status aws-iot-device-client.service
   fi
-  echo "${PMPT}AWS IoT Device Client is now running! Check /var/log/aws-iot-device-client.log for log output.${NC}"
+  echo "${PMPT}AWS IoT Device Client is now running! Check /var/log/aws-iot-device-client/aws-iot-device-client.log for log output.${NC}"
 fi

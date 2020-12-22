@@ -13,9 +13,10 @@
 #include <aws/iotidentity/RegisterThingRequest.h>
 #include <aws/iotidentity/RegisterThingResponse.h>
 #include <aws/iotidentity/RegisterThingSubscriptionRequest.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include <chrono>
-#include <condition_variable>
 #include <string>
 
 using namespace std;
@@ -29,14 +30,8 @@ using namespace Aws::Iot::DeviceClient::Util;
 constexpr char FleetProvisioning::TAG[];
 constexpr int FleetProvisioning::DEFAULT_WAIT_TIME_SECONDS;
 
-string FleetProvisioning::getName()
-{
-    return "Fleet Provisioning";
-}
-
 bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient identityClient)
 {
-
     auto onKeysAcceptedSubAck = [&](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
@@ -79,17 +74,52 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
             LOGM_INFO(TAG, "CreateKeysAndCertificateResponse certificateId: %s.", response->CertificateId->c_str());
             Aws::Crt::String certificateID = response->CertificateId->c_str();
             certificateOwnershipToken = *response->CertificateOwnershipToken;
-            certPath = certificateID + "-certificate.pem.crt";
-            keyPath = certificateID + "-private.pem.key";
+
+            ostringstream certPathStream;
+            ostringstream keyPathStream;
+            certPathStream << keyDir << certificateID << "-certificate.pem.crt";
+            keyPathStream << keyDir << certificateID << "-private.pem.key";
+            certPath = certPathStream.str().c_str();
+            keyPath = keyPathStream.str().c_str();
+
             if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()) &&
                 FileUtils::StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str()))
             {
                 LOGM_INFO(
                     TAG, "Stored certificate and private key in %s and %s files", certPath.c_str(), keyPath.c_str());
-                keysCreationCompletedPromise.set_value(true);
+
+                LOG_INFO(TAG, "Attempting to set permissions for certificate and private key...");
+                chmod(certPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                chmod(keyPath.c_str(), S_IRUSR | S_IWUSR);
+
+                int actualCertPermissions = FileUtils::getFilePermissions(certPath.c_str());
+                int actualKeyPermissions = FileUtils::getFilePermissions(keyPath.c_str());
+                if (Permissions::PUBLIC_CERT != actualCertPermissions ||
+                    Permissions::PRIVATE_KEY != actualKeyPermissions)
+                {
+                    LOGM_ERROR(
+                        TAG,
+                        "Failed to set permissions for provisioned cert and/or private key: {cert: {desired: %d, "
+                        "actual: %d}, key: {desired: %d, actual: %d}}",
+                        Permissions::PUBLIC_CERT,
+                        actualCertPermissions,
+                        Permissions::PRIVATE_KEY,
+                        actualKeyPermissions);
+                    keysCreationCompletedPromise.set_value(false);
+                }
+                else
+                {
+                    LOG_INFO(TAG, "Successfully set permissions on provisioned public certificate and private key");
+                    keysCreationCompletedPromise.set_value(true);
+                }
             }
             else
             {
+                LOGM_ERROR(
+                    TAG,
+                    "Failed to store public certificate and private key in files %s and %s",
+                    certPath.c_str(),
+                    keyPath.c_str());
                 keysCreationCompletedPromise.set_value(false);
             }
         }
@@ -312,14 +342,21 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
     // TODO: Add ClientBaseNotifier to log events
     LOG_INFO(TAG, "Fleet Provisioning Feature has been started.");
 
+    bool didSetup = FileUtils::createDirectoryWithPermissions(keyDir.c_str(), S_IRWXU) &&
+                    FileUtils::createDirectoryWithPermissions(Config::DEFAULT_CONFIG_DIR, S_IRWXU);
+    if (!didSetup)
+    {
+        LOG_ERROR(
+            TAG,
+            "Failed to access/create directories required for storage of provisioned certificates, cannot continue");
+        return false;
+    }
+
     IotIdentityClient identityClient(fpConnection.get()->getConnection());
     templateName = config.fleetProvisioning.templateName.value().c_str();
 
     if (CreateCertificateAndKeys(identityClient) && RegisterThing(identityClient))
     {
-        /*
-         * Store data in runtime conf file and update @config object.
-         */
         if (!ExportRuntimeConfig(
                 Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
                 certPath.c_str(),
@@ -342,9 +379,9 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
 
 bool FleetProvisioning::ExportRuntimeConfig(
     const string &file,
-    const string &certPath,
-    const string &keyPath,
-    const string &thingName)
+    const string &runtimeCertPath,
+    const string &runtimeKeyPath,
+    const string &runtimeThingName)
 {
     string jsonTemplate = R"({
 "%s": {
@@ -365,12 +402,24 @@ bool FleetProvisioning::ExportRuntimeConfig(
         PlainConfig::JSON_KEY_RUNTIME_CONFIG,
         PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_COMPLETED_FLEET_PROVISIONING,
         PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_CERT,
-        certPath.c_str(),
+        runtimeCertPath.c_str(),
         PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_KEY,
-        keyPath.c_str(),
+        runtimeKeyPath.c_str(),
         PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_THING_NAME,
-        thingName.c_str());
+        runtimeThingName.c_str());
     clientConfig.close();
     LOGM_INFO(TAG, "Exported runtime configurations to: %s", file.c_str());
+
+    chmod(file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    const int actual = FileUtils::getFilePermissions(file.c_str());
+    if (Permissions::RUNTIME_CONFIG_FILE != actual)
+    {
+        LOGM_WARN(
+            TAG,
+            "Failed to set appropriate permissions on runtime config %s, desired %d but found %d",
+            file.c_str(),
+            Permissions::RUNTIME_CONFIG_FILE,
+            actual);
+    }
     return true;
 }
