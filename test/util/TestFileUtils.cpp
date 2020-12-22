@@ -111,3 +111,41 @@ TEST(FileUtils, getsCorrectFileSizeForNonExistantFile)
     size_t bytes = FileUtils::getFileSize(filePath);
     ASSERT_EQ(0, bytes);
 }
+
+TEST(FileUtils, canSetupDirectoryAndSetPermissions)
+{
+    string dirPath = "/tmp/" + UniqueString::getRandomToken(10) + "/";
+
+    bool didSetup = FileUtils::createDirectoryWithPermissions(dirPath.c_str(), S_IRWXU);
+
+    ASSERT_TRUE(didSetup);
+    ASSERT_EQ(700, FileUtils::getFilePermissions(dirPath));
+
+    rmdir(dirPath.c_str());
+}
+
+TEST(FileUtils, setupDirectoryGoodResultsOnRepeatedAttempts)
+{
+    string dirPath = "/tmp/" + UniqueString::getRandomToken(10) + "/";
+
+    bool didSetup = FileUtils::createDirectoryWithPermissions(dirPath.c_str(), S_IRWXU);
+
+    ASSERT_TRUE(didSetup);
+    ASSERT_EQ(700, FileUtils::getFilePermissions(dirPath));
+
+    didSetup = FileUtils::createDirectoryWithPermissions(dirPath.c_str(), S_IRWXU);
+
+    ASSERT_TRUE(didSetup);
+    ASSERT_EQ(700, FileUtils::getFilePermissions(dirPath));
+
+    rmdir(dirPath.c_str());
+}
+
+TEST(FileUtils, setupDirectoryDetectedSetupFailure)
+{
+    string dirPath = "/dev/null/" + UniqueString::getRandomToken(10) + "/";
+
+    bool didSetup = FileUtils::createDirectoryWithPermissions(dirPath.c_str(), S_IRWXU);
+
+    ASSERT_FALSE(didSetup);
+}

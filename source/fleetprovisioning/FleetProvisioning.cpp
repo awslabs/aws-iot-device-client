@@ -30,14 +30,8 @@ using namespace Aws::Iot::DeviceClient::Util;
 constexpr char FleetProvisioning::TAG[];
 constexpr int FleetProvisioning::DEFAULT_WAIT_TIME_SECONDS;
 
-string FleetProvisioning::getName()
-{
-    return "Fleet Provisioning";
-}
-
 bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient identityClient)
 {
-
     auto onKeysAcceptedSubAck = [&](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
@@ -77,65 +71,56 @@ bool FleetProvisioning::CreateCertificateAndKeys(Iotidentity::IotIdentityClient 
     auto onKeysAccepted = [&](CreateKeysAndCertificateResponse *response, int ioErr) {
         if (ioErr == AWS_OP_SUCCESS)
         {
-            if (!FileUtils::mkdirs(keyDir.c_str()))
+            LOGM_INFO(TAG, "CreateKeysAndCertificateResponse certificateId: %s.", response->CertificateId->c_str());
+            Aws::Crt::String certificateID = response->CertificateId->c_str();
+            certificateOwnershipToken = *response->CertificateOwnershipToken;
+
+            ostringstream certPathStream;
+            ostringstream keyPathStream;
+            certPathStream << keyDir << certificateID << "-certificate.pem.crt";
+            keyPathStream << keyDir << certificateID << "-private.pem.key";
+            certPath = certPathStream.str().c_str();
+            keyPath = keyPathStream.str().c_str();
+
+            if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()) &&
+                FileUtils::StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str()))
             {
-                if (Permissions::KEY_DIR != FileUtils::getFilePermissions(keyDir))
-                {
-                    chmod(keyDir.c_str(), S_IRWXU);
-                    if (Permissions::KEY_DIR != FileUtils::getFilePermissions(keyDir))
-                    {
-                        LOGM_ERROR(
-                            "Failed to set appropriate permissions for key file directory %s, permissions should be "
-                            "set to %d",
-                            keyDir.c_str(),
-                            Permissions::KEY_DIR);
-                        keysCreationCompletedPromise.set_value(false);
-                        return;
-                    }
-                }
+                LOGM_INFO(
+                    TAG, "Stored certificate and private key in %s and %s files", certPath.c_str(), keyPath.c_str());
 
-                LOGM_INFO(TAG, "CreateKeysAndCertificateResponse certificateId: %s.", response->CertificateId->c_str());
-                Aws::Crt::String certificateID = response->CertificateId->c_str();
-                certificateOwnershipToken = *response->CertificateOwnershipToken;
-                certPath = certificateID + "-certificate.pem.crt";
-                keyPath = certificateID + "-private.pem.key";
-                if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()) &&
-                    FileUtils::StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str()))
+                LOG_INFO(TAG, "Attempting to set permissions for certificate and private key...");
+                chmod(certPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                chmod(keyPath.c_str(), S_IRUSR | S_IWUSR);
+
+                int actualCertPermissions = FileUtils::getFilePermissions(certPath.c_str());
+                int actualKeyPermissions = FileUtils::getFilePermissions(keyPath.c_str());
+                if (Permissions::PUBLIC_CERT != actualCertPermissions ||
+                    Permissions::PRIVATE_KEY != actualKeyPermissions)
                 {
-                    LOGM_INFO(
+                    LOGM_ERROR(
                         TAG,
-                        "Stored certificate and private key in %s and %s files",
-                        certPath.c_str(),
-                        keyPath.c_str());
-
-                    LOG_INFO(TAG, "Attempting to set permissions for certificate and private key...");
-                    chmod(certPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-                    chmod(keyPath.c_str(), S_IRUSR | S_IWUSR);
-
-                    int actualCertPermissions = FileUtils::getFilePermissions(certPath.c_str());
-                    int actualKeyPermissions = FileUtils::getFilePermissions(keyPath.c_str());
-                    if (Permissions::PUBLIC_CERT != actualCertPermissions ||
-                        Permissions::PRIVATE_KEY != actualKeyPermissions)
-                    {
-                        LOGM_ERROR(
-                            TAG,
-                            "Failed to set permissions for provisioned cert and/or private key: {cert: {desired: %d, "
-                            "actual: %d}, key: {desired: %d, actual: %d}}",
-                            Permissions::PUBLIC_CERT,
-                            actualCertPermissions,
-                            Permissions::PRIVATE_KEY,
-                            actualKeyPermissions);
-                        keysCreationCompletedPromise.set_value(false);
-                    }
-                    else
-                    {
-                        keysCreationCompletedPromise.set_value(true);
-                    }
+                        "Failed to set permissions for provisioned cert and/or private key: {cert: {desired: %d, "
+                        "actual: %d}, key: {desired: %d, actual: %d}}",
+                        Permissions::PUBLIC_CERT,
+                        actualCertPermissions,
+                        Permissions::PRIVATE_KEY,
+                        actualKeyPermissions);
+                    keysCreationCompletedPromise.set_value(false);
                 }
                 else
                 {
-                    keysCreationCompletedPromise.set_value(false);
+                    LOG_INFO(TAG, "Successfully set permissions on provisioned public certificate and private key");
+                    keysCreationCompletedPromise.set_value(true);
                 }
+            }
+            else
+            {
+                LOGM_ERROR(
+                    TAG,
+                    "Failed to store public certificate and private key in files %s and %s",
+                    certPath.c_str(),
+                    keyPath.c_str());
+                keysCreationCompletedPromise.set_value(false);
             }
         }
         else
@@ -357,35 +342,21 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
     // TODO: Add ClientBaseNotifier to log events
     LOG_INFO(TAG, "Fleet Provisioning Feature has been started.");
 
+    bool didSetup = FileUtils::createDirectoryWithPermissions(keyDir.c_str(), S_IRWXU) &&
+                    FileUtils::createDirectoryWithPermissions(Config::DEFAULT_CONFIG_DIR, S_IRWXU);
+    if (!didSetup)
+    {
+        LOG_ERROR(
+            TAG,
+            "Failed to access/create directories required for storage of provisioned certificates, cannot continue");
+        return false;
+    }
+
     IotIdentityClient identityClient(fpConnection.get()->getConnection());
     templateName = config.fleetProvisioning.templateName.value().c_str();
 
     if (CreateCertificateAndKeys(identityClient) && RegisterThing(identityClient))
     {
-        /*
-         * Store data in runtime conf file and update @config object.
-         */
-        if (!FileUtils::mkdirs(Config::DEFAULT_CONFIG_DIR))
-        {
-            LOGM_WARN(
-                TAG, "Failed to create directory %s for storage of runtime configuration", Config::DEFAULT_CONFIG_DIR);
-        }
-
-        if (Permissions::CONFIG_DIR != FileUtils::getFilePermissions(Config::DEFAULT_CONFIG_DIR))
-        {
-            chmod(Config::DEFAULT_CONFIG_DIR, S_IRWXU);
-            int actual = FileUtils::getFilePermissions(Config::DEFAULT_CONFIG_DIR);
-            if (Permissions::CONFIG_DIR != actual)
-            {
-                LOGM_WARN(
-                    TAG,
-                    "Failed to set appropriate permissions on configuration directory %s, desired %d but found %d",
-                    Config::DEFAULT_CONFIG_DIR,
-                    Permissions::CONFIG_DIR,
-                    actual);
-            }
-        }
-
         if (!ExportRuntimeConfig(
                 Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
                 certPath.c_str(),

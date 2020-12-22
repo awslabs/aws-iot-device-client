@@ -27,7 +27,6 @@ namespace Aws
                  * @return returns true if device is provisioned successfully
                  */
                 bool ProvisionDevice(std::shared_ptr<SharedCrtResourceManager> fpConnection, PlainConfig &config);
-                std::string getName();
 
               private:
                 /**
@@ -120,6 +119,7 @@ namespace Aws
                  * @return returns true if resources are created successfully
                  */
                 bool CreateCertificateAndKeys(Iotidentity::IotIdentityClient identityClient);
+
                 /**
                  * \brief registers the device with AWS IoT and create cloud resources
                  *
@@ -128,6 +128,7 @@ namespace Aws
                  * @return returns true if resources are registered and created successfully
                  */
                 bool RegisterThing(Iotidentity::IotIdentityClient identityClient);
+
                 /**
                  * \brief exports config of newly created resources to runtime config file
                  *

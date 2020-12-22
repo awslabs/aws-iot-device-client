@@ -47,6 +47,18 @@ constexpr char PlainConfig::JSON_KEY_DEVICE_DEFENDER[];
 constexpr char PlainConfig::JSON_KEY_FLEET_PROVISIONING[];
 constexpr char PlainConfig::JSON_KEY_RUNTIME_CONFIG[];
 
+constexpr int Permissions::KEY_DIR;
+constexpr int Permissions::ROOT_CA_DIR;
+constexpr int Permissions::CERT_DIR;
+constexpr int Permissions::CONFIG_DIR;
+constexpr int Permissions::LOG_DIR;
+constexpr int Permissions::PRIVATE_KEY;
+constexpr int Permissions::PUBLIC_CERT;
+constexpr int Permissions::LOG_FILE;
+constexpr int Permissions::CONFIG_FILE;
+constexpr int Permissions::RUNTIME_CONFIG_FILE;
+constexpr int Permissions::JOB_HANDLER;
+
 bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
 {
     const char *jsonKey = JSON_KEY_ENDPOINT;

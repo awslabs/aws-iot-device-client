@@ -91,44 +91,49 @@ int FileUtils::getFilePermissions(const std::string &filePath)
         return false;
     }
 
+    return permissionsMaskToInt(file_info.st_mode);
+}
+
+int FileUtils::permissionsMaskToInt(mode_t mask)
+{
     int user = 0;
-    if (file_info.st_mode & S_IRUSR)
+    if (mask & S_IRUSR)
     {
         user += 4;
     }
-    if (file_info.st_mode & S_IWUSR)
+    if (mask & S_IWUSR)
     {
         user += 2;
     }
-    if (file_info.st_mode & S_IXUSR)
+    if (mask & S_IXUSR)
     {
         user += 1;
     }
 
     int group = 0;
-    if (file_info.st_mode & S_IRGRP)
+    if (mask & S_IRGRP)
     {
         group += 4;
     }
-    if (file_info.st_mode & S_IWGRP)
+    if (mask & S_IWGRP)
     {
         group += 2;
     }
-    if (file_info.st_mode & S_IXGRP)
+    if (mask & S_IXGRP)
     {
         group += 1;
     }
 
     int world = 0;
-    if (file_info.st_mode & S_IROTH)
+    if (mask & S_IROTH)
     {
         world += 4;
     }
-    if (file_info.st_mode & S_IWOTH)
+    if (mask & S_IWOTH)
     {
         world += 2;
     }
-    if (file_info.st_mode & S_IXOTH)
+    if (mask & S_IXOTH)
     {
         world += 1;
     }
@@ -148,4 +153,37 @@ size_t FileUtils::getFileSize(const std::string &filePath)
     }
 
     return 0;
+}
+
+bool FileUtils::createDirectoryWithPermissions(const char *dirPath, mode_t permissions)
+{
+    const int desiredPermissions = permissionsMaskToInt(permissions);
+    if (!mkdirs(dirPath))
+    {
+        int actualPermissions = getFilePermissions(dirPath);
+        if (desiredPermissions != actualPermissions)
+        {
+            chmod(dirPath, permissions);
+            actualPermissions = getFilePermissions(dirPath);
+            if (desiredPermissions != actualPermissions)
+            {
+                LOGM_ERROR(
+                    TAG,
+                    "Failed to set appropriate permissions for directory %s, desired %d but found %d",
+                    dirPath,
+                    desiredPermissions,
+                    actualPermissions);
+                return false;
+            }
+        }
+        else
+        {
+            LOGM_INFO(
+                TAG, "Successfully create directory %s with required permissions %d", dirPath, desiredPermissions);
+            return true;
+        }
+    }
+
+    LOGM_ERROR(TAG, "Failed to create directory %s", dirPath);
+    return false;
 }
