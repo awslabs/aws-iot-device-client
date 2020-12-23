@@ -97,6 +97,7 @@ namespace Aws
                     {
                         mAccessToken = *config.tunneling.destinationAccessToken;
                         mRegion = *config.tunneling.region;
+                        mRootCa = *config.rootCa;
                         mPort = static_cast<uint16_t>(config.tunneling.port.value()); // The range is already checked
                     }
                 }
@@ -249,6 +250,7 @@ namespace Aws
                         accessToken,
                         AWS_SECURE_TUNNELING_DESTINATION_MODE,
                         GetEndpoint(region),
+                        mRootCa,
 
                         bind(&SecureTunnelingFeature::OnConnectionComplete, this),
                         bind(&SecureTunnelingFeature::OnSendDataComplete, this, placeholders::_1),

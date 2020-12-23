@@ -80,6 +80,7 @@ namespace Aws
                     std::string mThingName;
                     std::string mAccessToken;
                     std::string mRegion;
+                    std::string mRootCa;
                     uint16_t mPort{22};
                     bool mSubscribeNotification{true};
 
