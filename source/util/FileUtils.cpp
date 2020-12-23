@@ -143,13 +143,11 @@ int FileUtils::permissionsMaskToInt(mode_t mask)
 
 size_t FileUtils::getFileSize(const std::string &filePath)
 {
-    wordexp_t word;
-    wordexp(filePath.c_str(), &word, 0);
-    string expandedPath = word.we_wordv[0];
-    wordfree(&word);
+    wordexp_t expandedPath;
+    wordexp(filePath.c_str(), &expandedPath, 0);
 
     struct stat file_info;
-    if (stat(expandedPath.c_str(), &file_info) == 0)
+    if (stat(expandedPath.we_wordv[0], &file_info) == 0)
     {
         return file_info.st_size;
     }

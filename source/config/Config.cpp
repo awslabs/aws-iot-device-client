@@ -596,9 +596,11 @@ bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_CSR_FILE;
     if (json.ValueExists(jsonKey))
     {
-        wordexp_t expandedPath;
-        wordexp(json.GetString(jsonKey).c_str(), &expandedPath, 0);
-        csrFile = expandedPath.we_wordv[0];
+        wordexp_t word;
+        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+        csrFile = expandedPath;
     }
 
     return true;
@@ -616,9 +618,11 @@ bool PlainConfig::FleetProvisioning::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE))
     {
-        wordexp_t expandedPath;
-        wordexp(cliArgs.at(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE).c_str(), &expandedPath, 0);
-        csrFile = expandedPath.we_wordv[0];
+        wordexp_t word;
+        wordexp(cliArgs.at(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+        csrFile = expandedPath;
     }
 
     return true;
