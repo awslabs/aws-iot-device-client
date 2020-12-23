@@ -143,37 +143,40 @@ int FileUtils::permissionsMaskToInt(mode_t mask)
 
 size_t FileUtils::getFileSize(const std::string &filePath)
 {
-    wordexp_t expandedPath;
-    wordexp(filePath.c_str(), &expandedPath, 0);
+    wordexp_t word;
+    wordexp(filePath.c_str(), &word, 0);
+    string expandedPath = word.we_wordv[0];
+    wordfree(&word);
 
     struct stat file_info;
-    if (stat(expandedPath.we_wordv[0], &file_info) == 0)
+    if (stat(expandedPath.c_str(), &file_info) == 0)
     {
         return file_info.st_size;
     }
-
     return 0;
 }
 
 bool FileUtils::createDirectoryWithPermissions(const char *dirPath, mode_t permissions)
 {
     const int desiredPermissions = permissionsMaskToInt(permissions);
-    wordexp_t expandedPath;
-    wordexp(dirPath, &expandedPath, 0);
-    std::string dirExpandedPath = expandedPath.we_wordv[0];
-    if (!mkdirs(dirExpandedPath.c_str()))
+    wordexp_t word;
+    wordexp(dirPath, &word, 0);
+    string expandedPath = word.we_wordv[0];
+    wordfree(&word);
+
+    if (!mkdirs(expandedPath.c_str()))
     {
-        int actualPermissions = getFilePermissions(dirExpandedPath);
+        int actualPermissions = getFilePermissions(expandedPath);
         if (desiredPermissions != actualPermissions)
         {
-            chmod(dirExpandedPath.c_str(), permissions);
-            actualPermissions = getFilePermissions(dirExpandedPath);
+            chmod(expandedPath.c_str(), permissions);
+            actualPermissions = getFilePermissions(expandedPath);
             if (desiredPermissions != actualPermissions)
             {
                 LOGM_ERROR(
                     TAG,
                     "Failed to set appropriate permissions for directory %s, desired %d but found %d",
-                    dirExpandedPath.c_str(),
+                    expandedPath.c_str(),
                     desiredPermissions,
                     actualPermissions);
                 return false;
@@ -184,12 +187,12 @@ bool FileUtils::createDirectoryWithPermissions(const char *dirPath, mode_t permi
             LOGM_INFO(
                 TAG,
                 "Successfully create directory %s with required permissions %d",
-                dirExpandedPath.c_str(),
+                expandedPath.c_str(),
                 desiredPermissions);
             return true;
         }
     }
 
-    LOGM_ERROR(TAG, "Failed to create directory %s", dirExpandedPath.c_str());
+    LOGM_ERROR(TAG, "Failed to create directory %s", expandedPath.c_str());
     return false;
 }

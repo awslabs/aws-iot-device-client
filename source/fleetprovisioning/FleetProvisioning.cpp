@@ -89,6 +89,8 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
             wordexp(keyPathStream.str().c_str(), &expandedKeyPath, 0);
             keyPath = expandedKeyPath.we_wordv[0];
 
+            wordfree(&expandedCertPath);
+            wordfree(&expandedKeyPath);
             if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()) &&
                 FileUtils::StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str()))
             {
@@ -263,6 +265,8 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
             wordexp_t expandedPath;
             wordexp(certPathStream.str().c_str(), &expandedPath, 0);
             certPath = expandedPath.we_wordv[0];
+            wordfree(&expandedPath);
+
             if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()))
             {
                 LOGM_INFO(TAG, "Stored certificate in %s file", certPath.c_str());
@@ -563,13 +567,15 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
 
 bool FleetProvisioning::GetCsrFileContent(const string filePath)
 {
-    wordexp_t expandedPath;
-    wordexp(filePath.c_str(), &expandedPath, 0);
+    wordexp_t word;
+    wordexp(filePath.c_str(), &word, 0);
+    string expandedPath = word.we_wordv[0];
+    wordfree(&word);
 
     struct stat info;
-    if (stat(expandedPath.we_wordv[0], &info) != 0)
+    if (stat(expandedPath.c_str(), &info) != 0)
     {
-        LOGM_ERROR(TAG, "Unable to open CSR file %s, file does not exist", expandedPath.we_wordv[0]);
+        LOGM_ERROR(TAG, "Unable to open CSR file %s, file does not exist", expandedPath.c_str());
         return false;
     }
 
@@ -585,9 +591,9 @@ bool FleetProvisioning::GetCsrFileContent(const string filePath)
         return false;
     }
 
-    string csrFileParentDir = FileUtils::extractParentDirectory(expandedPath.we_wordv[0]);
+    string csrFileParentDir = FileUtils::extractParentDirectory(expandedPath.c_str());
     int actualCsrDirPermissions = FileUtils::getFilePermissions(csrFileParentDir);
-    int actualCsrFilePermissions = FileUtils::getFilePermissions(expandedPath.we_wordv[0]);
+    int actualCsrFilePermissions = FileUtils::getFilePermissions(expandedPath.c_str());
     if (Permissions::CSR_DIR != actualCsrDirPermissions)
     {
         LOGM_ERROR(
@@ -604,17 +610,17 @@ bool FleetProvisioning::GetCsrFileContent(const string filePath)
         LOGM_ERROR(
             TAG,
             "File permissions for CSR file %s are not set to the recommended setting of %d, found %d instead",
-            expandedPath.we_wordv[0],
+            expandedPath.c_str(),
             Permissions::CSR_FILE,
             actualCsrFilePermissions);
         return false;
     }
 
-    ifstream setting(expandedPath.we_wordv[0]);
+    ifstream setting(expandedPath.c_str());
     if (!setting.is_open())
     {
         LOGM_ERROR(
-            TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to open CSR file: '%s' ***", expandedPath.we_wordv[0]);
+            TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to open CSR file: '%s' ***", expandedPath.c_str());
         return false;
     }
     if (setting.peek() == ifstream::traits_type::eof())
@@ -646,9 +652,11 @@ bool FleetProvisioning::ExportRuntimeConfig(
     "%s": "%s"
     }
 })";
-    wordexp_t expandedPath;
-    wordexp(file.c_str(), &expandedPath, 0);
-    ofstream clientConfig(expandedPath.we_wordv[0]);
+    wordexp_t word;
+    wordexp(file.c_str(), &word, 0);
+    string expandedPath = word.we_wordv[0];
+    wordfree(&word);
+    ofstream clientConfig(expandedPath);
     if (!clientConfig.is_open())
     {
         LOGM_ERROR(TAG, "Unable to open file: '%s'", file.c_str());
