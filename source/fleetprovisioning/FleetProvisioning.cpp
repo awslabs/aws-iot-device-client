@@ -357,6 +357,9 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
 
     if (CreateCertificateAndKeys(identityClient) && RegisterThing(identityClient))
     {
+        /*
+         * Store data in runtime conf file and update @config object.
+         */
         if (!ExportRuntimeConfig(
                 Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
                 certPath.c_str(),

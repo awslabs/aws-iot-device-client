@@ -46,6 +46,12 @@ namespace Aws
                      * STDERR output issued by the child process should be marked as a job failure in IoT Core
                      */
                     const char *JOB_ATTR_ALLOW_STDERR = "allowStdErr";
+
+                    /**
+                     * \brief A field within a job document that the Jobs feature uses to determine whether
+                     * STDOUT issued by the child process should be published when updating the job execution status
+                     */
+                    const char *JOB_ATTR_INCLUDE_STDOUT = "includeStdOut";
                     /**
                      * \brief A field within a Job document that the Jobs feature uses to determine the location of
                      * the executable that should be run to handle this job
@@ -118,15 +124,7 @@ namespace Aws
                      * \brief User provided handler directory passed either through command-line arguments or through
                      * the Json configuration file
                      */
-                    std::string jobHandlerDir;
-                    /**
-                     * \brief whether to include StdOut information when calling UpdateJobExecution
-                     *
-                     * By default, we do not include the STDOUT output from the child process when updating the job
-                     * execution, since this output can be lengthy. TODO we should allow customers to pass this
-                     * attribute as part of the job doc in case the STDOUT is useful in debugging.
-                     */
-                    bool includeStdoutInUpdates = false;
+                    std::string jobHandlerDir = DEFAULT_JOBS_HANDLER_DIR;
 
                     // Ack handlers
                     /**
