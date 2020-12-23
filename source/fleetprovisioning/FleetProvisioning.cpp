@@ -78,11 +78,12 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
             Aws::Crt::String certificateID = response->CertificateId->c_str();
             certificateOwnershipToken = *response->CertificateOwnershipToken;
 
-            ostringstream certPathStream;
-            ostringstream keyPathStream;
+            ostringstream certPathStream, keyPathStream;
+            wordexp_t expandedCertPath, expandedKeyPath;
+
             certPathStream << keyDir << certificateID << "-certificate.pem.crt";
             keyPathStream << keyDir << certificateID << "-private.pem.key";
-            wordexp_t expandedCertPath, expandedKeyPath;
+
             wordexp(certPathStream.str().c_str(), &expandedCertPath, 0);
             certPath = expandedCertPath.we_wordv[0];
             wordexp(keyPathStream.str().c_str(), &expandedKeyPath, 0);
