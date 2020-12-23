@@ -324,35 +324,32 @@ void JobsFeature::publishUpdateJobExecutionStatus(JobExecutionData data, JobExec
         statusDetails["reason"] = statusInfo.reason.substr(0, MAX_STATUS_DETAIL_LENGTH).c_str();
     }
 
-    if (!statusInfo.stdoutput.empty() || !statusInfo.stderror.empty())
+    if (!statusInfo.stdoutput.empty())
     {
-        if (includeStdoutInUpdates && !statusInfo.stdoutput.empty())
-        {
-            // We want the most recent output since we can only include 1024 characters in the job execution update
-            int startPos = statusInfo.stdoutput.size() > MAX_STATUS_DETAIL_LENGTH
-                               ? statusInfo.stdoutput.size() - MAX_STATUS_DETAIL_LENGTH
-                               : 0;
-            // TODO We need to add filtering of invalid characters for the status details that may come from weird
-            // process output. The valid values for a statusDetail value are '[^\p{C}]+ which translates into
-            // "everything other than invisible control characters and unused code points" (See
-            // http://www.unicode.org/reports/tr18/#General_Category_Property)
-            statusDetails["stdout"] = statusInfo.stdoutput.substr(startPos, statusInfo.stdoutput.size()).c_str();
-        }
-        else
-        {
-            LOG_DEBUG(TAG, "Not including stdout with the status details");
-        }
-        if (!statusInfo.stderror.empty())
-        {
-            int startPos = statusInfo.stderror.size() > MAX_STATUS_DETAIL_LENGTH
-                               ? statusInfo.stderror.size() - MAX_STATUS_DETAIL_LENGTH
-                               : 0;
-            statusDetails["stderr"] = statusInfo.stderror.substr(startPos, statusInfo.stderror.size()).c_str();
-        }
-        else
-        {
-            LOG_DEBUG(TAG, "Not including stderr with the status details");
-        }
+        // We want the most recent output since we can only include 1024 characters in the job execution update
+        int startPos = statusInfo.stdoutput.size() > MAX_STATUS_DETAIL_LENGTH
+                           ? statusInfo.stdoutput.size() - MAX_STATUS_DETAIL_LENGTH
+                           : 0;
+        // TODO We need to add filtering of invalid characters for the status details that may come from weird
+        // process output. The valid values for a statusDetail value are '[^\p{C}]+ which translates into
+        // "everything other than invisible control characters and unused code points" (See
+        // http://www.unicode.org/reports/tr18/#General_Category_Property)
+        statusDetails["stdout"] = statusInfo.stdoutput.substr(startPos, statusInfo.stdoutput.size()).c_str();
+    }
+    else
+    {
+        LOG_DEBUG(TAG, "Not including stdout with the status details");
+    }
+    if (!statusInfo.stderror.empty())
+    {
+        int startPos = statusInfo.stderror.size() > MAX_STATUS_DETAIL_LENGTH
+                           ? statusInfo.stderror.size() - MAX_STATUS_DETAIL_LENGTH
+                           : 0;
+        statusDetails["stderr"] = statusInfo.stderror.substr(startPos, statusInfo.stderror.size()).c_str();
+    }
+    else
+    {
+        LOG_DEBUG(TAG, "Not including stderr with the status details");
     }
 
     /** When we update the job execution status, we need to perform an exponential
@@ -436,6 +433,7 @@ void JobsFeature::executeJob(JobExecutionData job)
     Aws::Crt::JsonView jobDoc = job.JobDocument->View();
     Aws::Crt::String operation = jobDoc.GetString(JOB_ATTR_OP);
     Aws::Crt::String path = jobDoc.GetString(JOB_ATTR_PATH);
+    bool includeStdOut = jobDoc.KeyExists(JOB_ATTR_INCLUDE_STDOUT) ? jobDoc.GetBool(JOB_ATTR_INCLUDE_STDOUT) : false;
 
     vector<string> args;
     ostringstream argsStringForLogging;
@@ -532,14 +530,14 @@ void JobsFeature::executeJob(JobExecutionData job)
     if (!executionStatus && engine->hasErrors() <= allowStdErr)
     {
         LOG_INFO(TAG, "Job executed successfully!");
-        publishUpdateJobExecutionStatus(job, {JobStatus::SUCCEEDED, "", engine->getStdOut(), engine->getStdErr()});
+        string standardOut = includeStdOut ? engine->getStdOut() : "";
+        publishUpdateJobExecutionStatus(job, {JobStatus::SUCCEEDED, "", standardOut, engine->getStdErr()});
     }
     else
     {
         LOG_WARN(TAG, "Job execution failed!");
-        // TODO See if we can add some more helpful log messages based on the error output
-        publishUpdateJobExecutionStatus(
-            job, {JobStatus::FAILED, reason.str(), engine->getStdOut(), engine->getStdErr()});
+        string standardOut = includeStdOut ? engine->getStdOut() : "";
+        publishUpdateJobExecutionStatus(job, {JobStatus::FAILED, reason.str(), standardOut, engine->getStdErr()});
     }
 
     unique_lock<mutex> lock(canStopLock);
