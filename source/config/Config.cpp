@@ -70,25 +70,34 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_CERT;
     if (json.ValueExists(jsonKey))
     {
-        wordexp_t expandedPath;
-        wordexp(json.GetString(jsonKey).c_str(), &expandedPath, 0);
-        cert = expandedPath.we_wordv[0];
+        wordexp_t word;
+        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+
+        cert = expandedPath;
     }
 
     jsonKey = JSON_KEY_KEY;
     if (json.ValueExists(jsonKey))
     {
-        wordexp_t expandedPath;
-        wordexp(json.GetString(jsonKey).c_str(), &expandedPath, 0);
-        key = expandedPath.we_wordv[0];
+        wordexp_t word;
+        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+
+        key = expandedPath;
     }
 
     jsonKey = JSON_KEY_ROOT_CA;
     if (json.ValueExists(jsonKey))
     {
-        wordexp_t expandedPath;
-        wordexp(json.GetString(jsonKey).c_str(), &expandedPath, 0);
-        rootCa = expandedPath.we_wordv[0];
+        wordexp_t word;
+        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+
+        rootCa = expandedPath;
     }
 
     jsonKey = JSON_KEY_THING_NAME;
@@ -156,21 +165,30 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::CLI_CERT))
     {
-        wordexp_t expandedPath;
-        wordexp(cliArgs.at(PlainConfig::CLI_CERT).c_str(), &expandedPath, 0);
-        cert = expandedPath.we_wordv[0];
+        wordexp_t word;
+        wordexp(cliArgs.at(PlainConfig::CLI_CERT).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+
+        cert = expandedPath;
     }
     if (cliArgs.count(PlainConfig::CLI_KEY))
     {
-        wordexp_t expandedPath;
-        wordexp(cliArgs.at(PlainConfig::CLI_KEY).c_str(), &expandedPath, 0);
-        key = expandedPath.we_wordv[0];
+        wordexp_t word;
+        wordexp(cliArgs.at(PlainConfig::CLI_KEY).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+
+        key = expandedPath;
     }
     if (cliArgs.count(PlainConfig::CLI_ROOT_CA))
     {
-        wordexp_t expandedPath;
-        wordexp(cliArgs.at(PlainConfig::CLI_ROOT_CA).c_str(), &expandedPath, 0);
-        rootCa = expandedPath.we_wordv[0];
+        wordexp_t word;
+        wordexp(cliArgs.at(PlainConfig::CLI_ROOT_CA).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+
+        rootCa = expandedPath;
     }
     if (cliArgs.count(PlainConfig::CLI_THING_NAME))
     {
@@ -335,9 +353,12 @@ bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_LOG_FILE;
     if (json.ValueExists(jsonKey))
     {
-        wordexp_t expandedPath;
-        wordexp(json.GetString(jsonKey).c_str(), &expandedPath, 0);
-        file = expandedPath.we_wordv[0];
+        wordexp_t word;
+        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+
+        file = expandedPath;
     }
 
     return true;
@@ -373,9 +394,12 @@ bool PlainConfig::LogConfig::LoadFromCliArgs(const CliArgs &cliArgs)
 
     if (cliArgs.count(CLI_LOG_FILE))
     {
-        wordexp_t expandedPath;
-        wordexp(cliArgs.at(CLI_LOG_FILE).c_str(), &expandedPath, 0);
-        file = expandedPath.we_wordv[0];
+        wordexp_t word;
+        wordexp(cliArgs.at(CLI_LOG_FILE).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+
+        file = expandedPath;
     }
 
     return true;
@@ -411,9 +435,12 @@ bool PlainConfig::Jobs::LoadFromCliArgs(const CliArgs &cliArgs)
 
     if (cliArgs.count(PlainConfig::Jobs::CLI_HANDLER_DIR))
     {
-        wordexp_t expandedPath;
-        wordexp(cliArgs.at(PlainConfig::Jobs::CLI_HANDLER_DIR).c_str(), &expandedPath, 0);
-        handlerDir = expandedPath.we_wordv[0];
+        wordexp_t word;
+        wordexp(cliArgs.at(CLI_HANDLER_DIR).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+
+        handlerDir = expandedPath;
     }
 
     return true;
@@ -662,17 +689,23 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromJson(const Crt::JsonVi
     jsonKey = JSON_KEY_CERT;
     if (json.ValueExists(jsonKey))
     {
-        wordexp_t expandedPath;
-        wordexp(json.GetString(jsonKey).c_str(), &expandedPath, 0);
-        cert = expandedPath.we_wordv[0];
+        wordexp_t word;
+        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+
+        cert = expandedPath;
     }
 
     jsonKey = JSON_KEY_KEY;
     if (json.ValueExists(jsonKey))
     {
-        wordexp_t expandedPath;
-        wordexp(json.GetString(jsonKey).c_str(), &expandedPath, 0);
-        key = expandedPath.we_wordv[0];
+        wordexp_t word;
+        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+
+        key = expandedPath;
     }
 
     jsonKey = JSON_KEY_THING_NAME;
@@ -865,13 +898,15 @@ bool Config::ValidateAndStoreRuntimeConfig()
 
 bool Config::ParseConfigFile(const string &file)
 {
-    wordexp_t expandedPath;
-    wordexp(file.c_str(), &expandedPath, 0);
+    wordexp_t word;
+    wordexp(file.c_str(), &word, 0);
+    string expandedPath = word.we_wordv[0];
+    wordfree(&word);
 
     struct stat info;
-    if (stat(expandedPath.we_wordv[0], &info) != 0)
+    if (stat(expandedPath.c_str(), &info) != 0)
     {
-        LOGM_DEBUG(TAG, "Unable to open config file %s, file does not exist", expandedPath.we_wordv[0]);
+        LOGM_DEBUG(TAG, "Unable to open config file %s, file does not exist", expandedPath.c_str());
         return false;
     }
 
@@ -887,9 +922,9 @@ bool Config::ParseConfigFile(const string &file)
         return false;
     }
 
-    string configFileParentDir = FileUtils::extractParentDirectory(expandedPath.we_wordv[0]);
+    string configFileParentDir = FileUtils::extractParentDirectory(expandedPath.c_str());
     int actualConfigDirPermissions = FileUtils::getFilePermissions(configFileParentDir);
-    int actualConfigFilePermissions = FileUtils::getFilePermissions(expandedPath.we_wordv[0]);
+    int actualConfigFilePermissions = FileUtils::getFilePermissions(expandedPath.c_str());
     if (Permissions::CONFIG_DIR != actualConfigDirPermissions)
     {
         LOGM_WARN(
@@ -905,15 +940,15 @@ bool Config::ParseConfigFile(const string &file)
         LOGM_WARN(
             TAG,
             "File permissions for configuration file %s are not set to the recommended setting of %d, found %d instead",
-            expandedPath.we_wordv[0],
+            expandedPath.c_str(),
             Permissions::CONFIG_FILE,
             actualConfigFilePermissions);
     }
 
-    ifstream setting(expandedPath.we_wordv[0]);
+    ifstream setting(expandedPath.c_str());
     if (!setting.is_open())
     {
-        LOGM_ERROR(TAG, "Unable to open file: '%s'", expandedPath.we_wordv[0]);
+        LOGM_ERROR(TAG, "Unable to open file: '%s'", expandedPath.c_str());
         return false;
     }
 

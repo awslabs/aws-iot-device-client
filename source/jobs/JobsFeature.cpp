@@ -576,17 +576,18 @@ int JobsFeature::init(
     baseNotifier = notifier;
     thingName = config.thingName->c_str();
 
-    wordexp_t expandedPath;
+    wordexp_t word;
     if (!config.jobs.handlerDir.empty())
     {
-        wordexp(config.jobs.handlerDir.c_str(), &expandedPath, 0);
-        jobHandlerDir = expandedPath.we_wordv[0];
+        wordexp(config.jobs.handlerDir.c_str(), &word, 0);
+        jobHandlerDir = word.we_wordv[0];
     }
     else
     {
-        wordexp(DEFAULT_JOBS_HANDLER_DIR.c_str(), &expandedPath, 0);
-        jobHandlerDir = expandedPath.we_wordv[0];
+        wordexp(DEFAULT_JOBS_HANDLER_DIR.c_str(), &word, 0);
+        jobHandlerDir = word.we_wordv[0];
     }
+    wordfree(&word);
 
     return 0;
 }
