@@ -3,6 +3,7 @@
 
 #include "SharedCrtResourceManager.h"
 #include "logging/LoggerFactory.h"
+#include "util/FileUtils.h"
 
 #include <aws/crt/Api.h>
 #include <sys/stat.h>
@@ -13,6 +14,7 @@ using namespace Aws::Crt::Io;
 using namespace Aws::Crt::Mqtt;
 using namespace Aws::Iot;
 using namespace Aws::Iot::DeviceClient;
+using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr int SharedCrtResourceManager::DEFAULT_WAIT_TIME_SECONDS;
@@ -33,17 +35,98 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
         LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.key->c_str());
         locatedAll = false;
     }
+    else
+    {
+        string parentDir = FileUtils::extractParentDirectory(config.key->c_str());
+        int actualParentDirPermissions = FileUtils::getFilePermissions(parentDir);
+        if (Permissions::KEY_DIR != actualParentDirPermissions)
+        {
+            LOGM_ERROR(
+                TAG,
+                "Permissions for private key parent directory %s should be %d but found %d instead",
+                parentDir.c_str(),
+                Permissions::KEY_DIR,
+                actualParentDirPermissions);
+            locatedAll = false;
+        }
+
+        int actualPrivateKeyPermissions = FileUtils::getFilePermissions(config.key->c_str());
+        if (Permissions::PRIVATE_KEY != actualPrivateKeyPermissions)
+        {
+            LOGM_ERROR(
+                TAG,
+                "Permissions for private key %s should be %d but found %d instead",
+                config.key->c_str(),
+                Permissions::PRIVATE_KEY,
+                actualPrivateKeyPermissions);
+            locatedAll = false;
+        }
+    }
 
     if (stat(config.cert->c_str(), &fileInfo) != 0)
     {
         LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.cert->c_str());
         locatedAll = false;
     }
+    else
+    {
+        string parentDir = FileUtils::extractParentDirectory(config.cert->c_str());
+        int actualParentDirPermissions = FileUtils::getFilePermissions(parentDir);
+        if (Permissions::CERT_DIR != actualParentDirPermissions)
+        {
+            LOGM_ERROR(
+                TAG,
+                "Permissions for public key parent directory %s should be %d but found %d instead",
+                parentDir.c_str(),
+                Permissions::CERT_DIR,
+                actualParentDirPermissions);
+            locatedAll = false;
+        }
+
+        int actualPublicKeyPermissions = FileUtils::getFilePermissions(config.cert->c_str());
+        if (Permissions::PUBLIC_CERT != actualPublicKeyPermissions)
+        {
+            LOGM_ERROR(
+                TAG,
+                "Permissions for public key %s should be %d but found %d instead",
+                config.cert->c_str(),
+                Permissions::PUBLIC_CERT,
+                actualPublicKeyPermissions);
+            locatedAll = false;
+        }
+    }
 
     if (stat(config.rootCa->c_str(), &fileInfo) != 0)
     {
         LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.rootCa->c_str());
         locatedAll = false;
+    }
+    else
+    {
+        string parentDir = FileUtils::extractParentDirectory(config.rootCa->c_str());
+        int actualParentDirPermissions = FileUtils::getFilePermissions(parentDir);
+        if (Permissions::ROOT_CA_DIR != actualParentDirPermissions)
+        {
+            LOGM_ERROR(
+                TAG,
+                "Permissions for Root CA parent directory %s should be %d but found %d instead",
+                parentDir.c_str(),
+                Permissions::ROOT_CA_DIR,
+                actualParentDirPermissions);
+            locatedAll = false;
+        }
+
+        int actualRootCAPermissions = FileUtils::getFilePermissions(config.rootCa->c_str());
+        if (Permissions::ROOT_CA != actualRootCAPermissions)
+        {
+            LOGM_ERROR(
+                TAG,
+                "Permissions for Root CA %s should be %d but found %d instead",
+                config.rootCa->c_str(),
+                Permissions::ROOT_CA,
+                actualRootCAPermissions);
+            locatedAll = false;
+        }
     }
 
     return locatedAll;
@@ -94,7 +177,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     if (!locateCredentials(config))
     {
         LOG_ERROR(TAG, "Failed to find file(s) required for establishing the MQTT connection");
-        return false;
+        return SharedCrtResourceManager::ABORT;
     }
     auto clientConfigBuilder = MqttClientConnectionConfigBuilder(config.cert->c_str(), config.key->c_str());
     clientConfigBuilder.WithEndpoint(config.endpoint->c_str());

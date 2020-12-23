@@ -33,7 +33,7 @@ namespace Aws
                      * If the user does not specify a desired log location in either the command line arguments
                      * or the Json configuration file, this is the default log that will be used
                      */
-                    std::string DEFAULT_LOG_FILE = "/var/log/aws-iot-device-client.log";
+                    std::string DEFAULT_LOG_FILE = "/var/log/aws-iot-device-client/aws-iot-device-client.log";
 
                     /**
                      * \brief Runtime configuration for which log file to log to.
