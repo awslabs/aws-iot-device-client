@@ -1,4 +1,4 @@
 {
     "operation": "echo",
-    "args": "\"Hello world!\""
+    "args": ["\"Hello world!\""]
 }
