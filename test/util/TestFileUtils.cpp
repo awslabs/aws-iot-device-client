@@ -55,9 +55,7 @@ TEST(FileUtils, handlesEmptyPathForStoreValueInFile)
 TEST(FileUtils, testStoreValueInFile)
 {
     ASSERT_TRUE(FileUtils::StoreValueInFile(
-        "This file was created as part of testStoreValueInFile unit test. Make sure you run this test with root "
-        "permissions",
-        "/tmp/testStoreValueInFile.txt"));
+        "This file was created as part of testStoreValueInFile unit test.", "/tmp/testStoreValueInFile.txt"));
 }
 TEST(FileUtils, handlesRootDir)
 {

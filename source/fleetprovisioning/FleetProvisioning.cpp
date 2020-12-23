@@ -82,11 +82,11 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
             ostringstream keyPathStream;
             certPathStream << keyDir << certificateID << "-certificate.pem.crt";
             keyPathStream << keyDir << certificateID << "-private.pem.key";
-            wordexp_t expandedPath;
-            wordexp(certPathStream.str().c_str(), &expandedPath, 0);
-            certPath = expandedPath.we_wordv[0];
-            wordexp(keyPathStream.str().c_str(), &expandedPath, 0);
-            keyPath = expandedPath.we_wordv[0];
+            wordexp_t expandedCertPath, expandedKeyPath;
+            wordexp(certPathStream.str().c_str(), &expandedCertPath, 0);
+            certPath = expandedCertPath.we_wordv[0];
+            wordexp(keyPathStream.str().c_str(), &expandedKeyPath, 0);
+            keyPath = expandedKeyPath.we_wordv[0];
 
             if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()) &&
                 FileUtils::StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str()))
@@ -573,14 +573,14 @@ bool FleetProvisioning::GetCsrFileContent(const string filePath)
     }
 
     size_t incomingFileSize = FileUtils::getFileSize(filePath);
-    if (5000 < incomingFileSize)
+    if (2000 < incomingFileSize)
     {
         LOGM_ERROR(
             TAG,
             "Refusing to open CSR file %s, file size %zu bytes is greater than allowable limit of %zu bytes",
             filePath.c_str(),
             incomingFileSize,
-            5000);
+            2000);
         return false;
     }
 
@@ -623,6 +623,7 @@ bool FleetProvisioning::GetCsrFileContent(const string filePath)
     }
 
     std::string fileContent((std::istreambuf_iterator<char>(setting)), std::istreambuf_iterator<char>());
+    //    TODO: Pending Security review. (Saving CSR file content in Class private variable)
     csrFile = fileContent;
 
     LOGM_INFO(TAG, "Successfully fetched CSR file '%s' and stored its content.", filePath.c_str());

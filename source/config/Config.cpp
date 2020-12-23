@@ -596,7 +596,9 @@ bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_CSR_FILE;
     if (json.ValueExists(jsonKey))
     {
-        csrFile = json.GetString(jsonKey).c_str();
+        wordexp_t expandedPath;
+        wordexp(json.GetString(jsonKey).c_str(), &expandedPath, 0);
+        csrFile = expandedPath.we_wordv[0];
     }
 
     return true;
@@ -614,7 +616,9 @@ bool PlainConfig::FleetProvisioning::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE))
     {
-        csrFile = cliArgs.at(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE).c_str();
+        wordexp_t expandedPath;
+        wordexp(cliArgs.at(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE).c_str(), &expandedPath, 0);
+        csrFile = expandedPath.we_wordv[0];
     }
 
     return true;
