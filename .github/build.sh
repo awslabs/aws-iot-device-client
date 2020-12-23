@@ -1,14 +1,14 @@
 #!/bin/sh
 
-buildMode="default"
+compileMode="default"
 
 # Check if first argument is compile mode
 compileModeArgument=$(echo "$1" | cut -c3-14)
 if [ "$compileModeArgument" = "compile-mode" ]; then
-  compileMode=$(echo "$1" | cut -d "=" -f2-)
-  case $compileMode in
+  compileModeTmp=$(echo "$1" | cut -d "=" -f2-)
+  case $compileModeTmp in
     st_component_mode)
-    buildMode="st_component_mode"
+    compileMode="st_component_mode"
     ;;
     *)
     echo "No compile mode match found"
@@ -66,7 +66,7 @@ if [ ! -d "./build" ]; then
 fi
 cd ./build/
 
-case $buildMode in
+case $compileMode in
     st_component_mode)
     echo "Building in ST component mode"
     cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON
