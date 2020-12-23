@@ -111,7 +111,7 @@ To configure the AWS IoT Device Client via JSON configuration file, you can also
 where `~/` refers to the home directory of the user running the Device Client. If you'd like to specify a different location
 for your configuration file, you can pass the `--config-file <your-path>` flag to the AWS IoT Device Client. 
 
-There are four (4) fields that MUST be passed to the AWS IoT Device Client through some combination of either CLI arguments, 
+There are five (5) fields that MUST be passed to the AWS IoT Device Client through some combination of either CLI arguments, 
 JSON configuration, or both:
 
 `endpoint`: This is the IoT Core endpoint that your device should connect to. This can be found by navigating to the settings
@@ -124,6 +124,7 @@ field by running `aws iot describe-endpoint` on the CLI.
 
 `root-ca`: This is the path to your device's Root Certificate Authority. (https://www.amazontrust.com/repository/AmazonRootCA1.pem)
 
+`thing-name`: This is the name for your thing. It should be unique across your regional AWS account. 
 
 ## Jobs Feature
 
@@ -138,14 +139,16 @@ When a new Job is received via these topics, the Jobs feature will look for and 
 
 ### Creating a Job
 
+[View a sample job document here] (sample-job-docs/install-packages.json)
+
 The following fields are extracted from the incoming Job document by the Jobs feature within the AWS IoT Device Client when a 
 job is received.
 
-`operation` [string] (Required): This is the executable or script that you'd like to run. Here we can specify a script located
+`operation` *string* (Required): This is the executable or script that you'd like to run. Here we can specify a script located
 in the Device Client's handler directory, such as `install-packages.sh`, or it could be a well known executable binary
 in the Device Client's environment path, such as `echo` or `apt-get`.
 
-`args` [string array] (Optional): This is a JSON array of string arguments which will be passed to the specified operation. For example, 
+`args` *string array* (Optional): This is a JSON array of string arguments which will be passed to the specified operation. For example, 
 if we want to run our `install-packages.sh` to install the package `ifupdown`, our args field would look like:
 ```
 ...
@@ -160,7 +163,7 @@ If we wanted our remote device to print out "Hello World", then our job document
 }
 ```
 
-`path` [string] (Optional): This field tells the Jobs feature where it should look to find an executable that matches the specified
+`path` *string* (Optional): This field tells the Jobs feature where it should look to find an executable that matches the specified
 operation. If this field is omitted, the Jobs feature will assume that the executable can be found in its path. If
 you expect that the executable (operation) should be found in the Job feature's handler directory 
 (~/.aws-iot-device-client/jobs by default or specified via command line/json configuration values), then the path
@@ -177,7 +180,7 @@ The path could also be specified as a particular directory that is expected on t
 ...
 ```
 
-`includeStdOut` [boolean] (Optional): This field tells the Jobs feature whether the standard output (STDOUT) of the child process
+`includeStdOut` *boolean* (Optional): This field tells the Jobs feature whether the standard output (STDOUT) of the child process
 should be included in the job execution update that is published to the IoT Jobs service. For example:
 ```
 ...
@@ -185,7 +188,7 @@ should be included in the job execution update that is published to the IoT Jobs
 ...
 ```
 
-`allowStdErr` [integer] (Optional): This field tells the Jobs feature whether a specific number of lines of output on STDERR
+`allowStdErr` *integer* (Optional): This field tells the Jobs feature whether a specific number of lines of output on STDERR
 from the job handler may be acceptable. If this field is omitted, the Jobs feature will use a default of 0 (zero), meaning
 that any lines of output on STDERR will cause the job to be marked as failed. For example: 
 ```
