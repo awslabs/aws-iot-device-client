@@ -76,7 +76,7 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
         {
             LOGM_ERROR(
                 TAG,
-                "Permissions for public key parent directory %s should be %d but found %d instead",
+                "Permissions for public cert parent directory %s should be %d but found %d instead",
                 parentDir.c_str(),
                 Permissions::CERT_DIR,
                 actualParentDirPermissions);
@@ -88,7 +88,7 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
         {
             LOGM_ERROR(
                 TAG,
-                "Permissions for public key %s should be %d but found %d instead",
+                "Permissions for public cert %s should be %d but found %d instead",
                 config.cert->c_str(),
                 Permissions::PUBLIC_CERT,
                 actualPublicKeyPermissions);

@@ -155,26 +155,30 @@ size_t FileUtils::getFileSize(const std::string &filePath)
     {
         return file_info.st_size;
     }
-
     return 0;
 }
 
 bool FileUtils::createDirectoryWithPermissions(const char *dirPath, mode_t permissions)
 {
     const int desiredPermissions = permissionsMaskToInt(permissions);
-    if (!mkdirs(dirPath))
+    wordexp_t word;
+    wordexp(dirPath, &word, 0);
+    string expandedPath = word.we_wordv[0];
+    wordfree(&word);
+
+    if (!mkdirs(expandedPath.c_str()))
     {
-        int actualPermissions = getFilePermissions(dirPath);
+        int actualPermissions = getFilePermissions(expandedPath);
         if (desiredPermissions != actualPermissions)
         {
-            chmod(dirPath, permissions);
-            actualPermissions = getFilePermissions(dirPath);
+            chmod(expandedPath.c_str(), permissions);
+            actualPermissions = getFilePermissions(expandedPath);
             if (desiredPermissions != actualPermissions)
             {
                 LOGM_ERROR(
                     TAG,
                     "Failed to set appropriate permissions for directory %s, desired %d but found %d",
-                    dirPath,
+                    expandedPath.c_str(),
                     desiredPermissions,
                     actualPermissions);
                 return false;
@@ -183,11 +187,14 @@ bool FileUtils::createDirectoryWithPermissions(const char *dirPath, mode_t permi
         else
         {
             LOGM_INFO(
-                TAG, "Successfully create directory %s with required permissions %d", dirPath, desiredPermissions);
+                TAG,
+                "Successfully create directory %s with required permissions %d",
+                expandedPath.c_str(),
+                desiredPermissions);
             return true;
         }
     }
 
-    LOGM_ERROR(TAG, "Failed to create directory %s", dirPath);
+    LOGM_ERROR(TAG, "Failed to create directory %s", expandedPath.c_str());
     return false;
 }

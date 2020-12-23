@@ -84,7 +84,7 @@ cmake ../ -DEXCLUDE_DD=ON
 
 ### Running the tests
 ```
-./build/test-aws-iot-device-client 
+./build/test/test-aws-iot-device-client 
 ```
 
 ## Setting Up The Device Client

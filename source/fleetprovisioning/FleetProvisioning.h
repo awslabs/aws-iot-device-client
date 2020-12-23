@@ -39,52 +39,61 @@ namespace Aws
                  */
                 static constexpr int DEFAULT_WAIT_TIME_SECONDS = 10;
                 /**
-                 * \brief an promise variable to check if publish request for CreateKeysAndCertificate was received
+                 * \brief a promise variable to check if publish request for CreateKeysAndCertificate was received
                  */
                 std::promise<bool> keysPublishCompletedPromise;
                 /**
-                 * \brief an promise variable to check if subscription request to CreateKeysAndCertificate Accept topic
+                 * \brief a promise variable to check if subscription request to CreateKeysAndCertificate Accept topic
                  * was executed
                  */
                 std::promise<bool> keysAcceptedCompletedPromise;
                 /**
-                 * \brief an promise variable to check if subscription to CreateKeysAndCertificate Reject topic was
+                 * \brief a promise variable to check if subscription to CreateKeysAndCertificate Reject topic was
                  * executed
                  */
                 std::promise<bool> keysRejectedCompletedPromise;
                 /**
-                 * \brief an promise variable to check if publish request for CreateKeysAndCertificate was executed
+                 * \brief a promise variable to check if publish request for CreateKeysAndCertificate was executed
                  */
                 std::promise<bool> keysCreationCompletedPromise;
-                /**
-                 * \brief an promise variable to check if publish request for CreateKeysAndCertificate was executed.
-                 * Client would know if the request was rejected using this promise variable
-                 */
-                std::promise<void> keysCreationFailedPromise;
 
                 /**
-                 * \brief an promise variable to check if publish request for RegisterThing was received
+                 * \brief a promise variable to check if publish request for RegisterThing was received
+                 */
+                std::promise<bool> csrPublishCompletedPromise;
+                /**
+                 * \brief a promise variable to check if subscription request to CreateCertificateFromCsr Accept topic
+                 * was executed
+                 */
+                std::promise<bool> csrAcceptedCompletedPromise;
+                /**
+                 * \brief a promise variable to check if subscription to CreateCertificateFromCsr Reject topic was
+                 * executed
+                 */
+                std::promise<bool> csrRejectedCompletedPromise;
+                /**
+                 * \brief a promise variable to check if publish request for CreateCertificateFromCsr was executed
+                 */
+                std::promise<bool> csrCreationCompletedPromise;
+
+                /**
+                 * \brief a promise variable to check if publish request for RegisterThing was received
                  */
                 std::promise<bool> registerPublishCompletedPromise;
                 /**
-                 * \brief an promise variable to check if subscription to RegisterThing Accept topic was
+                 * \brief a promise variable to check if subscription to RegisterThing Accept topic was
                  * executed
                  */
                 std::promise<bool> registerAcceptedCompletedPromise;
                 /**
-                 * \brief an promise variable to check if subscription to RegisterThing Reject topic was
+                 * \brief a promise variable to check if subscription to RegisterThing Reject topic was
                  * executed
                  */
                 std::promise<bool> registerRejectedCompletedPromise;
                 /**
-                 * \brief an promise variable to check if publish request for RegisterThing was executed
+                 * \brief a promise variable to check if publish request for RegisterThing was executed
                  */
                 std::promise<bool> registerThingCompletedPromise;
-                /**
-                 * \brief an promise variable to check if publish request for RegisterThing was executed.
-                 * Client would know if the request was rejected using this promise variable
-                 */
-                std::promise<void> registerThingFailedPromise;
 
                 /**
                  * \brief stores certificate Ownership Token
@@ -113,12 +122,27 @@ namespace Aws
                 Aws::Crt::String templateName;
 
                 /**
+                 * \brief stores CSR file content
+                 */
+                std::string csrFile;
+
+                /**
                  * \brief creates a new certificate and private key using the AWS certificate authority
                  *
                  * @param identityClient used for subscribing and publishing request for creating resources
                  * @return returns true if resources are created successfully
                  */
-                bool CreateCertificateAndKeys(Iotidentity::IotIdentityClient identityClient);
+
+                bool CreateCertificateAndKey(Iotidentity::IotIdentityClient identityClient);
+
+                /**
+                 * \brief generate a certificate from a certificate signing request (CSR) that keeps user private key
+                 * secure
+                 *
+                 * @param identityClient used for subscribing and publishing request for creating resources
+                 * @return returns true if resources are created successfully
+                 */
+                bool CreateCertificateUsingCSR(Iotidentity::IotIdentityClient identityClient);
 
                 /**
                  * \brief registers the device with AWS IoT and create cloud resources
@@ -143,6 +167,14 @@ namespace Aws
                     const std::string &runtimeCertPath,
                     const std::string &runtimeKeyPath,
                     const std::string &runtimeThingName);
+
+                /**
+                 * \brief gets CSR file content
+                 *
+                 * @param filePath CSR file location
+                 * @return returns false if client is not able to open the file or if file is empty
+                 */
+                bool GetCsrFileContent(const std::string filePath);
             };
         } // namespace DeviceClient
     }     // namespace Iot

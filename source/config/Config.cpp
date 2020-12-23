@@ -600,9 +600,11 @@ bool PlainConfig::DeviceDefender::Validate() const
 
 constexpr char PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING[];
 constexpr char PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME[];
+constexpr char PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE[];
 
 constexpr char PlainConfig::FleetProvisioning::JSON_KEY_ENABLED[];
 constexpr char PlainConfig::FleetProvisioning::JSON_KEY_TEMPLATE_NAME[];
+constexpr char PlainConfig::FleetProvisioning::JSON_KEY_CSR_FILE[];
 
 bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
 {
@@ -618,6 +620,16 @@ bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
         templateName = json.GetString(jsonKey).c_str();
     }
 
+    jsonKey = JSON_KEY_CSR_FILE;
+    if (json.ValueExists(jsonKey))
+    {
+        wordexp_t word;
+        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+        csrFile = expandedPath;
+    }
+
     return true;
 }
 
@@ -630,6 +642,14 @@ bool PlainConfig::FleetProvisioning::LoadFromCliArgs(const CliArgs &cliArgs)
     if (cliArgs.count(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME))
     {
         templateName = cliArgs.at(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME).c_str();
+    }
+    if (cliArgs.count(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE))
+    {
+        wordexp_t word;
+        wordexp(cliArgs.at(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE).c_str(), &word, 0);
+        string expandedPath = word.we_wordv[0];
+        wordfree(&word);
+        csrFile = expandedPath;
     }
 
     return true;
@@ -764,6 +784,7 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 
         {PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING, false, false, nullptr},
         {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME, true, false, nullptr},
+        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE, true, false, nullptr},
     };
 
     map<string, ArgumentDefinition> argumentDefinitionMap;
@@ -981,7 +1002,10 @@ void Config::PrintHelpMessage()
         "%s <service>:\t\t\t\t\t\tConnect secure tunnel to specific service\n"
         "%s:\t\t\t\t\tDisable MQTT new tunnel notification for Secure Tunneling\n"
         "%s <interval-in-seconds>:\t\t\tPositive integer to publish Device Defender metrics\n"
-        "%s <template-name>:\t\t\tUse specified Fleet Provisioning template name\n";
+        "%s <template-name>:\t\t\tUse specified Fleet Provisioning template name\n"
+        "%s <csr-file-path>:\t\t\tUse specified CSR file to generate a certificate by keeping user private key secure. "
+        "If CSR file is not provided, Client will use Claim Certificate and Private key to generate new Certificate "
+        "and Private Key while provisioning the device\n";
 
     cout << FormatMessage(
         helpMessageTemplate,
@@ -1006,7 +1030,8 @@ void Config::PrintHelpMessage()
         PlainConfig::Tunneling::CLI_TUNNELING_SERVICE,
         PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION,
         PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL,
-        PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME);
+        PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME,
+        PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE);
 }
 
 bool Config::ExportDefaultSetting(const string &file)
@@ -1030,7 +1055,8 @@ bool Config::ExportDefaultSetting(const string &file)
     }
     "%s": {
         "%s": true,
-        "%s": "<replace_with_template_name>"
+        "%s": "<replace_with_template_name>",
+        "%s": "<replace_with_csr-file-path>"
     }
 }
 )";
@@ -1057,7 +1083,8 @@ bool Config::ExportDefaultSetting(const string &file)
         PlainConfig::DeviceDefender::JSON_KEY_INTERVAL,
         PlainConfig::JSON_KEY_FLEET_PROVISIONING,
         PlainConfig::FleetProvisioning::JSON_KEY_ENABLED,
-        PlainConfig::FleetProvisioning::JSON_KEY_TEMPLATE_NAME);
+        PlainConfig::FleetProvisioning::JSON_KEY_TEMPLATE_NAME,
+        PlainConfig::FleetProvisioning::JSON_KEY_CSR_FILE);
 
     clientConfig.close();
     LOGM_INFO(TAG, "Exported settings to: %s", file.c_str());

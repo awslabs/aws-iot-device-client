@@ -114,6 +114,26 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       DD_ENABLED="false"
     fi
 
+    ### FP Config ###
+    echo "${PMPT}Enable Fleet Provisioning feature? y/n${NC}"
+    FP_ENABLED=""
+    read -r ENABLE_FP
+    if [ "$ENABLE_FP" = "y" ]; then
+      FP_ENABLED="true"
+      echo "${PMPT}Specify Fleet Provisioning Template name you want to use for Provisioning you device: ${NC}"
+      read -r TEMPLATE_NAME_TEMP
+      if [ "$TEMPLATE_NAME_TEMP" ]; then
+        FP_TEMPLATE_NAME=$TEMPLATE_NAME_TEMP
+      fi
+      echo "${PMPT}Specify absolute path to Certificate Signing Request (CSR) file used for creating new certificate while provisioning device by keeping private key secure: ${NC}"
+      read -r CSR_FILE_TEMP
+      if [ "$CSR_FILE_TEMP" ]; then
+        FP_CSR_FILE=$CSR_FILE_TEMP
+      fi
+    else
+      FP_ENABLED="false"
+    fi
+
     CONFIG_OUTPUT="
     {
       \"endpoint\":	\"$ENDPOINT\",
@@ -136,6 +156,11 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       \"device-defender\":	{
         \"enabled\":	$DD_ENABLED,
         \"interval-in-seconds\": $DD_INTERVAL
+      },
+      \"fleet-provisioning\":	{
+        \"enabled\":	$FP_ENABLED,
+        \"template-name\": \"$FP_TEMPLATE_NAME\",
+        \"csr-file\": \"$FP_CSR_FILE\"
       }
     }"
 
