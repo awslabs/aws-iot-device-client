@@ -17,10 +17,10 @@
 #include <aws/iotidentity/RegisterThingResponse.h>
 #include <aws/iotidentity/RegisterThingSubscriptionRequest.h>
 
-#include <sys/stat.h>
-#include <wordexp.h>
 #include <chrono>
 #include <string>
+#include <sys/stat.h>
+#include <wordexp.h>
 
 using namespace std;
 using namespace Aws::Crt;
@@ -287,10 +287,7 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
             }
             else
             {
-                LOGM_ERROR(
-                    TAG,
-                    "Failed to store public certificate in file %s",
-                    certPath.c_str());
+                LOGM_ERROR(TAG, "Failed to store public certificate in file %s", certPath.c_str());
                 csrCreationCompletedPromise.set_value(false);
             }
         }
@@ -615,7 +612,8 @@ bool FleetProvisioning::GetCsrFileContent(const string filePath)
     ifstream setting(expandedPath.we_wordv[0]);
     if (!setting.is_open())
     {
-        LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to open CSR file: '%s' ***", expandedPath.we_wordv[0]);
+        LOGM_ERROR(
+            TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to open CSR file: '%s' ***", expandedPath.we_wordv[0]);
         return false;
     }
     if (setting.peek() == ifstream::traits_type::eof())
