@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Resolution for Secure Tunneling SDK 16KB buffering issue. Current Secure Tunneling implementation will
 encounter issues if data written to the buffer is larger than 16KB
-- Resolution for Device Defender reboot segfault. There is a known issue where 
+- Resolution for Device Defender reboot segfault. There is a known issue where rebooting the device
+while Device Defender is running as a service will trigger a segfault when the Device Client starts again after the reboot
 
 ## [0.2.X] - 2020-12-23
 ### Added
@@ -15,6 +16,7 @@ encounter issues if data written to the buffer is larger than 16KB
 - CMake conditional compilation flags for reducing output executable footprint
 - CMake support for automatically building the [AWS IoT v2 SDK for C++](https://github.com/aws/aws-iot-device-sdk-cpp-v2)
 - Setup script for configuration automation and help installing the AWS IoT Device Client
+- Valgrind debugging support added to setup.sh
 - Configuration via CLI and JSON file
 - Logger with both standard output and file-based logging implementations
 - AWS IoT Jobs feature for execution of jobs on the device
