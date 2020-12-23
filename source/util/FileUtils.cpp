@@ -160,20 +160,20 @@ bool FileUtils::createDirectoryWithPermissions(const char *dirPath, mode_t permi
     const int desiredPermissions = permissionsMaskToInt(permissions);
     wordexp_t expandedPath;
     wordexp(dirPath, &expandedPath, 0);
-    dirPath = expandedPath.we_wordv[0];
-    if (!mkdirs(dirPath))
+    std::string dirExpandedPath = expandedPath.we_wordv[0];
+    if (!mkdirs(dirExpandedPath.c_str()))
     {
-        int actualPermissions = getFilePermissions(dirPath);
+        int actualPermissions = getFilePermissions(dirExpandedPath);
         if (desiredPermissions != actualPermissions)
         {
-            chmod(dirPath, permissions);
-            actualPermissions = getFilePermissions(dirPath);
+            chmod(dirExpandedPath.c_str(), permissions);
+            actualPermissions = getFilePermissions(dirExpandedPath);
             if (desiredPermissions != actualPermissions)
             {
                 LOGM_ERROR(
                     TAG,
                     "Failed to set appropriate permissions for directory %s, desired %d but found %d",
-                    dirPath,
+                    dirExpandedPath.c_str(),
                     desiredPermissions,
                     actualPermissions);
                 return false;
@@ -182,11 +182,14 @@ bool FileUtils::createDirectoryWithPermissions(const char *dirPath, mode_t permi
         else
         {
             LOGM_INFO(
-                TAG, "Successfully create directory %s with required permissions %d", dirPath, desiredPermissions);
+                TAG,
+                "Successfully create directory %s with required permissions %d",
+                dirExpandedPath.c_str(),
+                desiredPermissions);
             return true;
         }
     }
 
-    LOGM_ERROR(TAG, "Failed to create directory %s", dirPath);
+    LOGM_ERROR(TAG, "Failed to create directory %s", dirExpandedPath.c_str());
     return false;
 }
