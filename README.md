@@ -227,7 +227,7 @@ as a service, you can probably run something similar to `sudo systemctl start aw
 4. Create a Job targeting your thing: Now that the AWS IoT Device Client is running on our device, we can create a job either through
 the AWS Console or through the AWS CLI. For example, here's how we might create a job targeting a device on the command line:
 ```
-aws iot create-job --job-id run-foo --document "{\"operation\": \"Foo.py\", \"path\": \"default\"}" --targets arn:aws:iot:us-west-2:XXXXXXXXXX:thing/my-thing-ubuntu
+aws iot create-job --job-id run-foo --document "{\"operation\": \"Foo.py\", \"path\": \"default\"}" --targets arn:aws:iot:us-west-2:XXXXXXXXXX:thing/my-thing
 ```
 
 After creating this job, a notification will be sent from the AWS IoT Core endpoint via MQTT to the AWS IoT Device Client running
@@ -246,7 +246,7 @@ the job execution. The STDERR output is shown in the response body as part of th
 labeled 'stderr'. 
 
 ```
-ubuntu@ip-XXX-XX-XX-XX:~$ aws iot describe-job-execution --region us-west-2 --job-id 7ff399d0-87f7-rebootstage0-reboot-setup --thing-name matt-ua-ubuntu
+aws iot describe-job-execution --region us-west-2 --job-id 7ff399d0-87f7-rebootstage0-reboot-setup --thing-name my-test-thing
 {
     "execution": {
         "jobId": "7ff399d0-87f7-rebootstage0-reboot-setup",
