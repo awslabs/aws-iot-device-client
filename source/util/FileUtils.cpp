@@ -158,6 +158,9 @@ size_t FileUtils::getFileSize(const std::string &filePath)
 bool FileUtils::createDirectoryWithPermissions(const char *dirPath, mode_t permissions)
 {
     const int desiredPermissions = permissionsMaskToInt(permissions);
+    wordexp_t expandedPath;
+    wordexp(dirPath, &expandedPath, 0);
+    dirPath = expandedPath.we_wordv[0];
     if (!mkdirs(dirPath))
     {
         int actualPermissions = getFilePermissions(dirPath);

@@ -57,8 +57,8 @@ TEST(FileUtils, testStoreValueInFile)
     ASSERT_TRUE(FileUtils::StoreValueInFile(
         "This file was created as part of testStoreValueInFile unit test. Make sure you run this test with root "
         "permissions",
-        "./testStoreValueInFile.txt"));
-  
+        "/tmp/testStoreValueInFile.txt"));
+}
 TEST(FileUtils, handlesRootDir)
 {
     string rootDir = FileUtils::extractParentDirectory("/");

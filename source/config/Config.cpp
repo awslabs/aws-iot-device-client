@@ -960,7 +960,9 @@ void Config::PrintHelpMessage()
         "%s:\t\t\t\t\tDisable MQTT new tunnel notification for Secure Tunneling\n"
         "%s <interval-in-seconds>:\t\t\tPositive integer to publish Device Defender metrics\n"
         "%s <template-name>:\t\t\tUse specified Fleet Provisioning template name\n"
-        "%s <csr-file-path>:\t\t\t(Optional Field) Use specified CSR file for provisioning device\n";
+        "%s <csr-file-path>:\t\t\tUse specified CSR file to generate a certificate by keeping user private key secure. "
+        "If CSR file is not provided, Client will use Claim Certificate and Private key to generate new Certificate "
+        "and Private Key while provisioning the device\n";
 
     cout << FormatMessage(
         helpMessageTemplate,

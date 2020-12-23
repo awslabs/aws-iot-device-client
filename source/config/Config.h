@@ -34,6 +34,7 @@ namespace Aws
                 static constexpr int KEY_DIR = 700;
                 static constexpr int ROOT_CA_DIR = 700;
                 static constexpr int CERT_DIR = 700;
+                static constexpr int CSR_DIR = 700;
                 static constexpr int CONFIG_DIR = 745;
                 static constexpr int LOG_DIR = 745;
 
@@ -41,6 +42,7 @@ namespace Aws
                 static constexpr int PRIVATE_KEY = 600;
                 static constexpr int PUBLIC_CERT = 644;
                 static constexpr int ROOT_CA = 644;
+                static constexpr int CSR_FILE = 600;
                 static constexpr int LOG_FILE = 600;
                 static constexpr int CONFIG_FILE = 644;
                 static constexpr int RUNTIME_CONFIG_FILE = 644;

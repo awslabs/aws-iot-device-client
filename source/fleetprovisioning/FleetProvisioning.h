@@ -39,76 +39,61 @@ namespace Aws
                  */
                 static constexpr int DEFAULT_WAIT_TIME_SECONDS = 10;
                 /**
-                 * \brief an promise variable to check if publish request for CreateKeysAndCertificate was received
+                 * \brief a promise variable to check if publish request for CreateKeysAndCertificate was received
                  */
                 std::promise<bool> keysPublishCompletedPromise;
                 /**
-                 * \brief an promise variable to check if subscription request to CreateKeysAndCertificate Accept topic
+                 * \brief a promise variable to check if subscription request to CreateKeysAndCertificate Accept topic
                  * was executed
                  */
                 std::promise<bool> keysAcceptedCompletedPromise;
                 /**
-                 * \brief an promise variable to check if subscription to CreateKeysAndCertificate Reject topic was
+                 * \brief a promise variable to check if subscription to CreateKeysAndCertificate Reject topic was
                  * executed
                  */
                 std::promise<bool> keysRejectedCompletedPromise;
                 /**
-                 * \brief an promise variable to check if publish request for CreateKeysAndCertificate was executed
+                 * \brief a promise variable to check if publish request for CreateKeysAndCertificate was executed
                  */
                 std::promise<bool> keysCreationCompletedPromise;
-                /**
-                 * \brief an promise variable to check if publish request for CreateKeysAndCertificate was executed.
-                 * Client would know if the request was rejected using this promise variable
-                 */
-                std::promise<void> keysCreationFailedPromise;
 
                 /**
-                 * \brief an promise variable to check if publish request for RegisterThing was received
+                 * \brief a promise variable to check if publish request for RegisterThing was received
                  */
                 std::promise<bool> csrPublishCompletedPromise;
                 /**
-                 * \brief an promise variable to check if subscription request to CreateCertificateFromCsr Accept topic
+                 * \brief a promise variable to check if subscription request to CreateCertificateFromCsr Accept topic
                  * was executed
                  */
                 std::promise<bool> csrAcceptedCompletedPromise;
                 /**
-                 * \brief an promise variable to check if subscription to CreateCertificateFromCsr Reject topic was
+                 * \brief a promise variable to check if subscription to CreateCertificateFromCsr Reject topic was
                  * executed
                  */
                 std::promise<bool> csrRejectedCompletedPromise;
                 /**
-                 * \brief an promise variable to check if publish request for CreateCertificateFromCsr was executed
+                 * \brief a promise variable to check if publish request for CreateCertificateFromCsr was executed
                  */
                 std::promise<bool> csrCreationCompletedPromise;
-                /**
-                 * \brief an promise variable to check if publish request for CreateCertificateFromCsr was executed.
-                 * Client would know if the request was rejected using this promise variable
-                 */
-                std::promise<void> csrCreationFailedPromise;
 
                 /**
-                 * \brief an promise variable to check if publish request for RegisterThing was received
+                 * \brief a promise variable to check if publish request for RegisterThing was received
                  */
                 std::promise<bool> registerPublishCompletedPromise;
                 /**
-                 * \brief an promise variable to check if subscription to RegisterThing Accept topic was
+                 * \brief a promise variable to check if subscription to RegisterThing Accept topic was
                  * executed
                  */
                 std::promise<bool> registerAcceptedCompletedPromise;
                 /**
-                 * \brief an promise variable to check if subscription to RegisterThing Reject topic was
+                 * \brief a promise variable to check if subscription to RegisterThing Reject topic was
                  * executed
                  */
                 std::promise<bool> registerRejectedCompletedPromise;
                 /**
-                 * \brief an promise variable to check if publish request for RegisterThing was executed
+                 * \brief a promise variable to check if publish request for RegisterThing was executed
                  */
                 std::promise<bool> registerThingCompletedPromise;
-                /**
-                 * \brief an promise variable to check if publish request for RegisterThing was executed.
-                 * Client would know if the request was rejected using this promise variable
-                 */
-                std::promise<void> registerThingFailedPromise;
 
                 /**
                  * \brief stores certificate Ownership Token
@@ -139,7 +124,7 @@ namespace Aws
                 /**
                  * \brief stores CSR file content
                  */
-                Aws::Crt::String csrFile;
+                std::string csrFile;
 
                 /**
                  * \brief creates a new certificate and private key using the AWS certificate authority
