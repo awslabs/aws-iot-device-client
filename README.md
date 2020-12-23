@@ -139,7 +139,7 @@ When a new Job is received via these topics, the Jobs feature will look for and 
 
 ### Creating a Job
 
-[View a sample job document here] (sample-job-docs/install-packages.json)
+[View a sample job document here](sample-job-docs/install-packages.json)
 
 The following fields are extracted from the incoming Job document by the Jobs feature within the AWS IoT Device Client when a 
 job is received.
