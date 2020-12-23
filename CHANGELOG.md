@@ -22,7 +22,7 @@ while Device Defender is running as a service will trigger a segfault when the D
 - AWS IoT Jobs feature for execution of jobs on the device
 - AWS IoT Secure Tunneling feature for establishing secure tunnels to the device
 - AWS IoT Device Defender feature for publishing Device Defender metrics to AWS
-- AWS IoT Fleet Provisioning feature for device provisioning. Includes support for provisioning via CSR and 
+- AWS IoT Fleet Provisioning feature for device provisioning
 - Sample job documents and job handlers for examples of how to use the Jobs feature functionality
 - Semantic versioning logic built into the CMake system which pulls information from Git
 - Utility classes for operations on files and strings
