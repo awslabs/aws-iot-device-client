@@ -160,7 +160,10 @@ namespace Aws
                         // DC in release mode - we should decide how we want to behave in this scenario
 #else
                     // DC in debug mode
-                    LOG_ERROR(TAG, "*** DC FATAL ERROR: Aborting program due to unrecoverable feature error! ***");
+                    LOG_ERROR(
+                        TAG,
+                        "*** AWS IOT DEVICE CLIENT FATAL ERROR: Aborting program due to unrecoverable feature error! "
+                        "***");
                     LoggerFactory::getLoggerInstance()->shutdown();
                     abort();
 #endif
