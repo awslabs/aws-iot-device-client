@@ -172,27 +172,27 @@ bool PlainConfig::Validate() const
 #if !defined(DISABLE_MQTT)
     if (!endpoint.has_value() || endpoint->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Endpoint is missing ***");
+        LOGM_ERROR(Config::TAG, "*** %s: Endpoint is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!cert.has_value() || cert->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Certificate is missing ***");
+        LOGM_ERROR(Config::TAG, "*** %s: Certificate is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!key.has_value() || key->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Private Key is missing ***");
+        LOGM_ERROR(Config::TAG, "*** %s: Private Key is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!rootCa.has_value() || rootCa->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Root CA is missing ***");
+        LOGM_ERROR(Config::TAG, "*** %s: Root CA is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!thingName.has_value() || thingName->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Thing name is missing ***");
+        LOGM_ERROR(Config::TAG, "*** %s: Thing name is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
 #endif
@@ -466,12 +466,12 @@ bool PlainConfig::Tunneling::Validate() const
 
     if (!destinationAccessToken.has_value() || destinationAccessToken->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: destination-access-token is missing ***");
+        LOGM_ERROR(Config::TAG, "*** %s: destination-access-token is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!region.has_value() || region->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: region is missing ***");
+        LOGM_ERROR(Config::TAG, "*** %s: region is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!port.has_value()
@@ -481,7 +481,7 @@ bool PlainConfig::Tunneling::Validate() const
     )
 #endif
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: port is missing or invalid ***");
+        LOGM_ERROR(Config::TAG, "*** %s: port is missing or invalid ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
 
@@ -527,8 +527,9 @@ bool PlainConfig::DeviceDefender::LoadFromCliArgs(const CliArgs &cliArgs)
         {
             LOGM_ERROR(
                 Config::TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to convert CLI argument {%s} to integer, please use a "
+                "*** %s: Failed to convert CLI argument {%s} to integer, please use a "
                 "valid integer between 1 and MAX_INT ***",
+                DeviceClient::DC_FATAL_ERROR,
                 PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL);
             return false;
         }
@@ -544,7 +545,7 @@ bool PlainConfig::DeviceDefender::Validate() const
     }
     if (!interval.has_value() || (interval.value() <= 0))
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Interval value <= 0 ***");
+        LOGM_ERROR(Config::TAG, "*** %s: Interval value <= 0 ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
 
@@ -610,10 +611,11 @@ bool PlainConfig::FleetProvisioning::Validate() const
 
     if (!templateName.has_value() || templateName->empty())
     {
-        LOG_ERROR(
+        LOGM_ERROR(
             Config::TAG,
-            "*** AWS IOT DEVICE CLIENT FATAL ERROR: A template name must be specified if Fleet Provisioning is enabled "
-            "***");
+            "*** %s: A template name must be specified if Fleet Provisioning is enabled "
+            "***",
+            DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     return true;
@@ -737,7 +739,8 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unrecognised command line argument: %s ***",
+                "*** %s: Unrecognised command line argument: %s ***",
+                DeviceClient::DC_FATAL_ERROR,
                 currentArg.c_str());
             return false;
         }
@@ -746,8 +749,8 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Command Line argument '%s' cannot be specified more than once "
-                "***",
+                "*** %s: Command Line argument '%s' cannot be specified more than once ***",
+                DeviceClient::DC_FATAL_ERROR,
                 currentArg.c_str());
             return false;
         }
@@ -759,9 +762,8 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
             {
                 LOGM_ERROR(
                     TAG,
-                    "*** AWS IOT DEVICE CLIENT FATAL ERROR: Command Line argument '%s' was passed without specifying "
-                    "addition argument "
-                    "***",
+                    "*** *s: Command Line argument '%s' was passed without specifying addition argument ***",
+                    DeviceClient::DC_FATAL_ERROR,
                     currentArg.c_str());
                 return false;
             }
@@ -794,7 +796,7 @@ bool Config::init(const CliArgs &cliArgs)
     if (!ParseConfigFile(filename))
     {
         LOGM_ERROR(
-            TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to Parse Config file: '%s' ***", filename.c_str());
+            TAG, "*** %s: Unable to Parse Config file: '%s' ***", DeviceClient::DC_FATAL_ERROR, filename.c_str());
         return false;
     }
 
@@ -855,8 +857,8 @@ bool Config::ParseConfigFile(const string &file)
     }
 
     string configFileParentDir = FileUtils::ExtractParentDirectory(expandedPath.c_str());
-    FileUtils::ValidateFilePermissions(configFileParentDir, Permissions::CONFIG_DIR);
-    FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::CONFIG_FILE);
+    FileUtils::ValidateFilePermissions(configFileParentDir, Permissions::CONFIG_DIR, false);
+    FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::CONFIG_FILE, false);
 
     ifstream setting(expandedPath.c_str());
     if (!setting.is_open())
@@ -1004,6 +1006,6 @@ bool Config::ExportDefaultSetting(const string &file)
     LOGM_INFO(TAG, "Exported settings to: %s", file.c_str());
 
     chmod(file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    FileUtils::ValidateFilePermissions(file.c_str(), Permissions::CONFIG_FILE);
+    FileUtils::ValidateFilePermissions(file.c_str(), Permissions::CONFIG_FILE, false);
     return true;
 }

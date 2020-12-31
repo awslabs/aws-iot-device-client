@@ -2,6 +2,7 @@
 #include "../logging/LoggerFactory.h"
 
 #include <errno.h>
+#include <iostream>
 #include <limits.h> /* PATH_MAX */
 #include <string.h>
 #include <sys/stat.h>
@@ -101,18 +102,31 @@ int FileUtils::GetFilePermissions(const std::string &filePath)
     return PermissionsMaskToInt(file_info.st_mode);
 }
 
-bool FileUtils::ValidateFilePermissions(const std::string &path, const int filePermissions)
+bool FileUtils::ValidateFilePermissions(const std::string &path, const int filePermissions, bool fatalError)
 {
     int actualFilePermissions = FileUtils::GetFilePermissions(path);
     if (filePermissions != actualFilePermissions)
     {
-        LOGM_ERROR(
-            TAG,
-            "Permissions to given file/dir path '%s' is not set to recommended. {Permissions: {desired: %d, "
-            "actual: %d}}",
-            path.c_str(),
-            filePermissions,
-            actualFilePermissions);
+        if (fatalError)
+        {
+            LOGM_ERROR(
+                TAG,
+                "Permissions to given file/dir path '%s' is not set to recommended. {Permissions: {desired: %d, "
+                "actual: %d}}",
+                path.c_str(),
+                filePermissions,
+                actualFilePermissions);
+        }
+        else
+        {
+            LOGM_WARN(
+                TAG,
+                "Permissions to given file/dir path '%s' is not set to recommended. {Permissions: {desired: %d, "
+                "actual: %d}}",
+                path.c_str(),
+                filePermissions,
+                actualFilePermissions);
+        }
         return false;
     }
     return true;

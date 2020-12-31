@@ -62,9 +62,14 @@ namespace Aws
                      *
                      * @param path a path to a file/dir
                      * @param filePermissions correct permission for a given file
+                     * @param fatalError a boolean parameter to decide to log error message or warning message . Default
+                     * value is true
                      * @return an boolean value representing if permissions set on given file/dir are correct or not
                      */
-                    static bool ValidateFilePermissions(const std::string &filePath, const int filePermissions);
+                    static bool ValidateFilePermissions(
+                        const std::string &filePath,
+                        const int filePermissions,
+                        bool fatalError = true);
 
                     /**
                      * Converts a file permissions mask into a human readable format:

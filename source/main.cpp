@@ -160,10 +160,10 @@ namespace Aws
                         // DC in release mode - we should decide how we want to behave in this scenario
 #else
                     // DC in debug mode
-                    LOG_ERROR(
+                    LOGM_ERROR(
                         TAG,
-                        "*** AWS IOT DEVICE CLIENT FATAL ERROR: Aborting program due to unrecoverable feature error! "
-                        "***");
+                        "*** %s: Aborting program due to unrecoverable feature error! ***",
+                        DeviceClient::DC_FATAL_ERROR);
                     LoggerFactory::getLoggerInstance()->shutdown();
                     abort();
 #endif
@@ -210,11 +210,11 @@ int main(int argc, char *argv[])
         shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager);
     if (!resourceManager.get()->initialize(config.config))
     {
-        LOG_ERROR(
+        LOGM_ERROR(
             TAG,
-            "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to initialize the MQTT Client. Please verify your AWS IoT "
-            "credentials and/or "
-            "configuration. ***");
+            "*** %s: Failed to initialize the MQTT Client. Please verify your AWS IoT credentials and/or "
+            "configuration. ***",
+            DC_FATAL_ERROR);
         LoggerFactory::getLoggerInstance()->shutdown();
         abort();
     }
@@ -230,11 +230,12 @@ int main(int argc, char *argv[])
 #    if !defined(DISABLE_MQTT)
         if (resourceManager.get()->establishConnection(config.config) != SharedCrtResourceManager::SUCCESS)
         {
-            LOG_ERROR(
+            LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to establish the MQTT Client. Please verify your AWS "
+                "*** %s: Failed to establish the MQTT Client. Please verify your AWS "
                 "IoT credentials, "
-                "configuration and/or certificate policy. ***");
+                "configuration and/or certificate policy. ***",
+                DC_FATAL_ERROR);
             LoggerFactory::getLoggerInstance()->shutdown();
             abort();
         }
@@ -248,11 +249,12 @@ int main(int argc, char *argv[])
             !config.ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE) ||
             !config.ValidateAndStoreRuntimeConfig())
         {
-            LOG_ERROR(
+            LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to Provision thing or Validate newly created resources. "
+                "*** %s: Failed to Provision thing or Validate newly created resources. "
                 "Please verify your AWS IoT credentials, "
-                "configuration, Fleet Provisioning Template, claim certificate and policy used. ***");
+                "configuration, Fleet Provisioning Template, claim certificate and policy used. ***",
+                DC_FATAL_ERROR);
             LoggerFactory::getLoggerInstance()->shutdown();
             abort();
         }
@@ -266,11 +268,12 @@ int main(int argc, char *argv[])
 #if !defined(DISABLE_MQTT)
     if (resourceManager.get()->establishConnection(config.config) != SharedCrtResourceManager::SUCCESS)
     {
-        LOG_ERROR(
+        LOGM_ERROR(
             TAG,
-            "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to initialize the MQTT Client. Please verify your AWS IoT "
+            "*** %s: Failed to initialize the MQTT Client. Please verify your AWS IoT "
             "credentials and/or "
-            "configuration. ***");
+            "configuration. ***",
+            DC_FATAL_ERROR);
         LoggerFactory::getLoggerInstance()->shutdown();
         abort();
     }

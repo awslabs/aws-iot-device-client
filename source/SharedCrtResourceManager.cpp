@@ -125,11 +125,10 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
 {
     if (!locateCredentials(config))
     {
-        LOG_ERROR(
+        LOGM_ERROR(
             TAG,
-            "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to find file(s) with correct permissions required for "
-            "establishing the MQTT "
-            "connection ***");
+            "*** %s: Failed to find file(s) with correct permissions required for establishing the MQTT connection ***",
+            DeviceClient::DC_FATAL_ERROR);
         return SharedCrtResourceManager::ABORT;
     }
     auto clientConfigBuilder = MqttClientConnectionConfigBuilder(config.cert->c_str(), config.key->c_str());

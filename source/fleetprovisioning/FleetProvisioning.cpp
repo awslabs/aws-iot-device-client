@@ -40,8 +40,8 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to CreateKeysAndCertificate "
-                "accepted topic: %s. ***",
+                "*** %s: Error subscribing to CreateKeysAndCertificate accepted topic: %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 ErrorDebugString(ioErr));
         }
         keysAcceptedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
@@ -52,8 +52,8 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to CreateKeysAndCertificate "
-                "rejected topic: %s. ***",
+                "*** %s: Error subscribing to CreateKeysAndCertificate rejected topic: %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 ErrorDebugString(ioErr));
         }
         keysRejectedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
@@ -64,8 +64,8 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error publishing to CreateKeysAndCertificate topic: "
-                "%s. ***",
+                "*** %s: Error publishing to CreateKeysAndCertificate topic: %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 ErrorDebugString(ioErr));
         }
         keysPublishCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
@@ -120,7 +120,8 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on CreateKeysAndCertificate subscription: %s. ***",
+                "*** %s: Error on CreateKeysAndCertificate subscription: %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 ErrorDebugString(ioErr));
             keysCreationCompletedPromise.set_value(false);
         }
@@ -131,8 +132,8 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: CreateKeysAndCertificate failed with "
-                "statusCode %d, errorMessage %s and errorCode %s. ***",
+                "*** %s: CreateKeysAndCertificate failed with statusCode %d, errorMessage %s and errorCode %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 *error->StatusCode,
                 error->ErrorMessage->c_str(),
                 error->ErrorCode->c_str());
@@ -140,7 +141,7 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
         else
         {
             LOGM_ERROR(
-                TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on subscription: %s. ***", ErrorDebugString(ioErr));
+                TAG, "*** %s: Error on subscription: %s. ***", DeviceClient::DC_FATAL_ERROR, ErrorDebugString(ioErr));
         }
         keysCreationCompletedPromise.set_value(false);
     };
@@ -163,10 +164,10 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
         futureValKeysRejectedCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
             future_status::timeout)
     {
-        LOG_ERROR(
+        LOGM_ERROR(
             TAG,
-            "*** AWS IOT DEVICE CLIENT FATAL ERROR: Subscribing to CreateKeysAndCertificate Accepted and Rejected "
-            "topics timed out. ***");
+            "*** %s: Subscribing to CreateKeysAndCertificate Accepted and Rejected topics timed out. ***",
+            DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!futureValKeysAcceptedCompletedPromise.get() || !futureValKeysRejectedCompletedPromise.get())
@@ -184,14 +185,14 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
     if (futureValKeysPublishCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
         future_status::timeout)
     {
-        LOG_ERROR(
-            TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Publishing to CreateKeysAndCertificate topic timed out. ***");
+        LOGM_ERROR(
+            TAG, "*** %s: Publishing to CreateKeysAndCertificate topic timed out. ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (futureValKeysCreationCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
         future_status::timeout)
     {
-        LOG_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Create Keys and Certificate request timed out. ***");
+        LOGM_ERROR(TAG, "*** %s: Create Keys and Certificate request timed out. ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
 
@@ -205,9 +206,8 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to CreateCertificateFromCsr accepted topic: "
-                "%s. "
-                "***",
+                "*** %s: Error subscribing to CreateCertificateFromCsr accepted topic: %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 ErrorDebugString(ioErr));
         }
         csrAcceptedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
@@ -218,9 +218,8 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to CreateCertificateFromCsr rejected topic: "
-                "%s. "
-                "***",
+                "*** %s: Error subscribing to CreateCertificateFromCsr rejected topic: %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 ErrorDebugString(ioErr));
         }
         csrRejectedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
@@ -231,7 +230,8 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error publishing to CreateCertificateFromCsr topic: %s. ***",
+                "*** %s: Error publishing to CreateCertificateFromCsr topic: %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 ErrorDebugString(ioErr));
         }
         csrPublishCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
@@ -274,7 +274,8 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on CreateCertificateFromCsr subscription: %s. ***",
+                "*** %s: Error on CreateCertificateFromCsr subscription: %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 ErrorDebugString(ioErr));
             csrCreationCompletedPromise.set_value(false);
         }
@@ -285,8 +286,8 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: CreateCertificateFromCsr failed with "
-                "statusCode %d, errorMessage %s and errorCode %s. ***",
+                "*** %s: CreateCertificateFromCsr failed with statusCode %d, errorMessage %s and errorCode %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 *error->StatusCode,
                 error->ErrorMessage->c_str(),
                 error->ErrorCode->c_str());
@@ -295,8 +296,8 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on subscription to CreateCertificateFromCsr Rejected "
-                "topic: %s. ***",
+                "*** %s: Error on subscription to CreateCertificateFromCsr Rejected topic: %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 ErrorDebugString(ioErr));
         }
         csrCreationCompletedPromise.set_value(false);
@@ -321,10 +322,10 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         futureValCsrRejectedCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
             future_status::timeout)
     {
-        LOG_ERROR(
+        LOGM_ERROR(
             TAG,
-            "*** AWS IOT DEVICE CLIENT FATAL ERROR: Subscribing to CreateCertificateFromCsr Accepted and Rejected "
-            "topics timed out. ***");
+            "*** %s: Subscribing to CreateCertificateFromCsr Accepted and Rejected topics timed out. ***",
+            DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!futureValCsrAcceptedCompletedPromise.get() || !futureValCsrRejectedCompletedPromise.get())
@@ -343,14 +344,14 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
     if (futureValCsrPublishCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
         future_status::timeout)
     {
-        LOG_ERROR(
-            TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Publishing to CreateCertificateFromCsr topic timed out. ***");
+        LOGM_ERROR(
+            TAG, "*** %s: Publishing to CreateCertificateFromCsr topic timed out. ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (futureValCsrCreationCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
         future_status::timeout)
     {
-        LOG_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: CreateCertificateFromCsr request timed out. ***");
+        LOGM_ERROR(TAG, "*** %s: CreateCertificateFromCsr request timed out. ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
 
@@ -363,8 +364,8 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to RegisterThing accepted: "
-                "%s. ***",
+                "*** %s: Error subscribing to RegisterThing accepted: %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 ErrorDebugString(ioErr));
         }
         registerAcceptedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
@@ -375,8 +376,8 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error subscribing to RegisterThing rejected: "
-                "%s. ***",
+                "*** %s: Error subscribing to RegisterThing rejected: %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 ErrorDebugString(ioErr));
         }
         registerRejectedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
@@ -387,7 +388,8 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error publishing to RegisterThing: %s. ***",
+                "*** %s: Error publishing to RegisterThing: %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 ErrorDebugString(ioErr));
         }
         registerPublishCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
@@ -402,7 +404,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         else
         {
             LOGM_ERROR(
-                TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on subscription: %s. ***", ErrorDebugString(ioErr));
+                TAG, "*** %s: Error on subscription: %s. ***", DeviceClient::DC_FATAL_ERROR, ErrorDebugString(ioErr));
         }
         registerThingCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
@@ -412,8 +414,8 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: RegisterThing failed with statusCode %d, "
-                "errorMessage %s and errorCode %s. ***",
+                "*** %s: RegisterThing failed with statusCode %d, errorMessage %s and errorCode %s. ***",
+                DeviceClient::DC_FATAL_ERROR,
                 *error->StatusCode,
                 error->ErrorMessage->c_str(),
                 error->ErrorCode->c_str());
@@ -421,7 +423,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         else
         {
             LOGM_ERROR(
-                TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Error on subscription: %s. ***", ErrorDebugString(ioErr));
+                TAG, "*** %s: Error on subscription: %s. ***", DeviceClient::DC_FATAL_ERROR, ErrorDebugString(ioErr));
         }
         registerThingCompletedPromise.set_value(false);
     };
@@ -443,10 +445,10 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         futureValRegisterRejectedCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
             future_status::timeout)
     {
-        LOG_ERROR(
+        LOGM_ERROR(
             TAG,
-            "*** AWS IOT DEVICE CLIENT FATAL ERROR: Subscribing to RegisterThing Accepted and Rejected topics timed "
-            "out. ***");
+            "*** %s: Subscribing to RegisterThing Accepted and Rejected topics timed out. ***",
+            DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!futureValRegisterAcceptedCompletedPromise.get() || !futureValRegisterRejectedCompletedPromise.get())
@@ -466,14 +468,14 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
     if (futureValRegisterPublishCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
         future_status::timeout)
     {
-        LOG_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Publishing to Register Thing topic timed out. ***");
+        LOGM_ERROR(TAG, "*** %s: Publishing to Register Thing topic timed out. ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
 
     if (futureValRegisterThingCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
         future_status::timeout)
     {
-        LOG_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Register Thing request timed out. ***");
+        LOGM_ERROR(TAG, "*** %s: Register Thing request timed out. ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
 
@@ -489,10 +491,11 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
                     FileUtils::CreateDirectoryWithPermissions(Config::DEFAULT_CONFIG_DIR, S_IRWXU);
     if (!didSetup)
     {
-        LOG_ERROR(
+        LOGM_ERROR(
             TAG,
-            "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to access/create directories required for storage of "
-            "provisioned certificates, cannot continue ***");
+            "*** %s: Failed to access/create directories required for storage of provisioned certificates, cannot "
+            "continue ***",
+            DeviceClient::DC_FATAL_ERROR);
         return false;
     }
 
@@ -503,10 +506,11 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
     {
         if (!GetCsrFileContent(config.fleetProvisioning.csrFile->c_str()) || !CreateCertificateUsingCSR(identityClient))
         {
-            LOG_ERROR(
+            LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Fleet Provisioning Feature failed to generate a certificate "
-                "from a certificate signing request (CSR) ***");
+                "*** %s: Fleet Provisioning Feature failed to generate a certificate from a certificate signing "
+                "request (CSR) ***",
+                DeviceClient::DC_FATAL_ERROR);
             return false;
         }
         keyPath = config.key->c_str();
@@ -515,10 +519,10 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
     {
         if (!CreateCertificateAndKey(identityClient))
         {
-            LOG_ERROR(
+            LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Fleet Provisioning Feature failed to create a new certificate "
-                "and private key ***");
+                "*** %s: Fleet Provisioning Feature failed to create a new certificate and private key ***",
+                DeviceClient::DC_FATAL_ERROR);
             return false;
         }
     }
@@ -539,7 +543,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
         LOGM_INFO(TAG, "Successfully provisioned thing: %s", thingName.c_str());
         return true;
     }
-    LOG_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Fleet Provisioning Feature failed to provision device. ***");
+    LOGM_ERROR(TAG, "*** %s: Fleet Provisioning Feature failed to provision device. ***", DeviceClient::DC_FATAL_ERROR);
     return false;
 }
 
@@ -556,7 +560,8 @@ bool FleetProvisioning::GetCsrFileContent(const string filePath)
     {
         LOGM_ERROR(
             TAG,
-            "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to open CSR file %s, file does not exist ***",
+            "*** %s: Unable to open CSR file %s, file does not exist ***",
+            DeviceClient::DC_FATAL_ERROR,
             expandedPath.c_str());
         return false;
     }
@@ -566,8 +571,9 @@ bool FleetProvisioning::GetCsrFileContent(const string filePath)
     {
         LOGM_ERROR(
             TAG,
-            "*** AWS IOT DEVICE CLIENT FATAL ERROR: Refusing to open CSR file %s, file size %zu bytes is greater than "
-            "allowable limit of %zu bytes ***",
+            "*** %s: Refusing to open CSR file %s, file size %zu bytes is greater than allowable limit of %zu bytes "
+            "***",
+            DeviceClient::DC_FATAL_ERROR,
             filePath.c_str(),
             incomingFileSize,
             2000);
@@ -585,12 +591,12 @@ bool FleetProvisioning::GetCsrFileContent(const string filePath)
     if (!setting.is_open())
     {
         LOGM_ERROR(
-            TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to open CSR file: '%s' ***", expandedPath.c_str());
+            TAG, "*** %s: Unable to open CSR file: '%s' ***", DeviceClient::DC_FATAL_ERROR, expandedPath.c_str());
         return false;
     }
     if (setting.peek() == ifstream::traits_type::eof())
     {
-        LOG_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Given CSR file is empty ***");
+        LOGM_ERROR(TAG, "*** %s: Given CSR file is empty ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
 
@@ -621,7 +627,7 @@ bool FleetProvisioning::ExportRuntimeConfig(
     ofstream clientConfig(expandedPath);
     if (!clientConfig.is_open())
     {
-        LOGM_ERROR(TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to open file: '%s' ***", file.c_str());
+        LOGM_ERROR(TAG, "*** %s: Unable to open file: '%s' ***", DeviceClient::DC_FATAL_ERROR, file.c_str());
         return false;
     }
     clientConfig << FormatMessage(
@@ -638,6 +644,6 @@ bool FleetProvisioning::ExportRuntimeConfig(
     LOGM_INFO(TAG, "Exported runtime configurations to: %s", file.c_str());
 
     chmod(file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    FileUtils::ValidateFilePermissions(file.c_str(), Permissions::RUNTIME_CONFIG_FILE);
+    FileUtils::ValidateFilePermissions(file.c_str(), Permissions::RUNTIME_CONFIG_FILE, false);
     return true;
 }
