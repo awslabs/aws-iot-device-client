@@ -133,12 +133,17 @@ namespace Aws
                     static constexpr char CLI_TUNNELING_REGION[] = "--tunneling-region";
                     static constexpr char CLI_TUNNELING_SERVICE[] = "--tunneling-service";
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
+                    static constexpr char JSON_KEY_ENDPOINT[] = "endpoint";
 
                     bool enabled{false};
                     bool subscribeNotification{true};
                     Aws::Crt::Optional<std::string> destinationAccessToken;
                     Aws::Crt::Optional<std::string> region;
                     Aws::Crt::Optional<int> port;
+
+                    // Normally the endpoint is determined by `region` only. This is only used to override the normal
+                    // endpoint such as when testing against the gamma stage.
+                    Aws::Crt::Optional<std::string> endpoint;
                 };
                 Tunneling tunneling;
 

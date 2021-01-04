@@ -457,6 +457,7 @@ constexpr char PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN[];
 constexpr char PlainConfig::Tunneling::CLI_TUNNELING_REGION[];
 constexpr char PlainConfig::Tunneling::CLI_TUNNELING_SERVICE[];
 constexpr char PlainConfig::Tunneling::JSON_KEY_ENABLED[];
+constexpr char PlainConfig::Tunneling::JSON_KEY_ENDPOINT[];
 
 bool PlainConfig::Tunneling::LoadFromJson(const Crt::JsonView &json)
 {
@@ -464,6 +465,12 @@ bool PlainConfig::Tunneling::LoadFromJson(const Crt::JsonView &json)
     if (json.ValueExists(jsonKey))
     {
         enabled = json.GetBool(jsonKey);
+    }
+
+    jsonKey = JSON_KEY_ENDPOINT;
+    if (json.ValueExists(jsonKey))
+    {
+        endpoint = json.GetString(jsonKey).c_str();
     }
 
     return true;
