@@ -286,7 +286,8 @@ namespace Aws
 
                 string SecureTunnelingFeature::GetEndpoint(const string &region)
                 {
-                    if (mEndpoint.has_value()) {
+                    if (mEndpoint.has_value())
+                    {
                         return mEndpoint.value();
                     }
 
