@@ -66,19 +66,19 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     }
 
     jsonKey = JSON_KEY_CERT;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
         cert = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
 
     jsonKey = JSON_KEY_KEY;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
         key = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
 
     jsonKey = JSON_KEY_ROOT_CA;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
         rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
@@ -291,7 +291,7 @@ string PlainConfig::LogConfig::ParseLogType(string value)
 bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
 {
     const char *jsonKey = JSON_KEY_LOG_LEVEL;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
         try
         {
@@ -305,7 +305,7 @@ bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
     }
 
     jsonKey = JSON_KEY_LOG_TYPE;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
         try
         {
@@ -319,7 +319,7 @@ bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
     }
 
     jsonKey = JSON_KEY_LOG_FILE;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
         file = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
@@ -569,13 +569,13 @@ bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
     }
 
     jsonKey = JSON_KEY_TEMPLATE_NAME;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
         templateName = json.GetString(jsonKey).c_str();
     }
 
     jsonKey = JSON_KEY_CSR_FILE;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
         csrFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
@@ -635,13 +635,13 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromJson(const Crt::JsonVi
     }
 
     jsonKey = JSON_KEY_CERT;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
         cert = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
 
     jsonKey = JSON_KEY_KEY;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
         key = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
