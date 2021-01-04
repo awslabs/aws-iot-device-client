@@ -121,8 +121,8 @@ bool FileUtils::ValidateFilePermissions(const std::string &path, const int fileP
         {
             LOGM_WARN(
                 TAG,
-                "Permissions to given file/dir path '%s' is not set to recommended value... {Permissions: {desired: %d, "
-                "actual: %d}}",
+                "Permissions to given file/dir path '%s' is not set to recommended value... {Permissions: {desired: "
+                "%d, actual: %d}}",
                 path.c_str(),
                 filePermissions,
                 actualFilePermissions);
