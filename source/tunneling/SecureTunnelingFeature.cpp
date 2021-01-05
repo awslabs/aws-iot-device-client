@@ -100,6 +100,8 @@ namespace Aws
                         mRootCa = *config.rootCa;
                         mPort = static_cast<uint16_t>(config.tunneling.port.value()); // The range is already checked
                     }
+
+                    mEndpoint = config.tunneling.endpoint;
                 }
 
                 void SecureTunnelingFeature::runSecureTunneling()
@@ -284,6 +286,11 @@ namespace Aws
 
                 string SecureTunnelingFeature::GetEndpoint(const string &region)
                 {
+                    if (mEndpoint.has_value())
+                    {
+                        return mEndpoint.value();
+                    }
+
                     string endpoint = FormatMessage(DEFAULT_PROXY_ENDPOINT_HOST_FORMAT, region.c_str());
 
                     if (region.substr(0, 3) == "cn-")

@@ -25,14 +25,21 @@ namespace Aws
                      * @param path the full path to assess
                      * @return 0 upon success, some other number indicating an error otherwise
                      */
-                    static int mkdirs(const char *path);
+                    static int Mkdirs(const char *path);
 
                     /**
                      * \brief Given a path to a file, attempts to extract the parent directory
                      * @param filePath a path to a file
                      * @return the parent directory of the file
                      */
-                    static std::string extractParentDirectory(const std::string &filePath);
+                    static std::string ExtractParentDirectory(const std::string &filePath);
+
+                    /**
+                     * \brief Given a path to a file, attempts to extract the absolute path
+                     * @param filePath a path to a file
+                     * @return the expanded path of the file
+                     */
+                    static std::string ExtractExpandedPath(const std::string &filePath);
 
                     /**
                      * \brief Stores string value in given file
@@ -48,10 +55,24 @@ namespace Aws
                      * @param filePath a path to a file
                      * @return an integer representing the file permissions.
                      */
-                    static int getFilePermissions(const std::string &filePath);
+                    static int GetFilePermissions(const std::string &path);
 
                     /**
-                     * Converts a file permissions mask into a human readable format
+                     * \brief Returns true if permissions set for given file/dir are correct
+                     *
+                     * @param path a path to a file/dir
+                     * @param filePermissions correct permission for a given file
+                     * @param fatalError a boolean parameter to decide to log error message or warning message . Default
+                     * value is true
+                     * @return an boolean value representing if permissions set on given file/dir are correct or not
+                     */
+                    static bool ValidateFilePermissions(
+                        const std::string &filePath,
+                        const int filePermissions,
+                        bool fatalError = true);
+
+                    /**
+                     * Converts a file permissions mask into a human readable format:
                      *
                      * This function will return a 3-digit integer representing the permissions set by the mask.
                      * Each digit in the returned value will range from 0-7. The first digit is user, the second digit
@@ -65,14 +86,14 @@ namespace Aws
                      * @param mask the permissions mask
                      * @return an integer representing a human readable format of the permissions mask
                      */
-                    static int permissionsMaskToInt(mode_t mask);
+                    static int PermissionsMaskToInt(mode_t mask);
 
                     /**
                      * \brief Returns the size of the file in bytes
                      * @param filePath the path to the file
                      * @return the size of the file in bytes
                      */
-                    static size_t getFileSize(const std::string &filePath);
+                    static size_t GetFileSize(const std::string &filePath);
 
                     /**
                      * Attempts to create the provided directory with the given permissions
@@ -81,7 +102,7 @@ namespace Aws
                      * @return true if the directory was successfully created with the given permissions, false
                      * otherwise
                      */
-                    static bool createDirectoryWithPermissions(const char *dirPath, mode_t permissions);
+                    static bool CreateDirectoryWithPermissions(const char *dirPath, mode_t permissions);
                 };
             } // namespace Util
         }     // namespace DeviceClient
