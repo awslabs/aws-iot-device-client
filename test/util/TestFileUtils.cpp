@@ -13,37 +13,37 @@ using namespace Aws::Iot::DeviceClient::Util;
 
 TEST(FileUtils, handlesAbsoluteFilePath)
 {
-    string parentDir = FileUtils::extractParentDirectory("/var/log/aws-iot-device-client.log");
+    string parentDir = FileUtils::ExtractParentDirectory("/var/log/aws-iot-device-client.log");
     ASSERT_STREQ("/var/log/", parentDir.c_str());
 }
 
 TEST(FileUtils, handlesRelativeFilePath)
 {
-    string parentDir = FileUtils::extractParentDirectory("./out/aws-iot-device-client.log");
+    string parentDir = FileUtils::ExtractParentDirectory("./out/aws-iot-device-client.log");
     ASSERT_STREQ("./out/", parentDir.c_str());
 }
 
 TEST(FileUtils, handlesNoDirectories)
 {
-    string parentDir = FileUtils::extractParentDirectory("aws-iot-device-client.log");
+    string parentDir = FileUtils::ExtractParentDirectory("aws-iot-device-client.log");
     ASSERT_STREQ("", parentDir.c_str());
 }
 
 TEST(FileUtils, handlesRelativeCWD)
 {
-    string parentDir = FileUtils::extractParentDirectory("./aws-iot-device-client.log");
+    string parentDir = FileUtils::ExtractParentDirectory("./aws-iot-device-client.log");
     ASSERT_STREQ("./", parentDir.c_str());
 }
 
 TEST(FileUtils, handlesRelativeParent)
 {
-    string parentDir = FileUtils::extractParentDirectory("../aws-iot-device-client.log");
+    string parentDir = FileUtils::ExtractParentDirectory("../aws-iot-device-client.log");
     ASSERT_STREQ("../", parentDir.c_str());
 }
 
 TEST(FileUtils, handlesEmptyPath)
 {
-    string parentDir = FileUtils::extractParentDirectory("");
+    string parentDir = FileUtils::ExtractParentDirectory("");
     ASSERT_STREQ("", parentDir.c_str());
 }
 
@@ -59,19 +59,19 @@ TEST(FileUtils, testStoreValueInFile)
 }
 TEST(FileUtils, handlesRootDir)
 {
-    string rootDir = FileUtils::extractParentDirectory("/");
+    string rootDir = FileUtils::ExtractParentDirectory("/");
     ASSERT_STREQ("/", rootDir.c_str());
 }
 
 TEST(FileUtils, assertsCorrectFilePermissions)
 {
-    string filePath = "/tmp/" + UniqueString::getRandomToken(10);
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
 
     ofstream file(filePath, std::fstream::app);
     file << "test message" << endl;
 
     chmod(filePath.c_str(), S_IRUSR | S_IWUSR);
-    int permissions = FileUtils::getFilePermissions(filePath);
+    int permissions = FileUtils::GetFilePermissions(filePath);
     int expectedPermissions = 600;
     ASSERT_EQ(expectedPermissions, permissions);
 
@@ -80,11 +80,11 @@ TEST(FileUtils, assertsCorrectFilePermissions)
 
 TEST(FileUtils, assertsCorrectDirectoryPermissions)
 {
-    string dirPath = "/tmp/" + UniqueString::getRandomToken(10) + "/";
-    FileUtils::mkdirs(dirPath.c_str());
+    string dirPath = "/tmp/" + UniqueString::GetRandomToken(10) + "/";
+    FileUtils::Mkdirs(dirPath.c_str());
 
     chmod(dirPath.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH);
-    int permissions = FileUtils::getFilePermissions(dirPath);
+    int permissions = FileUtils::GetFilePermissions(dirPath);
     int expectedPermissions = 745;
     ASSERT_EQ(expectedPermissions, permissions);
 
@@ -93,11 +93,11 @@ TEST(FileUtils, assertsCorrectDirectoryPermissions)
 
 TEST(FileUtils, getsCorrectFileSize)
 {
-    string filePath = "/tmp/" + UniqueString::getRandomToken(10);
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
     ofstream file(filePath, std::fstream::app);
     file << "test message" << endl;
 
-    size_t bytes = FileUtils::getFileSize(filePath);
+    size_t bytes = FileUtils::GetFileSize(filePath);
     ASSERT_EQ(13, bytes);
 
     std::remove(filePath.c_str());
@@ -105,10 +105,10 @@ TEST(FileUtils, getsCorrectFileSize)
 
 TEST(FileUtils, getsCorrectFileSizeForEmptyFile)
 {
-    string filePath = "/tmp/" + UniqueString::getRandomToken(10);
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
     ofstream file(filePath, std::fstream::app);
 
-    size_t bytes = FileUtils::getFileSize(filePath);
+    size_t bytes = FileUtils::GetFileSize(filePath);
     ASSERT_EQ(0, bytes);
 
     std::remove(filePath.c_str());
@@ -116,46 +116,46 @@ TEST(FileUtils, getsCorrectFileSizeForEmptyFile)
 
 TEST(FileUtils, getsCorrectFileSizeForNonExistantFile)
 {
-    string filePath = "/tmp/" + UniqueString::getRandomToken(10);
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
 
-    size_t bytes = FileUtils::getFileSize(filePath);
+    size_t bytes = FileUtils::GetFileSize(filePath);
     ASSERT_EQ(0, bytes);
 }
 
 TEST(FileUtils, canSetupDirectoryAndSetPermissions)
 {
-    string dirPath = "/tmp/" + UniqueString::getRandomToken(10) + "/";
+    string dirPath = "/tmp/" + UniqueString::GetRandomToken(10) + "/";
 
-    bool didSetup = FileUtils::createDirectoryWithPermissions(dirPath.c_str(), S_IRWXU);
+    bool didSetup = FileUtils::CreateDirectoryWithPermissions(dirPath.c_str(), S_IRWXU);
 
     ASSERT_TRUE(didSetup);
-    ASSERT_EQ(700, FileUtils::getFilePermissions(dirPath));
+    ASSERT_EQ(700, FileUtils::GetFilePermissions(dirPath));
 
     rmdir(dirPath.c_str());
 }
 
 TEST(FileUtils, setupDirectoryGoodResultsOnRepeatedAttempts)
 {
-    string dirPath = "/tmp/" + UniqueString::getRandomToken(10) + "/";
+    string dirPath = "/tmp/" + UniqueString::GetRandomToken(10) + "/";
 
-    bool didSetup = FileUtils::createDirectoryWithPermissions(dirPath.c_str(), S_IRWXU);
-
-    ASSERT_TRUE(didSetup);
-    ASSERT_EQ(700, FileUtils::getFilePermissions(dirPath));
-
-    didSetup = FileUtils::createDirectoryWithPermissions(dirPath.c_str(), S_IRWXU);
+    bool didSetup = FileUtils::CreateDirectoryWithPermissions(dirPath.c_str(), S_IRWXU);
 
     ASSERT_TRUE(didSetup);
-    ASSERT_EQ(700, FileUtils::getFilePermissions(dirPath));
+    ASSERT_EQ(700, FileUtils::GetFilePermissions(dirPath));
+
+    didSetup = FileUtils::CreateDirectoryWithPermissions(dirPath.c_str(), S_IRWXU);
+
+    ASSERT_TRUE(didSetup);
+    ASSERT_EQ(700, FileUtils::GetFilePermissions(dirPath));
 
     rmdir(dirPath.c_str());
 }
 
 TEST(FileUtils, setupDirectoryDetectedSetupFailure)
 {
-    string dirPath = "/dev/null/" + UniqueString::getRandomToken(10) + "/";
+    string dirPath = "/dev/null/" + UniqueString::GetRandomToken(10) + "/";
 
-    bool didSetup = FileUtils::createDirectoryWithPermissions(dirPath.c_str(), S_IRWXU);
+    bool didSetup = FileUtils::CreateDirectoryWithPermissions(dirPath.c_str(), S_IRWXU);
 
     ASSERT_FALSE(didSetup);
 }

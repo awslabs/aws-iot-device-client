@@ -29,7 +29,7 @@ namespace Aws
                   public:
                     const static size_t MAX_CLIENT_TOKEN_SIZE = 64;
 
-                    static std::string getRandomToken(size_t length);
+                    static std::string GetRandomToken(size_t length);
                 };
             } // namespace Util
         }     // namespace DeviceClient
