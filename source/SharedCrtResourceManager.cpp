@@ -37,28 +37,11 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     }
     else
     {
-        string parentDir = FileUtils::extractParentDirectory(config.key->c_str());
-        int actualParentDirPermissions = FileUtils::getFilePermissions(parentDir);
-        if (Permissions::KEY_DIR != actualParentDirPermissions)
+        string parentDir = FileUtils::ExtractParentDirectory(config.key->c_str());
+        if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::KEY_DIR) ||
+            !FileUtils::ValidateFilePermissions(config.key->c_str(), Permissions::PRIVATE_KEY))
         {
-            LOGM_ERROR(
-                TAG,
-                "Permissions for private key parent directory %s should be %d but found %d instead",
-                parentDir.c_str(),
-                Permissions::KEY_DIR,
-                actualParentDirPermissions);
-            locatedAll = false;
-        }
-
-        int actualPrivateKeyPermissions = FileUtils::getFilePermissions(config.key->c_str());
-        if (Permissions::PRIVATE_KEY != actualPrivateKeyPermissions)
-        {
-            LOGM_ERROR(
-                TAG,
-                "Permissions for private key %s should be %d but found %d instead",
-                config.key->c_str(),
-                Permissions::PRIVATE_KEY,
-                actualPrivateKeyPermissions);
+            LOG_ERROR(TAG, "Incorrect permissions on private key file and/or parent directory");
             locatedAll = false;
         }
     }
@@ -70,28 +53,11 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     }
     else
     {
-        string parentDir = FileUtils::extractParentDirectory(config.cert->c_str());
-        int actualParentDirPermissions = FileUtils::getFilePermissions(parentDir);
-        if (Permissions::CERT_DIR != actualParentDirPermissions)
+        string parentDir = FileUtils::ExtractParentDirectory(config.cert->c_str());
+        if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::CERT_DIR) ||
+            !FileUtils::ValidateFilePermissions(config.cert->c_str(), Permissions::PUBLIC_CERT))
         {
-            LOGM_ERROR(
-                TAG,
-                "Permissions for public cert parent directory %s should be %d but found %d instead",
-                parentDir.c_str(),
-                Permissions::CERT_DIR,
-                actualParentDirPermissions);
-            locatedAll = false;
-        }
-
-        int actualPublicKeyPermissions = FileUtils::getFilePermissions(config.cert->c_str());
-        if (Permissions::PUBLIC_CERT != actualPublicKeyPermissions)
-        {
-            LOGM_ERROR(
-                TAG,
-                "Permissions for public cert %s should be %d but found %d instead",
-                config.cert->c_str(),
-                Permissions::PUBLIC_CERT,
-                actualPublicKeyPermissions);
+            LOG_ERROR(TAG, "Incorrect permissions on public cert file and/or parent directory");
             locatedAll = false;
         }
     }
@@ -103,28 +69,11 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     }
     else
     {
-        string parentDir = FileUtils::extractParentDirectory(config.rootCa->c_str());
-        int actualParentDirPermissions = FileUtils::getFilePermissions(parentDir);
-        if (Permissions::ROOT_CA_DIR != actualParentDirPermissions)
+        string parentDir = FileUtils::ExtractParentDirectory(config.rootCa->c_str());
+        if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::ROOT_CA_DIR) ||
+            !FileUtils::ValidateFilePermissions(config.cert->c_str(), Permissions::ROOT_CA))
         {
-            LOGM_ERROR(
-                TAG,
-                "Permissions for Root CA parent directory %s should be %d but found %d instead",
-                parentDir.c_str(),
-                Permissions::ROOT_CA_DIR,
-                actualParentDirPermissions);
-            locatedAll = false;
-        }
-
-        int actualRootCAPermissions = FileUtils::getFilePermissions(config.rootCa->c_str());
-        if (Permissions::ROOT_CA != actualRootCAPermissions)
-        {
-            LOGM_ERROR(
-                TAG,
-                "Permissions for Root CA %s should be %d but found %d instead",
-                config.rootCa->c_str(),
-                Permissions::ROOT_CA,
-                actualRootCAPermissions);
+            LOG_ERROR(TAG, "Incorrect permissions on Root CA file and/or parent directory");
             locatedAll = false;
         }
     }
@@ -176,7 +125,10 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
 {
     if (!locateCredentials(config))
     {
-        LOG_ERROR(TAG, "Failed to find file(s) required for establishing the MQTT connection");
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Failed to find file(s) with correct permissions required for establishing the MQTT connection ***",
+            DeviceClient::DC_FATAL_ERROR);
         return SharedCrtResourceManager::ABORT;
     }
     auto clientConfigBuilder = MqttClientConnectionConfigBuilder(config.cert->c_str(), config.key->c_str());
