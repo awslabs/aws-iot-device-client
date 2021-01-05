@@ -381,7 +381,7 @@ void JobsFeature::publishUpdateJobExecutionStatus(JobExecutionData data, JobExec
         request.StatusDetails = statusDetails;
 
         // Create a unique client token each time we attempt the request since the promise has to be fresh
-        string clientToken = UniqueString::getRandomToken(10);
+        string clientToken = UniqueString::GetRandomToken(10);
         request.ClientToken = Aws::Crt::Optional<Aws::Crt::String>(clientToken.c_str());
         unique_lock<mutex> writeLock(updateJobExecutionPromisesLock);
         this->updateJobExecutionPromises.insert(std::pair<Aws::Crt::String, EphemeralPromise<int>>(
@@ -479,7 +479,7 @@ void JobsFeature::executeJob(JobExecutionData job)
 
     if (operationOwnedByDeviceClient)
     {
-        const int actualPermissions = FileUtils::getFilePermissions(command.str().c_str());
+        const int actualPermissions = FileUtils::GetFilePermissions(command.str().c_str());
         if (Permissions::JOB_HANDLER != actualPermissions)
         {
             string message = FormatMessage(

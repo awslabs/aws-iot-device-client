@@ -11,15 +11,13 @@
 #endif
 #include "../util/FileUtils.h"
 
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <wordexp.h>
-
 #include <algorithm>
 #include <aws/crt/JsonObject.h>
 #include <iostream>
 #include <map>
 #include <stdexcept>
+#include <sys/stat.h>
+#include <wordexp.h>
 
 using namespace std;
 using namespace Aws::Iot;
@@ -70,34 +68,19 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_CERT;
     if (json.ValueExists(jsonKey))
     {
-        wordexp_t word;
-        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
-        string expandedPath = word.we_wordv[0];
-        wordfree(&word);
-
-        cert = expandedPath;
+        cert = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
 
     jsonKey = JSON_KEY_KEY;
     if (json.ValueExists(jsonKey))
     {
-        wordexp_t word;
-        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
-        string expandedPath = word.we_wordv[0];
-        wordfree(&word);
-
-        key = expandedPath;
+        key = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
 
     jsonKey = JSON_KEY_ROOT_CA;
     if (json.ValueExists(jsonKey))
     {
-        wordexp_t word;
-        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
-        string expandedPath = word.we_wordv[0];
-        wordfree(&word);
-
-        rootCa = expandedPath;
+        rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
 
     jsonKey = JSON_KEY_THING_NAME;
@@ -165,30 +148,15 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::CLI_CERT))
     {
-        wordexp_t word;
-        wordexp(cliArgs.at(PlainConfig::CLI_CERT).c_str(), &word, 0);
-        string expandedPath = word.we_wordv[0];
-        wordfree(&word);
-
-        cert = expandedPath;
+        cert = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::CLI_CERT).c_str());
     }
     if (cliArgs.count(PlainConfig::CLI_KEY))
     {
-        wordexp_t word;
-        wordexp(cliArgs.at(PlainConfig::CLI_KEY).c_str(), &word, 0);
-        string expandedPath = word.we_wordv[0];
-        wordfree(&word);
-
-        key = expandedPath;
+        key = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::CLI_KEY).c_str());
     }
     if (cliArgs.count(PlainConfig::CLI_ROOT_CA))
     {
-        wordexp_t word;
-        wordexp(cliArgs.at(PlainConfig::CLI_ROOT_CA).c_str(), &word, 0);
-        string expandedPath = word.we_wordv[0];
-        wordfree(&word);
-
-        rootCa = expandedPath;
+        rootCa = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::CLI_ROOT_CA).c_str());
     }
     if (cliArgs.count(PlainConfig::CLI_THING_NAME))
     {
@@ -204,27 +172,27 @@ bool PlainConfig::Validate() const
 #if !defined(DISABLE_MQTT)
     if (!endpoint.has_value() || endpoint->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Endpoint is missing ***");
+        LOGM_ERROR(Config::TAG, "*** %s: Endpoint is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!cert.has_value() || cert->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Certificate is missing ***");
+        LOGM_ERROR(Config::TAG, "*** %s: Certificate is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!key.has_value() || key->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Private Key is missing ***");
+        LOGM_ERROR(Config::TAG, "*** %s: Private Key is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!rootCa.has_value() || rootCa->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Root CA is missing ***");
+        LOGM_ERROR(Config::TAG, "*** %s: Root CA is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!thingName.has_value() || thingName->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Thing name is missing ***");
+        LOGM_ERROR(Config::TAG, "*** %s: Thing name is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
 #endif
@@ -353,12 +321,7 @@ bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_LOG_FILE;
     if (json.ValueExists(jsonKey))
     {
-        wordexp_t word;
-        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
-        string expandedPath = word.we_wordv[0];
-        wordfree(&word);
-
-        file = expandedPath;
+        file = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
 
     return true;
@@ -394,12 +357,7 @@ bool PlainConfig::LogConfig::LoadFromCliArgs(const CliArgs &cliArgs)
 
     if (cliArgs.count(CLI_LOG_FILE))
     {
-        wordexp_t word;
-        wordexp(cliArgs.at(CLI_LOG_FILE).c_str(), &word, 0);
-        string expandedPath = word.we_wordv[0];
-        wordfree(&word);
-
-        file = expandedPath;
+        file = FileUtils::ExtractExpandedPath(cliArgs.at(CLI_LOG_FILE).c_str());
     }
 
     return true;
@@ -435,12 +393,7 @@ bool PlainConfig::Jobs::LoadFromCliArgs(const CliArgs &cliArgs)
 
     if (cliArgs.count(PlainConfig::Jobs::CLI_HANDLER_DIR))
     {
-        wordexp_t word;
-        wordexp(cliArgs.at(CLI_HANDLER_DIR).c_str(), &word, 0);
-        string expandedPath = word.we_wordv[0];
-        wordfree(&word);
-
-        handlerDir = expandedPath;
+        handlerDir = FileUtils::ExtractExpandedPath(cliArgs.at(CLI_HANDLER_DIR).c_str());
     }
 
     return true;
@@ -513,12 +466,12 @@ bool PlainConfig::Tunneling::Validate() const
 
     if (!destinationAccessToken.has_value() || destinationAccessToken->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: destination-access-token is missing ***");
+        LOGM_ERROR(Config::TAG, "*** %s: destination-access-token is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!region.has_value() || region->empty())
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: region is missing ***");
+        LOGM_ERROR(Config::TAG, "*** %s: region is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     if (!port.has_value()
@@ -528,7 +481,7 @@ bool PlainConfig::Tunneling::Validate() const
     )
 #endif
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: port is missing or invalid ***");
+        LOGM_ERROR(Config::TAG, "*** %s: port is missing or invalid ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
 
@@ -574,8 +527,9 @@ bool PlainConfig::DeviceDefender::LoadFromCliArgs(const CliArgs &cliArgs)
         {
             LOGM_ERROR(
                 Config::TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Failed to convert CLI argument {%s} to integer, please use a "
+                "*** %s: Failed to convert CLI argument {%s} to integer, please use a "
                 "valid integer between 1 and MAX_INT ***",
+                DeviceClient::DC_FATAL_ERROR,
                 PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL);
             return false;
         }
@@ -591,7 +545,7 @@ bool PlainConfig::DeviceDefender::Validate() const
     }
     if (!interval.has_value() || (interval.value() <= 0))
     {
-        LOG_ERROR(Config::TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Interval value <= 0 ***");
+        LOGM_ERROR(Config::TAG, "*** %s: Interval value <= 0 ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
 
@@ -623,11 +577,7 @@ bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_CSR_FILE;
     if (json.ValueExists(jsonKey))
     {
-        wordexp_t word;
-        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
-        string expandedPath = word.we_wordv[0];
-        wordfree(&word);
-        csrFile = expandedPath;
+        csrFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
 
     return true;
@@ -645,11 +595,8 @@ bool PlainConfig::FleetProvisioning::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE))
     {
-        wordexp_t word;
-        wordexp(cliArgs.at(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE).c_str(), &word, 0);
-        string expandedPath = word.we_wordv[0];
-        wordfree(&word);
-        csrFile = expandedPath;
+        csrFile = FileUtils::ExtractExpandedPath(
+            cliArgs.at(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE).c_str());
     }
 
     return true;
@@ -664,10 +611,11 @@ bool PlainConfig::FleetProvisioning::Validate() const
 
     if (!templateName.has_value() || templateName->empty())
     {
-        LOG_ERROR(
+        LOGM_ERROR(
             Config::TAG,
-            "*** AWS IOT DEVICE CLIENT FATAL ERROR: A template name must be specified if Fleet Provisioning is enabled "
-            "***");
+            "*** %s: A template name must be specified if Fleet Provisioning is enabled "
+            "***",
+            DeviceClient::DC_FATAL_ERROR);
         return false;
     }
     return true;
@@ -689,23 +637,13 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromJson(const Crt::JsonVi
     jsonKey = JSON_KEY_CERT;
     if (json.ValueExists(jsonKey))
     {
-        wordexp_t word;
-        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
-        string expandedPath = word.we_wordv[0];
-        wordfree(&word);
-
-        cert = expandedPath;
+        cert = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
 
     jsonKey = JSON_KEY_KEY;
     if (json.ValueExists(jsonKey))
     {
-        wordexp_t word;
-        wordexp(json.GetString(jsonKey).c_str(), &word, 0);
-        string expandedPath = word.we_wordv[0];
-        wordfree(&word);
-
-        key = expandedPath;
+        key = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
 
     jsonKey = JSON_KEY_THING_NAME;
@@ -801,7 +739,8 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unrecognised command line argument: %s ***",
+                "*** %s: Unrecognised command line argument: %s ***",
+                DeviceClient::DC_FATAL_ERROR,
                 currentArg.c_str());
             return false;
         }
@@ -810,8 +749,8 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {
             LOGM_ERROR(
                 TAG,
-                "*** AWS IOT DEVICE CLIENT FATAL ERROR: Command Line argument '%s' cannot be specified more than once "
-                "***",
+                "*** %s: Command Line argument '%s' cannot be specified more than once ***",
+                DeviceClient::DC_FATAL_ERROR,
                 currentArg.c_str());
             return false;
         }
@@ -823,9 +762,8 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
             {
                 LOGM_ERROR(
                     TAG,
-                    "*** AWS IOT DEVICE CLIENT FATAL ERROR: Command Line argument '%s' was passed without specifying "
-                    "addition argument "
-                    "***",
+                    "*** *s: Command Line argument '%s' was passed without specifying addition argument ***",
+                    DeviceClient::DC_FATAL_ERROR,
                     currentArg.c_str());
                 return false;
             }
@@ -858,7 +796,7 @@ bool Config::init(const CliArgs &cliArgs)
     if (!ParseConfigFile(filename))
     {
         LOGM_ERROR(
-            TAG, "*** AWS IOT DEVICE CLIENT FATAL ERROR: Unable to Parse Config file: '%s' ***", filename.c_str());
+            TAG, "*** %s: Unable to Parse Config file: '%s' ***", DeviceClient::DC_FATAL_ERROR, filename.c_str());
         return false;
     }
 
@@ -898,11 +836,7 @@ bool Config::ValidateAndStoreRuntimeConfig()
 
 bool Config::ParseConfigFile(const string &file)
 {
-    wordexp_t word;
-    wordexp(file.c_str(), &word, 0);
-    string expandedPath = word.we_wordv[0];
-    wordfree(&word);
-
+    string expandedPath = FileUtils::ExtractExpandedPath(file.c_str());
     struct stat info;
     if (stat(expandedPath.c_str(), &info) != 0)
     {
@@ -910,7 +844,7 @@ bool Config::ParseConfigFile(const string &file)
         return false;
     }
 
-    size_t incomingFileSize = FileUtils::getFileSize(file);
+    size_t incomingFileSize = FileUtils::GetFileSize(file);
     if (5000 < incomingFileSize)
     {
         LOGM_WARN(
@@ -922,28 +856,9 @@ bool Config::ParseConfigFile(const string &file)
         return false;
     }
 
-    string configFileParentDir = FileUtils::extractParentDirectory(expandedPath.c_str());
-    int actualConfigDirPermissions = FileUtils::getFilePermissions(configFileParentDir);
-    int actualConfigFilePermissions = FileUtils::getFilePermissions(expandedPath.c_str());
-    if (Permissions::CONFIG_DIR != actualConfigDirPermissions)
-    {
-        LOGM_WARN(
-            TAG,
-            "File permissions for configuration directory %s are not set to the recommended setting of %d, found %d "
-            "instead",
-            configFileParentDir.c_str(),
-            Permissions::CONFIG_DIR,
-            actualConfigDirPermissions);
-    }
-    if (Permissions::CONFIG_FILE != actualConfigFilePermissions)
-    {
-        LOGM_WARN(
-            TAG,
-            "File permissions for configuration file %s are not set to the recommended setting of %d, found %d instead",
-            expandedPath.c_str(),
-            Permissions::CONFIG_FILE,
-            actualConfigFilePermissions);
-    }
+    string configFileParentDir = FileUtils::ExtractParentDirectory(expandedPath.c_str());
+    FileUtils::ValidateFilePermissions(configFileParentDir, Permissions::CONFIG_DIR, false);
+    FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::CONFIG_FILE, false);
 
     ifstream setting(expandedPath.c_str());
     if (!setting.is_open())
@@ -984,9 +899,9 @@ void Config::PrintHelpMessage()
         "and exit "
         "program\n"
         "%s <JSON-File-Location>:\t\t\t\t\tTake settings defined in the specified JSON file and start the binary\n"
-        "%s <[DEBUG, INFO, WARN, ERROR]>:\t Specify the log level for the AWS IoT Device Client\n"
-        "%s <[STDOUT, FILE]>:\t\t\t Specify the logger implementation to use.\n"
-        "%s <File-Location>:\t\t\t Write logs to specified log file when using the file logger.\n"
+        "%s <[DEBUG, INFO, WARN, ERROR]>:\t\t\t\tSpecify the log level for the AWS IoT Device Client\n"
+        "%s <[STDOUT, FILE]>:\t\t\t\t\t\tSpecify the logger implementation to use.\n"
+        "%s <File-Location>:\t\t\t\t\t\tWrite logs to specified log file when using the file logger.\n"
         "%s:\t\t\t\t\t\t\t\tEnables Jobs feature\n"
         "%s:\t\t\t\t\t\t\tEnables Tunneling feature\n"
         "%s:\t\t\t\t\t\tEnables Device Defender feature\n"
@@ -996,14 +911,15 @@ void Config::PrintHelpMessage()
         "%s <Key-Location>:\t\t\t\t\t\t\tUse Specified Key file\n"
         "%s <Root-CA-Location>:\t\t\t\t\t\tUse Specified Root-CA file\n"
         "%s <thing-name-value>:\t\t\t\t\tUse Specified Thing Name\n"
-        "%s <Jobs-handler-directory>:\t\tUse specified directory to find job handlers\n"
+        "%s <Jobs-handler-directory>:\t\t\t\tUse specified directory to find job handlers\n"
         "%s <destination-access-token>:\tUse Specified Destination Access Token for Secure Tunneling\n"
         "%s <region>:\t\t\t\t\t\tUse Specified AWS Region for Secure Tunneling\n"
         "%s <service>:\t\t\t\t\t\tConnect secure tunnel to specific service\n"
         "%s:\t\t\t\t\tDisable MQTT new tunnel notification for Secure Tunneling\n"
         "%s <interval-in-seconds>:\t\t\tPositive integer to publish Device Defender metrics\n"
         "%s <template-name>:\t\t\tUse specified Fleet Provisioning template name\n"
-        "%s <csr-file-path>:\t\t\tUse specified CSR file to generate a certificate by keeping user private key secure. "
+        "%s <csr-file-path>:\t\t\t\t\t\tUse specified CSR file to generate a certificate by keeping user private key "
+        "secure. "
         "If CSR file is not provided, Client will use Claim Certificate and Private key to generate new Certificate "
         "and Private Key while provisioning the device\n";
 
@@ -1090,15 +1006,6 @@ bool Config::ExportDefaultSetting(const string &file)
     LOGM_INFO(TAG, "Exported settings to: %s", file.c_str());
 
     chmod(file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    const int actual = FileUtils::getFilePermissions(file.c_str());
-    if (Permissions::CONFIG_FILE != actual)
-    {
-        LOGM_WARN(
-            TAG,
-            "Failed to set appropriate permissions on configuration file %s, desired %d but found %d",
-            file.c_str(),
-            Permissions::CONFIG_FILE,
-            actual);
-    }
+    FileUtils::ValidateFilePermissions(file.c_str(), Permissions::CONFIG_FILE, false);
     return true;
 }
