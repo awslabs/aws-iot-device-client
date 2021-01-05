@@ -333,21 +333,21 @@ Example:
 
 ## Fleet Provisioning Feature
 
-The AWS IoT Device Client has the capability to provision the device when logged in for the first time. The device client provides two different mechanism for provisioning user device (1) using claim certificate and private key and (2) using CSR file (along with claim certificate and key) to securely provision the device keeping user private key secure. Whichever method user decides to use for provisioning device, AWS IoT Device Client will make sure all the required resources are created correctly, registered with AWS IoT Core and device is ready to use other Device Client features. 
+The AWS IoT Device Client has the capability to provision the device when logged in for the first time. The device client provides two different mechanisms for provisioning the user device (1) using claim certificate and private key and (2) using CSR file (along with claim certificate and key) to securely provision the device while keeping the user private key secure. After all required information is provided, the Fleet Provisioning Feature will provision, register the device with AWS IoT Core, and then establish a connection to IoT Core that is ready for use by other Device Client features. 
 
-Device Client’s Fleet Provisioning feature when enabled and is provisioning device for the first time will first create Permanent Certificate, Private Key (if required) and will attach policy to certificate which will allow device to start/run other Device Client Features. Once these resources are created correctly, Fleet Provisioning feature will then create and register the thing/device with AWS IoT Core which will complete the provision process for the device. 
+When the AWS IoT Device Client's Fleet Provisioning feature is enabled and is provisioning the device for the first time, it will first create a permanent certificate, private key (if required), and will then attach a policy to the certificate in IoT Core which will provide the device with the permissions required to run other Device Client features such as Jobs, Secure Tunneling, and Device Defender. Once these resources are created correctly, Fleet Provisioning feature will then create and register the thing/device with AWS IoT Core which will complete the provision process for the device. 
 
 More details about AWS IoT Fleet Provisioning by claim can be found here: https://docs.aws.amazon.com/iot/latest/developerguide/provision-wo-cert.html
 
-*Note: It is worth noting here that if Fleet Provisioning feature fails at any point, application will abort with a fatal error.*
+*Note: It is worth noting here that if fleet provisioning fails to provision the new key, certificate or thing/device, the device client will abort with fatal error.*
 
-*Note: If CSR file is not provided, Device Client will use Claim Certificate and Private key for provisioning device.*
+*Note: If CSR file is not provided, the Device Client will use Claim Certificate and Private key for provisioning the device.*
 
 Check [CreateKeysAndCertificate](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-keys-cert) and [CreateCertificateFromCsr](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-cert-csr) API for more details.
 
 ### Resources required for Fleet Provisioning feature
 
-The AWS IoT Device Client's Fleet Provisioning feature will require following resources for provisioning the device. Claim Certificate and Private key will be used to create Secure MQTT connection between Device Client and AWS IoT Core. CSR file is only required if user wants to use [CreateCertificateFromCsr](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-cert-csr) API for creating permanent certificate. 
+The AWS IoT Device Client's Fleet Provisioning feature will require the following resources for provisioning the device. Claim Certificate and Private key will be used to create a Secure MQTT connection between Device Client and AWS IoT Core. CSR file is only required if you want to use [CreateCertificateFromCsr](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-cert-csr) API for creating permanent certificate. 
 
 * Claim Certificate
 * Private Key
@@ -356,9 +356,9 @@ The AWS IoT Device Client's Fleet Provisioning feature will require following re
 
 ### Sample Claim Certificate Policy
 
-Claim Certificate policy will allow Device Client to use claim certificate to securely connect to AWS IoT Core and provision device. It is worth noting here that Claim certificate policy restricts Device Client to only provision device; meaning, it will not allow Device Client to start/run any other feature apart from Fleet Provisioning. 
+Claim Certificate policy will allow the Device Client to use the claim certificate to securely connect to AWS IoT Core and provision the device. It is worth noting here that the Claim certificate policy restricts Device Client to only provision the device; meaning, it will not allow the Device Client to start/run any other feature apart from Fleet Provisioning. 
 
-User can use AWS IoT console for creating and attaching policy to claim certificate.
+You can navigate to the *AWS IoT console -> Secure -> Policies* to create and attach a policy to the claim certificate.
 
 ##### Sample Policy:
 
@@ -391,9 +391,9 @@ User can use AWS IoT console for creating and attaching policy to claim certific
 
 ### Sample Fleet Provisioning Template
 
-Fleet Provisioning template is where user will define all of the resources and their properties which the Device Client will create while provisioning the device.
+Fleet Provisioning template is where you will define all of the resources and their properties which the Device Client will create while provisioning the device.
 
-User can use AWS IoT console for creating valid Fleet Provisioning Template
+You can navigate to the *AWS IoT console -> Onboard -> Fleet Provisioning* Templates to create a Fleet Provisioning Template.
 
 ##### Sample Template:
 
@@ -449,9 +449,9 @@ User can use AWS IoT console for creating valid Fleet Provisioning Template
 
 ### Sample Permanent Certificate Policy
 
-Create and attach this policy to Fleet provisioning template. All of the new certificates created using your Fleet Provisioning  template will have this certificate policy attached to it by default which will allow Device Client to start other Device Client features. 
+Create and attach the permanent certificate policy to the Fleet provisioning template. All of the new certificates created using your Fleet Provisioning template will have this certificate policy attached to it by default which which will provide the device with the permissions required to run other Device Client features such as Jobs, Secure Tunneling, and Device Defender. 
 
-User can use AWS IoT console for creating certificate policy.
+You can navigate to the *AWS IoT console -> Secure -> Policies* to create a permanent certificate policy.
 
 ##### Sample (FPCertPolicy) Policy:
 
