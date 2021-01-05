@@ -16,6 +16,7 @@ namespace Aws
         namespace DeviceClient
         {
             using CliArgs = std::map<std::string, std::string>;
+            static constexpr char DC_FATAL_ERROR[] = "AWS IOT DEVICE CLIENT FATAL ERROR";
 
             class LoadableFromJsonAndCli
             {
