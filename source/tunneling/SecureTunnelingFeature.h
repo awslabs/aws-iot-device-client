@@ -4,12 +4,8 @@
 #include "../ClientBaseNotifier.h"
 #include "../Feature.h"
 #include "../SharedCrtResourceManager.h"
-#include "TcpForward.h"
-#include <aws/iotdevice/secure_tunneling.h>
 #include <aws/iotdevicecommon/IotDevice.h>
-#include <aws/iotsecuretunneling/SecureTunnel.h>
 #include <aws/iotsecuretunneling/SecureTunnelingNotifyResponse.h>
-#include <memory>
 
 namespace Aws
 {
@@ -19,6 +15,8 @@ namespace Aws
         {
             namespace SecureTunneling
             {
+                class SecureTunnelingContext;
+
                 class SecureTunnelingFeature : public Feature
                 {
                   public:
@@ -49,23 +47,26 @@ namespace Aws
                         int ioErr);
                     void OnSubscribeComplete(int ioErr);
 
+                    /*
                     void connectToSecureTunnel(const std::string &accessToken, const std::string &region);
-
                     void connectToTcpForward(uint16_t port);
                     void disconnectFromTcpForward();
+                    */
 
                     std::string GetEndpoint(const std::string &region);
 
-                    // Secure tunneling protocol client callbacks
-                    void OnConnectionComplete();
-                    void OnSendDataComplete(int errorCode);
-                    void OnDataReceive(const Crt::ByteBuf &data);
-                    void OnStreamStart();
-                    void OnStreamReset();
-                    void OnSessionReset();
+                    /*
+                                        // Secure tunneling protocol client callbacks
+                                        void OnConnectionComplete();
+                                        void OnSendDataComplete(int errorCode);
+                                        void OnDataReceive(const Crt::ByteBuf &data);
+                                        void OnStreamStart();
+                                        void OnStreamReset();
+                                        void OnSessionReset();
 
-                    // Tcp forward client callback
-                    void OnTcpForwardDataReceive(const Crt::ByteBuf &data);
+                                        // Tcp forward client callback
+                                        void OnTcpForwardDataReceive(const Crt::ByteBuf &data);
+                    */
 
                     // Member variables
                     static constexpr char TAG[] = "SecureTunneling.cpp";
@@ -76,23 +77,28 @@ namespace Aws
                     std::unique_ptr<Aws::Iotdevicecommon::DeviceApiHandle> mDeviceApiHandle;
                     std::shared_ptr<ClientBaseNotifier> mClientBaseNotifier;
 
-                    // From config
                     std::string mThingName;
-                    std::string mAccessToken;
-                    std::string mRegion;
                     std::string mRootCa;
-                    uint16_t mPort{22};
                     bool mSubscribeNotification{true};
 
                     // Normally the endpoint is determined by `region` only. This is only used to override the normal
                     // endpoint such as when testing against the gamma stage.
                     Aws::Crt::Optional<std::string> mEndpoint;
 
-                    // On demand
-                    std::unique_ptr<Aws::Iotsecuretunneling::SecureTunnel> mSecureTunnel;
-                    std::unique_ptr<TcpForward> mTcpForward;
+                    // Moving to SecureTunnelingContext
+                    /*
+                                        // Per tunnel
+                                        std::string mAccessToken;
+                                        std::string mRegion;
+                                        uint16_t mPort{22};
 
-                    Aws::Crt::Optional<Aws::Iotsecuretunneling::SecureTunnelingNotifyResponse> mLastSeenNotifyResponse;
+                                        std::unique_ptr<Aws::Iotsecuretunneling::SecureTunnel> mSecureTunnel;
+                                        std::unique_ptr<TcpForward> mTcpForward;
+
+                                        Aws::Crt::Optional<Aws::Iotsecuretunneling::SecureTunnelingNotifyResponse>
+                       mLastSeenNotifyResponse;
+                    */
+                    std::unique_ptr<SecureTunnelingContext> mContext;
                 };
             } // namespace SecureTunneling
         }     // namespace DeviceClient
