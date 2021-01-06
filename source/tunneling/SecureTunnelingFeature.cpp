@@ -52,18 +52,13 @@ namespace Aws
 
                 int SecureTunnelingFeature::start()
                 {
-                    runSecureTunneling();
+                    RunSecureTunneling();
                     mClientBaseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STARTED);
                     return 0;
                 }
 
                 int SecureTunnelingFeature::stop()
                 {
-                    //                    mSecureTunnel->Close();
-                    //                    mSecureTunnel.reset();
-                    //
-                    //                    mTcpForward->Close();
-                    //                    mTcpForward.reset();
                     for (auto &c : mContexts)
                     {
                         c.reset();
@@ -102,10 +97,6 @@ namespace Aws
 
                     if (!config.tunneling.subscribeNotification)
                     {
-                        // mAccessToken = *config.tunneling.destinationAccessToken;
-                        // mRegion = *config.tunneling.region;
-                        // mPort = static_cast<uint16_t>(config.tunneling.port.value()); // The range is already checked
-
                         std::unique_ptr<SecureTunnelingContext> context =
                             unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
                                 mSharedCrtResourceManager,
@@ -117,7 +108,7 @@ namespace Aws
                     }
                 }
 
-                void SecureTunnelingFeature::runSecureTunneling()
+                void SecureTunnelingFeature::RunSecureTunneling()
                 {
                     LOGM_INFO(TAG, "Running %s!", getName().c_str());
 
@@ -131,7 +122,7 @@ namespace Aws
                             request,
                             AWS_MQTT_QOS_AT_LEAST_ONCE,
                             bind(
-                                &SecureTunnelingFeature::onSubscribeToTunnelsNotifyResponse,
+                                &SecureTunnelingFeature::OnSubscribeToTunnelsNotifyResponse,
                                 this,
                                 placeholders::_1,
                                 placeholders::_2),
@@ -142,39 +133,12 @@ namespace Aws
                         // Access token and region were loaded from config and have already been validated
                         for (auto &c : mContexts)
                         {
-                            c->connectToSecureTunnel();
+                            c->ConnectToSecureTunnel();
                         }
                     }
                 }
 
-                //                template <typename T>
-                //                static bool operator==(const Aws::Crt::Optional<T> &lhs, const Aws::Crt::Optional<T>
-                //                &rhs)
-                //                {
-                //                    if (!lhs.has_value() && !rhs.has_value())
-                //                    {
-                //                        return true;
-                //                    }
-                //                    else if (lhs.has_value() && rhs.has_value())
-                //                    {
-                //                        return lhs.value() == rhs.value();
-                //                    }
-                //                    else
-                //                    {
-                //                        return false;
-                //                    }
-                //                }
-                //
-                //                static bool operator==(
-                //                    const SecureTunnelingNotifyResponse &lhs,
-                //                    const SecureTunnelingNotifyResponse &rhs)
-                //                {
-                //                    return lhs.Region == rhs.Region && lhs.ClientMode == rhs.ClientMode &&
-                //                           lhs.Services == rhs.Services && lhs.ClientAccessToken ==
-                //                           rhs.ClientAccessToken;
-                //                }
-
-                void SecureTunnelingFeature::onSubscribeToTunnelsNotifyResponse(
+                void SecureTunnelingFeature::OnSubscribeToTunnelsNotifyResponse(
                     SecureTunnelingNotifyResponse *response,
                     int ioErr)
                 {
@@ -182,17 +146,10 @@ namespace Aws
 
                     if (ioErr || !response)
                     {
-                        LOGM_ERROR(TAG, "onSubscribeToTunnelsNotifyResponse received error. ioErr=%d", ioErr);
+                        LOGM_ERROR(TAG, "OnSubscribeToTunnelsNotifyResponse received error. ioErr=%d", ioErr);
                         return;
                     }
 
-                    //                    if (mLastSeenNotifyResponse.has_value() && mLastSeenNotifyResponse.value() ==
-                    //                    *response)
-                    //                    {
-                    //                        LOG_INFO(TAG, "Received duplicate MQTT Tunnel Notification. Ignoring...");
-                    //                        return;
-                    //                    }
-                    //                    mLastSeenNotifyResponse = *response;
                     for (auto &c : mContexts)
                     {
                         if (c->IsDuplicateNotification(*response))
@@ -251,7 +208,7 @@ namespace Aws
                     std::unique_ptr<SecureTunnelingContext> context =
                         unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
                             mSharedCrtResourceManager, mRootCa, accessToken, GetEndpoint(region), port));
-                    context->connectToSecureTunnel();
+                    context->ConnectToSecureTunnel();
                     mContexts.push_back(std::move(context));
                 }
 
@@ -267,56 +224,6 @@ namespace Aws
                         // TODO: UA-5775 - Incorporate the baseClientNotifier onError event
                     }
                 }
-
-                //                void SecureTunnelingFeature::connectToSecureTunnel(const string &accessToken, const
-                //                string &region)
-                //                {
-                //                    if (accessToken.empty() || region.empty())
-                //                    {
-                //                        LOG_ERROR(TAG, "Cannot connect to secure tunnel. Either access token or region
-                //                        is empty"); return;
-                //                    }
-                //
-                //                    mSecureTunnel = unique_ptr<SecureTunnel>(new SecureTunnel(
-                //                        mSharedCrtResourceManager->getAllocator(),
-                //                        mSharedCrtResourceManager->getClientBootstrap(),
-                //                        Aws::Crt::Io::SocketOptions(),
-                //
-                //                        accessToken,
-                //                        AWS_SECURE_TUNNELING_DESTINATION_MODE,
-                //                        GetEndpoint(region),
-                //                        mRootCa,
-                //
-                //                        bind(&SecureTunnelingFeature::OnConnectionComplete, this),
-                //                        bind(&SecureTunnelingFeature::OnSendDataComplete, this, placeholders::_1),
-                //                        bind(&SecureTunnelingFeature::OnDataReceive, this, placeholders::_1),
-                //                        bind(&SecureTunnelingFeature::OnStreamStart, this),
-                //                        bind(&SecureTunnelingFeature::OnStreamReset, this),
-                //                        bind(&SecureTunnelingFeature::OnSessionReset, this)));
-                //                    mSecureTunnel->Connect();
-                //                }
-
-                //                void SecureTunnelingFeature::connectToTcpForward(uint16_t port)
-                //                {
-                //                    if (!IsValidPort(port))
-                //                    {
-                //                        LOGM_ERROR(TAG, "Cannot connect to invalid local port. port=%d", port);
-                //                        return;
-                //                    }
-                //
-                //                    mTcpForward = unique_ptr<TcpForward>(new TcpForward(
-                //                        mSharedCrtResourceManager,
-                //                        port,
-                //                        bind(&SecureTunnelingFeature::OnTcpForwardDataReceive, this,
-                //                        placeholders::_1)));
-                //                    mTcpForward->Connect();
-                //                }
-
-                //                void SecureTunnelingFeature::disconnectFromTcpForward()
-                //                {
-                //                    mTcpForward->Close();
-                //                    mTcpForward.reset();
-                //                }
 
                 string SecureTunnelingFeature::GetEndpoint(const string &region)
                 {
@@ -337,78 +244,6 @@ namespace Aws
 
                     return endpoint;
                 }
-
-                //                void SecureTunnelingFeature::OnConnectionComplete()
-                //                {
-                //                    LOG_DEBUG(TAG, "SecureTunnelingFeature::OnConnectionComplete");
-                //                }
-                //
-                //                void SecureTunnelingFeature::OnSendDataComplete(int errorCode)
-                //                {
-                //                    LOG_DEBUG(TAG, "SecureTunnelingFeature::OnSendDataComplete");
-                //                    if (errorCode)
-                //                    {
-                //                        LOGM_ERROR(TAG, "SecureTunnelingFeature::OnSendDataComplete errorCode=%d",
-                //                        errorCode);
-                //                    }
-                //                }
-                //
-                //                void SecureTunnelingFeature::OnDataReceive(const Crt::ByteBuf &data)
-                //                {
-                //                    LOGM_DEBUG(TAG, "SecureTunnelingFeature::OnDataReceive data.len=%d", data.len);
-                //                    string beginningBytes;
-                //                    for (size_t i = 0; i < 10 && i < data.len; i++)
-                //                    {
-                //                        beginningBytes += data.buffer[i];
-                //                    }
-                //                    string endingBytes;
-                //                    size_t i = data.len >= 10 ? data.len - 10 : 0;
-                //                    while (i < data.len)
-                //                    {
-                //                        endingBytes += data.buffer[i++];
-                //                    }
-                //                    LOGM_DEBUG(TAG, "beginningBytes=\n%s", beginningBytes.c_str());
-                //                    LOGM_DEBUG(TAG, "endingBytes=\n%s", endingBytes.c_str());
-                //
-                //                    mTcpForward->SendData(aws_byte_cursor_from_buf(&data));
-                //                }
-                //
-                //                void SecureTunnelingFeature::OnStreamStart()
-                //                {
-                //                    LOG_DEBUG(TAG, "SecureTunnelingFeature::OnStreamStart");
-                //                    connectToTcpForward(mPort);
-                //                }
-                //
-                //                void SecureTunnelingFeature::OnStreamReset()
-                //                {
-                //                    LOG_DEBUG(TAG, "SecureTunnelingFeature::OnStreamReset");
-                //                    disconnectFromTcpForward();
-                //                }
-                //
-                //                void SecureTunnelingFeature::OnSessionReset()
-                //                {
-                //                    LOG_DEBUG(TAG, "SecureTunnelingFeature::OnSessionReset");
-                //                    disconnectFromTcpForward();
-                //                }
-
-                //                void SecureTunnelingFeature::OnTcpForwardDataReceive(const Crt::ByteBuf &data)
-                //                {
-                //                    LOGM_DEBUG(TAG, "SecureTunnelingFeature::OnTcpForwardDataReceive data.len=%d",
-                //                    data.len); string beginningBytes; for (size_t i = 0; i < 10 && i < data.len; i++)
-                //                    {
-                //                        beginningBytes += data.buffer[i];
-                //                    }
-                //                    string endingBytes;
-                //                    size_t i = data.len >= 10 ? data.len - 10 : 0;
-                //                    while (i < data.len)
-                //                    {
-                //                        endingBytes += data.buffer[i++];
-                //                    }
-                //                    LOGM_DEBUG(TAG, "beginningBytes=\n%s", beginningBytes.c_str());
-                //                    LOGM_DEBUG(TAG, "endingBytes=\n%s", endingBytes.c_str());
-                //
-                //                    mSecureTunnel->SendData(aws_byte_cursor_from_buf(&data));
-                //                }
 
             } // namespace SecureTunneling
         }     // namespace DeviceClient

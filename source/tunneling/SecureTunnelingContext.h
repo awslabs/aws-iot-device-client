@@ -20,22 +20,20 @@ namespace Aws
                   public:
                     SecureTunnelingContext(
                         std::shared_ptr<SharedCrtResourceManager> manager,
-                        std::string rootCa,
-                        std::string accessToken,
-                        std::string endpoint,
+                        const std::string &rootCa,
+                        const std::string &accessToken,
+                        const std::string &endpoint,
                         uint16_t port);
                     ~SecureTunnelingContext();
 
                     bool IsDuplicateNotification(
                         const Aws::Iotsecuretunneling::SecureTunnelingNotifyResponse &response);
 
-                    void connectToSecureTunnel();
-
-                    //                    static bool IsValidPort(int port);
+                    void ConnectToSecureTunnel();
 
                   private:
-                    void connectToTcpForward();
-                    void disconnectFromTcpForward();
+                    void ConnectToTcpForward();
+                    void DisconnectFromTcpForward();
 
                     // Secure tunneling protocol client callbacks
                     void OnConnectionComplete();
@@ -55,7 +53,6 @@ namespace Aws
                     std::string mRootCa;
 
                     std::string mAccessToken;
-                    // std::string mRegion;
                     std::string mEndpoint;
                     uint16_t mPort{22};
 

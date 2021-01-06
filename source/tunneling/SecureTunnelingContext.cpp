@@ -19,9 +19,9 @@ namespace Aws
 
                 SecureTunnelingContext::SecureTunnelingContext(
                     std::shared_ptr<SharedCrtResourceManager> manager,
-                    std::string rootCa,
-                    std::string accessToken,
-                    std::string endpoint,
+                    const std::string &rootCa,
+                    const std::string &accessToken,
+                    const std::string &endpoint,
                     uint16_t port)
                 {
                     mSharedCrtResourceManager = manager;
@@ -74,7 +74,7 @@ namespace Aws
                     return false;
                 }
 
-                void SecureTunnelingContext::connectToSecureTunnel()
+                void SecureTunnelingContext::ConnectToSecureTunnel()
                 {
                     if (mAccessToken.empty() || mEndpoint.empty())
                     {
@@ -102,10 +102,7 @@ namespace Aws
                     mSecureTunnel->Connect();
                 }
 
-                //                bool SecureTunnelingContext::IsValidPort(int port) { return 1 <= port && port <=
-                //                65535; }
-
-                void SecureTunnelingContext::connectToTcpForward()
+                void SecureTunnelingContext::ConnectToTcpForward()
                 {
                     if (!SecureTunnelingFeature::IsValidPort(mPort))
                     {
@@ -120,7 +117,7 @@ namespace Aws
                     mTcpForward->Connect();
                 }
 
-                void SecureTunnelingContext::disconnectFromTcpForward()
+                void SecureTunnelingContext::DisconnectFromTcpForward()
                 {
                     mTcpForward->Close();
                     mTcpForward.reset();
@@ -143,58 +140,30 @@ namespace Aws
                 void SecureTunnelingContext::OnDataReceive(const Crt::ByteBuf &data)
                 {
                     LOGM_DEBUG(TAG, "SecureTunnelingFeature::OnDataReceive data.len=%d", data.len);
-                    string beginningBytes;
-                    for (size_t i = 0; i < 10 && i < data.len; i++)
-                    {
-                        beginningBytes += data.buffer[i];
-                    }
-                    string endingBytes;
-                    size_t i = data.len >= 10 ? data.len - 10 : 0;
-                    while (i < data.len)
-                    {
-                        endingBytes += data.buffer[i++];
-                    }
-                    LOGM_DEBUG(TAG, "beginningBytes=\n%s", beginningBytes.c_str());
-                    LOGM_DEBUG(TAG, "endingBytes=\n%s", endingBytes.c_str());
-
                     mTcpForward->SendData(aws_byte_cursor_from_buf(&data));
                 }
 
                 void SecureTunnelingContext::OnStreamStart()
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingFeature::OnStreamStart");
-                    connectToTcpForward();
+                    ConnectToTcpForward();
                 }
 
                 void SecureTunnelingContext::OnStreamReset()
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingFeature::OnStreamReset");
-                    disconnectFromTcpForward();
+                    DisconnectFromTcpForward();
                 }
 
                 void SecureTunnelingContext::OnSessionReset()
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingFeature::OnSessionReset");
-                    disconnectFromTcpForward();
+                    DisconnectFromTcpForward();
                 }
 
                 void SecureTunnelingContext::OnTcpForwardDataReceive(const Crt::ByteBuf &data)
                 {
                     LOGM_DEBUG(TAG, "SecureTunnelingFeature::OnTcpForwardDataReceive data.len=%d", data.len);
-                    string beginningBytes;
-                    for (size_t i = 0; i < 10 && i < data.len; i++)
-                    {
-                        beginningBytes += data.buffer[i];
-                    }
-                    string endingBytes;
-                    size_t i = data.len >= 10 ? data.len - 10 : 0;
-                    while (i < data.len)
-                    {
-                        endingBytes += data.buffer[i++];
-                    }
-                    LOGM_DEBUG(TAG, "beginningBytes=\n%s", beginningBytes.c_str());
-                    LOGM_DEBUG(TAG, "endingBytes=\n%s", endingBytes.c_str());
-
                     mSecureTunnel->SendData(aws_byte_cursor_from_buf(&data));
                 }
 
