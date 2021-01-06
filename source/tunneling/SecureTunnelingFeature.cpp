@@ -1,14 +1,13 @@
 #include "SecureTunnelingFeature.h"
 #include "../logging/LoggerFactory.h"
+#include "SecureTunnelingContext.h"
 #include "TcpForward.h"
-#include "aws/iotsecuretunneling/SecureTunnel.h"
 #include <aws/crt/mqtt/MqttClient.h>
 #include <aws/iotsecuretunneling/IotSecureTunnelingClient.h>
 #include <aws/iotsecuretunneling/SubscribeToTunnelsNotifyRequest.h>
 #include <map>
 #include <memory>
 #include <thread>
-#include "SecureTunnelingContext.h"
 
 using namespace std;
 using namespace Aws::Iotsecuretunneling;
@@ -65,7 +64,10 @@ namespace Aws
                     //
                     //                    mTcpForward->Close();
                     //                    mTcpForward.reset();
-                    mContext.reset();
+                    for (auto &c : mContexts)
+                    {
+                        c.reset();
+                    }
 
                     mClientBaseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
                     return 0;
@@ -104,12 +106,14 @@ namespace Aws
                         // mRegion = *config.tunneling.region;
                         // mPort = static_cast<uint16_t>(config.tunneling.port.value()); // The range is already checked
 
-                        mContext = unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
-                            mSharedCrtResourceManager,
-                            *config.rootCa,
-                            *config.tunneling.destinationAccessToken,
-                            GetEndpoint(*config.tunneling.region),
-                            static_cast<uint16_t>(config.tunneling.port.value())));
+                        std::unique_ptr<SecureTunnelingContext> context =
+                            unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
+                                mSharedCrtResourceManager,
+                                *config.rootCa,
+                                *config.tunneling.destinationAccessToken,
+                                GetEndpoint(*config.tunneling.region),
+                                static_cast<uint16_t>(config.tunneling.port.value())));
+                        mContexts.push_back(std::move(context));
                     }
                 }
 
@@ -136,34 +140,39 @@ namespace Aws
                     else
                     {
                         // Access token and region were loaded from config and have already been validated
-                        mContext->connectToSecureTunnel();
+                        for (auto &c : mContexts)
+                        {
+                            c->connectToSecureTunnel();
+                        }
                     }
                 }
 
-//                template <typename T>
-//                static bool operator==(const Aws::Crt::Optional<T> &lhs, const Aws::Crt::Optional<T> &rhs)
-//                {
-//                    if (!lhs.has_value() && !rhs.has_value())
-//                    {
-//                        return true;
-//                    }
-//                    else if (lhs.has_value() && rhs.has_value())
-//                    {
-//                        return lhs.value() == rhs.value();
-//                    }
-//                    else
-//                    {
-//                        return false;
-//                    }
-//                }
-//
-//                static bool operator==(
-//                    const SecureTunnelingNotifyResponse &lhs,
-//                    const SecureTunnelingNotifyResponse &rhs)
-//                {
-//                    return lhs.Region == rhs.Region && lhs.ClientMode == rhs.ClientMode &&
-//                           lhs.Services == rhs.Services && lhs.ClientAccessToken == rhs.ClientAccessToken;
-//                }
+                //                template <typename T>
+                //                static bool operator==(const Aws::Crt::Optional<T> &lhs, const Aws::Crt::Optional<T>
+                //                &rhs)
+                //                {
+                //                    if (!lhs.has_value() && !rhs.has_value())
+                //                    {
+                //                        return true;
+                //                    }
+                //                    else if (lhs.has_value() && rhs.has_value())
+                //                    {
+                //                        return lhs.value() == rhs.value();
+                //                    }
+                //                    else
+                //                    {
+                //                        return false;
+                //                    }
+                //                }
+                //
+                //                static bool operator==(
+                //                    const SecureTunnelingNotifyResponse &lhs,
+                //                    const SecureTunnelingNotifyResponse &rhs)
+                //                {
+                //                    return lhs.Region == rhs.Region && lhs.ClientMode == rhs.ClientMode &&
+                //                           lhs.Services == rhs.Services && lhs.ClientAccessToken ==
+                //                           rhs.ClientAccessToken;
+                //                }
 
                 void SecureTunnelingFeature::onSubscribeToTunnelsNotifyResponse(
                     SecureTunnelingNotifyResponse *response,
@@ -177,15 +186,20 @@ namespace Aws
                         return;
                     }
 
-//                    if (mLastSeenNotifyResponse.has_value() && mLastSeenNotifyResponse.value() == *response)
-//                    {
-//                        LOG_INFO(TAG, "Received duplicate MQTT Tunnel Notification. Ignoring...");
-//                        return;
-//                    }
-//                    mLastSeenNotifyResponse = *response;
-                    if (mContext->IsDuplicateNotification(*response)) {
-                        LOG_INFO(TAG, "Received duplicate MQTT Tunnel Notification. Ignoring...");
-                        return;
+                    //                    if (mLastSeenNotifyResponse.has_value() && mLastSeenNotifyResponse.value() ==
+                    //                    *response)
+                    //                    {
+                    //                        LOG_INFO(TAG, "Received duplicate MQTT Tunnel Notification. Ignoring...");
+                    //                        return;
+                    //                    }
+                    //                    mLastSeenNotifyResponse = *response;
+                    for (auto &c : mContexts)
+                    {
+                        if (c->IsDuplicateNotification(*response))
+                        {
+                            LOG_INFO(TAG, "Received duplicate MQTT Tunnel Notification. Ignoring...");
+                            return;
+                        }
                     }
 
                     string clientMode = response->ClientMode->c_str();
@@ -234,13 +248,11 @@ namespace Aws
 
                     LOGM_DEBUG(TAG, "Region=%s, Service=%s", region.c_str(), service.c_str());
 
-                    mContext = unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
-                        mSharedCrtResourceManager,
-                        mRootCa,
-                        accessToken,
-                        GetEndpoint(region),
-                        port));
-                    mContext->connectToSecureTunnel();
+                    std::unique_ptr<SecureTunnelingContext> context =
+                        unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
+                            mSharedCrtResourceManager, mRootCa, accessToken, GetEndpoint(region), port));
+                    context->connectToSecureTunnel();
+                    mContexts.push_back(std::move(context));
                 }
 
                 void SecureTunnelingFeature::OnSubscribeComplete(int ioErr)

@@ -98,7 +98,8 @@ namespace Aws
                                         Aws::Crt::Optional<Aws::Iotsecuretunneling::SecureTunnelingNotifyResponse>
                        mLastSeenNotifyResponse;
                     */
-                    std::unique_ptr<SecureTunnelingContext> mContext;
+
+                    std::vector<std::unique_ptr<SecureTunnelingContext>> mContexts;
                 };
             } // namespace SecureTunneling
         }     // namespace DeviceClient
