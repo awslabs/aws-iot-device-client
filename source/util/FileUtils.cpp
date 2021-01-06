@@ -2,7 +2,7 @@
 #include "../logging/LoggerFactory.h"
 
 #include <errno.h>
-#include <fstream>
+#include <iostream>
 #include <limits.h> /* PATH_MAX */
 #include <string.h>
 #include <sys/stat.h>
@@ -14,7 +14,7 @@ using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char FileUtils::TAG[];
 
-int FileUtils::mkdirs(const char *path)
+int FileUtils::Mkdirs(const char *path)
 {
     const size_t len = strlen(path);
     char path_buffer[PATH_MAX];
@@ -53,7 +53,7 @@ int FileUtils::mkdirs(const char *path)
     return 0;
 }
 
-string FileUtils::extractParentDirectory(const string &filePath)
+string FileUtils::ExtractParentDirectory(const string &filePath)
 {
     const size_t rightMostSlash = filePath.rfind("/");
     if (std::string::npos != rightMostSlash)
@@ -64,6 +64,15 @@ string FileUtils::extractParentDirectory(const string &filePath)
     {
         return "";
     }
+}
+
+string FileUtils::ExtractExpandedPath(const string &filePath)
+{
+    wordexp_t word;
+    wordexp(filePath.c_str(), &word, 0);
+    string expandedPath = word.we_wordv[0];
+    wordfree(&word);
+    return expandedPath;
 }
 
 bool FileUtils::StoreValueInFile(string value, string filePath)
@@ -79,12 +88,9 @@ bool FileUtils::StoreValueInFile(string value, string filePath)
     return true;
 }
 
-int FileUtils::getFilePermissions(const std::string &filePath)
+int FileUtils::GetFilePermissions(const std::string &filePath)
 {
-    wordexp_t word;
-    wordexp(filePath.c_str(), &word, 0);
-    string expandedPath = word.we_wordv[0];
-    wordfree(&word);
+    string expandedPath = ExtractExpandedPath(filePath.c_str());
 
     struct stat file_info;
     if (stat(expandedPath.c_str(), &file_info) == -1)
@@ -93,10 +99,40 @@ int FileUtils::getFilePermissions(const std::string &filePath)
         return false;
     }
 
-    return permissionsMaskToInt(file_info.st_mode);
+    return PermissionsMaskToInt(file_info.st_mode);
 }
 
-int FileUtils::permissionsMaskToInt(mode_t mask)
+bool FileUtils::ValidateFilePermissions(const std::string &path, const int filePermissions, bool fatalError)
+{
+    int actualFilePermissions = FileUtils::GetFilePermissions(path);
+    if (filePermissions != actualFilePermissions)
+    {
+        if (fatalError)
+        {
+            LOGM_ERROR(
+                TAG,
+                "Permissions to given file/dir path '%s' is not set to required value... {Permissions: {desired: %d, "
+                "actual: %d}}",
+                path.c_str(),
+                filePermissions,
+                actualFilePermissions);
+        }
+        else
+        {
+            LOGM_WARN(
+                TAG,
+                "Permissions to given file/dir path '%s' is not set to recommended value... {Permissions: {desired: "
+                "%d, actual: %d}}",
+                path.c_str(),
+                filePermissions,
+                actualFilePermissions);
+        }
+        return false;
+    }
+    return true;
+}
+
+int FileUtils::PermissionsMaskToInt(mode_t mask)
 {
     int user = 0;
     if (mask & S_IRUSR)
@@ -143,12 +179,9 @@ int FileUtils::permissionsMaskToInt(mode_t mask)
     return (user * 100) + (group * 10) + world;
 }
 
-size_t FileUtils::getFileSize(const std::string &filePath)
+size_t FileUtils::GetFileSize(const std::string &filePath)
 {
-    wordexp_t word;
-    wordexp(filePath.c_str(), &word, 0);
-    string expandedPath = word.we_wordv[0];
-    wordfree(&word);
+    string expandedPath = ExtractExpandedPath(filePath.c_str());
 
     struct stat file_info;
     if (stat(expandedPath.c_str(), &file_info) == 0)
@@ -158,21 +191,18 @@ size_t FileUtils::getFileSize(const std::string &filePath)
     return 0;
 }
 
-bool FileUtils::createDirectoryWithPermissions(const char *dirPath, mode_t permissions)
+bool FileUtils::CreateDirectoryWithPermissions(const char *dirPath, mode_t permissions)
 {
-    const int desiredPermissions = permissionsMaskToInt(permissions);
-    wordexp_t word;
-    wordexp(dirPath, &word, 0);
-    string expandedPath = word.we_wordv[0];
-    wordfree(&word);
+    const int desiredPermissions = PermissionsMaskToInt(permissions);
+    string expandedPath = ExtractExpandedPath(dirPath);
 
-    if (!mkdirs(expandedPath.c_str()))
+    if (!Mkdirs(expandedPath.c_str()))
     {
-        int actualPermissions = getFilePermissions(expandedPath);
+        int actualPermissions = GetFilePermissions(expandedPath);
         if (desiredPermissions != actualPermissions)
         {
             chmod(expandedPath.c_str(), permissions);
-            actualPermissions = getFilePermissions(expandedPath);
+            actualPermissions = GetFilePermissions(expandedPath);
             if (desiredPermissions != actualPermissions)
             {
                 LOGM_ERROR(

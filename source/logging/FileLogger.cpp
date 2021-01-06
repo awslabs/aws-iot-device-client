@@ -23,12 +23,12 @@ bool FileLogger::start(const PlainConfig &config)
     }
 
     struct stat info;
-    string logFileDir = FileUtils::extractParentDirectory(logFile);
+    string logFileDir = FileUtils::ExtractParentDirectory(logFile);
     if (stat(logFileDir.c_str(), &info) != 0)
     {
         cout << LOGGER_TAG << ": Cannot access " << logFileDir << "to write logs, attempting to create log directory"
              << endl;
-        FileUtils::mkdirs(logFileDir.c_str());
+        FileUtils::Mkdirs(logFileDir.c_str());
         if (stat(logFileDir.c_str(), &info) != 0)
         {
             cout << LOGGER_TAG << ": Failed to create log directories necessary for file-based logging" << endl;
@@ -50,10 +50,10 @@ bool FileLogger::start(const PlainConfig &config)
     }
 
     // Now we need to establish/verify permissions for the log directory and file
-    if (Permissions::LOG_DIR != FileUtils::getFilePermissions(logFileDir))
+    if (Permissions::LOG_DIR != FileUtils::GetFilePermissions(logFileDir))
     {
         chmod(logFileDir.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH);
-        if (Permissions::LOG_DIR != FileUtils::getFilePermissions(logFileDir))
+        if (Permissions::LOG_DIR != FileUtils::GetFilePermissions(logFileDir))
         {
             cout << LOGGER_TAG
                  << FormatMessage(
@@ -67,10 +67,10 @@ bool FileLogger::start(const PlainConfig &config)
     outputStream = unique_ptr<ofstream>(new ofstream(logFile, std::fstream::app));
     if (!outputStream->fail())
     {
-        if (Permissions::LOG_FILE != FileUtils::getFilePermissions(logFile))
+        if (Permissions::LOG_FILE != FileUtils::GetFilePermissions(logFile))
         {
             chmod(logFile.c_str(), S_IRUSR | S_IWUSR);
-            if (Permissions::LOG_FILE != FileUtils::getFilePermissions(logFile))
+            if (Permissions::LOG_FILE != FileUtils::GetFilePermissions(logFile))
             {
                 cout << LOGGER_TAG
                      << FormatMessage(

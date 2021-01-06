@@ -10,7 +10,7 @@
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Util;
 
-string UniqueString::getRandomToken(size_t len)
+string UniqueString::GetRandomToken(size_t len)
 {
     size_t length = len > UniqueString::MAX_CLIENT_TOKEN_SIZE ? UniqueString::MAX_CLIENT_TOKEN_SIZE : len;
     static auto &chrs = "0123456789"

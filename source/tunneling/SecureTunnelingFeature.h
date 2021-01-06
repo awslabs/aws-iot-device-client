@@ -54,7 +54,7 @@ namespace Aws
                     void connectToTcpForward(uint16_t port);
                     void disconnectFromTcpForward();
 
-                    static std::string GetEndpoint(const std::string &region);
+                    std::string GetEndpoint(const std::string &region);
 
                     // Secure tunneling protocol client callbacks
                     void OnConnectionComplete();
@@ -83,6 +83,10 @@ namespace Aws
                     std::string mRootCa;
                     uint16_t mPort{22};
                     bool mSubscribeNotification{true};
+
+                    // Normally the endpoint is determined by `region` only. This is only used to override the normal
+                    // endpoint such as when testing against the gamma stage.
+                    Aws::Crt::Optional<std::string> mEndpoint;
 
                     // On demand
                     std::unique_ptr<Aws::Iotsecuretunneling::SecureTunnel> mSecureTunnel;
