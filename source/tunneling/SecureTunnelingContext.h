@@ -29,7 +29,7 @@ namespace Aws
                     bool IsDuplicateNotification(
                         const Aws::Iotsecuretunneling::SecureTunnelingNotifyResponse &response);
 
-                    void ConnectToSecureTunnel();
+                    bool ConnectToSecureTunnel();
 
                   private:
                     void ConnectToTcpForward();

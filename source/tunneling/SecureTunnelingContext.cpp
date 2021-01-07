@@ -74,12 +74,12 @@ namespace Aws
                     return false;
                 }
 
-                void SecureTunnelingContext::ConnectToSecureTunnel()
+                bool SecureTunnelingContext::ConnectToSecureTunnel()
                 {
                     if (mAccessToken.empty() || mEndpoint.empty())
                     {
                         LOG_ERROR(TAG, "Cannot connect to secure tunnel. Either access token or endpoint is empty");
-                        return;
+                        return false;
                     }
 
                     mSecureTunnel = unique_ptr<SecureTunnel>(new SecureTunnel(
@@ -99,14 +99,14 @@ namespace Aws
                         bind(&SecureTunnelingContext::OnStreamReset, this),
                         bind(&SecureTunnelingContext::OnSessionReset, this)));
 
-                    mSecureTunnel->Connect();
+                    return mSecureTunnel->Connect() == AWS_OP_SUCCESS;
                 }
 
                 void SecureTunnelingContext::ConnectToTcpForward()
                 {
                     if (!SecureTunnelingFeature::IsValidPort(mPort))
                     {
-                        LOGM_ERROR(TAG, "Cannot connect to invalid local port. port=%d", mPort);
+                        LOGM_ERROR(TAG, "Cannot connect to invalid local port. port=%u", mPort);
                         return;
                     }
 
@@ -139,7 +139,7 @@ namespace Aws
 
                 void SecureTunnelingContext::OnDataReceive(const Crt::ByteBuf &data)
                 {
-                    LOGM_DEBUG(TAG, "SecureTunnelingFeature::OnDataReceive data.len=%d", data.len);
+                    LOGM_DEBUG(TAG, "SecureTunnelingFeature::OnDataReceive data.len=%zu", data.len);
                     mTcpForward->SendData(aws_byte_cursor_from_buf(&data));
                 }
 
@@ -163,7 +163,7 @@ namespace Aws
 
                 void SecureTunnelingContext::OnTcpForwardDataReceive(const Crt::ByteBuf &data)
                 {
-                    LOGM_DEBUG(TAG, "SecureTunnelingFeature::OnTcpForwardDataReceive data.len=%d", data.len);
+                    LOGM_DEBUG(TAG, "SecureTunnelingFeature::OnTcpForwardDataReceive data.len=%zu", data.len);
                     mSecureTunnel->SendData(aws_byte_cursor_from_buf(&data));
                 }
 

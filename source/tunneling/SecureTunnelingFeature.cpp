@@ -208,8 +208,10 @@ namespace Aws
                     std::unique_ptr<SecureTunnelingContext> context =
                         unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
                             mSharedCrtResourceManager, mRootCa, accessToken, GetEndpoint(region), port));
-                    context->ConnectToSecureTunnel();
-                    mContexts.push_back(std::move(context));
+                    if (context->ConnectToSecureTunnel())
+                    {
+                        mContexts.push_back(std::move(context));
+                    }
                 }
 
                 void SecureTunnelingFeature::OnSubscribeComplete(int ioErr)
