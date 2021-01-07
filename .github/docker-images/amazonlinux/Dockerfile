@@ -60,7 +60,7 @@ RUN mkdir sdk-cpp-workspace \
     && mkdir aws-iot-device-sdk-cpp-v2-build \
     && git clone --recursive https://github.com/aws/aws-iot-device-sdk-cpp-v2.git \
     && cd aws-iot-device-sdk-cpp-v2 \
-    && git checkout cebdd7baeb4a96ea925ba929f1e37eafe9d008b8 \
+    && git checkout 62516d506a4ae8b97a50eb240f8da57be43cb4f1 \
     && cd ../aws-iot-device-sdk-cpp-v2-build \
     && cmake -DCMAKE_INSTALL_PREFIX="/usr" -DBUILD_DEPS=ON ../aws-iot-device-sdk-cpp-v2 \
     && cmake --build . --target install
