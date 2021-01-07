@@ -18,10 +18,10 @@ namespace Aws
                 constexpr char SecureTunnelingContext::TAG[];
 
                 SecureTunnelingContext::SecureTunnelingContext(
-                    std::shared_ptr<SharedCrtResourceManager> manager,
-                    const std::string &rootCa,
-                    const std::string &accessToken,
-                    const std::string &endpoint,
+                    shared_ptr<SharedCrtResourceManager> manager,
+                    const string &rootCa,
+                    const string &accessToken,
+                    const string &endpoint,
                     uint16_t port)
                 {
                     mSharedCrtResourceManager = manager;
@@ -99,7 +99,12 @@ namespace Aws
                         bind(&SecureTunnelingContext::OnStreamReset, this),
                         bind(&SecureTunnelingContext::OnSessionReset, this)));
 
-                    return mSecureTunnel->Connect() == AWS_OP_SUCCESS;
+                    bool ok = mSecureTunnel->Connect() == AWS_OP_SUCCESS;
+                    if (!ok)
+                    {
+                        LOG_ERROR(TAG, "Cannot connect to secure tunnel. Please see the SDK log for detail.");
+                    }
+                    return ok;
                 }
 
                 void SecureTunnelingContext::ConnectToTcpForward()
