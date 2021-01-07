@@ -138,7 +138,7 @@ unique_ptr<LogQueue> FileLogger::takeLogQueue()
 {
     unique_ptr<LogQueue> tmp = std::move(logQueue);
     logQueue = unique_ptr<LogQueue>(new LogQueue);
-    return std::move(tmp);
+    return tmp;
 }
 
 void FileLogger::setLogQueue(std::unique_ptr<LogQueue> incomingQueue)

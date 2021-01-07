@@ -54,7 +54,7 @@ unique_ptr<LogQueue> StdOutLogger::takeLogQueue()
 {
     unique_ptr<LogQueue> tmp = std::move(logQueue);
     logQueue = unique_ptr<LogQueue>(new LogQueue);
-    return std::move(tmp);
+    return tmp;
 }
 
 void StdOutLogger::setLogQueue(std::unique_ptr<LogQueue> incomingQueue)
