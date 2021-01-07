@@ -800,7 +800,7 @@ bool Config::init(const CliArgs &cliArgs)
         filename = cliArgs.at(Config::CLI_CONFIG_FILE);
     }
 
-    if (!ParseConfigFile(filename))
+    if (!ParseConfigFile(filename, false))
     {
         LOGM_ERROR(
             TAG, "*** %s: Unable to Parse Config file: '%s' ***", DeviceClient::DC_FATAL_ERROR, filename.c_str());
@@ -812,7 +812,8 @@ bool Config::init(const CliArgs &cliArgs)
         return false;
     }
 
-    if (ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE) && ValidateAndStoreRuntimeConfig())
+    if (ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, true) &&
+        ValidateAndStoreRuntimeConfig())
     {
         LOGM_INFO(
             TAG,
@@ -841,13 +842,23 @@ bool Config::ValidateAndStoreRuntimeConfig()
     return true;
 }
 
-bool Config::ParseConfigFile(const string &file)
+bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
 {
     string expandedPath = FileUtils::ExtractExpandedPath(file.c_str());
     struct stat info;
     if (stat(expandedPath.c_str(), &info) != 0)
     {
-        LOGM_DEBUG(TAG, "Unable to open config file %s, file does not exist", expandedPath.c_str());
+        if (!isRuntimeConfig)
+        {
+            LOGM_DEBUG(TAG, "Unable to open config file %s, file does not exist", expandedPath.c_str());
+        }
+        else
+        {
+            LOG_DEBUG(
+                TAG,
+                "Did not find a runtime configuration file, assuming Fleet Provisioning has not run for this device");
+        }
+
         return false;
     }
 
