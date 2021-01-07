@@ -169,7 +169,7 @@ if [ "$BUILD_CONFIG" = "y" ]; then
     read -r GOOD_TO_GO
     if [ "$GOOD_TO_GO" = "y" ]; then
       CONFIGURED=1
-      mkdir "$OUTPUT_DIR" &>/dev/null | true
+      mkdir -p "$OUTPUT_DIR" &>/dev/null | true
       echo "$CONFIG_OUTPUT" | tee "$CONF_OUTPUT_PATH" >/dev/null
       chmod 745 "$OUTPUT_DIR"
       chmod 644 "$CONF_OUTPUT_PATH"
