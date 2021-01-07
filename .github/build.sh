@@ -10,6 +10,9 @@ if [ "$compileModeArgument" = "compile-mode" ]; then
     st_component_mode)
     compileMode="st_component_mode"
     ;;
+    rpi_cross_mode)
+    compileMode="rpi_cross_mode"
+    ;;
     *)
     echo "No compile mode match found"
     ;;
@@ -57,7 +60,6 @@ else
       fi
   fi
 fi
-
 ### Compile ###
 cd ..
 ln -s /home/sdk-cpp-workspace ./sdk-cpp-workspace
@@ -70,6 +72,32 @@ case $compileMode in
     st_component_mode)
     echo "Building in ST component mode"
     cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON
+    ;;
+    rpi_cross_mode)
+    apt-get update
+    apt-get install --assume-yes software-properties-common
+    apt-get install --assume-yes build-essential
+    apt-get install --assume-yes g++-arm-linux-gnueabihf
+    apt-get install --assume-yes gdb-multiarch
+    git clone https://github.com/raspberrypi/tools.git --depth=1 pitools
+    cpwd="$PWD"
+    export CROSSCOMP_DIR=$cpwd/pitools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin
+    wget https://www.openssl.org/source/openssl-1.1.1.tar.gz
+    tar -xvzf openssl-1.1.1.tar.gz
+    export INSTALL_DIR=/usr/lib/arm-linux-gnueabihf
+    cd openssl-1.1.1
+    ./Configure linux-generic32 shared \
+    --prefix=$INSTALL_DIR --openssldir=$INSTALL_DIR/openssl \
+    --cross-compile-prefix=$CROSSCOMP_DIR/arm-linux-gnueabihf-
+    make depend
+    make
+    make install
+    cd ..
+    cmake -DCMAKE_TOOLCHAIN_FILE=../Toolchain-rpi3-armhf.cmake ../ || true
+    cmake -DCMAKE_TOOLCHAIN_FILE=../Toolchain-rpi3-armhf.cmake ../
+    cmake --build . --target aws-iot-device-client
+    cmake --build . --target test-aws-iot-device-client
+    exit 0
     ;;
     *)
     cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF
