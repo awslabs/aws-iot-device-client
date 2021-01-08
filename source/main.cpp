@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
          */
         FleetProvisioning fleetProvisioning;
         if (!fleetProvisioning.ProvisionDevice(resourceManager, config.config) ||
-            !config.ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE) ||
+            !config.ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, true) ||
             !config.ValidateAndStoreRuntimeConfig())
         {
             LOGM_ERROR(
