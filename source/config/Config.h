@@ -18,11 +18,12 @@ namespace Aws
             using CliArgs = std::map<std::string, std::string>;
             static constexpr char DC_FATAL_ERROR[] = "AWS IOT DEVICE CLIENT FATAL ERROR";
 
-            class LoadableFromJsonAndCli
+            class LoadableFromJsonAndCliAndEnvironment
             {
               public:
                 virtual bool LoadFromJson(const Crt::JsonView &json) = 0;
                 virtual bool LoadFromCliArgs(const CliArgs &cliArgs) = 0;
+                virtual bool LoadFromEnvironment() = 0;
                 virtual bool Validate() const = 0;
             };
 
@@ -50,10 +51,11 @@ namespace Aws
                 static constexpr int JOB_HANDLER = 700;
             };
 
-            struct PlainConfig : public LoadableFromJsonAndCli
+            struct PlainConfig : public LoadableFromJsonAndCliAndEnvironment
             {
                 bool LoadFromJson(const Crt::JsonView &json) override;
                 bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                bool LoadFromEnvironment() override;
                 bool Validate() const override;
 
                 static constexpr char CLI_ENDPOINT[] = "--endpoint";
@@ -80,10 +82,11 @@ namespace Aws
                 Aws::Crt::Optional<std::string> rootCa;
                 Aws::Crt::Optional<std::string> thingName;
 
-                struct LogConfig : public LoadableFromJsonAndCli
+                struct LogConfig : public LoadableFromJsonAndCliAndEnvironment
                 {
                     bool LoadFromJson(const Crt::JsonView &json) override;
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
                     int ParseLogLevel(std::string value);
                     std::string ParseLogType(std::string value);
@@ -105,10 +108,11 @@ namespace Aws
                 };
                 LogConfig logConfig;
 
-                struct Jobs : public LoadableFromJsonAndCli
+                struct Jobs : public LoadableFromJsonAndCliAndEnvironment
                 {
                     bool LoadFromJson(const Crt::JsonView &json) override;
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
 
                     static constexpr char CLI_ENABLE_JOBS[] = "--enable-jobs";
@@ -121,10 +125,11 @@ namespace Aws
                 };
                 Jobs jobs;
 
-                struct Tunneling : public LoadableFromJsonAndCli
+                struct Tunneling : public LoadableFromJsonAndCliAndEnvironment
                 {
                     bool LoadFromJson(const Crt::JsonView &json) override;
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override;
                     bool Validate() const override;
 
                     static constexpr char CLI_ENABLE_TUNNELING[] = "--enable-tunneling";
@@ -148,10 +153,11 @@ namespace Aws
                 };
                 Tunneling tunneling;
 
-                struct DeviceDefender : public LoadableFromJsonAndCli
+                struct DeviceDefender : public LoadableFromJsonAndCliAndEnvironment
                 {
                     bool LoadFromJson(const Crt::JsonView &json) override;
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
 
                     static constexpr char CLI_ENABLE_DEVICE_DEFENDER[] = "--enable-device-defender";
@@ -165,10 +171,11 @@ namespace Aws
                 };
                 DeviceDefender deviceDefender;
 
-                struct FleetProvisioning : public LoadableFromJsonAndCli
+                struct FleetProvisioning : public LoadableFromJsonAndCliAndEnvironment
                 {
                     bool LoadFromJson(const Crt::JsonView &json) override;
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
 
                     static constexpr char CLI_ENABLE_FLEET_PROVISIONING[] = "--enable-fleet-provisioning";
@@ -185,10 +192,11 @@ namespace Aws
                 };
                 FleetProvisioning fleetProvisioning;
 
-                struct FleetProvisioningRuntimeConfig : public LoadableFromJsonAndCli
+                struct FleetProvisioningRuntimeConfig : public LoadableFromJsonAndCliAndEnvironment
                 {
                     bool LoadFromJson(const Crt::JsonView &json) override;
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
 
                     static constexpr char JSON_KEY_COMPLETED_FLEET_PROVISIONING[] = "completed-fp";
