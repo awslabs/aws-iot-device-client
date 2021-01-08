@@ -518,7 +518,7 @@ bool PlainConfig::Tunneling::LoadFromCliArgs(const CliArgs &cliArgs)
 
 bool PlainConfig::Tunneling::LoadFromEnvironment()
 {
-    const char* accessToken = std::getenv("AWSIOT_TUNNEL_ACCESS_TOKEN");
+    const char *accessToken = std::getenv("AWSIOT_TUNNEL_ACCESS_TOKEN");
     if (accessToken)
     {
         destinationAccessToken = accessToken;
