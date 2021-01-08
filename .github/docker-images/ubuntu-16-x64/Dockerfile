@@ -9,11 +9,21 @@ RUN apt-get update -qq \
     && apt-get -y install \
     git \
     curl \
-    libssl-dev \
     build-essential \
-    openssl \
     wget \
     && apt-get clean
+
+###############################################################################
+# Install OpenSSL 1.1.1
+###############################################################################
+WORKDIR /tmp
+RUN wget https://www.openssl.org/source/openssl-1.1.1i.tar.gz \
+    && tar -zxvf openssl-1.1.1i.tar.gz \
+    && cd openssl-1.1.1i.tar.gz \
+    && ./config \
+    && make \
+    && sudo make install \
+    && sudo ln -s /usr/local/bin/openssl /usr/bin/openssl
 
 ###############################################################################
 # Install pre-built CMake
