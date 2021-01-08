@@ -223,7 +223,7 @@ namespace Aws
 
                 static bool ParseCliArgs(int argc, char *argv[], CliArgs &cliArgs);
                 bool ValidateAndStoreRuntimeConfig();
-                bool ParseConfigFile(const std::string &file);
+                bool ParseConfigFile(const std::string &file, bool isRuntimeConfig);
                 bool init(const CliArgs &cliArgs);
 
                 PlainConfig config;
