@@ -1,6 +1,7 @@
 #!/bin/sh
 
 compileMode="default"
+stMode=false
 
 # Check if first argument is compile mode
 compileModeArgument=$(echo "$1" | cut -c3-14)
@@ -12,6 +13,10 @@ if [ "$compileModeArgument" = "compile-mode" ]; then
     ;;
     rpi_cross_mode)
     compileMode="rpi_cross_mode"
+    ;;
+    st_rpi_cross_mode)
+    compileMode="rpi_cross_mode"
+    stMode=true
     ;;
     *)
     echo "No compile mode match found"
@@ -93,8 +98,13 @@ case $compileMode in
     make
     make install
     cd ..
-    cmake -DCMAKE_TOOLCHAIN_FILE=../Toolchain-rpi3-armhf.cmake ../ || true
-    cmake -DCMAKE_TOOLCHAIN_FILE=../Toolchain-rpi3-armhf.cmake ../
+    if [ "$stMode" = true ]; then
+      cmake -DCMAKE_TOOLCHAIN_FILE=../Toolchain-rpi3-armhf.cmake -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../ || true
+      cmake -DCMAKE_TOOLCHAIN_FILE=../Toolchain-rpi3-armhf.cmake -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../
+    else
+      cmake -DCMAKE_TOOLCHAIN_FILE=../Toolchain-rpi3-armhf.cmake ../ || true
+      cmake -DCMAKE_TOOLCHAIN_FILE=../Toolchain-rpi3-armhf.cmake ../
+    fi
     cmake --build . --target aws-iot-device-client
     cmake --build . --target test-aws-iot-device-client
     exit 0

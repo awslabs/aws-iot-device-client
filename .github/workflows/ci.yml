@@ -52,6 +52,28 @@ jobs:
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
 
+  build-st-rpi-armhf:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/st-rpi-build'
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Build ${{ env.PACKAGE_NAME }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
+          export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          docker pull $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_rpi_cross_mode
+      - name: Archive st-raspbian-armhf Build Artifact
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/st-rpi-build'
+        with:
+          name: "ST.raspbian.armhf.${{ env.PACKAGE_NAME }}"
+          path: |
+            ./build/${{ env.PACKAGE_NAME }}
+
   build-amazonlinux:
     runs-on: ubuntu-latest
     steps:
