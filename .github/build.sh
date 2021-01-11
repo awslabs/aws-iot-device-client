@@ -71,7 +71,7 @@ cd ./build/
 case $compileMode in
     st_component_mode)
     echo "Building in ST component mode"
-    cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON
+    cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON
     ;;
     rpi_cross_mode)
     apt-get update
@@ -100,7 +100,7 @@ case $compileMode in
     exit 0
     ;;
     *)
-    cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF
+    cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON
     ;;
 esac
 
