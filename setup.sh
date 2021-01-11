@@ -253,6 +253,7 @@ if [ "$INSTALL_SERVICE" = "y" ]; then
       rm -f /sbin/aws-iot-device-client-bin
     fi
     cp "$DEVICE_CLIENT_ARTIFACT" "$BINARY_DESTINATION"
+    chmod 700 "$BINARY_DESTINATION"
     systemctl enable aws-iot-device-client.service
     systemctl start aws-iot-device-client.service
     systemctl status aws-iot-device-client.service
@@ -266,6 +267,7 @@ if [ "$INSTALL_SERVICE" = "y" ]; then
       rm -f /sbin/aws-iot-device-client-bin
     fi
     cp "$DEVICE_CLIENT_ARTIFACT" "$BINARY_DESTINATION"
+    chmod 700 "$BINARY_DESTINATION"
     service enable aws-iot-device-client.service
     service start aws-iot-device-client.service
     service status aws-iot-device-client.service

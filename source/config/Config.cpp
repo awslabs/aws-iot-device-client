@@ -2,13 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "Config.h"
+
 #if !defined(EXCLUDE_JOBS)
+
 #    include "../jobs/JobsFeature.h"
+
 #endif
+
 #include "../logging/LoggerFactory.h"
+
 #if !defined(EXCLUDE_ST)
+
 #    include "../tunneling/SecureTunnelingFeature.h"
+
 #endif
+
 #include "../util/FileUtils.h"
 
 #include <algorithm>
@@ -17,7 +25,6 @@
 #include <map>
 #include <stdexcept>
 #include <sys/stat.h>
-#include <wordexp.h>
 
 using namespace std;
 using namespace Aws::Iot;
@@ -68,19 +75,40 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_CERT;
     if (json.ValueExists(jsonKey))
     {
-        cert = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        if (!json.GetString(jsonKey).empty())
+        {
+            cert = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
     }
 
     jsonKey = JSON_KEY_KEY;
     if (json.ValueExists(jsonKey))
     {
-        key = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        if (!json.GetString(jsonKey).empty())
+        {
+            key = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
     }
 
     jsonKey = JSON_KEY_ROOT_CA;
     if (json.ValueExists(jsonKey))
     {
-        rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        if (!json.GetString(jsonKey).empty())
+        {
+            rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
     }
 
     jsonKey = JSON_KEY_THING_NAME;
@@ -165,6 +193,13 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
 
     return logConfig.LoadFromCliArgs(cliArgs) && jobs.LoadFromCliArgs(cliArgs) && tunneling.LoadFromCliArgs(cliArgs) &&
            deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs);
+}
+
+bool PlainConfig::LoadFromEnvironment()
+{
+    return logConfig.LoadFromEnvironment() && jobs.LoadFromEnvironment() && tunneling.LoadFromEnvironment() &&
+           deviceDefender.LoadFromEnvironment() && fleetProvisioning.LoadFromEnvironment() &&
+           fleetProvisioningRuntimeConfig.LoadFromEnvironment();
 }
 
 bool PlainConfig::Validate() const
@@ -293,35 +328,56 @@ bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
     const char *jsonKey = JSON_KEY_LOG_LEVEL;
     if (json.ValueExists(jsonKey))
     {
-        try
+        if (!json.GetString(jsonKey).empty())
         {
-            logLevel = ParseLogLevel(json.GetString(jsonKey).c_str());
+            try
+            {
+                logLevel = ParseLogLevel(json.GetString(jsonKey).c_str());
+            }
+            catch (const std::invalid_argument &e)
+            {
+                LOGM_ERROR(Config::TAG, "Unable to parse incoming log level value passed via JSON: %s", e.what());
+                return false;
+            }
         }
-        catch (const std::invalid_argument &e)
+        else
         {
-            LOGM_ERROR(Config::TAG, "Unable to parse incoming log level value passed via JSON: %s", e.what());
-            return false;
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
         }
     }
 
     jsonKey = JSON_KEY_LOG_TYPE;
     if (json.ValueExists(jsonKey))
     {
-        try
+        if (!json.GetString(jsonKey).empty())
         {
-            type = ParseLogType(json.GetString(jsonKey).c_str());
+            try
+            {
+                type = ParseLogType(json.GetString(jsonKey).c_str());
+            }
+            catch (const std::invalid_argument &e)
+            {
+                LOGM_ERROR(Config::TAG, "Unable to parse incoming log type value passed via JSON: %s", e.what());
+                return false;
+            }
         }
-        catch (const std::invalid_argument &e)
+        else
         {
-            LOGM_ERROR(Config::TAG, "Unable to parse incoming log type value passed via JSON: %s", e.what());
-            return false;
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
         }
     }
 
     jsonKey = JSON_KEY_LOG_FILE;
     if (json.ValueExists(jsonKey))
     {
-        file = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        if (!json.GetString(jsonKey).empty())
+        {
+            file = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
     }
 
     return true;
@@ -460,6 +516,17 @@ bool PlainConfig::Tunneling::LoadFromCliArgs(const CliArgs &cliArgs)
     return true;
 }
 
+bool PlainConfig::Tunneling::LoadFromEnvironment()
+{
+    const char *accessToken = std::getenv("AWSIOT_TUNNEL_ACCESS_TOKEN");
+    if (accessToken)
+    {
+        destinationAccessToken = accessToken;
+    }
+
+    return true;
+}
+
 bool PlainConfig::Tunneling::Validate() const
 {
     if (!enabled)
@@ -578,13 +645,27 @@ bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_TEMPLATE_NAME;
     if (json.ValueExists(jsonKey))
     {
-        templateName = json.GetString(jsonKey).c_str();
+        if (!json.GetString(jsonKey).empty())
+        {
+            templateName = json.GetString(jsonKey).c_str();
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
     }
 
     jsonKey = JSON_KEY_CSR_FILE;
     if (json.ValueExists(jsonKey))
     {
-        csrFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        if (!json.GetString(jsonKey).empty())
+        {
+            csrFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
     }
 
     return true;
@@ -644,13 +725,27 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromJson(const Crt::JsonVi
     jsonKey = JSON_KEY_CERT;
     if (json.ValueExists(jsonKey))
     {
-        cert = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        if (!json.GetString(jsonKey).empty())
+        {
+            cert = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
     }
 
     jsonKey = JSON_KEY_KEY;
     if (json.ValueExists(jsonKey))
     {
-        key = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        if (!json.GetString(jsonKey).empty())
+        {
+            key = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
     }
 
     jsonKey = JSON_KEY_THING_NAME;
@@ -661,6 +756,7 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromJson(const Crt::JsonVi
 
     return true;
 }
+
 bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromCliArgs(const CliArgs &cliArgs)
 {
     /*
@@ -800,7 +896,7 @@ bool Config::init(const CliArgs &cliArgs)
         filename = cliArgs.at(Config::CLI_CONFIG_FILE);
     }
 
-    if (!ParseConfigFile(filename))
+    if (!ParseConfigFile(filename, false))
     {
         LOGM_ERROR(
             TAG, "*** %s: Unable to Parse Config file: '%s' ***", DeviceClient::DC_FATAL_ERROR, filename.c_str());
@@ -812,7 +908,13 @@ bool Config::init(const CliArgs &cliArgs)
         return false;
     }
 
-    if (ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE) && ValidateAndStoreRuntimeConfig())
+    if (!config.LoadFromEnvironment())
+    {
+        return false;
+    }
+
+    if (ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, true) &&
+        ValidateAndStoreRuntimeConfig())
     {
         LOGM_INFO(
             TAG,
@@ -841,13 +943,23 @@ bool Config::ValidateAndStoreRuntimeConfig()
     return true;
 }
 
-bool Config::ParseConfigFile(const string &file)
+bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
 {
     string expandedPath = FileUtils::ExtractExpandedPath(file.c_str());
     struct stat info;
     if (stat(expandedPath.c_str(), &info) != 0)
     {
-        LOGM_DEBUG(TAG, "Unable to open config file %s, file does not exist", expandedPath.c_str());
+        if (!isRuntimeConfig)
+        {
+            LOGM_DEBUG(TAG, "Unable to open config file %s, file does not exist", expandedPath.c_str());
+        }
+        else
+        {
+            LOG_DEBUG(
+                TAG,
+                "Did not find a runtime configuration file, assuming Fleet Provisioning has not run for this device");
+        }
+
         return false;
     }
 
