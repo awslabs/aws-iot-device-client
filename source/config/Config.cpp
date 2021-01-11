@@ -195,6 +195,13 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
            deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs);
 }
 
+bool PlainConfig::LoadFromEnvironment()
+{
+    return logConfig.LoadFromEnvironment() && jobs.LoadFromEnvironment() && tunneling.LoadFromEnvironment() &&
+           deviceDefender.LoadFromEnvironment() && fleetProvisioning.LoadFromEnvironment() &&
+           fleetProvisioningRuntimeConfig.LoadFromEnvironment();
+}
+
 bool PlainConfig::Validate() const
 {
 #if !defined(DISABLE_MQTT)
@@ -504,6 +511,17 @@ bool PlainConfig::Tunneling::LoadFromCliArgs(const CliArgs &cliArgs)
 #else
         port = 0;
 #endif
+    }
+
+    return true;
+}
+
+bool PlainConfig::Tunneling::LoadFromEnvironment()
+{
+    const char *accessToken = std::getenv("AWSIOT_TUNNEL_ACCESS_TOKEN");
+    if (accessToken)
+    {
+        destinationAccessToken = accessToken;
     }
 
     return true;
@@ -886,6 +904,11 @@ bool Config::init(const CliArgs &cliArgs)
     }
 
     if (!config.LoadFromCliArgs(cliArgs))
+    {
+        return false;
+    }
+
+    if (!config.LoadFromEnvironment())
     {
         return false;
     }
