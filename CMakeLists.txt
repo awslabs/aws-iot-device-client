@@ -70,7 +70,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ldl")
-    set(PLATFORM_LIBS dl)
 endif()
 
 #########################################
@@ -145,10 +144,9 @@ if (NOT EXCLUDE_FP)
     set(DEP_DC_LIBS ${DEP_DC_LIBS} IotIdentity-cpp)
 endif ()
 
-target_link_libraries(${DC_PROJECT_NAME} ${PLATFORM_LIBS})
+target_link_libraries(${DC_PROJECT_NAME} ${DEP_DC_LIBS})
 target_link_libraries(${DC_PROJECT_NAME} OpenSSL::SSL)
 target_link_libraries(${DC_PROJECT_NAME} OpenSSL::Crypto)
-target_link_libraries(${DC_PROJECT_NAME} ${DEP_DC_LIBS})
 
 if (BUILD_TEST_DEPS)
     # Download and unpack googletest at configure time

@@ -54,7 +54,7 @@ jobs:
 
   build-st-rpi-armhf:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/st-rpi-build'
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
         with:
@@ -68,7 +68,7 @@ jobs:
       - name: Archive st-raspbian-armhf Build Artifact
         uses: actions/upload-artifact@v2
         # Run for main branch only
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/st-rpi-build'
+        if: github.ref == 'refs/heads/main'
         with:
           name: "ST.raspbian.armhf.${{ env.PACKAGE_NAME }}"
           path: |
