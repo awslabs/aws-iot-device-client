@@ -97,6 +97,7 @@ case $compileMode in
     make -j 4
     make install
     cd ..
+    # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
     cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../ || true
     cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../
     cmake --build . --target aws-iot-device-client
@@ -122,6 +123,7 @@ case $compileMode in
     make -j 4
     make install
     cd ..
+    # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
     cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
     cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../
     cmake --build . --target aws-iot-device-client
@@ -147,6 +149,7 @@ case $compileMode in
     make -j 4
     make install
     cd ..
+    # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
     cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake ../ || true
     cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake ../
     cmake --build . --target aws-iot-device-client
