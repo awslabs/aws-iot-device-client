@@ -92,7 +92,7 @@ case $compileMode in
     cd openssl-1.1.1
     ./Configure linux-generic32 shared \
       --prefix=$INSTALL_DIR --openssldir=$INSTALL_DIR/openssl \
-      --cross-compile-prefix=usr/bion/arm-linux-gnueabihf-
+      --cross-compile-prefix=/usr/bin/arm-linux-gnueabihf-
     make depend
     make -j 4
     make install
@@ -102,7 +102,7 @@ case $compileMode in
     cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../
     cmake --build . --target aws-iot-device-client
     cmake --build . --target test-aws-iot-device-client
-    exit 0
+    exit $?
     ;;
     #################################
     mips_cross_mode)
@@ -128,7 +128,7 @@ case $compileMode in
     cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../
     cmake --build . --target aws-iot-device-client
     cmake --build . --target test-aws-iot-device-client
-    exit 0
+    exit $?
     ;;
     #################################
     aarch64_cross_mode)
@@ -154,7 +154,7 @@ case $compileMode in
     cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake ../
     cmake --build . --target aws-iot-device-client
     cmake --build . --target test-aws-iot-device-client
-    exit 0
+    exit $?
     ;;
     *)
     cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON
