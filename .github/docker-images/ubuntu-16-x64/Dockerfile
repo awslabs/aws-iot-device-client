@@ -9,11 +9,21 @@ RUN apt-get update -qq \
     && apt-get -y install \
     git \
     curl \
-    libssl-dev \
     build-essential \
-    openssl \
     wget \
     && apt-get clean
+
+###############################################################################
+# Install OpenSSL 1.1.1
+###############################################################################
+WORKDIR /tmp
+RUN wget https://www.openssl.org/source/openssl-1.1.1.tar.gz \
+    && tar -zxvf openssl-1.1.1.tar.gz \
+    && cd openssl-1.1.1 \
+    && ./config \
+    && make \
+    && make install \
+    && ldconfig
 
 ###############################################################################
 # Install pre-built CMake
@@ -23,7 +33,7 @@ RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3
     && tar -zxvf cmake-3.10.0.tar.gz \
     && cd cmake-3.10.0 \ 
     && ./bootstrap \
-    && make -j 4 \
+    && make -j 2 \
     && make install
 
 ###############################################################################

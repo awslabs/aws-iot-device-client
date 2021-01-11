@@ -76,4 +76,8 @@ target_link_libraries(${GTEST_PROJECT} ${DEP_DC_LIBS})
 target_link_libraries(${GTEST_PROJECT} OpenSSL::SSL)
 target_link_libraries(${GTEST_PROJECT} OpenSSL::Crypto)
 
+if (LINK_DL)
+    target_link_libraries(${GTEST_PROJECT} dl)
+endif ()
+
 add_test(${GTEST_PROJECT} ${GTEST_PROJECT})
