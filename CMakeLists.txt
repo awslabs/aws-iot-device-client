@@ -3,6 +3,7 @@ project(aws-iot-device-client)
 
 option(BUILD_SDK "Builds the aws-iot-device-sdk-cpp-v2 as part of build. Only do this if the SDK is not installed." ON)
 option(BUILD_TEST_DEPS "Builds the device client test dependencies as part of build. Only do this if you do not have gtest installed and you wish to run the tests." ON)
+option(LINK_DL "Links the dlopen library with the Device Client." OFF)
 option(EXCLUDE_JOBS "Builds the device client without the IoT Jobs Feature." OFF)
 option(EXCLUDE_DD "Builds the device client without the IoT Device Defender Feature." OFF)
 option(EXCLUDE_ST "Builds the device client without the IoT Secure Tunneling Feature." OFF)
@@ -147,6 +148,12 @@ endif ()
 target_link_libraries(${DC_PROJECT_NAME} ${DEP_DC_LIBS})
 target_link_libraries(${DC_PROJECT_NAME} OpenSSL::SSL)
 target_link_libraries(${DC_PROJECT_NAME} OpenSSL::Crypto)
+
+# If you're linking statically against the SDK but dynamically against libraries such as OpenSSL,
+# you may need to link the device client against the dynamic loader provided by glib
+if (LINK_DL)
+    target_link_libraries(${DC_PROJECT_NAME} dl)
+endif ()
 
 if (BUILD_TEST_DEPS)
     # Download and unpack googletest at configure time

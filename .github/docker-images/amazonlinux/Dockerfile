@@ -28,14 +28,16 @@ RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3
     && make install
     
 ###############################################################################
-# Install pre-built libcrypto
+# Install OpenSSL 1.1.1
 ###############################################################################
 WORKDIR /tmp
-RUN curl -sSL https://d19elf31gohf1l.cloudfront.net/_binaries/libcrypto/libcrypto-1.1.1-manylinux1-x64.tar.gz -o libcrypto.tar.gz \
-    && mkdir /opt/openssl \
-    && tar xvzf libcrypto.tar.gz -C /usr/local \
-    # && LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/openssl/lib /opt/openssl/bin/openssl version \
-    && rm -f /tmp/libcrypto.tar.gz
+RUN wget https://www.openssl.org/source/openssl-1.1.1i.tar.gz \
+    && tar -zxvf openssl-1.1.1i.tar.gz \
+    && cd openssl-1.1.1i.tar.gz \
+    && ./config \
+    && make \
+    && sudo make install \
+    && sudo ln -s /usr/local/bin/openssl /usr/bin/openssl
 
 ###############################################################################
 # Clone and build Google Test
