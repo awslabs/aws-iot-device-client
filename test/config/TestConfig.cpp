@@ -4,6 +4,7 @@
 #include "../../source/config/Config.h"
 #include "gtest/gtest.h"
 #include <aws/crt/JsonObject.h>
+#include <stdlib.h>
 
 using namespace std;
 using namespace Aws::Crt;
@@ -170,18 +171,20 @@ TEST(Config, SecureTunnelingCli)
     JsonView jsonView = jsonObject.View();
 
     CliArgs cliArgs;
-    cliArgs[PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN] = "destination access token value";
     cliArgs[PlainConfig::Tunneling::CLI_TUNNELING_REGION] = "region value";
     cliArgs[PlainConfig::Tunneling::CLI_TUNNELING_SERVICE] = "SSH";
     cliArgs[PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION] = "";
 
+    setenv("AWSIOT_TUNNEL_ACCESS_TOKEN", "destination_access_token_value", 1);
+
     PlainConfig config;
     config.LoadFromJson(jsonView);
     config.LoadFromCliArgs(cliArgs);
+    config.LoadFromEnvironment();
 
     ASSERT_TRUE(config.Validate());
     ASSERT_TRUE(config.tunneling.enabled);
-    ASSERT_STREQ("destination access token value", config.tunneling.destinationAccessToken->c_str());
+    ASSERT_STREQ("destination_access_token_value", config.tunneling.destinationAccessToken->c_str());
     ASSERT_STREQ("region value", config.tunneling.region->c_str());
 #if !defined(EXCLUDE_ST)
     // Do not test against ST GetPortFromService if ST code is excluded
@@ -206,19 +209,21 @@ TEST(Config, SecureTunnelingDisableSubscription)
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
     CliArgs cliArgs;
-    cliArgs["--tunneling-disable-notification"] = "";
-    cliArgs["--tunneling-destination-access-token"] = "destination access token value";
-    cliArgs["--tunneling-region"] = "region value";
-    cliArgs["--tunneling-service"] = "SSH";
+    cliArgs[PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION] = "";
+    cliArgs[PlainConfig::Tunneling::CLI_TUNNELING_REGION] = "region value";
+    cliArgs[PlainConfig::Tunneling::CLI_TUNNELING_SERVICE] = "SSH";
+
+    setenv("AWSIOT_TUNNEL_ACCESS_TOKEN", "destination_access_token_value", 1);
 
     PlainConfig config;
     config.LoadFromJson(jsonView);
     config.LoadFromCliArgs(cliArgs);
+    config.LoadFromEnvironment();
 
     ASSERT_TRUE(config.Validate());
     ASSERT_TRUE(config.tunneling.enabled);
     ASSERT_FALSE(config.tunneling.subscribeNotification);
-    ASSERT_STREQ("destination access token value", config.tunneling.destinationAccessToken->c_str());
+    ASSERT_STREQ("destination_access_token_value", config.tunneling.destinationAccessToken->c_str());
     ASSERT_STREQ("region value", config.tunneling.region->c_str());
     ASSERT_EQ(22, config.tunneling.port.value());
 }
