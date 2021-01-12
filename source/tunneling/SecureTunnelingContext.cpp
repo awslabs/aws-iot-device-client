@@ -22,19 +22,20 @@ namespace Aws
                     const string &rootCa,
                     const string &accessToken,
                     const string &endpoint,
-                    uint16_t port)
+                    uint16_t port,
+                    OnConnectionShutdownFn onConnectionShutdown)
                 {
                     mSharedCrtResourceManager = manager;
                     mRootCa = rootCa;
                     mAccessToken = accessToken;
                     mEndpoint = endpoint;
                     mPort = port;
+                    mOnConnectionShutdown = onConnectionShutdown;
                 }
 
                 SecureTunnelingContext::~SecureTunnelingContext()
                 {
                     mSecureTunnel->Close();
-                    mTcpForward->Close();
                 }
 
                 template <typename T>
@@ -93,6 +94,7 @@ namespace Aws
                         mRootCa,
 
                         bind(&SecureTunnelingContext::OnConnectionComplete, this),
+                        bind(&SecureTunnelingContext::OnConnectionShutdown, this),
                         bind(&SecureTunnelingContext::OnSendDataComplete, this, placeholders::_1),
                         bind(&SecureTunnelingContext::OnDataReceive, this, placeholders::_1),
                         bind(&SecureTunnelingContext::OnStreamStart, this),
@@ -124,51 +126,56 @@ namespace Aws
 
                 void SecureTunnelingContext::DisconnectFromTcpForward()
                 {
-                    mTcpForward->Close();
                     mTcpForward.reset();
                 }
 
                 void SecureTunnelingContext::OnConnectionComplete()
                 {
-                    LOG_DEBUG(TAG, "SecureTunnelingFeature::OnConnectionComplete");
+                    LOG_DEBUG(TAG, "SecureTunnelingContext::OnConnectionComplete");
+                }
+
+                void SecureTunnelingContext::OnConnectionShutdown()
+                {
+                    LOG_DEBUG(TAG, "SecureTunnelingContext::OnConnectionShutdown");
+                    mOnConnectionShutdown(this);
                 }
 
                 void SecureTunnelingContext::OnSendDataComplete(int errorCode)
                 {
-                    LOG_DEBUG(TAG, "SecureTunnelingFeature::OnSendDataComplete");
+                    LOG_DEBUG(TAG, "SecureTunnelingContext::OnSendDataComplete");
                     if (errorCode)
                     {
-                        LOGM_ERROR(TAG, "SecureTunnelingFeature::OnSendDataComplete errorCode=%d", errorCode);
+                        LOGM_ERROR(TAG, "SecureTunnelingContext::OnSendDataComplete errorCode=%d", errorCode);
                     }
                 }
 
                 void SecureTunnelingContext::OnDataReceive(const Crt::ByteBuf &data)
                 {
-                    LOGM_DEBUG(TAG, "SecureTunnelingFeature::OnDataReceive data.len=%zu", data.len);
+                    LOGM_DEBUG(TAG, "SecureTunnelingContext::OnDataReceive data.len=%zu", data.len);
                     mTcpForward->SendData(aws_byte_cursor_from_buf(&data));
                 }
 
                 void SecureTunnelingContext::OnStreamStart()
                 {
-                    LOG_DEBUG(TAG, "SecureTunnelingFeature::OnStreamStart");
+                    LOG_DEBUG(TAG, "SecureTunnelingContext::OnStreamStart");
                     ConnectToTcpForward();
                 }
 
                 void SecureTunnelingContext::OnStreamReset()
                 {
-                    LOG_DEBUG(TAG, "SecureTunnelingFeature::OnStreamReset");
+                    LOG_DEBUG(TAG, "SecureTunnelingContext::OnStreamReset");
                     DisconnectFromTcpForward();
                 }
 
                 void SecureTunnelingContext::OnSessionReset()
                 {
-                    LOG_DEBUG(TAG, "SecureTunnelingFeature::OnSessionReset");
+                    LOG_DEBUG(TAG, "SecureTunnelingContext::OnSessionReset");
                     DisconnectFromTcpForward();
                 }
 
                 void SecureTunnelingContext::OnTcpForwardDataReceive(const Crt::ByteBuf &data)
                 {
-                    LOGM_DEBUG(TAG, "SecureTunnelingFeature::OnTcpForwardDataReceive data.len=%zu", data.len);
+                    LOGM_DEBUG(TAG, "SecureTunnelingContext::OnTcpForwardDataReceive data.len=%zu", data.len);
                     mSecureTunnel->SendData(aws_byte_cursor_from_buf(&data));
                 }
 
