@@ -4,6 +4,7 @@
 #include "SharedCrtResourceManager.h"
 #include "logging/LoggerFactory.h"
 #include "util/FileUtils.h"
+#include "util/Retry.h"
 
 #include <aws/crt/Api.h>
 #include <sys/stat.h>
@@ -18,6 +19,7 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr int SharedCrtResourceManager::DEFAULT_WAIT_TIME_SECONDS;
+constexpr int SharedCrtResourceManager::NON_RETRYABLE_ERRORS[];
 
 bool SharedCrtResourceManager::initialize(const PlainConfig &config)
 {
@@ -153,13 +155,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
         return connection->LastError();
     }
 
-    /*
-     * TODO: Look into if anything needs changed with this synchronous behavior
-     *
-     * In a real world application you probably don't want to enforce synchronous behavior
-     * but this is a sample console application, so we'll just do that with a condition variable.
-     */
-    promise<bool> connectionCompletedPromise;
+    promise<int> connectionCompletedPromise;
 
     /*
      * This will execute when an mqtt connect has completed or failed.
@@ -176,12 +172,12 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
                     "Please refer README->Fleet Provisioning Feature section for more details on recommended policies "
                     "for AWS IoT Device Client. ***");
             }
-            connectionCompletedPromise.set_value(false);
+            connectionCompletedPromise.set_value(errorCode);
         }
         else
         {
             LOGM_INFO(TAG, "MQTT connection established with return code: %d", returnCode);
-            connectionCompletedPromise.set_value(true);
+            connectionCompletedPromise.set_value(0);
         }
     };
 
@@ -198,9 +194,6 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     connection->OnConnectionCompleted = move(onConnectionCompleted);
     connection->OnDisconnect = move(onDisconnect);
 
-    /*
-     * Actually perform the connect dance.
-     */
     LOGM_INFO(TAG, "Establishing MQTT connection with client id %s...", config.thingName->c_str());
     if (!connection->Connect(config.thingName->c_str(), true, 0))
     {
@@ -208,17 +201,27 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
         return connection->LastError();
     }
 
-    if (connectionCompletedPromise.get_future().get())
+    int connectionStatus = connectionCompletedPromise.get_future().get();
+
+    if (SharedCrtResourceManager::SUCCESS == connectionStatus)
     {
         LOG_INFO(TAG, "Shared MQTT connection is ready!");
+        return SharedCrtResourceManager::SUCCESS;
     }
     else
     {
-        LOG_ERROR(TAG, "Failed to establish shared MQTT connection! ***");
-        return SharedCrtResourceManager::ABORT;
+        // We need to determine if we're seeing a retryable error or something fatal
+        for (int i = 0; i < static_cast<int>(sizeof(NON_RETRYABLE_ERRORS)); i++)
+        {
+            if (NON_RETRYABLE_ERRORS[i] == connectionStatus)
+            {
+                LOG_ERROR(TAG, "Encountered unretryable error when attempting to establish the MQTT connection");
+                return SharedCrtResourceManager::ABORT;
+            }
+        }
+        LOG_ERROR(TAG, "Failed to establish shared MQTT connection, but will attempt retry...");
+        return SharedCrtResourceManager::RETRY;
     }
-
-    return SharedCrtResourceManager::SUCCESS;
 }
 
 shared_ptr<MqttConnection> SharedCrtResourceManager::getConnection()
