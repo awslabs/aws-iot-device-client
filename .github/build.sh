@@ -105,12 +105,12 @@ case $compileMode in
     if [ "$stMode" = true ]; then
       # Set CMake flags for ST mode
       # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
-      cmake -DCMAKE_TOOLCHAIN_FILE=../Toolchain-rpi3-armhf.cmake -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../ || true
-      cmake -DCMAKE_TOOLCHAIN_FILE=../Toolchain-rpi3-armhf.cmake -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../ || true
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../
     else
       # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
-      cmake -DCMAKE_TOOLCHAIN_FILE=../Toolchain-rpi3-armhf.cmake ../ || true
-      cmake -DCMAKE_TOOLCHAIN_FILE=../Toolchain-rpi3-armhf.cmake ../
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../ || true
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../
     fi
     cmake --build . --target aws-iot-device-client
     cmake --build . --target test-aws-iot-device-client
