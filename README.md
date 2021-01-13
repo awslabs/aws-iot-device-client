@@ -1,14 +1,67 @@
 # AWS IoT Device Client
 
+The AWS IoT Device Client is free, open-source, modular software written in C++ that you can compile and install on
+ your Embedded Linux based IoT devices to access [AWS IoT Core](https://aws.amazon.com/iot-core/), [AWS IoT Device
+  Management](https://aws.amazon.com/iot-device-management/), and [AWS IoT Device
+  Defender](https://aws.amazon.com/iot-device-defender) features by default. It serves as a reference implementation for your IoT devices to work with AWS IoT
+   services, with operational best practices baked in – using it is the easiest way to create a proof-of-concept (PoC) for your IoT project. What’s more, since it is open-source, you can modify it to fit your business needs, or optimize it when you wish to scale up from a PoC to production.
+   
+- [AWS IoT Device Client](#aws-iot-device-client)
+    + [Current Capabilities](#current-capabilities)
+    + [List of Supported Platforms](#list-of-supported-platforms)
+  * [Installation](#installation)
+    + [Minimum Requirements](#minimum-requirements)
+    + [Building from source](#building-from-source)
+      - [Build and Install All Dependencies via CMake](#build-and-install-all-dependencies-via-cmake)
+      - [Build With Dependencies Already Installed](#build-with-dependencies-already-installed)
+      - [Custom Compilation - Exclude Specific IoT Features to Reduce Executable Footprint](#custom-compilation---exclude-specific-iot-features-to-reduce-executable-footprint)
+    + [Running the tests](#running-the-tests)
+  * [Setting Up The Device Client](#setting-up-the-device-client)
+    + [Runtime Configuration](#runtime-configuration)
+  * [Jobs Feature](#jobs-feature)
+    + [Creating a Job](#creating-a-job)
+    + [Creating your own Job Handler](#creating-your-own-job-handler)
+    + [Debugging your Job](#debugging-your-job)
+    + [Jobs Build Flags](#jobs-build-flags)
+    + [Jobs Feature Runtime Configuration Options](#jobs-feature-runtime-configuration-options)
+      - [Configuring the Jobs feature via the command line:](#configuring-the-jobs-feature-via-the-command-line)
+      - [Configuring the Jobs feature via JSON:](#configuring-the-jobs-feature-via-json)
+  * [Fleet Provisioning Feature](#fleet-provisioning-feature)
+    + [Resources required for Fleet Provisioning feature](#resources-required-for-fleet-provisioning-feature)
+    + [Sample Claim Certificate Policy](#sample-claim-certificate-policy)
+        * [Sample Policy:](#sample-policy)
+    + [Sample Fleet Provisioning Template](#sample-fleet-provisioning-template)
+        * [Sample Template:](#sample-template)
+    + [Sample Permanent Certificate Policy](#sample-permanent-certificate-policy)
+        * [Sample (FPCertPolicy) Policy:](#sample-fpcertpolicy-policy)
+  * [Logging](#logging)
+    + [Logging Configuration Options](#logging-configuration-options)
+    + [Security](#security)
+    + [License](#license) 
+    
+### Current Capabilities
+The modular IoT Device Client consists of a “base client” and discrete “client-side features” that support the following:
+* The base client handles MQTT connectivity with AWS IoT core - it enables your IoT device to automatically
+ connect and make subscriptions to feature-relevant MQTT topics. It also provides a logging API for device side logs.
+* The client-side [Jobs feature](https://aws.amazon.com/iot-device-management/features/#Remotely_Manage_Connected_Devices) enables you to execute remote actions on your device when you use the Jobs feature of
+ the AWS IoT Device Management service. It provides support for a few remote actions by default, and extensibility for custom actions. You can use custom actions to remotely control the state of your IoT devices.
+* The client-side [Secure Tunneling feature](https://aws.amazon.com/iot-device-management/features/#Secure_Tunneling) enables secure, privileged access to your IoT device when you use the
+ Secure Tunneling feature in the AWS IoT Device Management service.
+* The client-side Device Defender feature enables you to collect standard [Device Side Metrics](https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html) when you use the [Rules
+ Detect feature](https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html) in the AWS IoT Device Defender service.
+* The client-side Fleet Provisioning feature enables you to replace provisional credentials with device-specific ones
+  when you onboard a fleet of devices to AWS IoT Core. It creates a device specific certificate and private key, and registers the device on AWS IoT Core.
+### List of Supported Platforms
+The AWS IoT Device Client currently works by default on IoT devices with common microprocessors (x86_64 or ARM architectures), and common Linux software environments (Debian, Ubuntu, and RHEL).
+Tested devices: Raspberry Pi 4, <Add others>
+
 ## Installation
 
 ### Minimum Requirements
 
 * C++ 11 or higher
 * [CMake](https://cmake.org/) 3.10+
-
-### Note
-* CI Build uses OpenSSL 1.1.1 
+* *Note* CI Build uses OpenSSL 1.1.1 
 
 ### Building from source
 
