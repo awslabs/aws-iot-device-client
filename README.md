@@ -1,12 +1,7 @@
 # AWS IoT Device Client
 
-The AWS IoT Device Client is free, open-source, modular software written in C++ that you can compile and install on
- your Embedded Linux based IoT devices to access [AWS IoT Core](https://aws.amazon.com/iot-core/), [AWS IoT Device
-  Management](https://aws.amazon.com/iot-device-management/), and [AWS IoT Device
-  Defender](https://aws.amazon.com/iot-device-defender) features by default. It serves as a reference implementation for your IoT devices to work with AWS IoT
-   services, with operational best practices baked in – using it is the easiest way to create a proof-of-concept (PoC) for your IoT project. What’s more, since it is open-source, you can modify it to fit your business needs, or optimize it when you wish to scale up from a PoC to production.
-   
 - [AWS IoT Device Client](#aws-iot-device-client)
+    + [Introduction](#introduction)
     + [Current Capabilities](#current-capabilities)
     + [List of Supported Platforms](#list-of-supported-platforms)
   * [Installation](#installation)
@@ -38,6 +33,14 @@ The AWS IoT Device Client is free, open-source, modular software written in C++ 
     + [Logging Configuration Options](#logging-configuration-options)
     + [Security](#security)
     + [License](#license) 
+    
+## Introduction
+
+The AWS IoT Device Client is free, open-source, modular software written in C++ that you can compile and install on
+ your Embedded Linux based IoT devices to access [AWS IoT Core](https://aws.amazon.com/iot-core/), [AWS IoT Device
+  Management](https://aws.amazon.com/iot-device-management/), and [AWS IoT Device
+  Defender](https://aws.amazon.com/iot-device-defender) features by default. It serves as a reference implementation for your IoT devices to work with AWS IoT
+   services, with operational best practices baked in – using it is the easiest way to create a proof-of-concept (PoC) for your IoT project. What’s more, since it is open-source, you can modify it to fit your business needs, or optimize it when you wish to scale up from a PoC to production.
     
 ### Current Capabilities
 The modular IoT Device Client consists of a “base client” and discrete “client-side features” that support the following:
