@@ -63,11 +63,8 @@ void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
             {
                 childOutput.pop_back();
             }
-            if (lineCount <= MAX_LOG_LINES)
-            {
-                LOG_ERROR(logTag, childOutput.c_str());
-                this->errors.fetch_add(1);
-            }
+            LOG_ERROR(logTag, childOutput.c_str());
+            this->errors.fetch_add(1);
         }
         else
         {
@@ -76,10 +73,7 @@ void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
             {
                 childOutput.pop_back();
             }
-            if (lineCount <= MAX_LOG_LINES)
-            {
-                LOG_DEBUG(logTag, childOutput.c_str());
-            }
+            LOG_DEBUG(logTag, childOutput.c_str());
         }
         lineCount++;
     }
