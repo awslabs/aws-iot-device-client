@@ -33,10 +33,7 @@ namespace Aws
                     mOnConnectionShutdown = onConnectionShutdown;
                 }
 
-                SecureTunnelingContext::~SecureTunnelingContext()
-                {
-                    mSecureTunnel->Close();
-                }
+                SecureTunnelingContext::~SecureTunnelingContext() { mSecureTunnel->Close(); }
 
                 template <typename T>
                 static bool operator==(const Aws::Crt::Optional<T> &lhs, const Aws::Crt::Optional<T> &rhs)
@@ -124,10 +121,7 @@ namespace Aws
                     mTcpForward->Connect();
                 }
 
-                void SecureTunnelingContext::DisconnectFromTcpForward()
-                {
-                    mTcpForward.reset();
-                }
+                void SecureTunnelingContext::DisconnectFromTcpForward() { mTcpForward.reset(); }
 
                 void SecureTunnelingContext::OnConnectionComplete()
                 {
