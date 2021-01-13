@@ -462,7 +462,6 @@ bool PlainConfig::Jobs::Validate() const
 
 constexpr char PlainConfig::Tunneling::CLI_ENABLE_TUNNELING[];
 constexpr char PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION[];
-constexpr char PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN[];
 constexpr char PlainConfig::Tunneling::CLI_TUNNELING_REGION[];
 constexpr char PlainConfig::Tunneling::CLI_TUNNELING_SERVICE[];
 constexpr char PlainConfig::Tunneling::JSON_KEY_ENABLED[];
@@ -494,10 +493,6 @@ bool PlainConfig::Tunneling::LoadFromCliArgs(const CliArgs &cliArgs)
     if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION))
     {
         subscribeNotification = false;
-    }
-    if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN))
-    {
-        destinationAccessToken = cliArgs.at(PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN).c_str();
     }
     if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_REGION))
     {
@@ -815,7 +810,6 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {PlainConfig::Jobs::CLI_HANDLER_DIR, true, false, nullptr},
 
         {PlainConfig::Tunneling::CLI_ENABLE_TUNNELING, false, false, nullptr},
-        {PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN, true, false, nullptr},
         {PlainConfig::Tunneling::CLI_TUNNELING_REGION, true, false, nullptr},
         {PlainConfig::Tunneling::CLI_TUNNELING_SERVICE, true, false, nullptr},
         {PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION, false, false, nullptr},
@@ -1031,7 +1025,6 @@ void Config::PrintHelpMessage()
         "%s <Root-CA-Location>:\t\t\t\t\t\tUse Specified Root-CA file\n"
         "%s <thing-name-value>:\t\t\t\t\tUse Specified Thing Name\n"
         "%s <Jobs-handler-directory>:\t\t\t\tUse specified directory to find job handlers\n"
-        "%s <destination-access-token>:\tUse Specified Destination Access Token for Secure Tunneling\n"
         "%s <region>:\t\t\t\t\t\tUse Specified AWS Region for Secure Tunneling\n"
         "%s <service>:\t\t\t\t\t\tConnect secure tunnel to specific service\n"
         "%s:\t\t\t\t\tDisable MQTT new tunnel notification for Secure Tunneling\n"
@@ -1060,7 +1053,6 @@ void Config::PrintHelpMessage()
         PlainConfig::CLI_ROOT_CA,
         PlainConfig::CLI_THING_NAME,
         PlainConfig::Jobs::CLI_HANDLER_DIR,
-        PlainConfig::Tunneling::CLI_TUNNELING_DESTINATION_ACCESS_TOKEN,
         PlainConfig::Tunneling::CLI_TUNNELING_REGION,
         PlainConfig::Tunneling::CLI_TUNNELING_SERVICE,
         PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION,
