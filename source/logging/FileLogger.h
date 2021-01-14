@@ -92,7 +92,15 @@ namespace Aws
 
                   public:
                     virtual bool start(const PlainConfig &config) override;
+
+                    virtual void stop() override;
+
                     virtual void shutdown() override;
+
+                    virtual std::unique_ptr<LogQueue> takeLogQueue() override;
+
+                    virtual void setLogQueue(std::unique_ptr<LogQueue> logQueue) override;
+
                     virtual void flush() override;
                 };
             } // namespace Logging

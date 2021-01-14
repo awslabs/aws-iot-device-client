@@ -7,6 +7,7 @@
 #include "../config/Config.h"
 #include "../util/StringUtils.h"
 #include "LogLevel.h"
+#include "LogQueue.h"
 #include <chrono>
 #include <cstdarg>
 #include <ctime>
@@ -214,11 +215,31 @@ namespace Aws
                      * @return true if it is able to start successfully, false otherwise
                      */
                     virtual bool start(const PlainConfig &config) = 0;
+
+                    /**
+                     * \brief Attempts to stop the Logger implementation from writing any additional log messages,
+                     * likely to switch to a different logger implementation.
+                     */
+                    virtual void stop() = 0;
                     /**
                      * \brief Notifies the Logger implementation that any queued logs should be dumped to output and the
                      * logger should shut itself down
                      */
                     virtual void shutdown() = 0;
+
+                    /**
+                     * \brief Removes the LogQueue from the logger implementation so it can be passed to another
+                     * logger implementation for processing
+                     * @return a unique_ptr<LogQueue>
+                     */
+                    virtual std::unique_ptr<LogQueue> takeLogQueue() = 0;
+
+                    /**
+                     * \brief Passes a LogQueue to the logger implementation. Typically used if the logger
+                     * implementation is being changed
+                     * @param logQueue
+                     */
+                    virtual void setLogQueue(std::unique_ptr<LogQueue> logQueue) = 0;
 
                     /**
                      * \brief Flush the log output from the queue synchronously

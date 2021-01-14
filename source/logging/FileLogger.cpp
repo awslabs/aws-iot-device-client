@@ -125,6 +125,27 @@ void FileLogger::queueLog(
     logQueue.get()->addLog(unique_ptr<LogMessage>(new LogMessage(level, tag, t, message)));
 }
 
+void FileLogger::stop()
+{
+    needsShutdown = true;
+    logQueue->shutdown();
+
+    unique_lock<mutex> runLock(isRunningLock);
+    isRunning = false;
+}
+
+unique_ptr<LogQueue> FileLogger::takeLogQueue()
+{
+    unique_ptr<LogQueue> tmp = std::move(logQueue);
+    logQueue = unique_ptr<LogQueue>(new LogQueue);
+    return tmp;
+}
+
+void FileLogger::setLogQueue(std::unique_ptr<LogQueue> incomingQueue)
+{
+    this->logQueue = std::move(incomingQueue);
+}
+
 void FileLogger::shutdown()
 {
     needsShutdown = true;
@@ -149,6 +170,9 @@ void FileLogger::flush()
     while (logQueue->hasNextLog())
     {
         unique_ptr<LogMessage> message = logQueue->getNextLog();
-        writeLogMessage(std::move(message));
+        if (NULL != message)
+        {
+            writeLogMessage(std::move(message));
+        }
     }
 }
