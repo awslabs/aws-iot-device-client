@@ -126,6 +126,35 @@ field by running `aws iot describe-endpoint` on the CLI.
 
 `thing-name`: This is the name for your thing. It should be unique across your regional AWS account. 
 
+## File and Directory Permissions
+The AWS IoT Device Client requires specific permissions on files and directory storing these files. Please make sure these permissions are applied before starting the Device Client.
+
+#### Recommended and Required permissions on files
+File          | Permissions | Required |
+------------- | ------------- | -------------
+Private Keys  | 600 | **Yes**
+Public Certificates | 644 | **Yes**
+Root Certificate Authority | 644 | **Yes**
+CSR File  | 600 | **Yes**
+Log File  | 600 | **Yes**
+Job Handler | 700 | **Yes**
+JSON Config File | 644 | **Recommended**
+Runtime Config File | 644 | **Recommended**
+
+
+#### Recommended and Required permissions on directories storing respective files
+Directory           | Permissions | Required |
+------------- | ------------- | ------------- 
+Directory Storing Private Key | 700 | **Yes**
+Directory Storing Public Certificates   | 700 | **Yes**
+Directory Storing Root Certificate Authority | 700 | **Yes**
+Directory Storing CSR File  | 700 | **Yes**
+Directory Storing Log File  | 745 | **Yes**
+Directory Storing JSON Config File | 745 | **Recommended**
+Directory Storing Runtime Config File | 745 | **Recommended**
+
+*Note: It is worth noting here that files are directories storing these files created by AWS IoT Device Client will have the above mentioned permissions set by default*
+
 ## Jobs Feature
 
 The Jobs feature within the AWS IoT Device Client provides device-side functionality for execution of jobs created via
