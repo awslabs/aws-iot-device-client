@@ -85,8 +85,7 @@ cmake ../ -DEXCLUDE_DD=ON
 ```
 #### Cross Compiliation - Building from one architecture to the other
 **Description**:
-Cross Compiling allows you to compile for a **specific architecture** while on a **different architecture**.  This is extremely useful, as some *(Especially really constrained)* devices won't have the rescources to complete the build process.  Even if your devices can complete the build, it is often times much easier to build in a central location (like your developer laptop) and then distribute the artifacts to appropriate devices. 
-
+Cross Compiling allows you to compile for a **specific architecture** while on a **different architecture**.  This is extremely useful, as some *(Especially really constrained)* devices won't have the resources to complete the build process.  Even if your devices can complete the build, it is often times much easier to build in a central location (like your developer laptop) and then distribute the artifacts to appropriate devices. 
 
 The `cmake-toolchain` folder contains toolchains that will make cross compiling for other architectures easier. Currently we have toolchains to support cross compiling for the following architectures; **MIPS**, **ARMhf**, & **AArch64**.
 
@@ -101,7 +100,7 @@ For your build to be successful you'll also need a cross compiled version of our
 ```
 cmake ../ -DBUILD_SDK=ON -DCMAKE_TOOLCHAIN_FILE=<Path/To/Toolchain>
 ```
-The last dependency you'll need cross compiled is **openssl**.  This one is slightly more complicated but can be done as follows:  *(This example is from our build process, replace the information in carets)*
+The last dependency you'll need cross compiled is **openssl**.  This one is slightly more complicated but can be done as follows:  *(This example is from our build process, replace the information in carets.  It is also important to note that you should use whatever version of openssl matches the TLS stack on your device.)*
 ```
 wget https://www.openssl.org/source/openssl-1.1.1.tar.gz
 tar -xvzf openssl-1.1.1.tar.gz
@@ -117,7 +116,7 @@ make install
 For a real example look into our `.github/build.sh` script.
 
 **Other Architecture**:
-If you need to compile for an architecture that isn't currently supported.  You can create a new toolchain based on the sample toolchains included in the `cmake-toolchain` folder.
+If you need to compile for an architecture that isn't currently supported, then you can create a new toolchain based on the sample toolchains included in the cmake-toolchain folder.
 
 ### Running the tests
 ```
