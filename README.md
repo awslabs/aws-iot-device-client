@@ -482,7 +482,7 @@ You can navigate to the *AWS IoT console -> Secure -> Policies* to create a perm
 ```
 
 ## Device Defender Feature
-The Device Defender feature within the AWS IoT Device Client publishes [device-side metrics](https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html) about the device to the cloud.  A user can then use the cloud-side service to identify unusual behavior that might indicate a compromised device by monitoring the behavior of your devices.
+The Device Defender feature within the AWS IoT Device Client publishes [device-side metrics](https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html) about the device to the cloud.  You can then use the cloud-side service to identify unusual behavior that might indicate a compromised device by monitoring the behavior of your devices.
 
 To get started with the feature you'll only need to configure the following variables in your config file.
 (*These can also be configured from the command line*)  
@@ -495,7 +495,7 @@ To get started with the feature you'll only need to configure the following vari
 *It is important to note the interval's recommended minimum is 300 seconds, anything less than this is subject to being throttled.*
 Starting the AWS IoT Device Client will now start the Device Defender feature.  The device will begin publishing reports with all of the available [device-side metrics](https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html) (*You can see an example report at the bottom of the link*).
 
-The rest of the functionality and interaction with Device Defender will be on the cloud-side, where you can create things like security profiles and alarms to monitor the metrics your device publishes.
+The rest of the functionality and interaction with Device Defender will be on the cloud-side, where you can create things like security profiles and alarms to monitor the metrics your device publishes. [How to use AWS IoT Device Defender detect](https://docs.aws.amazon.com/iot/latest/developerguide/detect-HowToHowTo.html).
 
 ## Logging
 The AWS IoT Device Client has the capability to log directly to standard output or write logs to a log file. For
