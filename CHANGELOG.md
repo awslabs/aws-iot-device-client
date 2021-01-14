@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 encounter issues if data written to the buffer is larger than 16KB
 - Resolution for Device Defender reboot segfault. There is a known issue where rebooting the device
 while Device Defender is running as a service will trigger a segfault when the Device Client starts again after the reboot
+- Add support for transferring log queues between logger implementations when configuration changes (2021-01-07)
 
 ## [0.2.X] - 2020-12-23
 ### Added

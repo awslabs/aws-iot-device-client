@@ -1,6 +1,7 @@
 #!/bin/sh
 
 compileMode="default"
+stMode=false
 
 # Check if first argument is compile mode
 compileModeArgument=$(echo "$1" | cut -c3-14)
@@ -18,6 +19,10 @@ if [ "$compileModeArgument" = "compile-mode" ]; then
     ;;
     aarch64_cross_mode)
     compileMode="aarch64_cross_mode"
+    ;;
+    st_armhf_cross_mode)
+    compileMode="armhf_cross_mode"
+    stMode=true
     ;;
     *)
     echo "No compile mode match found"
@@ -92,17 +97,24 @@ case $compileMode in
     cd openssl-1.1.1
     ./Configure linux-generic32 shared \
       --prefix=$INSTALL_DIR --openssldir=$INSTALL_DIR/openssl \
-      --cross-compile-prefix=usr/bion/arm-linux-gnueabihf-
+      --cross-compile-prefix=/usr/bin/arm-linux-gnueabihf-
     make depend
     make -j 4
     make install
     cd ..
-    # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
-    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../ || true
-    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../
+    if [ "$stMode" = true ]; then
+      # Set CMake flags for ST mode
+      # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../ || true
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../
+    else
+      # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../ || true
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../
+    fi
     cmake --build . --target aws-iot-device-client
     cmake --build . --target test-aws-iot-device-client
-    exit 0
+    exit $?
     ;;
     #################################
     mips_cross_mode)
@@ -128,7 +140,7 @@ case $compileMode in
     cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../
     cmake --build . --target aws-iot-device-client
     cmake --build . --target test-aws-iot-device-client
-    exit 0
+    exit $?
     ;;
     #################################
     aarch64_cross_mode)
@@ -154,7 +166,7 @@ case $compileMode in
     cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake ../
     cmake --build . --target aws-iot-device-client
     cmake --build . --target test-aws-iot-device-client
-    exit 0
+    exit $?
     ;;
     *)
     cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON
