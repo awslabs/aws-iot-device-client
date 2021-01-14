@@ -16,17 +16,21 @@ shared_ptr<Logger> LoggerFactory::getLoggerInstance()
 
 bool LoggerFactory::reconfigure(const PlainConfig &config)
 {
-    logger->flush();
-
     if (config.logConfig.type == config.logConfig.LOG_TYPE_FILE && dynamic_cast<FileLogger *>(logger.get()) == nullptr)
     {
+        logger->stop();
+        unique_ptr<LogQueue> logQueue = logger->takeLogQueue();
         logger.reset(new FileLogger);
+        logger->setLogQueue(std::move(logQueue));
     }
     else if (
         config.logConfig.type == config.logConfig.LOG_TYPE_STDOUT &&
         dynamic_cast<StdOutLogger *>(logger.get()) == nullptr)
     {
+        logger->stop();
+        unique_ptr<LogQueue> logQueue = logger->takeLogQueue();
         logger.reset(new StdOutLogger);
+        logger->setLogQueue(std::move(logQueue));
     }
     return logger->start(config);
 }
