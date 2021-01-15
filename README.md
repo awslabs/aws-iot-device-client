@@ -96,11 +96,9 @@ cmake ../ -DCMAKE_TOOLCHAIN_FILE=<Path/To/Toolchain>
 This will allow the toolchain to overwrite variables *(various paths, compilers, & flags)* required to execute cross compilation without changing the original **cmake** file.
 
 **Dependencies**:
-For your build to be successful you'll also need a cross compiled version of our dependencies ([aws-iot-device-sdk-cpp-v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2) & **openssl**), for the SDK this can easily be accomplished by running **cmake** with the following flag: 
-```
-cmake ../ -DBUILD_SDK=ON -DCMAKE_TOOLCHAIN_FILE=<Path/To/Toolchain>
-```
-The last dependency you'll need cross compiled is **openssl**.  This one is slightly more complicated but can be done as follows:  *(This example is from our build process, replace the information in carets.  It is also important to note that you should use whatever version of openssl matches the TLS stack on your device.)*
+For your build to be successful you'll also need a cross compiled version of our dependencies ([aws-iot-device-sdk-cpp-v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2) & **openssl**), for the SDK this is automatically accomplished when running the **cmake** command above without the following flag `-DBUILD_SDK=OFF`.
+
+The last dependency you'll need cross compiled is **openssl**.  This one is slightly more complicated but can be done as follows:  *(This example is from our build process, replace the information in carets.  While we happen to be linking against OpenSSL 1.1.1 in this example since our target device uses OpenSSL 1.1.1 for its TLS implementation, you'll want to replace this with whatever TLS implementation is present on your target device.)*
 ```
 wget https://www.openssl.org/source/openssl-1.1.1.tar.gz
 tar -xvzf openssl-1.1.1.tar.gz
