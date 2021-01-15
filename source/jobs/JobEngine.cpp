@@ -39,6 +39,7 @@ void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
     {
         string childOutput;
         childOutput += buffer.data();
+        childOutput = Util::Sanitize(childOutput);
         if (isStdErr)
         {
             stderrstream.addString(childOutput);

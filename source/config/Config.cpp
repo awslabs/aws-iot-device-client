@@ -991,7 +991,7 @@ bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
     Aws::Crt::JsonView jsonView = Aws::Crt::JsonView(jsonObj);
     config.LoadFromJson(jsonView);
 
-    LOGM_INFO(TAG, "Successfully fetched JSON config file: %s", contents.c_str());
+    LOGM_INFO(TAG, "Successfully fetched JSON config file: %s", Sanitize(contents).c_str());
     setting.close();
 
     return true;
