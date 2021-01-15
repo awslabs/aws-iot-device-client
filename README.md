@@ -484,15 +484,15 @@ You can navigate to the *AWS IoT console -> Secure -> Policies* to create a perm
 ```
 
 ### Fleet Provisioning Runtime Config
-Once the device is provisioned correctly, Fleet Provisioning feature will validate and store the information about newly provisioned resources in an runtime config file. This file will be further used by the Device Client while connecting to AWS IoT Core. 
+Once the device is provisioned correctly, Fleet Provisioning feature will validate and store the information about newly provisioned resources in a runtime config file. This file will be further used by the Device Client while connecting to the AWS IoT Core. 
 
-The information stored in runtime config file **created by Fleet Provisioning feature**:
+The information stored in the runtime config file **created by Fleet Provisioning feature**:
 * Thing Name: Name of the newly provisioned thing
 * Certificate: Path of the newly created certificate file
-* Private Key Path: Path of the newly created private key file
-* Completed FP: A boolean value stating if the Fleet Provision process was completed earlier. This will make sure the Device Client does not repeats provisioning process in future even if Fleet Provisioning feature is enabled. 
+* Private Key: Path of the newly created private key file
+* FP Status: A boolean value stating if the Fleet Provision process was completed earlier. 
 
-If the AWS IoT Device Client is restarted in future, it will read the runtime config file and will use the certificate, private key and thing name as mentioned in the runtime config while connecting to AWS IoT core. 
+If the AWS IoT Device Client is restarted in future, it will read the runtime config file and will use the certificate, private key and thing name as mentioned in the runtime config while connecting to AWS IoT core **only if the value of 'completed-fp' parameter is true**. 
 
 ##### Example Fleet Provisioning Runtime Config:
 
@@ -516,7 +516,7 @@ The Fleet Provisioning feature is disabled by default. You can enable it by a CL
 
 Configuring the Fleet Provisioning feature via the command line:
 ```
-$ ./aws-iot-device-client --jobs-enabled [<true>|false>] --fleet-provisioning-template-name [Fleet-Provisioning-Template-Name] --csr-file [your/path/to/csr/file] 
+$ ./aws-iot-device-client --enable-fleet-provisioning [<true>|false>] --fleet-provisioning-template-name [Fleet-Provisioning-Template-Name] --csr-file [your/path/to/csr/file] 
 ```
 
 Configuring the Fleet Provisioning feature via JSON:
@@ -525,8 +525,8 @@ Configuring the Fleet Provisioning feature via JSON:
     ...
     "fleet-provisioning": {
         "enabled": [<true>|<false>],
-        "template-name": [Fleet-Provisioning-Template-Name]
-        "csr-file": "[your/path/to/csr/file]"
+        "template-name": "Fleet-Provisioning-Template-Name",
+        "csr-file": "your/path/to/csr/file"
     }
     ...
 }
