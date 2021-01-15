@@ -170,8 +170,11 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
             LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(errorCode));
             if (AWS_ERROR_MQTT_UNEXPECTED_HANGUP == errorCode)
             {
-                LOG_ERROR(TAG, "*** Did you make sure to attach iot:* to your policy for this thing?");
-                LOG_ERROR(TAG, "*** AWS Console -> IoT Core -> Secure -> Certificates");
+                LOG_ERROR(
+                    TAG,
+                    "*** Did you make sure you are using valid certificate with recommended policy attached to it? "
+                    "Please refer README->Fleet Provisioning Feature section for more details on recommended policies "
+                    "for AWS IoT Device Client. ***");
             }
             connectionCompletedPromise.set_value(false);
         }

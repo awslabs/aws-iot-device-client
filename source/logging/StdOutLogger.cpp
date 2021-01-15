@@ -44,6 +44,24 @@ bool StdOutLogger::start(const PlainConfig &config)
     return true;
 }
 
+void StdOutLogger::stop()
+{
+    needsShutdown = true;
+    logQueue->shutdown();
+}
+
+unique_ptr<LogQueue> StdOutLogger::takeLogQueue()
+{
+    unique_ptr<LogQueue> tmp = std::move(logQueue);
+    logQueue = unique_ptr<LogQueue>(new LogQueue);
+    return tmp;
+}
+
+void StdOutLogger::setLogQueue(std::unique_ptr<LogQueue> incomingQueue)
+{
+    this->logQueue = std::move(incomingQueue);
+}
+
 void StdOutLogger::shutdown()
 {
     needsShutdown = true;
@@ -58,7 +76,10 @@ void StdOutLogger::flush()
     while (logQueue->hasNextLog())
     {
         unique_ptr<LogMessage> message = logQueue->getNextLog();
-        writeLogMessage(std::move(message));
+        if (NULL != message)
+        {
+            writeLogMessage(std::move(message));
+        }
     }
 }
 
