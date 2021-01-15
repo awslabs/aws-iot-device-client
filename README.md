@@ -362,12 +362,12 @@ the Jobs feature will not execute the scripts or executables in this directory.
 
 #### Configuring the Jobs feature via the command line:
 ```
-./aws-iot-device-client --enable-jobs [<true>|false>] --handler-directory [your/path/to/job/handler/directory/]
+./aws-iot-device-client --enable-jobs --jobs-handler-dir [your/path/to/job/handler/directory/]
 ```
 
 Example:
 ```
-./aws-iot-device-client --enable-jobs true --handler-directory ~/.aws-iot-device-client/jobs/
+./aws-iot-device-client --enable-jobs --jobs-handler-dir ~/.aws-iot-device-client/jobs/
 ```
 
 #### Configuring the Jobs feature via JSON:
