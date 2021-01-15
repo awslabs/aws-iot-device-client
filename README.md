@@ -516,7 +516,7 @@ The Fleet Provisioning feature is disabled by default. You can enable it by a CL
 
 Configuring the Fleet Provisioning feature via the command line:
 ```
-$ ./aws-iot-device-client --enable-fleet-provisioning [<true>|false>] --fleet-provisioning-template-name [Fleet-Provisioning-Template-Name] --csr-file [your/path/to/csr/file] 
+$ ./aws-iot-device-client --enable-fleet-provisioning --fleet-provisioning-template-name [Fleet-Provisioning-Template-Name] --csr-file [your/path/to/csr/file] 
 ```
 
 Configuring the Fleet Provisioning feature via JSON:
