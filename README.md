@@ -127,7 +127,7 @@ field by running `aws iot describe-endpoint` on the CLI.
 `thing-name`: This is the name for your thing. It should be unique across your regional AWS account. 
 
 ## File and Directory Permissions
-The AWS IoT Device Client requires specific permissions on files and director storing these files. Please make sure these permissions are applied on files and directories which are created manually by user before starting the Device Client.
+The AWS IoT Device Client requires specific permissions on files and directory storing these files. Please make sure these permissions are applied on files and directories which are created manually by user before starting the Device Client.
 
 *Note: The numbers mentioned bellow are Chmod Permissions for File or Directory*
 
@@ -144,7 +144,7 @@ Config File | 644 | **Recommended**
 
 
 #### Recommended and Required permissions on directories storing respective files
-Directory           | Chmod Permissions | Required |
+Directory     | Chmod Permissions | Required |
 ------------- | ------------- | ------------- 
 Directory Storing Private Key | 700 | **Yes**
 Directory Storing Public Certificates   | 700 | **Yes**
