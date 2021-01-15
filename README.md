@@ -343,6 +343,8 @@ More details about AWS IoT Fleet Provisioning by claim can be found here: https:
 
 *Note: If CSR file is not provided, the Device Client will use Claim Certificate and Private key for provisioning the device.*
 
+*Note: Please make sure that the Claim certificate, private key and/or CSR file stored on device side have respective permissions applied to it as mentioned above in this document.*
+
 Check [CreateKeysAndCertificate](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-keys-cert) and [CreateCertificateFromCsr](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-cert-csr) API for more details.
 
 ### Resources required for Fleet Provisioning feature
@@ -480,6 +482,57 @@ You can navigate to the *AWS IoT console -> Secure -> Policies* to create a perm
   ]
 }
 ```
+
+### Fleet Provisioning Runtime Config
+Once the device is provisioned correctly, Fleet Provisioning feature will validate and store the information about newly provisioned resources in an runtime config file. This file will be further used by the Device Client while connecting to AWS IoT Core. 
+
+The information stored in runtime config file **created by Fleet Provisioning feature**:
+* Thing Name: Name of the newly provisioned thing
+* Certificate: Path of the newly created certificate file
+* Private Key Path: Path of the newly created private key file
+* Completed FP: A boolean value stating if the Fleet Provision process was completed earlier. This will make sure the Device Client does not repeats provisioning process in future even if Fleet Provisioning feature is enabled. 
+
+If the AWS IoT Device Client is restarted in future, it will read the runtime config file and will use the certificate, private key and thing name as mentioned in the runtime config while connecting to AWS IoT core. 
+
+##### Example Fleet Provisioning Runtime Config:
+
+Example runtime config created by Fleet Provisioning feature:
+
+```
+"runtime-config": {
+    "completed-fp": true,
+    "cert": "/path/to/newly/created/certificate.pem.crt",
+    "key": "/path/to/newly/created/private.pem.key",
+    "thing-name": "NewlyProvisionedThingName"
+    }
+}
+```
+
+*Note: It is worth noting here, if at any point in future you want to provision the device again, then you might have to either delete or update the content (completed-fp -> false) of runtime config file before starting the Device client with Fleet Provisioning feature enabled.*
+
+### Configuration
+
+The Fleet Provisioning feature is disabled by default. You can enable it by a CLI argument or in the configuration file.
+
+Configuring the Fleet Provisioning feature via the command line:
+```
+$ ./aws-iot-device-client --jobs-enabled [<true>|false>] --fleet-provisioning-template-name [Fleet-Provisioning-Template-Name] --csr-file [your/path/to/csr/file] 
+```
+
+Configuring the Fleet Provisioning feature via JSON:
+```
+{
+    ...
+    "fleet-provisioning": {
+        "enabled": [<true>|<false>],
+        "template-name": [Fleet-Provisioning-Template-Name]
+        "csr-file": "[your/path/to/csr/file]"
+    }
+    ...
+}
+```
+
+*Note: If CSR file is not provided, the Device Client will use Claim Certificate and Private key for provisioning the device.*
 
 ## Secure Tunneling Feature
 The Secure Tunneling feature allows you to gain access to a remote device even if the device is behind a firewall. You may want to remote access to a device to troubleshoot, or update its configuration. For complete reference of Secure Tunneling, please see [here](https://docs.aws.amazon.com/iot/latest/developerguide/secure-tunneling.html).
