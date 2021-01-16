@@ -6,6 +6,8 @@
 #include <limits.h> /* PATH_MAX */
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <wordexp.h>
 
 using namespace std;
@@ -88,32 +90,56 @@ bool FileUtils::StoreValueInFile(string value, string filePath)
     return true;
 }
 
-int FileUtils::GetFilePermissions(const std::string &filePath)
+int FileUtils::GetFilePermissions(const std::string &path)
 {
-    string expandedPath = ExtractExpandedPath(filePath.c_str());
-
     struct stat file_info;
-    if (stat(expandedPath.c_str(), &file_info) == -1)
+    if (stat(path.c_str(), &file_info) == -1)
     {
-        LOGM_ERROR(TAG, "Failed to stat %s", expandedPath.c_str());
+        LOGM_ERROR(TAG, "Failed to stat: %s. Please make sure valid file/dir path is provided.", path.c_str());
         return false;
     }
 
     return PermissionsMaskToInt(file_info.st_mode);
 }
 
+bool FileUtils::ValidateFileOwnershipPermissions(const std::string &path)
+{
+    struct stat file_info;
+    if (stat(path.c_str(), &file_info) == -1)
+    {
+        LOGM_ERROR(TAG, "Failed to stat: %s. Please make sure valid file/dir path is provided.", path.c_str());
+        return false;
+    }
+    if (getuid() != 0 && getuid() != file_info.st_uid)
+    {
+        LOGM_ERROR(TAG, "User does not have the ownership permissions to access the file/dir: %s", path.c_str());
+        return false;
+    }
+    return true;
+}
+
 bool FileUtils::ValidateFilePermissions(const std::string &path, const int filePermissions, bool fatalError)
 {
-    int actualFilePermissions = FileUtils::GetFilePermissions(path);
+    string expandedPath = ExtractExpandedPath(path.c_str());
+
+    if (fatalError && !ValidateFileOwnershipPermissions(expandedPath))
+    {
+        return false;
+    }
+    int actualFilePermissions = FileUtils::GetFilePermissions(expandedPath);
     if (filePermissions != actualFilePermissions)
     {
+        if (actualFilePermissions == 0)
+        {
+            return false;
+        }
         if (fatalError)
         {
             LOGM_ERROR(
                 TAG,
                 "Permissions to given file/dir path '%s' is not set to required value... {Permissions: {desired: %d, "
                 "actual: %d}}",
-                path.c_str(),
+                expandedPath.c_str(),
                 filePermissions,
                 actualFilePermissions);
         }
@@ -123,7 +149,7 @@ bool FileUtils::ValidateFilePermissions(const std::string &path, const int fileP
                 TAG,
                 "Permissions to given file/dir path '%s' is not set to recommended value... {Permissions: {desired: "
                 "%d, actual: %d}}",
-                path.c_str(),
+                expandedPath.c_str(),
                 filePermissions,
                 actualFilePermissions);
         }

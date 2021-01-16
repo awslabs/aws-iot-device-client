@@ -58,6 +58,14 @@ namespace Aws
                     static int GetFilePermissions(const std::string &path);
 
                     /**
+                     * \brief Validates ownership permissions on the given file/dir
+                     *
+                     * @param path a path to a file/dir
+                     * @return returns true if user have the ownership permissions to access given file/dir
+                     */
+                    static bool ValidateFileOwnershipPermissions(const std::string &path);
+
+                    /**
                      * \brief Returns true if permissions set for given file/dir are correct
                      *
                      * @param path a path to a file/dir
@@ -67,7 +75,7 @@ namespace Aws
                      * @return an boolean value representing if permissions set on given file/dir are correct or not
                      */
                     static bool ValidateFilePermissions(
-                        const std::string &filePath,
+                        const std::string &path,
                         const int filePermissions,
                         bool fatalError = true);
 
