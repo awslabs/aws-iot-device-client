@@ -484,7 +484,6 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
 
 bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpConnection, PlainConfig &config)
 {
-    // TODO: Add ClientBaseNotifier to log events
     LOG_INFO(TAG, "Fleet Provisioning Feature has been started.");
 
     bool didSetup = FileUtils::CreateDirectoryWithPermissions(keyDir.c_str(), S_IRWXU) &&
@@ -601,7 +600,6 @@ bool FleetProvisioning::GetCsrFileContent(const string filePath)
     }
 
     std::string fileContent((std::istreambuf_iterator<char>(setting)), std::istreambuf_iterator<char>());
-    //    TODO: Pending Security review. (Saving CSR file content in Class private variable)
     csrFile = fileContent;
 
     LOGM_INFO(TAG, "Successfully fetched CSR file '%s' and stored its content.", filePath.c_str());
