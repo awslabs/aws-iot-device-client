@@ -16,6 +16,8 @@ using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char FileUtils::TAG[];
 
+// TODO: Sanitize message variables before logging.
+
 int FileUtils::Mkdirs(const char *path)
 {
     const size_t len = strlen(path);
@@ -104,7 +106,6 @@ int FileUtils::GetFilePermissions(const std::string &path)
 
 bool FileUtils::ValidateFileOwnershipPermissions(const std::string &path)
 {
-    // TODO: Sanitize path before logging.
     struct stat file_info;
     if (stat(path.c_str(), &file_info) == -1)
     {
