@@ -19,7 +19,6 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr int SharedCrtResourceManager::DEFAULT_WAIT_TIME_SECONDS;
-constexpr int SharedCrtResourceManager::NON_RETRYABLE_ERRORS[];
 
 bool SharedCrtResourceManager::initialize(const PlainConfig &config)
 {
@@ -210,15 +209,6 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     }
     else
     {
-        // We need to determine if we're seeing a retryable error or something fatal
-        for (int i = 0; i < static_cast<int>(sizeof(NON_RETRYABLE_ERRORS)); i++)
-        {
-            if (NON_RETRYABLE_ERRORS[i] == connectionStatus)
-            {
-                LOG_ERROR(TAG, "Encountered unretryable error when attempting to establish the MQTT connection");
-                return SharedCrtResourceManager::ABORT;
-            }
-        }
         LOG_ERROR(TAG, "Failed to establish shared MQTT connection, but will attempt retry...");
         return SharedCrtResourceManager::RETRY;
     }

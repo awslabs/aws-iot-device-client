@@ -28,7 +28,6 @@ namespace Aws
                 const char *TAG = "SharedCrtResourceManager.cpp";
 
                 static constexpr int DEFAULT_WAIT_TIME_SECONDS = 10;
-                static constexpr int NON_RETRYABLE_ERRORS[] = {AWS_ERROR_MQTT_UNEXPECTED_HANGUP};
                 bool initialized = false;
                 std::promise<void> connectionClosedPromise;
                 std::unique_ptr<Aws::Crt::ApiHandle> apiHandle;

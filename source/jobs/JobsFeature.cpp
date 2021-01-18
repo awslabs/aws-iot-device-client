@@ -211,9 +211,14 @@ void JobsFeature::startNextPendingJobReceivedHandler(StartNextJobExecutionRespon
         }
         else
         {
-            handlingJob = true;
-            lock.unlock();
-            executeJob(response->Execution.value());
+            if (!isDuplicateNotification(response->Execution.value()))
+            {
+                handlingJob = true;
+                lock.unlock();
+
+                copyJobsNotification(response->Execution.value());
+                executeJob(response->Execution.value());
+            }
         }
     }
     else
@@ -252,9 +257,15 @@ void JobsFeature::nextJobChangedHandler(NextJobExecutionChangedEvent *event, int
         }
         else
         {
-            handlingJob = true;
-            lock.unlock();
-            executeJob(event->Execution.value());
+            // Check to see if this is a duplicate notification
+            if (!isDuplicateNotification(event->Execution.value()))
+            {
+                handlingJob = true;
+                lock.unlock();
+
+                copyJobsNotification(event->Execution.value());
+                executeJob(event->Execution.value());
+            }
         }
     }
     else
@@ -424,6 +435,48 @@ void JobsFeature::publishUpdateJobExecutionStatus(JobExecutionData data, JobExec
     };
     std::thread updateJobExecutionThread(&Retry::exponentialBackoff, publishLambda, retryConfig);
     updateJobExecutionThread.detach();
+}
+
+void JobsFeature::copyJobsNotification(Iotjobs::JobExecutionData job)
+{
+    unique_lock<mutex> copyNotificationLock(latestJobsNotificationLock);
+    latestJobsNotification.JobId = job.JobId.value();
+    latestJobsNotification.JobDocument = job.JobDocument.value();
+    latestJobsNotification.ExecutionNumber = job.ExecutionNumber.value();
+}
+
+bool JobsFeature::isDuplicateNotification(JobExecutionData job)
+{
+    unique_lock<mutex> readLatestNotificationLock(latestJobsNotificationLock);
+    if (!latestJobsNotification.JobId.has_value())
+    {
+        // We have not seen a job yet
+        LOG_DEBUG(TAG, "We have not seen a job yet, this is not a duplicate job notification");
+        return false;
+    }
+
+    if (strcmp(job.JobId.value().c_str(), latestJobsNotification.JobId.value().c_str()) != 0)
+    {
+        LOG_DEBUG(TAG, "Job ids differ");
+        return false;
+    }
+
+    if (strcmp(
+            job.JobDocument.value().View().WriteCompact().c_str(),
+            latestJobsNotification.JobDocument.value().View().WriteCompact().c_str()) != 0)
+    {
+        LOG_DEBUG(TAG, "Job document differs");
+        return false;
+    }
+
+    if (job.ExecutionNumber.value() != latestJobsNotification.ExecutionNumber.value())
+    {
+        LOG_DEBUG(TAG, "Execution number differs");
+        return false;
+    }
+
+    LOG_DEBUG(TAG, "Encountered a duplicate job notification");
+    return true;
 }
 
 void JobsFeature::executeJob(JobExecutionData job)
