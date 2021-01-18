@@ -18,6 +18,7 @@
 #endif
 
 #include "../util/FileUtils.h"
+#include "../util/StringUtils.h"
 
 #include <algorithm>
 #include <aws/crt/JsonObject.h>
@@ -296,7 +297,8 @@ int PlainConfig::LogConfig::ParseLogLevel(string level)
     }
     else
     {
-        throw std::invalid_argument(FormatMessage("Provided log level %s is not a known log level", level.c_str()));
+        throw std::invalid_argument(
+            FormatMessage("Provided log level %s is not a known log level", Sanitize(level).c_str()));
     }
 }
 
@@ -317,7 +319,7 @@ string PlainConfig::LogConfig::ParseLogType(string value)
     {
         throw std::invalid_argument(FormatMessage(
             "Provided log type %s is not a known log type. Acceptable values are: [%s, %s]",
-            value.c_str(),
+            Sanitize(value).c_str(),
             LOG_TYPE_FILE,
             LOG_TYPE_STDOUT));
     }
@@ -838,7 +840,7 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
                 TAG,
                 "*** %s: Unrecognised command line argument: %s ***",
                 DeviceClient::DC_FATAL_ERROR,
-                currentArg.c_str());
+                Sanitize(currentArg).c_str());
             return false;
         }
 
@@ -848,7 +850,7 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
                 TAG,
                 "*** %s: Command Line argument '%s' cannot be specified more than once ***",
                 DeviceClient::DC_FATAL_ERROR,
-                currentArg.c_str());
+                Sanitize(currentArg).c_str());
             return false;
         }
 
@@ -861,7 +863,7 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
                     TAG,
                     "*** *s: Command Line argument '%s' was passed without specifying addition argument ***",
                     DeviceClient::DC_FATAL_ERROR,
-                    currentArg.c_str());
+                    Sanitize(currentArg).c_str());
                 return false;
             }
 
@@ -893,7 +895,10 @@ bool Config::init(const CliArgs &cliArgs)
     if (!ParseConfigFile(filename, false))
     {
         LOGM_ERROR(
-            TAG, "*** %s: Unable to Parse Config file: '%s' ***", DeviceClient::DC_FATAL_ERROR, filename.c_str());
+            TAG,
+            "*** %s: Unable to Parse Config file: '%s' ***",
+            DeviceClient::DC_FATAL_ERROR,
+            Sanitize(filename).c_str());
         return false;
     }
 
@@ -945,7 +950,7 @@ bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
     {
         if (!isRuntimeConfig)
         {
-            LOGM_DEBUG(TAG, "Unable to open config file %s, file does not exist", expandedPath.c_str());
+            LOGM_DEBUG(TAG, "Unable to open config file %s, file does not exist", Sanitize(expandedPath).c_str());
         }
         else
         {
@@ -963,7 +968,7 @@ bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
         LOGM_WARN(
             TAG,
             "Refusing to open config file %s, file size %zu bytes is greater than allowable limit of %zu bytes",
-            file.c_str(),
+            Sanitize(file).c_str(),
             incomingFileSize,
             5000);
         return false;
@@ -976,7 +981,7 @@ bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
     ifstream setting(expandedPath.c_str());
     if (!setting.is_open())
     {
-        LOGM_ERROR(TAG, "Unable to open file: '%s'", expandedPath.c_str());
+        LOGM_ERROR(TAG, "Unable to open file: '%s'", Sanitize(expandedPath).c_str());
         return false;
     }
 
@@ -991,7 +996,7 @@ bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
     Aws::Crt::JsonView jsonView = Aws::Crt::JsonView(jsonObj);
     config.LoadFromJson(jsonView);
 
-    LOGM_INFO(TAG, "Successfully fetched JSON config file: %s", contents.c_str());
+    LOGM_INFO(TAG, "Successfully fetched JSON config file: %s", Sanitize(contents).c_str());
     setting.close();
 
     return true;
@@ -1090,7 +1095,7 @@ bool Config::ExportDefaultSetting(const string &file)
     ofstream clientConfig(file);
     if (!clientConfig.is_open())
     {
-        LOGM_ERROR(TAG, "Unable to open file: '%s'", file.c_str());
+        LOGM_ERROR(TAG, "Unable to open file: '%s'", Sanitize(file).c_str());
         return false;
     }
     clientConfig << FormatMessage(
@@ -1114,7 +1119,7 @@ bool Config::ExportDefaultSetting(const string &file)
         PlainConfig::FleetProvisioning::JSON_KEY_CSR_FILE);
 
     clientConfig.close();
-    LOGM_INFO(TAG, "Exported settings to: %s", file.c_str());
+    LOGM_INFO(TAG, "Exported settings to: %s", Sanitize(file).c_str());
 
     chmod(file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     FileUtils::ValidateFilePermissions(file.c_str(), Permissions::CONFIG_FILE, false);
