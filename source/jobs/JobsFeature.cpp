@@ -515,13 +515,14 @@ void JobsFeature::executeJob(JobExecutionData job)
     bool operationOwnedByDeviceClient = false;
     if (DEFAULT_PATH_KEYWORD == path)
     {
-        LOGM_DEBUG(TAG, "Using DC default command path {%s} for command execution", jobHandlerDir.c_str());
+        LOGM_DEBUG(TAG, "Using DC default command path {%s} for command execution", Sanitize(jobHandlerDir).c_str());
         operationOwnedByDeviceClient = true;
         command << jobHandlerDir;
     }
     else if (!path.empty())
     {
-        LOGM_DEBUG(TAG, "Using path {%s} supplied by job document for command execution", path.c_str());
+        LOGM_DEBUG(
+            TAG, "Using path {%s} supplied by job document for command execution", Sanitize(path.c_str()).c_str());
         command << path;
     }
     else
@@ -537,7 +538,7 @@ void JobsFeature::executeJob(JobExecutionData job)
         {
             string message = FormatMessage(
                 "Unacceptable permissions found for job handler %s, permissions should be %d but found %d",
-                command.str().c_str(),
+                Sanitize(command.str()).c_str(),
                 Permissions::JOB_HANDLER,
                 actualPermissions);
             LOG_ERROR(TAG, message.c_str());
@@ -552,7 +553,8 @@ void JobsFeature::executeJob(JobExecutionData job)
         allowStdErr = jobDoc.GetInteger(JOB_ATTR_ALLOW_STDERR);
     }
 
-    LOGM_DEBUG(TAG, "About to execute: %s %s", command.str().c_str(), argsStringForLogging.str().c_str());
+    LOGM_DEBUG(
+        TAG, "About to execute: %s %s", Sanitize(command.str()).c_str(), Sanitize(argsStringForLogging.str()).c_str());
     unique_ptr<JobEngine> engine(new JobEngine);
     int executionStatus = engine->exec_cmd(command.str().c_str(), args);
 
@@ -573,7 +575,7 @@ void JobsFeature::executeJob(JobExecutionData job)
     {
         reason << "Returned with status: " << executionStatus;
     }
-    LOG_INFO(TAG, reason.str().c_str());
+    LOG_INFO(TAG, Sanitize(reason.str()).c_str());
 
     if (engine->hasErrors())
     {

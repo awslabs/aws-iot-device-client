@@ -33,7 +33,7 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     bool locatedAll = true;
     if (stat(config.key->c_str(), &fileInfo) != 0)
     {
-        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.key->c_str());
+        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.key->c_str()).c_str());
         locatedAll = false;
     }
     else
@@ -49,7 +49,7 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
 
     if (stat(config.cert->c_str(), &fileInfo) != 0)
     {
-        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.cert->c_str());
+        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.cert->c_str()).c_str());
         locatedAll = false;
     }
     else
@@ -65,7 +65,8 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
 
     if (stat(config.rootCa->c_str(), &fileInfo) != 0)
     {
-        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.rootCa->c_str());
+        LOGM_ERROR(
+            TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.rootCa->c_str()).c_str());
         locatedAll = false;
     }
     else
