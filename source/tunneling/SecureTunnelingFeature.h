@@ -52,6 +52,8 @@ namespace Aws
 
                     std::string GetEndpoint(const std::string &region);
 
+                    void OnConnectionShutdown(SecureTunnelingContext *);
+
                     // Member variables
                     static constexpr char TAG[] = "SecureTunneling.cpp";
                     static constexpr char DEFAULT_PROXY_ENDPOINT_HOST_FORMAT[] = "data.tunneling.iot.%s.amazonaws.com";
