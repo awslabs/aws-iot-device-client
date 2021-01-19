@@ -3,6 +3,9 @@
 
 #include "StringUtils.h"
 #include <cstdarg>
+#include <sstream>
+
+using namespace std;
 
 namespace Aws
 {
@@ -12,7 +15,7 @@ namespace Aws
         {
             namespace Util
             {
-                std::string vFormatMessage(const char *message, va_list args)
+                string vFormatMessage(const char *message, va_list args)
                 {
                     va_list copy;
                     va_copy(copy, args);
@@ -29,13 +32,33 @@ namespace Aws
                     return buffer;
                 }
 
-                std::string FormatMessage(const char *message, ...)
+                string FormatMessage(const char *message, ...)
                 {
                     va_list args;
                     va_start(args, message);
                     std::string s = vFormatMessage(message, args);
                     va_end(args);
                     return s;
+                }
+
+                string Sanitize(std::string value)
+                {
+                    const char *input = value.c_str();
+                    ostringstream output;
+                    for (size_t i = 0; i < value.length(); i++)
+                    {
+                        char c = input[i];
+                        if ((9 <= c && c <= 10) // Tab and NewLine control characters
+                            || (32 <= c && c <= 36) || (38 <= c && c <= 126))
+                        {
+                            output << c;
+                        }
+                        else
+                        {
+                            output << ' ';
+                        }
+                    }
+                    return output.str();
                 }
             } // namespace Util
         }     // namespace DeviceClient
