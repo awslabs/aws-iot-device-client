@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 #include "TcpForward.h"
 #include "../logging/LoggerFactory.h"
 #include <aws/crt/io/SocketOptions.h>

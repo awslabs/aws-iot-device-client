@@ -6,8 +6,8 @@
 
 #include "LogMessage.h"
 #include <condition_variable>
+#include <deque>
 #include <mutex>
-#include <queue>
 
 namespace Aws
 {
@@ -40,7 +40,7 @@ namespace Aws
                     /**
                      * \brief Responsible for queuing the LogMessages upon arrival for processing
                      */
-                    std::queue<std::unique_ptr<LogMessage>> logQueue;
+                    std::deque<std::unique_ptr<LogMessage>> logQueue;
 
                   public:
                     /**

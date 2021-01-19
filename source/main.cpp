@@ -6,6 +6,8 @@
 #include "SharedCrtResourceManager.h"
 #include "Version.h"
 #include "config/Config.h"
+#include "util/Retry.h"
+
 #if !defined(EXCLUDE_DD)
 #    include "devicedefender/DeviceDefenderFeature.h"
 #endif
@@ -26,6 +28,7 @@
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient;
+using namespace Aws::Iot::DeviceClient::Util;
 #if !defined(EXCLUDE_DD)
 using namespace Aws::Iot::DeviceClient::DeviceDefender;
 #endif
@@ -40,6 +43,7 @@ using namespace Aws::Iot::DeviceClient::SecureTunneling;
 const char *TAG = "Main.cpp";
 
 vector<Feature *> features;
+shared_ptr<SharedCrtResourceManager> resourceManager;
 mutex featuresReadWriteLock;
 bool attemptingShutdown;
 Config config;
@@ -101,6 +105,37 @@ void handle_feature_stopped(Feature *feature)
         LOG_INFO(TAG, "All features have stopped");
         shutdown();
     }
+}
+
+void attemptConnection()
+{
+    std::mutex canStopLock;
+    bool needStop;
+    Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 900 * 1000, -1, canStopLock, needStop};
+    auto publishLambda = []() -> bool {
+        int connectionStatus = resourceManager.get()->establishConnection(config.config);
+        if (SharedCrtResourceManager::ABORT == connectionStatus)
+        {
+            LOGM_ERROR(
+                TAG,
+                "*** %s: Failed to establish the MQTT Client. Please verify your AWS "
+                "IoT credentials, "
+                "configuration and/or certificate policy. ***",
+                DC_FATAL_ERROR);
+            LoggerFactory::getLoggerInstance()->shutdown();
+            abort();
+        }
+        else if (SharedCrtResourceManager::RETRY == connectionStatus)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    };
+    std::thread attemptConnectionThread(&Retry::exponentialBackoff, publishLambda, retryConfig);
+    attemptConnectionThread.join();
 }
 
 namespace Aws
@@ -211,8 +246,7 @@ int main(int argc, char *argv[])
 
     shared_ptr<DefaultClientBaseNotifier> listener =
         shared_ptr<DefaultClientBaseNotifier>(new DefaultClientBaseNotifier);
-    shared_ptr<SharedCrtResourceManager> resourceManager =
-        shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager);
+    resourceManager = shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager);
     if (!resourceManager.get()->initialize(config.config))
     {
         LOGM_ERROR(
@@ -233,17 +267,7 @@ int main(int argc, char *argv[])
          * Establish MQTT connection using claim certificates and private key to provision device/thing.
          */
 #    if !defined(DISABLE_MQTT)
-        if (resourceManager.get()->establishConnection(config.config) != SharedCrtResourceManager::SUCCESS)
-        {
-            LOGM_ERROR(
-                TAG,
-                "*** %s: Failed to establish the MQTT Client. Please verify your AWS "
-                "IoT credentials, "
-                "configuration and/or certificate policy. ***",
-                DC_FATAL_ERROR);
-            LoggerFactory::getLoggerInstance()->shutdown();
-            abort();
-        }
+        attemptConnection();
 #    endif
 
         /*
@@ -271,17 +295,7 @@ int main(int argc, char *argv[])
      * features.
      */
 #if !defined(DISABLE_MQTT)
-    if (resourceManager.get()->establishConnection(config.config) != SharedCrtResourceManager::SUCCESS)
-    {
-        LOGM_ERROR(
-            TAG,
-            "*** %s: Failed to initialize the MQTT Client. Please verify your AWS IoT "
-            "credentials and/or "
-            "configuration. ***",
-            DC_FATAL_ERROR);
-        LoggerFactory::getLoggerInstance()->shutdown();
-        abort();
-    }
+    attemptConnection();
 #endif
     featuresReadWriteLock.lock(); // LOCK
 

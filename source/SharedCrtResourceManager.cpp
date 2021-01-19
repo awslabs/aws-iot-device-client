@@ -4,6 +4,7 @@
 #include "SharedCrtResourceManager.h"
 #include "logging/LoggerFactory.h"
 #include "util/FileUtils.h"
+#include "util/Retry.h"
 
 #include <aws/crt/Api.h>
 #include <sys/stat.h>
@@ -32,7 +33,7 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     bool locatedAll = true;
     if (stat(config.key->c_str(), &fileInfo) != 0)
     {
-        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.key->c_str());
+        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.key->c_str()).c_str());
         locatedAll = false;
     }
     else
@@ -48,7 +49,7 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
 
     if (stat(config.cert->c_str(), &fileInfo) != 0)
     {
-        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.cert->c_str());
+        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.cert->c_str()).c_str());
         locatedAll = false;
     }
     else
@@ -64,14 +65,15 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
 
     if (stat(config.rootCa->c_str(), &fileInfo) != 0)
     {
-        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.rootCa->c_str());
+        LOGM_ERROR(
+            TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.rootCa->c_str()).c_str());
         locatedAll = false;
     }
     else
     {
         string parentDir = FileUtils::ExtractParentDirectory(config.rootCa->c_str());
         if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::ROOT_CA_DIR) ||
-            !FileUtils::ValidateFilePermissions(config.cert->c_str(), Permissions::ROOT_CA))
+            !FileUtils::ValidateFilePermissions(config.rootCa->c_str(), Permissions::ROOT_CA))
         {
             LOG_ERROR(TAG, "Incorrect permissions on Root CA file and/or parent directory");
             locatedAll = false;
@@ -153,13 +155,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
         return connection->LastError();
     }
 
-    /*
-     * TODO: Look into if anything needs changed with this synchronous behavior
-     *
-     * In a real world application you probably don't want to enforce synchronous behavior
-     * but this is a sample console application, so we'll just do that with a condition variable.
-     */
-    promise<bool> connectionCompletedPromise;
+    promise<int> connectionCompletedPromise;
 
     /*
      * This will execute when an mqtt connect has completed or failed.
@@ -170,15 +166,18 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
             LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(errorCode));
             if (AWS_ERROR_MQTT_UNEXPECTED_HANGUP == errorCode)
             {
-                LOG_ERROR(TAG, "*** Did you make sure to attach iot:* to your policy for this thing?");
-                LOG_ERROR(TAG, "*** AWS Console -> IoT Core -> Secure -> Certificates");
+                LOG_ERROR(
+                    TAG,
+                    "*** Did you make sure you are using valid certificate with recommended policy attached to it? "
+                    "Please refer README->Fleet Provisioning Feature section for more details on recommended policies "
+                    "for AWS IoT Device Client. ***");
             }
-            connectionCompletedPromise.set_value(false);
+            connectionCompletedPromise.set_value(errorCode);
         }
         else
         {
             LOGM_INFO(TAG, "MQTT connection established with return code: %d", returnCode);
-            connectionCompletedPromise.set_value(true);
+            connectionCompletedPromise.set_value(0);
         }
     };
 
@@ -195,9 +194,6 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     connection->OnConnectionCompleted = move(onConnectionCompleted);
     connection->OnDisconnect = move(onDisconnect);
 
-    /*
-     * Actually perform the connect dance.
-     */
     LOGM_INFO(TAG, "Establishing MQTT connection with client id %s...", config.thingName->c_str());
     if (!connection->Connect(config.thingName->c_str(), true, 0))
     {
@@ -205,17 +201,18 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
         return connection->LastError();
     }
 
-    if (connectionCompletedPromise.get_future().get())
+    int connectionStatus = connectionCompletedPromise.get_future().get();
+
+    if (SharedCrtResourceManager::SUCCESS == connectionStatus)
     {
         LOG_INFO(TAG, "Shared MQTT connection is ready!");
+        return SharedCrtResourceManager::SUCCESS;
     }
     else
     {
-        LOG_ERROR(TAG, "Failed to establish shared MQTT connection! ***");
-        return SharedCrtResourceManager::ABORT;
+        LOG_ERROR(TAG, "Failed to establish shared MQTT connection, but will attempt retry...");
+        return SharedCrtResourceManager::RETRY;
     }
-
-    return SharedCrtResourceManager::SUCCESS;
 }
 
 shared_ptr<MqttConnection> SharedCrtResourceManager::getConnection()
