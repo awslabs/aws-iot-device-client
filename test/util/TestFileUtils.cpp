@@ -92,6 +92,17 @@ TEST(FileUtils, assertsMkdirSuccess)
     rmdir(dirPath.c_str());
 }
 
+TEST(FileUtils, assertsEmptyDirFail)
+{
+    string dirPath = "";
+    int ret = FileUtils::Mkdirs(dirPath);
+    std::cout << ret << std::endl;
+    // struct stat info;
+    ASSERT_EQ(-1, ret);
+
+    rmdir(dirPath.c_str());
+}
+
 TEST(FileUtils, assertsCorrectDirectoryPermissions)
 {
     string dirPath = "/tmp/" + UniqueString::GetRandomToken(10) + "/";
