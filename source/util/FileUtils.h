@@ -28,7 +28,7 @@ namespace Aws
                      * @param path the full path to assess
                      * @return 0 upon success, some other number indicating an error otherwise
                      */
-                    static int Mkdirs(const char *path);
+                    static int Mkdirs(const std::string &path);
 
                     /**
                      * \brief Given a path to a file, attempts to extract the parent directory
