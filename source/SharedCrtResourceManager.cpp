@@ -72,7 +72,7 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     {
         string parentDir = FileUtils::ExtractParentDirectory(config.rootCa->c_str());
         if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::ROOT_CA_DIR) ||
-            !FileUtils::ValidateFilePermissions(config.cert->c_str(), Permissions::ROOT_CA))
+            !FileUtils::ValidateFilePermissions(config.rootCa->c_str(), Permissions::ROOT_CA))
         {
             LOG_ERROR(TAG, "Incorrect permissions on Root CA file and/or parent directory");
             locatedAll = false;
