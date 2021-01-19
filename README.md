@@ -1,23 +1,27 @@
-
-
 # AWS IoT Device Client
 
 - [AWS IoT Device Client](#aws-iot-device-client)
-    + [Introduction](#introduction)
+  * [Introduction](#introduction)
     + [Current Capabilities](#current-capabilities)
     + [List of Supported Platforms](#list-of-supported-platforms)
   * [Installation](#installation)
     + [Minimum Requirements](#minimum-requirements)
     + [Building from source](#building-from-source)
+      - [Quick Start](#quick-start)
       - [Build and Install All Dependencies via CMake](#build-and-install-all-dependencies-via-cmake)
       - [Build With Dependencies Already Installed](#build-with-dependencies-already-installed)
       - [Custom Compilation - Exclude Specific IoT Features to Reduce Executable Footprint](#custom-compilation---exclude-specific-iot-features-to-reduce-executable-footprint)
+      - [Cross Compiliation - Building from one architecture to the other](#cross-compiliation---building-from-one-architecture-to-the-other)
     + [Running the tests](#running-the-tests)
   * [Setting Up The Device Client](#setting-up-the-device-client)
-    + [Runtime Configuration](#runtime-configuration)
+    + [Configuring the AWS IoT Device Client](#configuring-the-aws-iot-device-client)
+  * [File and Directory Permissions](#file-and-directory-permissions)
+      - [Recommended and Required permissions on files](#recommended-and-required-permissions-on-files)
+      - [Recommended and Required permissions on directories storing respective files](#recommended-and-required-permissions-on-directories-storing-respective-files)
   * [Jobs Feature](#jobs-feature)
     + [Creating a Job](#creating-a-job)
     + [Creating your own Job Handler](#creating-your-own-job-handler)
+      - [Job/Job Handler Security Considerations](#jobjob-handler-security-considerations)
     + [Debugging your Job](#debugging-your-job)
     + [Jobs Build Flags](#jobs-build-flags)
     + [Jobs Feature Runtime Configuration Options](#jobs-feature-runtime-configuration-options)
@@ -31,10 +35,18 @@
         * [Sample Template:](#sample-template)
     + [Sample Permanent Certificate Policy](#sample-permanent-certificate-policy)
         * [Sample (FPCertPolicy) Policy:](#sample-fpcertpolicy-policy)
+    + [Fleet Provisioning Runtime Config](#fleet-provisioning-runtime-config)
+        * [Example Fleet Provisioning Runtime Config:](#example-fleet-provisioning-runtime-config)
+    + [Configuration](#configuration)
+  * [Device Defender Feature](#device-defender-feature)
+  * [Secure Tunneling Feature](#secure-tunneling-feature)
+    + [Configuration](#configuration-1)
+    + [Example steps to use the Secure Tunneling feature](#example-steps-to-use-the-secure-tunneling-feature)
+    + [Limitation](#limitation)
   * [Logging](#logging)
     + [Logging Configuration Options](#logging-configuration-options)
     + [Security](#security)
-    + [License](#license) 
+    + [License](#license)
     
 ## Introduction
 
@@ -70,16 +82,34 @@ Tested devices: Raspberry Pi 4, <Add others>
 
 ### Building from source
 
+To use the AWS IoT Device Client, you'll need to compile an executable using the source code provided by this
+repository. Below, you'll find instructions for how to build the AWS IoT Device Client for your target machine. 
+ 
+#### Quick Start #### 
+
+The following commands should work for most users when you plan to run the AWS IoT Device Client on the same machine
+that you're performing the compilation on:
+
+```
+# Building
+mkdir aws-iot-device-client/build
+cd aws-iot-device-client/build
+cmake ../
+cmake --build . --target aws-iot-device-client
+
+# Setup
+cd ../
+./setup.sh # At this point you'll need to respond to prompts for information, including paths to your thing certs
+
+# Run the AWS IoT Device Client
+./aws-iot-device-client # This command runs the executable
+```
+
 #### Build and Install All Dependencies via CMake
 
 **Description**:  
-Use this build method for the simplest getting started experience. CMake will pull the dependencies required to build
+Use this build method to compile an executable AWS IoT Device Client. CMake will pull the dependencies required to build
 the AWS IoT Device Client, including the [aws-iot-device-sdk-cpp-v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2).
-
-Options:
-* BUILD_SDK: This CMake flag is set to `ON` by default, which will enable CMake to pull and build the 
-  aws-iot-device-sdk-cpp-v2
-* BUILD_TEST_DEPS: This CMake flag is set to `ON` by default, will enable CMake to pull and build googletest
 
 Use the following `cmake` commands to build the AWS IoT Device Client with dependencies and tests. These should be run
 with  `aws-iot-device-client` (the contents of this repository) in a folder called `aws-iot-device-client` in your 
@@ -103,6 +133,11 @@ applicable if you already have the aws-iot-device-sdk-cpp-v2 installed on your d
   is installed.
 * The Device Client tests require that [googletest](https://github.com/google/googletest) is installed.
 
+Options (These options can be passed to :
+* BUILD_SDK: This CMake flag is set to `ON` by default, which will enable CMake to pull and build the 
+  aws-iot-device-sdk-cpp-v2
+* BUILD_TEST_DEPS: This CMake flag is set to `ON` by default, will enable CMake to pull and build googletest
+
 Use the following `cmake` commands to build the AWS IoT Device Client with already existing and installed dependencies.
 These commands should be run with `aws-iot-device-client` (the contents of this repository) in a folder called
 `aws-iot-device-client` in your current working directory
@@ -118,9 +153,10 @@ cmake --build . --target test-aws-iot-device-client # This line builds the test 
 #### Custom Compilation - Exclude Specific IoT Features to Reduce Executable Footprint
 
 **Description**:
-The Device Client can be customized during build time to exclude certain IoT features from compilation. All features are
-included by default. Use CMake variables in order to configure which features to exclude. See the project 
-`CMakeLists.txt` file for the options provided and their descriptions.
+The Device Client can be customized during build time to exclude certain IoT features from compilation, which may be
+helpful if you don't plan to use a particular feature and you'd like to decrease the overall size of the output
+executable. All features are included by default. Use CMake variables in order to configure which features to
+exclude. See the project `CMakeLists.txt` file for the options provided and their descriptions.
 
 **Use Case**:
 If there are certain IoT Features that you do not plan to use, then you can potentially minimize both on-disk and 
@@ -182,17 +218,24 @@ If you need to compile for an architecture that isn't currently supported, then 
 This package comes with a interactive script for setting up the Device Client. This script can be used to generate
 initial Device Client configuration, as well as setup the Device Client as a service.
 
-When setting up the Device Client as a service, you will be asked to provide the location of the Device Client binary
-as well as the service file. For an example of the service file, see the file included in this repository at 
-`setup/device-client.service`. You can also accept the default location during this step by hitting return. 
-
 To use the script, run the following command.
 
-```bash
+```
 ./setup.sh
 ```
 
-### Runtime Configuration
+When setting up the Device Client as a service, you will be asked to provide the location of the Device Client binary
+as well as the service file. For an example of the service file, see the file included in this repository at 
+`setup/device-client.service`. You can also accept the default location during this step by hitting return.
+
+You should also make sure to run the script as root or via `sudo` if you are installing the AWS IoT Device Client as
+ a service as follows:
+ 
+ ```
+sudo ./setup.sh
+```
+  
+### Configuring the AWS IoT Device Client
 Configuration information can be passed to the AWS IoT Device Client through either the command line, a JSON configuration
 file, or both. For a complete list of available command line arguments, pass `--help` to the executable. 
 
@@ -354,6 +397,17 @@ on your target thing. The Device Client will automatically invoke Foo.py and wil
 
 For more examples of how a Job handler can be implemented, check out the sample job handlers within this package under the
 `sample-job-handlers` directory. 
+
+#### Job/Job Handler Security Considerations
+
+When creating a job, it's critically important that you consider the risks associated with executing particular commands
+on the device. For example, running a job that prints the contents of secure credentials to STDOUT or STDERR will cause
+these contents to enter the AWS IoT Device Client logs, and may run the risk of exposing these credentials to an
+attacker if the logs are not properly secured.
+
+We recommend avoiding execution of any jobs that may reveal or leak sensitive information such as credentials
+, private keys, or sensitive files as well as assignment of appropriately restrictive permissions for your credentials
+/sensitive files. 
 
 ### Debugging your Job
 
