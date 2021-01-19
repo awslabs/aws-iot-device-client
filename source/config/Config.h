@@ -120,7 +120,7 @@ namespace Aws
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
                     static constexpr char JSON_KEY_HANDLER_DIR[] = "handler-directory";
 
-                    bool enabled{false};
+                    bool enabled{true};
                     std::string handlerDir;
                 };
                 Jobs jobs;
@@ -139,7 +139,7 @@ namespace Aws
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
                     static constexpr char JSON_KEY_ENDPOINT[] = "endpoint";
 
-                    bool enabled{false};
+                    bool enabled{true};
                     bool subscribeNotification{true};
                     Aws::Crt::Optional<std::string> destinationAccessToken;
                     Aws::Crt::Optional<std::string> region;
@@ -164,7 +164,7 @@ namespace Aws
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
                     static constexpr char JSON_KEY_INTERVAL[] = "interval-in-seconds";
 
-                    bool enabled{false};
+                    bool enabled{true};
                     Aws::Crt::Optional<int> interval;
                 };
                 DeviceDefender deviceDefender;
