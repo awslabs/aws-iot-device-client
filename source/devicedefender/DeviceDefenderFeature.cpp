@@ -125,7 +125,7 @@ namespace Aws
                 {
                     resourceManager = manager;
                     baseNotifier = notifier;
-                    interval = *config.deviceDefender.interval;
+                    interval = config.deviceDefender.interval;
                     thingName = *config.thingName;
                     return 0;
                 }

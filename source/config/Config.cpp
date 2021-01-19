@@ -614,7 +614,7 @@ bool PlainConfig::DeviceDefender::Validate() const
     {
         return true;
     }
-    if (!interval.has_value() || (interval.value() <= 0))
+    if (interval <= 0)
     {
         LOGM_ERROR(Config::TAG, "*** %s: Interval value <= 0 ***", DeviceClient::DC_FATAL_ERROR);
         return false;

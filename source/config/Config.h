@@ -165,7 +165,7 @@ namespace Aws
                     static constexpr char JSON_KEY_INTERVAL[] = "interval-in-seconds";
 
                     bool enabled{true};
-                    Aws::Crt::Optional<int> interval;
+                    int interval{300};
                 };
                 DeviceDefender deviceDefender;
 
