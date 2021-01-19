@@ -131,7 +131,8 @@ void attemptConnection()
                 "configuration and/or certificate policy. ***",
                 DC_FATAL_ERROR);
             LoggerFactory::getLoggerInstance()->shutdown();
-            abort();
+            deviceClientAbort("Failed to establish MQTT connection due to credential/configuration error");
+            return false;
         }
         else if (SharedCrtResourceManager::RETRY == connectionStatus)
         {
