@@ -17,7 +17,7 @@ using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char FileUtils::TAG[];
 
-int FileUtils::Mkdirs(std::string path)
+int FileUtils::Mkdirs(const std::string &path)
 {
     if (path.length() < 1)
     {

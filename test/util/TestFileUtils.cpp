@@ -88,6 +88,7 @@ TEST(FileUtils, assertsMkdirSuccess)
     int ret = FileUtils::Mkdirs(dirPath);
     struct stat info;
     ASSERT_EQ(stat(dirPath.c_str(), &info), ret);
+    ASSERT_EQ(0, !(info.st_mode & S_IFDIR));
 
     rmdir(dirPath.c_str());
 }
@@ -98,6 +99,7 @@ TEST(FileUtils, assertsMkdirSuccessWoEndSlash)
     int ret = FileUtils::Mkdirs(dirPath);
     struct stat info;
     ASSERT_EQ(stat(dirPath.c_str(), &info), ret);
+    ASSERT_EQ(0, !(info.st_mode & S_IFDIR));
 
     rmdir(dirPath.c_str());
 }
@@ -108,6 +110,7 @@ TEST(FileUtils, assertsMkdirSuccessJustString)
     int ret = FileUtils::Mkdirs(dirPath);
     struct stat info;
     ASSERT_EQ(stat(dirPath.c_str(), &info), ret);
+    ASSERT_EQ(0, !(info.st_mode & S_IFDIR));
 
     rmdir(dirPath.c_str());
 }
@@ -127,6 +130,7 @@ TEST(FileUtils, assertsMkdirSuccessRelativeFolder)
     int ret = FileUtils::Mkdirs(dirPath);
     struct stat info;
     ASSERT_EQ(stat(dirPath.c_str(), &info), ret);
+    ASSERT_EQ(0, !(info.st_mode & S_IFDIR));
 
     rmdir(dirPath.c_str());
 }
