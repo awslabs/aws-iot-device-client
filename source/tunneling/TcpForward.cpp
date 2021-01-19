@@ -36,6 +36,8 @@ namespace Aws
 
                 TcpForward::~TcpForward()
                 {
+                    Close();
+
                     aws_socket_clean_up(&mSocket);
                     aws_byte_buf_clean_up(&mSendBuffer);
                 }
