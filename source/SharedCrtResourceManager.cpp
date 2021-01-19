@@ -32,7 +32,7 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     bool locatedAll = true;
     if (stat(config.key->c_str(), &fileInfo) != 0)
     {
-        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.key->c_str());
+        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.key->c_str()).c_str());
         locatedAll = false;
     }
     else
@@ -48,7 +48,7 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
 
     if (stat(config.cert->c_str(), &fileInfo) != 0)
     {
-        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.cert->c_str());
+        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.cert->c_str()).c_str());
         locatedAll = false;
     }
     else
@@ -64,7 +64,8 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
 
     if (stat(config.rootCa->c_str(), &fileInfo) != 0)
     {
-        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", config.rootCa->c_str());
+        LOGM_ERROR(
+            TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.rootCa->c_str()).c_str());
         locatedAll = false;
     }
     else
@@ -170,8 +171,11 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
             LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(errorCode));
             if (AWS_ERROR_MQTT_UNEXPECTED_HANGUP == errorCode)
             {
-                LOG_ERROR(TAG, "*** Did you make sure to attach iot:* to your policy for this thing?");
-                LOG_ERROR(TAG, "*** AWS Console -> IoT Core -> Secure -> Certificates");
+                LOG_ERROR(
+                    TAG,
+                    "*** Did you make sure you are using valid certificate with recommended policy attached to it? "
+                    "Please refer README->Fleet Provisioning Feature section for more details on recommended policies "
+                    "for AWS IoT Device Client. ***");
             }
             connectionCompletedPromise.set_value(false);
         }

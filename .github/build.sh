@@ -24,6 +24,10 @@ if [ "$compileModeArgument" = "compile-mode" ]; then
     compileMode="armhf_cross_mode"
     stMode=true
     ;;
+    st_aarch64_cross_mode)
+    compileMode="aarch64_cross_mode"
+    stMode=true
+    ;;
     *)
     echo "No compile mode match found"
     ;;
@@ -82,7 +86,7 @@ cd ./build/
 case $compileMode in
     st_component_mode)
     echo "Building in ST component mode"
-    cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON
+    cmake ../ -DBUILD_SDK=ON -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON
     ;;
     armhf_cross_mode)
     apt-get update
@@ -105,8 +109,8 @@ case $compileMode in
     if [ "$stMode" = true ]; then
       # Set CMake flags for ST mode
       # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
-      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../ || true
-      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../ || true
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../
     else
       # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
       cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../ || true
@@ -161,9 +165,16 @@ case $compileMode in
     make -j 4
     make install
     cd ..
-    # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
-    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake ../ || true
-    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake ../
+    if [ "$stMode" = true ]; then
+      # Set CMake flags for ST mode
+      # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../ || true
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../
+    else
+      # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake ../ || true
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake ../
+    fi
     cmake --build . --target aws-iot-device-client
     cmake --build . --target test-aws-iot-device-client
     exit $?

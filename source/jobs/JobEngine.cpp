@@ -35,10 +35,28 @@ void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
     string pidString = std::to_string(childPID);
     char const *logTag = pidString.c_str();
 
+    size_t lineCount = 0;
     while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
     {
+        if (lineCount > MAX_LOG_LINES)
+        {
+            string limitMessage = Util::FormatMessage(
+                "*** The specified job has exceeded the maximum output limit for %s, no further output will be written "
+                "from this file descriptor for this job ***",
+                isStdErr ? "STDERR" : "STDOUT");
+            if (isStdErr)
+            {
+                LOG_ERROR(TAG, limitMessage.c_str());
+            }
+            else
+            {
+                LOG_DEBUG(TAG, limitMessage.c_str());
+            }
+            return;
+        }
         string childOutput;
         childOutput += buffer.data();
+        childOutput = Util::Sanitize(childOutput);
         if (isStdErr)
         {
             stderrstream.addString(childOutput);
@@ -58,6 +76,7 @@ void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
             }
             LOG_DEBUG(logTag, childOutput.c_str());
         }
+        lineCount++;
     }
 }
 
