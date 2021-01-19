@@ -30,7 +30,7 @@ TEST(FileUtils, handlesRelativeFilePath)
 TEST(FileUtils, handlesNoDirectories)
 {
     string parentDir = FileUtils::ExtractParentDirectory("aws-iot-device-client.log");
-    ASSERT_STREQ("", parentDir.c_str());
+    ASSERT_STREQ("./", parentDir.c_str());
 }
 
 TEST(FileUtils, handlesRelativeCWD)
@@ -48,7 +48,7 @@ TEST(FileUtils, handlesRelativeParent)
 TEST(FileUtils, handlesEmptyPath)
 {
     string parentDir = FileUtils::ExtractParentDirectory("");
-    ASSERT_STREQ("", parentDir.c_str());
+    ASSERT_STREQ("./", parentDir.c_str());
 }
 
 TEST(FileUtils, handlesEmptyPathForStoreValueInFile)
