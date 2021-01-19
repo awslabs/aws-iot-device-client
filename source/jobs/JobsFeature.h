@@ -101,6 +101,10 @@ namespace Aws
                      */
                     Aws::Crt::Map<Aws::Crt::String, Aws::Iot::DeviceClient::Jobs::EphemeralPromise<int>>
                         updateJobExecutionPromises;
+
+                    std::mutex latestJobsNotificationLock;
+                    Aws::Iotjobs::JobExecutionData latestJobsNotification;
+
                     /**
                      * \brief The resource manager used to manage CRT resources
                      */
@@ -259,14 +263,31 @@ namespace Aws
                      */
                     void updateJobExecutionStatusRejectedHandler(Iotjobs::RejectedError *rejectedError, int ioError);
 
-                    // Process a Job
                     /**
                      * \brief Called to begin the execution of a job on the device
                      *
                      * @param job the job to execute
                      */
                     void executeJob(Iotjobs::JobExecutionData job);
-                    // Begin running the Jobs feature
+
+                    /**
+                     * \brief Given a job notification, determines whether it's a duplicate message.
+                     *
+                     * This method was originally intended to handle scenarios such as network instability
+                     * or loss where the jobs feature may receive multiple instances of the same message.
+                     * This allows us to eliminate duplicates that would otherwise cause the Jobs feature
+                     * to run the same job more than once.
+                     * @param job
+                     * @return true if it's a duplicate, false otherwise
+                     */
+                    bool isDuplicateNotification(Iotjobs::JobExecutionData job);
+
+                    /**
+                     * \brief Stores information about a job notification
+                     *
+                     * @param job
+                     */
+                    void copyJobsNotification(Iotjobs::JobExecutionData job);
                     /**
                      * \brief Begins running the Jobs feature
                      */
