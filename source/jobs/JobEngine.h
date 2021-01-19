@@ -33,6 +33,12 @@ namespace Aws
                 {
                   private:
                     const char *TAG = "JobEngine.cpp";
+                    /**
+                     * \brief The maximum number of lines that we'll read from STDOUT or STDERR of the child process
+                     * before stopping. This prevents against log corruption in the event that the specified
+                     * job generates a large volume of output
+                     */
+                    static constexpr size_t MAX_LOG_LINES = 1000;
 
                     /**
                      * \brief The number of lines received on STDERR from the child process
