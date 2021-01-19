@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 #ifndef DEVICE_CLIENT_TCPFORWARD_H
 #define DEVICE_CLIENT_TCPFORWARD_H
 
