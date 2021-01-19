@@ -92,13 +92,41 @@ TEST(FileUtils, assertsMkdirSuccess)
     rmdir(dirPath.c_str());
 }
 
-TEST(FileUtils, assertsEmptyDirFail)
+TEST(FileUtils, assertsMkdirSuccessWoEndSlash)
+{
+    string dirPath = "/tmp/" + UniqueString::GetRandomToken(10);
+    int ret = FileUtils::Mkdirs(dirPath);
+    struct stat info;
+    ASSERT_EQ(stat(dirPath.c_str(), &info), ret);
+
+    rmdir(dirPath.c_str());
+}
+
+TEST(FileUtils, assertsMkdirSuccessJustString)
+{
+    string dirPath = "test.test.test";
+    int ret = FileUtils::Mkdirs(dirPath);
+    struct stat info;
+    ASSERT_EQ(stat(dirPath.c_str(), &info), ret);
+
+    rmdir(dirPath.c_str());
+}
+
+TEST(FileUtils, assertsMkdirSuccessEmptyDirPathFail)
 {
     string dirPath = "";
     int ret = FileUtils::Mkdirs(dirPath);
-    std::cout << ret << std::endl;
-    // struct stat info;
     ASSERT_EQ(-1, ret);
+
+    rmdir(dirPath.c_str());
+}
+
+TEST(FileUtils, assertsMkdirSuccessRelativeFolder)
+{
+    string dirPath = "relative/test/dir/";
+    int ret = FileUtils::Mkdirs(dirPath);
+    struct stat info;
+    ASSERT_EQ(stat(dirPath.c_str(), &info), ret);
 
     rmdir(dirPath.c_str());
 }

@@ -19,16 +19,26 @@ constexpr char FileUtils::TAG[];
 
 int FileUtils::Mkdirs(std::string path)
 {
+    if (path.length() < 1)
+    {
+        return -1;
+    }
     for (size_t i = 1; i < path.length(); i++)
     {
         if (path[i] == '/')
         {
+            std::cout << path.substr(0, i) << std::endl;
             if (mkdir(path.substr(0, i).c_str(), S_IRWXU) != 0)
             {
                 if (errno != EEXIST)
                     return -1;
             }
         }
+    }
+    if (mkdir(path.c_str(), S_IRWXU) != 0)
+    {
+        if (errno != EEXIST)
+            return -1;
     }
     return 0;
 }
