@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 #include "FileUtils.h"
 #include "../logging/LoggerFactory.h"
 
@@ -14,42 +17,19 @@ using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char FileUtils::TAG[];
 
-int FileUtils::Mkdirs(const char *path)
+int FileUtils::Mkdirs(std::string path)
 {
-    const size_t len = strlen(path);
-    char path_buffer[PATH_MAX];
-    char *p;
-
-    errno = 0;
-
-    /* Copy string so its mutable */
-    if (len > sizeof(path_buffer) - 1)
+    for (size_t i = 1; i < path.length(); i++)
     {
-        errno = ENAMETOOLONG;
-        return -1;
-    }
-    strcpy(path_buffer, path);
-
-    for (p = path_buffer + 1; *p; p++)
-    {
-        if (*p == '/')
+        if (path[i] == '/')
         {
-            /* Temporarily truncate */
-            *p = '\0';
-            if (mkdir(path_buffer, S_IRWXU) != 0)
+            if (mkdir(path.substr(0, i).c_str(), S_IRWXU) != 0)
             {
                 if (errno != EEXIST)
                     return -1;
             }
-            *p = '/';
         }
     }
-    if (mkdir(path_buffer, S_IRWXU) != 0)
-    {
-        if (errno != EEXIST)
-            return -1;
-    }
-
     return 0;
 }
 
@@ -196,7 +176,7 @@ bool FileUtils::CreateDirectoryWithPermissions(const char *dirPath, mode_t permi
     const int desiredPermissions = PermissionsMaskToInt(permissions);
     string expandedPath = ExtractExpandedPath(dirPath);
 
-    if (!Mkdirs(expandedPath.c_str()))
+    if (!Mkdirs(expandedPath))
     {
         int actualPermissions = GetFilePermissions(expandedPath);
         if (desiredPermissions != actualPermissions)

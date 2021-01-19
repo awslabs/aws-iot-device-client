@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
+#include <sys/stat.h>
 #include <unistd.h>
 
 using namespace std;
@@ -78,10 +79,20 @@ TEST(FileUtils, assertsCorrectFilePermissions)
     std::remove(filePath.c_str());
 }
 
+TEST(FileUtils, assertsMkdirSuccess)
+{
+    string dirPath = "/tmp/" + UniqueString::GetRandomToken(10) + "/";
+    int ret = FileUtils::Mkdirs(dirPath);
+    struct stat info;
+    ASSERT_EQ(stat(dirPath.c_str(), &info), ret);
+
+    rmdir(dirPath.c_str());
+}
+
 TEST(FileUtils, assertsCorrectDirectoryPermissions)
 {
     string dirPath = "/tmp/" + UniqueString::GetRandomToken(10) + "/";
-    FileUtils::Mkdirs(dirPath.c_str());
+    FileUtils::Mkdirs(dirPath);
 
     chmod(dirPath.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH);
     int permissions = FileUtils::GetFilePermissions(dirPath);
