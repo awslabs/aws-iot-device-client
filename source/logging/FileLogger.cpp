@@ -28,7 +28,7 @@ bool FileLogger::start(const PlainConfig &config)
     {
         cout << LOGGER_TAG << ": Cannot access " << logFileDir << "to write logs, attempting to create log directory"
              << endl;
-        FileUtils::Mkdirs(logFileDir.c_str());
+        FileUtils::Mkdirs(logFileDir);
         if (stat(logFileDir.c_str(), &info) != 0)
         {
             cout << LOGGER_TAG << ": Failed to create log directories necessary for file-based logging" << endl;
