@@ -69,6 +69,11 @@ void shutdown()
             feature->stop();
         }
         LoggerFactory::getLoggerInstance().get()->shutdown();
+
+        if (featuresCopy.empty())
+        {
+            exit(0);
+        }
     }
     else
     {

@@ -18,6 +18,9 @@ namespace Aws
         {
             namespace SecureTunneling
             {
+                class SecureTunnelingContext;
+                using OnConnectionShutdownFn = std::function<void(SecureTunnelingContext *)>;
+
                 class SecureTunnelingContext
                 {
                   public:
@@ -26,7 +29,8 @@ namespace Aws
                         const std::string &rootCa,
                         const std::string &accessToken,
                         const std::string &endpoint,
-                        uint16_t port);
+                        uint16_t port,
+                        OnConnectionShutdownFn onConnectionShutdown);
                     ~SecureTunnelingContext();
 
                     bool IsDuplicateNotification(
@@ -40,6 +44,7 @@ namespace Aws
 
                     // Secure tunneling protocol client callbacks
                     void OnConnectionComplete();
+                    void OnConnectionShutdown();
                     void OnSendDataComplete(int errorCode);
                     void OnDataReceive(const Crt::ByteBuf &data);
                     void OnStreamStart();
@@ -58,6 +63,8 @@ namespace Aws
                     std::string mAccessToken;
                     std::string mEndpoint;
                     uint16_t mPort{22};
+
+                    OnConnectionShutdownFn mOnConnectionShutdown;
 
                     std::unique_ptr<Aws::Iotsecuretunneling::SecureTunnel> mSecureTunnel;
                     std::unique_ptr<TcpForward> mTcpForward;
