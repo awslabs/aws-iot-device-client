@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 #ifndef AWS_IOT_DEVICE_CLIENT_FILEUTILS_H
 #define AWS_IOT_DEVICE_CLIENT_FILEUTILS_H
 
