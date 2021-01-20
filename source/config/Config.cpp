@@ -446,7 +446,7 @@ bool PlainConfig::Jobs::LoadFromCliArgs(const CliArgs &cliArgs)
 {
     if (cliArgs.count(PlainConfig::Jobs::CLI_ENABLE_JOBS))
     {
-        enabled = true;
+        enabled = cliArgs.at(CLI_ENABLE_JOBS).compare("true") == 0;
     }
 
     if (cliArgs.count(PlainConfig::Jobs::CLI_HANDLER_DIR))
@@ -490,7 +490,7 @@ bool PlainConfig::Tunneling::LoadFromCliArgs(const CliArgs &cliArgs)
 {
     if (cliArgs.count(PlainConfig::Tunneling::CLI_ENABLE_TUNNELING))
     {
-        enabled = true;
+        enabled = cliArgs.at(CLI_ENABLE_TUNNELING).compare("true") == 0;
     }
     if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION))
     {
@@ -586,7 +586,7 @@ bool PlainConfig::DeviceDefender::LoadFromCliArgs(const CliArgs &cliArgs)
 {
     if (cliArgs.count(PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER))
     {
-        enabled = true;
+        enabled = cliArgs.at(CLI_ENABLE_DEVICE_DEFENDER).compare("true") == 0;
     }
     if (cliArgs.count(PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL))
     {
@@ -614,7 +614,7 @@ bool PlainConfig::DeviceDefender::Validate() const
     {
         return true;
     }
-    if (!interval.has_value() || (interval.value() <= 0))
+    if (interval <= 0)
     {
         LOGM_ERROR(Config::TAG, "*** %s: Interval value <= 0 ***", DeviceClient::DC_FATAL_ERROR);
         return false;
@@ -672,7 +672,7 @@ bool PlainConfig::FleetProvisioning::LoadFromCliArgs(const CliArgs &cliArgs)
 {
     if (cliArgs.count(PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING))
     {
-        enabled = true;
+        enabled = cliArgs.at(CLI_ENABLE_FLEET_PROVISIONING).compare("true") == 0;
     }
     if (cliArgs.count(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME))
     {
@@ -808,18 +808,18 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {PlainConfig::LogConfig::CLI_LOG_TYPE, true, false, nullptr},
         {PlainConfig::LogConfig::CLI_LOG_FILE, true, false, nullptr},
 
-        {PlainConfig::Jobs::CLI_ENABLE_JOBS, false, false, nullptr},
+        {PlainConfig::Jobs::CLI_ENABLE_JOBS, true, false, nullptr},
         {PlainConfig::Jobs::CLI_HANDLER_DIR, true, false, nullptr},
 
-        {PlainConfig::Tunneling::CLI_ENABLE_TUNNELING, false, false, nullptr},
+        {PlainConfig::Tunneling::CLI_ENABLE_TUNNELING, true, false, nullptr},
         {PlainConfig::Tunneling::CLI_TUNNELING_REGION, true, false, nullptr},
         {PlainConfig::Tunneling::CLI_TUNNELING_SERVICE, true, false, nullptr},
         {PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION, false, false, nullptr},
 
-        {PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER, false, false, nullptr},
+        {PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER, true, false, nullptr},
         {PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL, true, false, nullptr},
 
-        {PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING, false, false, nullptr},
+        {PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING, true, false, nullptr},
         {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME, true, false, nullptr},
         {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE, true, false, nullptr},
     };
