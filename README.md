@@ -472,12 +472,12 @@ the Jobs feature will not execute the scripts or executables in this directory.
 
 #### Configuring the Jobs feature via the command line:
 ```
-./aws-iot-device-client --enable-jobs --jobs-handler-dir [your/path/to/job/handler/directory/]
+./aws-iot-device-client --enable-jobs [true|false] --jobs-handler-dir [your/path/to/job/handler/directory/]
 ```
 
 Example:
 ```
-./aws-iot-device-client --enable-jobs --jobs-handler-dir ~/.aws-iot-device-client/jobs/
+./aws-iot-device-client --enable-jobs true --jobs-handler-dir ~/.aws-iot-device-client/jobs/
 ```
 
 #### Configuring the Jobs feature via JSON:
@@ -485,7 +485,7 @@ Example:
     {
         ...
         "jobs": {
-            "enabled": [<true>|<false>],
+            "enabled": [true|false],
             "handler-directory": "[your/path/to/job/handler/directory/]"
         }
         ...
@@ -689,7 +689,7 @@ The Fleet Provisioning feature is disabled by default. You can enable it by a CL
 
 Configuring the Fleet Provisioning feature via the command line:
 ```
-$ ./aws-iot-device-client --enable-fleet-provisioning --fleet-provisioning-template-name [Fleet-Provisioning-Template-Name] --csr-file [your/path/to/csr/file] 
+$ ./aws-iot-device-client --enable-fleet-provisioning [true|false] --fleet-provisioning-template-name [Fleet-Provisioning-Template-Name] --csr-file [your/path/to/csr/file] 
 ```
 
 Configuring the Fleet Provisioning feature via JSON:
@@ -697,7 +697,7 @@ Configuring the Fleet Provisioning feature via JSON:
 {
     ...
     "fleet-provisioning": {
-        "enabled": [<true>|<false>],
+        "enabled": [true|false],
         "template-name": "Fleet-Provisioning-Template-Name",
         "csr-file": "your/path/to/csr/file"
     }
@@ -730,19 +730,19 @@ The Secure Tunneling feature allows you to gain access to a remote device even i
 Without the Device Client, if you wanted secure privileged access to a device by secure tunneling, you would need to build and deploy a compatible binary of [local proxy](https://docs.aws.amazon.com/iot/latest/developerguide/local-proxy.html) onto the device. You'd also need to write, build and deploy [code](https://docs.aws.amazon.com/iot/latest/developerguide/agent-snippet.html) that subscribes to the MQTT new tunnel topic and launches the local proxy. When you use the Device Client, you can skip building the local proxy for your IoT device and writing code to subscribe to the relevant MQTT topics. You can simply build and deploy the Device Client to your IoT devices and enable the Secure Tunneling feature.
 
 ### Configuration
-The Secure Tunneling feature is disabled by default. You can enable it by a CLI argument or in the configuration file.
+You can enable or disable the Secure Tunneling feature by a CLI argument or in the configuration file.
 
-To enable the feature by CLI:
+To enable/disable the feature by CLI:
 ```
-$ ./aws-iot-device-client --enable-tunneling
+$ ./aws-iot-device-client --enable-tunneling [true|false]
 ```
 
-To enable the feature in the configuration file:
+To enable/disable the feature in the configuration file:
 ```
 {
   ...
   "tunneling": {
-    "enabled": true
+    "enabled": [true|false]
   }
   ...
 }
