@@ -53,7 +53,7 @@ TEST(Config, AllFeaturesEnabled)
     ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
     ASSERT_TRUE(config.deviceDefender.enabled);
-    ASSERT_EQ(300, config.deviceDefender.interval.value());
+    ASSERT_EQ(300, config.deviceDefender.interval);
 }
 
 TEST(Config, HappyCaseMinimumConfig)
@@ -78,9 +78,10 @@ TEST(Config, HappyCaseMinimumConfig)
     ASSERT_STREQ("key", config.key->c_str());
     ASSERT_STREQ("root-ca", config.rootCa->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_FALSE(config.jobs.enabled);
-    ASSERT_FALSE(config.tunneling.enabled);
-    ASSERT_FALSE(config.deviceDefender.enabled);
+    ASSERT_TRUE(config.jobs.enabled);
+    ASSERT_TRUE(config.tunneling.enabled);
+    ASSERT_TRUE(config.deviceDefender.enabled);
+    ASSERT_FALSE(config.fleetProvisioning.enabled);
 }
 
 TEST(Config, HappyCaseMinimumCli)
@@ -101,9 +102,10 @@ TEST(Config, HappyCaseMinimumCli)
     ASSERT_STREQ("key", config.key->c_str());
     ASSERT_STREQ("root-ca", config.rootCa->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_FALSE(config.jobs.enabled);
-    ASSERT_FALSE(config.tunneling.enabled);
-    ASSERT_FALSE(config.deviceDefender.enabled);
+    ASSERT_TRUE(config.jobs.enabled);
+    ASSERT_TRUE(config.tunneling.enabled);
+    ASSERT_TRUE(config.deviceDefender.enabled);
+    ASSERT_FALSE(config.fleetProvisioning.enabled);
 }
 
 TEST(Config, MissingSomeSettings)
