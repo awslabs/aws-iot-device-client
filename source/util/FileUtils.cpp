@@ -71,7 +71,7 @@ bool FileUtils::StoreValueInFile(string value, string filePath)
     ofstream file(filePath);
     if (!file.is_open())
     {
-        LOGM_ERROR(FileUtils::TAG, "Unable to open file: '%s'", filePath.c_str());
+        LOGM_ERROR(FileUtils::TAG, "Unable to open file: '%s'", Sanitize(filePath).c_str());
         return false;
     }
     file << value;
@@ -84,7 +84,8 @@ int FileUtils::GetFilePermissions(const std::string &path)
     struct stat file_info;
     if (stat(path.c_str(), &file_info) == -1)
     {
-        LOGM_ERROR(TAG, "Failed to stat: %s. Please make sure valid file/dir path is provided.", path.c_str());
+        LOGM_ERROR(
+            TAG, "Failed to stat: %s. Please make sure valid file/dir path is provided.", Sanitize(path).c_str());
         return false;
     }
 
@@ -96,12 +97,14 @@ bool FileUtils::ValidateFileOwnershipPermissions(const std::string &path)
     struct stat file_info;
     if (stat(path.c_str(), &file_info) == -1)
     {
-        LOGM_ERROR(TAG, "Failed to stat: %s. Please make sure valid file/dir path is provided.", path.c_str());
+        LOGM_ERROR(
+            TAG, "Failed to stat: %s. Please make sure valid file/dir path is provided.", Sanitize(path).c_str());
         return false;
     }
     if (getuid() != 0 && getuid() != file_info.st_uid)
     {
-        LOGM_ERROR(TAG, "User does not have the ownership permissions to access the file/dir: %s", path.c_str());
+        LOGM_ERROR(
+            TAG, "User does not have the ownership permissions to access the file/dir: %s", Sanitize(path).c_str());
         return false;
     }
     return true;
@@ -128,7 +131,7 @@ bool FileUtils::ValidateFilePermissions(const std::string &path, const int fileP
                 TAG,
                 "Permissions to given file/dir path '%s' is not set to required value... {Permissions: {desired: %d, "
                 "actual: %d}}",
-                expandedPath.c_str(),
+                Sanitize(expandedPath).c_str(),
                 filePermissions,
                 actualFilePermissions);
         }
@@ -138,7 +141,7 @@ bool FileUtils::ValidateFilePermissions(const std::string &path, const int fileP
                 TAG,
                 "Permissions to given file/dir path '%s' is not set to recommended value... {Permissions: {desired: "
                 "%d, actual: %d}}",
-                expandedPath.c_str(),
+                Sanitize(expandedPath).c_str(),
                 filePermissions,
                 actualFilePermissions);
         }
@@ -223,7 +226,7 @@ bool FileUtils::CreateDirectoryWithPermissions(const char *dirPath, mode_t permi
                 LOGM_ERROR(
                     TAG,
                     "Failed to set appropriate permissions for directory %s, desired %d but found %d",
-                    expandedPath.c_str(),
+                    Sanitize(expandedPath).c_str(),
                     desiredPermissions,
                     actualPermissions);
                 return false;
@@ -234,12 +237,12 @@ bool FileUtils::CreateDirectoryWithPermissions(const char *dirPath, mode_t permi
             LOGM_INFO(
                 TAG,
                 "Successfully create directory %s with required permissions %d",
-                expandedPath.c_str(),
+                Sanitize(expandedPath).c_str(),
                 desiredPermissions);
             return true;
         }
     }
 
-    LOGM_ERROR(TAG, "Failed to create directory %s", expandedPath.c_str());
+    LOGM_ERROR(TAG, "Failed to create directory %s", Sanitize(expandedPath).c_str());
     return false;
 }
