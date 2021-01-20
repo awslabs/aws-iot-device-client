@@ -38,7 +38,6 @@ namespace Aws
         {
             namespace DeviceDefender
             {
-
                 struct passableUserData
                 {
                     const char *tag;
