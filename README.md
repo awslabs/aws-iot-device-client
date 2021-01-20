@@ -235,7 +235,7 @@ You should also make sure to run the script as root or via `sudo` if you are ins
 sudo ./setup.sh
 ```
 
-*Note: It is worth noting here that by default Jobs, Secure Tunneling and Device Defender feature of the Device Client is **enabled** and Fleet Provisioning feature is **disabled**. Use JSON config file and/or CLI options to enable/disable specific feature.*
+*Note: It is worth noting here that by default Jobs, Secure Tunneling and Device Defender feature of the Device Client are **enabled** and Fleet Provisioning feature is **disabled**. Use JSON config file and/or CLI options to enable/disable specific feature.*
 
 You can use the following command to see all of the CLI options available for the Device Client
 
