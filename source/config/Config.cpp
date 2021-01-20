@@ -1045,7 +1045,7 @@ void Config::PrintHelpMessage()
         "%s <region>:\t\t\t\t\t\tUse Specified AWS Region for Secure Tunneling\n"
         "%s <service>:\t\t\t\t\t\tConnect secure tunnel to specific service\n"
         "%s:\t\t\t\t\tDisable MQTT new tunnel notification for Secure Tunneling\n"
-        "%s <interval-in-seconds>:\t\t\tPositive integer to publish Device Defender metrics\n"
+        "%s <interval>:\t\t\tPositive integer to publish Device Defender metrics\n"
         "%s <template-name>:\t\t\tUse specified Fleet Provisioning template name\n"
         "%s <csr-file-path>:\t\t\t\t\t\tUse specified CSR file to generate a certificate by keeping user private key "
         "secure. "

@@ -155,7 +155,7 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       },
       \"device-defender\":	{
         \"enabled\":	$DD_ENABLED,
-        \"interval-in-seconds\": $DD_INTERVAL
+        \"interval\": $DD_INTERVAL
       },
       \"fleet-provisioning\":	{
         \"enabled\":	$FP_ENABLED,

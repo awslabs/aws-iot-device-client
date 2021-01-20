@@ -17,8 +17,8 @@
 		"enabled": true
 	},
 	"device-defender":	{
-		"enabled":	true,
-		"interval-in-seconds": 300
+		"enabled": true,
+		"interval": 300
 	},
 	"fleet-provisioning": {
 		"enabled": false,

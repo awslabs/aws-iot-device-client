@@ -763,7 +763,7 @@ $ ./aws-iot-device-client --enable-device-defender [true|false] --device-defende
   ...
  "device-defender":	{
 		"enabled":	true,
-		"interval-in-seconds": 300
+		"interval": 300
   }
   ...
 }
