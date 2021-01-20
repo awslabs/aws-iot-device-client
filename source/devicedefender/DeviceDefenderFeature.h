@@ -107,7 +107,7 @@ namespace Aws
                     /**
                      * \brief Called when Iot Device Defender SDK task stops, this function will stop the Iot
                      * Device Defender SDK task, & unsubscribe from the accepted/rejected Device Defender MQTT topics
-                    /**
+                     */
                     void stopDeviceDefender();
                 };
             } // namespace DeviceDefender
