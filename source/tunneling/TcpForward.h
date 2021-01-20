@@ -40,7 +40,7 @@ namespace Aws
                         OnTcpForwardDataReceive onTcpForwardDataReceive);
 
                     /**
-                     * Destructor
+                     * \brief Destructor
                      */
                     ~TcpForward();
 

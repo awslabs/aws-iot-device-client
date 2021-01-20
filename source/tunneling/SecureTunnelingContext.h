@@ -22,8 +22,8 @@ namespace Aws
                 using OnConnectionShutdownFn = std::function<void(SecureTunnelingContext *)>;
 
                 /**
-                 * A class that represents a secure tunnel and local TCP port forward pair. The class also implements
-                 * all the callbacks required for secure tunneling and local TCP port forward.
+                 * \brief A class that represents a secure tunnel and local TCP port forward pair. The class also
+                 * implements all the callbacks required for secure tunneling and local TCP port forward.
                  */
                 class SecureTunnelingContext
                 {
