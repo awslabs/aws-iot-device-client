@@ -235,6 +235,7 @@ namespace Aws
                 PlainConfig config;
 
               private:
+                static bool FileExists(const std::string &filename);
                 static void PrintHelpMessage();
                 static bool ExportDefaultSetting(const std::string &file);
             };
