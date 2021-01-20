@@ -246,3 +246,10 @@ bool FileUtils::CreateDirectoryWithPermissions(const char *dirPath, mode_t permi
     LOGM_ERROR(TAG, "Failed to create directory %s", Sanitize(expandedPath).c_str());
     return false;
 }
+
+bool FileUtils::FileExists(const string &filename)
+{
+    string expandedPath = FileUtils::ExtractExpandedPath(filename.c_str());
+    ifstream f(expandedPath);
+    return f.good();
+}

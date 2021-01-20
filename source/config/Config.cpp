@@ -887,12 +887,25 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 bool Config::init(const CliArgs &cliArgs)
 {
     string filename = Config::DEFAULT_CONFIG_FILE;
+    bool bReadConfigFile = FileUtils::FileExists(filename);
+
     if (cliArgs.count(Config::CLI_CONFIG_FILE))
     {
         filename = cliArgs.at(Config::CLI_CONFIG_FILE);
+        if (!FileUtils::FileExists(filename))
+        {
+            LOGM_ERROR(
+                TAG,
+                "*** %s: Config file specified in the CLI doesn't exist: '%s' ***",
+                DeviceClient::DC_FATAL_ERROR,
+                Sanitize(filename).c_str());
+            return false;
+        }
+
+        bReadConfigFile = true;
     }
 
-    if (!ParseConfigFile(filename, false))
+    if (bReadConfigFile && !ParseConfigFile(filename, false))
     {
         LOGM_ERROR(
             TAG,
@@ -945,8 +958,7 @@ bool Config::ValidateAndStoreRuntimeConfig()
 bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
 {
     string expandedPath = FileUtils::ExtractExpandedPath(file.c_str());
-    struct stat info;
-    if (stat(expandedPath.c_str(), &info) != 0)
+    if (!FileUtils::FileExists(expandedPath))
     {
         if (!isRuntimeConfig)
         {
