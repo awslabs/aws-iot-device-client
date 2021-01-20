@@ -1017,8 +1017,8 @@ bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
 bool Config::FileExists(const string &filename)
 {
     string expandedPath = FileUtils::ExtractExpandedPath(filename.c_str());
-    struct stat info;
-    return stat(expandedPath.c_str(), &info) == 0;
+    ifstream f(expandedPath);
+    return f.good();
 }
 
 void Config::PrintHelpMessage()
