@@ -99,8 +99,9 @@ that you're performing the compilation on:
 
 ```
 # Building
-mkdir aws-iot-device-client/build
-cd aws-iot-device-client/build
+cd aws-iot-device-client
+mkdir build
+cd build
 cmake ../
 cmake --build . --target aws-iot-device-client
 
@@ -123,8 +124,9 @@ with  `aws-iot-device-client` (the contents of this repository) in a folder call
 current working directory:
 
 ```bash
-mkdir aws-iot-device-client/build
-cd aws-iot-device-client/build
+cd aws-iot-device-client
+mkdir build
+cd build
 cmake ../
 cmake --build . --target aws-iot-device-client
 cmake --build . --target test-aws-iot-device-client # This line builds the test executable
@@ -150,8 +152,9 @@ These commands should be run with `aws-iot-device-client` (the contents of this 
 `aws-iot-device-client` in your current working directory
 
 ```bash
-mkdir aws-iot-device-client/build
-cd aws-iot-device-client/build
+cd aws-iot-device-client
+mkdir build
+cd build
 cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF
 cmake --build . --target aws-iot-device-client
 cmake --build . --target test-aws-iot-device-client # This line builds the test executable
@@ -178,8 +181,9 @@ Available CMake flags for feature exclusion:
 Example CMake command to exclude only the Device Defender feature from the build:
 
 ```bash
-mkdir aws-iot-device-client/build
-cd aws-iot-device-client/build
+cd aws-iot-device-client
+mkdir build
+cd build
 cmake ../ -DEXCLUDE_DD=ON
 ```
 #### Cross Compiliation - Building from one architecture to the other
