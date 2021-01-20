@@ -216,3 +216,14 @@ TEST(FileUtils, setupDirectoryDetectedSetupFailure)
 
     ASSERT_FALSE(didSetup);
 }
+
+TEST(FileUtils, FileExists)
+{
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
+    ofstream file(filePath, std::fstream::app);
+    file << "test message" << endl;
+    ASSERT_TRUE(FileUtils::FileExists(filePath));
+
+    std::remove(filePath.c_str());
+    ASSERT_FALSE(FileUtils::FileExists(filePath));
+}

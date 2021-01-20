@@ -114,6 +114,14 @@ namespace Aws
                      * otherwise
                      */
                     static bool CreateDirectoryWithPermissions(const char *dirPath, mode_t permissions);
+
+                    /**
+                     * \brief Check if the given filename exists
+                     *
+                     * @param filename Filename to check
+                     * @return True if the file exists. False otherwise.
+                     */
+                    static bool FileExists(const std::string &filename);
                 };
             } // namespace Util
         }     // namespace DeviceClient

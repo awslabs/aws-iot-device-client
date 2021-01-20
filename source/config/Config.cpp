@@ -887,12 +887,12 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 bool Config::init(const CliArgs &cliArgs)
 {
     string filename = Config::DEFAULT_CONFIG_FILE;
-    bool bReadConfigFile = FileExists(filename);
+    bool bReadConfigFile = FileUtils::FileExists(filename);
 
     if (cliArgs.count(Config::CLI_CONFIG_FILE))
     {
         filename = cliArgs.at(Config::CLI_CONFIG_FILE);
-        if (!FileExists(filename))
+        if (!FileUtils::FileExists(filename))
         {
             LOGM_ERROR(
                 TAG,
@@ -958,7 +958,7 @@ bool Config::ValidateAndStoreRuntimeConfig()
 bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
 {
     string expandedPath = FileUtils::ExtractExpandedPath(file.c_str());
-    if (!FileExists(expandedPath))
+    if (!FileUtils::FileExists(expandedPath))
     {
         if (!isRuntimeConfig)
         {
@@ -1012,13 +1012,6 @@ bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
     setting.close();
 
     return true;
-}
-
-bool Config::FileExists(const string &filename)
-{
-    string expandedPath = FileUtils::ExtractExpandedPath(filename.c_str());
-    ifstream f(expandedPath);
-    return f.good();
 }
 
 void Config::PrintHelpMessage()
