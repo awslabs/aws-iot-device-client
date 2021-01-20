@@ -106,7 +106,8 @@ namespace Aws
                                 *config.rootCa,
                                 *config.tunneling.destinationAccessToken,
                                 GetEndpoint(*config.tunneling.region),
-                                static_cast<uint16_t>(config.tunneling.port.value())));
+                                static_cast<uint16_t>(config.tunneling.port.value()),
+                                bind(&SecureTunnelingFeature::OnConnectionShutdown, this, placeholders::_1)));
                         mContexts.push_back(std::move(context));
                     }
                 }
@@ -210,7 +211,12 @@ namespace Aws
 
                     std::unique_ptr<SecureTunnelingContext> context =
                         unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
-                            mSharedCrtResourceManager, mRootCa, accessToken, GetEndpoint(region), port));
+                            mSharedCrtResourceManager,
+                            mRootCa,
+                            accessToken,
+                            GetEndpoint(region),
+                            port,
+                            bind(&SecureTunnelingFeature::OnConnectionShutdown, this, placeholders::_1)));
                     if (context->ConnectToSecureTunnel())
                     {
                         mContexts.push_back(std::move(context));
@@ -248,6 +254,23 @@ namespace Aws
                     }
 
                     return endpoint;
+                }
+
+                void SecureTunnelingFeature::OnConnectionShutdown(SecureTunnelingContext *contextToRemove)
+                {
+                    LOG_DEBUG(TAG, "SecureTunnelingFeature::OnConnectionShutdown");
+
+                    auto it = find_if(mContexts.begin(), mContexts.end(), [&](unique_ptr<SecureTunnelingContext> &c) {
+                        return c.get() == contextToRemove;
+                    });
+                    mContexts.erase(std::remove(mContexts.begin(), mContexts.end(), *it));
+
+#if defined(DISABLE_MQTT)
+                    if (mContexts.empty())
+                    {
+                        stop();
+                    }
+#endif
                 }
 
             } // namespace SecureTunneling

@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
+#include <sys/stat.h>
 #include <unistd.h>
 
 using namespace std;
@@ -29,7 +30,7 @@ TEST(FileUtils, handlesRelativeFilePath)
 TEST(FileUtils, handlesNoDirectories)
 {
     string parentDir = FileUtils::ExtractParentDirectory("aws-iot-device-client.log");
-    ASSERT_STREQ("", parentDir.c_str());
+    ASSERT_STREQ("./", parentDir.c_str());
 }
 
 TEST(FileUtils, handlesRelativeCWD)
@@ -47,7 +48,7 @@ TEST(FileUtils, handlesRelativeParent)
 TEST(FileUtils, handlesEmptyPath)
 {
     string parentDir = FileUtils::ExtractParentDirectory("");
-    ASSERT_STREQ("", parentDir.c_str());
+    ASSERT_STREQ("./", parentDir.c_str());
 }
 
 TEST(FileUtils, handlesEmptyPathForStoreValueInFile)
@@ -81,10 +82,63 @@ TEST(FileUtils, assertsCorrectFilePermissions)
     std::remove(filePath.c_str());
 }
 
+TEST(FileUtils, assertsMkdirSuccess)
+{
+    string dirPath = "/tmp/" + UniqueString::GetRandomToken(10) + "/";
+    int ret = FileUtils::Mkdirs(dirPath);
+    struct stat info;
+    ASSERT_EQ(stat(dirPath.c_str(), &info), ret);
+    ASSERT_TRUE(info.st_mode & S_IFDIR);
+
+    rmdir(dirPath.c_str());
+}
+
+TEST(FileUtils, assertsMkdirSuccessWoEndSlash)
+{
+    string dirPath = "/tmp/" + UniqueString::GetRandomToken(10);
+    int ret = FileUtils::Mkdirs(dirPath);
+    struct stat info;
+    ASSERT_EQ(stat(dirPath.c_str(), &info), ret);
+    ASSERT_TRUE(info.st_mode & S_IFDIR);
+
+    rmdir(dirPath.c_str());
+}
+
+TEST(FileUtils, assertsMkdirSuccessJustString)
+{
+    string dirPath = "test.test.test";
+    int ret = FileUtils::Mkdirs(dirPath);
+    struct stat info;
+    ASSERT_EQ(stat(dirPath.c_str(), &info), ret);
+    ASSERT_TRUE(info.st_mode & S_IFDIR);
+
+    rmdir(dirPath.c_str());
+}
+
+TEST(FileUtils, assertsMkdirSuccessEmptyDirPathFail)
+{
+    string dirPath = "";
+    int ret = FileUtils::Mkdirs(dirPath);
+    ASSERT_EQ(-1, ret);
+
+    rmdir(dirPath.c_str());
+}
+
+TEST(FileUtils, assertsMkdirSuccessRelativeFolder)
+{
+    string dirPath = "relative/test/dir/";
+    int ret = FileUtils::Mkdirs(dirPath);
+    struct stat info;
+    ASSERT_EQ(stat(dirPath.c_str(), &info), ret);
+    ASSERT_TRUE(info.st_mode & S_IFDIR);
+
+    rmdir(dirPath.c_str());
+}
+
 TEST(FileUtils, assertsCorrectDirectoryPermissions)
 {
     string dirPath = "/tmp/" + UniqueString::GetRandomToken(10) + "/";
-    FileUtils::Mkdirs(dirPath.c_str());
+    FileUtils::Mkdirs(dirPath);
 
     chmod(dirPath.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH);
     int permissions = FileUtils::GetFilePermissions(dirPath);
