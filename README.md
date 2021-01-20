@@ -234,6 +234,14 @@ You should also make sure to run the script as root or via `sudo` if you are ins
  ```
 sudo ./setup.sh
 ```
+
+*Note: It is worth noting here that by default Jobs, Secure Tunneling and Device Defender feature of the Device Client is **enabled** and Fleet Provisioning feature is **disabled**. Use JSON config file and/or CLI options to enable/disable specific feature.*
+
+You can use the following command to see all of the CLI options available for the Device Client
+
+ ```
+./aws-iot-device-client --help
+```
   
 ### Configuring the AWS IoT Device Client
 Configuration information can be passed to the AWS IoT Device Client through either the command line, a JSON configuration
@@ -718,7 +726,7 @@ The Device Defender feature within the AWS IoT Device Client publishes [device-s
 To get started with the feature you will need to set the right configuration.
 #### Configuring the Device Defender feature via the command line:
 ```
-$ ./aws-iot-device-client --enable-device-defender --device-defender-interval 300
+$ ./aws-iot-device-client --enable-device-defender [true|false] --device-defender-interval 300
 ```
 
 #### Configuring the Device Defender feature via the JSON configuration file:
