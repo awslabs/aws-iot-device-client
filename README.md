@@ -462,7 +462,7 @@ Example:
 ```
 cmake ../ -DEXCLUDE_JOBS=ON
 ```
-### Jobs Feature Runtime Configuration Options
+### Jobs Feature Configuration Options
 `enabled`: Whether or not the jobs feature is enabled (True/False).
  
 `handler-directory`: A path to a directory containing scripts or executables that the Jobs feature should look in
@@ -658,7 +658,7 @@ You can navigate to the *AWS IoT console -> Secure -> Policies* to create a perm
 }
 ```
 
-### Fleet Provisioning Runtime Configuration Options
+### Fleet Provisioning Configuration Options
 Once the device is provisioned correctly, Fleet Provisioning feature will validate and store the information about newly provisioned resources in a runtime config file on your device. This file will be further used by the Device Client while connecting to AWS IoT Core. 
 
 The information stored in the runtime config file **created by Fleet Provisioning feature**:
@@ -714,7 +714,7 @@ $ ./aws-iot-device-client --enable-fleet-provisioning [true|false] --fleet-provi
 ## Device Defender Feature
 The Device Defender feature within the AWS IoT Device Client publishes [device-side metrics](https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html) about the device to the cloud.  You can then use the cloud-side service to identify unusual behavior that might indicate a compromised device by monitoring the behavior of your devices.
 
-### Device Defender Runtime Configuration Options
+### Device Defender Configuration Options
 To get started with the feature you will need to set the right configuration. This consists of two parameters
 
 `enabled`: Whether or not the Device Defender feature is enabled (True/False).
