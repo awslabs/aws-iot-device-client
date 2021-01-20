@@ -35,7 +35,7 @@
         * [Sample Template:](#sample-template)
     + [Sample Permanent Certificate Policy](#sample-permanent-certificate-policy)
         * [Sample (FPCertPolicy) Policy:](#sample-fpcertpolicy-policy)
-    + [Fleet Provisioning Runtime Config](#fleet-provisioning-runtime-config)
+    + [Fleet Provisioning Runtime Config](#fleet-provisioning-runtime-configuration-options)
         * [Example Fleet Provisioning Runtime Config:](#example-fleet-provisioning-runtime-config)
     + [Fleet Provisioning Feature Configuration Options:](#fleet-provisioning-feature-configuration-options:)
         - [Configuring the Fleet Provisioning feature via the command line:](#configuring-the-fleet-provisioning-feature-via-the-command-line)
@@ -477,8 +477,8 @@ Example:
 ```
 cmake ../ -DEXCLUDE_JOBS=ON
 ```
-### Jobs Feature Runtime Configuration Options
-`enabled`: Whether or not the jobs feature should be enabled or not.
+### Jobs Feature Configuration Options
+`enabled`: Whether or not the jobs feature is enabled (True/False).
  
 `handler-directory`: A path to a directory containing scripts or executables that the Jobs feature should look in
 when receiving an incoming job. If there is a script or executable in the directory that matches the name of the
@@ -673,7 +673,7 @@ You can navigate to the *AWS IoT console -> Secure -> Policies* to create a perm
 }
 ```
 
-### Fleet Provisioning Runtime Config
+### Fleet Provisioning Configuration Options
 Once the device is provisioned correctly, Fleet Provisioning feature will validate and store the information about newly provisioned resources in a runtime config file on your device. This file will be further used by the Device Client while connecting to AWS IoT Core. 
 
 The information stored in the runtime config file **created by Fleet Provisioning feature**:
@@ -729,8 +729,13 @@ $ ./aws-iot-device-client --enable-fleet-provisioning [true|false] --fleet-provi
 ## Device Defender Feature
 The Device Defender feature within the AWS IoT Device Client publishes [device-side metrics](https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html) about the device to the cloud.  You can then use the cloud-side service to identify unusual behavior that might indicate a compromised device by monitoring the behavior of your devices.
 
-### Device Defender Feature Configuration Options:
-To get started with the feature you will need to set the right configuration.
+### Device Defender Configuration Options
+To get started with the feature you will need to set the right configuration. This consists of two parameters
+
+`enabled`: Whether or not the Device Defender feature is enabled (True/False).
+ 
+`device-defender-interval`: Defines the interval in seconds between each cycle of gathering and reporting Device Defender metrics. The client-side Device Defender feature gathers your device side metrics and posts them to the Device Defender cloud service.
+
 #### Configuring the Device Defender feature via the command line:
 ```
 $ ./aws-iot-device-client --enable-device-defender [true|false] --device-defender-interval 300
@@ -757,8 +762,11 @@ The Secure Tunneling feature allows you to gain access to a remote device even i
 
 Without the Device Client, if you wanted secure privileged access to a device by secure tunneling, you would need to build and deploy a compatible binary of [local proxy](https://docs.aws.amazon.com/iot/latest/developerguide/local-proxy.html) onto the device. You'd also need to write, build and deploy [code](https://docs.aws.amazon.com/iot/latest/developerguide/agent-snippet.html) that subscribes to the MQTT new tunnel topic and launches the local proxy. When you use the Device Client, you can skip building the local proxy for your IoT device and writing code to subscribe to the relevant MQTT topics. You can simply build and deploy the Device Client to your IoT devices and enable the Secure Tunneling feature.
 
-### Secure Tunneling Feature Configuration Options:
+### Secure Tunneling Configuration Options
+
 You can enable or disable the Secure Tunneling feature by a CLI argument or in the configuration file.
+
+`enabled`: Whether or not the Secure Tunneling feature is enabled (True/False).
 
 #### Configuring the Secure Tunneling feature via the command line:
 ```
