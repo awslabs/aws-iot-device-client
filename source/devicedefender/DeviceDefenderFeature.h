@@ -60,7 +60,7 @@ namespace Aws
                     /**
                      * \brief the ThingName to use
                      */
-                    std::string thingName = "";
+                    std::string thingName;
                     /**
                      * \brief The resource manager used to manage CRT resources
                      */
@@ -72,21 +72,25 @@ namespace Aws
                     std::shared_ptr<ClientBaseNotifier> baseNotifier;
 
                     /**
-                     * \brief The first part of the MQTT topic that is built around the thingName
+                     * \brief The first part of the MQTT topic that is built around the thingName,
+                     * $aws/things/<thingName>/defender/metrics/json
                      */
                     static constexpr char TOPIC_PRE[] = "$aws/things/";
                     /**
-                     * \brief The second part of the MQTT topic that is built around the thingName
+                     * \brief The second part of the MQTT topic that is built around the thingName,
+                     * $aws/things/<thingName>/defender/metrics/json
                      */
                     static constexpr char TOPIC_POST[] = "/defender/metrics/json";
                     /**
                      * \brief The third part of the MQTT topic that is built around the thingName
-                     * published to by the service when reports are accepted
+                     * published to by the service when reports are accepted.
+                     * $aws/things/<thingName>/defender/metrics/json/accepted
                      */
                     static constexpr char TOPIC_ACCEPTED[] = "/accepted";
                     /**
                      * \brief The third part of the MQTT topic that is built around the thingName
                      * published to by the service when reports are rejected
+                     * $aws/things/<thingName>/defender/metrics/json/rejected
                      */
                     static constexpr char TOPIC_REJECTED[] = "/rejected";
                     /**
@@ -95,12 +99,14 @@ namespace Aws
                     std::unique_ptr<Aws::Iotdevicedefenderv1::ReportTask> task;
 
                     /**
-                     * \brief Called by feature start, builds and starts the Iot Device Defender SDK task
+                     * \brief Called by feature start, this will build the task, add it to the eventLoopGroup in
+                     * the SharedCrtResourceManager, & will start the task.  This function will also subscribe
+                     * to the accepted/rejected Device Defender MQTT topics
                      */
                     void startDeviceDefender();
                     /**
-                     * \brief Called when Iot Device Defender SDK task stops, this  also unsubscribes from the MQTT
-                     * topic
+                     * \brief Called when Iot Device Defender SDK task stops, this function will stop the Iot
+                     * Device Defender SDK task, & unsubscribe from the accepted/rejected Device Defender MQTT topics
                      */
                     void stopDeviceDefender();
                 };
