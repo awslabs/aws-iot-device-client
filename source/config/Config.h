@@ -162,7 +162,7 @@ namespace Aws
                     static constexpr char CLI_DEVICE_DEFENDER_INTERVAL[] = "--device-defender-interval";
 
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
-                    static constexpr char JSON_KEY_INTERVAL[] = "interval-in-seconds";
+                    static constexpr char JSON_KEY_INTERVAL[] = "interval";
 
                     bool enabled{true};
                     int interval{300};

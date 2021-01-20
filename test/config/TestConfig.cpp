@@ -32,7 +32,7 @@ TEST(Config, AllFeaturesEnabled)
     },
     "device-defender": {
         "enabled": true,
-        "interval-in-seconds": 300
+        "interval": 300
     }
 })";
     JsonObject jsonObject(jsonString);
