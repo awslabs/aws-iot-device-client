@@ -83,6 +83,19 @@ void shutdown()
     }
 }
 
+/**
+ * \brief This function is a wrapper around abort() which makes sure we let the user know
+ * that we are aborting execution due to some type of configuration issue
+ *
+ * @param reason the reason why the abort is happening
+ */
+void deviceClientAbort(string reason)
+{
+    cout << "AWS IoT Device Client must abort execution, reason: " << reason << endl;
+    cout << "Please check the AWS IoT Device Client logs for more information" << endl;
+    abort();
+}
+
 void handle_feature_stopped(Feature *feature)
 {
     featuresReadWriteLock.lock(); // LOCK
@@ -123,7 +136,8 @@ void attemptConnection()
                 "configuration and/or certificate policy. ***",
                 DC_FATAL_ERROR);
             LoggerFactory::getLoggerInstance()->shutdown();
-            abort();
+            deviceClientAbort("Failed to establish MQTT connection due to credential/configuration error");
+            return false;
         }
         else if (SharedCrtResourceManager::RETRY == connectionStatus)
         {
@@ -205,7 +219,7 @@ namespace Aws
                         "*** %s: Aborting program due to unrecoverable feature error! ***",
                         DeviceClient::DC_FATAL_ERROR);
                     LoggerFactory::getLoggerInstance()->shutdown();
-                    abort();
+                    deviceClientAbort(feature->getName() + " encountered an error");
 #endif
                 }
             };
@@ -255,7 +269,7 @@ int main(int argc, char *argv[])
             "configuration. ***",
             DC_FATAL_ERROR);
         LoggerFactory::getLoggerInstance()->shutdown();
-        abort();
+        deviceClientAbort("MQTT initialization failed due to credential/configuration error");
     }
 
 #if !defined(EXCLUDE_FP)
@@ -285,7 +299,7 @@ int main(int argc, char *argv[])
                 "configuration, Fleet Provisioning Template, claim certificate and policy used. ***",
                 DC_FATAL_ERROR);
             LoggerFactory::getLoggerInstance()->shutdown();
-            abort();
+            deviceClientAbort("Fleet provisioning failed");
         }
         resourceManager->disconnect();
     }

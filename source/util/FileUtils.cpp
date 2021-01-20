@@ -53,7 +53,7 @@ string FileUtils::ExtractParentDirectory(const string &filePath)
     }
     else
     {
-        return "";
+        return "./";
     }
 }
 

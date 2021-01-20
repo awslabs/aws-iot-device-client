@@ -45,8 +45,8 @@
     + [Limitation](#limitation)
   * [Logging](#logging)
     + [Logging Configuration Options](#logging-configuration-options)
-    + [Security](#security)
-    + [License](#license)
+  * [Security](#security)
+  * [License](#license)
     
 ## Introduction
 
@@ -814,10 +814,10 @@ If you've decided to add additional logs to the AWS IoT Device Client's source c
 logging API macros can be found in `source/logging/LoggerFactory.h` and typically follow the convention of 
 `LOG_XXXX` for simple log messages and `LOGM_XXXX` for logs that should be formatted with variadic arguments. 
 
-### Security
+## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
 
-### License
+## License
 
 This project is licensed under the Apache-2.0 License.
