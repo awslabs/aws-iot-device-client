@@ -60,10 +60,10 @@ The AWS IoT Device Client is free, open-source, modular software written in C++ 
 The modular IoT Device Client consists of a “base client” and discrete “client-side features” that support the following:
 * The base client handles MQTT connectivity with AWS IoT core - it enables your IoT device to automatically
  connect and make subscriptions to feature-relevant MQTT topics. It also provides a logging API for device side logs.
-* The client-side [Jobs feature](https://aws.amazon.com/iot-device-management/features/#Remotely_Manage_Connected_Devices) enables you to execute remote actions on your device when you use the Jobs feature of
+* The client-side Jobs feature enables you to execute remote actions on your device when you use the [Jobs feature](https://aws.amazon.com/iot-device-management/features/#Remotely_Manage_Connected_Devices) of
  the AWS IoT Device Management service. It provides support for a few remote actions by default, and extensibility for custom actions. You can use custom actions to remotely control the state of your IoT devices.
-* The client-side [Secure Tunneling feature](https://aws.amazon.com/iot-device-management/features/#Secure_Tunneling) enables secure, privileged access to your IoT device when you use the
- Secure Tunneling feature in the AWS IoT Device Management service.
+* The client-side Secure Tunneling feature enables secure, privileged access to your IoT device when you use the
+ [Secure Tunneling feature](https://aws.amazon.com/iot-device-management/features/#Secure_Tunneling) in the AWS IoT Device Management service.
 * The client-side Device Defender feature enables you to collect standard [Device Side Metrics](https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html) when you use the [Rules
  Detect feature](https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html) in the AWS IoT Device Defender service.
 * The client-side Fleet Provisioning feature enables you to replace provisional credentials with device-specific ones
@@ -239,7 +239,9 @@ sudo ./setup.sh
 Configuration information can be passed to the AWS IoT Device Client through either the command line, a JSON configuration
 file, or both. For a complete list of available command line arguments, pass `--help` to the executable. 
 
-To configure the AWS IoT Device Client via JSON configuration file, you can also modify our configuration template 
+Note: Parameters that are passed through the command line take precedence and overwrite any values that may have been written in the JSON configuration file. 
+
+To configure the AWS IoT Device Client via the JSON configuration file, you can also modify our configuration template 
 `config-template.json` located in the root of this package and store it at `~/.aws-iot-device-client/aws-iot-device-client.conf`
 where `~/` refers to the home directory of the user running the Device Client. If you'd like to specify a different location
 for your configuration file, you can pass the `--config-file <your-path>` flag to the AWS IoT Device Client. 
@@ -480,7 +482,7 @@ Example:
 ./aws-iot-device-client --enable-jobs true --jobs-handler-dir ~/.aws-iot-device-client/jobs/
 ```
 
-#### Configuring the Jobs feature via JSON:
+#### Configuring the Jobs feature via the JSON configuration file:
 ```
     {
         ...
@@ -506,23 +508,23 @@ Example:
 
 ## Fleet Provisioning Feature
 
-The AWS IoT Device Client has the capability to provision the device when logged in for the first time. The device client provides two different mechanisms for provisioning the user device (1) using claim certificate and private key and (2) using CSR file (along with claim certificate and key) to securely provision the device while keeping the user private key secure. After all required information is provided, the Fleet Provisioning Feature will provision, register the device with AWS IoT Core, and then establish a connection to IoT Core that is ready for use by other Device Client features. 
+The AWS IoT Device Client has the capability to provision your IoT device when you connect it to AWS IoT Core for the first time. The device client provides two different mechanisms for provisioning your device (1) using a claim certificate and private key and (2) using a CSR file (along with claim certificate and key) to securely provision the device while keeping the user private key secure. After all required information is provided, the Fleet Provisioning Feature will provision, register the device with AWS IoT Core, and then establish a connection to IoT Core that is ready for use by other Device Client features. 
 
-When the AWS IoT Device Client's Fleet Provisioning feature is enabled and is provisioning the device for the first time, it will first create a permanent certificate, private key (if required), and will then attach a policy to the certificate in IoT Core which will provide the device with the permissions required to run other Device Client features such as Jobs, Secure Tunneling, and Device Defender. Once these resources are created correctly, Fleet Provisioning feature will then create and register the thing/device with AWS IoT Core which will complete the provision process for the device. 
+When the AWS IoT Device Client's Fleet Provisioning feature is enabled and provisions the device for the first time, it will first create a permanent certificate, private key (if required), and will then attach a policy to the certificate in IoT Core which will provide the device with the permissions required to run other Device Client features such as Jobs, Secure Tunneling, and Device Defender. Once these resources are created correctly, Fleet Provisioning feature will then create and register the thing/device with AWS IoT Core which will complete the provision process for the device. 
 
 More details about AWS IoT Fleet Provisioning by claim can be found here: https://docs.aws.amazon.com/iot/latest/developerguide/provision-wo-cert.html
 
-*Note: It is worth noting here that if fleet provisioning fails to provision the new key, certificate or thing/device, the device client will abort with fatal error.*
+*Note: If the fleet provisioning feature fails to provision the new key, certificate or thing/device, the device client will abort with fatal error.*
 
-*Note: If CSR file is not provided, the Device Client will use Claim Certificate and Private key for provisioning the device.*
+*Note: If a CSR file is not provided, the Device Client will use Claim Certificate and Private key for provisioning the device.*
 
-*Note: Please make sure that the Claim certificate, private key and/or CSR file stored on device side have respective permissions applied to it as mentioned above in this document.*
+*Note: Please make sure that the Claim certificate, private key and/or CSR file stored on device side have respective permissions applied to it as mentioned above in the "File and Directory Permissions" section of the readme.*
 
-Check [CreateKeysAndCertificate](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-keys-cert) and [CreateCertificateFromCsr](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-cert-csr) API for more details.
+Refer to the [CreateKeysAndCertificate](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-keys-cert) and [CreateCertificateFromCsr](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-cert-csr) APIs for more details.
 
 ### Resources required for Fleet Provisioning feature
 
-The AWS IoT Device Client's Fleet Provisioning feature will require the following resources for provisioning the device. Claim Certificate and Private key will be used to create a Secure MQTT connection between Device Client and AWS IoT Core. CSR file is only required if you want to use [CreateCertificateFromCsr](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-cert-csr) API for creating permanent certificate. 
+The AWS IoT Device Client's Fleet Provisioning feature will require the following resources for provisioning the device. The Claim Certificate and Private Key will be used to create a secure MQTT connection between Device Client and AWS IoT Core. A CSR file is only required if you want to use the [CreateCertificateFromCsr](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-cert-csr) API for creating a permanent certificate. 
 
 * Claim Certificate
 * Private Key
@@ -531,7 +533,7 @@ The AWS IoT Device Client's Fleet Provisioning feature will require the followin
 
 ### Sample Claim Certificate Policy
 
-Claim Certificate policy will allow the Device Client to use the claim certificate to securely connect to AWS IoT Core and provision the device. It is worth noting here that the Claim certificate policy restricts Device Client to only provision the device; meaning, it will not allow the Device Client to start/run any other feature apart from Fleet Provisioning. 
+Claim Certificate policy will allow the Device Client to use the claim certificate to securely connect to AWS IoT Core and provision the device. Please note, the Claim certificate policy example provided below restricts the Device Client to only provision the device; it does not enable the Device Client to interact with any other cloud side features apart from Fleet Provisioning. 
 
 You can navigate to the *AWS IoT console -> Secure -> Policies* to create and attach a policy to the claim certificate.
 
@@ -566,7 +568,7 @@ You can navigate to the *AWS IoT console -> Secure -> Policies* to create and at
 
 ### Sample Fleet Provisioning Template
 
-Fleet Provisioning template is where you will define all of the resources and their properties which the Device Client will create while provisioning the device.
+A Fleet Provisioning template is a JSON document that uses parameters to describe the resources your device must use to interact with AWS IoT. When you use the Fleet Provisioning feature of the Device Client along with a template for your device, it automates the creation of these resources as part of the provisioning process.
 
 You can navigate to the *AWS IoT console -> Onboard -> Fleet Provisioning* Templates to create a Fleet Provisioning Template.
 
@@ -624,7 +626,7 @@ You can navigate to the *AWS IoT console -> Onboard -> Fleet Provisioning* Templ
 
 ### Sample Permanent Certificate Policy
 
-Create and attach the permanent certificate policy to the Fleet provisioning template. All of the new certificates created using your Fleet Provisioning template will have this certificate policy attached to it by default which which will provide the device with the permissions required to run other Device Client features such as Jobs, Secure Tunneling, and Device Defender. 
+Create and attach the permanent certificate policy to the Fleet provisioning template. All new certificates created using your Fleet Provisioning template will have this certificate policy attached to it by default, which will provide the device with the permissions required to invoke other Device Client features such as Jobs, Secure Tunneling, and Device Defender. 
 
 You can navigate to the *AWS IoT console -> Secure -> Policies* to create a permanent certificate policy.
 
@@ -657,7 +659,7 @@ You can navigate to the *AWS IoT console -> Secure -> Policies* to create a perm
 ```
 
 ### Fleet Provisioning Runtime Config
-Once the device is provisioned correctly, Fleet Provisioning feature will validate and store the information about newly provisioned resources in a runtime config file. This file will be further used by the Device Client while connecting to the AWS IoT Core. 
+Once the device is provisioned correctly, Fleet Provisioning feature will validate and store the information about newly provisioned resources in a runtime config file on your device. This file will be further used by the Device Client while connecting to AWS IoT Core. 
 
 The information stored in the runtime config file **created by Fleet Provisioning feature**:
 * Thing Name: Name of the newly provisioned thing
@@ -665,7 +667,8 @@ The information stored in the runtime config file **created by Fleet Provisionin
 * Private Key: Path of the newly created private key file
 * FP Status: A boolean value stating if the Fleet Provision process was completed earlier. 
 
-If the AWS IoT Device Client is restarted in future, it will read the runtime config file and will use the certificate, private key and thing name as mentioned in the runtime config while connecting to AWS IoT core **only if the value of 'completed-fp' parameter is true**. 
+The runtime-config file is stored on your device at ```~/.aws-iot-device-client/aws-iot-device-client-runtime.conf```.
+If the AWS IoT Device Client is restarted in future, it reads the runtime config file, and will use the certificate, private key and thing name mentioned in the runtime config while connecting to AWS IoT core **only if the value of 'completed-fp' parameter is true**. 
 
 ##### Example Fleet Provisioning Runtime Config:
 
@@ -681,18 +684,18 @@ Example runtime config created by Fleet Provisioning feature:
 }
 ```
 
-*Note: It is worth noting here, if at any point in future you want to provision the device again, then you might have to either delete or update the content (completed-fp -> false) of runtime config file before starting the Device client with Fleet Provisioning feature enabled.*
+*Note: If you wish to re-provision your device in the future, then you can either delete or update the runtime config file, setting the "completed-fp" parameter to "false" before starting the Device client with Fleet Provisioning feature enabled.*
 
 ### Configuration
 
-The Fleet Provisioning feature is disabled by default. You can enable it by a CLI argument or in the configuration file.
+The Fleet Provisioning feature is disabled by default. You can enable it by using a CLI argument or in the configuration file.
 
-Configuring the Fleet Provisioning feature via the command line:
+#### Configuring the Fleet Provisioning feature via the command line:
 ```
 $ ./aws-iot-device-client --enable-fleet-provisioning [true|false] --fleet-provisioning-template-name [Fleet-Provisioning-Template-Name] --csr-file [your/path/to/csr/file] 
 ```
 
-Configuring the Fleet Provisioning feature via JSON:
+#### Configuring the Fleet Provisioning feature via the JSON configuration file:
 ```
 {
     ...
@@ -711,18 +714,28 @@ Configuring the Fleet Provisioning feature via JSON:
 ## Device Defender Feature
 The Device Defender feature within the AWS IoT Device Client publishes [device-side metrics](https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html) about the device to the cloud.  You can then use the cloud-side service to identify unusual behavior that might indicate a compromised device by monitoring the behavior of your devices.
 
-To get started with the feature you'll only need to configure the following variables in your config file.
-(*These can also be configured from the command line*)  
+### Configuration
+To get started with the feature you will need to set the right configuration.
+#### Configuring the Device Defender feature via the command line:
 ```
-    "device-defender":	{
+$ ./aws-iot-device-client --enable-device-defender --device-defender-interval 300
+```
+
+#### Configuring the Device Defender feature via the JSON configuration file:
+```
+{
+  ...
+ "device-defender":	{
 		"enabled":	true,
 		"interval-in-seconds": 300
-	} 
+  }
+  ...
+}
 ```
 *It is important to note the interval's recommended minimum is 300 seconds, anything less than this is subject to being throttled.*
 Starting the AWS IoT Device Client will now start the Device Defender feature.  The device will begin publishing reports with all of the available [device-side metrics](https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html) (*You can see an example report at the bottom of the link*).
 
-The rest of the functionality and interaction with Device Defender will be on the cloud-side, where you can create things like security profiles and alarms to monitor the metrics your device publishes. [How to use AWS IoT Device Defender detect](https://docs.aws.amazon.com/iot/latest/developerguide/detect-HowToHowTo.html).
+The rest of the functionality and interaction with Device Defender will be on the cloud-side, where you can create security profiles and alarms to monitor the metrics your device publishes. In order to learn more about the cloud side features, please refer [How to use AWS IoT Device Defender detect](https://docs.aws.amazon.com/iot/latest/developerguide/detect-HowToHowTo.html).
 
 ## Secure Tunneling Feature
 The Secure Tunneling feature allows you to gain access to a remote device even if the device is behind a firewall. You may want to remote access to a device to troubleshoot, or update its configuration. For complete reference of Secure Tunneling, please see [here](https://docs.aws.amazon.com/iot/latest/developerguide/secure-tunneling.html).
@@ -732,12 +745,12 @@ Without the Device Client, if you wanted secure privileged access to a device by
 ### Configuration
 You can enable or disable the Secure Tunneling feature by a CLI argument or in the configuration file.
 
-To enable/disable the feature by CLI:
+#### Configuring the Secure Tunneling feature via the command line:
 ```
 $ ./aws-iot-device-client --enable-tunneling [true|false]
 ```
 
-To enable/disable the feature in the configuration file:
+#### Configuring the Secure Tunneling feature via the JSON configuration file:
 ```
 {
   ...
@@ -780,12 +793,12 @@ is unable to log to either the specified or default location.
 
 ### Logging Configuration Options
 
-Configuring the logger via the command line:
+#### Configuring the logger via the command line:
 ```
 ./aws-iot-device-client --log-level WARN --log-type FILE --log-file ./aws-iot-device-client.log
 ```
 
-Configuring the logger via JSON:
+#### Configuring the logger via the JSON configuration file:
 ```
     {
         ...
