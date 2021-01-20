@@ -5,11 +5,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- Resolution for Secure Tunneling SDK 16KB buffering issue. Current Secure Tunneling implementation will
+- Support for Secure Tunnel multiplexing
+
+## [1.0.X] - 2021-01-19
+### Added
+- Support for opening multiple tunnels at the same time
+- Handling for secure tunnel OnConnectionShutdown
+- Cross compilation toolchains for a number of platforms
+- Log sanitization to minimize attack surface and protect against printf vulnerabilities
+- Handling for empty json values, local keys and certificates
+- Log messaging to indicate permission information to the user
+- Limitations to log output for Job child processes
+- Exponential backoff retry for initial MQTT connection
+- Recovery mode for Jobs feature to handle duplicate notifications received after connectivity loss
+- Improved logging API startup behavior
+- Support for transferring log queues between logger implementations when configuration changes
+
+### Changed
+- README documentation to provide a better getting started experience
+- String handling in utility functions to reduce risk of string related security vulnerabilities
+
+### Removed
+
+### Fixed
+- Secure Tunneling SDK 16KB buffering issue. Previous Secure Tunneling implementation would
 encounter issues if data written to the buffer is larger than 16KB
-- Resolution for Device Defender reboot segfault. There is a known issue where rebooting the device
-while Device Defender is running as a service will trigger a segfault when the Device Client starts again after the reboot
-- Add support for transferring log queues between logger implementations when configuration changes (2021-01-07)
+- Device Defender reboot segfault. There was a known issue where rebooting the device
+  while Device Defender is running as a service would trigger a segfault when the Device Client starts again after the reboot
 
 ## [0.2.X] - 2020-12-23
 ### Added
@@ -40,5 +62,6 @@ while Device Defender is running as a service will trigger a segfault when the D
 ## Release Deltas
 
 [Unreleased](https://github.com/awslabs/aws-iot-device-client/compare/v0.2...HEAD)
+[1.0.X](https://github.com/awslabs/aws-iot-device-client/compare/v0.2...v1.0)
 [0.2.X](https://github.com/awslabs/aws-iot-device-client/compare/v0.0...v0.2)
 [0.0.X](https://github.com/awslabs/aws-iot-device-client/releases/tag/v0.0)
