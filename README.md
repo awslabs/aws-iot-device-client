@@ -746,7 +746,7 @@ The Secure Tunneling feature allows you to gain access to a remote device even i
 
 Without the Device Client, if you wanted secure privileged access to a device by secure tunneling, you would need to build and deploy a compatible binary of [local proxy](https://docs.aws.amazon.com/iot/latest/developerguide/local-proxy.html) onto the device. You'd also need to write, build and deploy [code](https://docs.aws.amazon.com/iot/latest/developerguide/agent-snippet.html) that subscribes to the MQTT new tunnel topic and launches the local proxy. When you use the Device Client, you can skip building the local proxy for your IoT device and writing code to subscribe to the relevant MQTT topics. You can simply build and deploy the Device Client to your IoT devices and enable the Secure Tunneling feature.
 
-### Secure Tunneling Runtime Configuration Options
+### Secure Tunneling Configuration Options
 You can enable or disable the Secure Tunneling feature by a CLI argument or in the configuration file.
 
 `enabled`: Whether or not the Secure Tunneling feature is enabled (True/False).
