@@ -25,33 +25,36 @@
     + [Debugging your Job](#debugging-your-job)
     + [Jobs Build Flags](#jobs-build-flags)
     + [Jobs Feature Configuration Options](#jobs-feature-configuration-options)
-      - [Configuring the Jobs feature via the command line:](#configuring-the-jobs-feature-via-the-command-line)
-      - [Configuring the Jobs feature via the JSON configuration file:](#configuring-the-jobs-feature-via-the-json-configuration-file)
+      - [Configuring the Jobs feature via the command line](#configuring-the-jobs-feature-via-the-command-line)
+      - [Configuring the Jobs feature via the JSON configuration file](#configuring-the-jobs-feature-via-the-json-configuration-file)
   * [Fleet Provisioning Feature](#fleet-provisioning-feature)
     + [Resources required for Fleet Provisioning feature](#resources-required-for-fleet-provisioning-feature)
     + [Sample Claim Certificate Policy](#sample-claim-certificate-policy)
-        * [Sample Policy:](#sample-policy)
+        * [Sample Policy](#sample-policy)
     + [Sample Fleet Provisioning Template](#sample-fleet-provisioning-template)
-        * [Sample Template:](#sample-template)
+        * [Sample Template](#sample-template)
     + [Sample Permanent Certificate Policy](#sample-permanent-certificate-policy)
-        * [Sample (FPCertPolicy) Policy:](#sample-fpcertpolicy-policy)
+        * [Sample (FPCertPolicy) Policy](#sample-fpcertpolicy-policy)
     + [Fleet Provisioning Runtime Configuration File](#fleet-provisioning-runtime-configuration-file)
-        * [Example Fleet Provisioning Runtime Configuration File:](#example-fleet-provisioning-runtime-configuration-file)
+        * [Example Fleet Provisioning Runtime Configuration File](#example-fleet-provisioning-runtime-configuration-file)
     + [Fleet Provisioning Feature Configuration Options](#fleet-provisioning-feature-configuration-options)
-        - [Configuring the Fleet Provisioning feature via the command line:](#configuring-the-fleet-provisioning-feature-via-the-command-line)
-        - [Configuring the Fleet Provisioning feature via the JSON configuration file:](#configuring-the-fleet-provisioning-feature-via-the-json-configuration-file)
+      - [Configuring the Fleet Provisioning feature via the command line](#configuring-the-fleet-provisioning-feature-via-the-command-line)
+      - [Configuring the Fleet Provisioning feature via the JSON configuration file](#configuring-the-fleet-provisioning-feature-via-the-json-configuration-file)
   * [Device Defender Feature](#device-defender-feature)
     + [Device Defender Feature Configuration Options](#device-defender-feature-configuration-options)
-        - [Configuring the Device Defender feature via the command line:](#configuring-the-device-defender-feature-via-the-command-line)
-        - [Configuring the Device Defender feature via the JSON configuration file:](#configuring-the-device-defender-feature-via-the-json-configuration-file) 
+      - [Configuring the Device Defender feature via the command line](#configuring-the-device-defender-feature-via-the-command-line)
+      - [Configuring the Device Defender feature via the JSON configuration file](#configuring-the-device-defender-feature-via-the-json-configuration-file)
   * [Secure Tunneling Feature](#secure-tunneling-feature)
     + [Secure Tunneling Feature Configuration Options](#secure-tunneling-feature-configuration-options)
-        - [Configuring the Secure Tunneling feature via the command line:](#configuring-the-secure-tunneling-feature-via-the-command-line)
-        - [Configuring the Secure Tunneling feature via the JSON configuration file:](#configuring-the-secure-tunneling-feature-via-the-json-configuration-file)
+      - [Configuring the Secure Tunneling feature via the command line](#configuring-the-secure-tunneling-feature-via-the-command-line)
+      - [Configuring the Secure Tunneling feature via the JSON configuration file](#configuring-the-secure-tunneling-feature-via-the-json-configuration-file)
     + [Example steps to use the Secure Tunneling feature](#example-steps-to-use-the-secure-tunneling-feature)
     + [Limitation](#limitation)
   * [Logging](#logging)
     + [Logging Configuration Options](#logging-configuration-options)
+      - [Configuring the logger via the command line](#configuring-the-logger-via-the-command-line)
+      - [Configuring the logger via the JSON configuration file](#configuring-the-logger-via-the-json-configuration-file)
+  * [Documentation](#documentation)
   * [Security](#security)
   * [License](#license)
     
@@ -76,8 +79,7 @@ The modular IoT Device Client consists of a “base client” and discrete “cl
 * The client-side Fleet Provisioning feature enables you to replace provisional credentials with device-specific ones
   when you onboard a fleet of devices to AWS IoT Core. It creates a device specific certificate and private key, and registers the device on AWS IoT Core.
 ### List of Supported Platforms
-The AWS IoT Device Client currently works by default on IoT devices with common microprocessors (x86_64 or ARM architectures), and common Linux software environments (Debian, Ubuntu, and RHEL).
-Tested devices: Raspberry Pi 4, <Add others>
+The AWS IoT Device Client currently works by default on IoT devices with common microprocessors (x86_64, ARM, MIPS architectures), and common Linux software environments (Debian, Ubuntu, and RHEL).
 
 ## Installation
 
@@ -491,7 +493,7 @@ update the job based on the performance of the specified executable. This direct
 of `700`, and any script/executable in this directory should have permissions of `700`. If these permissions are not found, 
 the Jobs feature will not execute the scripts or executables in this directory. 
 
-#### Configuring the Jobs feature via the command line:
+#### Configuring the Jobs feature via the command line
 ```
 ./aws-iot-device-client --enable-jobs [true|false] --jobs-handler-dir [your/path/to/job/handler/directory/]
 ```
@@ -501,7 +503,7 @@ Example:
 ./aws-iot-device-client --enable-jobs true --jobs-handler-dir ~/.aws-iot-device-client/jobs/
 ```
 
-#### Configuring the Jobs feature via the JSON configuration file:
+#### Configuring the Jobs feature via the JSON configuration file
 ```
     {
         ...
@@ -556,7 +558,7 @@ Claim Certificate policy will allow the Device Client to use the claim certifica
 
 You can navigate to the *AWS IoT console -> Secure -> Policies* to create and attach a policy to the claim certificate.
 
-##### Sample Policy:
+##### Sample Policy
 
 ```
 {
@@ -591,7 +593,7 @@ A Fleet Provisioning template is a JSON document that uses parameters to describ
 
 You can navigate to the *AWS IoT console -> Onboard -> Fleet Provisioning* Templates to create a Fleet Provisioning Template.
 
-##### Sample Template:
+##### Sample Template
 
 ```
 {
@@ -649,7 +651,7 @@ Create and attach the permanent certificate policy to the Fleet provisioning tem
 
 You can navigate to the *AWS IoT console -> Secure -> Policies* to create a permanent certificate policy.
 
-##### Sample (FPCertPolicy) Policy:
+##### Sample (FPCertPolicy) Policy
 
 ```
 {
@@ -689,7 +691,7 @@ The information stored in the runtime config file **created by Fleet Provisionin
 The runtime-config file is stored on your device at ```~/.aws-iot-device-client/aws-iot-device-client-runtime.conf```.
 If the AWS IoT Device Client is restarted in future, it reads the runtime config file, and will use the certificate, private key and thing name mentioned in the runtime config while connecting to AWS IoT core **only if the value of 'completed-fp' parameter is true**. 
 
-##### Example Fleet Provisioning Runtime Configuration File:
+##### Example Fleet Provisioning Runtime Configuration File
 
 Example runtime config created by Fleet Provisioning feature:
 
@@ -705,7 +707,7 @@ Example runtime config created by Fleet Provisioning feature:
 
 *Note: If you wish to re-provision your device in the future, then you can either delete or update the runtime config file, setting the "completed-fp" parameter to "false" before starting the Device client with Fleet Provisioning feature enabled.*
 
-### Fleet Provisioning Feature Configuration Options:
+### Fleet Provisioning Feature Configuration Options
 
 The Fleet Provisioning feature is disabled by default. You can use the JSON config file and/or CLI options to enable/disable the feature.
 
@@ -721,12 +723,12 @@ To get started with the feature you will need to set the right configuration. Th
 
 `csr-file`: Path to the CSR file. If CSR file is not provided, the Device Client will use Private key and Claim certificate for provisioning the device
 
-#### Configuring the Fleet Provisioning feature via the command line:
+#### Configuring the Fleet Provisioning feature via the command line
 ```
 $ ./aws-iot-device-client --enable-fleet-provisioning [true|false] --fleet-provisioning-template-name [Fleet-Provisioning-Template-Name] --csr-file [your/path/to/csr/file] 
 ```
 
-#### Configuring the Fleet Provisioning feature via the JSON configuration file:
+#### Configuring the Fleet Provisioning feature via the JSON configuration file
 ```
 {
     ...
@@ -752,12 +754,12 @@ To get started with the feature you will need to set the right configuration. Th
  
 `device-defender-interval`: Defines the interval in seconds between each cycle of gathering and reporting Device Defender metrics. The client-side Device Defender feature gathers your device side metrics and posts them to the Device Defender cloud service.
 
-#### Configuring the Device Defender feature via the command line:
+#### Configuring the Device Defender feature via the command line
 ```
 $ ./aws-iot-device-client --enable-device-defender [true|false] --device-defender-interval 300
 ```
 
-#### Configuring the Device Defender feature via the JSON configuration file:
+#### Configuring the Device Defender feature via the JSON configuration file
 ```
 {
   ...
@@ -784,12 +786,12 @@ You can enable or disable the Secure Tunneling feature by a CLI argument or in t
 
 `enabled`: Whether or not the Secure Tunneling feature is enabled (True/False).
 
-#### Configuring the Secure Tunneling feature via the command line:
+#### Configuring the Secure Tunneling feature via the command line
 ```
 $ ./aws-iot-device-client --enable-tunneling [true|false]
 ```
 
-#### Configuring the Secure Tunneling feature via the JSON configuration file:
+#### Configuring the Secure Tunneling feature via the JSON configuration file
 ```
 {
   ...
@@ -832,12 +834,12 @@ is unable to log to either the specified or default location.
 
 ### Logging Configuration Options
 
-#### Configuring the logger via the command line:
+#### Configuring the logger via the command line
 ```
 ./aws-iot-device-client --log-level WARN --log-type FILE --log-file ./aws-iot-device-client.log
 ```
 
-#### Configuring the logger via the JSON configuration file:
+#### Configuring the logger via the JSON configuration file
 ```
     {
         ...
