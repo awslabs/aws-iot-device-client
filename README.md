@@ -853,6 +853,31 @@ If you've decided to add additional logs to the AWS IoT Device Client's source c
 logging API macros can be found in `source/logging/LoggerFactory.h` and typically follow the convention of 
 `LOG_XXXX` for simple log messages and `LOGM_XXXX` for logs that should be formatted with variadic arguments. 
 
+## Documentation
+
+The AWS IoT Device Client project supports the generation of [Doxygen](https://www.doxygen.nl/index.html) documentation.
+To generate the documentation, you'll first need to install Doxygen on your machine. This can be done using Homebrew on Mac
+as follows:
+
+```
+brew install doxygen # https://formulae.brew.sh/formula/doxygen
+```
+
+and on Linux (Ubuntu):
+
+```
+sudo apt-get install doxygen
+```
+
+Once Doxygen is installed on your machine, you can generate the documentation as follows:
+
+```
+cd doc # Navigate into the documentation folder
+doxygen # Doxygen bin generates HTML and Latex output
+```
+
+To view the HTML documentation, you can then navigate into the HTML folder and open `index.html` in your preferred web browser. 
+
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
