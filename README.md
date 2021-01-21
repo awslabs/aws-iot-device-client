@@ -79,7 +79,7 @@ The modular IoT Device Client consists of a “base client” and discrete “cl
 * The client-side Fleet Provisioning feature enables you to replace provisional credentials with device-specific ones
   when you onboard a fleet of devices to AWS IoT Core. It creates a device specific certificate and private key, and registers the device on AWS IoT Core.
 ### List of Supported Platforms
-The AWS IoT Device Client currently works by default on IoT devices with common microprocessors (x86_64, ARM, MIPS architectures), and common Linux software environments (Debian, Ubuntu, and RHEL).
+The AWS IoT Device Client currently works by default on IoT devices with common microprocessors (x86_64, ARM architectures), and common Linux software environments (Debian, Ubuntu, and RHEL).
 
 ## Installation
 
