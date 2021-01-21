@@ -4,10 +4,12 @@ All notable changes to the AWS IoT Device Client will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-- Support for Secure Tunnel multiplexing
+## [Known Issues]
+- [Device Client aborts on Red Hat Enterprise Linux ARM](https://github.com/awslabs/aws-iot-device-client/issues/87)
+- [Device Client crashes due to SIGSEGV on Ubuntu x86](https://github.com/awslabs/aws-iot-device-client/issues/86)
+- [Device Client crashes on Red Hat Enterprise Linux due to SIGILL](https://github.com/awslabs/aws-iot-device-client/issues/85)
 
-## [1.0.X] - 2021-01-19
+## [1.0.X] - 2021-01-21
 ### Added
 - Support for opening multiple tunnels at the same time
 - Handling for secure tunnel OnConnectionShutdown
@@ -15,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Log sanitization to minimize attack surface and protect against printf vulnerabilities
 - Handling for empty json values, local keys and certificates
 - Log messaging to indicate permission information to the user
+- Ownership validation against required files
 - Limitations to log output for Job child processes
 - Exponential backoff retry for initial MQTT connection
 - Recovery mode for Jobs feature to handle duplicate notifications received after connectivity loss
@@ -24,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - README documentation to provide a better getting started experience
 - String handling in utility functions to reduce risk of string related security vulnerabilities
+- Improved CLI handling for feature enable/disable to maintain parity with .conf JSON file
+- Device Client no longer requires presence of a configuration file as long as required values are provided via CLI
 
 ### Removed
 
@@ -61,7 +66,7 @@ encounter issues if data written to the buffer is larger than 16KB
 
 ## Release Deltas
 
-[Unreleased](https://github.com/awslabs/aws-iot-device-client/compare/v0.2...HEAD)
+[Unreleased](https://github.com/awslabs/aws-iot-device-client/compare/v1.0...HEAD)
 [1.0.X](https://github.com/awslabs/aws-iot-device-client/compare/v0.2...v1.0)
 [0.2.X](https://github.com/awslabs/aws-iot-device-client/compare/v0.0...v0.2)
 [0.0.X](https://github.com/awslabs/aws-iot-device-client/releases/tag/v0.0)
