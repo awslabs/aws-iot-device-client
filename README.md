@@ -37,7 +37,7 @@
         * [Sample (FPCertPolicy) Policy:](#sample-fpcertpolicy-policy)
     + [Fleet Provisioning Runtime Configuration File](#fleet-provisioning-runtime-configuration-file)
         * [Example Fleet Provisioning Runtime Configuration File:](#example-fleet-provisioning-runtime-configuration-file)
-    + [Fleet Provisioning Feature Configuration Options](#fleet-provisioning-feature-configuration-options:)
+    + [Fleet Provisioning Feature Configuration Options](#fleet-provisioning-feature-configuration-options)
         - [Configuring the Fleet Provisioning feature via the command line:](#configuring-the-fleet-provisioning-feature-via-the-command-line)
         - [Configuring the Fleet Provisioning feature via the JSON configuration file:](#configuring-the-fleet-provisioning-feature-via-the-json-configuration-file)
   * [Device Defender Feature](#device-defender-feature)
