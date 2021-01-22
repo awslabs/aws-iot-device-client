@@ -274,7 +274,15 @@ constexpr char PlainConfig::LogConfig::JSON_KEY_LOG_LEVEL[];
 constexpr char PlainConfig::LogConfig::JSON_KEY_LOG_TYPE[];
 constexpr char PlainConfig::LogConfig::JSON_KEY_LOG_FILE[];
 
-int PlainConfig::LogConfig::ParseLogLevel(string level)
+constexpr char PlainConfig::LogConfig::CLI_ENABLE_SDK_LOGGING[];
+constexpr char PlainConfig::LogConfig::CLI_SDK_LOG_LEVEL[];
+constexpr char PlainConfig::LogConfig::CLI_SDK_LOG_FILE[];
+
+constexpr char PlainConfig::LogConfig::JSON_KEY_ENABLE_SDK_LOGGING[];
+constexpr char PlainConfig::LogConfig::JSON_KEY_SDK_LOG_LEVEL[];
+constexpr char PlainConfig::LogConfig::JSON_KEY_SDK_LOG_FILE[];
+
+int PlainConfig::LogConfig::ParseDeviceClientLogLevel(string level)
 {
     string temp = level;
     std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c) { return std::toupper(c); });
@@ -297,12 +305,48 @@ int PlainConfig::LogConfig::ParseLogLevel(string level)
     }
     else
     {
-        throw std::invalid_argument(
-            FormatMessage("Provided log level %s is not a known log level", Sanitize(level).c_str()));
+        throw std::invalid_argument(FormatMessage(
+            "Provided log level %s is not a known log level for the AWS IoT Device Client", Sanitize(level).c_str()));
     }
 }
 
-string PlainConfig::LogConfig::ParseLogType(string value)
+Aws::Crt::LogLevel PlainConfig::LogConfig::ParseSDKLogLevel(string level)
+{
+    string temp = level;
+    std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c) { return std::toupper(c); });
+
+    if ("TRACE" == temp)
+    {
+        return Aws::Crt::LogLevel::Trace;
+    }
+    else if ("DEBUG" == temp)
+    {
+        return Aws::Crt::LogLevel::Debug;
+    }
+    else if ("INFO" == temp)
+    {
+        return Aws::Crt::LogLevel::Info;
+    }
+    else if ("WARN" == temp)
+    {
+        return Aws::Crt::LogLevel::Warn;
+    }
+    else if ("ERROR" == temp)
+    {
+        return Aws::Crt::LogLevel::Error;
+    }
+    else if ("FATAL" == temp)
+    {
+        return Aws::Crt::LogLevel::Fatal;
+    }
+    else
+    {
+        throw std::invalid_argument(
+            FormatMessage("Provided log level %s is not a known log level for the SDK", Sanitize(level).c_str()));
+    }
+}
+
+string PlainConfig::LogConfig::ParseDeviceClientLogType(string value)
 {
     string temp = value;
     // Convert to lowercase for comparisons
@@ -334,7 +378,7 @@ bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
         {
             try
             {
-                logLevel = ParseLogLevel(json.GetString(jsonKey).c_str());
+                deviceClientlogLevel = ParseDeviceClientLogLevel(json.GetString(jsonKey).c_str());
             }
             catch (const std::invalid_argument &e)
             {
@@ -355,7 +399,7 @@ bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
         {
             try
             {
-                type = ParseLogType(json.GetString(jsonKey).c_str());
+                deviceClientLogtype = ParseDeviceClientLogType(json.GetString(jsonKey).c_str());
             }
             catch (const std::invalid_argument &e)
             {
@@ -374,7 +418,50 @@ bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
     {
         if (!json.GetString(jsonKey).empty())
         {
-            file = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            deviceClientLogFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
+    }
+
+    jsonKey = JSON_KEY_ENABLE_SDK_LOGGING;
+    if (json.ValueExists(jsonKey) && json.GetBool(jsonKey))
+    {
+        if (json.GetBool(jsonKey))
+        {
+            sdkLoggingEnabled = true;
+        }
+    }
+
+    jsonKey = JSON_KEY_SDK_LOG_LEVEL;
+    if (json.ValueExists(jsonKey))
+    {
+        if (!json.GetString(jsonKey).empty())
+        {
+            try
+            {
+                sdkLogLevel = ParseSDKLogLevel(json.GetString(jsonKey).c_str());
+            }
+            catch (const std::invalid_argument &e)
+            {
+                LOGM_ERROR(Config::TAG, "Unable to parse incoming SDK log type value passed via JSON: %s", e.what());
+                return false;
+            }
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
+    }
+
+    jsonKey = JSON_KEY_SDK_LOG_FILE;
+    if (json.ValueExists(jsonKey))
+    {
+        if (!json.GetString(jsonKey).empty())
+        {
+            sdkLogFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
         else
         {
@@ -391,7 +478,7 @@ bool PlainConfig::LogConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     {
         try
         {
-            logLevel = ParseLogLevel(cliArgs.at(CLI_LOG_LEVEL));
+            deviceClientlogLevel = ParseDeviceClientLogLevel(cliArgs.at(CLI_LOG_LEVEL));
         }
         catch (const std::invalid_argument &e)
         {
@@ -404,7 +491,7 @@ bool PlainConfig::LogConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     {
         try
         {
-            type = ParseLogType(cliArgs.at(CLI_LOG_TYPE));
+            deviceClientLogtype = ParseDeviceClientLogType(cliArgs.at(CLI_LOG_TYPE));
         }
         catch (const std::invalid_argument &e)
         {
@@ -415,7 +502,31 @@ bool PlainConfig::LogConfig::LoadFromCliArgs(const CliArgs &cliArgs)
 
     if (cliArgs.count(CLI_LOG_FILE))
     {
-        file = FileUtils::ExtractExpandedPath(cliArgs.at(CLI_LOG_FILE).c_str());
+        deviceClientLogFile = FileUtils::ExtractExpandedPath(cliArgs.at(CLI_LOG_FILE).c_str());
+    }
+
+    if (cliArgs.count(CLI_ENABLE_SDK_LOGGING))
+    {
+        sdkLoggingEnabled = true;
+    }
+
+    if (cliArgs.count(CLI_SDK_LOG_FILE))
+    {
+        sdkLogFile = FileUtils::ExtractExpandedPath(cliArgs.at(CLI_SDK_LOG_FILE).c_str());
+    }
+
+    if (cliArgs.count(CLI_SDK_LOG_LEVEL))
+    {
+        try
+        {
+            sdkLogLevel = ParseSDKLogLevel(cliArgs.at(CLI_SDK_LOG_LEVEL));
+        }
+        catch (const std::invalid_argument &e)
+        {
+            LOGM_ERROR(
+                Config::TAG, "Unable to parse incoming sdk log level value passed via command line: %s", e.what());
+            return false;
+        }
     }
 
     return true;
@@ -807,6 +918,9 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {PlainConfig::LogConfig::CLI_LOG_LEVEL, true, false, nullptr},
         {PlainConfig::LogConfig::CLI_LOG_TYPE, true, false, nullptr},
         {PlainConfig::LogConfig::CLI_LOG_FILE, true, false, nullptr},
+        {PlainConfig::LogConfig::CLI_ENABLE_SDK_LOGGING, false, false, nullptr},
+        {PlainConfig::LogConfig::CLI_SDK_LOG_LEVEL, true, false, nullptr},
+        {PlainConfig::LogConfig::CLI_SDK_LOG_FILE, true, false, nullptr},
 
         {PlainConfig::Jobs::CLI_ENABLE_JOBS, true, false, nullptr},
         {PlainConfig::Jobs::CLI_HANDLER_DIR, true, false, nullptr},
@@ -1032,6 +1146,9 @@ void Config::PrintHelpMessage()
         "%s <[DEBUG, INFO, WARN, ERROR]>:\t\t\t\tSpecify the log level for the AWS IoT Device Client\n"
         "%s <[STDOUT, FILE]>:\t\t\t\t\t\tSpecify the logger implementation to use.\n"
         "%s <File-Location>:\t\t\t\t\t\tWrite logs to specified log file when using the file logger.\n"
+        "%s \t\t\t\t\t\t\tEnable SDK Logging.\n"
+        "%s <[Trace, Debug, Info, Warn, Error, Fatal]>:\t\tSpecify the log level for the SDK\n"
+        "%s <File-Location>:\t\t\t\t\t\tWrite SDK logs to specified log file.\n"
         "%s [true|false]:\t\t\t\t\t\tEnables/Disables Jobs feature\n"
         "%s [true|false]:\t\t\t\t\tEnables/Disables Tunneling feature\n"
         "%s [true|false]:\t\t\t\t\tEnables/Disables Device Defender feature\n"
@@ -1045,7 +1162,7 @@ void Config::PrintHelpMessage()
         "%s <region>:\t\t\t\t\t\tUse Specified AWS Region for Secure Tunneling\n"
         "%s <service>:\t\t\t\t\t\tConnect secure tunnel to specific service\n"
         "%s:\t\t\t\t\tDisable MQTT new tunnel notification for Secure Tunneling\n"
-        "%s <interval>:\t\t\tPositive integer to publish Device Defender metrics\n"
+        "%s <interval>:\t\t\t\t\tPositive integer to publish Device Defender metrics\n"
         "%s <template-name>:\t\t\tUse specified Fleet Provisioning template name\n"
         "%s <csr-file-path>:\t\t\t\t\t\tUse specified CSR file to generate a certificate by keeping user private key "
         "secure. "
@@ -1060,6 +1177,9 @@ void Config::PrintHelpMessage()
         PlainConfig::LogConfig::CLI_LOG_LEVEL,
         PlainConfig::LogConfig::CLI_LOG_TYPE,
         PlainConfig::LogConfig::CLI_LOG_FILE,
+        PlainConfig::LogConfig::CLI_ENABLE_SDK_LOGGING,
+        PlainConfig::LogConfig::CLI_SDK_LOG_LEVEL,
+        PlainConfig::LogConfig::CLI_SDK_LOG_FILE,
         PlainConfig::Jobs::CLI_ENABLE_JOBS,
         PlainConfig::Tunneling::CLI_ENABLE_TUNNELING,
         PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER,

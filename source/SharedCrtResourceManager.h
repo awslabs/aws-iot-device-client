@@ -39,7 +39,7 @@ namespace Aws
                 struct aws_allocator *allocator;
 
                 bool locateCredentials(const PlainConfig &config);
-                int buildClient();
+                int buildClient(const PlainConfig &config);
                 void initializeAllocator();
 
               public:
