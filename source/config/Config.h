@@ -4,6 +4,7 @@
 #ifndef DEVICE_CLIENT_CONFIG_H
 #define DEVICE_CLIENT_CONFIG_H
 
+#include <aws/crt/Api.h>
 #include <aws/crt/JsonObject.h>
 #include <aws/crt/Optional.h>
 #include <fstream>
@@ -88,8 +89,9 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
-                    int ParseLogLevel(std::string value);
-                    std::string ParseLogType(std::string value);
+                    int ParseDeviceClientLogLevel(std::string value);
+                    Aws::Crt::LogLevel ParseSDKLogLevel(std::string value);
+                    std::string ParseDeviceClientLogType(std::string value);
 
                     static constexpr char LOG_TYPE_FILE[] = "file";
                     static constexpr char LOG_TYPE_STDOUT[] = "stdout";
@@ -102,9 +104,22 @@ namespace Aws
                     static constexpr char JSON_KEY_LOG_TYPE[] = "type";
                     static constexpr char JSON_KEY_LOG_FILE[] = "file";
 
-                    int logLevel{3};
-                    std::string type;
-                    std::string file;
+                    static constexpr char CLI_ENABLE_SDK_LOGGING[] = "--enable-sdk-logging";
+                    static constexpr char CLI_SDK_LOG_LEVEL[] = "--sdk-log-level";
+                    static constexpr char CLI_SDK_LOG_FILE[] = "--sdk-log-file";
+
+                    static constexpr char JSON_KEY_ENABLE_SDK_LOGGING[] = "enable-sdk-logging";
+                    static constexpr char JSON_KEY_SDK_LOG_LEVEL[] = "sdk-log-level";
+                    static constexpr char JSON_KEY_SDK_LOG_FILE[] = "sdk-log-file";
+
+                    static constexpr char DEFAULT_SDK_LOG_FILE[] = "/var/log/aws-iot-device-client/sdk.log";
+
+                    int deviceClientlogLevel{3};
+                    std::string deviceClientLogtype;
+                    std::string deviceClientLogFile;
+                    bool sdkLoggingEnabled = false;
+                    Aws::Crt::LogLevel sdkLogLevel = Aws::Crt::LogLevel::Trace;
+                    std::string sdkLogFile = DEFAULT_SDK_LOG_FILE;
                 };
                 LogConfig logConfig;
 

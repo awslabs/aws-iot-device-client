@@ -16,7 +16,8 @@ shared_ptr<Logger> LoggerFactory::getLoggerInstance()
 
 bool LoggerFactory::reconfigure(const PlainConfig &config)
 {
-    if (config.logConfig.type == config.logConfig.LOG_TYPE_FILE && dynamic_cast<FileLogger *>(logger.get()) == nullptr)
+    if (config.logConfig.deviceClientLogtype == config.logConfig.LOG_TYPE_FILE &&
+        dynamic_cast<FileLogger *>(logger.get()) == nullptr)
     {
         logger->stop();
         unique_ptr<LogQueue> logQueue = logger->takeLogQueue();
@@ -24,7 +25,7 @@ bool LoggerFactory::reconfigure(const PlainConfig &config)
         logger->setLogQueue(std::move(logQueue));
     }
     else if (
-        config.logConfig.type == config.logConfig.LOG_TYPE_STDOUT &&
+        config.logConfig.deviceClientLogtype == config.logConfig.LOG_TYPE_STDOUT &&
         dynamic_cast<StdOutLogger *>(logger.get()) == nullptr)
     {
         logger->stop();

@@ -5,6 +5,7 @@
 #include "logging/LoggerFactory.h"
 #include "util/FileUtils.h"
 #include "util/Retry.h"
+#include "util/StringUtils.h"
 
 #include <aws/crt/Api.h>
 #include <sys/stat.h>
@@ -23,7 +24,7 @@ constexpr int SharedCrtResourceManager::DEFAULT_WAIT_TIME_SECONDS;
 bool SharedCrtResourceManager::initialize(const PlainConfig &config)
 {
     initializeAllocator();
-    initialized = buildClient() == SharedCrtResourceManager::SUCCESS;
+    initialized = buildClient(config) == SharedCrtResourceManager::SUCCESS;
     return initialized;
 }
 
@@ -88,11 +89,23 @@ void SharedCrtResourceManager::initializeAllocator()
     allocator = aws_mem_tracer_new(aws_default_allocator(), nullptr, AWS_MEMTRACE_BYTES, 0);
 }
 
-int SharedCrtResourceManager::buildClient()
+int SharedCrtResourceManager::buildClient(const PlainConfig &config)
 {
     // We MUST declare an instance of the ApiHandle to perform global initialization
     // of the SDK libraries
     apiHandle = unique_ptr<ApiHandle>(new ApiHandle());
+    if (config.logConfig.sdkLoggingEnabled)
+    {
+        apiHandle->InitializeLogging(config.logConfig.sdkLogLevel, config.logConfig.sdkLogFile.c_str());
+        LOGM_INFO(TAG, "SDK logging is enabled. Check %s for SDK logs.", Sanitize(config.logConfig.sdkLogFile).c_str());
+    }
+    else
+    {
+        LOG_INFO(
+            TAG,
+            "SDK logging is disabled. Enable it with --enable-sdk-logging on the command line or "
+            "logging::enable-sdk-logging in your configuration file");
+    }
 
     eventLoopGroup = unique_ptr<EventLoopGroup>(
         new EventLoopGroup(1 // The number of threads used depends on your use-case. IF you have a maximum of less than

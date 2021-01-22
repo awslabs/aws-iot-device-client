@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
         dynamic_cast<StdOutLogger *>(LoggerFactory::getLoggerInstance().get()) == nullptr)
     {
         // We attempted to start a non-stdout logger and failed, so we should fall back to STDOUT
-        config.config.logConfig.type = config.config.logConfig.LOG_TYPE_STDOUT;
+        config.config.logConfig.deviceClientLogtype = config.config.logConfig.LOG_TYPE_STDOUT;
         LoggerFactory::reconfigure(config.config);
     }
 

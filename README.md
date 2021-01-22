@@ -53,7 +53,9 @@
   * [Logging](#logging)
     + [Logging Configuration Options](#logging-configuration-options)
       - [Configuring the logger via the command line](#configuring-the-logger-via-the-command-line)
+      - [Configuring SDK logging via the command line](#configuring-sdk-logging-via-the-command-line)
       - [Configuring the logger via the JSON configuration file](#configuring-the-logger-via-the-json-configuration-file)
+      - [Configuring SDK logging via the JSON configuration file](#configuring-sdk-logging-via-the-json-configuration-file)
   * [Documentation](#documentation)
   * [Additional Resources](#additional-resources)
   * [Security](#security)
@@ -833,11 +835,21 @@ the default log location of `/var/log/aws-iot-device-client/aws-iot-device-clien
 elevated permissions to log to this location, and will automatically fall back to STDOUT logging if the Device Client
 is unable to log to either the specified or default location. 
 
+The AWS IoT Device Client also provides the ability to enable native SDK logging from the AWS Common Runtime (CRT). By
+default, enabling this functionality will log TRACE level logs and above to `/var/log/aws-iot-device-client/sdk.log`
+but these defaults can be overridden as show below. If no configuration options are passed, SDK logging is disabled
+by default.
+
 ### Logging Configuration Options
 
 #### Configuring the logger via the command line
 ```
 ./aws-iot-device-client --log-level WARN --log-type FILE --log-file ./aws-iot-device-client.log
+```
+
+#### Configuring SDK logging via the command line
+```
+./aws-iot-device-client --enable-sdk-logging --sdk-log-level Warn --sdk-log-file /home/user/my-log-file.log
 ```
 
 #### Configuring the logger via the JSON configuration file
@@ -855,6 +867,20 @@ is unable to log to either the specified or default location.
 If you've decided to add additional logs to the AWS IoT Device Client's source code, the high-level
 logging API macros can be found in `source/logging/LoggerFactory.h` and typically follow the convention of 
 `LOG_XXXX` for simple log messages and `LOGM_XXXX` for logs that should be formatted with variadic arguments. 
+
+#### Configuring SDK logging via the JSON configuration file
+```
+{
+        ...
+        "logging": {
+            ...
+            "enable-sdk-logging": true,
+            "sdk-log-level": "Warn",
+            "sdk-log-file": "/home/user/my-log-file.log"
+        }
+        ...
+    }
+```
 
 ## Documentation
 

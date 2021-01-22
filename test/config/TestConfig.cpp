@@ -47,9 +47,9 @@ TEST(Config, AllFeaturesEnabled)
     ASSERT_STREQ("key", config.key->c_str());
     ASSERT_STREQ("root-ca", config.rootCa->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_STREQ("file", config.logConfig.type.c_str());
-    ASSERT_STREQ("./aws-iot-device-client.log", config.logConfig.file.c_str());
-    ASSERT_EQ(3, config.logConfig.logLevel); // Expect DEBUG log level, which is 3
+    ASSERT_STREQ("file", config.logConfig.deviceClientLogtype.c_str());
+    ASSERT_STREQ("./aws-iot-device-client.log", config.logConfig.deviceClientLogFile.c_str());
+    ASSERT_EQ(3, config.logConfig.deviceClientlogLevel); // Expect DEBUG log level, which is 3
     ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
     ASSERT_TRUE(config.deviceDefender.enabled);
@@ -257,7 +257,94 @@ TEST(Config, LoggingConfigurationCLI)
     config.LoadFromJson(jsonView);
     config.LoadFromCliArgs(cliArgs);
 
-    ASSERT_EQ(1, config.logConfig.logLevel); // Expect WARN log level, which is 1
-    ASSERT_STREQ("file", config.logConfig.type.c_str());
-    ASSERT_STREQ("./client.log", config.logConfig.file.c_str());
+    ASSERT_EQ(1, config.logConfig.deviceClientlogLevel); // Expect WARN log level, which is 1
+    ASSERT_STREQ("file", config.logConfig.deviceClientLogtype.c_str());
+    ASSERT_STREQ("./client.log", config.logConfig.deviceClientLogFile.c_str());
+}
+
+TEST(Config, SDKLoggingConfigurationCLIDefaults)
+{
+    CliArgs cliArgs;
+
+    PlainConfig config;
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_FALSE(config.logConfig.sdkLoggingEnabled);
+    ASSERT_EQ(Aws::Crt::LogLevel::Trace, config.logConfig.sdkLogLevel);
+    ASSERT_STREQ(PlainConfig::LogConfig::DEFAULT_SDK_LOG_FILE, config.logConfig.sdkLogFile.c_str());
+}
+
+TEST(Config, SDKLoggingConfigurationCLIOverride)
+{
+    CliArgs cliArgs;
+    cliArgs[PlainConfig::LogConfig::CLI_ENABLE_SDK_LOGGING] = "";
+    cliArgs[PlainConfig::LogConfig::CLI_SDK_LOG_LEVEL] = "Warn";
+    cliArgs[PlainConfig::LogConfig::CLI_SDK_LOG_FILE] = "./sdk.log";
+
+    PlainConfig config;
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_TRUE(config.logConfig.sdkLoggingEnabled);
+    ASSERT_EQ(Aws::Crt::LogLevel::Warn, config.logConfig.sdkLogLevel);
+    ASSERT_STREQ("./sdk.log", config.logConfig.sdkLogFile.c_str());
+}
+
+TEST(Config, SDKLoggingConfigurationJsonDefaults)
+{
+    constexpr char jsonString[] = R"(
+{
+	"endpoint": "endpoint value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
+	"thing-name": "thing-name value",
+    "logging": {
+        "level": "DEBUG",
+        "type": "STDOUT",
+        "file": "client.log"
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.logConfig.sdkLoggingEnabled);
+    ASSERT_EQ(Aws::Crt::LogLevel::Trace, config.logConfig.sdkLogLevel);
+    ASSERT_STREQ(PlainConfig::LogConfig::DEFAULT_SDK_LOG_FILE, config.logConfig.sdkLogFile.c_str());
+}
+
+TEST(Config, SDKLoggingConfigurationJson)
+{
+    constexpr char jsonString[] = R"(
+{
+	"endpoint": "endpoint value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
+	"thing-name": "thing-name value",
+    "logging": {
+        "level": "DEBUG",
+        "type": "STDOUT",
+        "file": "device-client.log",
+        "enable-sdk-logging": true,
+        "sdk-log-level": "warn",
+        "sdk-log-file": "sdk-log.log"
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.logConfig.sdkLoggingEnabled);
+    ASSERT_EQ(Aws::Crt::LogLevel::Warn, config.logConfig.sdkLogLevel);
+    ASSERT_STREQ("sdk-log.log", config.logConfig.sdkLogFile.c_str());
+
+    // Also make sure none of the device client log API settings have been modified
+    ASSERT_EQ(3, config.logConfig.deviceClientlogLevel);
+    ASSERT_STREQ("stdout", config.logConfig.deviceClientLogtype.c_str());
+    ASSERT_STREQ("device-client.log", config.logConfig.deviceClientLogFile.c_str());
 }

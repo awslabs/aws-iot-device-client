@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Device Client crashes due to SIGSEGV on Ubuntu x86](https://github.com/awslabs/aws-iot-device-client/issues/86)
 - [Device Client crashes on Red Hat Enterprise Linux due to SIGILL](https://github.com/awslabs/aws-iot-device-client/issues/85)
 
+## [Unreleased]
+### Added
+- SDK logging now configurable via CLI or JSON
+
 ## [1.0.X] - 2021-01-21
 ### Added
 - Support for opening multiple tunnels at the same time

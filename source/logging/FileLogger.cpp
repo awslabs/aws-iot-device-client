@@ -16,10 +16,10 @@ using namespace Aws::Iot::DeviceClient::Util;
 
 bool FileLogger::start(const PlainConfig &config)
 {
-    setLogLevel(config.logConfig.logLevel);
-    if (!config.logConfig.file.empty())
+    setLogLevel(config.logConfig.deviceClientlogLevel);
+    if (!config.logConfig.deviceClientLogFile.empty())
     {
-        logFile = config.logConfig.file;
+        logFile = config.logConfig.deviceClientLogFile;
     }
 
     struct stat info;
