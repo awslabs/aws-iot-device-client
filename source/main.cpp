@@ -15,7 +15,7 @@
 #    include "jobs/JobsFeature.h"
 #endif
 #if !defined(EXCLUDE_FP)
-#    include "fleetprovisioning/FleetProvisioning.h"
+#    include "fleetprovisioning/FleetProvisioningFeature.h"
 #endif
 #include "logging/LoggerFactory.h"
 #if !defined(EXCLUDE_ST)
@@ -38,6 +38,9 @@ using namespace Aws::Iot::DeviceClient::Jobs;
 using namespace Aws::Iot::DeviceClient::Logging;
 #if !defined(EXCLUDE_ST)
 using namespace Aws::Iot::DeviceClient::SecureTunneling;
+#endif
+#if !defined(EXCLUDE_FP)
+using namespace Aws::Iot::DeviceClient::FleetProvisioning;
 #endif
 
 const char *TAG = "Main.cpp";
@@ -287,7 +290,7 @@ int main(int argc, char *argv[])
         /*
          * Provision Device, parse new runtime conf file and validate its content.
          */
-        FleetProvisioning fleetProvisioning;
+        FleetProvisioningFeature fleetProvisioning;
         if (!fleetProvisioning.ProvisionDevice(resourceManager, config.config) ||
             !config.ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, true) ||
             !config.ValidateAndStoreRuntimeConfig())
