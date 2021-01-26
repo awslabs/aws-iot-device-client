@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "FleetProvisioningFeature.h"
+#include "FleetProvisioning.h"
 #include "../logging/LoggerFactory.h"
 #include "../util/FileUtils.h"
 
@@ -27,14 +27,14 @@ using namespace Aws::Crt;
 using namespace Aws::Iotidentity;
 using namespace Aws::Iot;
 using namespace Aws::Iot::DeviceClient;
-using namespace Aws::Iot::DeviceClient::FleetProvisioning;
+using namespace Aws::Iot::DeviceClient::FleetProvisioningNS;
 using namespace Aws::Iot::DeviceClient::Logging;
 using namespace Aws::Iot::DeviceClient::Util;
 
-constexpr char FleetProvisioningFeature::TAG[];
-constexpr int FleetProvisioningFeature::DEFAULT_WAIT_TIME_SECONDS;
+constexpr char FleetProvisioning::TAG[];
+constexpr int FleetProvisioning::DEFAULT_WAIT_TIME_SECONDS;
 
-bool FleetProvisioningFeature::CreateCertificateAndKey(Iotidentity::IotIdentityClient identityClient)
+bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient identityClient)
 {
     auto onKeysAcceptedSubAck = [&](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
@@ -200,7 +200,7 @@ bool FleetProvisioningFeature::CreateCertificateAndKey(Iotidentity::IotIdentityC
     return futureValKeysPublishCompletedPromise.get() && futureValKeysCreationCompletedPromise.get();
 }
 
-bool FleetProvisioningFeature::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient identityClient)
+bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient identityClient)
 {
     auto onCsrAcceptedSubAck = [&](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
@@ -358,7 +358,7 @@ bool FleetProvisioningFeature::CreateCertificateUsingCSR(Iotidentity::IotIdentit
 
     return futureValCsrPublishCompletedPromise.get() && futureValCsrCreationCompletedPromise.get();
 }
-bool FleetProvisioningFeature::RegisterThing(Iotidentity::IotIdentityClient identityClient)
+bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityClient)
 {
     auto onRegisterAcceptedSubAck = [&](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
@@ -483,7 +483,7 @@ bool FleetProvisioningFeature::RegisterThing(Iotidentity::IotIdentityClient iden
     return futureValRegisterPublishCompletedPromise.get() && futureValRegisterThingCompletedPromise.get();
 }
 
-bool FleetProvisioningFeature::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpConnection, PlainConfig &config)
+bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpConnection, PlainConfig &config)
 {
     LOG_INFO(TAG, "Fleet Provisioning Feature has been started.");
 
@@ -551,7 +551,7 @@ bool FleetProvisioningFeature::ProvisionDevice(shared_ptr<SharedCrtResourceManag
  * Helper methods
  */
 
-bool FleetProvisioningFeature::GetCsrFileContent(const string filePath)
+bool FleetProvisioning::GetCsrFileContent(const string filePath)
 {
     string expandedPath = FileUtils::ExtractExpandedPath(filePath.c_str());
 
@@ -608,7 +608,7 @@ bool FleetProvisioningFeature::GetCsrFileContent(const string filePath)
     return true;
 }
 
-bool FleetProvisioningFeature::ExportRuntimeConfig(
+bool FleetProvisioning::ExportRuntimeConfig(
     const string &file,
     const string &runtimeCertPath,
     const string &runtimeKeyPath,

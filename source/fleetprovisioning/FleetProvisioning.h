@@ -12,12 +12,12 @@ namespace Aws
     {
         namespace DeviceClient
         {
-            namespace FleetProvisioning
+            namespace FleetProvisioningNS
             {
                 /**
                  * \brief Provides IoT Fleet Provisioning related functionality within the Device Client
                  */
-                class FleetProvisioningFeature
+                class FleetProvisioning
                 {
                   public:
                     /**
@@ -35,7 +35,7 @@ namespace Aws
                      * \brief Used by the logger to specify that log messages are coming from the Fleet Provisioning
                      * feature
                      */
-                    static constexpr char TAG[] = "FleetProvisioningFeature.cpp";
+                    static constexpr char TAG[] = "FleetProvisioning.cpp";
                     /**
                      * \brief The default value in seconds for which Device client will wait for promise variables to be
                      * initialized. These promise variables will be initialized in respective callback methods
@@ -179,7 +179,7 @@ namespace Aws
                      */
                     bool GetCsrFileContent(const std::string filePath);
                 };
-            } // namespace FleetProvisioning
+            } // namespace FleetProvisioningNS
         }     // namespace DeviceClient
     }         // namespace Iot
 } // namespace Aws
