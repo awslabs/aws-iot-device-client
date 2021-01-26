@@ -30,12 +30,6 @@ constexpr char DeviceDefenderFeature::TOPIC_POST[];
 constexpr char DeviceDefenderFeature::TOPIC_ACCEPTED[];
 constexpr char DeviceDefenderFeature::TOPIC_REJECTED[];
 
-struct passableUserData
-{
-    const char *tag;
-    string *thingName;
-};
-
 string DeviceDefenderFeature::getName()
 {
     return "Device Defender";
@@ -46,14 +40,9 @@ void DeviceDefenderFeature::startDeviceDefender()
     LOGM_INFO(TAG, "Starting %s", getName().c_str());
 
     auto onCancelled = [&](void *userData) -> void {
-        passableUserData *recv = static_cast<passableUserData *>(userData);
-        LOGM_DEBUG(recv->tag, "task called onCancelled for thing: %s", (*recv->thingName).c_str());
+        LOGM_DEBUG(TAG, "task called onCancelled for thing: %s", thingName.c_str());
         stop();
     };
-
-    passableUserData userData;
-    userData.thingName = &thingName;
-    userData.tag = TAG;
 
     Iotdevicedefenderv1::ReportTaskBuilder taskBuilder(
         resourceManager->getAllocator(),
@@ -63,7 +52,7 @@ void DeviceDefenderFeature::startDeviceDefender()
     taskBuilder.WithTaskPeriodSeconds((uint32_t)interval);
     taskBuilder.WithNetworkConnectionSamplePeriodSeconds((uint32_t)interval);
     taskBuilder.WithTaskCancelledHandler(onCancelled);
-    taskBuilder.WithTaskCancellationUserData(&userData);
+    taskBuilder.WithTaskCancellationUserData(NULL);
     LOGM_INFO(TAG, "%s task builder interval: %i", getName().c_str(), interval);
     task = unique_ptr<Iotdevicedefenderv1::ReportTask>(new Iotdevicedefenderv1::ReportTask(taskBuilder.Build()));
     LOGM_DEBUG(TAG, "%s task build finished", getName().c_str());
