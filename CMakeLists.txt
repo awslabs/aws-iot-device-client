@@ -66,7 +66,9 @@ endif ()
 set(DC_PROJECT_NAME aws-iot-device-client)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_FLAGS_DEBUGOPT "")
-set(CMAKE_BUILD_TYPE Debug) # Switch to Release for the "Release" build
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug) # Switch to Release for the "Release" build, IE cmake -DCMAKE_BUILD_TYPE=Release ../
+endif ()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
