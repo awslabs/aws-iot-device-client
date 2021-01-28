@@ -39,6 +39,9 @@ using namespace Aws::Iot::DeviceClient::Logging;
 #if !defined(EXCLUDE_ST)
 using namespace Aws::Iot::DeviceClient::SecureTunneling;
 #endif
+#if !defined(EXCLUDE_FP)
+using namespace Aws::Iot::DeviceClient::FleetProvisioningNS;
+#endif
 
 const char *TAG = "Main.cpp";
 

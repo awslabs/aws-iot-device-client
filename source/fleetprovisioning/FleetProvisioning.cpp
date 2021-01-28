@@ -27,6 +27,7 @@ using namespace Aws::Crt;
 using namespace Aws::Iotidentity;
 using namespace Aws::Iot;
 using namespace Aws::Iot::DeviceClient;
+using namespace Aws::Iot::DeviceClient::FleetProvisioningNS;
 using namespace Aws::Iot::DeviceClient::Logging;
 using namespace Aws::Iot::DeviceClient::Util;
 
