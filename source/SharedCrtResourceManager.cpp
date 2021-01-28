@@ -157,7 +157,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
             TAG,
             "MQTT Client Configuration initialization failed with error: %s",
             ErrorDebugString(clientConfig.LastError()));
-        return clientConfig.LastError();
+        return ABORT;
     }
 
     connection = mqttClient->NewConnection(clientConfig);
@@ -165,7 +165,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     if (!*connection)
     {
         LOGM_ERROR(TAG, "MQTT Connection Creation failed with error: %s", ErrorDebugString(connection->LastError()));
-        return connection->LastError();
+        return ABORT;
     }
 
     promise<int> connectionCompletedPromise;
@@ -211,7 +211,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     if (!connection->Connect(config.thingName->c_str(), true, 0))
     {
         LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(connection->LastError()));
-        return connection->LastError();
+        return RETRY;
     }
 
     int connectionStatus = connectionCompletedPromise.get_future().get();

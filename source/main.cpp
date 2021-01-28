@@ -140,15 +140,15 @@ void attemptConnection()
                 DC_FATAL_ERROR);
             LoggerFactory::getLoggerInstance()->shutdown();
             deviceClientAbort("Failed to establish MQTT connection due to credential/configuration error");
-            return false;
+            return true;
         }
-        else if (SharedCrtResourceManager::RETRY == connectionStatus)
+        else if (SharedCrtResourceManager::SUCCESS == connectionStatus)
         {
-            return false;
+            return true;
         }
         else
         {
-            return true;
+            return false;
         }
     };
     std::thread attemptConnectionThread(&Retry::exponentialBackoff, publishLambda, retryConfig);
