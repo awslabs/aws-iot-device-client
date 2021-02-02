@@ -413,7 +413,6 @@ TEST(Config, MissingFleetProvisioningConfig)
     ASSERT_TRUE(config.fleetProvisioning.enabled);
 #else
     ASSERT_TRUE(config.Validate());
-    ASSERT_FALSE(config.fleetProvisioning.enabled);
 #endif
 }
 
