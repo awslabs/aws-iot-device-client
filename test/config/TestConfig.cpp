@@ -407,8 +407,14 @@ TEST(Config, MissingFleetProvisioningConfig)
 
     config.LoadFromCliArgs(cliArgs);
 
+#if !defined(DISABLE_MQTT)
+    // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
     ASSERT_FALSE(config.Validate());
     ASSERT_TRUE(config.fleetProvisioning.enabled);
+#else
+    ASSERT_TRUE(config.Validate());
+    ASSERT_FALSE(config.fleetProvisioning.enabled);
+#endif
 }
 
 TEST(Config, FleetProvisioningCli)
