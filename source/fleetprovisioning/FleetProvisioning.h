@@ -182,7 +182,7 @@ namespace Aws
                     /**
                      * \brief locate and validate device private key
                      *
-                     * @param filePath Device private key location
+                     * @param filePath device private key location
                      * @return returns false if client is not able to find the file or if valid permissions are not set
                      */
                     bool LocateDeviceKey(const std::string filePath);

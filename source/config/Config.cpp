@@ -1189,14 +1189,10 @@ void Config::PrintHelpMessage()
         "%s <csr-file-path>:\t\t\t\t\t\tUse specified CSR file to generate a certificate by keeping user private key "
         "secure. "
         "If the CSR file or the device key is not provided, Client will use Claim Certificate and Private key to "
-        "generate new "
-        "Certificate "
-        "and Private Key while provisioning the device\n"
+        "generate new Certificate and Private Key while provisioning the device\n"
         "%s <device-key-path>:\t\t\t\t\t\tUse specified device key after provisioning using csr file is completed"
         "If the CSR file or the device key is not provided, Client will use Claim Certificate and Private key to "
-        "generate new "
-        "Certificate "
-        "and Private Key while provisioning the device\n";
+        "generate new Certificate and Private Key while provisioning the device\n";
 
     cout << FormatMessage(
         helpMessageTemplate,
