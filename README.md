@@ -558,9 +558,9 @@ More details about AWS IoT Fleet Provisioning by claim can be found here: https:
 
 *Note: If the fleet provisioning feature fails to provision the new key, certificate or thing/device, the device client will abort with fatal error.*
 
-*Note: If the CSR file or the Device Private Key is not provided, the Device Client will use Claim certificate and Private key for provisioning the device*
+*Note: If the CSR file is specified without also specifying a device private key, the Device Client will use Claim Certificate and Private key to generate new Certificate and Private Key while provisioning the device*
 
-*Note: Please make sure that the Claim certificate, private key and/or CSR file, device private key stored on device side have respective permissions applied to it as mentioned above in the "File and Directory Permissions" section of the readme.*
+*Note: Please make sure that the Claim certificate, private key, CSR file and/or device private key stored on device side have respective permissions applied to it as mentioned above in the "File and Directory Permissions" section of the readme.*
 
 Refer to the [CreateKeysAndCertificate](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-keys-cert) and [CreateCertificateFromCsr](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-cert-csr) APIs for more details.
 
@@ -747,7 +747,7 @@ To get started with the feature you will need to set the right configuration. Th
 
 `device-key`: Path to the device private key.
 
-*Note: If the CSR file or the Device Private Key is not provided, the Device Client will use Claim certificate and Private key for provisioning the device*
+*Note: If the CSR file is specified without also specifying a device private key, the Device Client will use Claim Certificate and Private key to generate new Certificate and Private Key while provisioning the device*
 
 #### Configuring the Fleet Provisioning feature via the command line
 ```
@@ -768,7 +768,7 @@ $ ./aws-iot-device-client --enable-fleet-provisioning [true|false] --fleet-provi
 }
 ```
 
-*Note: If the CSR file or the Device Private Key is not provided, the Device Client will use Claim certificate and Private key for provisioning the device*
+*Note: If the CSR file is specified without also specifying a device private key, the Device Client will use Claim Certificate and Private key to generate new Certificate and Private Key while provisioning the device*
 
 
 ## Device Defender Feature

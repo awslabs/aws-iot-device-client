@@ -128,6 +128,11 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       if [ "$CSR_FILE_TEMP" ]; then
         FP_CSR_FILE=$CSR_FILE_TEMP
       fi
+      printf ${PMPT} "Specify absolute path to Device Private Key file:"
+      read -r DEVICE_KEY_TEMP
+      if [ "$DEVICE_KEY_TEMP" ]; then
+        FP_DEVICE_KEY=$DEVICE_KEY_TEMP
+      fi
     else
       FP_ENABLED="false"
     fi
@@ -158,7 +163,8 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       \"fleet-provisioning\":	{
         \"enabled\":	$FP_ENABLED,
         \"template-name\": \"$FP_TEMPLATE_NAME\",
-        \"csr-file\": \"$FP_CSR_FILE\"
+        \"csr-file\": \"$FP_CSR_FILE\",
+        \"device-key\": \"$FP_DEVICE_KEY\"
       }
     }"
 

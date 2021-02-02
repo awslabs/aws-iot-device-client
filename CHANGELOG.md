@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - SDK logging now configurable via CLI or JSON
-- Support for configuring Device Private Key via CLI and JSON 
+- Support for configuring Device Private Key via CLI and JSON for Fleet provisioning using CreateCertificateFromCsr API 
 
 ## [1.0.X] - 2021-01-21
 ### Added
