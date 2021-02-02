@@ -739,10 +739,12 @@ bool PlainConfig::DeviceDefender::Validate() const
 constexpr char PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING[];
 constexpr char PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME[];
 constexpr char PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE[];
+constexpr char PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY[];
 
 constexpr char PlainConfig::FleetProvisioning::JSON_KEY_ENABLED[];
 constexpr char PlainConfig::FleetProvisioning::JSON_KEY_TEMPLATE_NAME[];
 constexpr char PlainConfig::FleetProvisioning::JSON_KEY_CSR_FILE[];
+constexpr char PlainConfig::FleetProvisioning::JSON_KEY_DEVICE_KEY[];
 
 bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
 {
@@ -777,6 +779,18 @@ bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
             LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
         }
     }
+    jsonKey = JSON_KEY_DEVICE_KEY;
+    if (json.ValueExists(jsonKey))
+    {
+        if (!json.GetString(jsonKey).empty())
+        {
+            deviceKey = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
+    }
 
     return true;
 }
@@ -795,6 +809,11 @@ bool PlainConfig::FleetProvisioning::LoadFromCliArgs(const CliArgs &cliArgs)
     {
         csrFile = FileUtils::ExtractExpandedPath(
             cliArgs.at(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE).c_str());
+    }
+    if (cliArgs.count(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY))
+    {
+        deviceKey = FileUtils::ExtractExpandedPath(
+            cliArgs.at(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY).c_str());
     }
 
     return true;
@@ -938,6 +957,7 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING, true, false, nullptr},
         {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME, true, false, nullptr},
         {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE, true, false, nullptr},
+        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY, true, false, nullptr},
     };
 
     map<string, ArgumentDefinition> argumentDefinitionMap;
@@ -1168,7 +1188,14 @@ void Config::PrintHelpMessage()
         "%s <template-name>:\t\t\tUse specified Fleet Provisioning template name\n"
         "%s <csr-file-path>:\t\t\t\t\t\tUse specified CSR file to generate a certificate by keeping user private key "
         "secure. "
-        "If CSR file is not provided, Client will use Claim Certificate and Private key to generate new Certificate "
+        "If the CSR file or the device key is not provided, Client will use Claim Certificate and Private key to "
+        "generate new "
+        "Certificate "
+        "and Private Key while provisioning the device\n"
+        "%s <device-key-path>:\t\t\t\t\t\tUse specified device key after provisioning using csr file is completed"
+        "If the CSR file or the device key is not provided, Client will use Claim Certificate and Private key to "
+        "generate new "
+        "Certificate "
         "and Private Key while provisioning the device\n";
 
     cout << FormatMessage(
@@ -1197,7 +1224,8 @@ void Config::PrintHelpMessage()
         PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION,
         PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL,
         PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME,
-        PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE);
+        PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE,
+        PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY);
 }
 
 bool Config::ExportDefaultSetting(const string &file)

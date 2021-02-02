@@ -558,9 +558,9 @@ More details about AWS IoT Fleet Provisioning by claim can be found here: https:
 
 *Note: If the fleet provisioning feature fails to provision the new key, certificate or thing/device, the device client will abort with fatal error.*
 
-*Note: If a CSR file is not provided, the Device Client will use Claim Certificate and Private key for provisioning the device.*
+*Note: If the CSR file or the Device Private Key is not provided, the Device Client will use Claim certificate and Private key for provisioning the device*
 
-*Note: Please make sure that the Claim certificate, private key and/or CSR file stored on device side have respective permissions applied to it as mentioned above in the "File and Directory Permissions" section of the readme.*
+*Note: Please make sure that the Claim certificate, private key and/or CSR file, device private key stored on device side have respective permissions applied to it as mentioned above in the "File and Directory Permissions" section of the readme.*
 
 Refer to the [CreateKeysAndCertificate](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-keys-cert) and [CreateCertificateFromCsr](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-cert-csr) APIs for more details.
 
@@ -571,6 +571,7 @@ The AWS IoT Device Client's Fleet Provisioning feature will require the followin
 * Claim Certificate
 * Private Key
 * CSR File (Required for creating certificate using [CreateCertificateFromCsr](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-cert-csr) API)
+* Device Private Key (Required for provisioning using CSR file)
 * Fleet Provisioning Template
 
 ### Sample Claim Certificate Policy
@@ -706,7 +707,7 @@ Once the device is provisioned correctly, Fleet Provisioning feature will valida
 The information stored in the runtime config file **created by Fleet Provisioning feature**:
 * Thing Name: Name of the newly provisioned thing
 * Certificate: Path of the newly created certificate file
-* Private Key: Path of the newly created private key file
+* Private Key: Path of the newly created or device private key file
 * FP Status: A boolean value stating if the Fleet Provision process was completed earlier. 
 
 The runtime-config file is stored on your device at ```~/.aws-iot-device-client/aws-iot-device-client-runtime.conf```.
@@ -720,7 +721,7 @@ Example runtime config created by Fleet Provisioning feature:
 "runtime-config": {
     "completed-fp": true,
     "cert": "/path/to/newly/created/certificate.pem.crt",
-    "key": "/path/to/newly/created/private.pem.key",
+    "key": "/path/to/private.pem.key",
     "thing-name": "NewlyProvisionedThingName"
     }
 }
@@ -742,11 +743,15 @@ To get started with the feature you will need to set the right configuration. Th
 
 **Optional Parameter:**
 
-`csr-file`: Path to the CSR file. If CSR file is not provided, the Device Client will use Private key and Claim certificate for provisioning the device
+`csr-file`: Path to the CSR file.
+
+`device-key`: Path to the device private key.
+
+*Note: If the CSR file or the Device Private Key is not provided, the Device Client will use Claim certificate and Private key for provisioning the device*
 
 #### Configuring the Fleet Provisioning feature via the command line
 ```
-$ ./aws-iot-device-client --enable-fleet-provisioning [true|false] --fleet-provisioning-template-name [Fleet-Provisioning-Template-Name] --csr-file [your/path/to/csr/file] 
+$ ./aws-iot-device-client --enable-fleet-provisioning [true|false] --fleet-provisioning-template-name [Fleet-Provisioning-Template-Name] --csr-file [your/path/to/csr/file] --device-key [your/path/to/device/private/key] 
 ```
 
 #### Configuring the Fleet Provisioning feature via the JSON configuration file
@@ -756,13 +761,14 @@ $ ./aws-iot-device-client --enable-fleet-provisioning [true|false] --fleet-provi
     "fleet-provisioning": {
         "enabled": [true|false],
         "template-name": "Fleet-Provisioning-Template-Name",
-        "csr-file": "your/path/to/csr/file"
+        "csr-file": "your/path/to/csr/file",
+        "device-key": "your/path/to/device/private/key"
     }
     ...
 }
 ```
 
-*Note: If CSR file is not provided, the Device Client will use Claim Certificate and Private key for provisioning the device.*
+*Note: If the CSR file or the Device Private Key is not provided, the Device Client will use Claim certificate and Private key for provisioning the device*
 
 
 ## Device Defender Feature

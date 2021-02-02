@@ -36,6 +36,7 @@ constexpr int FleetProvisioning::DEFAULT_WAIT_TIME_SECONDS;
 
 bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient identityClient)
 {
+    LOG_INFO(TAG, "Provisioning new device certificate and private key using CreateKeysAndCertificate API");
     auto onKeysAcceptedSubAck = [&](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
@@ -202,6 +203,7 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
 
 bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient identityClient)
 {
+    LOG_INFO(TAG, "Provisioning new device certificate using CreateCertificateFromCsr API");
     auto onCsrAcceptedSubAck = [&](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
@@ -502,9 +504,11 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
     IotIdentityClient identityClient(fpConnection.get()->getConnection());
     templateName = config.fleetProvisioning.templateName.value().c_str();
 
-    if (config.fleetProvisioning.csrFile.has_value() && !config.fleetProvisioning.csrFile->empty())
+    if (config.fleetProvisioning.csrFile.has_value() && !config.fleetProvisioning.csrFile->empty() &&
+        config.fleetProvisioning.deviceKey.has_value() && !config.fleetProvisioning.deviceKey->empty())
     {
-        if (!GetCsrFileContent(config.fleetProvisioning.csrFile->c_str()) || !CreateCertificateUsingCSR(identityClient))
+        if (!GetCsrFileContent(config.fleetProvisioning.csrFile->c_str()) ||
+            !LocateDeviceKey(config.fleetProvisioning.deviceKey->c_str()) || !CreateCertificateUsingCSR(identityClient))
         {
             LOGM_ERROR(
                 TAG,
@@ -513,7 +517,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
                 DeviceClient::DC_FATAL_ERROR);
             return false;
         }
-        keyPath = config.key->c_str();
+        keyPath = config.fleetProvisioning.deviceKey->c_str();
     }
     else
     {
@@ -550,6 +554,34 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
 /*
  * Helper methods
  */
+
+bool FleetProvisioning::LocateDeviceKey(const string filePath)
+{
+    struct stat info;
+    bool locatedDeviceKey = true;
+    string expandedPath = FileUtils::ExtractExpandedPath(filePath.c_str());
+    if (stat(expandedPath.c_str(), &info) != 0)
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Failed to find the device private key %s, file does not exist ***",
+            DeviceClient::DC_FATAL_ERROR,
+            Sanitize(expandedPath).c_str());
+        locatedDeviceKey = false;
+    }
+    else
+    {
+        string parentDir = FileUtils::ExtractParentDirectory(expandedPath.c_str());
+        if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::KEY_DIR) ||
+            !FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::PRIVATE_KEY))
+        {
+            LOG_ERROR(TAG, "Incorrect permissions on the device private key file and/or parent directory");
+            locatedDeviceKey = false;
+        }
+    }
+
+    return locatedDeviceKey;
+}
 
 bool FleetProvisioning::GetCsrFileContent(const string filePath)
 {
