@@ -563,10 +563,7 @@ bool FleetProvisioning::LocateDeviceKey(const string filePath)
     if (stat(expandedPath.c_str(), &info) != 0)
     {
         LOGM_ERROR(
-            TAG,
-            "*** %s: Failed to find the device private key %s, file does not exist ***",
-            DeviceClient::DC_FATAL_ERROR,
-            Sanitize(expandedPath).c_str());
+            TAG, "Failed to find the device private key %s, file does not exist", Sanitize(expandedPath).c_str());
         locatedDeviceKey = false;
     }
     else
