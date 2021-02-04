@@ -213,7 +213,7 @@ cmake ../ -DEXCLUDE_DD=ON
 **Description**:
 Cross Compiling allows you to compile for a **specific architecture** while on a **different architecture**.  This is extremely useful, as some *(Especially really constrained)* devices won't have the resources to complete the build process.  Even if your devices can complete the build, it is often times much easier to build in a central location (like your developer laptop) and then distribute the artifacts to appropriate devices. 
 
-The `cmake-toolchain` folder contains toolchains that will make cross compiling for other architectures easier. Currently we have toolchains to support cross compiling for the following architectures; **MIPS**, **ARMhf**, & **AArch64**.
+The `cmake-toolchain` folder contains toolchains that will make cross compiling for other architectures easier. Currently we have toolchains to support cross compiling for the following architectures; **MIPS32**, **ARMhf**, & **AArch64**.
 
 You can specify one of the given toolchains when running cmake:
 ```
