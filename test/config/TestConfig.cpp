@@ -33,6 +33,12 @@ TEST(Config, AllFeaturesEnabled)
     "device-defender": {
         "enabled": true,
         "interval": 300
+    },
+    "fleet-provisioning": {
+        "enabled": true,
+        "template-name": "template-name",
+		"csr-file": "csr-file",
+		"device-key": "device-key"
     }
 })";
     JsonObject jsonObject(jsonString);
@@ -53,7 +59,11 @@ TEST(Config, AllFeaturesEnabled)
     ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
     ASSERT_TRUE(config.deviceDefender.enabled);
+    ASSERT_TRUE(config.fleetProvisioning.enabled);
     ASSERT_EQ(300, config.deviceDefender.interval);
+    ASSERT_STREQ("template-name", config.fleetProvisioning.templateName->c_str());
+    ASSERT_STREQ("csr-file", config.fleetProvisioning.csrFile->c_str());
+    ASSERT_STREQ("device-key", config.fleetProvisioning.deviceKey->c_str());
 }
 
 TEST(Config, HappyCaseMinimumConfig)
@@ -347,4 +357,96 @@ TEST(Config, SDKLoggingConfigurationJson)
     ASSERT_EQ(3, config.logConfig.deviceClientlogLevel);
     ASSERT_STREQ("stdout", config.logConfig.deviceClientLogtype.c_str());
     ASSERT_STREQ("device-client.log", config.logConfig.deviceClientLogFile.c_str());
+}
+
+TEST(Config, FleetProvisioningMinimumConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+	"endpoint": "endpoint value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
+	"thing-name": "thing-name value",
+    "fleet-provisioning": {
+        "enabled": true,
+        "template-name": "template-name"
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_TRUE(config.fleetProvisioning.enabled);
+    ASSERT_STREQ("template-name", config.fleetProvisioning.templateName->c_str());
+}
+
+TEST(Config, MissingFleetProvisioningConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+	"endpoint": "endpoint value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
+	"thing-name": "thing-name value"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    CliArgs cliArgs;
+    cliArgs[PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING] = "true";
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+
+    config.LoadFromCliArgs(cliArgs);
+
+#if !defined(DISABLE_MQTT)
+    // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
+    ASSERT_FALSE(config.Validate());
+    ASSERT_TRUE(config.fleetProvisioning.enabled);
+#else
+    ASSERT_TRUE(config.Validate());
+#endif
+}
+
+TEST(Config, FleetProvisioningCli)
+{
+    constexpr char jsonString[] = R"(
+{
+	"endpoint": "endpoint value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
+	"thing-name": "thing-name value",
+    "fleet-provisioning": {
+        "enabled": true,
+        "template-name": "template-name",
+		"csr-file": "csr-file",
+		"device-key": "device-key"
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    CliArgs cliArgs;
+    cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME] = "cli-template-name";
+    cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE] = "cli-csr-file";
+    cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY] = "cli-device-key";
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_TRUE(config.fleetProvisioning.enabled);
+    ASSERT_STREQ("cli-template-name", config.fleetProvisioning.templateName->c_str());
+    ASSERT_STREQ("cli-csr-file", config.fleetProvisioning.csrFile->c_str());
+    ASSERT_STREQ("cli-device-key", config.fleetProvisioning.deviceKey->c_str());
 }
