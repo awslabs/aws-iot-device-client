@@ -29,6 +29,7 @@ jobs:
           name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}"                                                                                                                          
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
+            ./setup/
   
   update-doxygen:
     runs-on: ubuntu-latest
@@ -79,6 +80,7 @@ jobs:
           name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}"                                                                                                                          
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
+            ./setup/
 
   build-mips32:
     runs-on: ubuntu-latest
@@ -101,6 +103,7 @@ jobs:
           name: "DC.linux.mips.${{ env.PACKAGE_NAME }}"                                                                                                                          
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
+            ./setup/
 
   build-aarch64:
     runs-on: ubuntu-latest
@@ -123,6 +126,7 @@ jobs:
           name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}"                                                                                                                          
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
+            ./setup/
 
   build-amazonlinux:
     runs-on: ubuntu-latest
@@ -157,6 +161,7 @@ jobs:
           name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}"                                                                                                                          
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
+            ./setup/
 
   gpp-compat:
     runs-on: ubuntu-latest

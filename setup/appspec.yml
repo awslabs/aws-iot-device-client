@@ -1,0 +1,14 @@
+version: 0.0
+os: linux
+files:
+  - source: /aws-iot-device-client
+    destination: /sbin/
+hooks:
+  ApplicationStart:
+    - location: codedeploy/start_service.sh
+      timeout: 300
+      runas: root
+  ApplicationStop:
+    - location: codedeploy/stop_service.sh
+      timeout: 300
+      runas: root
