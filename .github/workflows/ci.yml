@@ -218,7 +218,6 @@ jobs:
 
   build-st-ubuntu-16-aarch64:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
         with:
@@ -240,7 +239,6 @@ jobs:
 
   build-st-ubuntu-16-armhf32:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v2
         with:
