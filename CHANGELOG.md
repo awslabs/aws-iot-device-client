@@ -7,7 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Known Issues]
 - [Device Client aborts on Red Hat Enterprise Linux ARM](https://github.com/awslabs/aws-iot-device-client/issues/87)
 - [Device Client crashes due to SIGSEGV on Ubuntu x86](https://github.com/awslabs/aws-iot-device-client/issues/86)
-- [Device Client crashes on Red Hat Enterprise Linux due to SIGILL](https://github.com/awslabs/aws-iot-device-client/issues/85)
 
 ## [Unreleased]
 ### Added
