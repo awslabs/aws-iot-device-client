@@ -2,6 +2,7 @@
 
 compileMode="default"
 stMode=false
+sharedLibs=false
 
 # Check if first argument is compile mode
 compileModeArgument=$(echo "$1" | cut -c3-14)
@@ -11,6 +12,9 @@ if [ "$compileModeArgument" = "compile-mode" ]; then
     st_component_mode)
     compileMode="st_component_mode"
     ;;
+    shared_lib_mode)
+    sharedLibs=true
+    ;;
     armhf_cross_mode)
     compileMode="armhf_cross_mode"
     ;;
@@ -19,6 +23,18 @@ if [ "$compileModeArgument" = "compile-mode" ]; then
     ;;
     aarch64_cross_mode)
     compileMode="aarch64_cross_mode"
+    ;;
+    armhf_cross_mode_shared_libs)
+    compileMode="armhf_cross_mode"
+    sharedLibs=true
+    ;;
+    mips_cross_mode_shared_libs)
+    compileMode="mips_cross_mode"
+    sharedLibs=true
+    ;;
+    aarch64_cross_mode_shared_libs)
+    compileMode="aarch64_cross_mode"
+    sharedLibs=true
     ;;
     st_armhf_cross_mode)
     compileMode="armhf_cross_mode"
@@ -111,6 +127,9 @@ case $compileMode in
       # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
       cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../ || true
       cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../
+    elif [ "$sharedLibs" = true ]; then
+      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON ../ || true
+      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON ../
     else
       # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
       cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../ || true
@@ -140,8 +159,13 @@ case $compileMode in
     make install
     cd ..
     # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
-    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
-    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../
+    if [ "$sharedLibs" = true ]; then
+      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
+      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../
+    else
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../
+    fi
     cmake --build . --target aws-iot-device-client
     cmake --build . --target test-aws-iot-device-client
     exit $?
@@ -170,6 +194,9 @@ case $compileMode in
       # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
       cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../ || true
       cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../
+    elif [ "$sharedLibs" = true ]; then
+      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON ../ || true
+      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON ../
     else
       # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
       cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake ../ || true
@@ -180,7 +207,11 @@ case $compileMode in
     exit $?
     ;;
     *)
-    cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON
+    if [ "$sharedLibs" = false ]; then
+      cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON
+    else
+      cmake ../ -DBUILD_SHARED_LIBS=ON -DBUILD_SDK=ON -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON
+    fi
     ;;
 esac
 
