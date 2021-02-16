@@ -211,7 +211,7 @@ jobs:
         with:                                                                                                                                                                                                 
           name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.shared"                                                                                                                          
           path: |                                                                                                                                                                                             
-            ./build/${{ env.PACKAGE_NAME }}
+            ./build/
             ./setup/
   
   build-shared-libs-amazonlinux:
@@ -246,7 +246,7 @@ jobs:
         with:                                                                                                                                                                                                 
           name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.shared"
           path: |                                                                                                                                                                                             
-            ./build/${{ env.PACKAGE_NAME }}
+            ./build/
             ./setup/
 
   build-shared-libs-armhf32:
@@ -268,7 +268,7 @@ jobs:
           with:                                                                                                                                                                                                 
             name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.shared"
             path: |                                                                                                                                                                                             
-              ./build/${{ env.PACKAGE_NAME }}
+              ./build/
               ./setup/
 
   build-shared-libs-mips32:
@@ -290,7 +290,7 @@ jobs:
         with:                                                                                                                                                                                                 
           name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.shared"
           path: |                                                                                                                                                                                             
-            ./build/${{ env.PACKAGE_NAME }}
+            ./build/
             ./setup/
 
   build-shared-libs-aarch64:
@@ -312,7 +312,7 @@ jobs:
         with:                                                                                                                                                                                                 
           name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.shared"
           path: |                                                                                                                                                                                             
-            ./build/${{ env.PACKAGE_NAME }}
+            ./build/
             ./setup/
 
   build-st-ubuntu-16-x64:
@@ -335,6 +335,7 @@ jobs:
           name: "ST.ubuntu.x64.${{ env.PACKAGE_NAME }}"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
+            ./setup/
 
   build-st-ubuntu-16-aarch64:
     runs-on: ubuntu-latest
@@ -356,6 +357,7 @@ jobs:
           name: "ST.ubuntu.aarch64.${{ env.PACKAGE_NAME }}"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
+            ./setup/
 
   build-st-ubuntu-16-armhf32:
     runs-on: ubuntu-latest
@@ -377,3 +379,4 @@ jobs:
           name: "ST.linux.armhf.${{ env.PACKAGE_NAME }}"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
+            ./setup/
