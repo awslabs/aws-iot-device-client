@@ -1,3 +1,4 @@
+
 # AWS IoT Device Client
 
 - [AWS IoT Device Client](#aws-iot-device-client)
@@ -91,7 +92,8 @@ The AWS IoT Device Client currently works by default on IoT devices with common 
 
 * C++ 11 or higher
 * [CMake](https://cmake.org/) 3.10+
-* *Note* CI Build uses OpenSSL 1.1.1 
+* *Note:* CI Build uses OpenSSL 1.1.1
+* *Note:* CI Build uses [aws-iot-device-sdk-cpp-v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2) commit hash located in `CMakeLists.txt.awssdk`
 
 ### Building from source
 
@@ -120,6 +122,7 @@ cd ../
 ```
 
 #### Build and Install All Dependencies via CMake
+**Note:** It is important to know that we build the Device Client with a specific commit hash of the [aws-iot-device-sdk-cpp-v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2).  This commit can be located in `CMakeLists.txt.awssdk`.  While other versions of the [aws-iot-device-sdk-cpp-v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2) ***may*** work, it is highly recommended that the specified commit is used. 
 
 **Description**:  
 Use this build method to compile an executable AWS IoT Device Client. CMake will pull the dependencies required to build
