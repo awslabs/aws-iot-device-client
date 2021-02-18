@@ -9,28 +9,6 @@ env:
   PACKAGE_NAME: aws-iot-device-client
 
 jobs:
-  build-ubuntu-16-x64:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Build ${{ env.PACKAGE_NAME }}
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
-          export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
-          docker pull $DOCKER_IMAGE
-          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
-      - name: Archive ubuntu-16-x64 Build Artifact                                                                                                                                                        
-        uses: actions/upload-artifact@v2                                                                                                                                                                      
-        # Run for main branch only                                                                                                                                                                            
-        if: github.ref == 'refs/heads/main'                                                                                                                                                                   
-        with:                                                                                                                                                                                                 
-          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}"                                                                                                                          
-          path: |                                                                                                                                                                                             
-            ./build/${{ env.PACKAGE_NAME }}
-            ./setup/
-  
   update-doxygen:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'  
@@ -59,9 +37,8 @@ jobs:
         branch: gh-pages
         force: true
 
-  build-armhf32:
+  build-ubuntu-16-x64:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'  
     steps:
       - uses: actions/checkout@v2
         with:
@@ -71,59 +48,13 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
           export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
           docker pull $DOCKER_IMAGE
-          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=armhf_cross_mode
-      - name: Archive armhf32 Build Artifact                                                                                                                                                        
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
+      - name: Archive ubuntu-16-x64 Build Artifact                                                                                                                                                        
         uses: actions/upload-artifact@v2                                                                                                                                                                      
         # Run for main branch only                                                                                                                                                                            
         if: github.ref == 'refs/heads/main'                                                                                                                                                                   
         with:                                                                                                                                                                                                 
-          name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}"                                                                                                                          
-          path: |                                                                                                                                                                                             
-            ./build/${{ env.PACKAGE_NAME }}
-            ./setup/
-
-  build-mips32:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'  
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Build ${{ env.PACKAGE_NAME }}
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
-          export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
-          docker pull $DOCKER_IMAGE
-          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=mips_cross_mode
-      - name: Archive mips32 Build Artifact                                                                                                                                                        
-        uses: actions/upload-artifact@v2                                                                                                                                                                      
-        # Run for main branch only                                                                                                                                                                            
-        if: github.ref == 'refs/heads/main'                                                                                                                                                                   
-        with:                                                                                                                                                                                                 
-          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}"                                                                                                                          
-          path: |                                                                                                                                                                                             
-            ./build/${{ env.PACKAGE_NAME }}
-            ./setup/
-
-  build-aarch64:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'  
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Build ${{ env.PACKAGE_NAME }}
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
-          export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
-          docker pull $DOCKER_IMAGE
-          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=aarch64_cross_mode
-      - name: Archive aarch64 Build Artifact                                                                                                                                                        
-        uses: actions/upload-artifact@v2                                                                                                                                                                      
-        # Run for main branch only                                                                                                                                                                            
-        if: github.ref == 'refs/heads/main'                                                                                                                                                                   
-        with:                                                                                                                                                                                                 
-          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}"                                                                                                                          
+          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}"                                                                                                                          
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
             ./setup/
@@ -195,6 +126,195 @@ jobs:
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compiler=clang-${{ matrix.version }}
 
+  build-armhf32:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Build ${{ env.PACKAGE_NAME }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
+          export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          docker pull $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=armhf_cross_mode
+      - name: Archive armhf32 Build Artifact                                                                                                                                                        
+        uses: actions/upload-artifact@v2                                                                                                                                                                      
+        # Run for main branch only                                                                                                                                                                            
+        if: github.ref == 'refs/heads/main'                                                                                                                                                                   
+        with:                                                                                                                                                                                                 
+          name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}"                                                                                                                          
+          path: |                                                                                                                                                                                             
+            ./build/${{ env.PACKAGE_NAME }}
+            ./setup/
+
+  build-mips32:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Build ${{ env.PACKAGE_NAME }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
+          export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          docker pull $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=mips_cross_mode
+      - name: Archive mips32 Build Artifact                                                                                                                                                        
+        uses: actions/upload-artifact@v2                                                                                                                                                                      
+        # Run for main branch only                                                                                                                                                                            
+        if: github.ref == 'refs/heads/main'                                                                                                                                                                   
+        with:                                                                                                                                                                                                 
+          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}"                                                                                                                          
+          path: |                                                                                                                                                                                             
+            ./build/${{ env.PACKAGE_NAME }}
+            ./setup/
+
+  build-aarch64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Build ${{ env.PACKAGE_NAME }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
+          export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          docker pull $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=aarch64_cross_mode
+      - name: Archive aarch64 Build Artifact                                                                                                                                                        
+        uses: actions/upload-artifact@v2                                                                                                                                                                      
+        # Run for main branch only                                                                                                                                                                            
+        if: github.ref == 'refs/heads/main'                                                                                                                                                                   
+        with:                                                                                                                                                                                                 
+          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}"                                                                                                                          
+          path: |                                                                                                                                                                                             
+            ./build/${{ env.PACKAGE_NAME }}
+            ./setup/
+
+  build-shared-libs-ubuntu-16-x64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Build ${{ env.PACKAGE_NAME }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
+          export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          docker pull $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=shared_lib_mode
+      - name: Archive ubuntu-16-x64 Build Artifact                                                                                                                                                        
+        uses: actions/upload-artifact@v2                                                                                                                                                                      
+        # Run for main branch only                                                                                                                                                                            
+        if: github.ref == 'refs/heads/main'                                                                                                                                                                   
+        with:                                                                                                                                                                                                 
+          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.shared"                                                                                                                          
+          path: |                                                                                                                                                                                             
+            ./build/
+            ./setup/
+  
+  build-shared-libs-amazonlinux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Build ${{ env.PACKAGE_NAME }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
+          export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/amazonlinux:latest
+          docker pull $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=shared_lib_mode
+
+  build-shared-libs-rhel-ubi8:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Build ${{ env.PACKAGE_NAME }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
+          export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubi8:latest
+          docker pull $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=shared_lib_mode
+      - name: Archive rhel-ubi8 Build Artifact                                                                                                                                                        
+        uses: actions/upload-artifact@v2                                                                                                                                                                      
+        # Run for main branch only                                                                                                                                                                            
+        if: github.ref == 'refs/heads/main'                                                                                                                                                                   
+        with:                                                                                                                                                                                                 
+          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.shared"
+          path: |                                                                                                                                                                                             
+            ./build/
+            ./setup/
+
+  build-shared-libs-armhf32:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+          with:
+            fetch-depth: 0
+        - name: Build ${{ env.PACKAGE_NAME }}
+          run: |
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
+            export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+            docker pull $DOCKER_IMAGE
+            docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=armhf_cross_mode_shared_libs
+        - name: Archive armhf32 Build Artifact                                                                                                                                                        
+          uses: actions/upload-artifact@v2                                                                                                                                                                      
+          # Run for main branch only                                                                                                                                                                            
+          if: github.ref == 'refs/heads/main'                                                                                                                                                                   
+          with:                                                                                                                                                                                                 
+            name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.shared"
+            path: |                                                                                                                                                                                             
+              ./build/
+              ./setup/
+
+  build-shared-libs-mips32:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Build ${{ env.PACKAGE_NAME }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
+          export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          docker pull $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=mips_cross_mode_shared_libs
+      - name: Archive mips32 Build Artifact                                                                                                                                                        
+        uses: actions/upload-artifact@v2                                                                                                                                                                      
+        # Run for main branch only                                                                                                                                                                            
+        if: github.ref == 'refs/heads/main'                                                                                                                                                                   
+        with:                                                                                                                                                                                                 
+          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.shared"
+          path: |                                                                                                                                                                                             
+            ./build/
+            ./setup/
+
+  build-shared-libs-aarch64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Build ${{ env.PACKAGE_NAME }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
+          export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          docker pull $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=aarch64_cross_mode_shared_libs
+      - name: Archive aarch64 Build Artifact                                                                                                                                                        
+        uses: actions/upload-artifact@v2                                                                                                                                                                      
+        # Run for main branch only                                                                                                                                                                            
+        if: github.ref == 'refs/heads/main'                                                                                                                                                                   
+        with:                                                                                                                                                                                                 
+          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.shared"
+          path: |                                                                                                                                                                                             
+            ./build/
+            ./setup/
+
   build-st-ubuntu-16-x64:
     runs-on: ubuntu-latest
     steps:
@@ -215,6 +335,7 @@ jobs:
           name: "ST.ubuntu.x64.${{ env.PACKAGE_NAME }}"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
+            ./setup/
 
   build-st-ubuntu-16-aarch64:
     runs-on: ubuntu-latest
@@ -236,6 +357,7 @@ jobs:
           name: "ST.ubuntu.aarch64.${{ env.PACKAGE_NAME }}"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
+            ./setup/
 
   build-st-ubuntu-16-armhf32:
     runs-on: ubuntu-latest
@@ -257,3 +379,4 @@ jobs:
           name: "ST.linux.armhf.${{ env.PACKAGE_NAME }}"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
+            ./setup/
