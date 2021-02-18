@@ -130,6 +130,8 @@ case $compileMode in
     elif [ "$sharedLibs" = true ]; then
       cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON ../ || true
       cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON ../
+      make install DESTDIR=./shared_install_dir
+      chmod 0777 ./shared_install_dir
     else
       # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
       cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../ || true
@@ -162,6 +164,8 @@ case $compileMode in
     if [ "$sharedLibs" = true ]; then
       cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
       cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../
+      make install DESTDIR=./shared_install_dir
+      chmod 0777 ./shared_install_dir
     else
       cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
       cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../
@@ -197,6 +201,8 @@ case $compileMode in
     elif [ "$sharedLibs" = true ]; then
       cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON ../ || true
       cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON ../
+      make install DESTDIR=./shared_install_dir
+      chmod 0777 ./shared_install_dir
     else
       # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
       cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake ../ || true
@@ -210,7 +216,9 @@ case $compileMode in
     if [ "$sharedLibs" = false ]; then
       cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON
     else
-      cmake ../ -DBUILD_SHARED_LIBS=ON -DBUILD_SDK=ON -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON
+      cmake ../ -DBUILD_SHARED_LIBS=ON -DBUILD_SDK=ON -DLINK_DL=ON
+      make install DESTDIR=./shared_install_dir
+      chmod 0777 ./shared_install_dir
     fi
     ;;
 esac

@@ -211,7 +211,8 @@ jobs:
         with:                                                                                                                                                                                                 
           name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.shared"                                                                                                                          
           path: |                                                                                                                                                                                             
-            ./build/
+            ./build/${{ env.PACKAGE_NAME }}
+            ./build/shared_install_dir
             ./setup/
   
   build-shared-libs-amazonlinux:
@@ -232,7 +233,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          fetch-depth: 0      
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u awslabs --password-stdin
@@ -246,7 +247,8 @@ jobs:
         with:                                                                                                                                                                                                 
           name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.shared"
           path: |                                                                                                                                                                                             
-            ./build/
+            ./build/${{ env.PACKAGE_NAME }}
+            ./build/shared_install_dir
             ./setup/
 
   build-shared-libs-armhf32:
@@ -261,6 +263,7 @@ jobs:
             export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
             docker pull $DOCKER_IMAGE
             docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=armhf_cross_mode_shared_libs
+        
         - name: Archive armhf32 Build Artifact                                                                                                                                                        
           uses: actions/upload-artifact@v2                                                                                                                                                                      
           # Run for main branch only                                                                                                                                                                            
@@ -268,7 +271,8 @@ jobs:
           with:                                                                                                                                                                                                 
             name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.shared"
             path: |                                                                                                                                                                                             
-              ./build/
+              ./build/${{ env.PACKAGE_NAME }}
+              ./build/shared_install_dir
               ./setup/
 
   build-shared-libs-mips32:
@@ -290,7 +294,8 @@ jobs:
         with:                                                                                                                                                                                                 
           name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.shared"
           path: |                                                                                                                                                                                             
-            ./build/
+            ./build/${{ env.PACKAGE_NAME }}
+            ./build/shared_install_dir
             ./setup/
 
   build-shared-libs-aarch64:
@@ -312,7 +317,8 @@ jobs:
         with:                                                                                                                                                                                                 
           name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.shared"
           path: |                                                                                                                                                                                             
-            ./build/
+            ./build/${{ env.PACKAGE_NAME }}
+            ./build/shared_install_dir
             ./setup/
 
   build-st-ubuntu-16-x64:
