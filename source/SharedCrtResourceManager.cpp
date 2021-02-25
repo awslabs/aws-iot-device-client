@@ -136,6 +136,22 @@ int SharedCrtResourceManager::buildClient(const PlainConfig &config)
     return SharedCrtResourceManager::SUCCESS;
 }
 
+void SharedCrtResourceManager::initializeAWSHttpLib()
+{
+    if (!initialized)
+    {
+        LOG_WARN(TAG, "Tried to aws_http_library_init but the SharedCrtResourceManager has not yet been initialized!");
+        return;
+    }
+    if (initializedAWSHttpLib)
+    {
+        LOG_WARN(TAG, "Tried to aws_http_library_init but it was already initialized!");
+        return;
+    }
+    aws_http_library_init(getAllocator());
+    initializedAWSHttpLib = true;
+}
+
 int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
 {
     if (!locateCredentials(config))
