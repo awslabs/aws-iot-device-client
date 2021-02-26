@@ -52,11 +52,18 @@ jobs:
       - name: Archive ubuntu-16-x64 Build Artifact                                                                                                                                                        
         uses: actions/upload-artifact@v2                                                                                                                                                                      
         # Run for main branch only                                                                                                                                                                            
-        if: github.ref == 'refs/heads/main'                                                                                                                                                                   
+        if: github.ref == 'refs/heads/main'
         with:                                                                                                                                                                                                 
           name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}"                                                                                                                          
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
+      - name: Archive setup files
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}"
+          path: |
             ./setup/
 
   build-amazonlinux:
@@ -92,6 +99,13 @@ jobs:
           name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}"                                                                                                                          
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
+      - name: Archive setup files
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}"
+          path: |
             ./setup/
 
   gpp-compat:
@@ -146,6 +160,13 @@ jobs:
           name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}"                                                                                                                          
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
+      - name: Archive setup files
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}"
+          path: |
             ./setup/
 
   build-mips32:
@@ -168,6 +189,13 @@ jobs:
           name: "DC.linux.mips.${{ env.PACKAGE_NAME }}"                                                                                                                          
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
+      - name: Archive setup files
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}"
+          path: |
             ./setup/
 
   build-aarch64:
@@ -190,6 +218,13 @@ jobs:
           name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}"                                                                                                                          
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
+      - name: Archive setup files
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}"
+          path: |
             ./setup/
 
   build-shared-libs-ubuntu-16-x64:
@@ -207,12 +242,26 @@ jobs:
       - name: Archive ubuntu-16-x64 Build Artifact                                                                                                                                                        
         uses: actions/upload-artifact@v2                                                                                                                                                                      
         # Run for main branch only                                                                                                                                                                            
-        if: github.ref == 'refs/heads/main'                                                                                                                                                                   
+        if: github.ref == 'refs/heads/main'
         with:                                                                                                                                                                                                 
           name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.shared"                                                                                                                          
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
+      - name: Archive SDK shared libraries
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.shared"
+          path: |
             ./build/shared_install_dir
+      - name: Archive setup files
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.shared"
+          path: |
             ./setup/
   
   build-shared-libs-amazonlinux:
@@ -248,7 +297,21 @@ jobs:
           name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.shared"
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
+      - name: Archive SDK shared libraries
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.shared"
+          path: |
             ./build/shared_install_dir
+      - name: Archive setup files
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.shared"
+          path: |
             ./setup/
 
   build-shared-libs-armhf32:
@@ -263,7 +326,6 @@ jobs:
             export DOCKER_IMAGE=docker.pkg.github.com/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
             docker pull $DOCKER_IMAGE
             docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=armhf_cross_mode_shared_libs
-        
         - name: Archive armhf32 Build Artifact                                                                                                                                                        
           uses: actions/upload-artifact@v2                                                                                                                                                                      
           # Run for main branch only                                                                                                                                                                            
@@ -272,7 +334,21 @@ jobs:
             name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.shared"
             path: |                                                                                                                                                                                             
               ./build/${{ env.PACKAGE_NAME }}
+        - name: Archive SDK shared libraries
+          uses: actions/upload-artifact@v2
+          # Run for main branch only
+          if: github.ref == 'refs/heads/main'
+          with:
+            name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.shared"
+            path: |
               ./build/shared_install_dir
+        - name: Archive setup files
+          uses: actions/upload-artifact@v2
+          # Run for main branch only
+          if: github.ref == 'refs/heads/main'
+          with:
+            name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.shared"
+            path: |
               ./setup/
 
   build-shared-libs-mips32:
@@ -295,7 +371,21 @@ jobs:
           name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.shared"
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
+      - name: Archive SDK shared libraries
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.shared"
+          path: |
             ./build/shared_install_dir
+      - name: Archive setup files
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.shared"
+          path: |
             ./setup/
 
   build-shared-libs-aarch64:
@@ -318,7 +408,21 @@ jobs:
           name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.shared"
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
+      - name: Archive SDK shared libraries
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.shared"
+          path: |
             ./build/shared_install_dir
+      - name: Archive setup files
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.shared"
+          path: |
             ./setup/
 
   build-st-ubuntu-16-x64:
@@ -341,7 +445,6 @@ jobs:
           name: "ST.ubuntu.x64.${{ env.PACKAGE_NAME }}"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
-            ./setup/
 
   build-st-ubuntu-16-aarch64:
     runs-on: ubuntu-latest
@@ -363,7 +466,6 @@ jobs:
           name: "ST.ubuntu.aarch64.${{ env.PACKAGE_NAME }}"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
-            ./setup/
 
   build-st-ubuntu-16-armhf32:
     runs-on: ubuntu-latest
@@ -385,4 +487,3 @@ jobs:
           name: "ST.linux.armhf.${{ env.PACKAGE_NAME }}"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
-            ./setup/
