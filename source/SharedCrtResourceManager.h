@@ -6,6 +6,7 @@
 
 #include "config/Config.h"
 
+#include <atomic>
 #include <aws/crt/Api.h>
 #include <aws/iot/MqttClient.h>
 #include <iostream>
@@ -29,6 +30,7 @@ namespace Aws
 
                 static constexpr int DEFAULT_WAIT_TIME_SECONDS = 10;
                 bool initialized = false;
+                std::atomic<bool> initializedAWSHttpLib{false};
                 std::promise<void> connectionClosedPromise;
                 std::unique_ptr<Aws::Crt::ApiHandle> apiHandle;
                 std::unique_ptr<Aws::Crt::Io::EventLoopGroup> eventLoopGroup;
@@ -47,6 +49,7 @@ namespace Aws
                 static const int RETRY = 1;
                 static const int ABORT = 2;
                 bool initialize(const PlainConfig &config);
+                void initializeAWSHttpLib();
                 int establishConnection(const PlainConfig &config);
                 std::shared_ptr<Crt::Mqtt::MqttConnection> getConnection();
                 Aws::Crt::Io::EventLoopGroup *getEventLoopGroup();

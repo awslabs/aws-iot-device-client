@@ -38,8 +38,7 @@ namespace Aws
                     shared_ptr<ClientBaseNotifier> notifier,
                     const PlainConfig &config)
                 {
-                    // TODO: UA-5774 - Move SDK initialization to application level
-                    aws_http_library_init(sharedCrtResourceManager->getAllocator());
+                    sharedCrtResourceManager->initializeAWSHttpLib();
 
                     this->mSharedCrtResourceManager = sharedCrtResourceManager;
                     mDeviceApiHandle = unique_ptr<Aws::Iotdevicecommon::DeviceApiHandle>(
