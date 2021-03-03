@@ -15,7 +15,7 @@ bool Retry::exponentialBackoff(
     function<void()> onSuccess,
     ExponentialRetryConfig config)
 {
-    bool needToStop;
+    bool needToStop = false;
     if (config.needStopFlag != nullptr)
     {
         needToStop = config.needStopFlag->load();
