@@ -406,7 +406,6 @@ void JobsFeature::publishUpdateJobExecutionStatus(JobExecutionData data, JobExec
     auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool {
         // We first need to make sure that we haven't previously leaked any promises into our map
         unique_lock<mutex> leakLock(updateJobExecutionPromisesLock);
-        LOG_DEBUG(TAG, "Got updateJobExecutionPromisesLock");
         for (auto keyPromise = updateJobExecutionPromises.cbegin(); keyPromise != updateJobExecutionPromises.cend();
              /** no increment here **/)
         {

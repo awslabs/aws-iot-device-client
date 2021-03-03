@@ -57,14 +57,14 @@ namespace Aws
                      * @param retryableFunction the function to retry. This function should return a bool indicating
                      * whether it is successful or not, since this indicator is what will determine whether the
                      * function is retried or not.
-                     * @param onSuccess a callback function which will be executed upon successful
-                     * execution of the retryable function
+                     * @param onComplete a callback function which will be executed once this function is finished
+                     * attempting retries
                      * @param config the ExponentialRetryConfig specifying whether the function should be retried
                      * @return a bool representing whether the retryableFunction was successful or not
                      */
                     static bool exponentialBackoff(
                         std::function<bool()> retryableFunction,
-                        std::function<void()> onSuccess,
+                        std::function<void()> onComplete,
                         ExponentialRetryConfig config);
                 };
             } // namespace Util

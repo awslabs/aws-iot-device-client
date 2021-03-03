@@ -12,7 +12,7 @@ const char *Retry::TAG = "Retry.cpp";
 
 bool Retry::exponentialBackoff(
     function<bool()> retryableFunction,
-    function<void()> onSuccess,
+    function<void()> onComplete,
     ExponentialRetryConfig config)
 {
     bool needToStop = false;
@@ -38,10 +38,6 @@ bool Retry::exponentialBackoff(
     while (!successful && !needToStop && (config.maxRetries < 0 || retriesSoFar < config.maxRetries))
     {
         successful = retryableFunction();
-        if (successful && nullptr != onSuccess)
-        {
-            onSuccess();
-        }
 
         // So we don't have to worry about overflowing on an infinite number of retries
         if (config.maxRetries >= 0)
@@ -60,6 +56,11 @@ bool Retry::exponentialBackoff(
         {
             needToStop = config.needStopFlag->load();
         }
+    }
+
+    if (nullptr != onComplete)
+    {
+        onComplete();
     }
 
     return successful;
