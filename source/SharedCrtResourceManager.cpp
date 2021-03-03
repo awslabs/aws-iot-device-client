@@ -290,6 +290,7 @@ Aws::Crt::Io::ClientBootstrap *SharedCrtResourceManager::getClientBootstrap()
 
 void SharedCrtResourceManager::disconnect()
 {
+    LOG_DEBUG(TAG, "Attempting to disconnect MQTT connection");
     if (connection->Disconnect())
     {
         if (connectionClosedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==

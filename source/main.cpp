@@ -57,30 +57,27 @@ Config config;
  */
 void shutdown()
 {
-    if (!attemptingShutdown)
+    featuresReadWriteLock.lock(); // LOCK
+    // Make a copy of the features vector for thread safety
+    vector<Feature *> featuresCopy = features;
+    featuresReadWriteLock.unlock(); // UNLOCK
+
+    if (!attemptingShutdown && !featuresCopy.empty())
     {
         attemptingShutdown = true;
-
-        featuresReadWriteLock.lock(); // LOCK
-        // Make a copy of the features vector for thread safety
-        vector<Feature *> featuresCopy = features;
-        featuresReadWriteLock.unlock(); // UNLOCK
 
         for (auto &feature : featuresCopy)
         {
             LOGM_DEBUG(TAG, "Attempting shutdown of %s", feature->getName().c_str());
             feature->stop();
         }
-        LoggerFactory::getLoggerInstance().get()->shutdown();
-
-        if (featuresCopy.empty())
-        {
-            exit(0);
-        }
     }
     else
     {
-        // terminate program
+// terminate program
+#if !defined(DISABLE_MQTT)
+        resourceManager.get()->disconnect();
+#endif
         LoggerFactory::getLoggerInstance().get()->shutdown();
         exit(0);
     }
@@ -125,9 +122,7 @@ void handle_feature_stopped(Feature *feature)
 
 void attemptConnection()
 {
-    std::mutex canStopLock;
-    bool needStop;
-    Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 900 * 1000, -1, canStopLock, needStop};
+    Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 900 * 1000, -1, nullptr};
     auto publishLambda = []() -> bool {
         int connectionStatus = resourceManager.get()->establishConnection(config.config);
         if (SharedCrtResourceManager::ABORT == connectionStatus)
@@ -151,7 +146,7 @@ void attemptConnection()
             return false;
         }
     };
-    std::thread attemptConnectionThread(&Retry::exponentialBackoff, publishLambda, retryConfig);
+    std::thread attemptConnectionThread(&Retry::exponentialBackoff, publishLambda, nullptr, retryConfig);
     attemptConnectionThread.join();
 }
 
@@ -203,7 +198,8 @@ namespace Aws
                         }
                         case ClientBaseErrorNotification::MESSAGE_RECEIVED_AFTER_SHUTDOWN:
                         {
-                            LOGM_ERROR(TAG, "Received message after feature shutdown: %s", msg.c_str());
+                            LOGM_WARN(TAG, "Received message after feature shutdown: %s", msg.c_str());
+                            return;
                         }
                         default:
                         {
@@ -374,9 +370,6 @@ int main(int argc, char *argv[])
         LOGM_INFO(TAG, "Received signal: (%d)", received_signal);
         if (SIGINT == received_signal)
         {
-#if !defined(DISABLE_MQTT)
-            resourceManager.get()->disconnect();
-#endif
             shutdown();
         }
     }

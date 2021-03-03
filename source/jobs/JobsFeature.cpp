@@ -93,6 +93,7 @@ void JobsFeature::ackSubscribeToUpdateJobExecutionAccepted(int ioError)
         LOG_ERROR(TAG, errorMessage.c_str());
         baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_REJECTED, errorMessage);
     }
+    updateAcceptedPromise.set_value(ioError);
 }
 
 void JobsFeature::ackSubscribeToUpdateJobExecutionRejected(int ioError)
@@ -105,6 +106,7 @@ void JobsFeature::ackSubscribeToUpdateJobExecutionRejected(int ioError)
         LOG_ERROR(TAG, errorMessage.c_str());
         baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_REJECTED, errorMessage);
     }
+    updateRejectedPromise.set_value(ioError);
 }
 
 /** Publishes a request to start the next pending job. In order to receive the response message,
@@ -112,6 +114,7 @@ void JobsFeature::ackSubscribeToUpdateJobExecutionRejected(int ioError)
  */
 void JobsFeature::publishStartNextPendingJobExecutionRequest()
 {
+    LOG_DEBUG(TAG, "Publishing startNextPendingJobExecutionRequest");
     StartNextPendingJobExecutionRequest startNextRequest;
     startNextRequest.ThingName = thingName.c_str();
     jobsClient->PublishStartNextPendingJobExecution(
@@ -126,6 +129,7 @@ void JobsFeature::publishStartNextPendingJobExecutionRequest()
  */
 void JobsFeature::subscribeToStartNextPendingJobExecution()
 {
+    LOG_DEBUG(TAG, "Attempting to subscribe to startNextPendingJobExecution accepted and rejected");
     StartNextPendingJobExecutionSubscriptionRequest startNextSub;
     startNextSub.ThingName = thingName.c_str();
     jobsClient->SubscribeToStartNextPendingJobExecutionAccepted(
@@ -147,6 +151,7 @@ void JobsFeature::subscribeToStartNextPendingJobExecution()
  */
 void JobsFeature::subscribeToNextJobChangedEvents()
 {
+    LOG_DEBUG(TAG, "Attempting to subscribe to nextJobChanged events");
     NextJobExecutionChangedSubscriptionRequest nextJobSub;
     nextJobSub.ThingName = thingName.c_str();
     jobsClient->SubscribeToNextJobExecutionChangedEvents(
@@ -158,6 +163,7 @@ void JobsFeature::subscribeToNextJobChangedEvents()
 
 void JobsFeature::subscribeToUpdateJobExecutionStatusAccepted(string jobId)
 {
+    LOGM_DEBUG(TAG, "Attempting to subscribe to updateJobExecutionStatusAccepted for jobId %s", jobId.c_str());
     UpdateJobExecutionSubscriptionRequest request;
     request.ThingName = thingName.c_str();
     request.JobId = jobId.c_str();
@@ -167,10 +173,19 @@ void JobsFeature::subscribeToUpdateJobExecutionStatusAccepted(string jobId)
         std::bind(
             &JobsFeature::updateJobExecutionStatusAcceptedHandler, this, std::placeholders::_1, std::placeholders::_2),
         std::bind(&JobsFeature::ackSubscribeToUpdateJobExecutionAccepted, this, std::placeholders::_1));
+
+    if (std::future_status::timeout == updateAcceptedPromise.get_future().wait_for(std::chrono::seconds(10)))
+    {
+        ostringstream errorMessage;
+        errorMessage << "Failed to subscribe to updateJobExecutionStatusAccepted!";
+        LOG_ERROR(TAG, errorMessage.str().c_str());
+        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_REJECTED, errorMessage.str());
+    }
 }
 
 void JobsFeature::subscribeToUpdateJobExecutionStatusRejected(string jobId)
 {
+    LOGM_DEBUG(TAG, "Attempting to subscribe to updateJobExecutionStatusRejected for jobId %s", jobId.c_str());
     UpdateJobExecutionSubscriptionRequest request;
     request.ThingName = thingName.c_str();
     request.JobId = jobId.c_str();
@@ -180,6 +195,14 @@ void JobsFeature::subscribeToUpdateJobExecutionStatusRejected(string jobId)
         std::bind(
             &JobsFeature::updateJobExecutionStatusRejectedHandler, this, std::placeholders::_1, std::placeholders::_2),
         std::bind(&JobsFeature::ackSubscribeToUpdateJobExecutionRejected, this, std::placeholders::_1));
+
+    if (std::future_status::timeout == updateRejectedPromise.get_future().wait_for(std::chrono::seconds(10)))
+    {
+        ostringstream errorMessage;
+        errorMessage << "Failed to subscribe to updateJobExecutionStatusRejected!";
+        LOG_ERROR(TAG, errorMessage.str().c_str());
+        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_REJECTED, errorMessage.str());
+    }
 }
 
 /**
@@ -195,10 +218,8 @@ void JobsFeature::startNextPendingJobReceivedHandler(StartNextJobExecutionRespon
     }
     if (response->Execution.has_value())
     {
-        unique_lock<mutex> lock(canStopLock);
-        if (needStop)
+        if (needStop.load())
         {
-            lock.unlock();
             LOG_WARN(TAG, "Received new job but JobsFeature is stopped");
             ostringstream jobMessage;
             jobMessage << "Incoming " << Iotjobs::JobStatusMarshaller::ToString(response->Execution->Status.value())
@@ -213,8 +234,7 @@ void JobsFeature::startNextPendingJobReceivedHandler(StartNextJobExecutionRespon
         {
             if (!isDuplicateNotification(response->Execution.value()))
             {
-                handlingJob = true;
-                lock.unlock();
+                handlingJob.store(true);
 
                 copyJobsNotification(response->Execution.value());
                 executeJob(response->Execution.value());
@@ -244,10 +264,8 @@ void JobsFeature::nextJobChangedHandler(NextJobExecutionChangedEvent *event, int
 
     if (event->Execution.has_value())
     {
-        unique_lock<mutex> lock(canStopLock);
-        if (needStop)
+        if (needStop.load())
         {
-            lock.unlock();
             LOG_WARN(TAG, "Received new job but JobsFeature is stopped");
             ostringstream jobMessage;
             jobMessage << "Incoming " << Iotjobs::JobStatusMarshaller::ToString(event->Execution->Status.value())
@@ -260,8 +278,7 @@ void JobsFeature::nextJobChangedHandler(NextJobExecutionChangedEvent *event, int
             // Check to see if this is a duplicate notification
             if (!isDuplicateNotification(event->Execution.value()))
             {
-                handlingJob = true;
-                lock.unlock();
+                handlingJob.store(true);
 
                 copyJobsNotification(event->Execution.value());
                 executeJob(event->Execution.value());
@@ -297,6 +314,7 @@ void JobsFeature::updateJobExecutionStatusAcceptedHandler(Iotjobs::UpdateJobExec
         return;
     }
 
+    LOGM_DEBUG(TAG, "Removing ClientToken %s from the updateJobExecution promises map", clientToken.c_str());
     keyValuePair->second.set_value(0);
 }
 
@@ -367,15 +385,37 @@ void JobsFeature::publishUpdateJobExecutionStatus(JobExecutionData data, JobExec
      * backoff in case our request gets throttled. Otherwise, if we never properly
      * update the job execution status, we'll never receive the next job
      */
-    Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 640 * 1000, -1, canStopLock, needStop};
+    Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 640 * 1000, -1, &needStop};
+    if (needStop.load())
+    {
+        // If we need to stop the Jobs feature, then we're making a best-effort attempt here
+        // to update the job execution status prior to shutting down rather than infinite backoff
+        retryConfig.maxRetries = 3;
+        retryConfig.needStopFlag = nullptr;
+    }
+
+    auto onRetrySuccess = [this]() -> void {
+        handlingJob.store(false);
+        if (needStop.load())
+        {
+            LOGM_INFO(TAG, "Shutting down %s now that job execution is complete", getName().c_str());
+            baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
+        }
+    };
+
     auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool {
         // We first need to make sure that we haven't previously leaked any promises into our map
         unique_lock<mutex> leakLock(updateJobExecutionPromisesLock);
+        LOG_DEBUG(TAG, "Got updateJobExecutionPromisesLock");
         for (auto keyPromise = updateJobExecutionPromises.cbegin(); keyPromise != updateJobExecutionPromises.cend();
              /** no increment here **/)
         {
             if (keyPromise->second.isExpired())
             {
+                LOGM_DEBUG(
+                    TAG,
+                    "Removing expired promise for ClientToken %s from the updateJobExecution promise map",
+                    keyPromise->first.c_str());
                 keyPromise = updateJobExecutionPromises.erase(keyPromise);
             }
             else
@@ -398,6 +438,10 @@ void JobsFeature::publishUpdateJobExecutionStatus(JobExecutionData data, JobExec
         this->updateJobExecutionPromises.insert(std::pair<Aws::Crt::String, EphemeralPromise<int>>(
             clientToken.c_str(), EphemeralPromise<int>(std::chrono::milliseconds(15 * 1000))));
         writeLock.unlock();
+        LOGM_DEBUG(
+            TAG,
+            "Created EphermalPromise for ClientToken %s in the updateJobExecution promises map",
+            clientToken.c_str());
 
         this->jobsClient->PublishUpdateJobExecution(
             request,
@@ -433,7 +477,7 @@ void JobsFeature::publishUpdateJobExecutionStatus(JobExecutionData data, JobExec
         this->updateJobExecutionPromises.erase(clientToken.c_str());
         return success;
     };
-    std::thread updateJobExecutionThread(&Retry::exponentialBackoff, publishLambda, retryConfig);
+    std::thread updateJobExecutionThread(&Retry::exponentialBackoff, publishLambda, onRetrySuccess, retryConfig);
     updateJobExecutionThread.detach();
 }
 
@@ -594,15 +638,6 @@ void JobsFeature::executeJob(JobExecutionData job)
         string standardOut = includeStdOut ? engine->getStdOut() : "";
         publishUpdateJobExecutionStatus(job, {JobStatus::FAILED, reason.str(), standardOut, engine->getStdErr()});
     }
-
-    unique_lock<mutex> lock(canStopLock);
-    handlingJob = false;
-    if (needStop)
-    {
-        lock.unlock();
-        LOGM_INFO(TAG, "Shutting down %s now that job execution is complete", getName().c_str());
-        baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
-    }
 }
 
 void JobsFeature::runJobs()
@@ -658,11 +693,9 @@ int JobsFeature::start()
 
 int JobsFeature::stop()
 {
-    unique_lock<mutex> lock(canStopLock);
-    needStop = true;
-    if (!handlingJob)
+    needStop.store(true);
+    if (!handlingJob.load())
     {
-        lock.unlock();
         baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
     }
 

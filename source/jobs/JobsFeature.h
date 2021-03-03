@@ -82,15 +82,11 @@ namespace Aws
                     /**
                      * \brief Whether the DeviceClient base has requested this feature to stop
                      */
-                    bool needStop = false;
+                    std::atomic<bool> needStop{false};
                     /**
                      * \brief Whether the jobs feature is currently executing a job
                      */
-                    bool handlingJob = false;
-                    /**
-                     * \brief A mutex used to control access to the stop and handling job flags
-                     */
-                    std::mutex canStopLock;
+                    std::atomic<bool> handlingJob{false};
 
                     /**
                      * \brief A lock used to control access to the map of EphemeralPromise
@@ -170,6 +166,8 @@ namespace Aws
                     void ackUpdateJobExecutionStatus(int ioError);
                     void ackSubscribeToUpdateJobExecutionAccepted(int ioError);
                     void ackSubscribeToUpdateJobExecutionRejected(int ioError);
+                    std::promise<int> updateAcceptedPromise;
+                    std::promise<int> updateRejectedPromise;
 
                     // Outgoing Mqtt messages/topic subscriptions
                     /**
