@@ -54,7 +54,7 @@ jobs:
         # Run for main branch only                                                                                                                                                                            
         if: github.ref == 'refs/heads/main'
         with:                                                                                                                                                                                                 
-          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}"                                                                                                                          
+          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.static"
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
@@ -62,7 +62,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}"
+          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.static"
           path: |
             ./setup/
 
@@ -96,7 +96,7 @@ jobs:
         # Run for main branch only                                                                                                                                                                            
         if: github.ref == 'refs/heads/main'                                                                                                                                                                   
         with:                                                                                                                                                                                                 
-          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}"                                                                                                                          
+          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.static"
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
@@ -104,7 +104,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}"
+          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.static"
           path: |
             ./setup/
 
@@ -157,7 +157,7 @@ jobs:
         # Run for main branch only                                                                                                                                                                            
         if: github.ref == 'refs/heads/main'                                                                                                                                                                   
         with:                                                                                                                                                                                                 
-          name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}"                                                                                                                          
+          name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.static"
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
@@ -165,7 +165,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}"
+          name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.static"
           path: |
             ./setup/
 
@@ -186,7 +186,7 @@ jobs:
         # Run for main branch only                                                                                                                                                                            
         if: github.ref == 'refs/heads/main'                                                                                                                                                                   
         with:                                                                                                                                                                                                 
-          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}"                                                                                                                          
+          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.static"
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
@@ -194,7 +194,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}"
+          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.static"
           path: |
             ./setup/
 
@@ -215,7 +215,7 @@ jobs:
         # Run for main branch only                                                                                                                                                                            
         if: github.ref == 'refs/heads/main'                                                                                                                                                                   
         with:                                                                                                                                                                                                 
-          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}"                                                                                                                          
+          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.static"
           path: |                                                                                                                                                                                             
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
@@ -223,7 +223,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}"
+          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.static"
           path: |
             ./setup/
 
