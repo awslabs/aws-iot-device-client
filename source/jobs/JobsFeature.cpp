@@ -476,7 +476,9 @@ void JobsFeature::publishUpdateJobExecutionStatus(JobExecutionData data, JobExec
         this->updateJobExecutionPromises.erase(clientToken.c_str());
         return success;
     };
-    std::thread updateJobExecutionThread(&Retry::exponentialBackoff, publishLambda, onRetrySuccess, retryConfig);
+    std::thread updateJobExecutionThread([retryConfig, publishLambda, onRetrySuccess] {
+        Retry::exponentialBackoff(retryConfig, publishLambda, onRetrySuccess);
+    });
     updateJobExecutionThread.detach();
 }
 

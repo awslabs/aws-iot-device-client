@@ -146,7 +146,8 @@ void attemptConnection()
             return false;
         }
     };
-    std::thread attemptConnectionThread(&Retry::exponentialBackoff, publishLambda, nullptr, retryConfig);
+    std::thread attemptConnectionThread(
+        [retryConfig, publishLambda] { Retry::exponentialBackoff(retryConfig, publishLambda); });
     attemptConnectionThread.join();
 }
 

@@ -11,9 +11,9 @@ using namespace Aws::Iot::DeviceClient::Util;
 const char *Retry::TAG = "Retry.cpp";
 
 bool Retry::exponentialBackoff(
+    ExponentialRetryConfig config,
     function<bool()> retryableFunction,
-    function<void()> onComplete,
-    ExponentialRetryConfig config)
+    function<void()> onComplete)
 {
     bool needToStop = false;
     if (config.needStopFlag != nullptr)
@@ -24,6 +24,12 @@ bool Retry::exponentialBackoff(
     if (needToStop)
     {
         LOG_DEBUG(TAG, "Stop flag was set prior to executing retryable function, will not attempt retryable execution");
+
+        if (nullptr != onComplete)
+        {
+            onComplete();
+        }
+
         return false;
     }
 

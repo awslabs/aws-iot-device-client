@@ -54,18 +54,18 @@ namespace Aws
                      * In the event of throttling by IoT Core APIs, such as when we perform UpdateJobExecution
                      * within the Jobs feature, it is necessary to perform an exponential backoff to improve the
                      * chances of receiving a success response.
+                     * @param config the ExponentialRetryConfig specifying whether the function should be retried
                      * @param retryableFunction the function to retry. This function should return a bool indicating
                      * whether it is successful or not, since this indicator is what will determine whether the
                      * function is retried or not.
                      * @param onComplete a callback function which will be executed once this function is finished
                      * attempting retries
-                     * @param config the ExponentialRetryConfig specifying whether the function should be retried
                      * @return a bool representing whether the retryableFunction was successful or not
                      */
                     static bool exponentialBackoff(
+                        ExponentialRetryConfig config,
                         std::function<bool()> retryableFunction,
-                        std::function<void()> onComplete,
-                        ExponentialRetryConfig config);
+                        std::function<void()> onComplete = nullptr);
                 };
             } // namespace Util
         }     // namespace DeviceClient
