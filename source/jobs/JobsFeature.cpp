@@ -43,9 +43,9 @@ void JobsFeature::ackSubscribeToNextJobChanged(int ioError)
     if (ioError)
     {
         // TODO We need to implement a strategy for what do when our subscription fails
-        string errorMessage = "Failed to subscribe to nextJobChanged";
+        string errorMessage = "Encountered an ioError while attempting to subscribe to NextJobChanged";
         LOG_ERROR(TAG, errorMessage.c_str());
-        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_REJECTED, errorMessage);
+        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_FAILED, errorMessage);
     }
 }
 
@@ -60,9 +60,9 @@ void JobsFeature::ackSubscribeToStartNextJobAccepted(int ioError)
     if (ioError)
     {
         // TODO We need to implement a strategy for what do when our subscription fails
-        string errorMessage = "Failed to subscribe to nextJobChanged";
+        string errorMessage = "Encountered an ioError while attempting to subscribe to StartNextJobAccepted";
         LOG_ERROR(TAG, errorMessage.c_str());
-        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_REJECTED, errorMessage);
+        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_FAILED, errorMessage);
     }
 }
 
@@ -72,9 +72,9 @@ void JobsFeature::ackSubscribeToStartNextJobRejected(int ioError)
     if (ioError)
     {
         // TODO We need to implement a strategy for what do when our subscription fails
-        string errorMessage = "Failed to subscribe to nextJobChanged";
+        string errorMessage = "Encountered an ioError while attempting to subscribe to StartNextJobRejected";
         LOG_ERROR(TAG, errorMessage.c_str());
-        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_REJECTED, errorMessage);
+        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_FAILED, errorMessage);
     }
 }
 
@@ -89,9 +89,9 @@ void JobsFeature::ackSubscribeToUpdateJobExecutionAccepted(int ioError)
     if (ioError)
     {
         // TODO We need to implement a strategy for what do when our subscription fails
-        string errorMessage = "Failed to subscribe to nextJobChanged";
+        string errorMessage = "Encountered an ioError while attempting to subscribe to UpdateJobExecutionAccepted";
         LOG_ERROR(TAG, errorMessage.c_str());
-        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_REJECTED, errorMessage);
+        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_FAILED, errorMessage);
     }
     updateAcceptedPromise.set_value(ioError);
 }
@@ -102,9 +102,9 @@ void JobsFeature::ackSubscribeToUpdateJobExecutionRejected(int ioError)
     if (ioError)
     {
         // TODO We need to implement a strategy for what do when our subscription fails
-        string errorMessage = "Failed to subscribe to nextJobChanged";
+        string errorMessage = "Encountered an ioError while attempting to subscribe to UpdateJobExecutionRejected";
         LOG_ERROR(TAG, errorMessage.c_str());
-        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_REJECTED, errorMessage);
+        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_FAILED, errorMessage);
     }
     updateRejectedPromise.set_value(ioError);
 }
@@ -177,9 +177,10 @@ void JobsFeature::subscribeToUpdateJobExecutionStatusAccepted(string jobId)
     if (std::future_status::timeout == updateAcceptedPromise.get_future().wait_for(std::chrono::seconds(10)))
     {
         ostringstream errorMessage;
-        errorMessage << "Failed to subscribe to updateJobExecutionStatusAccepted!";
+        errorMessage
+            << "Timed out while waiting for acknowledgement of subscription to UpdateJobExecutionStatusAccepted";
         LOG_ERROR(TAG, errorMessage.str().c_str());
-        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_REJECTED, errorMessage.str());
+        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_FAILED, errorMessage.str());
     }
 }
 
@@ -199,9 +200,10 @@ void JobsFeature::subscribeToUpdateJobExecutionStatusRejected(string jobId)
     if (std::future_status::timeout == updateRejectedPromise.get_future().wait_for(std::chrono::seconds(10)))
     {
         ostringstream errorMessage;
-        errorMessage << "Failed to subscribe to updateJobExecutionStatusRejected!";
+        errorMessage
+            << "Timed out while waiting for acknowledgement of subscription to UpdateJobExecutionStatusRejected";
         LOG_ERROR(TAG, errorMessage.str().c_str());
-        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_REJECTED, errorMessage.str());
+        baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_FAILED, errorMessage.str());
     }
 }
 
@@ -249,9 +251,16 @@ void JobsFeature::startNextPendingJobReceivedHandler(StartNextJobExecutionRespon
 
 void JobsFeature::startNextPendingJobRejectedHandler(RejectedError *rejectedError, int ioError)
 {
-    ostringstream errorMessage;
-    errorMessage << "startNextPendingJob subscription rejected: " << rejectedError->Message->c_str();
-    baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_REJECTED, errorMessage.str());
+    if (ioError)
+    {
+        LOGM_ERROR(TAG, "Encountered ioError %d within startNextPendingJobRejectedHandler", ioError);
+        return;
+    }
+
+    if (rejectedError->Message.has_value())
+    {
+        LOGM_ERROR(TAG, "startNextPendingJob rejected: %s", rejectedError->Message->c_str());
+    }
 }
 
 void JobsFeature::nextJobChangedHandler(NextJobExecutionChangedEvent *event, int ioError)

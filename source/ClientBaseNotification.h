@@ -35,7 +35,7 @@ namespace Aws
             enum class ClientBaseErrorNotification
             {
                 MESSAGE_RECEIVED_AFTER_SHUTDOWN,
-                SUBSCRIPTION_REJECTED
+                SUBSCRIPTION_FAILED
             };
         } // namespace DeviceClient
     }     // namespace Iot

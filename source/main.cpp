@@ -192,7 +192,7 @@ namespace Aws
                 {
                     switch (error)
                     {
-                        case ClientBaseErrorNotification::SUBSCRIPTION_REJECTED:
+                        case ClientBaseErrorNotification::SUBSCRIPTION_FAILED:
                         {
                             LOGM_ERROR(TAG, "Subscription rejected: %s", msg.c_str());
                             break;
