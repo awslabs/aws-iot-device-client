@@ -4,6 +4,10 @@ files:
   - source: /aws-iot-device-client
     destination: /sbin/
 hooks:
+  BeforeInstall:
+    - location: codedeploy/before_install.sh
+      timeout: 300
+      runas: root
   ApplicationStart:
     - location: codedeploy/start_service.sh
       timeout: 300
