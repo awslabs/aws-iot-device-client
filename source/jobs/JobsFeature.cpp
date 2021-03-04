@@ -43,7 +43,8 @@ void JobsFeature::ackSubscribeToNextJobChanged(int ioError)
     if (ioError)
     {
         // TODO We need to implement a strategy for what do when our subscription fails
-        string errorMessage = "Encountered an ioError while attempting to subscribe to NextJobChanged";
+        string errorMessage =
+            FormatMessage("Encountered ioError {%d} while attempting to subscribe to NextJobChanged", ioError);
         LOG_ERROR(TAG, errorMessage.c_str());
         baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_FAILED, errorMessage);
     }
