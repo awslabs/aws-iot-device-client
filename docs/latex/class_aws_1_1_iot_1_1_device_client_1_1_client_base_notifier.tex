@@ -1,0 +1,77 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Client\+Base\+Notifier Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}\index{Aws::Iot::DeviceClient::ClientBaseNotifier@{Aws::Iot::DeviceClient::ClientBaseNotifier}}
+
+
+Interface the provides event-\/based messaging between features and the client base (Main.\+cpp)  
+
+
+
+
+{\ttfamily \#include $<$Client\+Base\+Notifier.\+h$>$}
+
+Inheritance diagram for Aws\+::Iot\+::Device\+Client\+::Client\+Base\+Notifier\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier_ae892fac9b0a778d8882bf56cb88ec26d}{on\+Event}} (\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature}} $\ast$feature, Aws\+::\+Iot\+::\+Device\+Client\+::\+Client\+Base\+Event\+Notification notification)=0
+\begin{DoxyCompactList}\small\item\em Indicates an event has occurred within a feature. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier_a4b1f9d16f18965cccb96de1518a53abe}{on\+Error}} (\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature}} $\ast$feature, Aws\+::\+Iot\+::\+Device\+Client\+::\+Client\+Base\+Error\+Notification notification, std\+::string message)=0
+\begin{DoxyCompactList}\small\item\em Indicates an error event has occurred within a feature. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Interface the provides event-\/based messaging between features and the client base (Main.\+cpp) 
+
+This class is used to allow features to notify the client base (Main.\+cpp) of changes or events that have happened and require attention. The interface methods are implemented at the client base level, and are called upon within the feature. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier_a4b1f9d16f18965cccb96de1518a53abe}\label{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier_a4b1f9d16f18965cccb96de1518a53abe}} 
+\index{Aws::Iot::DeviceClient::ClientBaseNotifier@{Aws::Iot::DeviceClient::ClientBaseNotifier}!onError@{onError}}
+\index{onError@{onError}!Aws::Iot::DeviceClient::ClientBaseNotifier@{Aws::Iot::DeviceClient::ClientBaseNotifier}}
+\doxysubsubsection{\texorpdfstring{onError()}{onError()}}
+{\footnotesize\ttfamily virtual void Aws\+::\+Iot\+::\+Device\+Client\+::\+Client\+Base\+Notifier\+::on\+Error (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature}} $\ast$}]{feature,  }\item[{Aws\+::\+Iot\+::\+Device\+Client\+::\+Client\+Base\+Error\+Notification}]{notification,  }\item[{std\+::string}]{message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Indicates an error event has occurred within a feature. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em feature} & a feature should pass reference to itself to aid the client base in taking action \\
+\hline
+{\em notification} & the error code representing the error that has occurred \\
+\hline
+{\em message} & an optional message that may be passed regarding the error to provide additional context \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier_ae892fac9b0a778d8882bf56cb88ec26d}\label{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier_ae892fac9b0a778d8882bf56cb88ec26d}} 
+\index{Aws::Iot::DeviceClient::ClientBaseNotifier@{Aws::Iot::DeviceClient::ClientBaseNotifier}!onEvent@{onEvent}}
+\index{onEvent@{onEvent}!Aws::Iot::DeviceClient::ClientBaseNotifier@{Aws::Iot::DeviceClient::ClientBaseNotifier}}
+\doxysubsubsection{\texorpdfstring{onEvent()}{onEvent()}}
+{\footnotesize\ttfamily virtual void Aws\+::\+Iot\+::\+Device\+Client\+::\+Client\+Base\+Notifier\+::on\+Event (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature}} $\ast$}]{feature,  }\item[{Aws\+::\+Iot\+::\+Device\+Client\+::\+Client\+Base\+Event\+Notification}]{notification }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Indicates an event has occurred within a feature. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em feature} & a feature should pass reference to itself to aid the agent base in taking action \\
+\hline
+{\em notification} & the event code representing the event that has occurred \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_default_client_base_notifier_a78ef5a78282bedbfce408e34ebb6a542}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Default\+Client\+Base\+Notifier}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/Client\+Base\+Notifier.\+h\end{DoxyCompactItemize}

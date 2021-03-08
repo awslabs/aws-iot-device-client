@@ -1,0 +1,161 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Device\+Defender\+::Device\+Defender\+Feature Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature}\index{Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature@{Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature}}
+
+
+Provides IoT Device Defender related functionality within the Device Client.  
+
+
+
+
+{\ttfamily \#include $<$Device\+Defender\+Feature.\+h$>$}
+
+Inheritance diagram for Aws\+::Iot\+::Device\+Client\+::Device\+Defender\+::Device\+Defender\+Feature\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_aab2d344e20e1975d94f04ce424a350d4}{init}} (std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$ manager, std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}{Client\+Base\+Notifier}} $>$ notifier, const \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_plain_config}{Plain\+Config}} \&config)
+\begin{DoxyCompactList}\small\item\em Initializes the Device Defender feature with all the required setup information, event handlers, and the shared Mqtt\+Connection. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a9756456b46159446a17e93d65028963b}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a9756456b46159446a17e93d65028963b}} 
+void {\bfseries Load\+From\+Config} (const \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_plain_config}{Plain\+Config}} \&config)
+\item 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a970567f029b428224c769d608de249c4}{get\+Name}} () override
+\begin{DoxyCompactList}\small\item\em For a given feature, returns its name. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a4f1090347b3b875a0d89fdceb1fea7b8}{start}} () override
+\begin{DoxyCompactList}\small\item\em Start the feature. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a618a12044a581035fbe02f0f4f5813f7}{stop}} () override
+\begin{DoxyCompactList}\small\item\em Stop the feature. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a6c8c13cd985b74ff9c639921225fe99a}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a6c8c13cd985b74ff9c639921225fe99a}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a6c8c13cd985b74ff9c639921225fe99a}{start\+Device\+Defender}} ()
+\begin{DoxyCompactList}\small\item\em Called by feature start, this will build the task, add it to the event\+Loop\+Group in the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}}, \& will start the task. This function will also subscribe to the accepted/rejected Device Defender M\+Q\+TT topics. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a29f964f019b5abae73dbb252355b8a83}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a29f964f019b5abae73dbb252355b8a83}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a29f964f019b5abae73dbb252355b8a83}{stop\+Device\+Defender}} ()
+\begin{DoxyCompactList}\small\item\em Called when Iot Device Defender S\+DK task stops, this function will stop the Iot Device Defender S\+DK task, \& unsubscribe from the accepted/rejected Device Defender M\+Q\+TT topics. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_ac3e35348cde1d5d6a9f0d94d401c5be8}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_ac3e35348cde1d5d6a9f0d94d401c5be8}} 
+int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_ac3e35348cde1d5d6a9f0d94d401c5be8}{interval}}
+\begin{DoxyCompactList}\small\item\em An interval in seconds used to determine how often to publish reports. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a94c232fb069b691c86f50e071be52980}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a94c232fb069b691c86f50e071be52980}} 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a94c232fb069b691c86f50e071be52980}{thing\+Name}}
+\begin{DoxyCompactList}\small\item\em the Thing\+Name to use \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_abe2e798db9d8c78b478441cb95f0ca15}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_abe2e798db9d8c78b478441cb95f0ca15}} 
+std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_abe2e798db9d8c78b478441cb95f0ca15}{resource\+Manager}}
+\begin{DoxyCompactList}\small\item\em The resource manager used to manage C\+RT resources. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_aa2f55fc2a35b656301cf0039f09bc408}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_aa2f55fc2a35b656301cf0039f09bc408}} 
+std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}{Client\+Base\+Notifier}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_aa2f55fc2a35b656301cf0039f09bc408}{base\+Notifier}}
+\begin{DoxyCompactList}\small\item\em An interface used to notify the Client base if there is an event that requires its attention. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a76a601d0e3709a5984e7922721a30619}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a76a601d0e3709a5984e7922721a30619}} 
+std\+::unique\+\_\+ptr$<$ Aws\+::\+Iotdevicedefenderv1\+::\+Report\+Task $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a76a601d0e3709a5984e7922721a30619}{task}}
+\begin{DoxyCompactList}\small\item\em The Iot Device Defender S\+DK task responsible for publishing the reports. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a418d69418549311e3026386766ca6638}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a418d69418549311e3026386766ca6638}} 
+static constexpr char \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a418d69418549311e3026386766ca6638}{T\+AG}} \mbox{[}$\,$\mbox{]} = \char`\"{}Device\+Defender.\+cpp\char`\"{}
+\begin{DoxyCompactList}\small\item\em Used by the logger to specify that log messages are coming from the Device Defender feature. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a184874a29b7c367e898ec386fff1a83f}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a184874a29b7c367e898ec386fff1a83f}} 
+static constexpr char \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a184874a29b7c367e898ec386fff1a83f}{T\+O\+P\+I\+C\+\_\+\+P\+RE}} \mbox{[}$\,$\mbox{]} = \char`\"{}\$aws/things/\char`\"{}
+\begin{DoxyCompactList}\small\item\em The first part of the M\+Q\+TT topic that is built around the thing\+Name, \$aws/things/$<$thing\+Name$>$/defender/metrics/json. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_ab6407a1677ee82a399fa6ab04fdcaeac}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_ab6407a1677ee82a399fa6ab04fdcaeac}} 
+static constexpr char \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_ab6407a1677ee82a399fa6ab04fdcaeac}{T\+O\+P\+I\+C\+\_\+\+P\+O\+ST}} \mbox{[}$\,$\mbox{]} = \char`\"{}/defender/metrics/json\char`\"{}
+\begin{DoxyCompactList}\small\item\em The second part of the M\+Q\+TT topic that is built around the thing\+Name, \$aws/things/$<$thing\+Name$>$/defender/metrics/json. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a126efcfab79ced5cf92f19075cc783c8}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a126efcfab79ced5cf92f19075cc783c8}} 
+static constexpr char \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a126efcfab79ced5cf92f19075cc783c8}{T\+O\+P\+I\+C\+\_\+\+A\+C\+C\+E\+P\+T\+ED}} \mbox{[}$\,$\mbox{]} = \char`\"{}/accepted\char`\"{}
+\begin{DoxyCompactList}\small\item\em The third part of the M\+Q\+TT topic that is built around the thing\+Name published to by the service when reports are accepted. \$aws/things/$<$thing\+Name$>$/defender/metrics/json/accepted. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_aed0c10562d74c6232c5450a8fa608ea5}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_aed0c10562d74c6232c5450a8fa608ea5}} 
+static constexpr char \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_aed0c10562d74c6232c5450a8fa608ea5}{T\+O\+P\+I\+C\+\_\+\+R\+E\+J\+E\+C\+T\+ED}} \mbox{[}$\,$\mbox{]} = \char`\"{}/rejected\char`\"{}
+\begin{DoxyCompactList}\small\item\em The third part of the M\+Q\+TT topic that is built around the thing\+Name published to by the service when reports are rejected \$aws/things/$<$thing\+Name$>$/defender/metrics/json/rejected. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Provides IoT Device Defender related functionality within the Device Client. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a970567f029b428224c769d608de249c4}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a970567f029b428224c769d608de249c4}} 
+\index{Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature@{Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature}!getName@{getName}}
+\index{getName@{getName}!Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature@{Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature}}
+\doxysubsubsection{\texorpdfstring{getName()}{getName()}}
+{\footnotesize\ttfamily string Device\+Defender\+Feature\+::get\+Name (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+For a given feature, returns its name. 
+
+\begin{DoxyReturn}{Returns}
+a string value representing the feature\textquotesingle{}s name 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_a7f56b81457898d67ddc1942e57e3c0d5}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_aab2d344e20e1975d94f04ce424a350d4}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_aab2d344e20e1975d94f04ce424a350d4}} 
+\index{Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature@{Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature}!init@{init}}
+\index{init@{init}!Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature@{Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily int Device\+Defender\+Feature\+::init (\begin{DoxyParamCaption}\item[{std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$}]{manager,  }\item[{std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}{Client\+Base\+Notifier}} $>$}]{notifier,  }\item[{const \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_plain_config}{Plain\+Config}} \&}]{config }\end{DoxyParamCaption})}
+
+
+
+Initializes the Device Defender feature with all the required setup information, event handlers, and the shared Mqtt\+Connection. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em manager} & the shared Mqtt\+Connection\+Manager \\
+\hline
+{\em notifier} & an \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}{Client\+Base\+Notifier}} used for notifying the client base of events or errors \\
+\hline
+{\em config} & configuration information passed in by the user via either the command line or configuration file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a non-\/zero return code indicates a problem. The logs can be checked for more info 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a4f1090347b3b875a0d89fdceb1fea7b8}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a4f1090347b3b875a0d89fdceb1fea7b8}} 
+\index{Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature@{Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature}!start@{start}}
+\index{start@{start}!Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature@{Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature}}
+\doxysubsubsection{\texorpdfstring{start()}{start()}}
+{\footnotesize\ttfamily int Device\+Defender\+Feature\+::start (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Start the feature. 
+
+\begin{DoxyReturn}{Returns}
+an integer representing the S\+U\+C\+C\+E\+SS or F\+A\+I\+L\+U\+RE of the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a4f1090347b3b875a0d89fdceb1fea7b8}{start()}} operation on the feature 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_ac9a936ebd88f7e35914a6aac99badf7d}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a618a12044a581035fbe02f0f4f5813f7}\label{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a618a12044a581035fbe02f0f4f5813f7}} 
+\index{Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature@{Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature}!stop@{stop}}
+\index{stop@{stop}!Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature@{Aws::Iot::DeviceClient::DeviceDefender::DeviceDefenderFeature}}
+\doxysubsubsection{\texorpdfstring{stop()}{stop()}}
+{\footnotesize\ttfamily int Device\+Defender\+Feature\+::stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Stop the feature. 
+
+\begin{DoxyReturn}{Returns}
+an integer representing the S\+U\+C\+C\+E\+SS or F\+A\+I\+L\+U\+RE of the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a618a12044a581035fbe02f0f4f5813f7}{stop()}} operation on the feature 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_a5b672f7b1403512cad9104ba923fc73d}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/devicedefender/Device\+Defender\+Feature.\+h\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/devicedefender/Device\+Defender\+Feature.\+cpp\end{DoxyCompactItemize}

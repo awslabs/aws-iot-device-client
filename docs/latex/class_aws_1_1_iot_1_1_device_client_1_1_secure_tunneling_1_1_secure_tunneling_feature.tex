@@ -1,0 +1,297 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Secure\+Tunneling\+::Secure\+Tunneling\+Feature Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature}\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}}
+
+
+Provides IoT Secure Tunneling related functionality within the Device Client.  
+
+
+
+
+{\ttfamily \#include $<$Secure\+Tunneling\+Feature.\+h$>$}
+
+Inheritance diagram for Aws\+::Iot\+::Device\+Client\+::Secure\+Tunneling\+::Secure\+Tunneling\+Feature\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a91ae57f57ac24b8da585356f47981d94}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a91ae57f57ac24b8da585356f47981d94}} 
+\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a91ae57f57ac24b8da585356f47981d94}{Secure\+Tunneling\+Feature}} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a90c1083b18d61d7dc8a7018e54494e09}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a90c1083b18d61d7dc8a7018e54494e09}} 
+\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a90c1083b18d61d7dc8a7018e54494e09}{$\sim$\+Secure\+Tunneling\+Feature}} () override
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_ae8600a395ea715e35ccd12a8f79be34c}{init}} (std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$ manager, std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}{Client\+Base\+Notifier}} $>$ notifier, const \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_plain_config}{Plain\+Config}} \&config)
+\begin{DoxyCompactList}\small\item\em Initializes the Secure Tunneling feature with all the required setup information, event handlers, and the shared Mqtt\+Connection. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_accc93db855be85847c3472754439594f}{get\+Name}} () override
+\begin{DoxyCompactList}\small\item\em For a given feature, returns its name. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a9e33fc786883e519e587f7d89f2a9086}{start}} () override
+\begin{DoxyCompactList}\small\item\em Start the feature. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a9cd3840b50bd1f62537df3354c7d2fbf}{stop}} () override
+\begin{DoxyCompactList}\small\item\em Stop the feature. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static uint16\+\_\+t \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_af9e304cd7e3eb06cd2358b3e9fe838c0}{Get\+Port\+From\+Service}} (const std\+::string \&service)
+\begin{DoxyCompactList}\small\item\em Returns the port number of the given service. \end{DoxyCompactList}\item 
+static bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a40e54cf67d52c08f73d8b5486e846bac}{Is\+Valid\+Port}} (int port)
+\begin{DoxyCompactList}\small\item\em Check if the given port is within the valid range. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a72e0cfcb7782c86dc8e7595cac703009}{Load\+From\+Config}} (const \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_plain_config}{Plain\+Config}} \&config)
+\begin{DoxyCompactList}\small\item\em Load configuration data from the config object. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a5c65f96aad2c5018af0633f590d4af0c}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a5c65f96aad2c5018af0633f590d4af0c}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a5c65f96aad2c5018af0633f590d4af0c}{Run\+Secure\+Tunneling}} ()
+\begin{DoxyCompactList}\small\item\em Run the Secure Tunneling feature. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_ac865de9e5b5a8ae64911d9fcfc83750b}{On\+Subscribe\+To\+Tunnels\+Notify\+Response}} (Aws\+::\+Iotsecuretunneling\+::\+Secure\+Tunneling\+Notify\+Response $\ast$response, int io\+Err)
+\begin{DoxyCompactList}\small\item\em Callback when a M\+Q\+TT new tunnel notification is received. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_ac883c84d52e745b2e58b039c60416d09}{On\+Subscribe\+Complete}} (int io\+Err)
+\begin{DoxyCompactList}\small\item\em Callback when subscribe to M\+Q\+TT new tunnel notification is complete. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a930dcd5d280ecc9ae591f6f9a8cf3c0a}{Get\+Endpoint}} (const std\+::string \&region)
+\begin{DoxyCompactList}\small\item\em Get the secure tunneling data plain endpoint given an A\+WS region. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_afb34e3a40f628b963992e5187b8fc596}{On\+Connection\+Shutdown}} (\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context}{Secure\+Tunneling\+Context}} $\ast$context\+To\+Remove)
+\begin{DoxyCompactList}\small\item\em Callback when a secure tunnel is shutdown. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_ab7c083e3e44ccc4c68230103b3052d84}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_ab7c083e3e44ccc4c68230103b3052d84}} 
+std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_ab7c083e3e44ccc4c68230103b3052d84}{m\+Shared\+Crt\+Resource\+Manager}}
+\begin{DoxyCompactList}\small\item\em The resource manager used to manage C\+RT resources. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a2bad62761f33272e901f3c9046ba4e20}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a2bad62761f33272e901f3c9046ba4e20}} 
+std\+::unique\+\_\+ptr$<$ Aws\+::\+Iotdevicecommon\+::\+Device\+Api\+Handle $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a2bad62761f33272e901f3c9046ba4e20}{m\+Device\+Api\+Handle}}
+\begin{DoxyCompactList}\small\item\em A resource required to initialize the IoT S\+DK. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a3bec48f8bae11a8b070409a1c6d5a5b4}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a3bec48f8bae11a8b070409a1c6d5a5b4}} 
+std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}{Client\+Base\+Notifier}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a3bec48f8bae11a8b070409a1c6d5a5b4}{m\+Client\+Base\+Notifier}}
+\begin{DoxyCompactList}\small\item\em An object used to notify the Client base if there is an event that requires its attention. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_af374641c2f33bc8985af08b26d0fb6d1}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_af374641c2f33bc8985af08b26d0fb6d1}} 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_af374641c2f33bc8985af08b26d0fb6d1}{m\+Thing\+Name}}
+\begin{DoxyCompactList}\small\item\em The Thing\+Name to use. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a1b59b829f560cebd8b58189bc0479f95}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a1b59b829f560cebd8b58189bc0479f95}} 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a1b59b829f560cebd8b58189bc0479f95}{m\+Root\+Ca}}
+\begin{DoxyCompactList}\small\item\em Path to the Amazon root CA. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a85ec525712376af69f99ae024a28fb55}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a85ec525712376af69f99ae024a28fb55}} 
+bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a85ec525712376af69f99ae024a28fb55}{m\+Subscribe\+Notification}} \{true\}
+\begin{DoxyCompactList}\small\item\em Should the Secure Tunneling feature subscribe to M\+Q\+TT new tunnel notification? \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a214e9168c8d239bd8d33c4bfe33fce95}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a214e9168c8d239bd8d33c4bfe33fce95}} 
+Aws\+::\+Crt\+::\+Optional$<$ std\+::string $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a214e9168c8d239bd8d33c4bfe33fce95}{m\+Endpoint}}
+\begin{DoxyCompactList}\small\item\em Endpoint override. Normally the endpoint is determined by {\ttfamily region} only. This is only used to override the normal endpoint such as when testing against the gamma stage. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a4e2431941bc9e6e9f30415122bfdb610}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a4e2431941bc9e6e9f30415122bfdb610}} 
+std\+::vector$<$ std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context}{Secure\+Tunneling\+Context}} $>$ $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a4e2431941bc9e6e9f30415122bfdb610}{m\+Contexts}}
+\begin{DoxyCompactList}\small\item\em A vector of \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context}{Secure\+Tunneling\+Context}}. Each context represents an active secure tunneling session. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a7d700b7591d51240c6aca5b579ab810e}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a7d700b7591d51240c6aca5b579ab810e}} 
+static constexpr char \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a7d700b7591d51240c6aca5b579ab810e}{T\+AG}} \mbox{[}$\,$\mbox{]} = \char`\"{}Secure\+Tunneling.\+cpp\char`\"{}
+\begin{DoxyCompactList}\small\item\em Used by the logger to specify that log messages are coming from the Secure Tunneling feature. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a8834fc640c69a3ed47fc57e3b59a8923}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a8834fc640c69a3ed47fc57e3b59a8923}} 
+static constexpr char \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a8834fc640c69a3ed47fc57e3b59a8923}{D\+E\+F\+A\+U\+L\+T\+\_\+\+P\+R\+O\+X\+Y\+\_\+\+E\+N\+D\+P\+O\+I\+N\+T\+\_\+\+H\+O\+S\+T\+\_\+\+F\+O\+R\+M\+AT}} \mbox{[}$\,$\mbox{]} = \char`\"{}data.\+tunneling.\+iot.\%s.\+amazonaws.\+com\char`\"{}
+\begin{DoxyCompactList}\small\item\em Format string for forming the secure tunneling data plain endpoint. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_aeaafb01665e10b726f93f5247767193e}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_aeaafb01665e10b726f93f5247767193e}} 
+static std\+::map$<$ std\+::string, uint16\+\_\+t $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_aeaafb01665e10b726f93f5247767193e}{m\+Service\+To\+Port\+Map}}
+\begin{DoxyCompactList}\small\item\em A map for converting supported services to their port numbers. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Provides IoT Secure Tunneling related functionality within the Device Client. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a930dcd5d280ecc9ae591f6f9a8cf3c0a}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a930dcd5d280ecc9ae591f6f9a8cf3c0a}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}!GetEndpoint@{GetEndpoint}}
+\index{GetEndpoint@{GetEndpoint}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}}
+\doxysubsubsection{\texorpdfstring{GetEndpoint()}{GetEndpoint()}}
+{\footnotesize\ttfamily string Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Feature\+::\+Get\+Endpoint (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{region }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Get the secure tunneling data plain endpoint given an A\+WS region. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em region} & A\+WS region \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Secure Tunneling data plain endpoint 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_accc93db855be85847c3472754439594f}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_accc93db855be85847c3472754439594f}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}!getName@{getName}}
+\index{getName@{getName}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}}
+\doxysubsubsection{\texorpdfstring{getName()}{getName()}}
+{\footnotesize\ttfamily string Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Feature\+::get\+Name (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+For a given feature, returns its name. 
+
+\begin{DoxyReturn}{Returns}
+a string value representing the feature\textquotesingle{}s name 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_a7f56b81457898d67ddc1942e57e3c0d5}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_af9e304cd7e3eb06cd2358b3e9fe838c0}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_af9e304cd7e3eb06cd2358b3e9fe838c0}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}!GetPortFromService@{GetPortFromService}}
+\index{GetPortFromService@{GetPortFromService}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}}
+\doxysubsubsection{\texorpdfstring{GetPortFromService()}{GetPortFromService()}}
+{\footnotesize\ttfamily uint16\+\_\+t Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Feature\+::\+Get\+Port\+From\+Service (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{service }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Returns the port number of the given service. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em service} & the name of the service \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the port number 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_ae8600a395ea715e35ccd12a8f79be34c}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_ae8600a395ea715e35ccd12a8f79be34c}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}!init@{init}}
+\index{init@{init}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily int Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Feature\+::init (\begin{DoxyParamCaption}\item[{std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$}]{manager,  }\item[{std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}{Client\+Base\+Notifier}} $>$}]{notifier,  }\item[{const \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_plain_config}{Plain\+Config}} \&}]{config }\end{DoxyParamCaption})}
+
+
+
+Initializes the Secure Tunneling feature with all the required setup information, event handlers, and the shared Mqtt\+Connection. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em manager} & the shared resource manager \\
+\hline
+{\em notifier} & an \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}{Client\+Base\+Notifier}} used for notifying the client base of events or errors \\
+\hline
+{\em config} & configuration information passed in by the user via either the command line or configuration file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a non-\/zero return code indicates a problem. The logs can be checked for more info 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a40e54cf67d52c08f73d8b5486e846bac}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a40e54cf67d52c08f73d8b5486e846bac}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}!IsValidPort@{IsValidPort}}
+\index{IsValidPort@{IsValidPort}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}}
+\doxysubsubsection{\texorpdfstring{IsValidPort()}{IsValidPort()}}
+{\footnotesize\ttfamily bool Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Feature\+::\+Is\+Valid\+Port (\begin{DoxyParamCaption}\item[{int}]{port }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Check if the given port is within the valid range. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em port} & the port to check \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the port is within the valid range. False otherwise. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a72e0cfcb7782c86dc8e7595cac703009}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a72e0cfcb7782c86dc8e7595cac703009}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}!LoadFromConfig@{LoadFromConfig}}
+\index{LoadFromConfig@{LoadFromConfig}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}}
+\doxysubsubsection{\texorpdfstring{LoadFromConfig()}{LoadFromConfig()}}
+{\footnotesize\ttfamily void Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Feature\+::\+Load\+From\+Config (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_plain_config}{Plain\+Config}} \&}]{config }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Load configuration data from the config object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & the configuration object to load from \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_afb34e3a40f628b963992e5187b8fc596}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_afb34e3a40f628b963992e5187b8fc596}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}!OnConnectionShutdown@{OnConnectionShutdown}}
+\index{OnConnectionShutdown@{OnConnectionShutdown}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}}
+\doxysubsubsection{\texorpdfstring{OnConnectionShutdown()}{OnConnectionShutdown()}}
+{\footnotesize\ttfamily void Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Feature\+::\+On\+Connection\+Shutdown (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context}{Secure\+Tunneling\+Context}} $\ast$}]{context\+To\+Remove }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Callback when a secure tunnel is shutdown. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em context\+To\+Remove} & a \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context}{Secure\+Tunneling\+Context}} that represents the secure tunnel that was shutdown \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_ac883c84d52e745b2e58b039c60416d09}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_ac883c84d52e745b2e58b039c60416d09}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}!OnSubscribeComplete@{OnSubscribeComplete}}
+\index{OnSubscribeComplete@{OnSubscribeComplete}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}}
+\doxysubsubsection{\texorpdfstring{OnSubscribeComplete()}{OnSubscribeComplete()}}
+{\footnotesize\ttfamily void Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Feature\+::\+On\+Subscribe\+Complete (\begin{DoxyParamCaption}\item[{int}]{io\+Err }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Callback when subscribe to M\+Q\+TT new tunnel notification is complete. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em io\+Err} & error code \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_ac865de9e5b5a8ae64911d9fcfc83750b}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_ac865de9e5b5a8ae64911d9fcfc83750b}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}!OnSubscribeToTunnelsNotifyResponse@{OnSubscribeToTunnelsNotifyResponse}}
+\index{OnSubscribeToTunnelsNotifyResponse@{OnSubscribeToTunnelsNotifyResponse}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}}
+\doxysubsubsection{\texorpdfstring{OnSubscribeToTunnelsNotifyResponse()}{OnSubscribeToTunnelsNotifyResponse()}}
+{\footnotesize\ttfamily void Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Feature\+::\+On\+Subscribe\+To\+Tunnels\+Notify\+Response (\begin{DoxyParamCaption}\item[{Aws\+::\+Iotsecuretunneling\+::\+Secure\+Tunneling\+Notify\+Response $\ast$}]{response,  }\item[{int}]{io\+Err }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Callback when a M\+Q\+TT new tunnel notification is received. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em response} & M\+Q\+TT new tunnel notification \\
+\hline
+{\em io\+Err} & error code \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a9e33fc786883e519e587f7d89f2a9086}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a9e33fc786883e519e587f7d89f2a9086}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}!start@{start}}
+\index{start@{start}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}}
+\doxysubsubsection{\texorpdfstring{start()}{start()}}
+{\footnotesize\ttfamily int Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Feature\+::start (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Start the feature. 
+
+\begin{DoxyReturn}{Returns}
+an integer representing the S\+U\+C\+C\+E\+SS or F\+A\+I\+L\+U\+RE of the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a9e33fc786883e519e587f7d89f2a9086}{start()}} operation on the feature 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_ac9a936ebd88f7e35914a6aac99badf7d}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a9cd3840b50bd1f62537df3354c7d2fbf}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a9cd3840b50bd1f62537df3354c7d2fbf}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}!stop@{stop}}
+\index{stop@{stop}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingFeature}}
+\doxysubsubsection{\texorpdfstring{stop()}{stop()}}
+{\footnotesize\ttfamily int Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Feature\+::stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Stop the feature. 
+
+\begin{DoxyReturn}{Returns}
+an integer representing the S\+U\+C\+C\+E\+SS or F\+A\+I\+L\+U\+RE of the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a9cd3840b50bd1f62537df3354c7d2fbf}{stop()}} operation on the feature 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_a5b672f7b1403512cad9104ba923fc73d}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/tunneling/Secure\+Tunneling\+Feature.\+h\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/tunneling/Secure\+Tunneling\+Feature.\+cpp\end{DoxyCompactItemize}

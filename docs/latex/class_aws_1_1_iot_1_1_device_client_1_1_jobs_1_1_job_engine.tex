@@ -1,0 +1,161 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Jobs\+::Job\+Engine Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine}\index{Aws::Iot::DeviceClient::Jobs::JobEngine@{Aws::Iot::DeviceClient::Jobs::JobEngine}}
+
+
+Manages the execution of a Job.  
+
+
+
+
+{\ttfamily \#include $<$Job\+Engine.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_aab65000d16ffe1c250c9af0c51d9abe6}{process\+Cmd\+Output}} (int fd, bool is\+Std\+Err, int child\+P\+ID)
+\begin{DoxyCompactList}\small\item\em Used by output processing threads to assess output from the child process. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_a51fcb47a9ed2d8c32109d47cc4cfff6d}{exec\+\_\+cmd}} (std\+::string action, std\+::vector$<$ std\+::string $>$ args)
+\begin{DoxyCompactList}\small\item\em Executes the given command (action) and passes the provided vector of arguments to that command. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_abcc11a86226e74648e3a5395ae180171}{has\+Errors}} ()
+\begin{DoxyCompactList}\small\item\em Begin the execution of a command with the specified arguments. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_affcb240c8fd6c1fe197997131929c20e}{get\+Std\+Out}} ()
+\begin{DoxyCompactList}\small\item\em Take the S\+T\+D\+O\+UT received from the child process. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_a2f3764967a7d06f30fe7e3df583b5040}{get\+Std\+Err}} ()
+\begin{DoxyCompactList}\small\item\em Take the S\+T\+D\+E\+RR received from the child process. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_a3e391a699bb7c903498eead712a20288}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_a3e391a699bb7c903498eead712a20288}} 
+const char $\ast$ {\bfseries T\+AG} = \char`\"{}Job\+Engine.\+cpp\char`\"{}
+\item 
+std\+::atomic\+\_\+int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_a1cac8361d8365feb7b0e5807abc07e33}{errors}} \{0\}
+\begin{DoxyCompactList}\small\item\em The number of lines received on S\+T\+D\+E\+RR from the child process. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_ac90bc5fc6289d89cb012f0d6322b520c}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_ac90bc5fc6289d89cb012f0d6322b520c}} 
+\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Limited\+Stream\+Buffer}} \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_ac90bc5fc6289d89cb012f0d6322b520c}{stdoutstream}}
+\begin{DoxyCompactList}\small\item\em Partial output from S\+T\+D\+O\+UT of the child process to be used in Update\+Job\+Execution. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_aefc97336f6335fb64a11ee690c22d834}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_aefc97336f6335fb64a11ee690c22d834}} 
+\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Limited\+Stream\+Buffer}} \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_aefc97336f6335fb64a11ee690c22d834}{stderrstream}}
+\begin{DoxyCompactList}\small\item\em Partial output from S\+T\+D\+E\+RR of the child process to be used in Update\+Job\+Execution. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_a333eb4a7c9d0ec7143e2b954ee5a1be3}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_a333eb4a7c9d0ec7143e2b954ee5a1be3}} 
+static constexpr size\+\_\+t \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_a333eb4a7c9d0ec7143e2b954ee5a1be3}{M\+A\+X\+\_\+\+L\+O\+G\+\_\+\+L\+I\+N\+ES}} = 1000
+\begin{DoxyCompactList}\small\item\em The maximum number of lines that we\textquotesingle{}ll read from S\+T\+D\+O\+UT or S\+T\+D\+E\+RR of the child process before stopping. This prevents against log corruption in the event that the specified job generates a large volume of output. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Manages the execution of a Job. 
+
+The \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine}{Job\+Engine}} is fully responsible for executing a given command and its arguments, which may point to handlers provided as part of the Device Client or to other executables available to the device. The \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine}{Job\+Engine}} manages all of the setup required to redirect output from the child process so that it can be analyzed by the Jobs feature and used to determine job success. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_a51fcb47a9ed2d8c32109d47cc4cfff6d}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_a51fcb47a9ed2d8c32109d47cc4cfff6d}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobEngine@{Aws::Iot::DeviceClient::Jobs::JobEngine}!exec\_cmd@{exec\_cmd}}
+\index{exec\_cmd@{exec\_cmd}!Aws::Iot::DeviceClient::Jobs::JobEngine@{Aws::Iot::DeviceClient::Jobs::JobEngine}}
+\doxysubsubsection{\texorpdfstring{exec\_cmd()}{exec\_cmd()}}
+{\footnotesize\ttfamily int Job\+Engine\+::exec\+\_\+cmd (\begin{DoxyParamCaption}\item[{std\+::string}]{action,  }\item[{std\+::vector$<$ std\+::string $>$}]{args }\end{DoxyParamCaption})}
+
+
+
+Executes the given command (action) and passes the provided vector of arguments to that command. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em action} & the command to execute \\
+\hline
+{\em args} & the arguments to pass to that command \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+an integer representing the return code of the executed process 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_a2f3764967a7d06f30fe7e3df583b5040}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_a2f3764967a7d06f30fe7e3df583b5040}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobEngine@{Aws::Iot::DeviceClient::Jobs::JobEngine}!getStdErr@{getStdErr}}
+\index{getStdErr@{getStdErr}!Aws::Iot::DeviceClient::Jobs::JobEngine@{Aws::Iot::DeviceClient::Jobs::JobEngine}}
+\doxysubsubsection{\texorpdfstring{getStdErr()}{getStdErr()}}
+{\footnotesize\ttfamily std\+::string Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Job\+Engine\+::get\+Std\+Err (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Take the S\+T\+D\+E\+RR received from the child process. 
+
+\begin{DoxyReturn}{Returns}
+a \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer}{Limited\+Stream\+Buffer}} taken from the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine}{Job\+Engine}} 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_affcb240c8fd6c1fe197997131929c20e}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_affcb240c8fd6c1fe197997131929c20e}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobEngine@{Aws::Iot::DeviceClient::Jobs::JobEngine}!getStdOut@{getStdOut}}
+\index{getStdOut@{getStdOut}!Aws::Iot::DeviceClient::Jobs::JobEngine@{Aws::Iot::DeviceClient::Jobs::JobEngine}}
+\doxysubsubsection{\texorpdfstring{getStdOut()}{getStdOut()}}
+{\footnotesize\ttfamily std\+::string Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Job\+Engine\+::get\+Std\+Out (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Take the S\+T\+D\+O\+UT received from the child process. 
+
+\begin{DoxyReturn}{Returns}
+a \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer}{Limited\+Stream\+Buffer}} taken from the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine}{Job\+Engine}} 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_abcc11a86226e74648e3a5395ae180171}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_abcc11a86226e74648e3a5395ae180171}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobEngine@{Aws::Iot::DeviceClient::Jobs::JobEngine}!hasErrors@{hasErrors}}
+\index{hasErrors@{hasErrors}!Aws::Iot::DeviceClient::Jobs::JobEngine@{Aws::Iot::DeviceClient::Jobs::JobEngine}}
+\doxysubsubsection{\texorpdfstring{hasErrors()}{hasErrors()}}
+{\footnotesize\ttfamily int Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Job\+Engine\+::has\+Errors (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Begin the execution of a command with the specified arguments. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em operation} & the operation to perform, likely the path to an executable \\
+\hline
+{\em args} & the arguments to pass to the executable \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the return code of the child process, or an error code if it cannot be executed
+\end{DoxyReturn}
+Whether the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine}{Job\+Engine}} is reporting errors received from the child process
+
+\begin{DoxyReturn}{Returns}
+an integer representing the number of lines received on S\+T\+D\+E\+RR 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_aab65000d16ffe1c250c9af0c51d9abe6}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_aab65000d16ffe1c250c9af0c51d9abe6}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobEngine@{Aws::Iot::DeviceClient::Jobs::JobEngine}!processCmdOutput@{processCmdOutput}}
+\index{processCmdOutput@{processCmdOutput}!Aws::Iot::DeviceClient::Jobs::JobEngine@{Aws::Iot::DeviceClient::Jobs::JobEngine}}
+\doxysubsubsection{\texorpdfstring{processCmdOutput()}{processCmdOutput()}}
+{\footnotesize\ttfamily void Job\+Engine\+::process\+Cmd\+Output (\begin{DoxyParamCaption}\item[{int}]{fd,  }\item[{bool}]{is\+Std\+Err,  }\item[{int}]{child\+P\+ID }\end{DoxyParamCaption})}
+
+
+
+Used by output processing threads to assess output from the child process. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fd} & the file descriptor of the output to process \\
+\hline
+{\em is\+Std\+Err} & whether the output being processed is from S\+T\+D\+E\+RR \\
+\hline
+{\em child\+P\+ID} & the process ID of the child process \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_a1cac8361d8365feb7b0e5807abc07e33}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine_a1cac8361d8365feb7b0e5807abc07e33}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobEngine@{Aws::Iot::DeviceClient::Jobs::JobEngine}!errors@{errors}}
+\index{errors@{errors}!Aws::Iot::DeviceClient::Jobs::JobEngine@{Aws::Iot::DeviceClient::Jobs::JobEngine}}
+\doxysubsubsection{\texorpdfstring{errors}{errors}}
+{\footnotesize\ttfamily std\+::atomic\+\_\+int Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Job\+Engine\+::errors \{0\}\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+The number of lines received on S\+T\+D\+E\+RR from the child process. 
+
+Used to determine whether the job was successful or not, since a script with multiple commands will return the return code of the final command and may not be indicative of whether all actions were successful. The incoming job document may include a property that specifies an acceptable number of S\+T\+D\+E\+RR lines to allow in case some errors are expected. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/jobs/Job\+Engine.\+h\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/jobs/Job\+Engine.\+cpp\end{DoxyCompactItemize}

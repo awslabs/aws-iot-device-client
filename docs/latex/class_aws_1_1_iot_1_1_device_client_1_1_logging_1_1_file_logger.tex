@@ -1,0 +1,226 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Logging\+::File\+Logger Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger}\index{Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}}
+
+
+File-\/based logging implementation for writing log messages to a file on the device.  
+
+
+
+
+{\ttfamily \#include $<$File\+Logger.\+h$>$}
+
+Inheritance diagram for Aws\+::Iot\+::Device\+Client\+::Logging\+::File\+Logger\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_ac9373269d6d5c7a5ee1ba896182c97ff}{start}} (const \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_plain_config}{Plain\+Config}} \&config) override
+\begin{DoxyCompactList}\small\item\em Starts the underlying logger implementation\textquotesingle{}s logging behavior. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a31cbe6ad19051138966eae72ff233702}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a31cbe6ad19051138966eae72ff233702}} 
+virtual void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a31cbe6ad19051138966eae72ff233702}{stop}} () override
+\begin{DoxyCompactList}\small\item\em Attempts to stop the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger}{Logger}} implementation from writing any additional log messages, likely to switch to a different logger implementation. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a7cbd7f8942bc9da32a9ff385128d5519}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a7cbd7f8942bc9da32a9ff385128d5519}} 
+virtual void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a7cbd7f8942bc9da32a9ff385128d5519}{shutdown}} () override
+\begin{DoxyCompactList}\small\item\em Notifies the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger}{Logger}} implementation that any queued logs should be dumped to output and the logger should shut itself down. \end{DoxyCompactList}\item 
+virtual std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a5c55467d8f46332d6ef2acde379df2f7}{take\+Log\+Queue}} () override
+\begin{DoxyCompactList}\small\item\em Removes the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} from the logger implementation so it can be passed to another logger implementation for processing. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a42b047d2f2379638add126414690d65d}{set\+Log\+Queue}} (std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a9d9cf4cb8c016d0f364bbf182e41c1fe}{log\+Queue}}) override
+\begin{DoxyCompactList}\small\item\em Passes a \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} to the logger implementation. Typically used if the logger implementation is being changed. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a507513cb4aca226a5ed6da292bfd915a}{flush}} () override
+\begin{DoxyCompactList}\small\item\em Flush the log output from the queue synchronously. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_aea84d831a8e014a164b85504dd755466}{write\+Log\+Message}} (std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message}{Log\+Message}} $>$ message)
+\begin{DoxyCompactList}\small\item\em Write the log message to the log file. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_adb5a5536099975ee80b04b1635112d52}{create\+Log\+Directories}} ()
+\begin{DoxyCompactList}\small\item\em Creates the directories required as part of the full path to the desired log file. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a3c6b08640df02c4065c358523dc6a37d}{run}} ()
+\begin{DoxyCompactList}\small\item\em Begins processing of log messages in the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}}. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a549cf9783ce070e514c0f68340ae5d1c}{queue\+Log}} (Log\+Level level, const char $\ast$tag, std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$ t, std\+::string message) override
+\begin{DoxyCompactList}\small\item\em Implemented by the underlying logger implementation to pass responsibility for managing the log message from the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger}{Logger}} interface to the logger implementation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a771b31b2f05b4f8fa29de755f15eb35c}{D\+E\+F\+A\+U\+L\+T\+\_\+\+L\+O\+G\+\_\+\+F\+I\+LE}} = \char`\"{}/var/log/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client.\+log\char`\"{}
+\begin{DoxyCompactList}\small\item\em The full path to the default log file for the Device Client. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_abb78588623916c835dbca8751995f8cd}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_abb78588623916c835dbca8751995f8cd}} 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_abb78588623916c835dbca8751995f8cd}{log\+File}} = \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a771b31b2f05b4f8fa29de755f15eb35c}{D\+E\+F\+A\+U\+L\+T\+\_\+\+L\+O\+G\+\_\+\+F\+I\+LE}}
+\begin{DoxyCompactList}\small\item\em Runtime configuration for which log file to log to. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a0e7a54d7e865f03ba082821248e4beef}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a0e7a54d7e865f03ba082821248e4beef}} 
+bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a0e7a54d7e865f03ba082821248e4beef}{needs\+Shutdown}} = false
+\begin{DoxyCompactList}\small\item\em Flag used to notify underlying threads that they should discontinue any processing so that the application can safely shutdown. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_aae7badd8eb227b7207210e817c111188}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_aae7badd8eb227b7207210e817c111188}} 
+std\+::mutex {\bfseries is\+Running\+Lock}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a7c85906ad319df437506fa462dc7947a}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a7c85906ad319df437506fa462dc7947a}} 
+bool {\bfseries is\+Running} = false
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a9d9cf4cb8c016d0f364bbf182e41c1fe}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a9d9cf4cb8c016d0f364bbf182e41c1fe}} 
+std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a9d9cf4cb8c016d0f364bbf182e41c1fe}{log\+Queue}} = std\+::unique\+\_\+ptr$<$\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}}$>$(new \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}})
+\begin{DoxyCompactList}\small\item\em a \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} instance used to queue incoming log messages for processing \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a32c72325d8fdf1aa7b65911c50f6be30}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a32c72325d8fdf1aa7b65911c50f6be30}} 
+std\+::unique\+\_\+ptr$<$ std\+::ofstream $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a32c72325d8fdf1aa7b65911c50f6be30}{output\+Stream}}
+\begin{DoxyCompactList}\small\item\em an std\+::ofstream representing an underlying file that is used to write log output to disk \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Detailed Description}
+File-\/based logging implementation for writing log messages to a file on the device. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_adb5a5536099975ee80b04b1635112d52}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_adb5a5536099975ee80b04b1635112d52}} 
+\index{Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}!createLogDirectories@{createLogDirectories}}
+\index{createLogDirectories@{createLogDirectories}!Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}}
+\doxysubsubsection{\texorpdfstring{createLogDirectories()}{createLogDirectories()}}
+{\footnotesize\ttfamily void Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+File\+Logger\+::create\+Log\+Directories (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Creates the directories required as part of the full path to the desired log file. 
+
+This method is run as part of the initialization process of the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger}{File\+Logger}} implementation to create any directories required as part of the full path to the desired log file \mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a507513cb4aca226a5ed6da292bfd915a}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a507513cb4aca226a5ed6da292bfd915a}} 
+\index{Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}!flush@{flush}}
+\index{flush@{flush}!Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}}
+\doxysubsubsection{\texorpdfstring{flush()}{flush()}}
+{\footnotesize\ttfamily void File\+Logger\+::flush (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Flush the log output from the queue synchronously. 
+
+This is helpful for scenarios where you need to ensure that the logs are written to disk before any other activity takes place. Note that this will not block other threads, only the thread that this is called from 
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger_a4743383e9c69bec10ba970dc4394781e}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+Logger}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a549cf9783ce070e514c0f68340ae5d1c}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a549cf9783ce070e514c0f68340ae5d1c}} 
+\index{Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}!queueLog@{queueLog}}
+\index{queueLog@{queueLog}!Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}}
+\doxysubsubsection{\texorpdfstring{queueLog()}{queueLog()}}
+{\footnotesize\ttfamily void File\+Logger\+::queue\+Log (\begin{DoxyParamCaption}\item[{Log\+Level}]{level,  }\item[{const char $\ast$}]{tag,  }\item[{std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$}]{t,  }\item[{std\+::string}]{message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [private]}, {\ttfamily [virtual]}}
+
+
+
+Implemented by the underlying logger implementation to pass responsibility for managing the log message from the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger}{Logger}} interface to the logger implementation. 
+
+This virtual method should be implemented by the underlying logger implementation to actually accept and eventually process the incoming log message. To reduce complications induced by multithreading, the underlying logger implementation should queue the message for processing by another thread if possible. 
+\begin{DoxyParams}{Parameters}
+{\em level} & the log level \\
+\hline
+{\em tag} & a tag that indicates where the log message is coming from \\
+\hline
+{\em t} & a timestamp representing the time the message was created \\
+\hline
+{\em message} & the message to log \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger_a75acdae576e13ddd84bccb70d8fb1fef}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+Logger}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a3c6b08640df02c4065c358523dc6a37d}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a3c6b08640df02c4065c358523dc6a37d}} 
+\index{Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}!run@{run}}
+\index{run@{run}!Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}}
+\doxysubsubsection{\texorpdfstring{run()}{run()}}
+{\footnotesize\ttfamily void File\+Logger\+::run (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Begins processing of log messages in the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}}. 
+
+This method will begin processing of log messages in the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}}. The thread will process until all of the messages are removed from the queue, and then will wait until new messages arrive in the queue. This method will check to make sure the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a7cbd7f8942bc9da32a9ff385128d5519}{shutdown()}} method has not been called before processing any additional messages in the queue. \mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a42b047d2f2379638add126414690d65d}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a42b047d2f2379638add126414690d65d}} 
+\index{Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}!setLogQueue@{setLogQueue}}
+\index{setLogQueue@{setLogQueue}!Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}}
+\doxysubsubsection{\texorpdfstring{setLogQueue()}{setLogQueue()}}
+{\footnotesize\ttfamily void File\+Logger\+::set\+Log\+Queue (\begin{DoxyParamCaption}\item[{std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} $>$}]{log\+Queue }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Passes a \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} to the logger implementation. Typically used if the logger implementation is being changed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em log\+Queue} & \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger_a6b80ca4200fbc58bb2994ef4319ea822}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+Logger}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_ac9373269d6d5c7a5ee1ba896182c97ff}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_ac9373269d6d5c7a5ee1ba896182c97ff}} 
+\index{Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}!start@{start}}
+\index{start@{start}!Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}}
+\doxysubsubsection{\texorpdfstring{start()}{start()}}
+{\footnotesize\ttfamily bool File\+Logger\+::start (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_plain_config}{Plain\+Config}} \&}]{config }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Starts the underlying logger implementation\textquotesingle{}s logging behavior. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & the config data passed in from the C\+LI and J\+S\+ON \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if it is able to start successfully, false otherwise 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger_ad42e38afcd7402f5dc1213b2f0b96961}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+Logger}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a5c55467d8f46332d6ef2acde379df2f7}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a5c55467d8f46332d6ef2acde379df2f7}} 
+\index{Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}!takeLogQueue@{takeLogQueue}}
+\index{takeLogQueue@{takeLogQueue}!Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}}
+\doxysubsubsection{\texorpdfstring{takeLogQueue()}{takeLogQueue()}}
+{\footnotesize\ttfamily unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} $>$ File\+Logger\+::take\+Log\+Queue (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Removes the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} from the logger implementation so it can be passed to another logger implementation for processing. 
+
+\begin{DoxyReturn}{Returns}
+a unique\+\_\+ptr$<$\+Log\+Queue$>$ 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger_a39f3326be17f9ed4b1385f057134774d}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+Logger}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_aea84d831a8e014a164b85504dd755466}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_aea84d831a8e014a164b85504dd755466}} 
+\index{Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}!writeLogMessage@{writeLogMessage}}
+\index{writeLogMessage@{writeLogMessage}!Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}}
+\doxysubsubsection{\texorpdfstring{writeLogMessage()}{writeLogMessage()}}
+{\footnotesize\ttfamily void File\+Logger\+::write\+Log\+Message (\begin{DoxyParamCaption}\item[{std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message}{Log\+Message}} $>$}]{message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Write the log message to the log file. 
+
+This method will write the log message to the file specified for logging 
+\begin{DoxyParams}{Parameters}
+{\em message} & the message to log \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a771b31b2f05b4f8fa29de755f15eb35c}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_file_logger_a771b31b2f05b4f8fa29de755f15eb35c}} 
+\index{Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}!DEFAULT\_LOG\_FILE@{DEFAULT\_LOG\_FILE}}
+\index{DEFAULT\_LOG\_FILE@{DEFAULT\_LOG\_FILE}!Aws::Iot::DeviceClient::Logging::FileLogger@{Aws::Iot::DeviceClient::Logging::FileLogger}}
+\doxysubsubsection{\texorpdfstring{DEFAULT\_LOG\_FILE}{DEFAULT\_LOG\_FILE}}
+{\footnotesize\ttfamily std\+::string Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+File\+Logger\+::\+D\+E\+F\+A\+U\+L\+T\+\_\+\+L\+O\+G\+\_\+\+F\+I\+LE = \char`\"{}/var/log/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client.\+log\char`\"{}\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+The full path to the default log file for the Device Client. 
+
+If the user does not specify a desired log location in either the command line arguments or the Json configuration file, this is the default log that will be used 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/logging/File\+Logger.\+h\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/logging/File\+Logger.\+cpp\end{DoxyCompactItemize}

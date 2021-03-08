@@ -1,0 +1,90 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_feature}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Feature Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_feature}\index{Aws::Iot::DeviceClient::Feature@{Aws::Iot::DeviceClient::Feature}}
+
+
+Common interface for orchestration of Device Client features.  
+
+
+
+
+{\ttfamily \#include $<$Feature.\+h$>$}
+
+Inheritance diagram for Aws\+::Iot\+::Device\+Client\+::Feature\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=0.959726cm]{class_aws_1_1_iot_1_1_device_client_1_1_feature}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_ac9a936ebd88f7e35914a6aac99badf7d}{start}} ()=0
+\begin{DoxyCompactList}\small\item\em Start the feature. \end{DoxyCompactList}\item 
+virtual int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_a5b672f7b1403512cad9104ba923fc73d}{stop}} ()=0
+\begin{DoxyCompactList}\small\item\em Stop the feature. \end{DoxyCompactList}\item 
+virtual std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_a7f56b81457898d67ddc1942e57e3c0d5}{get\+Name}} ()=0
+\begin{DoxyCompactList}\small\item\em For a given feature, returns its name. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Common interface for orchestration of Device Client features. 
+
+The \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature}{Feature}} interface provides some basic methods for orchestrating the individual features running as part of the Device Client (DC). The \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_ac9a936ebd88f7e35914a6aac99badf7d}{start()}} and \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_a5b672f7b1403512cad9104ba923fc73d}{stop()}} methods allow the agent base (main.\+cpp) to either start operation of the feature after performing initialization or to stop a feature in the event that it receives a signal indicating that the program must shut down as soon as possible. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_feature_a7f56b81457898d67ddc1942e57e3c0d5}\label{class_aws_1_1_iot_1_1_device_client_1_1_feature_a7f56b81457898d67ddc1942e57e3c0d5}} 
+\index{Aws::Iot::DeviceClient::Feature@{Aws::Iot::DeviceClient::Feature}!getName@{getName}}
+\index{getName@{getName}!Aws::Iot::DeviceClient::Feature@{Aws::Iot::DeviceClient::Feature}}
+\doxysubsubsection{\texorpdfstring{getName()}{getName()}}
+{\footnotesize\ttfamily virtual std\+::string Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature\+::get\+Name (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+For a given feature, returns its name. 
+
+\begin{DoxyReturn}{Returns}
+a string value representing the feature\textquotesingle{}s name 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_accc93db855be85847c3472754439594f}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Feature}}, \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a970567f029b428224c769d608de249c4}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Device\+Defender\+::\+Device\+Defender\+Feature}}, and \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a88bff915e713b132ce5a49a3d60ba294}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Jobs\+Feature}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_feature_ac9a936ebd88f7e35914a6aac99badf7d}\label{class_aws_1_1_iot_1_1_device_client_1_1_feature_ac9a936ebd88f7e35914a6aac99badf7d}} 
+\index{Aws::Iot::DeviceClient::Feature@{Aws::Iot::DeviceClient::Feature}!start@{start}}
+\index{start@{start}!Aws::Iot::DeviceClient::Feature@{Aws::Iot::DeviceClient::Feature}}
+\doxysubsubsection{\texorpdfstring{start()}{start()}}
+{\footnotesize\ttfamily virtual int Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature\+::start (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Start the feature. 
+
+\begin{DoxyReturn}{Returns}
+an integer representing the S\+U\+C\+C\+E\+SS or F\+A\+I\+L\+U\+RE of the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_ac9a936ebd88f7e35914a6aac99badf7d}{start()}} operation on the feature 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a9e33fc786883e519e587f7d89f2a9086}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Feature}}, \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a4f1090347b3b875a0d89fdceb1fea7b8}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Device\+Defender\+::\+Device\+Defender\+Feature}}, and \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a6369b1914ce964ca98c9474a38e3214f}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Jobs\+Feature}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_feature_a5b672f7b1403512cad9104ba923fc73d}\label{class_aws_1_1_iot_1_1_device_client_1_1_feature_a5b672f7b1403512cad9104ba923fc73d}} 
+\index{Aws::Iot::DeviceClient::Feature@{Aws::Iot::DeviceClient::Feature}!stop@{stop}}
+\index{stop@{stop}!Aws::Iot::DeviceClient::Feature@{Aws::Iot::DeviceClient::Feature}}
+\doxysubsubsection{\texorpdfstring{stop()}{stop()}}
+{\footnotesize\ttfamily virtual int Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature\+::stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Stop the feature. 
+
+\begin{DoxyReturn}{Returns}
+an integer representing the S\+U\+C\+C\+E\+SS or F\+A\+I\+L\+U\+RE of the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_a5b672f7b1403512cad9104ba923fc73d}{stop()}} operation on the feature 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_feature_a9cd3840b50bd1f62537df3354c7d2fbf}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Feature}}, \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_device_defender_1_1_device_defender_feature_a618a12044a581035fbe02f0f4f5813f7}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Device\+Defender\+::\+Device\+Defender\+Feature}}, and \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_aeec6332d60872b2a4471f6494f93b1c4}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Jobs\+Feature}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/Feature.\+h\end{DoxyCompactItemize}

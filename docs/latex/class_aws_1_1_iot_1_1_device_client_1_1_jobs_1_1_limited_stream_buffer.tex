@@ -1,0 +1,93 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Jobs\+::Limited\+Stream\+Buffer Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer}\index{Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer@{Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer}}
+
+
+Used to buffer output from S\+T\+D\+O\+UT or S\+T\+D\+E\+RR of the child process for placement in the status details when updating a job execution.  
+
+
+
+
+{\ttfamily \#include $<$Limited\+Stream\+Buffer.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_a3896a40c3e126a15f627b2d5eb3f5a5f}{Limited\+Stream\+Buffer}} (size\+\_\+t size\+Limit)
+\begin{DoxyCompactList}\small\item\em We provide an additional constructor with a configurable size\+Limit for testing. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_ab3388037fd612b094635a2fccdd3727e}{add\+String}} (std\+::string value)
+\begin{DoxyCompactList}\small\item\em Add the given string to the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer}{Limited\+Stream\+Buffer}}. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_a99396226499c5aee2bc55c903d23c48e}{to\+String}} ()
+\begin{DoxyCompactList}\small\item\em Generates a string value from the contents of the buffer. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_a2ef7054bf63c3809a9c85af48418ca53}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_a2ef7054bf63c3809a9c85af48418ca53}} 
+std\+::mutex \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_a2ef7054bf63c3809a9c85af48418ca53}{buffer\+Lock}}
+\begin{DoxyCompactList}\small\item\em Used to improve the thread safety of this class by preventing concurrent reads and writes. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_acbbbbe06bc7b9bf293a3fd6710a94d1a}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_acbbbbe06bc7b9bf293a3fd6710a94d1a}} 
+size\+\_\+t \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_acbbbbe06bc7b9bf293a3fd6710a94d1a}{contents\+Size}} = 0
+\begin{DoxyCompactList}\small\item\em The current size of the buffer. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_abe31825292542ae742ce4ba8b8b29a4f}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_abe31825292542ae742ce4ba8b8b29a4f}} 
+size\+\_\+t \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_abe31825292542ae742ce4ba8b8b29a4f}{contents\+Size\+Limit}}
+\begin{DoxyCompactList}\small\item\em The maximum allowable size of this buffer. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_af0b1176b7d46b34764fdcf77f35d2b7c}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_af0b1176b7d46b34764fdcf77f35d2b7c}} 
+std\+::deque$<$ std\+::string $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_af0b1176b7d46b34764fdcf77f35d2b7c}{buffer}}
+\begin{DoxyCompactList}\small\item\em The underlying deque implementation used to buffer words. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Used to buffer output from S\+T\+D\+O\+UT or S\+T\+D\+E\+RR of the child process for placement in the status details when updating a job execution. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_a3896a40c3e126a15f627b2d5eb3f5a5f}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_a3896a40c3e126a15f627b2d5eb3f5a5f}} 
+\index{Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer@{Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer}!LimitedStreamBuffer@{LimitedStreamBuffer}}
+\index{LimitedStreamBuffer@{LimitedStreamBuffer}!Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer@{Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer}}
+\doxysubsubsection{\texorpdfstring{LimitedStreamBuffer()}{LimitedStreamBuffer()}}
+{\footnotesize\ttfamily Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Limited\+Stream\+Buffer\+::\+Limited\+Stream\+Buffer (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{size\+Limit }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+We provide an additional constructor with a configurable size\+Limit for testing. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em size\+Limit} & the maximum size of the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer}{Limited\+Stream\+Buffer}} \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_ab3388037fd612b094635a2fccdd3727e}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_ab3388037fd612b094635a2fccdd3727e}} 
+\index{Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer@{Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer}!addString@{addString}}
+\index{addString@{addString}!Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer@{Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer}}
+\doxysubsubsection{\texorpdfstring{addString()}{addString()}}
+{\footnotesize\ttfamily void Limited\+Stream\+Buffer\+::add\+String (\begin{DoxyParamCaption}\item[{std\+::string}]{value }\end{DoxyParamCaption})}
+
+
+
+Add the given string to the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer}{Limited\+Stream\+Buffer}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em value} & the value to add \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_a99396226499c5aee2bc55c903d23c48e}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer_a99396226499c5aee2bc55c903d23c48e}} 
+\index{Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer@{Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer}!toString@{toString}}
+\index{toString@{toString}!Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer@{Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}}
+{\footnotesize\ttfamily string Limited\+Stream\+Buffer\+::to\+String (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Generates a string value from the contents of the buffer. 
+
+\begin{DoxyReturn}{Returns}
+a string representing the combined contents of the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_limited_stream_buffer}{Limited\+Stream\+Buffer}} 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/jobs/Limited\+Stream\+Buffer.\+h\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/jobs/Limited\+Stream\+Buffer.\+cpp\end{DoxyCompactItemize}

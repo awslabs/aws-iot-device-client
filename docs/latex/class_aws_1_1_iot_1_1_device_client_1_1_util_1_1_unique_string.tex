@@ -1,0 +1,34 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_unique_string}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Util\+::Unique\+String Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_unique_string}\index{Aws::Iot::DeviceClient::Util::UniqueString@{Aws::Iot::DeviceClient::Util::UniqueString}}
+
+
+Utility class intended to provide a somewhat \textquotesingle{}unique\textquotesingle{} token.  
+
+
+
+
+{\ttfamily \#include $<$Unique\+String.\+h$>$}
+
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_unique_string_a26db8c5f22628539193d1098d148d820}\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_unique_string_a26db8c5f22628539193d1098d148d820}} 
+static std\+::string {\bfseries Get\+Random\+Token} (size\+\_\+t length)
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_unique_string_a8a2409c73da7f7b81bb8abbe6d87b1dd}\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_unique_string_a8a2409c73da7f7b81bb8abbe6d87b1dd}} 
+const static size\+\_\+t {\bfseries M\+A\+X\+\_\+\+C\+L\+I\+E\+N\+T\+\_\+\+T\+O\+K\+E\+N\+\_\+\+S\+I\+ZE} = 64
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Utility class intended to provide a somewhat \textquotesingle{}unique\textquotesingle{} token. 
+
+We do not make any promises about the uniqueness of the generated token, only that it is hopefully unique enough for our purposes. IE we currently use the get\+Random\+Token function to generate a token that can be used to map Update\+Job\+Execution requests back to their responses (in which only a few should be in flight at any given time) but this function would not be ideal for keys across a large store of data. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/util/Unique\+String.\+h\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/util/Unique\+String.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,34 @@
+\hypertarget{struct_aws_1_1_iot_1_1_device_client_1_1_util_1_1_retry_1_1_exponential_retry_config}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Util\+::Retry\+::Exponential\+Retry\+Config Struct Reference}
+\label{struct_aws_1_1_iot_1_1_device_client_1_1_util_1_1_retry_1_1_exponential_retry_config}\index{Aws::Iot::DeviceClient::Util::Retry::ExponentialRetryConfig@{Aws::Iot::DeviceClient::Util::Retry::ExponentialRetryConfig}}
+
+
+Used for passing an exponential retry configuration to the exponential\+Backoff function.  
+
+
+
+
+{\ttfamily \#include $<$Retry.\+h$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{struct_aws_1_1_iot_1_1_device_client_1_1_util_1_1_retry_1_1_exponential_retry_config_a81e7f18bc16233d1c44567928fe1fdee}\label{struct_aws_1_1_iot_1_1_device_client_1_1_util_1_1_retry_1_1_exponential_retry_config_a81e7f18bc16233d1c44567928fe1fdee}} 
+long \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_util_1_1_retry_1_1_exponential_retry_config_a81e7f18bc16233d1c44567928fe1fdee}{starting\+Backoff\+Millis}}
+\begin{DoxyCompactList}\small\item\em The initial amount of time between retries in milliseconds. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{struct_aws_1_1_iot_1_1_device_client_1_1_util_1_1_retry_1_1_exponential_retry_config_abe087a52a62ebf3286ac5141cbb240cc}\label{struct_aws_1_1_iot_1_1_device_client_1_1_util_1_1_retry_1_1_exponential_retry_config_abe087a52a62ebf3286ac5141cbb240cc}} 
+long \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_util_1_1_retry_1_1_exponential_retry_config_abe087a52a62ebf3286ac5141cbb240cc}{max\+Backoff\+Millis}}
+\begin{DoxyCompactList}\small\item\em The maximum amount of time between retries in milliseconds. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{struct_aws_1_1_iot_1_1_device_client_1_1_util_1_1_retry_1_1_exponential_retry_config_a4b4cb1e28c66a294d31926b66e17a3a1}\label{struct_aws_1_1_iot_1_1_device_client_1_1_util_1_1_retry_1_1_exponential_retry_config_a4b4cb1e28c66a294d31926b66e17a3a1}} 
+long \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_util_1_1_retry_1_1_exponential_retry_config_a4b4cb1e28c66a294d31926b66e17a3a1}{max\+Retries}}
+\begin{DoxyCompactList}\small\item\em The maximum number of retries to perform. {\itshape N\+O\+TE} if the specified number is negative, the exponential\+Backoff function will retry the provided function an infinite number of times until it returns successfully or is shut down. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{struct_aws_1_1_iot_1_1_device_client_1_1_util_1_1_retry_1_1_exponential_retry_config_a0dd43a336bcd68d2e7809d0da2a2a547}\label{struct_aws_1_1_iot_1_1_device_client_1_1_util_1_1_retry_1_1_exponential_retry_config_a0dd43a336bcd68d2e7809d0da2a2a547}} 
+std\+::atomic$<$ bool $>$ $\ast$ {\bfseries need\+Stop\+Flag}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Used for passing an exponential retry configuration to the exponential\+Backoff function. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/util/Retry.\+h\end{DoxyCompactItemize}

@@ -1,0 +1,540 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Jobs\+::Jobs\+Feature Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature}\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+
+
+Provides IoT Jobs related functionality within the Device Client.  
+
+
+
+
+{\ttfamily \#include $<$Jobs\+Feature.\+h$>$}
+
+Inheritance diagram for Aws\+::Iot\+::Device\+Client\+::Jobs\+::Jobs\+Feature\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_1_1_job_execution_status_info}{Job\+Execution\+Status\+Info}}
+\begin{DoxyCompactList}\small\item\em Wrapper struct to aggregate \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_job_engine}{Job\+Engine}} output for updating a job execution status. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a88bff915e713b132ce5a49a3d60ba294}{get\+Name}} ()
+\begin{DoxyCompactList}\small\item\em For a given feature, returns its name. \end{DoxyCompactList}\item 
+virtual int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ae5ed8ac46280309eb3918b1d19ec1c54}{init}} (std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$ manager, std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}{Client\+Base\+Notifier}} $>$ notifier, const \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_plain_config}{Plain\+Config}} \&config)
+\begin{DoxyCompactList}\small\item\em Initializes the Jobs feature with all the required setup information, event handlers, and the shared Mqtt\+Connection. \end{DoxyCompactList}\item 
+virtual int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a6369b1914ce964ca98c9474a38e3214f}{start}} ()
+\begin{DoxyCompactList}\small\item\em Start the feature. \end{DoxyCompactList}\item 
+virtual int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_aeec6332d60872b2a4471f6494f93b1c4}{stop}} ()
+\begin{DoxyCompactList}\small\item\em Stop the feature. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a4031ad851a1bb42ced1392fb32090e46}{ack\+Subscribe\+To\+Next\+Job\+Changed}} (int io\+Error)
+\begin{DoxyCompactList}\small\item\em Acknowledgement that IoT Core has received our request for subscription to Next\+Job\+Changed. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a61eaca0e8195d1805b1ea94b39d04474}{ack\+Subscribe\+To\+Start\+Next\+Job\+Accepted}} (int io\+Error)
+\begin{DoxyCompactList}\small\item\em Acknowledgement that IoT Core has received our request for subscription to Start\+Next\+Job\+Accepted. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ae34fa1e7a48d09d81b7007c991a1719f}{ack\+Subscribe\+To\+Start\+Next\+Job\+Rejected}} (int io\+Error)
+\begin{DoxyCompactList}\small\item\em Acknowledgement that IoT Core has received our request for subscription to Start\+Next\+Job\+Rejected. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a63306a1777aae7bb64a3e80bc1285d72}{ack\+Start\+Next\+Pending\+Job\+Pub}} (int io\+Error)
+\begin{DoxyCompactList}\small\item\em Acknowledgement that IoT Core has received our Start\+Next\+Pending\+Job message. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_abfca3cadf2210cea1b6fcc82bbb21725}{ack\+Update\+Job\+Execution\+Status}} (int io\+Error)
+\begin{DoxyCompactList}\small\item\em Acknowledgement that IoT Core has received our Update\+Job\+Execution\+Status message. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a881265a4086c4c66345d34f563f12280}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a881265a4086c4c66345d34f563f12280}} 
+void {\bfseries ack\+Subscribe\+To\+Update\+Job\+Execution\+Accepted} (int io\+Error)
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_aad6b16ad9e5bffe134be6ba660ad5fea}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_aad6b16ad9e5bffe134be6ba660ad5fea}} 
+void {\bfseries ack\+Subscribe\+To\+Update\+Job\+Execution\+Rejected} (int io\+Error)
+\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a546393fde6216c790c95d6a7a6903ddc}{publish\+Start\+Next\+Pending\+Job\+Execution\+Request}} ()
+\begin{DoxyCompactList}\small\item\em Publishes a request to start\+Next\+Pending\+Job\+Execution. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_af56753139f5926916926fc15d1b43f58}{publish\+Update\+Job\+Execution\+Status}} (Aws\+::\+Iotjobs\+::\+Job\+Execution\+Data data, \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_1_1_job_execution_status_info}{Job\+Execution\+Status\+Info}} status\+Info)
+\begin{DoxyCompactList}\small\item\em Attempts to update a job execution to the provided status. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ab76653347635a003fda9e3748ee8d053}{subscribe\+To\+Start\+Next\+Pending\+Job\+Execution}} ()
+\begin{DoxyCompactList}\small\item\em Creates a subscription to the start\+Next\+Pending\+Job\+Execution topic. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a38337467d49ff8804886cb4cd5aa61d0}{subscribe\+To\+Next\+Job\+Changed\+Events}} ()
+\begin{DoxyCompactList}\small\item\em Creates a subscription to Next\+Job\+Changed\+Events. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a15e9508e5eac303329646830223ce927}{subscribe\+To\+Update\+Job\+Execution\+Status\+Accepted}} (std\+::string job\+Id)
+\begin{DoxyCompactList}\small\item\em Enables the Jobs feature to receive response information from the IoT Jobs service when an update is accepted. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a2769b90aae519400c54300cca7d0719c}{subscribe\+To\+Update\+Job\+Execution\+Status\+Rejected}} (std\+::string job\+Id)
+\begin{DoxyCompactList}\small\item\em Enables the Jobs feature to receive response information from the IoT Jobs service when an update is rejected. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a4a976be8e597b38a1eeaaadc6d048739}{start\+Next\+Pending\+Job\+Received\+Handler}} (Iotjobs\+::\+Start\+Next\+Job\+Execution\+Response $\ast$response, int io\+Error)
+\begin{DoxyCompactList}\small\item\em Executed upon receiving a response to our request to Start\+Next\+Pending\+Job. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a974eb6561346d4612c975a9df28ad516}{start\+Next\+Pending\+Job\+Rejected\+Handler}} (Iotjobs\+::\+Rejected\+Error $\ast$rejected\+Error, int io\+Error)
+\begin{DoxyCompactList}\small\item\em Executed if our request to Start\+Next\+Pending\+Job is rejected. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a699398d2cdb6ad04950408f957d57cf0}{next\+Job\+Changed\+Handler}} (Iotjobs\+::\+Next\+Job\+Execution\+Changed\+Event $\ast$event, int io\+Err)
+\begin{DoxyCompactList}\small\item\em Executed when the next job for this thing to execute has changed. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a5c763db4b185acc3beb7f292cab09f77}{update\+Job\+Execution\+Status\+Accepted\+Handler}} (Iotjobs\+::\+Update\+Job\+Execution\+Response $\ast$response, int io\+Error)
+\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a15ac84770cecf46cd377c2f16d5994fa}{update\+Job\+Execution\+Status\+Rejected\+Handler}} (Iotjobs\+::\+Rejected\+Error $\ast$rejected\+Error, int io\+Error)
+\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a021bbb91acaf6ef46ef41fb55ebff69e}{execute\+Job}} (Iotjobs\+::\+Job\+Execution\+Data job)
+\begin{DoxyCompactList}\small\item\em Called to begin the execution of a job on the device. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a43ec792550c419ef608352d276f415c8}{is\+Duplicate\+Notification}} (Iotjobs\+::\+Job\+Execution\+Data job)
+\begin{DoxyCompactList}\small\item\em Given a job notification, determines whether it\textquotesingle{}s a duplicate message. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a9f121d4d293369a876b300d899f5867b}{copy\+Jobs\+Notification}} (Iotjobs\+::\+Job\+Execution\+Data job)
+\begin{DoxyCompactList}\small\item\em Stores information about a job notification. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ae42ed26b1a4bb83fe4f408f45729246f}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ae42ed26b1a4bb83fe4f408f45729246f}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ae42ed26b1a4bb83fe4f408f45729246f}{run\+Jobs}} ()
+\begin{DoxyCompactList}\small\item\em Begins running the Jobs feature. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ac6fcbba9b37a075c82a8be74e0ef5941}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ac6fcbba9b37a075c82a8be74e0ef5941}} 
+const char $\ast$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ac6fcbba9b37a075c82a8be74e0ef5941}{T\+AG}} = \char`\"{}Jobs\+Feature.\+cpp\char`\"{}
+\begin{DoxyCompactList}\small\item\em Used by the logger to specify that log messages are coming from the Jobs feature. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_abc5ede80a369d78034b4a3b7e1700d09}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_abc5ede80a369d78034b4a3b7e1700d09}} 
+const char $\ast$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_abc5ede80a369d78034b4a3b7e1700d09}{J\+O\+B\+\_\+\+A\+T\+T\+R\+\_\+\+OP}} = \char`\"{}operation\char`\"{}
+\begin{DoxyCompactList}\small\item\em A field within a Job document that the Jobs feature uses to determine which job to run. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ab4c8f275b27255bea9f67c2301ec1dfd}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ab4c8f275b27255bea9f67c2301ec1dfd}} 
+const char $\ast$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ab4c8f275b27255bea9f67c2301ec1dfd}{J\+O\+B\+\_\+\+A\+T\+T\+R\+\_\+\+A\+R\+GS}} = \char`\"{}args\char`\"{}
+\begin{DoxyCompactList}\small\item\em A field within a Job document that the Jobs feature uses to determine which arguments to pass to the operation being run. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_afd50429795fa66c3986132ca98f3d209}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_afd50429795fa66c3986132ca98f3d209}} 
+const char $\ast$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_afd50429795fa66c3986132ca98f3d209}{J\+O\+B\+\_\+\+A\+T\+T\+R\+\_\+\+A\+L\+L\+O\+W\+\_\+\+S\+T\+D\+E\+RR}} = \char`\"{}allow\+Std\+Err\char`\"{}
+\begin{DoxyCompactList}\small\item\em A field within a Job document that the Jobs feature uses to determine whether S\+T\+D\+E\+RR output issued by the child process should be marked as a job failure in IoT Core. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_af3faf0824c3b40e078452642ae53ff0e}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_af3faf0824c3b40e078452642ae53ff0e}} 
+const char $\ast$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_af3faf0824c3b40e078452642ae53ff0e}{J\+O\+B\+\_\+\+A\+T\+T\+R\+\_\+\+I\+N\+C\+L\+U\+D\+E\+\_\+\+S\+T\+D\+O\+UT}} = \char`\"{}include\+Std\+Out\char`\"{}
+\begin{DoxyCompactList}\small\item\em A field within a job document that the Jobs feature uses to determine whether S\+T\+D\+O\+UT issued by the child process should be published when updating the job execution status. \end{DoxyCompactList}\item 
+const char $\ast$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a7cb8aaf7a89223ff69bfa6752f35d7b3}{J\+O\+B\+\_\+\+A\+T\+T\+R\+\_\+\+P\+A\+TH}} = \char`\"{}path\char`\"{}
+\begin{DoxyCompactList}\small\item\em A field within a Job document that the Jobs feature uses to determine the location of the executable that should be run to handle this job. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ac840150bd4fe9cfe959ce742a15c2b15}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ac840150bd4fe9cfe959ce742a15c2b15}} 
+const char $\ast$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ac840150bd4fe9cfe959ce742a15c2b15}{D\+E\+F\+A\+U\+L\+T\+\_\+\+P\+A\+T\+H\+\_\+\+K\+E\+Y\+W\+O\+RD}} = \char`\"{}default\char`\"{}
+\begin{DoxyCompactList}\small\item\em A keyword that can be specified as the \char`\"{}path\char`\"{} in a job doc to tell the Jobs feature to use the configured handler directory when looking for an executable matching the specified operation. \end{DoxyCompactList}\item 
+const size\+\_\+t \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a3f0629514f8a97930ded3e64aae5f952}{M\+A\+X\+\_\+\+S\+T\+A\+T\+U\+S\+\_\+\+D\+E\+T\+A\+I\+L\+\_\+\+L\+E\+N\+G\+TH}} = 1024
+\begin{DoxyCompactList}\small\item\em The default directory that the Jobs feature will use to find executables matching an incoming job document\textquotesingle{}s operation attribute. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a2a626ee75dcbf527b70ea572b2bcfa82}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a2a626ee75dcbf527b70ea572b2bcfa82}} 
+const int {\bfseries U\+P\+D\+A\+T\+E\+\_\+\+J\+O\+B\+\_\+\+E\+X\+E\+C\+U\+T\+I\+O\+N\+\_\+\+R\+E\+J\+E\+C\+T\+E\+D\+\_\+\+C\+O\+DE} = -\/1
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a22e3bd36ee066ec60907ddb725a6c643}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a22e3bd36ee066ec60907ddb725a6c643}} 
+const std\+::string {\bfseries D\+E\+F\+A\+U\+L\+T\+\_\+\+J\+O\+B\+S\+\_\+\+H\+A\+N\+D\+L\+E\+R\+\_\+\+D\+IR} = \char`\"{}$\sim$/.aws-\/iot-\/device-\/client/jobs/\char`\"{}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a155d798a5de563ba398e8d2a9ec8594c}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a155d798a5de563ba398e8d2a9ec8594c}} 
+std\+::atomic$<$ bool $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a155d798a5de563ba398e8d2a9ec8594c}{need\+Stop}} \{false\}
+\begin{DoxyCompactList}\small\item\em Whether the Device\+Client base has requested this feature to stop. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_af3c6c7ae021342f7f7b37a9fec113e7b}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_af3c6c7ae021342f7f7b37a9fec113e7b}} 
+std\+::atomic$<$ bool $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_af3c6c7ae021342f7f7b37a9fec113e7b}{handling\+Job}} \{false\}
+\begin{DoxyCompactList}\small\item\em Whether the jobs feature is currently executing a job. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ab4449de08e2cc376ff0c6942f56f15db}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ab4449de08e2cc376ff0c6942f56f15db}} 
+std\+::mutex \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ab4449de08e2cc376ff0c6942f56f15db}{update\+Job\+Execution\+Promises\+Lock}}
+\begin{DoxyCompactList}\small\item\em A lock used to control access to the map of \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise}{Ephemeral\+Promise}}. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_afb82743d214fa7dce63125b5809fd97e}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_afb82743d214fa7dce63125b5809fd97e}} 
+Aws\+::\+Crt\+::\+Map$<$ Aws\+::\+Crt\+::\+String, \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Ephemeral\+Promise}}$<$ int $>$ $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_afb82743d214fa7dce63125b5809fd97e}{update\+Job\+Execution\+Promises}}
+\begin{DoxyCompactList}\small\item\em Allows us to map Update\+Job\+Execution responses back to their original request. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ac836a3bd8d835654076ea56bc7a57745}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ac836a3bd8d835654076ea56bc7a57745}} 
+std\+::mutex {\bfseries latest\+Jobs\+Notification\+Lock}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a96f7c2f34ed5fefb690f51fbc94f00e5}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a96f7c2f34ed5fefb690f51fbc94f00e5}} 
+Aws\+::\+Iotjobs\+::\+Job\+Execution\+Data {\bfseries latest\+Jobs\+Notification}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ab798b4c4f1f9790ff6b92002bf13533f}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ab798b4c4f1f9790ff6b92002bf13533f}} 
+std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ab798b4c4f1f9790ff6b92002bf13533f}{resource\+Manager}}
+\begin{DoxyCompactList}\small\item\em The resource manager used to manage C\+RT resources. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a2f7ddca3946641f18591475b0072044d}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a2f7ddca3946641f18591475b0072044d}} 
+std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}{Client\+Base\+Notifier}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a2f7ddca3946641f18591475b0072044d}{base\+Notifier}}
+\begin{DoxyCompactList}\small\item\em An interface used to notify the Client base if there is an event that requires its attention. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a3e1943f1c6c221953e2d6dd884adcb0d}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a3e1943f1c6c221953e2d6dd884adcb0d}} 
+std\+::unique\+\_\+ptr$<$ Aws\+::\+Iotjobs\+::\+Iot\+Jobs\+Client $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a3e1943f1c6c221953e2d6dd884adcb0d}{jobs\+Client}}
+\begin{DoxyCompactList}\small\item\em an Iot\+Jobs\+Client used to make calls to the A\+WS IoT Jobs service \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a10d7baa43855fc9d73404ddfc03eb347}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a10d7baa43855fc9d73404ddfc03eb347}} 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a10d7baa43855fc9d73404ddfc03eb347}{thing\+Name}}
+\begin{DoxyCompactList}\small\item\em the Thing\+Name to use \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a37030f5e63e8d42448dab3a0dd70d7b2}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a37030f5e63e8d42448dab3a0dd70d7b2}} 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a37030f5e63e8d42448dab3a0dd70d7b2}{job\+Handler\+Dir}} = D\+E\+F\+A\+U\+L\+T\+\_\+\+J\+O\+B\+S\+\_\+\+H\+A\+N\+D\+L\+E\+R\+\_\+\+D\+IR
+\begin{DoxyCompactList}\small\item\em User provided handler directory passed either through command-\/line arguments or through the Json configuration file. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a96c04319b80254bde588e96dba066514}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a96c04319b80254bde588e96dba066514}} 
+std\+::promise$<$ int $>$ {\bfseries update\+Accepted\+Promise}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_aada37e78ca84befa0e8370a34b349b01}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_aada37e78ca84befa0e8370a34b349b01}} 
+std\+::promise$<$ int $>$ {\bfseries update\+Rejected\+Promise}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Provides IoT Jobs related functionality within the Device Client. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a63306a1777aae7bb64a3e80bc1285d72}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a63306a1777aae7bb64a3e80bc1285d72}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!ackStartNextPendingJobPub@{ackStartNextPendingJobPub}}
+\index{ackStartNextPendingJobPub@{ackStartNextPendingJobPub}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{ackStartNextPendingJobPub()}{ackStartNextPendingJobPub()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::ack\+Start\+Next\+Pending\+Job\+Pub (\begin{DoxyParamCaption}\item[{int}]{io\+Error }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Acknowledgement that IoT Core has received our Start\+Next\+Pending\+Job message. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em io\+Error} & a non-\/zero code here indicates a problem. Turn on logging in IoT Core and check Cloud\+Watch for more insights on errors \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a4031ad851a1bb42ced1392fb32090e46}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a4031ad851a1bb42ced1392fb32090e46}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!ackSubscribeToNextJobChanged@{ackSubscribeToNextJobChanged}}
+\index{ackSubscribeToNextJobChanged@{ackSubscribeToNextJobChanged}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{ackSubscribeToNextJobChanged()}{ackSubscribeToNextJobChanged()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::ack\+Subscribe\+To\+Next\+Job\+Changed (\begin{DoxyParamCaption}\item[{int}]{io\+Error }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Acknowledgement that IoT Core has received our request for subscription to Next\+Job\+Changed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em io\+Error} & a non-\/zero code here indicates a problem. Turn on logging in IoT Core and check Cloud\+Watch for more insights on errors \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a61eaca0e8195d1805b1ea94b39d04474}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a61eaca0e8195d1805b1ea94b39d04474}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!ackSubscribeToStartNextJobAccepted@{ackSubscribeToStartNextJobAccepted}}
+\index{ackSubscribeToStartNextJobAccepted@{ackSubscribeToStartNextJobAccepted}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{ackSubscribeToStartNextJobAccepted()}{ackSubscribeToStartNextJobAccepted()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::ack\+Subscribe\+To\+Start\+Next\+Job\+Accepted (\begin{DoxyParamCaption}\item[{int}]{io\+Error }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Acknowledgement that IoT Core has received our request for subscription to Start\+Next\+Job\+Accepted. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em io\+Error} & a non-\/zero code here indicates a problem. Turn on logging in IoT Core and check Cloud\+Watch for more insights on errors \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ae34fa1e7a48d09d81b7007c991a1719f}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ae34fa1e7a48d09d81b7007c991a1719f}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!ackSubscribeToStartNextJobRejected@{ackSubscribeToStartNextJobRejected}}
+\index{ackSubscribeToStartNextJobRejected@{ackSubscribeToStartNextJobRejected}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{ackSubscribeToStartNextJobRejected()}{ackSubscribeToStartNextJobRejected()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::ack\+Subscribe\+To\+Start\+Next\+Job\+Rejected (\begin{DoxyParamCaption}\item[{int}]{io\+Error }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Acknowledgement that IoT Core has received our request for subscription to Start\+Next\+Job\+Rejected. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em io\+Error} & a non-\/zero code here indicates a problem. Turn on logging in IoT Core and check Cloud\+Watch for more insights on errors \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_abfca3cadf2210cea1b6fcc82bbb21725}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_abfca3cadf2210cea1b6fcc82bbb21725}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!ackUpdateJobExecutionStatus@{ackUpdateJobExecutionStatus}}
+\index{ackUpdateJobExecutionStatus@{ackUpdateJobExecutionStatus}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{ackUpdateJobExecutionStatus()}{ackUpdateJobExecutionStatus()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::ack\+Update\+Job\+Execution\+Status (\begin{DoxyParamCaption}\item[{int}]{io\+Error }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Acknowledgement that IoT Core has received our Update\+Job\+Execution\+Status message. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em io\+Error} & a non-\/zero code here indicates a problem. Turn on logging in IoT Core and check Cloud\+Watch for more insights on errors \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a9f121d4d293369a876b300d899f5867b}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a9f121d4d293369a876b300d899f5867b}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!copyJobsNotification@{copyJobsNotification}}
+\index{copyJobsNotification@{copyJobsNotification}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{copyJobsNotification()}{copyJobsNotification()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::copy\+Jobs\+Notification (\begin{DoxyParamCaption}\item[{Iotjobs\+::\+Job\+Execution\+Data}]{job }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Stores information about a job notification. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a021bbb91acaf6ef46ef41fb55ebff69e}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a021bbb91acaf6ef46ef41fb55ebff69e}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!executeJob@{executeJob}}
+\index{executeJob@{executeJob}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{executeJob()}{executeJob()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::execute\+Job (\begin{DoxyParamCaption}\item[{Iotjobs\+::\+Job\+Execution\+Data}]{job }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Called to begin the execution of a job on the device. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job} & the job to execute \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a88bff915e713b132ce5a49a3d60ba294}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a88bff915e713b132ce5a49a3d60ba294}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!getName@{getName}}
+\index{getName@{getName}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{getName()}{getName()}}
+{\footnotesize\ttfamily string Jobs\+Feature\+::get\+Name (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+For a given feature, returns its name. 
+
+\begin{DoxyReturn}{Returns}
+a string value representing the feature\textquotesingle{}s name 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_a7f56b81457898d67ddc1942e57e3c0d5}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ae5ed8ac46280309eb3918b1d19ec1c54}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ae5ed8ac46280309eb3918b1d19ec1c54}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!init@{init}}
+\index{init@{init}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{init()}{init()}}
+{\footnotesize\ttfamily int Jobs\+Feature\+::init (\begin{DoxyParamCaption}\item[{std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$}]{manager,  }\item[{std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}{Client\+Base\+Notifier}} $>$}]{notifier,  }\item[{const \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_plain_config}{Plain\+Config}} \&}]{config }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Initializes the Jobs feature with all the required setup information, event handlers, and the shared Mqtt\+Connection. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em manager} & the shared Mqtt\+Connection\+Manager \\
+\hline
+{\em notifier} & an \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_client_base_notifier}{Client\+Base\+Notifier}} used for notifying the client base of events or errors \\
+\hline
+{\em config} & configuration information passed in by the user via either the command line or configuration file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a non-\/zero return code indicates a problem. The logs can be checked for more info 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a43ec792550c419ef608352d276f415c8}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a43ec792550c419ef608352d276f415c8}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!isDuplicateNotification@{isDuplicateNotification}}
+\index{isDuplicateNotification@{isDuplicateNotification}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{isDuplicateNotification()}{isDuplicateNotification()}}
+{\footnotesize\ttfamily bool Jobs\+Feature\+::is\+Duplicate\+Notification (\begin{DoxyParamCaption}\item[{Iotjobs\+::\+Job\+Execution\+Data}]{job }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Given a job notification, determines whether it\textquotesingle{}s a duplicate message. 
+
+This method was originally intended to handle scenarios such as network instability or loss where the jobs feature may receive multiple instances of the same message. This allows us to eliminate duplicates that would otherwise cause the Jobs feature to run the same job more than once. 
+\begin{DoxyParams}{Parameters}
+{\em job} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if it\textquotesingle{}s a duplicate, false otherwise 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a699398d2cdb6ad04950408f957d57cf0}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a699398d2cdb6ad04950408f957d57cf0}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!nextJobChangedHandler@{nextJobChangedHandler}}
+\index{nextJobChangedHandler@{nextJobChangedHandler}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{nextJobChangedHandler()}{nextJobChangedHandler()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::next\+Job\+Changed\+Handler (\begin{DoxyParamCaption}\item[{Iotjobs\+::\+Next\+Job\+Execution\+Changed\+Event $\ast$}]{event,  }\item[{int}]{io\+Err }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Executed when the next job for this thing to execute has changed. 
+
+This typically happens after updating a job execution and the Jobs A\+PI is notifying the Device Client that we have a new job to execute 
+\begin{DoxyParams}{Parameters}
+{\em event} & information about the next job \\
+\hline
+{\em io\+Err} & a non-\/zero error code indicates a problem \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a546393fde6216c790c95d6a7a6903ddc}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a546393fde6216c790c95d6a7a6903ddc}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!publishStartNextPendingJobExecutionRequest@{publishStartNextPendingJobExecutionRequest}}
+\index{publishStartNextPendingJobExecutionRequest@{publishStartNextPendingJobExecutionRequest}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{publishStartNextPendingJobExecutionRequest()}{publishStartNextPendingJobExecutionRequest()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::publish\+Start\+Next\+Pending\+Job\+Execution\+Request (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Publishes a request to start\+Next\+Pending\+Job\+Execution. 
+
+Publishes a request to start the next pending job. In order to receive the response message, subscribe\+To\+Get\+Pending\+Jobs() must have been called successfully before this. \mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_af56753139f5926916926fc15d1b43f58}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_af56753139f5926916926fc15d1b43f58}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!publishUpdateJobExecutionStatus@{publishUpdateJobExecutionStatus}}
+\index{publishUpdateJobExecutionStatus@{publishUpdateJobExecutionStatus}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{publishUpdateJobExecutionStatus()}{publishUpdateJobExecutionStatus()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::publish\+Update\+Job\+Execution\+Status (\begin{DoxyParamCaption}\item[{Aws\+::\+Iotjobs\+::\+Job\+Execution\+Data}]{data,  }\item[{\mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_1_1_job_execution_status_info}{Job\+Execution\+Status\+Info}}}]{status\+Info }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Attempts to update a job execution to the provided status. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & Job\+Execution\+Data containing information about the job \\
+\hline
+{\em status\+Info} & status information including the Job status, as well as S\+T\+D\+O\+UT and S\+T\+D\+E\+RR from the child process \\
+\hline
+\end{DoxyParams}
+When we update the job execution status, we need to perform an exponential backoff in case our request gets throttled. Otherwise, if we never properly update the job execution status, we\textquotesingle{}ll never receive the next job
+
+no increment here\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a6369b1914ce964ca98c9474a38e3214f}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a6369b1914ce964ca98c9474a38e3214f}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!start@{start}}
+\index{start@{start}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{start()}{start()}}
+{\footnotesize\ttfamily int Jobs\+Feature\+::start (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Start the feature. 
+
+\begin{DoxyReturn}{Returns}
+an integer representing the S\+U\+C\+C\+E\+SS or F\+A\+I\+L\+U\+RE of the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a6369b1914ce964ca98c9474a38e3214f}{start()}} operation on the feature 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_ac9a936ebd88f7e35914a6aac99badf7d}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a4a976be8e597b38a1eeaaadc6d048739}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a4a976be8e597b38a1eeaaadc6d048739}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!startNextPendingJobReceivedHandler@{startNextPendingJobReceivedHandler}}
+\index{startNextPendingJobReceivedHandler@{startNextPendingJobReceivedHandler}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{startNextPendingJobReceivedHandler()}{startNextPendingJobReceivedHandler()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::start\+Next\+Pending\+Job\+Received\+Handler (\begin{DoxyParamCaption}\item[{Iotjobs\+::\+Start\+Next\+Job\+Execution\+Response $\ast$}]{response,  }\item[{int}]{io\+Error }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Executed upon receiving a response to our request to Start\+Next\+Pending\+Job. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em response} & the response from Iot Core \\
+\hline
+{\em io\+Error} & a non-\/zero error code indicates a problem\\
+\hline
+\end{DoxyParams}
+Upon receipt of the Pending\+Jobs message, this handler method will attempt to add the first available job to the Event\+Queue. \mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a974eb6561346d4612c975a9df28ad516}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a974eb6561346d4612c975a9df28ad516}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!startNextPendingJobRejectedHandler@{startNextPendingJobRejectedHandler}}
+\index{startNextPendingJobRejectedHandler@{startNextPendingJobRejectedHandler}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{startNextPendingJobRejectedHandler()}{startNextPendingJobRejectedHandler()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::start\+Next\+Pending\+Job\+Rejected\+Handler (\begin{DoxyParamCaption}\item[{Iotjobs\+::\+Rejected\+Error $\ast$}]{rejected\+Error,  }\item[{int}]{io\+Error }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Executed if our request to Start\+Next\+Pending\+Job is rejected. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em rejected\+Error} & information about the rejection \\
+\hline
+{\em io\+Error} & a non-\/zero error code indicates a problem \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_aeec6332d60872b2a4471f6494f93b1c4}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_aeec6332d60872b2a4471f6494f93b1c4}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!stop@{stop}}
+\index{stop@{stop}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{stop()}{stop()}}
+{\footnotesize\ttfamily int Jobs\+Feature\+::stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Stop the feature. 
+
+\begin{DoxyReturn}{Returns}
+an integer representing the S\+U\+C\+C\+E\+SS or F\+A\+I\+L\+U\+RE of the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_aeec6332d60872b2a4471f6494f93b1c4}{stop()}} operation on the feature 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_feature_a5b672f7b1403512cad9104ba923fc73d}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Feature}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a38337467d49ff8804886cb4cd5aa61d0}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a38337467d49ff8804886cb4cd5aa61d0}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!subscribeToNextJobChangedEvents@{subscribeToNextJobChangedEvents}}
+\index{subscribeToNextJobChangedEvents@{subscribeToNextJobChangedEvents}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{subscribeToNextJobChangedEvents()}{subscribeToNextJobChangedEvents()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::subscribe\+To\+Next\+Job\+Changed\+Events (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Creates a subscription to Next\+Job\+Changed\+Events. 
+
+As the Jobs feature executes incoming jobs, the next pending job for this thing will change. By subscribing to the topic associated with the Next\+Job\+Execution\+Changed, we no longer need to poll for new jobs and instead can be notified that there is new work to do. \mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ab76653347635a003fda9e3748ee8d053}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_ab76653347635a003fda9e3748ee8d053}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!subscribeToStartNextPendingJobExecution@{subscribeToStartNextPendingJobExecution}}
+\index{subscribeToStartNextPendingJobExecution@{subscribeToStartNextPendingJobExecution}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{subscribeToStartNextPendingJobExecution()}{subscribeToStartNextPendingJobExecution()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::subscribe\+To\+Start\+Next\+Pending\+Job\+Execution (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Creates a subscription to the start\+Next\+Pending\+Job\+Execution topic. 
+
+Creates the required topic subscriptions to enable delivery of the response message associated with publishing a request to Start the next pending job execution \mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a15e9508e5eac303329646830223ce927}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a15e9508e5eac303329646830223ce927}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!subscribeToUpdateJobExecutionStatusAccepted@{subscribeToUpdateJobExecutionStatusAccepted}}
+\index{subscribeToUpdateJobExecutionStatusAccepted@{subscribeToUpdateJobExecutionStatusAccepted}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{subscribeToUpdateJobExecutionStatusAccepted()}{subscribeToUpdateJobExecutionStatusAccepted()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::subscribe\+To\+Update\+Job\+Execution\+Status\+Accepted (\begin{DoxyParamCaption}\item[{std\+::string}]{job\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Enables the Jobs feature to receive response information from the IoT Jobs service when an update is accepted. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & the job ID to listen for. Use \char`\"{}+\char`\"{} to subscribe for all job executions for this thing. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a2769b90aae519400c54300cca7d0719c}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a2769b90aae519400c54300cca7d0719c}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!subscribeToUpdateJobExecutionStatusRejected@{subscribeToUpdateJobExecutionStatusRejected}}
+\index{subscribeToUpdateJobExecutionStatusRejected@{subscribeToUpdateJobExecutionStatusRejected}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{subscribeToUpdateJobExecutionStatusRejected()}{subscribeToUpdateJobExecutionStatusRejected()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::subscribe\+To\+Update\+Job\+Execution\+Status\+Rejected (\begin{DoxyParamCaption}\item[{std\+::string}]{job\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Enables the Jobs feature to receive response information from the IoT Jobs service when an update is rejected. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & the job ID to listen for. Use \char`\"{}+\char`\"{} to subscribe for all job executions for this thing. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a5c763db4b185acc3beb7f292cab09f77}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a5c763db4b185acc3beb7f292cab09f77}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!updateJobExecutionStatusAcceptedHandler@{updateJobExecutionStatusAcceptedHandler}}
+\index{updateJobExecutionStatusAcceptedHandler@{updateJobExecutionStatusAcceptedHandler}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{updateJobExecutionStatusAcceptedHandler()}{updateJobExecutionStatusAcceptedHandler()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::update\+Job\+Execution\+Status\+Accepted\+Handler (\begin{DoxyParamCaption}\item[{Iotjobs\+::\+Update\+Job\+Execution\+Response $\ast$}]{response,  }\item[{int}]{io\+Error }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+A handler function called by the C\+RT S\+DK when we receive a response to our request to update a job execution status 
+\begin{DoxyParams}{Parameters}
+{\em response} & information used to determine which job execution was updated \\
+\hline
+{\em io\+Error} & a non-\/zero error code indicates a problem \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a15ac84770cecf46cd377c2f16d5994fa}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a15ac84770cecf46cd377c2f16d5994fa}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!updateJobExecutionStatusRejectedHandler@{updateJobExecutionStatusRejectedHandler}}
+\index{updateJobExecutionStatusRejectedHandler@{updateJobExecutionStatusRejectedHandler}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{updateJobExecutionStatusRejectedHandler()}{updateJobExecutionStatusRejectedHandler()}}
+{\footnotesize\ttfamily void Jobs\+Feature\+::update\+Job\+Execution\+Status\+Rejected\+Handler (\begin{DoxyParamCaption}\item[{Iotjobs\+::\+Rejected\+Error $\ast$}]{rejected\+Error,  }\item[{int}]{io\+Error }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+A handler function called by the C\+RT S\+DK when our request to update a job execution status is rejected 
+\begin{DoxyParams}{Parameters}
+{\em response} & information used to determine which job execution was updated \\
+\hline
+{\em io\+Error} & a non-\/zero error code indicates a problem \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a7cb8aaf7a89223ff69bfa6752f35d7b3}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a7cb8aaf7a89223ff69bfa6752f35d7b3}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!JOB\_ATTR\_PATH@{JOB\_ATTR\_PATH}}
+\index{JOB\_ATTR\_PATH@{JOB\_ATTR\_PATH}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{JOB\_ATTR\_PATH}{JOB\_ATTR\_PATH}}
+{\footnotesize\ttfamily const char$\ast$ Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Jobs\+Feature\+::\+J\+O\+B\+\_\+\+A\+T\+T\+R\+\_\+\+P\+A\+TH = \char`\"{}path\char`\"{}\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+A field within a Job document that the Jobs feature uses to determine the location of the executable that should be run to handle this job. 
+
+If the path attribute is specified as \char`\"{}default\char`\"{}, the Jobs feature will attempt to find the executable in the path configured via the configuration file or command line arguments. Otherwise, the Jobs feature will assume that the \$\+P\+A\+TH contains the executable \mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a3f0629514f8a97930ded3e64aae5f952}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_jobs_feature_a3f0629514f8a97930ded3e64aae5f952}} 
+\index{Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}!MAX\_STATUS\_DETAIL\_LENGTH@{MAX\_STATUS\_DETAIL\_LENGTH}}
+\index{MAX\_STATUS\_DETAIL\_LENGTH@{MAX\_STATUS\_DETAIL\_LENGTH}!Aws::Iot::DeviceClient::Jobs::JobsFeature@{Aws::Iot::DeviceClient::Jobs::JobsFeature}}
+\doxysubsubsection{\texorpdfstring{MAX\_STATUS\_DETAIL\_LENGTH}{MAX\_STATUS\_DETAIL\_LENGTH}}
+{\footnotesize\ttfamily const size\+\_\+t Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Jobs\+Feature\+::\+M\+A\+X\+\_\+\+S\+T\+A\+T\+U\+S\+\_\+\+D\+E\+T\+A\+I\+L\+\_\+\+L\+E\+N\+G\+TH = 1024\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+The default directory that the Jobs feature will use to find executables matching an incoming job document\textquotesingle{}s operation attribute. 
+
+A limit enforced by the A\+WS IoT Jobs A\+PI on the maximum number of characters allowed to be provided in a Status\+Detail entry when calling the Update\+Job\+Execution A\+PI 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/jobs/Jobs\+Feature.\+h\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/jobs/Jobs\+Feature.\+cpp\end{DoxyCompactItemize}

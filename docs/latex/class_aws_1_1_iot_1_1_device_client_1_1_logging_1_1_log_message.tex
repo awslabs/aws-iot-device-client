@@ -1,0 +1,103 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Logging\+::Log\+Message Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message}\index{Aws::Iot::DeviceClient::Logging::LogMessage@{Aws::Iot::DeviceClient::Logging::LogMessage}}
+
+
+Represents all data that a \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger}{Logger}} implementation requires to log data, including a Log\+Level, a tag indicating the source of the log message, a time when the message was generated, and the associated message.  
+
+
+
+
+{\ttfamily \#include $<$Log\+Message.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_abdaf457e13704aa4afa4047c5aa55865}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_abdaf457e13704aa4afa4047c5aa55865}} 
+{\bfseries Log\+Message} (Log\+Level \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_a088cb79700c2bdaee0f2855963dead08}{level}}, std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_a751caf3538bd2d0c4c5ba8b2a160699c}{tag}}, std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_ac527ebc5e1b1292741d830c1e5096cb9}{time}}, std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_aef2c076d9c6cdf6890b71a63e4e02fc8}{message}})
+\item 
+Log\+Level \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_aca1e4e5b8ff937fd35745716f7d62bc8}{get\+Level}} ()
+\begin{DoxyCompactList}\small\item\em Returns the Log\+Level of the message. \end{DoxyCompactList}\item 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_a32d0716b00cdd136e490e09ac05787a2}{get\+Tag}} ()
+\begin{DoxyCompactList}\small\item\em Returns the message tag. \end{DoxyCompactList}\item 
+std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_adaa5edba4e124584c6fe597ed76f90b1}{get\+Time}} ()
+\begin{DoxyCompactList}\small\item\em Returns the time that the message was generated. \end{DoxyCompactList}\item 
+std\+::string \& \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_af02a48506f5eb6e4023666d2d6f8a280}{get\+Message}} ()
+\begin{DoxyCompactList}\small\item\em Returns the log message. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_a088cb79700c2bdaee0f2855963dead08}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_a088cb79700c2bdaee0f2855963dead08}} 
+Log\+Level \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_a088cb79700c2bdaee0f2855963dead08}{level}}
+\begin{DoxyCompactList}\small\item\em The Log\+Level \mbox{[}D\+E\+B\+UG, I\+N\+FO, W\+A\+RN, E\+R\+R\+OR\mbox{]}. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_a751caf3538bd2d0c4c5ba8b2a160699c}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_a751caf3538bd2d0c4c5ba8b2a160699c}} 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_a751caf3538bd2d0c4c5ba8b2a160699c}{tag}}
+\begin{DoxyCompactList}\small\item\em A tag used to indicate the source of the log message. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_ac527ebc5e1b1292741d830c1e5096cb9}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_ac527ebc5e1b1292741d830c1e5096cb9}} 
+std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_ac527ebc5e1b1292741d830c1e5096cb9}{time}}
+\begin{DoxyCompactList}\small\item\em The time that the message was logged. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_aef2c076d9c6cdf6890b71a63e4e02fc8}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_aef2c076d9c6cdf6890b71a63e4e02fc8}} 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_aef2c076d9c6cdf6890b71a63e4e02fc8}{message}}
+\begin{DoxyCompactList}\small\item\em The message to be logged. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Represents all data that a \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger}{Logger}} implementation requires to log data, including a Log\+Level, a tag indicating the source of the log message, a time when the message was generated, and the associated message. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_aca1e4e5b8ff937fd35745716f7d62bc8}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_aca1e4e5b8ff937fd35745716f7d62bc8}} 
+\index{Aws::Iot::DeviceClient::Logging::LogMessage@{Aws::Iot::DeviceClient::Logging::LogMessage}!getLevel@{getLevel}}
+\index{getLevel@{getLevel}!Aws::Iot::DeviceClient::Logging::LogMessage@{Aws::Iot::DeviceClient::Logging::LogMessage}}
+\doxysubsubsection{\texorpdfstring{getLevel()}{getLevel()}}
+{\footnotesize\ttfamily Log\+Level Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+Log\+Message\+::get\+Level (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Returns the Log\+Level of the message. 
+
+\begin{DoxyReturn}{Returns}
+the desired Log\+Level o fthe message 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_af02a48506f5eb6e4023666d2d6f8a280}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_af02a48506f5eb6e4023666d2d6f8a280}} 
+\index{Aws::Iot::DeviceClient::Logging::LogMessage@{Aws::Iot::DeviceClient::Logging::LogMessage}!getMessage@{getMessage}}
+\index{getMessage@{getMessage}!Aws::Iot::DeviceClient::Logging::LogMessage@{Aws::Iot::DeviceClient::Logging::LogMessage}}
+\doxysubsubsection{\texorpdfstring{getMessage()}{getMessage()}}
+{\footnotesize\ttfamily std\+::string\& Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+Log\+Message\+::get\+Message (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Returns the log message. 
+
+\begin{DoxyReturn}{Returns}
+the log message 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_a32d0716b00cdd136e490e09ac05787a2}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_a32d0716b00cdd136e490e09ac05787a2}} 
+\index{Aws::Iot::DeviceClient::Logging::LogMessage@{Aws::Iot::DeviceClient::Logging::LogMessage}!getTag@{getTag}}
+\index{getTag@{getTag}!Aws::Iot::DeviceClient::Logging::LogMessage@{Aws::Iot::DeviceClient::Logging::LogMessage}}
+\doxysubsubsection{\texorpdfstring{getTag()}{getTag()}}
+{\footnotesize\ttfamily std\+::string Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+Log\+Message\+::get\+Tag (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Returns the message tag. 
+
+\begin{DoxyReturn}{Returns}
+the message tag 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_adaa5edba4e124584c6fe597ed76f90b1}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message_adaa5edba4e124584c6fe597ed76f90b1}} 
+\index{Aws::Iot::DeviceClient::Logging::LogMessage@{Aws::Iot::DeviceClient::Logging::LogMessage}!getTime@{getTime}}
+\index{getTime@{getTime}!Aws::Iot::DeviceClient::Logging::LogMessage@{Aws::Iot::DeviceClient::Logging::LogMessage}}
+\doxysubsubsection{\texorpdfstring{getTime()}{getTime()}}
+{\footnotesize\ttfamily std\+::chrono\+::time\+\_\+point$<$std\+::chrono\+::system\+\_\+clock$>$ Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+Log\+Message\+::get\+Time (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Returns the time that the message was generated. 
+
+\begin{DoxyReturn}{Returns}
+the time that the message was generated 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/logging/Log\+Message.\+h\end{DoxyCompactItemize}

@@ -1,0 +1,205 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Secure\+Tunneling\+::Secure\+Tunneling\+Context Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context}\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext}}
+
+
+A class that represents a secure tunnel and local T\+CP port forward pair. The class also implements all the callbacks required for secure tunneling and local T\+CP port forward.  
+
+
+
+
+{\ttfamily \#include $<$Secure\+Tunneling\+Context.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a7619ca8a373c28c33a59615f69d6a2fc}{Secure\+Tunneling\+Context}} (std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$ manager, const std\+::string \&root\+Ca, const std\+::string \&access\+Token, const std\+::string \&endpoint, uint16\+\_\+t port, On\+Connection\+Shutdown\+Fn on\+Connection\+Shutdown)
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_aa416f61064dda593184cedd86e16acbe}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_aa416f61064dda593184cedd86e16acbe}} 
+\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_aa416f61064dda593184cedd86e16acbe}{$\sim$\+Secure\+Tunneling\+Context}} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a2903abce816d29356985d7a37cde728e}{Is\+Duplicate\+Notification}} (const Aws\+::\+Iotsecuretunneling\+::\+Secure\+Tunneling\+Notify\+Response \&response)
+\begin{DoxyCompactList}\small\item\em Check to see if we have seen and processed the given M\+Q\+TT notification. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a521c773c7019dc456922500627d241e8}{Connect\+To\+Secure\+Tunnel}} ()
+\begin{DoxyCompactList}\small\item\em Connect to a secure tunnel. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a52c98c3f5cb3e81e8dabbc35dbf19f76}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a52c98c3f5cb3e81e8dabbc35dbf19f76}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a52c98c3f5cb3e81e8dabbc35dbf19f76}{Connect\+To\+Tcp\+Forward}} ()
+\begin{DoxyCompactList}\small\item\em Connect to local T\+CP forward. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_ad97af549a42effe5815a34e95a18ec24}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_ad97af549a42effe5815a34e95a18ec24}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_ad97af549a42effe5815a34e95a18ec24}{Disconnect\+From\+Tcp\+Forward}} ()
+\begin{DoxyCompactList}\small\item\em Disconnect from local T\+CP forward. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a394e303d5f6111f8ad94c040bfd35be9}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a394e303d5f6111f8ad94c040bfd35be9}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a394e303d5f6111f8ad94c040bfd35be9}{On\+Connection\+Complete}} ()
+\begin{DoxyCompactList}\small\item\em Callback when secure tunnel connection is complete. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a5b1f07f8a5b26e4f698430589ce4b6c4}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a5b1f07f8a5b26e4f698430589ce4b6c4}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a5b1f07f8a5b26e4f698430589ce4b6c4}{On\+Connection\+Shutdown}} ()
+\begin{DoxyCompactList}\small\item\em Callback when secure tunnel connection is shutdown. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_ae65a8bbb27479f1310a708f354c35b9d}{On\+Send\+Data\+Complete}} (int error\+Code)
+\begin{DoxyCompactList}\small\item\em Callback when data send to secure tunnel is complete. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a778a6fd8e30ec1c14d4b57443acdb5ac}{On\+Data\+Receive}} (const Crt\+::\+Byte\+Buf \&data)
+\begin{DoxyCompactList}\small\item\em Callback when data is received from secure tunnel. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a35943770e783bc406b867dc951c107a2}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a35943770e783bc406b867dc951c107a2}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a35943770e783bc406b867dc951c107a2}{On\+Stream\+Start}} ()
+\begin{DoxyCompactList}\small\item\em Callback when secure tunnel stream\+\_\+start is received. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a3900c7ed3eeaa110d440d3b7763c07ac}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a3900c7ed3eeaa110d440d3b7763c07ac}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a3900c7ed3eeaa110d440d3b7763c07ac}{On\+Stream\+Reset}} ()
+\begin{DoxyCompactList}\small\item\em Callback when secure tunnel stream\+\_\+reset is received. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a3863d150eee150129127e0639286907d}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a3863d150eee150129127e0639286907d}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a3863d150eee150129127e0639286907d}{On\+Session\+Reset}} ()
+\begin{DoxyCompactList}\small\item\em Callback when secure tunnel session\+\_\+reset is received. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a72d579a67fd19f1462a15cee8033de73}{On\+Tcp\+Forward\+Data\+Receive}} (const Crt\+::\+Byte\+Buf \&data)
+\begin{DoxyCompactList}\small\item\em Callback when data is received from the local T\+CP port. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a7b2b3ec32fadb243eefdf40f55c9dcbf}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a7b2b3ec32fadb243eefdf40f55c9dcbf}} 
+std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a7b2b3ec32fadb243eefdf40f55c9dcbf}{m\+Shared\+Crt\+Resource\+Manager}}
+\begin{DoxyCompactList}\small\item\em The resource manager used to manage C\+RT resources. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_abe29a269fb28c92b4703ac2ca7e585af}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_abe29a269fb28c92b4703ac2ca7e585af}} 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_abe29a269fb28c92b4703ac2ca7e585af}{m\+Root\+Ca}}
+\begin{DoxyCompactList}\small\item\em Path to the Amazon root CA. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a6fddc24c6add770d088741a75f0ea91f}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a6fddc24c6add770d088741a75f0ea91f}} 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a6fddc24c6add770d088741a75f0ea91f}{m\+Access\+Token}}
+\begin{DoxyCompactList}\small\item\em Destination access token. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_aa07933f466bffedac5718eb90961691a}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_aa07933f466bffedac5718eb90961691a}} 
+std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_aa07933f466bffedac5718eb90961691a}{m\+Endpoint}}
+\begin{DoxyCompactList}\small\item\em Secure Tunneling data plain endpoint. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_ae87a537fedeb6aef41ba8f7352fc2a86}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_ae87a537fedeb6aef41ba8f7352fc2a86}} 
+uint16\+\_\+t \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_ae87a537fedeb6aef41ba8f7352fc2a86}{m\+Port}} \{22\}
+\begin{DoxyCompactList}\small\item\em The local T\+CP port to connect to. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a6e2f845575d6e01a4dcf11585b79948a}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a6e2f845575d6e01a4dcf11585b79948a}} 
+On\+Connection\+Shutdown\+Fn \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a6e2f845575d6e01a4dcf11585b79948a}{m\+On\+Connection\+Shutdown}}
+\begin{DoxyCompactList}\small\item\em Callback when the secure tunnel is shutdown. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a4f4a7c085ff9a1f4d1c4df317e986823}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a4f4a7c085ff9a1f4d1c4df317e986823}} 
+std\+::unique\+\_\+ptr$<$ Aws\+::\+Iotsecuretunneling\+::\+Secure\+Tunnel $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a4f4a7c085ff9a1f4d1c4df317e986823}{m\+Secure\+Tunnel}}
+\begin{DoxyCompactList}\small\item\em An A\+WS IoT S\+DK Secure Tunnel object. It manages the secure tunnel. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a340b87ef9235822ac609a9ff62cd698d}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a340b87ef9235822ac609a9ff62cd698d}} 
+std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward}{Tcp\+Forward}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a340b87ef9235822ac609a9ff62cd698d}{m\+Tcp\+Forward}}
+\begin{DoxyCompactList}\small\item\em Manages local T\+CP port forward. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_abb811790d7df9ec7d079f0e99626e912}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_abb811790d7df9ec7d079f0e99626e912}} 
+Aws\+::\+Crt\+::\+Optional$<$ Aws\+::\+Iotsecuretunneling\+::\+Secure\+Tunneling\+Notify\+Response $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_abb811790d7df9ec7d079f0e99626e912}{m\+Last\+Seen\+Notify\+Response}}
+\begin{DoxyCompactList}\small\item\em Save the M\+Q\+TT new tunnel notification that results in the creation of this tunnel context. This is used to avoid creating duplicate tunnel contexts as A\+WS M\+Q\+TT Broker may send duplicate notifications. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a28cc91d533330283781464efe5ce72c8}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a28cc91d533330283781464efe5ce72c8}} 
+static constexpr char \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a28cc91d533330283781464efe5ce72c8}{T\+AG}} \mbox{[}$\,$\mbox{]} = \char`\"{}Secure\+Tunneling\+Context.\+cpp\char`\"{}
+\begin{DoxyCompactList}\small\item\em Used by the logger to specify that log messages are coming from this class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+A class that represents a secure tunnel and local T\+CP port forward pair. The class also implements all the callbacks required for secure tunneling and local T\+CP port forward. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a7619ca8a373c28c33a59615f69d6a2fc}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a7619ca8a373c28c33a59615f69d6a2fc}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext}!SecureTunnelingContext@{SecureTunnelingContext}}
+\index{SecureTunnelingContext@{SecureTunnelingContext}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext}}
+\doxysubsubsection{\texorpdfstring{SecureTunnelingContext()}{SecureTunnelingContext()}}
+{\footnotesize\ttfamily Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Context\+::\+Secure\+Tunneling\+Context (\begin{DoxyParamCaption}\item[{std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$}]{manager,  }\item[{const std\+::string \&}]{root\+Ca,  }\item[{const std\+::string \&}]{access\+Token,  }\item[{const std\+::string \&}]{endpoint,  }\item[{uint16\+\_\+t}]{port,  }\item[{On\+Connection\+Shutdown\+Fn}]{on\+Connection\+Shutdown }\end{DoxyParamCaption})}
+
+
+
+Constructor. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em manager} & the shared resource manager \\
+\hline
+{\em root\+Ca} & path to the Amazon root CA \\
+\hline
+{\em access\+Token} & destination access token for connecting to a secure tunnel \\
+\hline
+{\em endpoint} & secure tunneling data plain endpoint \\
+\hline
+{\em port} & the local T\+CP port to connect to \\
+\hline
+{\em on\+Connection\+Shutdown} & callback when the secure tunnel is shutdown \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a521c773c7019dc456922500627d241e8}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a521c773c7019dc456922500627d241e8}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext}!ConnectToSecureTunnel@{ConnectToSecureTunnel}}
+\index{ConnectToSecureTunnel@{ConnectToSecureTunnel}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext}}
+\doxysubsubsection{\texorpdfstring{ConnectToSecureTunnel()}{ConnectToSecureTunnel()}}
+{\footnotesize\ttfamily bool Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Context\+::\+Connect\+To\+Secure\+Tunnel (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Connect to a secure tunnel. 
+
+\begin{DoxyReturn}{Returns}
+True if successfully connected to the tunnel. False otherwise. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a2903abce816d29356985d7a37cde728e}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a2903abce816d29356985d7a37cde728e}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext}!IsDuplicateNotification@{IsDuplicateNotification}}
+\index{IsDuplicateNotification@{IsDuplicateNotification}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext}}
+\doxysubsubsection{\texorpdfstring{IsDuplicateNotification()}{IsDuplicateNotification()}}
+{\footnotesize\ttfamily bool Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Context\+::\+Is\+Duplicate\+Notification (\begin{DoxyParamCaption}\item[{const Aws\+::\+Iotsecuretunneling\+::\+Secure\+Tunneling\+Notify\+Response \&}]{response }\end{DoxyParamCaption})}
+
+
+
+Check to see if we have seen and processed the given M\+Q\+TT notification. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em response} & M\+Q\+TT notification \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the given M\+Q\+TT notification is a duplication. False otherwise. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a778a6fd8e30ec1c14d4b57443acdb5ac}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a778a6fd8e30ec1c14d4b57443acdb5ac}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext}!OnDataReceive@{OnDataReceive}}
+\index{OnDataReceive@{OnDataReceive}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext}}
+\doxysubsubsection{\texorpdfstring{OnDataReceive()}{OnDataReceive()}}
+{\footnotesize\ttfamily void Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Context\+::\+On\+Data\+Receive (\begin{DoxyParamCaption}\item[{const Crt\+::\+Byte\+Buf \&}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Callback when data is received from secure tunnel. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & data received from the secure tunnel \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_ae65a8bbb27479f1310a708f354c35b9d}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_ae65a8bbb27479f1310a708f354c35b9d}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext}!OnSendDataComplete@{OnSendDataComplete}}
+\index{OnSendDataComplete@{OnSendDataComplete}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext}}
+\doxysubsubsection{\texorpdfstring{OnSendDataComplete()}{OnSendDataComplete()}}
+{\footnotesize\ttfamily void Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Context\+::\+On\+Send\+Data\+Complete (\begin{DoxyParamCaption}\item[{int}]{error\+Code }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Callback when data send to secure tunnel is complete. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em error\+Code} & error code \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a72d579a67fd19f1462a15cee8033de73}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_secure_tunneling_context_a72d579a67fd19f1462a15cee8033de73}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext}!OnTcpForwardDataReceive@{OnTcpForwardDataReceive}}
+\index{OnTcpForwardDataReceive@{OnTcpForwardDataReceive}!Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext@{Aws::Iot::DeviceClient::SecureTunneling::SecureTunnelingContext}}
+\doxysubsubsection{\texorpdfstring{OnTcpForwardDataReceive()}{OnTcpForwardDataReceive()}}
+{\footnotesize\ttfamily void Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Secure\+Tunneling\+Context\+::\+On\+Tcp\+Forward\+Data\+Receive (\begin{DoxyParamCaption}\item[{const Crt\+::\+Byte\+Buf \&}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Callback when data is received from the local T\+CP port. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & data received from the local T\+CP port \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/tunneling/Secure\+Tunneling\+Context.\+h\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/tunneling/Secure\+Tunneling\+Context.\+cpp\end{DoxyCompactItemize}

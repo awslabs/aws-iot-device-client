@@ -1,0 +1,100 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Logging\+::Log\+Queue Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}\index{Aws::Iot::DeviceClient::Logging::LogQueue@{Aws::Iot::DeviceClient::Logging::LogQueue}}
+
+
+A thread-\/safe queue used by our \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger}{Logger}} implementations to queue incoming messages from multiple threads and process them in order.  
+
+
+
+
+{\ttfamily \#include $<$Log\+Queue.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_aaa3cf9fd1a81682f9e9a44bbce487308}{add\+Log}} (std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message}{Log\+Message}} $>$ log)
+\begin{DoxyCompactList}\small\item\em Adds a single log to the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}}. \end{DoxyCompactList}\item 
+std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message}{Log\+Message}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a0db76ccf436b508b17d82fccaff63eb4}{get\+Next\+Log}} ()
+\begin{DoxyCompactList}\small\item\em Gets the next log message. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a400cd1c4ec72d56c544d32a49be15012}{has\+Next\+Log}} ()
+\begin{DoxyCompactList}\small\item\em Determine whether the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} has a message available. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a09549fcdba5c73d9005909e24060affe}{shutdown}} ()
+\begin{DoxyCompactList}\small\item\em Force all consumers to stop waiting so that they can flush the queue and end any waiting behavior that might prevent the thread from shutting down. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a19081d3bfe573cc7c339c94af0191f9b}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a19081d3bfe573cc7c339c94af0191f9b}} 
+bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a19081d3bfe573cc7c339c94af0191f9b}{is\+Shutdown}} = false
+\begin{DoxyCompactList}\small\item\em Whether the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} has been shutdown or not. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a66d900c666ee229611c0d93c14068a54}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a66d900c666ee229611c0d93c14068a54}} 
+std\+::mutex \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a66d900c666ee229611c0d93c14068a54}{queue\+Lock}}
+\begin{DoxyCompactList}\small\item\em a Mutex used to control multi-\/threaded access to the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a6dc1a27976cb58c747c1af33a12c28a4}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a6dc1a27976cb58c747c1af33a12c28a4}} 
+std\+::condition\+\_\+variable \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a6dc1a27976cb58c747c1af33a12c28a4}{new\+Log\+Notifier}}
+\begin{DoxyCompactList}\small\item\em Used to wake up waiting threads when new data arrives, or when the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} has shut down. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a239a0702bd5e299187454d3c6687b5fa}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a239a0702bd5e299187454d3c6687b5fa}} 
+std\+::deque$<$ std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message}{Log\+Message}} $>$ $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a239a0702bd5e299187454d3c6687b5fa}{log\+Queue}}
+\begin{DoxyCompactList}\small\item\em Responsible for queuing the Log\+Messages upon arrival for processing. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+A thread-\/safe queue used by our \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger}{Logger}} implementations to queue incoming messages from multiple threads and process them in order. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_aaa3cf9fd1a81682f9e9a44bbce487308}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_aaa3cf9fd1a81682f9e9a44bbce487308}} 
+\index{Aws::Iot::DeviceClient::Logging::LogQueue@{Aws::Iot::DeviceClient::Logging::LogQueue}!addLog@{addLog}}
+\index{addLog@{addLog}!Aws::Iot::DeviceClient::Logging::LogQueue@{Aws::Iot::DeviceClient::Logging::LogQueue}}
+\doxysubsubsection{\texorpdfstring{addLog()}{addLog()}}
+{\footnotesize\ttfamily void Log\+Queue\+::add\+Log (\begin{DoxyParamCaption}\item[{std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message}{Log\+Message}} $>$}]{log }\end{DoxyParamCaption})}
+
+
+
+Adds a single log to the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em log} & the log to add to the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a0db76ccf436b508b17d82fccaff63eb4}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a0db76ccf436b508b17d82fccaff63eb4}} 
+\index{Aws::Iot::DeviceClient::Logging::LogQueue@{Aws::Iot::DeviceClient::Logging::LogQueue}!getNextLog@{getNextLog}}
+\index{getNextLog@{getNextLog}!Aws::Iot::DeviceClient::Logging::LogQueue@{Aws::Iot::DeviceClient::Logging::LogQueue}}
+\doxysubsubsection{\texorpdfstring{getNextLog()}{getNextLog()}}
+{\footnotesize\ttfamily std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message}{Log\+Message}} $>$ Log\+Queue\+::get\+Next\+Log (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Gets the next log message. 
+
+\begin{DoxyReturn}{Returns}
+the next log message in the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a400cd1c4ec72d56c544d32a49be15012}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a400cd1c4ec72d56c544d32a49be15012}} 
+\index{Aws::Iot::DeviceClient::Logging::LogQueue@{Aws::Iot::DeviceClient::Logging::LogQueue}!hasNextLog@{hasNextLog}}
+\index{hasNextLog@{hasNextLog}!Aws::Iot::DeviceClient::Logging::LogQueue@{Aws::Iot::DeviceClient::Logging::LogQueue}}
+\doxysubsubsection{\texorpdfstring{hasNextLog()}{hasNextLog()}}
+{\footnotesize\ttfamily bool Log\+Queue\+::has\+Next\+Log (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Determine whether the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} has a message available. 
+
+\begin{DoxyReturn}{Returns}
+true if there is a message present, false otherwise 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a09549fcdba5c73d9005909e24060affe}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a09549fcdba5c73d9005909e24060affe}} 
+\index{Aws::Iot::DeviceClient::Logging::LogQueue@{Aws::Iot::DeviceClient::Logging::LogQueue}!shutdown@{shutdown}}
+\index{shutdown@{shutdown}!Aws::Iot::DeviceClient::Logging::LogQueue@{Aws::Iot::DeviceClient::Logging::LogQueue}}
+\doxysubsubsection{\texorpdfstring{shutdown()}{shutdown()}}
+{\footnotesize\ttfamily void Log\+Queue\+::shutdown (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Force all consumers to stop waiting so that they can flush the queue and end any waiting behavior that might prevent the thread from shutting down. 
+
+This function essentially shuts off any of the \textquotesingle{}waiting\textquotesingle{} behavior when it comes to getting the next message in the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}}. It will force the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue_a0db76ccf436b508b17d82fccaff63eb4}{get\+Next\+Log()}} method to return whether there is a log message or not 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/logging/Log\+Queue.\+h\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/logging/Log\+Queue.\+cpp\end{DoxyCompactItemize}

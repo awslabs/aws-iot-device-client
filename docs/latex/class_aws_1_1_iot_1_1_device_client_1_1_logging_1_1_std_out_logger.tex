@@ -1,0 +1,190 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Logging\+::Std\+Out\+Logger Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger}\index{Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}}
+
+
+Logging implementation that writes log messages directly to S\+T\+D\+O\+UT.  
+
+
+
+
+{\ttfamily \#include $<$Std\+Out\+Logger.\+h$>$}
+
+Inheritance diagram for Aws\+::Iot\+::Device\+Client\+::Logging\+::Std\+Out\+Logger\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_aa27086cd009717d85b957ef1740b14e9}{start}} (const \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_plain_config}{Plain\+Config}} \&config) override
+\begin{DoxyCompactList}\small\item\em Starts the underlying logger implementation\textquotesingle{}s logging behavior. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a1bf5765608b8109129488fe2bfa8616c}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a1bf5765608b8109129488fe2bfa8616c}} 
+virtual void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a1bf5765608b8109129488fe2bfa8616c}{stop}} () override
+\begin{DoxyCompactList}\small\item\em Attempts to stop the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger}{Logger}} implementation from writing any additional log messages, likely to switch to a different logger implementation. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_ae0e55f2d2a1ce818ddb4ed14c293051f}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_ae0e55f2d2a1ce818ddb4ed14c293051f}} 
+virtual void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_ae0e55f2d2a1ce818ddb4ed14c293051f}{shutdown}} () override
+\begin{DoxyCompactList}\small\item\em Notifies the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger}{Logger}} implementation that any queued logs should be dumped to output and the logger should shut itself down. \end{DoxyCompactList}\item 
+virtual std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_acff57144a637686b21f27aa0da9628a2}{take\+Log\+Queue}} () override
+\begin{DoxyCompactList}\small\item\em Removes the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} from the logger implementation so it can be passed to another logger implementation for processing. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_aa35c525dc9aa3fef0f1f244781d304ea}{set\+Log\+Queue}} (std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a0c39b3bc0fa3164c5efc793fa54c58eb}{log\+Queue}}) override
+\begin{DoxyCompactList}\small\item\em Passes a \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} to the logger implementation. Typically used if the logger implementation is being changed. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a27610c8adc232399266ef8c8f09eb46b}{flush}} () override
+\begin{DoxyCompactList}\small\item\em Flush the log output from the queue synchronously. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a829dd9d573157d3cbc6865b38572dd85}{queue\+Log}} (Log\+Level level, const char $\ast$tag, std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$ t, std\+::string message) override
+\begin{DoxyCompactList}\small\item\em Implemented by the underlying logger implementation to pass responsibility for managing the log message from the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger}{Logger}} interface to the logger implementation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a8b7972522f4c1e399f9f8448da5703f5}{run}} ()
+\begin{DoxyCompactList}\small\item\em Begins processing of log messages in the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}}. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a795accad8a751b0f94341bb1b3325121}{write\+Log\+Message}} (std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message}{Log\+Message}} $>$ message)
+\begin{DoxyCompactList}\small\item\em Write the log message to standard output. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a4e526296245920334c21e20e5cad0d75}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a4e526296245920334c21e20e5cad0d75}} 
+bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a4e526296245920334c21e20e5cad0d75}{needs\+Shutdown}} = false
+\begin{DoxyCompactList}\small\item\em Flag used to notify underlying threads that they should discontinue any processing so that the application can safely shutdown. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a0c39b3bc0fa3164c5efc793fa54c58eb}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a0c39b3bc0fa3164c5efc793fa54c58eb}} 
+std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a0c39b3bc0fa3164c5efc793fa54c58eb}{log\+Queue}} = std\+::unique\+\_\+ptr$<$\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}}$>$(new \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}})
+\begin{DoxyCompactList}\small\item\em a \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} instance used to queue incoming log messages for processing \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Detailed Description}
+Logging implementation that writes log messages directly to S\+T\+D\+O\+UT. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a27610c8adc232399266ef8c8f09eb46b}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a27610c8adc232399266ef8c8f09eb46b}} 
+\index{Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}!flush@{flush}}
+\index{flush@{flush}!Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}}
+\doxysubsubsection{\texorpdfstring{flush()}{flush()}}
+{\footnotesize\ttfamily void Std\+Out\+Logger\+::flush (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Flush the log output from the queue synchronously. 
+
+This is helpful for scenarios where you need to ensure that the logs are written to disk before any other activity takes place. Note that this will not block other threads, only the thread that this is called from 
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger_a4743383e9c69bec10ba970dc4394781e}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+Logger}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a829dd9d573157d3cbc6865b38572dd85}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a829dd9d573157d3cbc6865b38572dd85}} 
+\index{Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}!queueLog@{queueLog}}
+\index{queueLog@{queueLog}!Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}}
+\doxysubsubsection{\texorpdfstring{queueLog()}{queueLog()}}
+{\footnotesize\ttfamily void Std\+Out\+Logger\+::queue\+Log (\begin{DoxyParamCaption}\item[{Log\+Level}]{level,  }\item[{const char $\ast$}]{tag,  }\item[{std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$}]{t,  }\item[{std\+::string}]{message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+Implemented by the underlying logger implementation to pass responsibility for managing the log message from the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger}{Logger}} interface to the logger implementation. 
+
+This virtual method should be implemented by the underlying logger implementation to actually accept and eventually process the incoming log message. To reduce complications induced by multithreading, the underlying logger implementation should queue the message for processing by another thread if possible. 
+\begin{DoxyParams}{Parameters}
+{\em level} & the log level \\
+\hline
+{\em tag} & a tag that indicates where the log message is coming from \\
+\hline
+{\em t} & a timestamp representing the time the message was created \\
+\hline
+{\em message} & the message to log \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger_a75acdae576e13ddd84bccb70d8fb1fef}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+Logger}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a8b7972522f4c1e399f9f8448da5703f5}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a8b7972522f4c1e399f9f8448da5703f5}} 
+\index{Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}!run@{run}}
+\index{run@{run}!Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}}
+\doxysubsubsection{\texorpdfstring{run()}{run()}}
+{\footnotesize\ttfamily void Std\+Out\+Logger\+::run (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Begins processing of log messages in the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}}. 
+
+This method will begin processing of log messages in the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}}. The thread will process until all of the messages are removed from the queue, and then will wait until new messages arrive in the queue. This method will check to make sure the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_ae0e55f2d2a1ce818ddb4ed14c293051f}{shutdown()}} method has not been called before processing any additional messages in the queue. \mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_aa35c525dc9aa3fef0f1f244781d304ea}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_aa35c525dc9aa3fef0f1f244781d304ea}} 
+\index{Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}!setLogQueue@{setLogQueue}}
+\index{setLogQueue@{setLogQueue}!Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}}
+\doxysubsubsection{\texorpdfstring{setLogQueue()}{setLogQueue()}}
+{\footnotesize\ttfamily void Std\+Out\+Logger\+::set\+Log\+Queue (\begin{DoxyParamCaption}\item[{std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} $>$}]{log\+Queue }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Passes a \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} to the logger implementation. Typically used if the logger implementation is being changed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em log\+Queue} & \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger_a6b80ca4200fbc58bb2994ef4319ea822}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+Logger}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_aa27086cd009717d85b957ef1740b14e9}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_aa27086cd009717d85b957ef1740b14e9}} 
+\index{Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}!start@{start}}
+\index{start@{start}!Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}}
+\doxysubsubsection{\texorpdfstring{start()}{start()}}
+{\footnotesize\ttfamily bool Std\+Out\+Logger\+::start (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{struct_aws_1_1_iot_1_1_device_client_1_1_plain_config}{Plain\+Config}} \&}]{config }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Starts the underlying logger implementation\textquotesingle{}s logging behavior. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & the config data passed in from the C\+LI and J\+S\+ON \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if it is able to start successfully, false otherwise 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger_ad42e38afcd7402f5dc1213b2f0b96961}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+Logger}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_acff57144a637686b21f27aa0da9628a2}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_acff57144a637686b21f27aa0da9628a2}} 
+\index{Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}!takeLogQueue@{takeLogQueue}}
+\index{takeLogQueue@{takeLogQueue}!Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}}
+\doxysubsubsection{\texorpdfstring{takeLogQueue()}{takeLogQueue()}}
+{\footnotesize\ttfamily unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} $>$ Std\+Out\+Logger\+::take\+Log\+Queue (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Removes the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_queue}{Log\+Queue}} from the logger implementation so it can be passed to another logger implementation for processing. 
+
+\begin{DoxyReturn}{Returns}
+a unique\+\_\+ptr$<$\+Log\+Queue$>$ 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_logger_a39f3326be17f9ed4b1385f057134774d}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Logging\+::\+Logger}}.
+
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a795accad8a751b0f94341bb1b3325121}\label{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_std_out_logger_a795accad8a751b0f94341bb1b3325121}} 
+\index{Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}!writeLogMessage@{writeLogMessage}}
+\index{writeLogMessage@{writeLogMessage}!Aws::Iot::DeviceClient::Logging::StdOutLogger@{Aws::Iot::DeviceClient::Logging::StdOutLogger}}
+\doxysubsubsection{\texorpdfstring{writeLogMessage()}{writeLogMessage()}}
+{\footnotesize\ttfamily void Std\+Out\+Logger\+::write\+Log\+Message (\begin{DoxyParamCaption}\item[{std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_logging_1_1_log_message}{Log\+Message}} $>$}]{message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Write the log message to standard output. 
+
+This method will write the log message to the file specified for logging 
+\begin{DoxyParams}{Parameters}
+{\em message} & the message to log \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/logging/Std\+Out\+Logger.\+h\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/logging/Std\+Out\+Logger.\+cpp\end{DoxyCompactItemize}

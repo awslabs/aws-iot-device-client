@@ -1,0 +1,258 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Util\+::File\+Utils Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils}\index{Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}}
+
+
+Utility functions for operations related to files.  
+
+
+
+
+{\ttfamily \#include $<$File\+Utils.\+h$>$}
+
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_acec1cd53ec38fcb34606141443dec4fe}{Mkdirs}} (const std\+::string \&path)
+\begin{DoxyCompactList}\small\item\em Creates each of the directories in the provided path if they do not exist. \end{DoxyCompactList}\item 
+static std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a137435480bde485798fe38cb63ae6b0d}{Extract\+Parent\+Directory}} (const std\+::string \&file\+Path)
+\begin{DoxyCompactList}\small\item\em Given a path to a file, attempts to extract the parent directory. \end{DoxyCompactList}\item 
+static std\+::string \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_ae1e32f8a3f157e2753c5eba96e7e3cd4}{Extract\+Expanded\+Path}} (const std\+::string \&file\+Path)
+\begin{DoxyCompactList}\small\item\em Given a path to a file, attempts to extract the absolute path. \end{DoxyCompactList}\item 
+static bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a61556e62cd69ac493b7515d454927818}{Store\+Value\+In\+File}} (std\+::string value, std\+::string file\+Path)
+\begin{DoxyCompactList}\small\item\em Stores string value in given file. \end{DoxyCompactList}\item 
+static int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a19750e263a09c001b4d403ebcfee3472}{Get\+File\+Permissions}} (const std\+::string \&path)
+\begin{DoxyCompactList}\small\item\em Returns an integer representing the permissions of the specified file. \end{DoxyCompactList}\item 
+static bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_ab96cf791fb6c6093216c111d7d095ee9}{Validate\+File\+Ownership\+Permissions}} (const std\+::string \&path)
+\begin{DoxyCompactList}\small\item\em Validates ownership permissions on the given file/dir. \end{DoxyCompactList}\item 
+static bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a9ea83b4248bea73525919cca6bb8c39d}{Validate\+File\+Permissions}} (const std\+::string \&path, const int file\+Permissions, bool fatal\+Error=true)
+\begin{DoxyCompactList}\small\item\em Returns true if permissions set for given file/dir are correct. \end{DoxyCompactList}\item 
+static int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_af165bb643fa6c8aa0d6beace43275dcd}{Permissions\+Mask\+To\+Int}} (mode\+\_\+t mask)
+\item 
+static size\+\_\+t \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a8f59952c80127b314abba046876830c0}{Get\+File\+Size}} (const std\+::string \&file\+Path)
+\begin{DoxyCompactList}\small\item\em Returns the size of the file in bytes. \end{DoxyCompactList}\item 
+static bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a28fa5c453d546e54b07de465370b2b2e}{Create\+Directory\+With\+Permissions}} (const char $\ast$dir\+Path, mode\+\_\+t permissions)
+\item 
+static bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_af8008713194f85f0d601f41f1d59194d}{File\+Exists}} (const std\+::string \&filename)
+\begin{DoxyCompactList}\small\item\em Check if the given filename exists. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_acea40b3e18d2999c94926e029eff0959}\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_acea40b3e18d2999c94926e029eff0959}} 
+static constexpr char {\bfseries T\+AG} \mbox{[}$\,$\mbox{]} = \char`\"{}File\+Utils.\+cpp\char`\"{}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Utility functions for operations related to files. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a28fa5c453d546e54b07de465370b2b2e}\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a28fa5c453d546e54b07de465370b2b2e}} 
+\index{Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}!CreateDirectoryWithPermissions@{CreateDirectoryWithPermissions}}
+\index{CreateDirectoryWithPermissions@{CreateDirectoryWithPermissions}!Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}}
+\doxysubsubsection{\texorpdfstring{CreateDirectoryWithPermissions()}{CreateDirectoryWithPermissions()}}
+{\footnotesize\ttfamily bool File\+Utils\+::\+Create\+Directory\+With\+Permissions (\begin{DoxyParamCaption}\item[{const char $\ast$}]{dir\+Path,  }\item[{mode\+\_\+t}]{permissions }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Attempts to create the provided directory with the given permissions 
+\begin{DoxyParams}{Parameters}
+{\em dir\+Path} & the path to the directory \\
+\hline
+{\em permissions} & the permission mask that should be applied to the directory \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the directory was successfully created with the given permissions, false otherwise 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_ae1e32f8a3f157e2753c5eba96e7e3cd4}\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_ae1e32f8a3f157e2753c5eba96e7e3cd4}} 
+\index{Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}!ExtractExpandedPath@{ExtractExpandedPath}}
+\index{ExtractExpandedPath@{ExtractExpandedPath}!Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}}
+\doxysubsubsection{\texorpdfstring{ExtractExpandedPath()}{ExtractExpandedPath()}}
+{\footnotesize\ttfamily string File\+Utils\+::\+Extract\+Expanded\+Path (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{file\+Path }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Given a path to a file, attempts to extract the absolute path. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em file\+Path} & a path to a file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the expanded path of the file 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a137435480bde485798fe38cb63ae6b0d}\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a137435480bde485798fe38cb63ae6b0d}} 
+\index{Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}!ExtractParentDirectory@{ExtractParentDirectory}}
+\index{ExtractParentDirectory@{ExtractParentDirectory}!Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}}
+\doxysubsubsection{\texorpdfstring{ExtractParentDirectory()}{ExtractParentDirectory()}}
+{\footnotesize\ttfamily string File\+Utils\+::\+Extract\+Parent\+Directory (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{file\+Path }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Given a path to a file, attempts to extract the parent directory. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em file\+Path} & a path to a file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the parent directory of the file 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_af8008713194f85f0d601f41f1d59194d}\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_af8008713194f85f0d601f41f1d59194d}} 
+\index{Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}!FileExists@{FileExists}}
+\index{FileExists@{FileExists}!Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}}
+\doxysubsubsection{\texorpdfstring{FileExists()}{FileExists()}}
+{\footnotesize\ttfamily bool File\+Utils\+::\+File\+Exists (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{filename }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Check if the given filename exists. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em filename} & Filename to check \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the file exists. False otherwise. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a19750e263a09c001b4d403ebcfee3472}\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a19750e263a09c001b4d403ebcfee3472}} 
+\index{Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}!GetFilePermissions@{GetFilePermissions}}
+\index{GetFilePermissions@{GetFilePermissions}!Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}}
+\doxysubsubsection{\texorpdfstring{GetFilePermissions()}{GetFilePermissions()}}
+{\footnotesize\ttfamily int File\+Utils\+::\+Get\+File\+Permissions (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{path }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Returns an integer representing the permissions of the specified file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em file\+Path} & a path to a file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+an integer representing the file permissions. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a8f59952c80127b314abba046876830c0}\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a8f59952c80127b314abba046876830c0}} 
+\index{Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}!GetFileSize@{GetFileSize}}
+\index{GetFileSize@{GetFileSize}!Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}}
+\doxysubsubsection{\texorpdfstring{GetFileSize()}{GetFileSize()}}
+{\footnotesize\ttfamily size\+\_\+t File\+Utils\+::\+Get\+File\+Size (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{file\+Path }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Returns the size of the file in bytes. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em file\+Path} & the path to the file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the size of the file in bytes 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_acec1cd53ec38fcb34606141443dec4fe}\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_acec1cd53ec38fcb34606141443dec4fe}} 
+\index{Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}!Mkdirs@{Mkdirs}}
+\index{Mkdirs@{Mkdirs}!Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}}
+\doxysubsubsection{\texorpdfstring{Mkdirs()}{Mkdirs()}}
+{\footnotesize\ttfamily int File\+Utils\+::\+Mkdirs (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{path }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Creates each of the directories in the provided path if they do not exist. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & the full path to assess \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 upon success, some other number indicating an error otherwise 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_af165bb643fa6c8aa0d6beace43275dcd}\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_af165bb643fa6c8aa0d6beace43275dcd}} 
+\index{Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}!PermissionsMaskToInt@{PermissionsMaskToInt}}
+\index{PermissionsMaskToInt@{PermissionsMaskToInt}!Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}}
+\doxysubsubsection{\texorpdfstring{PermissionsMaskToInt()}{PermissionsMaskToInt()}}
+{\footnotesize\ttfamily int File\+Utils\+::\+Permissions\+Mask\+To\+Int (\begin{DoxyParamCaption}\item[{mode\+\_\+t}]{mask }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Converts a file permissions mask into a human readable format\+:
+
+This function will return a 3-\/digit integer representing the permissions set by the mask. Each digit in the returned value will range from 0-\/7. The first digit is user, the second digit is group, and the third digit is world (everyone). The digit is determined by adding the permissions found from the following categories\+:
+
+4 -\/ has read privileges 2 -\/ has write privileges 1 -\/ has execute privileges
+
+
+\begin{DoxyParams}{Parameters}
+{\em mask} & the permissions mask \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+an integer representing a human readable format of the permissions mask 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a61556e62cd69ac493b7515d454927818}\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a61556e62cd69ac493b7515d454927818}} 
+\index{Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}!StoreValueInFile@{StoreValueInFile}}
+\index{StoreValueInFile@{StoreValueInFile}!Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}}
+\doxysubsubsection{\texorpdfstring{StoreValueInFile()}{StoreValueInFile()}}
+{\footnotesize\ttfamily bool File\+Utils\+::\+Store\+Value\+In\+File (\begin{DoxyParamCaption}\item[{std\+::string}]{value,  }\item[{std\+::string}]{file\+Path }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Stores string value in given file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em value} & string value to be stored in given file \\
+\hline
+{\em file\+Path} & a path to a file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true on success 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_ab96cf791fb6c6093216c111d7d095ee9}\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_ab96cf791fb6c6093216c111d7d095ee9}} 
+\index{Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}!ValidateFileOwnershipPermissions@{ValidateFileOwnershipPermissions}}
+\index{ValidateFileOwnershipPermissions@{ValidateFileOwnershipPermissions}!Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}}
+\doxysubsubsection{\texorpdfstring{ValidateFileOwnershipPermissions()}{ValidateFileOwnershipPermissions()}}
+{\footnotesize\ttfamily bool File\+Utils\+::\+Validate\+File\+Ownership\+Permissions (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{path }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Validates ownership permissions on the given file/dir. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & a path to a file/dir \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+returns true if user have the ownership permissions to access given file/dir 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a9ea83b4248bea73525919cca6bb8c39d}\label{class_aws_1_1_iot_1_1_device_client_1_1_util_1_1_file_utils_a9ea83b4248bea73525919cca6bb8c39d}} 
+\index{Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}!ValidateFilePermissions@{ValidateFilePermissions}}
+\index{ValidateFilePermissions@{ValidateFilePermissions}!Aws::Iot::DeviceClient::Util::FileUtils@{Aws::Iot::DeviceClient::Util::FileUtils}}
+\doxysubsubsection{\texorpdfstring{ValidateFilePermissions()}{ValidateFilePermissions()}}
+{\footnotesize\ttfamily bool File\+Utils\+::\+Validate\+File\+Permissions (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{path,  }\item[{const int}]{file\+Permissions,  }\item[{bool}]{fatal\+Error = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Returns true if permissions set for given file/dir are correct. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & a path to a file/dir \\
+\hline
+{\em file\+Permissions} & correct permission for a given file \\
+\hline
+{\em fatal\+Error} & a boolean parameter to decide to log error message or warning message . Default value is true \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+an boolean value representing if permissions set on given file/dir are correct or not 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/util/File\+Utils.\+h\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/util/File\+Utils.\+cpp\end{DoxyCompactItemize}

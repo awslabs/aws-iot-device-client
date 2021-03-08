@@ -1,0 +1,75 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Jobs\+::Ephemeral\+Promise$<$ T $>$ Class Template Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise}\index{Aws::Iot::DeviceClient::Jobs::EphemeralPromise$<$ T $>$@{Aws::Iot::DeviceClient::Jobs::EphemeralPromise$<$ T $>$}}
+
+
+Provides the ability to specify a point of expiration for a promise.  
+
+
+
+
+{\ttfamily \#include $<$Ephemeral\+Promise.\+h$>$}
+
+Inheritance diagram for Aws\+::Iot\+::Device\+Client\+::Jobs\+::Ephemeral\+Promise$<$ T $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_a8dedc29ad89c996bafb0a7ea52941967}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_a8dedc29ad89c996bafb0a7ea52941967}} 
+{\bfseries Ephemeral\+Promise} (std\+::chrono\+::milliseconds \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_a3cd168edb7d7de52f978aa6b431ae8c0}{ttl\+Millis}})
+\item 
+bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_a4cdc9ca2aaf0aac6a397a1e2a9214c90}{is\+Expired}} () const
+\begin{DoxyCompactList}\small\item\em Whether the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise}{Ephemeral\+Promise}} is expired or not. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_aed6485529175850ccbd949dd6e9f2afe}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_aed6485529175850ccbd949dd6e9f2afe}} 
+\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_aed6485529175850ccbd949dd6e9f2afe}{Ephemeral\+Promise}} ()
+\begin{DoxyCompactList}\small\item\em The default constructor is hidden as private since it shouldn\textquotesingle{}t be used. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_a3cd168edb7d7de52f978aa6b431ae8c0}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_a3cd168edb7d7de52f978aa6b431ae8c0}} 
+std\+::chrono\+::milliseconds \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_a3cd168edb7d7de52f978aa6b431ae8c0}{ttl\+Millis}}
+\begin{DoxyCompactList}\small\item\em The time to live for this promise in milliseconds. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_a7c1a4893c3cae960fa8ed42279d93b73}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_a7c1a4893c3cae960fa8ed42279d93b73}} 
+std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_a7c1a4893c3cae960fa8ed42279d93b73}{creation\+Time}}
+\begin{DoxyCompactList}\small\item\em The time this promise was created. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$typename T$>$\newline
+class Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Ephemeral\+Promise$<$ T $>$}
+
+Provides the ability to specify a point of expiration for a promise. 
+
+This class allows you to specify a point of expiration for a promise indicating that the promise\textquotesingle{}s time of usefulness is expired. This is used in our std\+::map of Update\+Job\+Execution promises, in case we fail to erase a promise due to an exception or interruption of some kind. This way, we don\textquotesingle{}t leak the promises. 
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & \\
+\hline
+\end{DoxyTemplParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_a4cdc9ca2aaf0aac6a397a1e2a9214c90}\label{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise_a4cdc9ca2aaf0aac6a397a1e2a9214c90}} 
+\index{Aws::Iot::DeviceClient::Jobs::EphemeralPromise$<$ T $>$@{Aws::Iot::DeviceClient::Jobs::EphemeralPromise$<$ T $>$}!isExpired@{isExpired}}
+\index{isExpired@{isExpired}!Aws::Iot::DeviceClient::Jobs::EphemeralPromise$<$ T $>$@{Aws::Iot::DeviceClient::Jobs::EphemeralPromise$<$ T $>$}}
+\doxysubsubsection{\texorpdfstring{isExpired()}{isExpired()}}
+{\footnotesize\ttfamily template$<$typename T $>$ \\
+bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise}{Aws\+::\+Iot\+::\+Device\+Client\+::\+Jobs\+::\+Ephemeral\+Promise}}$<$ T $>$\+::is\+Expired (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Whether the \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_jobs_1_1_ephemeral_promise}{Ephemeral\+Promise}} is expired or not. 
+
+\begin{DoxyReturn}{Returns}
+true if expired, false otherwise 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/jobs/Ephemeral\+Promise.\+h\end{DoxyCompactItemize}

@@ -1,0 +1,130 @@
+\hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward}{}\doxysection{Aws\+::Iot\+::Device\+Client\+::Secure\+Tunneling\+::Tcp\+Forward Class Reference}
+\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward}\index{Aws::Iot::DeviceClient::SecureTunneling::TcpForward@{Aws::Iot::DeviceClient::SecureTunneling::TcpForward}}
+
+
+A class that represents a local T\+CP socket. It implements all callbacks required by using aws\+\_\+socket.  
+
+
+
+
+{\ttfamily \#include $<$Tcp\+Forward.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_ab7c56677f6f28b12223830a238bd9a17}{Tcp\+Forward}} (std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$ shared\+Crt\+Resource\+Manager, uint16\+\_\+t port, On\+Tcp\+Forward\+Data\+Receive on\+Tcp\+Forward\+Data\+Receive)
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a5c893165a638399f815c7889d66096f6}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a5c893165a638399f815c7889d66096f6}} 
+\mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a5c893165a638399f815c7889d66096f6}{$\sim$\+Tcp\+Forward}} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a13b963b1009718b84b79e7b2943792a5}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a13b963b1009718b84b79e7b2943792a5}} 
+int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a13b963b1009718b84b79e7b2943792a5}{Connect}} ()
+\begin{DoxyCompactList}\small\item\em Connect to the local T\+CP socket. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_af0961f83e2e761252a7560616f927593}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_af0961f83e2e761252a7560616f927593}} 
+int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_af0961f83e2e761252a7560616f927593}{Close}} ()
+\begin{DoxyCompactList}\small\item\em Close the local T\+CP socket. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_aa20aab4ae6ecd3004100da9976b95310}{Send\+Data}} (const Crt\+::\+Byte\+Cursor \&data)
+\begin{DoxyCompactList}\small\item\em Send the given payload to the T\+CP socket. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a1c0858f85b387468dd56715ffdf9ee92}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a1c0858f85b387468dd56715ffdf9ee92}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a1c0858f85b387468dd56715ffdf9ee92}{On\+Connection\+Result}} (struct aws\+\_\+socket $\ast$socket, int error\+\_\+code)
+\begin{DoxyCompactList}\small\item\em Callback when connection to a socket is complete. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_ae2d1c879f7f37bdfe7a965ad6736b7df}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_ae2d1c879f7f37bdfe7a965ad6736b7df}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_ae2d1c879f7f37bdfe7a965ad6736b7df}{On\+Write\+Completed}} (struct aws\+\_\+socket $\ast$socket, int error\+\_\+code, size\+\_\+t bytes\+\_\+written)
+\begin{DoxyCompactList}\small\item\em Callback when writing to the socket is complete. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a60a65f8be68d2008bf5410657e4624ff}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a60a65f8be68d2008bf5410657e4624ff}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a60a65f8be68d2008bf5410657e4624ff}{On\+Readable}} (struct aws\+\_\+socket $\ast$socket, int error\+\_\+code)
+\begin{DoxyCompactList}\small\item\em Callback when the socket has data to read. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a702830a3834fd824dc013be4c9f355f9}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a702830a3834fd824dc013be4c9f355f9}} 
+void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a702830a3834fd824dc013be4c9f355f9}{Flush\+Send\+Buffer}} ()
+\begin{DoxyCompactList}\small\item\em Flush any buffered data (saved before the socket is ready) to the socket. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a04d36587c626df9c2392fd2f3ff12122}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a04d36587c626df9c2392fd2f3ff12122}} 
+static void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a04d36587c626df9c2392fd2f3ff12122}{s\+On\+Connection\+Result}} (struct aws\+\_\+socket $\ast$socket, int error\+\_\+code, void $\ast$user\+\_\+data)
+\begin{DoxyCompactList}\small\item\em Callback when connection to a socket is complete. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a4203de375f36fbde339599d435b511b0}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a4203de375f36fbde339599d435b511b0}} 
+static void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a4203de375f36fbde339599d435b511b0}{s\+On\+Write\+Completed}} (struct aws\+\_\+socket $\ast$socket, int error\+\_\+code, size\+\_\+t bytes\+\_\+written, void $\ast$user\+\_\+data)
+\begin{DoxyCompactList}\small\item\em Callback when writing to the socket is complete. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a59535904825ea855774f41f880f0c778}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a59535904825ea855774f41f880f0c778}} 
+static void \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a59535904825ea855774f41f880f0c778}{s\+On\+Readable}} (struct aws\+\_\+socket $\ast$socket, int error\+\_\+code, void $\ast$user\+\_\+data)
+\begin{DoxyCompactList}\small\item\em Callback when the socket has data to read. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a6f68f3a182d517fed7376e8874207b7a}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a6f68f3a182d517fed7376e8874207b7a}} 
+std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a6f68f3a182d517fed7376e8874207b7a}{m\+Shared\+Crt\+Resource\+Manager}}
+\begin{DoxyCompactList}\small\item\em The resource manager used to manage C\+RT resources. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a991b1bb00f6389f3a9e49984c09cfd18}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a991b1bb00f6389f3a9e49984c09cfd18}} 
+uint16\+\_\+t \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a991b1bb00f6389f3a9e49984c09cfd18}{m\+Port}}
+\begin{DoxyCompactList}\small\item\em The local T\+CP port to connect to. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a7260f7982d221b29480ab16092505b2e}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a7260f7982d221b29480ab16092505b2e}} 
+On\+Tcp\+Forward\+Data\+Receive \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a7260f7982d221b29480ab16092505b2e}{m\+On\+Tcp\+Forward\+Data\+Receive}}
+\begin{DoxyCompactList}\small\item\em Callback when data is received from the local T\+CP port. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a624e8376d97bd12aa650e3cd018efd7a}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a624e8376d97bd12aa650e3cd018efd7a}} 
+aws\+\_\+socket \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a624e8376d97bd12aa650e3cd018efd7a}{m\+Socket}} \{\}
+\begin{DoxyCompactList}\small\item\em An A\+WS S\+DK socket object. It manages the connection to the local T\+CP port. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a899ca18e84f5f14bac91ae77b26dc41f}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a899ca18e84f5f14bac91ae77b26dc41f}} 
+bool \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a899ca18e84f5f14bac91ae77b26dc41f}{m\+Connected}}
+\begin{DoxyCompactList}\small\item\em Is the socket connected yet? \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a6efb4ad2b675389b667621c154cb5b54}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a6efb4ad2b675389b667621c154cb5b54}} 
+Aws\+::\+Crt\+::\+Byte\+Buf \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a6efb4ad2b675389b667621c154cb5b54}{m\+Send\+Buffer}}
+\begin{DoxyCompactList}\small\item\em A buffer to store data from the secure tunnel. This is only used before the socket is connected. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a2a696885fdeba14f64b09781b2275ab5}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a2a696885fdeba14f64b09781b2275ab5}} 
+static constexpr char \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_a2a696885fdeba14f64b09781b2275ab5}{T\+AG}} \mbox{[}$\,$\mbox{]} = \char`\"{}Tcp\+Forward.\+cpp\char`\"{}
+\begin{DoxyCompactList}\small\item\em Used by the logger to specify that log messages are coming from this class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+A class that represents a local T\+CP socket. It implements all callbacks required by using aws\+\_\+socket. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_ab7c56677f6f28b12223830a238bd9a17}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_ab7c56677f6f28b12223830a238bd9a17}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::TcpForward@{Aws::Iot::DeviceClient::SecureTunneling::TcpForward}!TcpForward@{TcpForward}}
+\index{TcpForward@{TcpForward}!Aws::Iot::DeviceClient::SecureTunneling::TcpForward@{Aws::Iot::DeviceClient::SecureTunneling::TcpForward}}
+\doxysubsubsection{\texorpdfstring{TcpForward()}{TcpForward()}}
+{\footnotesize\ttfamily Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Tcp\+Forward\+::\+Tcp\+Forward (\begin{DoxyParamCaption}\item[{std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_aws_1_1_iot_1_1_device_client_1_1_shared_crt_resource_manager}{Shared\+Crt\+Resource\+Manager}} $>$}]{shared\+Crt\+Resource\+Manager,  }\item[{uint16\+\_\+t}]{port,  }\item[{On\+Tcp\+Forward\+Data\+Receive}]{on\+Tcp\+Forward\+Data\+Receive }\end{DoxyParamCaption})}
+
+
+
+Constructor. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em shared\+Crt\+Resource\+Manager} & the shared resource manager \\
+\hline
+{\em port} & the local T\+CP port to connect to \\
+\hline
+{\em on\+Tcp\+Forward\+Data\+Receive} & callback when there is data received from the local T\+CP port \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_aa20aab4ae6ecd3004100da9976b95310}\label{class_aws_1_1_iot_1_1_device_client_1_1_secure_tunneling_1_1_tcp_forward_aa20aab4ae6ecd3004100da9976b95310}} 
+\index{Aws::Iot::DeviceClient::SecureTunneling::TcpForward@{Aws::Iot::DeviceClient::SecureTunneling::TcpForward}!SendData@{SendData}}
+\index{SendData@{SendData}!Aws::Iot::DeviceClient::SecureTunneling::TcpForward@{Aws::Iot::DeviceClient::SecureTunneling::TcpForward}}
+\doxysubsubsection{\texorpdfstring{SendData()}{SendData()}}
+{\footnotesize\ttfamily int Aws\+::\+Iot\+::\+Device\+Client\+::\+Secure\+Tunneling\+::\+Tcp\+Forward\+::\+Send\+Data (\begin{DoxyParamCaption}\item[{const Crt\+::\+Byte\+Cursor \&}]{data }\end{DoxyParamCaption})}
+
+
+
+Send the given payload to the T\+CP socket. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & the payload to send \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/tunneling/Tcp\+Forward.\+h\item 
+/home/runner/work/aws-\/iot-\/device-\/client/aws-\/iot-\/device-\/client/source/tunneling/Tcp\+Forward.\+cpp\end{DoxyCompactItemize}
