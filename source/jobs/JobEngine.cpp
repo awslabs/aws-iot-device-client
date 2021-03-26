@@ -175,3 +175,26 @@ int JobEngine::exec_cmd(string action, vector<string> args)
     }
     return returnCode;
 }
+
+string JobEngine::getReason(int statusCode)
+{
+    ostringstream reason;
+    if (WIFEXITED(statusCode))
+    {
+        reason << "Job exited with status: " << WEXITSTATUS(statusCode);
+    }
+    else if (WIFSIGNALED(statusCode))
+    {
+        reason << "Job killed by signal: " << WTERMSIG(statusCode);
+    }
+    else if (WIFSTOPPED(statusCode))
+    {
+        reason << "Job stopped by signal: " << WSTOPSIG(statusCode);
+    }
+    else
+    {
+        reason << "Job returned with status: " << statusCode;
+    }
+
+    return reason.str();
+}

@@ -93,6 +93,13 @@ namespace Aws
                     int hasErrors() { return errors; }
 
                     /**
+                     * \brief Evaluates the return code of the JobEngine's command execution
+                     * @param statusCode the status code returned by the job execution
+                     * @return the output of the status code evaluation
+                     */
+                    std::string getReason(int statusCode);
+
+                    /**
                      * \brief Take the STDOUT received from the child process
                      *
                      * @return a LimitedStreamBuffer taken from the JobEngine

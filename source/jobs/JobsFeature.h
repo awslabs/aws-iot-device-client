@@ -194,7 +194,8 @@ namespace Aws
                      */
                     void publishUpdateJobExecutionStatus(
                         Aws::Iotjobs::JobExecutionData data,
-                        JobExecutionStatusInfo statusInfo);
+                        JobExecutionStatusInfo statusInfo,
+                        std::function<void(void)> onCompleteCallback = nullptr);
                     /**
                      * \brief Creates a subscription to the startNextPendingJobExecution topic
                      */
@@ -267,6 +268,17 @@ namespace Aws
                      * @param job the job to execute
                      */
                     void executeJob(Iotjobs::JobExecutionData job);
+
+                    /**
+                     * \brief Builds the command that will be executed
+                     * @param path the provided path to the executable
+                     * @param operation the name of the executable
+                     * @return the full executable path.
+                     *
+                     * If this command is unable to find a given job handler and/or the permissions
+                     * for the given job handler are inappropriate, this function will thrown an exception.
+                     */
+                    std::string buildCommand(Aws::Crt::String path, Aws::Crt::String operation);
 
                     /**
                      * \brief Given a job notification, determines whether it's a duplicate message.
