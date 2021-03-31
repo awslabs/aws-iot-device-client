@@ -44,7 +44,7 @@ The modular IoT Device Client consists of a “base client” and discrete “cl
 * The client-side Fleet Provisioning feature enables you to replace provisional credentials with device-specific ones
   when you onboard a fleet of devices to AWS IoT Core. It creates a device specific certificate and private key, and registers the device on AWS IoT Core.
 ### List of Supported Platforms
-The AWS IoT Device Client currently works by default on IoT devices with common microprocessors (x86_64, ARM architectures), and common Linux software environments (Debian, Ubuntu, and RHEL).
+The AWS IoT Device Client currently works on IoT devices with common microprocessors (x86_64, ARM architectures), and common Linux software environments (Debian, Ubuntu, and RHEL).
 
 ## Installation
 *__Sections:__*
@@ -59,8 +59,10 @@ The AWS IoT Device Client currently works by default on IoT devices with common 
 
 * C++ 11 or higher
 * [CMake](https://cmake.org/) 3.10+
-* *Note:* CI Build uses OpenSSL 1.1.1
-* *Note:* CI Build uses [aws-iot-device-sdk-cpp-v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2) commit hash located in `CMakeLists.txt.awssdk`
+* OpenSSL 1.1.1
+* [aws-iot-device-sdk-cpp-v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2) commit hash located in `CMakeLists.txt.awssdk`
+
+*Note:* The TLS stack, and the version of the SDK mentioned above is what our CI uses.  You could potentially use a different TLS stack for example, we just don't actively test or support this.
 
 ### Building from source
 
@@ -74,6 +76,7 @@ that you're performing the compilation on:
 
 ```
 # Building
+git clone https://github.com/awslabs/aws-iot-device-client
 cd aws-iot-device-client
 mkdir build
 cd build

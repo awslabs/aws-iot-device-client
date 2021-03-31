@@ -2,6 +2,7 @@
  **Notice:** Running the AWS IoT Device Client will incur usage of AWS IoT services, and is likely to incur charges on your AWS account. Please refer the pricing pages for [AWS IoT Core](https://aws.amazon.com/iot-core/pricing/), [AWS IoT Device Management](https://aws.amazon.com/iot-device-management/pricing/), and [AWS IoT Device Defender](https://aws.amazon.com/iot-device-defender/pricing/) for more details.
 
   * [Jobs Feature](#jobs-feature)
+    + [Sample Jobs](#sample-jobs)
     + [Creating a Job](#creating-a-job)
     + [Creating your own Job Handler](#creating-your-own-job-handler)
       - [Job/Job Handler Security Considerations](#jobjob-handler-security-considerations)
@@ -15,25 +16,24 @@
 
 ## Jobs Feature
 
-The Jobs feature within the AWS IoT Device Client provides device-side functionality for execution of jobs created via
-https://docs.aws.amazon.com/iot/latest/developerguide/iot-jobs.html. When the Jobs feature starts within the AWS IoT Device Client, 
-the feature will attempt to establish subscriptions to important notification topics, and will also publish
-a request to receive the latest pending jobs. It will use the shared MQTT connection to subscribe/publish to these
-topics. 
+The Jobs feature within the AWS IoT Device Client provides device-side functionality for execution of [jobs created](https://docs.aws.amazon.com/iot/latest/developerguide/iot-jobs.html). When the Jobs feature starts within the AWS IoT Device Client, the feature will attempt to establish subscriptions to important notification topics, and will also publish a request to receive the latest pending jobs. It will use the shared MQTT connection to subscribe/publish to these topics. 
 
 When a new Job is received via these topics, the Jobs feature will look for and extract the following required and optional elements:
 
+### Sample Jobs
+Existing [Sample Job Docs](../../sample-job-docs)
+Existing [Sample Job Handlers](../../sample-job-handlers)
 
 ### Creating a Job
 
-[View a sample job document here](sample-job-docs/install-packages.json)
+[View a sample job document here](../../sample-job-docs/install-packages.json)
 
 The following fields are extracted from the incoming Job document by the Jobs feature within the AWS IoT Device Client when a 
 job is received.
 
 `operation` *string* (Required): This is the executable or script that you'd like to run. Here we can specify a script located
 in the Device Client's handler directory, such as `install-packages.sh`, or it could be a well known executable binary
-in the Device Client's environment path, such as `echo` or `apt-get`.
+in the Device Client's environmentx path, such as `echo` or `apt-get`.
 
 `args` *string array* (Optional): This is a JSON array of string arguments which will be passed to the specified operation. For example, 
 if we want to run our `install-packages.sh` to install the package `ifupdown`, our args field would look like:
@@ -51,7 +51,7 @@ If we wanted our remote device to print out "Hello World", then our job document
 ```
 
 `path` *string* (Optional): This field tells the Jobs feature where it should look to find an executable that matches the specified
-operation. If this field is omitted, the Jobs feature will assume that the executable can be found in its path. If
+operation. If this field is omitted, the Jobs feature will assume that the executable can be found in the `PATH` environment variable. If
 you expect that the executable (operation) should be found in the Job feature's handler directory 
 (~/.aws-iot-device-client/jobs by default or specified via command line/json configuration values), then the path
 must be specified as part of the job document as follows:
@@ -94,13 +94,13 @@ device.
 
 For example, we might want to create a new application written in Python called "foo" that should be run whenever our
 device receives a "foo" job. After writing the foo application, which for this particular example might only consist of a single
-file called "Foo.py", here's the steps that we would need to go through to set our AWS IoT Device Client to automatically trigger
+file called `Foo.py`, here's the steps that we would need to go through to set our AWS IoT Device Client to automatically trigger
 foo:
 
-1. Add Foo.py to our Job Handler Directory: By default, the Jobs feature will look at ~/.aws-iot-device-client/jobs/ for a handler, 
-so we should put Foo.py here (where `~/` represents the home directory of the user that will run the Device Client - /root if we're
-running the AWS IoT Device Client as a service, or /home/ubuntu/ if we're running under the default Ubuntu user). The new path
-then looks something like /home/ubuntu/.aws-iot-device-client/jobs/Foo.py. 
+1. Add `Foo.py` to our Job Handler Directory: By default, the Jobs feature will look at `~/.aws-iot-device-client/jobs/` for a handler, 
+so we should put `Foo.py` here (where `~/` represents the home directory of the user that will run the Device Client - `/root` if we're
+running the AWS IoT Device Client as a service, or `/home/ubuntu/` if we're running under the default Ubuntu user). The new path
+then looks something like `/home/ubuntu/.aws-iot-device-client/jobs/Foo.py`. 
 
 2. Set Foo's file permissions: All job handlers that we place in the AWS IoT Device Client's handler directory need to have
 permissions of `700`, meaning the user that owns it has read, write, and execute permissions while all other users

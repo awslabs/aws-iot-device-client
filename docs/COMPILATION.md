@@ -25,6 +25,7 @@ with  `aws-iot-device-client` (the contents of this repository) in a folder call
 current working directory:
 
 ```
+git clone https://github.com/awslabs/aws-iot-device-client
 cd aws-iot-device-client
 mkdir build
 cd build
@@ -53,6 +54,7 @@ These commands should be run with `aws-iot-device-client` (the contents of this 
 `aws-iot-device-client` in your current working directory
 
 ```
+git clone https://github.com/awslabs/aws-iot-device-client
 cd aws-iot-device-client
 mkdir build
 cd build
@@ -100,6 +102,7 @@ Available CMake flags for feature exclusion:
 Example CMake command to exclude only the Device Defender feature from the build:
 
 ```bash
+git clone https://github.com/awslabs/aws-iot-device-client
 cd aws-iot-device-client
 mkdir build
 cd build

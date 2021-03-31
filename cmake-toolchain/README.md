@@ -6,19 +6,21 @@
 ## Building from one architecture to the other
 
 **Description**:
-Cross Compiling allows you to compile for a **specific architecture** while on a **different architecture**.  This is extremely useful, as some *(Especially really constrained)* devices won't have the resources to complete the build process.  Even if your devices can complete the build, it is often times much easier to build in a central location (like your developer laptop) and then distribute the artifacts to appropriate devices. 
+Cross-compiling allows you to compile for a **specific architecture** while on a **different architecture**, for exmaple you may want to compile the Device Client for a Raspberry Pi (ARMhf) using cmake toolchains you could compile the binary on your laptop (x86_64) and then tranfer it over.  This is extremely useful, as some *(Especially really constrained)* devices won't have the resources to complete the build process.  Even if your devices can complete the build, it is often times much easier to build in a central location (like your developer laptop) and then distribute the artifacts to appropriate devices. 
 
-The `cmake-toolchain` folder contains toolchains that will make cross compiling for other architectures easier. Currently we have toolchains to support cross compiling for the following architectures; **MIPS32**, **ARMhf**, & **AArch64**.
+The `cmake-toolchain` folder contains toolchains files that will make cross compiling for other architectures easier (This does not include the compilers). Currently we have toolchain files to support cross compiling for the following architectures; **MIPS32**, **ARMhf**, andx **AArch64**.
 
-You can specify one of the given toolchains when running cmake:
+You can specify one of the given build toolchains when running cmake:
 ```
-cmake ../ -DCMAKE_TOOLCHAIN_FILE=<Path/To/Toolchain>
+cmake ../ -DCMAKE_TOOLCHAIN_FILE=<Path/To/Build/Toolchain/File>
 ```
-This will allow the toolchain to overwrite variables *(various paths, compilers, & flags)* required to execute cross compilation without changing the original **cmake** file.
+This will allow the toolchain files to overwrite variables *(various paths, compilers, and flags)* required to execute cross compilation without changing the original **cmake** file.
 
 **Dependencies**:
-For your build to be successful you'll also need a cross compiled version of our dependencies ([aws-iot-device-sdk-cpp-v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2) & **openssl**), for the SDK this is automatically accomplished when running the **cmake** command above without the following flag `-DBUILD_SDK=OFF`.
-
+For your build to be successful you'll also need a cross compiled version of our dependencies ([aws-iot-device-sdk-cpp-v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2) and **openssl**), for the SDK this is automatically accomplished when running the **cmake** command above without the following flag `-DBUILD_SDK=OFF`.
+```
+cmake ../ -DCMAKE_TOOLCHAIN_FILE=<Path/To/Build/Toolchain/File>
+```
 The last dependency you'll need cross compiled is **openssl**.  This one is slightly more complicated but can be done as follows:  *(This example is from our build process, replace the information in carets.  While we happen to be linking against OpenSSL 1.1.1 in this example since our target device uses OpenSSL 1.1.1 for its TLS implementation, you'll want to replace this with whatever TLS implementation is present on your target device.)*
 ```
 wget https://www.openssl.org/source/openssl-1.1.1.tar.gz
@@ -32,9 +34,9 @@ make depend
 make -j 4
 make install 
 ```
-For a real example look into our `.github/build.sh` script.
+For a real example look into our [.github/build.sh](../.github/build.sh) script.
 
 **Other Architecture**:
-If you need to compile for an architecture that isn't currently supported, then you can create a new toolchain based on the sample toolchains included in the cmake-toolchain folder.
+If you need to compile for an architecture that isn't currently supported, then you can create a new toolchain files based on the sample toolchains included in the cmake-toolchain folder.
 
 [*Back To The Top*](#cross-compilation)

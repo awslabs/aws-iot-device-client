@@ -23,7 +23,7 @@ The AWS IoT Device Client has the capability to provision your IoT device when y
 
 When the AWS IoT Device Client's Fleet Provisioning feature is enabled and provisions the device for the first time, it will first create a permanent certificate, private key (if required), and will then attach a policy to the certificate in IoT Core which will provide the device with the permissions required to run other Device Client features such as Jobs, Secure Tunneling, and Device Defender. Once these resources are created correctly, Fleet Provisioning feature will then create and register the thing/device with AWS IoT Core which will complete the provision process for the device. 
 
-More details about AWS IoT Fleet Provisioning by claim can be found here: https://docs.aws.amazon.com/iot/latest/developerguide/provision-wo-cert.html
+More details about AWS IoT Fleet Provisioning by claim can be found [here](https://docs.aws.amazon.com/iot/latest/developerguide/provision-wo-cert.html).
 
 *Note: If the fleet provisioning feature fails to provision the new key, certificate or thing/device, the device client will abort with fatal error.*
 

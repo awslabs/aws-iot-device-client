@@ -5,7 +5,7 @@
 
 ## Setting Up The Device Client
 
-This package comes with a interactive script for setting up the Device Client. This script can be used to generate
+This package comes with an interactive script for setting up the Device Client. This script can be used to generate
 initial Device Client configuration, as well as setup the Device Client as a service.
 
 To use the script, run the following command.
@@ -33,4 +33,5 @@ You can use the following command to see all of the CLI options available for th
 ./aws-iot-device-client --help
 ```
 
+Next [Configuring the AWS IoT Device Client](docs/CONFIG.md)  
 [*Back To The Top*](#setup)

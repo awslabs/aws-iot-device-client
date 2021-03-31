@@ -46,7 +46,7 @@ On the remote device:
 On your laptop:
 1. Create a new secure tunnel on the AWS Console
 2. Copy the source access token
-3. Start the local proxy with the source access token. For example:  
+3. Start the [local proxy](https://github.com/aws-samples/aws-iot-securetunneling-localproxy/blob/master/README.md#options-set-via-command-line-arguments) with the source access token. For example:  
 ```
 $ ./localproxy -r us-east-1 -s 8080 -t <source token>
 ```
@@ -58,4 +58,4 @@ $ ssh -p 8080 <remote_user_name>@localhost
 ### Limitation
 The Secure Tunneling feature within the AWS IoT Device Client currently does not support [multiplex data streams](https://docs.aws.amazon.com/iot/latest/developerguide/multiplexing.html). However the feature supports multiple tunnels each with a single data streams.
 
-[*Back To The Top*](#secure-tunneling)
+[*Back To The Top*](#)
