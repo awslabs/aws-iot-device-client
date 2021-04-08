@@ -352,7 +352,10 @@ void JobsFeature::updateJobExecutionStatusRejectedHandler(Iotjobs::RejectedError
     updateJobExecutionPromises.at(clientToken).set_value(UPDATE_JOB_EXECUTION_REJECTED_CODE);
 }
 
-void JobsFeature::publishUpdateJobExecutionStatus(JobExecutionData data, JobExecutionStatusInfo statusInfo)
+void JobsFeature::publishUpdateJobExecutionStatus(
+    JobExecutionData data,
+    JobExecutionStatusInfo statusInfo,
+    function<void(void)> onCompleteCallback)
 {
     LOG_DEBUG(TAG, "Attempting to update job execution status!");
 
@@ -403,15 +406,6 @@ void JobsFeature::publishUpdateJobExecutionStatus(JobExecutionData data, JobExec
         retryConfig.maxRetries = 3;
         retryConfig.needStopFlag = nullptr;
     }
-
-    auto onRetrySuccess = [this]() -> void {
-        handlingJob.store(false);
-        if (needStop.load())
-        {
-            LOGM_INFO(TAG, "Shutting down %s now that job execution is complete", getName().c_str());
-            baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
-        }
-    };
 
     auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool {
         // We first need to make sure that we haven't previously leaked any promises into our map
@@ -486,8 +480,8 @@ void JobsFeature::publishUpdateJobExecutionStatus(JobExecutionData data, JobExec
         this->updateJobExecutionPromises.erase(clientToken.c_str());
         return success;
     };
-    std::thread updateJobExecutionThread([retryConfig, publishLambda, onRetrySuccess] {
-        Retry::exponentialBackoff(retryConfig, publishLambda, onRetrySuccess);
+    std::thread updateJobExecutionThread([retryConfig, publishLambda, onCompleteCallback] {
+        Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);
     });
     updateJobExecutionThread.detach();
 }
@@ -534,9 +528,50 @@ bool JobsFeature::isDuplicateNotification(JobExecutionData job)
     return true;
 }
 
+string JobsFeature::buildCommand(Aws::Crt::String path, Aws::Crt::String operation)
+{
+    ostringstream commandStream;
+    bool operationOwnedByDeviceClient = false;
+    if (DEFAULT_PATH_KEYWORD == path)
+    {
+        LOGM_DEBUG(TAG, "Using DC default command path {%s} for command execution", Sanitize(jobHandlerDir).c_str());
+        operationOwnedByDeviceClient = true;
+        commandStream << jobHandlerDir;
+    }
+    else if (!path.empty())
+    {
+        LOGM_DEBUG(
+            TAG, "Using path {%s} supplied by job document for command execution", Sanitize(path.c_str()).c_str());
+        commandStream << path;
+    }
+    else
+    {
+        LOG_DEBUG(TAG, "Assuming executable is in PATH");
+    }
+    commandStream << operation;
+
+    if (operationOwnedByDeviceClient)
+    {
+        const int actualPermissions = FileUtils::GetFilePermissions(commandStream.str().c_str());
+        if (Permissions::JOB_HANDLER != actualPermissions)
+        {
+            string message = FormatMessage(
+                "Unacceptable permissions found for job handler %s, permissions should be %d but found %d",
+                Sanitize(commandStream.str()).c_str(),
+                Permissions::JOB_HANDLER,
+                actualPermissions);
+            LOG_ERROR(TAG, message.c_str());
+            throw std::runtime_error(message);
+        }
+    }
+
+    return commandStream.str();
+}
+
 void JobsFeature::executeJob(JobExecutionData job)
 {
     LOGM_INFO(TAG, "Executing job: %s", job.JobId->c_str());
+    publishUpdateJobExecutionStatus(job, {Iotjobs::JobStatus::IN_PROGRESS, "", "", ""});
 
     Aws::Crt::JsonView jobDoc = job.JobDocument->View();
     Aws::Crt::String operation = jobDoc.GetString(JOB_ATTR_OP);
@@ -559,47 +594,21 @@ void JobsFeature::executeJob(JobExecutionData job)
             TAG, "Did not find any arguments in the incoming job document. Value should be a JSON array of arguments");
     }
 
+    auto shutdownHandler = [this]() -> void {
+        handlingJob.store(false);
+        if (needStop.load())
+        {
+            LOGM_INFO(TAG, "Shutting down %s now that job execution is complete", getName().c_str());
+            baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
+        }
+    };
+
     if (operation.empty())
     {
         LOG_ERROR(TAG, "Unable to execute job, no operation provided!");
-        publishUpdateJobExecutionStatus(job, {Iotjobs::JobStatus::FAILED, "No operation provided", "", ""});
+        publishUpdateJobExecutionStatus(
+            job, {Iotjobs::JobStatus::FAILED, "No operation provided", "", ""}, shutdownHandler);
         return;
-    }
-
-    ostringstream command;
-    bool operationOwnedByDeviceClient = false;
-    if (DEFAULT_PATH_KEYWORD == path)
-    {
-        LOGM_DEBUG(TAG, "Using DC default command path {%s} for command execution", Sanitize(jobHandlerDir).c_str());
-        operationOwnedByDeviceClient = true;
-        command << jobHandlerDir;
-    }
-    else if (!path.empty())
-    {
-        LOGM_DEBUG(
-            TAG, "Using path {%s} supplied by job document for command execution", Sanitize(path.c_str()).c_str());
-        command << path;
-    }
-    else
-    {
-        LOG_DEBUG(TAG, "Assuming executable is in PATH");
-    }
-    command << operation;
-
-    if (operationOwnedByDeviceClient)
-    {
-        const int actualPermissions = FileUtils::GetFilePermissions(command.str().c_str());
-        if (Permissions::JOB_HANDLER != actualPermissions)
-        {
-            string message = FormatMessage(
-                "Unacceptable permissions found for job handler %s, permissions should be %d but found %d",
-                Sanitize(command.str()).c_str(),
-                Permissions::JOB_HANDLER,
-                actualPermissions);
-            LOG_ERROR(TAG, message.c_str());
-            publishUpdateJobExecutionStatus(job, {Iotjobs::JobStatus::FAILED, message, "", ""});
-            return;
-        }
     }
 
     int allowStdErr = 0;
@@ -608,47 +617,48 @@ void JobsFeature::executeJob(JobExecutionData job)
         allowStdErr = jobDoc.GetInteger(JOB_ATTR_ALLOW_STDERR);
     }
 
-    LOGM_DEBUG(
-        TAG, "About to execute: %s %s", Sanitize(command.str()).c_str(), Sanitize(argsStringForLogging.str()).c_str());
-    unique_ptr<JobEngine> engine(new JobEngine);
-    int executionStatus = engine->exec_cmd(command.str().c_str(), args);
-
-    ostringstream reason;
-    if (WIFEXITED(executionStatus))
+    string command;
+    try
     {
-        reason << "Exited with status: " << WEXITSTATUS(executionStatus);
+        command = buildCommand(path, operation);
     }
-    else if (WIFSIGNALED(executionStatus))
+    catch (exception &e)
     {
-        reason << "Killed by signal: " << WTERMSIG(executionStatus);
-    }
-    else if (WIFSTOPPED(executionStatus))
-    {
-        reason << "stopped by signal: " << WSTOPSIG(executionStatus);
-    }
-    else
-    {
-        reason << "Returned with status: " << executionStatus;
-    }
-    LOG_INFO(TAG, Sanitize(reason.str()).c_str());
-
-    if (engine->hasErrors())
-    {
-        LOG_WARN(TAG, "JobEngine reported receiving errors from STDERR");
+        publishUpdateJobExecutionStatus(job, {Iotjobs::JobStatus::FAILED, e.what(), "", ""}, shutdownHandler);
+        return;
     }
 
-    if (!executionStatus && engine->hasErrors() <= allowStdErr)
-    {
-        LOG_INFO(TAG, "Job executed successfully!");
-        string standardOut = includeStdOut ? engine->getStdOut() : "";
-        publishUpdateJobExecutionStatus(job, {JobStatus::SUCCEEDED, "", standardOut, engine->getStdErr()});
-    }
-    else
-    {
-        LOG_WARN(TAG, "Job execution failed!");
-        string standardOut = includeStdOut ? engine->getStdOut() : "";
-        publishUpdateJobExecutionStatus(job, {JobStatus::FAILED, reason.str(), standardOut, engine->getStdErr()});
-    }
+    LOGM_INFO(TAG, "About to execute: %s %s", Sanitize(command).c_str(), Sanitize(argsStringForLogging.str()).c_str());
+
+    auto runJob = [this, job, command, args, allowStdErr, includeStdOut, shutdownHandler]() {
+        JobEngine engine;
+        int executionStatus = engine.exec_cmd(command.c_str(), args);
+        string reason = engine.getReason(executionStatus);
+
+        LOG_INFO(TAG, Sanitize(reason).c_str());
+
+        if (engine.hasErrors())
+        {
+            LOG_WARN(TAG, "JobEngine reported receiving errors from STDERR");
+        }
+
+        if (!executionStatus && engine.hasErrors() <= allowStdErr)
+        {
+            LOG_INFO(TAG, "Job executed successfully!");
+            string standardOut = includeStdOut ? engine.getStdOut() : "";
+            publishUpdateJobExecutionStatus(
+                job, {JobStatus::SUCCEEDED, "", standardOut, engine.getStdErr()}, shutdownHandler);
+        }
+        else
+        {
+            LOG_WARN(TAG, "Job execution failed!");
+            string standardOut = includeStdOut ? engine.getStdOut() : "";
+            publishUpdateJobExecutionStatus(
+                job, {JobStatus::FAILED, reason, standardOut, engine.getStdErr()}, shutdownHandler);
+        }
+    };
+    thread jobEngineThread(runJob);
+    jobEngineThread.detach();
 }
 
 void JobsFeature::runJobs()
