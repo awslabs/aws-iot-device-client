@@ -5,7 +5,7 @@
 
 ### Modifications
 #### Change summary
-Please describe what changes are included in this CR. 
+Please describe what changes are included in this pull request. 
 
 #### Revision diff summary
 If there is more than one revision, please explain what has been changed since the last revision.
