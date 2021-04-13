@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - '*'
+  pull_request:
+    branches:
+      - '*'
 
 env:
   PACKAGE_NAME: aws-iot-device-client
