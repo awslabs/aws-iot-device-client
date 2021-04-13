@@ -4,6 +4,7 @@
 #ifndef AWS_IOT_DEVICE_CLIENT_FILEUTILS_H
 #define AWS_IOT_DEVICE_CLIENT_FILEUTILS_H
 
+#include <aws/common/byte_buf.h>
 #include <string>
 
 namespace Aws
@@ -51,6 +52,23 @@ namespace Aws
                      * @return true on success
                      */
                     static bool StoreValueInFile(std::string value, std::string filePath);
+
+                    /**
+                     * \brief Reads data of size into buffer
+                     * @param pathToFile Path to a file
+                     * @param data Buffer to contain data
+                     * @param size Size of data to read
+                     * @return 0 on success
+                     */
+                    static int ReadFromFile(const std::string pathToFile, aws_byte_buf *data, size_t size);
+
+                    /**
+                     * \brief Write data into file in append mode
+                     * @param pathToFile Path to a file
+                     * @param data Buffer containing data
+                     * @return 0 on success
+                     */
+                    static int WriteToFile(const std::string pathToFile, const aws_byte_buf *data);
 
                     /**
                      * \brief Returns an integer representing the permissions of the specified file.

@@ -9,6 +9,8 @@ option(EXCLUDE_DD "Builds the device client without the IoT Device Defender Feat
 option(EXCLUDE_ST "Builds the device client without the IoT Secure Tunneling Feature." OFF)
 option(EXCLUDE_FP "Builds the device client without the IoT Fleet Provisioning Feature." OFF)
 option(DISABLE_MQTT "WARNING: This flag is meant for internal use cases and will prevent Device Client features from operating. Builds the device client without MQTT Connection Management." OFF)
+option(EXCLUDE_SAMPLES "Builds the device client without any of the IoT Sample Features." OFF)
+option(EXCLUDE_PUBSUB "Builds the device client without the IoT Pub Sub Sample Feature." OFF)
 option(GIT_VERSION "Updates the version number using the Git commit history" ON)
 
 if (EXCLUDE_JOBS)
@@ -31,6 +33,14 @@ if (DISABLE_MQTT)
     add_definitions(-DDISABLE_MQTT)
 endif ()
 
+if (EXCLUDE_SAMPLES)
+    add_definitions(-DEXCLUDE_SAMPLES)
+endif ()
+
+if (EXCLUDE_PUBSUB)
+    add_definitions(-DEXCLUDE_PUBSUB)
+endif ()
+
 list(APPEND CMAKE_MODULE_PATH "./sdk-cpp-workspace/lib/cmake")
 
 file(GLOB CONFIG_SRC "source/config/*.cpp")
@@ -41,7 +51,8 @@ file(GLOB DC_SRC "source/*.cpp" /
         "source/*.c" /
         ${CONFIG_SRC}
         ${LOG_SRC}
-        ${UTIL_SRC})
+        ${UTIL_SRC}
+        ${SAMP_SRC})
 
 if (NOT EXCLUDE_DD)
     file(GLOB DD_SRC "source/devicedefender/*.cpp")
@@ -61,6 +72,13 @@ endif ()
 if (NOT EXCLUDE_FP)
     file(GLOB FP_SRC "source/fleetprovisioning/*.cpp")
     list(APPEND DC_SRC ${FP_SRC})
+endif ()
+
+if (NOT EXCLUDE_SAMPLES)
+    if (NOT EXCLUDE_PUBSUB)
+        file(GLOB PUBSUB_SRC "source/samples/pubsub/*.cpp")
+        list(APPEND DC_SRC ${PUBSUB_SRC})
+    endif ()
 endif ()
 
 set(DC_PROJECT_NAME aws-iot-device-client)

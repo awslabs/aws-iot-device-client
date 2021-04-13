@@ -52,6 +52,8 @@ constexpr char PlainConfig::JSON_KEY_TUNNELING[];
 constexpr char PlainConfig::JSON_KEY_DEVICE_DEFENDER[];
 constexpr char PlainConfig::JSON_KEY_FLEET_PROVISIONING[];
 constexpr char PlainConfig::JSON_KEY_RUNTIME_CONFIG[];
+constexpr char PlainConfig::JSON_KEY_SAMPLES[];
+constexpr char PlainConfig::JSON_KEY_PUB_SUB[];
 
 constexpr int Permissions::KEY_DIR;
 constexpr int Permissions::ROOT_CA_DIR;
@@ -64,6 +66,7 @@ constexpr int Permissions::LOG_FILE;
 constexpr int Permissions::CONFIG_FILE;
 constexpr int Permissions::RUNTIME_CONFIG_FILE;
 constexpr int Permissions::JOB_HANDLER;
+constexpr int Permissions::PUB_SUB_FILES;
 
 bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
 {
@@ -166,6 +169,18 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
         logConfig = temp;
     }
 
+    jsonKey = JSON_KEY_SAMPLES;
+    if (json.ValueExists(jsonKey))
+    {
+        const char *jsonKeyTwo = JSON_KEY_PUB_SUB;
+        if (json.ValueExists(jsonKey))
+        {
+            PubSub temp;
+            temp.LoadFromJson(json.GetJsonObject(jsonKey).GetJsonObject(jsonKeyTwo));
+            pubSub = temp;
+        }
+    }
+
     return true;
 }
 
@@ -193,14 +208,15 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     }
 
     return logConfig.LoadFromCliArgs(cliArgs) && jobs.LoadFromCliArgs(cliArgs) && tunneling.LoadFromCliArgs(cliArgs) &&
-           deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs);
+           deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs) &&
+           pubSub.LoadFromCliArgs(cliArgs);
 }
 
 bool PlainConfig::LoadFromEnvironment()
 {
     return logConfig.LoadFromEnvironment() && jobs.LoadFromEnvironment() && tunneling.LoadFromEnvironment() &&
            deviceDefender.LoadFromEnvironment() && fleetProvisioning.LoadFromEnvironment() &&
-           fleetProvisioningRuntimeConfig.LoadFromEnvironment();
+           fleetProvisioningRuntimeConfig.LoadFromEnvironment() && pubSub.LoadFromEnvironment();
 }
 
 bool PlainConfig::Validate() const
@@ -256,6 +272,12 @@ bool PlainConfig::Validate() const
 #endif
 #if !defined(EXCLUDE_FP)
     if (!fleetProvisioning.Validate())
+    {
+        return false;
+    }
+#endif
+#if !defined(EXCLUDE_PUBSUB)
+    if (!pubSub.Validate())
     {
         return false;
     }
@@ -904,6 +926,118 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::Validate() const
            !thingName->empty();
 }
 
+constexpr char PlainConfig::PubSub::CLI_ENABLE_PUB_SUB[];
+constexpr char PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_TOPIC[];
+constexpr char PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE[];
+constexpr char PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC[];
+constexpr char PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE[];
+
+constexpr char PlainConfig::PubSub::JSON_ENABLE_PUB_SUB[];
+constexpr char PlainConfig::PubSub::JSON_PUB_SUB_PUBLISH_TOPIC[];
+constexpr char PlainConfig::PubSub::JSON_PUB_SUB_PUBLISH_FILE[];
+constexpr char PlainConfig::PubSub::JSON_PUB_SUB_SUBSCRIBE_TOPIC[];
+constexpr char PlainConfig::PubSub::JSON_PUB_SUB_SUBSCRIBE_FILE[];
+
+bool PlainConfig::PubSub::LoadFromJson(const Crt::JsonView &json)
+{
+    const char *jsonKey = JSON_ENABLE_PUB_SUB;
+    if (json.ValueExists(jsonKey))
+    {
+        enabled = json.GetBool(jsonKey);
+    }
+
+    jsonKey = JSON_PUB_SUB_PUBLISH_TOPIC;
+    if (json.ValueExists(jsonKey))
+    {
+        publishTopic = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+    }
+
+    jsonKey = JSON_PUB_SUB_PUBLISH_FILE;
+    if (json.ValueExists(jsonKey))
+    {
+        publishFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+    }
+
+    jsonKey = JSON_PUB_SUB_SUBSCRIBE_TOPIC;
+    if (json.ValueExists(jsonKey))
+    {
+        subscribeTopic = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+    }
+
+    jsonKey = JSON_PUB_SUB_SUBSCRIBE_FILE;
+    if (json.ValueExists(jsonKey))
+    {
+        subscribeFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+    }
+
+    return true;
+}
+
+bool PlainConfig::PubSub::LoadFromCliArgs(const CliArgs &cliArgs)
+{
+    if (cliArgs.count(PlainConfig::PubSub::CLI_ENABLE_PUB_SUB))
+    {
+        enabled = cliArgs.at(CLI_ENABLE_PUB_SUB).compare("true") == 0;
+    }
+    if (cliArgs.count(PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_TOPIC))
+    {
+        publishTopic = cliArgs.at(PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_TOPIC);
+    }
+    if (cliArgs.count(PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE))
+    {
+        subscribeTopic = cliArgs.at(PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC);
+    }
+    if (cliArgs.count(PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC))
+    {
+        subscribeTopic = cliArgs.at(PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC);
+    }
+    if (cliArgs.count(PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE))
+    {
+        subscribeFile = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE));
+    }
+    return true;
+}
+
+bool PlainConfig::PubSub::Validate() const
+{
+    if (!enabled)
+    {
+        return true;
+    }
+    if (!publishTopic.has_value() || publishTopic->empty())
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Publish Topic field must be specified if Pub-Sub sample feature is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+    if (!subscribeTopic.has_value() || subscribeTopic->empty())
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Subscribe Topic field must be specified if Pub-Sub sample feature is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+    if (publishFile.has_value() && !publishFile->empty())
+    {
+        if (!FileUtils::ValidateFilePermissions(publishFile.value(), Permissions::PUB_SUB_FILES, true))
+        {
+            return false;
+        }
+    }
+    if (subscribeFile.has_value() && !subscribeFile->empty())
+    {
+        if (!FileUtils::ValidateFilePermissions(subscribeFile.value(), Permissions::PUB_SUB_FILES, true))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 constexpr char Config::TAG[];
 constexpr char Config::DEFAULT_CONFIG_DIR[];
 constexpr char Config::DEFAULT_KEY_DIR[];
@@ -1175,6 +1309,7 @@ void Config::PrintHelpMessage()
         "%s [true|false]:\t\t\t\t\tEnables/Disables Tunneling feature\n"
         "%s [true|false]:\t\t\t\t\tEnables/Disables Device Defender feature\n"
         "%s [true|false]:\t\t\t\tEnables/Disables Fleet Provisioning feature\n"
+        "%s [true|false]:\t\t\t\t\t\tEnables/Disables Pub/Sub Sample feature\n"
         "%s <endpoint-value>:\t\t\t\t\t\tUse Specified Endpoint\n"
         "%s <Cert-Location>:\t\t\t\t\t\t\tUse Specified Cert file\n"
         "%s <Key-Location>:\t\t\t\t\t\t\tUse Specified Key file\n"
@@ -1192,7 +1327,11 @@ void Config::PrintHelpMessage()
         "%s <device-key-path>:\t\t\t\t\t\tUse specified device key to connect to IoT core after provisioning using csr "
         "file is completed. If the CSR file is specified without also specifying a device private key, the Device "
         "Client will use Claim Certificate and Private key to generate new Certificate and Private Key while "
-        "provisioning the device\n";
+        "provisioning the device\n"
+        "%s <publish-topic>:\t\t\t\t\tThe topic the Pub/Sub sample feature will publish to\n"
+        "%s <path/to/publish/file>:\t\t\t\t\tThe file the Pub/Sub sample feature will read from when publishing\n"
+        "%s <subscribe-topic>:\t\t\t\t\tThe topic the Pub/Sub sample feature will receive messages on\n"
+        "%s <path/to/sub/file>:\t\t\t\t\tThe file the Pub/Sub sample feature will write received messaged to\n";
 
     cout << FormatMessage(
         helpMessageTemplate,
@@ -1209,6 +1348,7 @@ void Config::PrintHelpMessage()
         PlainConfig::Tunneling::CLI_ENABLE_TUNNELING,
         PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER,
         PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING,
+        PlainConfig::PubSub::CLI_ENABLE_PUB_SUB,
         PlainConfig::CLI_ENDPOINT,
         PlainConfig::CLI_CERT,
         PlainConfig::CLI_KEY,
@@ -1221,7 +1361,11 @@ void Config::PrintHelpMessage()
         PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL,
         PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME,
         PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE,
-        PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY);
+        PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY,
+        PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_TOPIC,
+        PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE,
+        PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC,
+        PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE);
 }
 
 bool Config::ExportDefaultSetting(const string &file)
