@@ -202,7 +202,7 @@ Example runtime config created by Fleet Provisioning feature:
 
 The Fleet Provisioning feature is disabled by default. You can use the JSON config file and/or CLI options to enable/disable the feature.
 
-To get started with the feature you will need to set the right configuration. This consists of two required parameters and one optional parameter
+To get started with the feature you will need to set the right configuration. This consists of two required parameters and two optional parameters
 
 **Required Parameters:**
 
@@ -216,11 +216,13 @@ To get started with the feature you will need to set the right configuration. Th
 
 `device-key`: Path to the device private key.
 
+`template-parameters`: The Fleet Provisioning Template parameters. A JSON object specified as an escaped string.
+
 *Note: If the CSR file is specified without also specifying a device private key, the Device Client will use Claim Certificate and Private key to generate new Certificate and Private Key while provisioning the device*
 
 #### Configuring the Fleet Provisioning feature via the command line
 ```
-$ ./aws-iot-device-client --enable-fleet-provisioning [true|false] --fleet-provisioning-template-name [Fleet-Provisioning-Template-Name] --csr-file [your/path/to/csr/file] --device-key [your/path/to/device/private/key] 
+$ ./aws-iot-device-client --enable-fleet-provisioning [true|false] --fleet-provisioning-template-name [Fleet-Provisioning-Template-Name] --fleet-provisioning-template-parameters [Fleet-Provisioning-Template-Parameters] --csr-file [your/path/to/csr/file] --device-key [your/path/to/device/private/key] 
 ```
 
 #### Configuring the Fleet Provisioning feature via the JSON configuration file
@@ -231,7 +233,8 @@ $ ./aws-iot-device-client --enable-fleet-provisioning [true|false] --fleet-provi
         "enabled": [true|false],
         "template-name": "Fleet-Provisioning-Template-Name",
         "csr-file": "your/path/to/csr/file",
-        "device-key": "your/path/to/device/private/key"
+        "device-key": "your/path/to/device/private/key",
+		"template-parameters": "Fleet-Provisioning-Template-Parameters",
     }
     ...
 }

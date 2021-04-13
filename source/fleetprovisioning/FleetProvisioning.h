@@ -124,6 +124,11 @@ namespace Aws
                      */
                     Aws::Crt::String templateName;
 
+                   /**
+                    * \brief stores Fleet Provisioning template parameters
+                    */
+                    Aws::Crt::String templateParameters;
+				
                     /**
                      * \brief stores CSR file content
                      */
@@ -186,6 +191,14 @@ namespace Aws
                      * @return returns false if client is not able to find the file or if valid permissions are not set
                      */
                     bool LocateDeviceKey(const std::string filePath);
+					
+					/**
+					 * \brief Build template parameters
+					 *
+					 * @param A JSON object specified as an escaped string
+					 * @return Map of template parameters key/value
+					 */
+					Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> MapParameters(const Aws::Crt::String escaped_json);
                 };
             } // namespace FleetProvisioningNS
         }     // namespace DeviceClient

@@ -38,7 +38,8 @@ TEST(Config, AllFeaturesEnabled)
         "enabled": true,
         "template-name": "template-name",
 		"csr-file": "csr-file",
-		"device-key": "device-key"
+		"device-key": "device-key",
+		"template-parameters": "template-parameters"
     }
 })";
     JsonObject jsonObject(jsonString);
@@ -62,6 +63,7 @@ TEST(Config, AllFeaturesEnabled)
     ASSERT_TRUE(config.fleetProvisioning.enabled);
     ASSERT_EQ(300, config.deviceDefender.interval);
     ASSERT_STREQ("template-name", config.fleetProvisioning.templateName->c_str());
+	ASSERT_STREQ("template-parameters", config.fleetProvisioning.templateParameters->c_str());
     ASSERT_STREQ("csr-file", config.fleetProvisioning.csrFile->c_str());
     ASSERT_STREQ("device-key", config.fleetProvisioning.deviceKey->c_str());
 }
@@ -370,7 +372,8 @@ TEST(Config, FleetProvisioningMinimumConfig)
 	"thing-name": "thing-name value",
     "fleet-provisioning": {
         "enabled": true,
-        "template-name": "template-name"
+        "template-name": "template-name",
+		"template-parameters": "template-parameters"
     }
 })";
     JsonObject jsonObject(jsonString);
@@ -382,6 +385,7 @@ TEST(Config, FleetProvisioningMinimumConfig)
     ASSERT_TRUE(config.Validate());
     ASSERT_TRUE(config.fleetProvisioning.enabled);
     ASSERT_STREQ("template-name", config.fleetProvisioning.templateName->c_str());
+	ASSERT_STREQ("template-parameters", config.fleetProvisioning.templateParameters->c_str());
 }
 
 TEST(Config, MissingFleetProvisioningConfig)
@@ -429,7 +433,8 @@ TEST(Config, FleetProvisioningCli)
         "enabled": true,
         "template-name": "template-name",
 		"csr-file": "csr-file",
-		"device-key": "device-key"
+		"device-key": "device-key",
+		"template-parameters": "template-parameters"
     }
 })";
     JsonObject jsonObject(jsonString);
@@ -437,6 +442,7 @@ TEST(Config, FleetProvisioningCli)
 
     CliArgs cliArgs;
     cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME] = "cli-template-name";
+	cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS] = "cli-template-parameters";
     cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE] = "cli-csr-file";
     cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY] = "cli-device-key";
 
@@ -447,6 +453,7 @@ TEST(Config, FleetProvisioningCli)
     ASSERT_TRUE(config.Validate());
     ASSERT_TRUE(config.fleetProvisioning.enabled);
     ASSERT_STREQ("cli-template-name", config.fleetProvisioning.templateName->c_str());
+	ASSERT_STREQ("cli-template-parameters", config.fleetProvisioning.templateParameters->c_str());
     ASSERT_STREQ("cli-csr-file", config.fleetProvisioning.csrFile->c_str());
     ASSERT_STREQ("cli-device-key", config.fleetProvisioning.deviceKey->c_str());
 }
