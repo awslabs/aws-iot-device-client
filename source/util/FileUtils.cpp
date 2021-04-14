@@ -79,6 +79,55 @@ bool FileUtils::StoreValueInFile(string value, string filePath)
     return true;
 }
 
+int FileUtils::ReadFromFile(const std::string pathToFile, aws_byte_buf *data, size_t size)
+{
+    ifstream file(pathToFile);
+    if (data->capacity < size)
+    {
+        LOGM_ERROR(FileUtils::TAG, "Allocated read buffer smaller than size: %zu < %zu", data->capacity, size);
+        return AWS_OP_ERR;
+    }
+    if (!file.is_open())
+    {
+        LOGM_ERROR(FileUtils::TAG, "Unable to open file: '%s'", Sanitize(pathToFile).c_str());
+        return AWS_OP_ERR;
+    }
+    file.read((char *)data->buffer, size);
+    data->len = size;
+
+    if (!file)
+    {
+        file.close();
+        return AWS_OP_ERR;
+    }
+    else
+    {
+        file.close();
+        return AWS_OP_SUCCESS;
+    }
+}
+
+int FileUtils::WriteToFile(const std::string pathToFile, const aws_byte_buf *data)
+{
+    ofstream file(pathToFile, std::ios::app);
+    if (!file.is_open())
+    {
+        LOGM_ERROR(FileUtils::TAG, "Unable to open file: '%s'", Sanitize(pathToFile).c_str());
+        return AWS_OP_ERR;
+    }
+    file.write((char *)data->buffer, data->len);
+    if (!file)
+    {
+        file.close();
+        return AWS_OP_ERR;
+    }
+    else
+    {
+        file.close();
+        return AWS_OP_SUCCESS;
+    }
+}
+
 int FileUtils::GetFilePermissions(const std::string &path)
 {
     struct stat file_info;

@@ -25,5 +25,14 @@
 		"template-name": "replace_with_template_name",
 		"csr-file": "replace_with_csr_file_path",
 		"device-key": "replace_with_device_private_key_file_path"
+	},
+	"samples": {
+		"pub-sub": {
+			"enabled": false,
+			"publish-topic": "replace_with_publish_topic",
+			"publish-file": "replace_with_publish_file",
+			"subscribe-topic": "replace_with_subscribe_topic",
+			"subscribe-file": "replace_with_subscribe_file"
+		}
 	}
 }

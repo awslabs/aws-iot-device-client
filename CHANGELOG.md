@@ -12,6 +12,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - SDK logging now configurable via CLI or JSON
 - Support for configuring Device Private Key via CLI and JSON for Fleet provisioning using CreateCertificateFromCsr API 
+- Added [Pub/Sub Sample Feature](source/samples/pubsub/README.md)
+- Update job to "In Progress" after receive
+- Shared Lib builds in Github Actions
+- Add CodeDeploy config for integration test setup
+- Doxygen Github Actions
+
+### Changed
+- Reademe Makeover
+- Address cross-platform compatibility for ANSI color codes
+
+### Removed
+
+### Fixed
+- Properly stripping symbols on RELEASE builds
+- Updated SDK version to fix shared lib builds
+- Broken Doxygen URL in the Readme
+- Fix Ubi8 and Al2 Dockerfile Openssl install
 
 ## [1.0.X] - 2021-01-21
 ### Added
