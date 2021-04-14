@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Device Client aborts on Red Hat Enterprise Linux ARM](https://github.com/awslabs/aws-iot-device-client/issues/87)
 - [Device Client crashes due to SIGSEGV on Ubuntu x86](https://github.com/awslabs/aws-iot-device-client/issues/86)
 
-## [Unreleased]
+## [1.1.X] - 2021-04-14
 ### Added
 - SDK logging now configurable via CLI or JSON
 - Support for configuring Device Private Key via CLI and JSON for Fleet provisioning using CreateCertificateFromCsr API 
@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Doxygen Github Actions
 
 ### Changed
-- Reademe Makeover
+- Readme Makeover
 - Address cross-platform compatibility for ANSI color codes
 
 ### Removed
