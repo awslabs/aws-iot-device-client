@@ -39,9 +39,9 @@ int PubSubFeature::init(
     baseNotifier = notifier;
     thingName = *config.thingName;
     pubTopic = config.pubSub.publishTopic.value();
-    pubFile = config.pubSub.publishFile.value();
     subTopic = config.pubSub.subscribeTopic.value();
-    subFile = config.pubSub.subscribeFile.value();
+    pubFile = config.pubSub.publishFile.has_value() ? config.pubSub.publishFile.value() : "";
+    subFile = config.pubSub.subscribeFile.has_value() ? config.pubSub.subscribeFile.value() : "";
 
     return AWS_OP_SUCCESS;
 }
