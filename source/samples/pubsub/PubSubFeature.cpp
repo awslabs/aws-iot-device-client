@@ -75,7 +75,8 @@ void PubSubFeature::publishFileData()
     ByteBuf payload;
     if (pubFile == "")
     {
-        payload = ByteBufFromCString(DEFAULT_PUBLISH_PAYLOAD.c_str());
+        aws_byte_buf_init(&payload, resourceManager->getAllocator(), DEFAULT_PUBLISH_PAYLOAD.size());
+        aws_byte_buf_write(&payload, (uint8_t *)DEFAULT_PUBLISH_PAYLOAD.c_str(), DEFAULT_PUBLISH_PAYLOAD.size());
     }
     else if (getPublishFileData(&payload) != AWS_OP_SUCCESS)
     {
@@ -99,13 +100,17 @@ int PubSubFeature::start()
         LOGM_DEBUG(TAG, "SubAck: PacketId:(%u), ErrorCode:%i", getName().c_str(), errorCode);
     };
     auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void {
+        LOGM_DEBUG(TAG, "Message received on subscribe topic, size: %zu bytes", payload.len);
         if (string((char *)payload.buffer) == PUBLISH_TRIGGER_PAYLOAD)
         {
             publishFileData();
         }
-        if ((FileUtils::WriteToFile(subFile, &payload) != 0) && (subFile != ""))
+        if (subFile != "")
         {
-            LOG_ERROR(TAG, "Failure writing incoming payload to subscribe file... Skipping");
+            if (FileUtils::WriteToFile(subFile, &payload) != 0)
+            {
+                LOG_ERROR(TAG, "Failure writing incoming payload to subscribe file... Skipping");
+            }
         }
     };
 
