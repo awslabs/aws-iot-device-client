@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Resolved issue where missing pub sub sample files (publish file and subscribe file) would cause a seg fault
+- Resolved issue where pub sub sample lost reference on the Default Publish Payload allocator, publishing a blank string
 
 ## [1.1.X] - 2021-04-14
 ### Added
