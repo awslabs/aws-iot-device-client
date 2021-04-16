@@ -83,6 +83,7 @@ You can navigate to the *AWS IoT console -> Secure -> Policies* to create and at
 A Fleet Provisioning template is a JSON document that uses parameters to describe the resources your device must use to interact with AWS IoT. When you use the Fleet Provisioning feature of the Device Client along with a template for your device, it automates the creation of these resources as part of the provisioning process.
 
 You can navigate to the *AWS IoT console -> Onboard -> Fleet Provisioning* Templates to create a Fleet Provisioning Template.
+More details about AWS IoT Fleet Provisioning template can be found [here](https://docs.aws.amazon.com/iot/latest/developerguide/provision-template.html).
 
 ##### Sample Template
 
@@ -202,7 +203,7 @@ Example runtime config created by Fleet Provisioning feature:
 
 The Fleet Provisioning feature is disabled by default. You can use the JSON config file and/or CLI options to enable/disable the feature.
 
-To get started with the feature you will need to set the right configuration. This consists of two required parameters and two optional parameters
+To get started with the feature you will need to set the right configuration. This consists of two required parameters and three optional parameters
 
 **Required Parameters:**
 
@@ -216,9 +217,10 @@ To get started with the feature you will need to set the right configuration. Th
 
 `device-key`: Path to the device private key.
 
-`template-parameters`: The Fleet Provisioning Template parameters. A JSON object specified as an escaped string.
+`template-parameters`: The Fleet Provisioning Template parameters. A JSON object specified as an escaped string. In this example we define 'SerialNumber' with value 'Device-SN' as a parameter to the template: "{\"SerialNumber\": \"Device-SN\"}"
 
 *Note: If the CSR file is specified without also specifying a device private key, the Device Client will use Claim Certificate and Private key to generate new Certificate and Private Key while provisioning the device*
+*Note: Provisioning process will exit with an error in case template parameters are malformed as JSON escaped string.
 
 #### Configuring the Fleet Provisioning feature via the command line
 ```
@@ -234,7 +236,7 @@ $ ./aws-iot-device-client --enable-fleet-provisioning [true|false] --fleet-provi
         "template-name": "Fleet-Provisioning-Template-Name",
         "csr-file": "your/path/to/csr/file",
         "device-key": "your/path/to/device/private/key",
-		"template-parameters": "Fleet-Provisioning-Template-Parameters",
+        "template-parameters": "Fleet-Provisioning-Template-Parameters",
     }
     ...
 }

@@ -118,12 +118,12 @@ if [ "$BUILD_CONFIG" = "y" ]; then
     read -r ENABLE_FP
     if [ "$ENABLE_FP" = "y" ]; then
       FP_ENABLED="true"
-      printf ${PMPT} "Specify Fleet Provisioning Template name you want to use for Provisioning you device:"
+      printf ${PMPT} "Specify Fleet Provisioning Template name you want to use for Provisioning your device:"
       read -r TEMPLATE_NAME_TEMP
       if [ "$TEMPLATE_NAME_TEMP" ]; then
         FP_TEMPLATE_NAME=$TEMPLATE_NAME_TEMP
       fi
-	  printf ${PMPT} "Specify Fleet Provisioning Template parameters you want to use for Provisioning you device:"
+      printf ${PMPT} "Specify Fleet Provisioning Template parameters you want to use for Provisioning your device:"
       read -r TEMPLATE_PARAMS_TEMP
       if [ "$TEMPLATE_PARAMS_TEMP" ]; then
         FP_TEMPLATE_PARAMS=$TEMPLATE_PARAMS_TEMP
@@ -168,7 +168,7 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       \"fleet-provisioning\":	{
         \"enabled\":	$FP_ENABLED,
         \"template-name\": \"$FP_TEMPLATE_NAME\",
-		\"template-parameters\": \"$FP_TEMPLATE_PARAMS\",
+        \"template-parameters\": \"$FP_TEMPLATE_PARAMS\",
         \"csr-file\": \"$FP_CSR_FILE\",
         \"device-key\": \"$FP_DEVICE_KEY\"
       }

@@ -463,8 +463,8 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
     RegisterThingRequest registerThingRequest;
     registerThingRequest.TemplateName = templateName;
     registerThingRequest.CertificateOwnershipToken = certificateOwnershipToken;
-	registerThingRequest.Parameters = MapParameters(templateParameters);
-
+    registerThingRequest.Parameters = templateParameters;
+    
     identityClient.PublishRegisterThing(registerThingRequest, AWS_MQTT_QOS_AT_LEAST_ONCE, onRegisterPublishSubAck);
 
     auto futureValRegisterPublishCompletedPromise = registerPublishCompletedPromise.get_future();
@@ -504,7 +504,10 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
 
     IotIdentityClient identityClient(fpConnection.get()->getConnection());
     templateName = config.fleetProvisioning.templateName.value().c_str();
-	templateParameters = config.fleetProvisioning.templateParameters.value().c_str();
+    if(!MapParameters(config.fleetProvisioning.templateParameters.value().c_str()))
+    {
+        return false;
+    }
 
     if (config.fleetProvisioning.csrFile.has_value() && !config.fleetProvisioning.csrFile->empty() &&
         config.fleetProvisioning.deviceKey.has_value() && !config.fleetProvisioning.deviceKey->empty())
@@ -678,17 +681,25 @@ bool FleetProvisioning::ExportRuntimeConfig(
     return true;
 }
 
-Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> FleetProvisioning::MapParameters(const Aws::Crt::String escaped_json)
+bool FleetProvisioning::MapParameters(const Aws::Crt::String &escaped_json)
 {
-    Aws::Crt::JsonObject value(escaped_json);
-    Map<String, JsonView> pm = value.View().GetAllObjects();
-    Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> params =
-    Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String>();
-    
-    for (const auto &x : pm)
+    if (!escaped_json.empty())
     {
-        params.emplace(x.first, x.second.AsString());
-    }
+        Aws::Crt::JsonObject jsonObj(escaped_json);
+        if (!jsonObj.WasParseSuccessful())
+        {
+            LOGM_ERROR(
+                Config::TAG,
+                "*** Couldn't parse template parameters JSON. GetErrorMessage returns: %s ***",
+                jsonObj.GetErrorMessage().c_str());
+            return false;
+        }
     
-    return params;
+        Aws::Crt::Map<Aws::Crt::String, Aws::Crt::JsonView> pm = jsonObj.View().GetAllObjects();
+        for (const auto &x : pm)
+        {
+            templateParameters.emplace(x.first, x.second.AsString());
+        }
+    }
+    return true;
 }
