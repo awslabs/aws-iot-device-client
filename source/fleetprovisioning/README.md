@@ -223,6 +223,7 @@ To get started with the feature you will need to set the right configuration. Th
 ```
 
 *Note: If the CSR file is specified without also specifying a device private key, the Device Client will use Claim Certificate and Private key to generate new Certificate and Private Key while provisioning the device*
+
 *Note: Provisioning process will exit with an error in case template parameters are malformed as JSON escaped string.*
 
 #### Configuring the Fleet Provisioning feature via the command line
