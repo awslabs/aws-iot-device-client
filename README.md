@@ -11,6 +11,7 @@
   * [Fleet Provisioning Feature](source/fleetprovisioning/README.md)
   * [Device Defender Feature](source/devicedefender/README.md)
   * [Secure Tunneling Feature](source/tunneling/README.md)
+  * [MQTT Pub/Sub Sample Feature](source/samples/pubsub/README.md)
   * [Logging](source/logging/README.md)
   * [Doxygen Documentation](docs/README.md)
   * [Additional Resources](#additional-resources)
@@ -108,6 +109,9 @@ cd ../
 [Fleet Provisioning Feature Readme](source/fleetprovisioning/README.md)  
 [Device Defender Feature Readme](source/devicedefender/README.md)  
 [Secure Tunneling Feature Readme](source/tunneling/README.md)
+
+## AWS IoT Device Client Samples
+[MQTT Pub/Sub Sample Feature](source/samples/pubsub/README.md)
 
 ## Logging
 [Logging Readme](source/logging/README.md)

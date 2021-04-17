@@ -21,6 +21,12 @@
 #if !defined(EXCLUDE_ST)
 #    include "tunneling/SecureTunnelingFeature.h"
 #endif
+#if !defined(EXCLUDE_SAMPLES)
+#    if !defined(EXCLUDE_PUBSUB)
+#        include "samples/pubsub/PubSubFeature.h"
+#    endif
+#endif
+
 #include <csignal>
 #include <memory>
 #include <thread>
@@ -41,6 +47,11 @@ using namespace Aws::Iot::DeviceClient::SecureTunneling;
 #endif
 #if !defined(EXCLUDE_FP)
 using namespace Aws::Iot::DeviceClient::FleetProvisioningNS;
+#endif
+#if !defined(EXCLUDE_SAMPLES)
+#    if !defined(EXCLUDE_PUBSUB)
+using namespace Aws::Iot::DeviceClient::Samples;
+#    endif
 #endif
 
 const char *TAG = "Main.cpp";
@@ -356,6 +367,23 @@ int main(int argc, char *argv[])
     {
         LOG_INFO(TAG, "Device Defender is disabled");
     }
+#endif
+
+#if !defined(EXCLUDE_SAMPLES)
+#    if !defined(EXCLUDE_PUBSUB)
+    unique_ptr<PubSubFeature> pubSub;
+    if (config.config.pubSub.enabled)
+    {
+        LOG_INFO(TAG, "PubSub is enabled");
+        pubSub = unique_ptr<PubSubFeature>(new PubSubFeature());
+        pubSub->init(resourceManager, listener, config.config);
+        features.push_back(pubSub.get());
+    }
+    else
+    {
+        LOG_INFO(TAG, "Pub Sub is disabled");
+    }
+#    endif
 #endif
 
     for (auto &feature : features)

@@ -50,6 +50,7 @@ namespace Aws
                 static constexpr int CONFIG_FILE = 644;
                 static constexpr int RUNTIME_CONFIG_FILE = 644;
                 static constexpr int JOB_HANDLER = 700;
+                static constexpr int PUB_SUB_FILES = 600;
             };
 
             struct PlainConfig : public LoadableFromJsonAndCliAndEnvironment
@@ -76,6 +77,9 @@ namespace Aws
                 static constexpr char JSON_KEY_FLEET_PROVISIONING[] = "fleet-provisioning";
                 static constexpr char JSON_KEY_RUNTIME_CONFIG[] = "runtime-config";
                 static constexpr char JSON_KEY_LOGGING[] = "logging";
+
+                static constexpr char JSON_KEY_SAMPLES[] = "samples";
+                static constexpr char JSON_KEY_PUB_SUB[] = "pub-sub";
 
                 Aws::Crt::Optional<std::string> endpoint;
                 Aws::Crt::Optional<std::string> cert;
@@ -229,6 +233,33 @@ namespace Aws
                     Aws::Crt::Optional<std::string> thingName;
                 };
                 FleetProvisioningRuntimeConfig fleetProvisioningRuntimeConfig;
+
+                struct PubSub : public LoadableFromJsonAndCliAndEnvironment
+                {
+                    bool LoadFromJson(const Crt::JsonView &json) override;
+                    bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override { return true; }
+                    bool Validate() const override;
+
+                    static constexpr char CLI_ENABLE_PUB_SUB[] = "--enable-pub-sub";
+                    static constexpr char CLI_PUB_SUB_PUBLISH_TOPIC[] = "--publish-topic";
+                    static constexpr char CLI_PUB_SUB_PUBLISH_FILE[] = "--publish-file";
+                    static constexpr char CLI_PUB_SUB_SUBSCRIBE_TOPIC[] = "--subscribe-topic";
+                    static constexpr char CLI_PUB_SUB_SUBSCRIBE_FILE[] = "--subscribe-file";
+
+                    static constexpr char JSON_ENABLE_PUB_SUB[] = "enabled";
+                    static constexpr char JSON_PUB_SUB_PUBLISH_TOPIC[] = "publish-topic";
+                    static constexpr char JSON_PUB_SUB_PUBLISH_FILE[] = "publish-file";
+                    static constexpr char JSON_PUB_SUB_SUBSCRIBE_TOPIC[] = "subscribe-topic";
+                    static constexpr char JSON_PUB_SUB_SUBSCRIBE_FILE[] = "subscribe-file";
+
+                    bool enabled{false};
+                    Aws::Crt::Optional<std::string> publishTopic;
+                    Aws::Crt::Optional<std::string> publishFile;
+                    Aws::Crt::Optional<std::string> subscribeTopic;
+                    Aws::Crt::Optional<std::string> subscribeFile;
+                };
+                PubSub pubSub;
             };
 
             class Config

@@ -195,9 +195,10 @@ namespace Aws
                     /**
                      * \brief Map template parameters from a JSON object specified as an escaped string
                      *
+                     * @param params Template parameters given as JSON escaped string
                      * @return false if failed parsing template parameters
                      */
-                    bool MapParameters(const Aws::Crt::String &escaped_json);
+                    bool MapParameters(const Aws::Crt::Optional<std::string> &params);
                 };
             } // namespace FleetProvisioningNS
         }     // namespace DeviceClient

@@ -8,10 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Device Client aborts on Red Hat Enterprise Linux ARM](https://github.com/awslabs/aws-iot-device-client/issues/87)
 - [Device Client crashes due to SIGSEGV on Ubuntu x86](https://github.com/awslabs/aws-iot-device-client/issues/86)
 
-## [Unreleased]
+## Unreleased
+
+### Fixed
+- Resolved issue where missing pub sub sample files (publish file and subscribe file) would cause a seg fault
+- Resolved issue where pub sub sample lost reference on the Default Publish Payload allocator, publishing a blank string
+
+## [1.1.X] - 2021-04-14
 ### Added
 - SDK logging now configurable via CLI or JSON
 - Support for configuring Device Private Key via CLI and JSON for Fleet provisioning using CreateCertificateFromCsr API 
+- Added [Pub/Sub Sample Feature](source/samples/pubsub/README.md)
+- Update job to "In Progress" after receive
+- Shared Lib builds in Github Actions
+- Add CodeDeploy config for integration test setup
+- Doxygen Github Actions
+
+### Changed
+- Readme Makeover
+- Address cross-platform compatibility for ANSI color codes
+
+### Removed
+
+### Fixed
+- Properly stripping symbols on RELEASE builds
+- Updated SDK version to fix shared lib builds
+- Broken Doxygen URL in the Readme
+- Fix Ubi8 and Al2 Dockerfile Openssl install
 
 ## [1.0.X] - 2021-01-21
 ### Added

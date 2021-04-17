@@ -6,6 +6,9 @@
 #include "../../source/util/UniqueString.h"
 #include "gtest/gtest.h"
 
+#include <aws/common/byte_buf.h>
+#include <aws/crt/Types.h>
+
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
@@ -13,6 +16,8 @@
 #include <unistd.h>
 
 using namespace std;
+using namespace Aws;
+using namespace Aws::Crt;
 using namespace Aws::Iot::DeviceClient::Util;
 
 TEST(FileUtils, handlesAbsoluteFilePath)
@@ -226,4 +231,91 @@ TEST(FileUtils, FileExists)
 
     std::remove(filePath.c_str());
     ASSERT_FALSE(FileUtils::FileExists(filePath));
+}
+
+TEST(FileUtils, byteBufWrite)
+{
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
+
+    string someData = "Hello World!";
+    aws_byte_buf someDataByteBuf = ByteBufFromCString(someData.c_str());
+
+    ASSERT_EQ(0, FileUtils::WriteToFile(filePath, &someDataByteBuf));
+
+    ASSERT_EQ(someData.size(), FileUtils::GetFileSize(filePath));
+    remove(filePath.c_str());
+}
+
+TEST(FileUtils, byteBufWriteAppend)
+{
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
+
+    string someData = "Hello World!";
+    aws_byte_buf someDataByteBuf = ByteBufFromCString(someData.c_str());
+    ASSERT_EQ(0, FileUtils::WriteToFile(filePath, &someDataByteBuf));
+    ASSERT_EQ(0, FileUtils::WriteToFile(filePath, &someDataByteBuf));
+
+    ASSERT_EQ(someData.size() * 2, FileUtils::GetFileSize(filePath));
+    remove(filePath.c_str());
+}
+
+TEST(FileUtils, byteBufReadWrite)
+{
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
+
+    string someData = "Hello World!";
+    aws_byte_buf someDataByteBuf = ByteBufFromCString(someData.c_str());
+
+    ASSERT_EQ(0, FileUtils::WriteToFile(filePath, &someDataByteBuf));
+
+    aws_byte_buf readDataByteBuf;
+    aws_byte_buf_init(&readDataByteBuf, aws_default_allocator(), someData.size());
+    ASSERT_EQ(0, FileUtils::ReadFromFile(filePath, &readDataByteBuf, someData.size()));
+
+    for (size_t i = 0; i < readDataByteBuf.len; i++)
+    {
+        ASSERT_EQ((uint8_t)someData[i], readDataByteBuf.buffer[i]);
+    }
+    remove(filePath.c_str());
+}
+
+TEST(FileUtils, byteBufReadWriteAppend)
+{
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
+
+    string someData = "Hello World!";
+    aws_byte_buf someDataByteBuf = ByteBufFromCString(someData.c_str());
+    ASSERT_EQ(0, FileUtils::WriteToFile(filePath, &someDataByteBuf));
+    ASSERT_EQ(0, FileUtils::WriteToFile(filePath, &someDataByteBuf));
+
+    someData = "Hello World!Hello World!";
+    someDataByteBuf = ByteBufFromCString(someData.c_str());
+    aws_byte_buf readDataByteBuf;
+    aws_byte_buf_init(&readDataByteBuf, aws_default_allocator(), someData.size());
+    ASSERT_EQ(0, FileUtils::ReadFromFile(filePath, &readDataByteBuf, someData.size()));
+
+    for (size_t i = 0; i < readDataByteBuf.len; i++)
+    {
+        ASSERT_EQ((uint8_t)someData[i], readDataByteBuf.buffer[i]);
+    }
+    remove(filePath.c_str());
+}
+
+TEST(FileUtils, byteBufReadSizeLargerThanBuffer)
+{
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
+
+    aws_byte_buf readDataByteBuf;
+    aws_byte_buf_init(&readDataByteBuf, aws_default_allocator(), 10);
+
+    ASSERT_EQ(-1, FileUtils::ReadFromFile(filePath, &readDataByteBuf, 500));
+}
+
+TEST(FileUtils, byteBufReadNonexistentFile)
+{
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
+
+    aws_byte_buf readDataByteBuf;
+    aws_byte_buf_init(&readDataByteBuf, aws_default_allocator(), 1);
+    ASSERT_EQ(-1, FileUtils::ReadFromFile(filePath, &readDataByteBuf, 1));
 }

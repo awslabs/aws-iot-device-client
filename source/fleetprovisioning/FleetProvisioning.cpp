@@ -504,7 +504,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
 
     IotIdentityClient identityClient(fpConnection.get()->getConnection());
     templateName = config.fleetProvisioning.templateName.value().c_str();
-    if(!MapParameters(config.fleetProvisioning.templateParameters.value().c_str()))
+    if(!MapParameters(config.fleetProvisioning.templateParameters))
     {
         return false;
     }
@@ -681,11 +681,11 @@ bool FleetProvisioning::ExportRuntimeConfig(
     return true;
 }
 
-bool FleetProvisioning::MapParameters(const Aws::Crt::String &escaped_json)
+bool FleetProvisioning::MapParameters(const Aws::Crt::Optional<std::string> &params)
 {
-    if (!escaped_json.empty())
+    if (params.has_value())
     {
-        Aws::Crt::JsonObject jsonObj(escaped_json);
+        Aws::Crt::JsonObject jsonObj(params.value().c_str());
         if (!jsonObj.WasParseSuccessful())
         {
             LOGM_ERROR(

@@ -127,6 +127,8 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       read -r TEMPLATE_PARAMS_TEMP
       if [ "$TEMPLATE_PARAMS_TEMP" ]; then
         FP_TEMPLATE_PARAMS=$TEMPLATE_PARAMS_TEMP
+      else
+        FP_TEMPLATE_PARAMS="{}"
       fi
       printf ${PMPT} "Specify absolute path to Certificate Signing Request (CSR) file used for creating new certificate while provisioning device by keeping private key secure:"
       read -r CSR_FILE_TEMP
@@ -140,6 +142,24 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       fi
     else
       FP_ENABLED="false"
+    fi
+
+    ### PUBSUB Config ###
+    printf ${PMPT} "Enable Pub Sub sample feature? y/n"
+    PUBSUB_ENABLED=""
+    read -r ENABLE_PUBSUB
+    if [ "$ENABLE_PUBSUB" = "y" ]; then
+      PUBSUB_ENABLED="true"
+      printf ${PMPT} "Specify a topic for the feature to publish to:"
+      read -r PUB_TOPIC
+      printf ${PMPT} "Specify the path of a file for the feature to publish (Leaving this blank will publish 'Hello World!'):"
+      read -r PUB_FILE
+      printf ${PMPT} "Specify a topic for the feature to subscribe to:"
+      read -r SUB_TOPIC
+      printf ${PMPT} "Specify the path of a file for the feature to write to (Optional):"
+      read -r SUB_FILE
+    else
+      PUBSUB_ENABLED="false"
     fi
 
     CONFIG_OUTPUT="
@@ -171,6 +191,15 @@ if [ "$BUILD_CONFIG" = "y" ]; then
         \"template-parameters\": \"$FP_TEMPLATE_PARAMS\",
         \"csr-file\": \"$FP_CSR_FILE\",
         \"device-key\": \"$FP_DEVICE_KEY\"
+      },
+      \"samples\": {
+        \"pub-sub\": {
+          \"enabled\": $PUBSUB_ENABLED,
+          \"publish-topic\": \"$PUB_TOPIC\",
+          \"publish-file\": \"$PUB_FILE\",
+          \"subscribe-topic\": \"$SUB_TOPIC\",
+          \"subscribe-file\": \"$SUB_FILE\"
+        }
       }
     }"
 
