@@ -217,10 +217,13 @@ To get started with the feature you will need to set the right configuration. Th
 
 `device-key`: Path to the device private key.
 
-`template-parameters`: The Fleet Provisioning Template parameters. A JSON object specified as an escaped string. In this example we define 'SerialNumber' with value 'Device-SN' as a parameter to the template: "{\"SerialNumber\": \"Device-SN\"}"
+`template-parameters`: The Fleet Provisioning Template parameters. A JSON object specified as an escaped string. In this example we define 'SerialNumber' with value 'Device-SN' as a parameter to the template:
+```
+"{\"SerialNumber\": \"Device-SN\"}"
+```
 
 *Note: If the CSR file is specified without also specifying a device private key, the Device Client will use Claim Certificate and Private key to generate new Certificate and Private Key while provisioning the device*
-*Note: Provisioning process will exit with an error in case template parameters are malformed as JSON escaped string.
+*Note: Provisioning process will exit with an error in case template parameters are malformed as JSON escaped string.*
 
 #### Configuring the Fleet Provisioning feature via the command line
 ```
