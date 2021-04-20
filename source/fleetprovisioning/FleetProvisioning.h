@@ -124,9 +124,9 @@ namespace Aws
                      */
                     Aws::Crt::String templateName;
 
-                   /**
-                    * \brief stores Fleet Provisioning template parameters map
-                    */
+                    /**
+                     * \brief stores Fleet Provisioning template parameters map
+                     */
                     Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> templateParameters;
 
                     /**
@@ -191,7 +191,7 @@ namespace Aws
                      * @return returns false if client is not able to find the file or if valid permissions are not set
                      */
                     bool LocateDeviceKey(const std::string filePath);
-                    
+
                     /**
                      * \brief Map template parameters from a JSON object specified as an escaped string
                      *

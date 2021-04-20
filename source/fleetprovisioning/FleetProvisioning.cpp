@@ -464,7 +464,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
     registerThingRequest.TemplateName = templateName;
     registerThingRequest.CertificateOwnershipToken = certificateOwnershipToken;
     registerThingRequest.Parameters = templateParameters;
-    
+
     identityClient.PublishRegisterThing(registerThingRequest, AWS_MQTT_QOS_AT_LEAST_ONCE, onRegisterPublishSubAck);
 
     auto futureValRegisterPublishCompletedPromise = registerPublishCompletedPromise.get_future();
@@ -504,7 +504,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
 
     IotIdentityClient identityClient(fpConnection.get()->getConnection());
     templateName = config.fleetProvisioning.templateName.value().c_str();
-    if(!MapParameters(config.fleetProvisioning.templateParameters))
+    if (!MapParameters(config.fleetProvisioning.templateParameters))
     {
         return false;
     }
@@ -694,7 +694,7 @@ bool FleetProvisioning::MapParameters(const Aws::Crt::Optional<std::string> &par
                 jsonObj.GetErrorMessage().c_str());
             return false;
         }
-    
+
         Aws::Crt::Map<Aws::Crt::String, Aws::Crt::JsonView> pm = jsonObj.View().GetAllObjects();
         for (const auto &x : pm)
         {

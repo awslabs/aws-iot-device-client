@@ -440,7 +440,8 @@ TEST(Config, FleetProvisioningCli)
 
     CliArgs cliArgs;
     cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME] = "cli-template-name";
-    cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS] = "{\"SerialNumber\": \"Device-SN\"}";
+    cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS] =
+        "{\"SerialNumber\": \"Device-SN\"}";
     cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE] = "cli-csr-file";
     cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY] = "cli-device-key";
 

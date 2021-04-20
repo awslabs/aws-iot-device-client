@@ -840,7 +840,8 @@ bool PlainConfig::FleetProvisioning::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS))
     {
-        templateParameters = cliArgs.at(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS).c_str();
+        templateParameters =
+            cliArgs.at(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS).c_str();
     }
     if (cliArgs.count(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE))
     {
@@ -872,7 +873,7 @@ bool PlainConfig::FleetProvisioning::Validate() const
             DeviceClient::DC_FATAL_ERROR);
         return false;
     }
-    
+
     return true;
 }
 
@@ -1338,7 +1339,8 @@ void Config::PrintHelpMessage()
         "%s:\t\t\t\t\tDisable MQTT new tunnel notification for Secure Tunneling\n"
         "%s <interval>:\t\t\t\t\tPositive integer to publish Device Defender metrics\n"
         "%s <template-name>:\t\t\tUse specified Fleet Provisioning template name\n"
-        "%s <template-parameters>:\t\tUse specified Fleet Provisioning template parameters. A JSON object specified as an escaped string\n"
+        "%s <template-parameters>:\t\tUse specified Fleet Provisioning template parameters. A JSON object specified as "
+        "an escaped string\n"
         "%s <csr-file-path>:\t\t\t\t\t\tUse specified CSR file to generate a certificate by keeping user private key "
         "secure. If the CSR file is specified without also specifying a device private key, the Device Client will use "
         "Claim Certificate and Private key to generate new Certificate and Private Key while provisioning the device\n"

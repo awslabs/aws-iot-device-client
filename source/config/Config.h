@@ -197,7 +197,8 @@ namespace Aws
 
                     static constexpr char CLI_ENABLE_FLEET_PROVISIONING[] = "--enable-fleet-provisioning";
                     static constexpr char CLI_FLEET_PROVISIONING_TEMPLATE_NAME[] = "--fleet-provisioning-template-name";
-                    static constexpr char CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS[] = "--fleet-provisioning-template-parameters";
+                    static constexpr char CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS[] =
+                        "--fleet-provisioning-template-parameters";
                     static constexpr char CLI_FLEET_PROVISIONING_CSR_FILE[] = "--csr-file";
                     static constexpr char CLI_FLEET_PROVISIONING_DEVICE_KEY[] = "--device-key";
 
