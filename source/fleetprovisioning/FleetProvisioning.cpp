@@ -681,7 +681,7 @@ bool FleetProvisioning::ExportRuntimeConfig(
     return true;
 }
 
-bool FleetProvisioning::MapParameters(const Aws::Crt::Optional<std::string> &params)
+bool FleetProvisioning::MapParameters(const Aws::Crt::Optional<std::string> params)
 {
     if (params.has_value())
     {

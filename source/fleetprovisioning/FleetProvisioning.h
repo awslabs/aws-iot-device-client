@@ -37,10 +37,10 @@ namespace Aws
                      * @return false if failed parsing template parameters
                      */
                     bool MapParameters(const Aws::Crt::Optional<std::string>
-                                           &params); // Function must return boolean as
-                                                     // we need to handle parsing error
-                                                     // Having an empty map is also valid, so we need
-                                                     // to destinguish between parsing error and empty parameters
+                                           params); // Function must return boolean as
+                                                    // we need to handle parsing error
+                                                    // Having an empty map is also valid, so we need
+                                                    // to destinguish between parsing error and empty parameters
 
                   private:
                     /**
