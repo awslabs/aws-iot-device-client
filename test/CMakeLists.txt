@@ -54,13 +54,16 @@ file(GLOB FP_TST "./fleetprovisioning/*.cpp")
 file(GLOB DC_TST "./*.cpp" /
         ${CONFIG_TST}
         ${LOG_TST}
-        ${UTIL_TST}
-        ${FP_TST})
+        ${UTIL_TST})
 
 file(GLOB JOBS_TST "./jobs/*.cpp")
 
 if (NOT EXCLUDE_JOBS)
     list(APPEND DC_TST ${JOBS_TST})
+endif ()
+
+if (NOT EXCLUDE_FP)
+    list(APPEND DC_TST ${FP_TST})
 endif ()
 
 list(APPEND DC_SRC ${DC_TST})
