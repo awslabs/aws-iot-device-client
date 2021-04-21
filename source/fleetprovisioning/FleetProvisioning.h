@@ -30,6 +30,18 @@ namespace Aws
                      */
                     bool ProvisionDevice(std::shared_ptr<SharedCrtResourceManager> fpConnection, PlainConfig &config);
 
+                    /**
+                     * \brief Map template parameters from a JSON object specified as an escaped string
+                     *
+                     * @param params Template parameters given as JSON escaped string
+                     * @return false if failed parsing template parameters
+                     */
+                    bool MapParameters(const Aws::Crt::Optional<std::string>
+                                           &params); // Function must return boolean as
+                                                     // we need to handle parsing error
+                                                     // Having an empty map is also valid, so we need
+                                                     // to destinguish between parsing error and empty parameters
+
                   private:
                     /**
                      * \brief Used by the logger to specify that log messages are coming from the Fleet Provisioning
@@ -191,14 +203,6 @@ namespace Aws
                      * @return returns false if client is not able to find the file or if valid permissions are not set
                      */
                     bool LocateDeviceKey(const std::string filePath);
-
-                    /**
-                     * \brief Map template parameters from a JSON object specified as an escaped string
-                     *
-                     * @param params Template parameters given as JSON escaped string
-                     * @return false if failed parsing template parameters
-                     */
-                    bool MapParameters(const Aws::Crt::Optional<std::string> &params);
                 };
             } // namespace FleetProvisioningNS
         }     // namespace DeviceClient

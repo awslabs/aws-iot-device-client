@@ -50,10 +50,12 @@ endif ()
 file(GLOB CONFIG_TST "./config/*.cpp")
 file(GLOB UTIL_TST "./util/*.cpp")
 file(GLOB LOG_TST "./logging/*.cpp")
+file(GLOB FP_TST "./fleetprovisioning/*.cpp")
 file(GLOB DC_TST "./*.cpp" /
         ${CONFIG_TST}
         ${LOG_TST}
-        ${UTIL_TST})
+        ${UTIL_TST}
+        ${FP_TST})
 
 file(GLOB JOBS_TST "./jobs/*.cpp")
 
