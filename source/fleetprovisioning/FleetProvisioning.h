@@ -33,14 +33,14 @@ namespace Aws
                     /**
                      * \brief Map template parameters from a JSON object specified as an escaped string
                      *
+                     * Function must return boolean as we need to handle parsing error
+                     * Having an empty map is also valid, so we need to destinguish between parsing error and empty
+                     * parameters
+                     *
                      * @param params Template parameters given as JSON escaped string
                      * @return false if failed parsing template parameters
                      */
-                    bool MapParameters(const Aws::Crt::Optional<std::string>
-                                           params); // Function must return boolean as
-                                                    // we need to handle parsing error
-                                                    // Having an empty map is also valid, so we need
-                                                    // to destinguish between parsing error and empty parameters
+                    bool MapParameters(const Aws::Crt::Optional<std::string> params);
 
                   private:
                     /**
