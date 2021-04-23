@@ -50,3 +50,20 @@ TEST(StringUtils, leavesNewLineAndTabAlone)
     string original = "\toriginal\n";
     ASSERT_STREQ(original.c_str(), Sanitize(original).c_str());
 }
+
+TEST(StringUtils, maptoString)
+{
+    Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> map;
+    map.insert(std::pair<Aws::Crt::String, Aws::Crt::String>("a", "b"));
+    map.insert(std::pair<Aws::Crt::String, Aws::Crt::String>("c", "d"));
+    string expected = "\"a\": \"b\",\n\t"
+                      "\"c\": \"d\"";
+    ASSERT_STREQ(expected.c_str(), MapToJsonString(map).c_str());
+}
+
+TEST(StringUtils, emptyMaptoString)
+{
+    Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> map;
+    string expected = "";
+    ASSERT_STREQ(expected.c_str(), MapToJsonString(map).c_str());
+}

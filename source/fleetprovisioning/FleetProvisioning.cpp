@@ -403,6 +403,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         {
             LOGM_INFO(TAG, "RegisterThingResponse ThingName: %s.", response->ThingName->c_str());
             thingName = response->ThingName->c_str();
+            deviceConfig = MapToJsonString(response->DeviceConfiguration).c_str();
         }
         else
         {
@@ -539,7 +540,8 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
                 Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
                 certPath.c_str(),
                 keyPath.c_str(),
-                thingName.c_str()))
+                thingName.c_str(),
+                deviceConfig.c_str()))
         {
             return false;
         }
@@ -638,17 +640,21 @@ bool FleetProvisioning::GetCsrFileContent(const string filePath)
 }
 
 bool FleetProvisioning::ExportRuntimeConfig(
-    const string &file,
-    const string &runtimeCertPath,
-    const string &runtimeKeyPath,
-    const string &runtimeThingName)
+    const std::string &file,
+    const std::string &runtimeCertPath,
+    const std::string &runtimeKeyPath,
+    const std::string &runtimeThingName,
+    const std::string &runtimeDeviceConfig)
 {
     string jsonTemplate = R"({
 "%s": {
     "%s": true,
     "%s": "%s",
     "%s": "%s",
-    "%s": "%s"
+    "%s": "%s",
+    "%s": {
+        %s
+        }
     }
 })";
     string expandedPath = FileUtils::ExtractExpandedPath(file.c_str());
@@ -667,8 +673,9 @@ bool FleetProvisioning::ExportRuntimeConfig(
         PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_KEY,
         runtimeKeyPath.c_str(),
         PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_THING_NAME,
-        runtimeThingName.c_str());
-    clientConfig.close();
+        runtimeThingName.c_str(),
+        PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_DEVICE_CONFIG,
+        runtimeDeviceConfig.c_str());
     LOGM_INFO(TAG, "Exported runtime configurations to: %s", file.c_str());
 
     chmod(file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);

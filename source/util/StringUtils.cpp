@@ -3,6 +3,7 @@
 
 #include "StringUtils.h"
 #include <cstdarg>
+#include <map>
 #include <sstream>
 
 using namespace std;
@@ -59,6 +60,31 @@ namespace Aws
                         }
                     }
                     return output.str();
+                }
+
+                string addString(Aws::Crt::String first, Aws::Crt::String second)
+                {
+                    string jsonTemplate = R"("%s": "%s")";
+                    return FormatMessage(jsonTemplate.c_str(), first.c_str(), second.c_str());
+                }
+
+                string MapToJsonString(Crt::Optional<Crt::Map<Aws::Crt::String, Aws::Crt::String>> map)
+                {
+                    std::map<Aws::Crt::String, Aws::Crt::String>::iterator it;
+                    string result = "";
+                    unsigned int count = 0;
+                    for (it = map->begin(); it != map->end(); it++)
+                    {
+                        count++;
+                        result.erase(std::find(result.begin(), result.end(), '\0'), result.end());
+                        result = result.append(addString(it->first, it->second));
+                        if (count != map->size())
+                        {
+                            result.erase(std::find(result.begin(), result.end(), '\0'), result.end());
+                            result = result.append(",\n\t");
+                        }
+                    }
+                    return result;
                 }
             } // namespace Util
         }     // namespace DeviceClient
