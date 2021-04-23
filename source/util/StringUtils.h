@@ -1,8 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-#include <aws-iot-device-sdk-cpp-v2-src/crt/aws-crt-cpp/include/aws/crt/Types.h>
 #include <string>
+#include <aws/crt/Types.h>
 
 namespace Aws
 {
