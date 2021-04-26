@@ -1044,10 +1044,6 @@ bool PlainConfig::PubSub::Validate() const
     {
         if (!FileUtils::ValidateFilePermissions(publishFile.value(), Permissions::PUB_SUB_FILES, true))
         {
-            LOGM_ERROR(
-                Config::TAG,
-                "*** %s: Publish File field must be specified if Pub-Sub sample feature is enabled ***",
-                DeviceClient::DC_FATAL_ERROR);
             return false;
         }
     }
@@ -1063,10 +1059,6 @@ bool PlainConfig::PubSub::Validate() const
     {
         if (!FileUtils::ValidateFilePermissions(subscribeFile.value(), Permissions::PUB_SUB_FILES, true))
         {
-            LOGM_ERROR(
-                Config::TAG,
-                "*** %s: Subscribe File field must be specified if Pub-Sub sample feature is enabled ***",
-                DeviceClient::DC_FATAL_ERROR);
             return false;
         }
     }
