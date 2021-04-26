@@ -56,7 +56,7 @@ namespace Aws
                  * @param map the map object to convert into string
                  * @return string form of map
                  */
-                std::string MapToJsonString(Crt::Optional<Crt::Map<Aws::Crt::String, Aws::Crt::String>>);
+                std::string MapToString(Crt::Optional<Crt::Map<Aws::Crt::String, Aws::Crt::String>>);
             } // namespace Util
         }     // namespace DeviceClient
     }         // namespace Iot

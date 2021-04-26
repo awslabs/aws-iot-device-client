@@ -68,7 +68,7 @@ namespace Aws
                     return FormatMessage(jsonTemplate.c_str(), first.c_str(), second.c_str());
                 }
 
-                string MapToJsonString(Crt::Optional<Crt::Map<Aws::Crt::String, Aws::Crt::String>> map)
+                string MapToString(Crt::Optional<Crt::Map<Aws::Crt::String, Aws::Crt::String>> map)
                 {
                     std::map<Aws::Crt::String, Aws::Crt::String>::iterator it;
                     string result = "";
@@ -76,14 +76,13 @@ namespace Aws
                     for (it = map->begin(); it != map->end(); it++)
                     {
                         count++;
-                        result.erase(std::find(result.begin(), result.end(), '\0'), result.end());
                         result = result.append(addString(it->first, it->second));
                         if (count != map->size())
                         {
-                            result.erase(std::find(result.begin(), result.end(), '\0'), result.end());
                             result = result.append(",\n\t");
                         }
                     }
+                    result.erase(remove(result.begin(), result.end(), '\0'), result.end());
                     return result;
                 }
             } // namespace Util

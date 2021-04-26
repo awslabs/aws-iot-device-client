@@ -118,6 +118,9 @@ namespace Aws
 
                     /**
                      * \brief stores device config of newly provisioned device
+                     * The device configuration contains arbitrary data user want to send to devices while provisioning.
+                     * More details about device configuration is available over here:
+                     * https://docs.aws.amazon.com/iot/latest/developerguide/provision-template.html#device-config.
                      */
                     Aws::Crt::String deviceConfig;
 

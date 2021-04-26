@@ -403,7 +403,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         {
             LOGM_INFO(TAG, "RegisterThingResponse ThingName: %s.", response->ThingName->c_str());
             thingName = response->ThingName->c_str();
-            deviceConfig = MapToJsonString(response->DeviceConfiguration).c_str();
+            deviceConfig = MapToString(response->DeviceConfiguration).c_str();
         }
         else
         {
