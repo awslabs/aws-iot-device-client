@@ -1,9 +1,9 @@
 {
-	"endpoint": "replace_with_endpoint_value",
-	"cert": "replace_with_certificate_file_location",
-	"key": "replace_with_private_key_file_location",
-	"root-ca": "replace_with_root_ca_file_location",
-	"thing-name": "replace_with_thing_name",
+	"endpoint": "<replace_with_endpoint_value>",
+	"cert": "<replace_with_certificate_file_path>",
+	"key": "<replace_with_private_key_file_path>",
+	"root-ca": "<replace_with_root_ca_file_path>",
+	"thing-name": "<replace_with_thing_name>",
 	"logging": {
 		"level": "DEBUG",
 		"type": "FILE",
@@ -11,28 +11,28 @@
 	},
 	"jobs": {
 		"enabled": true,
-		"handler-directory": "replace_with_path_to_handler_dir"
+		"handler-directory": "<replace_with_job_handler_directory_path>"
 	},
 	"tunneling": {
 		"enabled": true
 	},
-	"device-defender":	{
+	"device-defender": {
 		"enabled": true,
 		"interval": 300
 	},
 	"fleet-provisioning": {
 		"enabled": false,
-		"template-name": "replace_with_template_name",
-		"csr-file": "replace_with_csr_file_path",
-		"device-key": "replace_with_device_private_key_file_path"
+		"template-name": "<replace_with_template_name>",
+		"csr-file": "<replace_with_csr_file_path>",
+		"device-key": "<replace_with_device_private_key_file_path>"
 	},
 	"samples": {
 		"pub-sub": {
 			"enabled": false,
-			"publish-topic": "replace_with_publish_topic",
-			"publish-file": "replace_with_publish_file",
-			"subscribe-topic": "replace_with_subscribe_topic",
-			"subscribe-file": "replace_with_subscribe_file"
+			"publish-topic": "<replace_with_publish_topic>",
+			"publish-file": "<replace_with_publish_file_path>",
+			"subscribe-topic": "<replace_with_subscribe_topic>",
+			"subscribe-file": "<replace_with_subscribe_file_path>"
 		}
 	}
 }
