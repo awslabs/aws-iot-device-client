@@ -966,25 +966,53 @@ bool PlainConfig::PubSub::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_PUB_SUB_PUBLISH_TOPIC;
     if (json.ValueExists(jsonKey))
     {
-        publishTopic = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        if (!json.GetString(jsonKey).empty())
+        {
+            publishTopic = json.GetString(jsonKey).c_str();
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
     }
 
     jsonKey = JSON_PUB_SUB_PUBLISH_FILE;
     if (json.ValueExists(jsonKey))
     {
-        publishFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        if (!json.GetString(jsonKey).empty())
+        {
+            publishFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
     }
 
     jsonKey = JSON_PUB_SUB_SUBSCRIBE_TOPIC;
     if (json.ValueExists(jsonKey))
     {
-        subscribeTopic = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        if (!json.GetString(jsonKey).empty())
+        {
+            subscribeTopic = json.GetString(jsonKey).c_str();
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
     }
 
     jsonKey = JSON_PUB_SUB_SUBSCRIBE_FILE;
     if (json.ValueExists(jsonKey))
     {
-        subscribeFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        if (!json.GetString(jsonKey).empty())
+        {
+            subscribeFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
     }
 
     return true;
@@ -1029,6 +1057,13 @@ bool PlainConfig::PubSub::Validate() const
             DeviceClient::DC_FATAL_ERROR);
         return false;
     }
+    if (publishFile.has_value() && !publishFile->empty())
+    {
+        if (!FileUtils::ValidateFilePermissions(publishFile.value(), Permissions::PUB_SUB_FILES, true))
+        {
+            return false;
+        }
+    }
     if (!subscribeTopic.has_value() || subscribeTopic->empty())
     {
         LOGM_ERROR(
@@ -1036,13 +1071,6 @@ bool PlainConfig::PubSub::Validate() const
             "*** %s: Subscribe Topic field must be specified if Pub-Sub sample feature is enabled ***",
             DeviceClient::DC_FATAL_ERROR);
         return false;
-    }
-    if (publishFile.has_value() && !publishFile->empty())
-    {
-        if (!FileUtils::ValidateFilePermissions(publishFile.value(), Permissions::PUB_SUB_FILES, true))
-        {
-            return false;
-        }
     }
     if (subscribeFile.has_value() && !subscribeFile->empty())
     {
@@ -1398,8 +1426,13 @@ bool Config::ExportDefaultSetting(const string &file)
     "%s": "<replace_with_root_ca_file_path>",
     "%s": "<replace_with_thing_name>",
     "%s": {
+        "%s": "DEBUG",
+        "%s": "FILE",
+        "%s": "/var/log/aws-iot-device-client/aws-iot-device-client.log"
+    },
+    "%s": {
         "%s": true,
-        "%s": "<replace_with_job_handler-directory_path>"
+        "%s": "<replace_with_job_handler_directory_path>"
     },
     "%s": {
         "%s": true
@@ -1407,11 +1440,21 @@ bool Config::ExportDefaultSetting(const string &file)
     "%s": {
         "%s": true,
         "%s": <replace_with_interval>
-    }
+    },
     "%s": {
-        "%s": true,
+        "%s": false,
         "%s": "<replace_with_template_name>",
-        "%s": "<replace_with_csr-file-path>"
+        "%s": "<replace_with_csr_file_path>",
+        "%s": "<replace_with_device_private_key_file_path>"
+    },
+    "%s": {
+        "%s": {
+            "%s": false,
+            "%s": "<replace_with_publish_topic>",
+            "%s": "<replace_with_publish_file_path>",
+            "%s": "<replace_with_subscribe_topic>",
+            "%s": "<replace_with_subscribe_file_path>"
+        }
     }
 }
 )";
@@ -1428,6 +1471,10 @@ bool Config::ExportDefaultSetting(const string &file)
         PlainConfig::JSON_KEY_KEY,
         PlainConfig::JSON_KEY_ROOT_CA,
         PlainConfig::JSON_KEY_THING_NAME,
+        PlainConfig::JSON_KEY_LOGGING,
+        PlainConfig::LogConfig::JSON_KEY_LOG_LEVEL,
+        PlainConfig::LogConfig::JSON_KEY_LOG_TYPE,
+        PlainConfig::LogConfig::JSON_KEY_LOG_FILE,
         PlainConfig::JSON_KEY_JOBS,
         PlainConfig::Jobs::JSON_KEY_ENABLED,
         PlainConfig::Jobs::JSON_KEY_HANDLER_DIR,
@@ -1440,7 +1487,15 @@ bool Config::ExportDefaultSetting(const string &file)
         PlainConfig::FleetProvisioning::JSON_KEY_ENABLED,
         PlainConfig::FleetProvisioning::JSON_KEY_TEMPLATE_NAME,
         PlainConfig::FleetProvisioning::JSON_KEY_TEMPLATE_PARAMETERS,
-        PlainConfig::FleetProvisioning::JSON_KEY_CSR_FILE);
+        PlainConfig::FleetProvisioning::JSON_KEY_CSR_FILE,
+        PlainConfig::FleetProvisioning::JSON_KEY_DEVICE_KEY,
+        PlainConfig::JSON_KEY_SAMPLES,
+        PlainConfig::JSON_KEY_PUB_SUB,
+        PlainConfig::PubSub::JSON_ENABLE_PUB_SUB,
+        PlainConfig::PubSub::JSON_PUB_SUB_PUBLISH_TOPIC,
+        PlainConfig::PubSub::JSON_PUB_SUB_PUBLISH_FILE,
+        PlainConfig::PubSub::JSON_PUB_SUB_SUBSCRIBE_TOPIC,
+        PlainConfig::PubSub::JSON_PUB_SUB_SUBSCRIBE_FILE);
 
     clientConfig.close();
     LOGM_INFO(TAG, "Exported settings to: %s", Sanitize(file).c_str());
