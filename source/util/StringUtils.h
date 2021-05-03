@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+#include <aws/crt/Types.h>
 #include <string>
 
 namespace Aws
@@ -39,6 +40,23 @@ namespace Aws
                  * @return the sanitized value
                  */
                 std::string Sanitize(std::string value);
+
+                /**
+                 * \brief helper method to concat strings with ':' in between
+                 *
+                 * @param first first string
+                 * @param second second string
+                 * @return string in 'first:second' form
+                 */
+
+                std::string addString(Aws::Crt::String first, Aws::Crt::String second);
+                /**
+                 * \brief Given an input map object, will return the string form of the map
+                 *
+                 * @param map the map object to convert into string
+                 * @return string form of map
+                 */
+                std::string MapToString(Crt::Optional<Crt::Map<Aws::Crt::String, Aws::Crt::String>>);
             } // namespace Util
         }     // namespace DeviceClient
     }         // namespace Iot

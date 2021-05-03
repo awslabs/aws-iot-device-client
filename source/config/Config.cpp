@@ -881,6 +881,7 @@ constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_COMPLETED_F
 constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_CERT[];
 constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_KEY[];
 constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_THING_NAME[];
+constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_DEVICE_CONFIG[];
 
 bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromJson(const Crt::JsonView &json)
 {

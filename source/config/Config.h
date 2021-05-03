@@ -227,6 +227,7 @@ namespace Aws
                     static constexpr char JSON_KEY_CERT[] = "cert";
                     static constexpr char JSON_KEY_KEY[] = "key";
                     static constexpr char JSON_KEY_THING_NAME[] = "thing-name";
+                    static constexpr char JSON_KEY_DEVICE_CONFIG[] = "device-config";
 
                     bool completedFleetProvisioning{false};
                     Aws::Crt::Optional<std::string> cert;
