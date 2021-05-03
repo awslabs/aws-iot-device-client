@@ -1013,7 +1013,7 @@ bool PlainConfig::PubSub::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE))
     {
-        subscribeTopic = cliArgs.at(PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC);
+        publishFile = cliArgs.at(PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE);
     }
     if (cliArgs.count(PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC))
     {
@@ -1062,7 +1062,6 @@ bool PlainConfig::PubSub::Validate() const
             return false;
         }
     }
-
     return true;
 }
 

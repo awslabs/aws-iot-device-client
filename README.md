@@ -11,8 +11,9 @@
   * [Fleet Provisioning Feature](source/fleetprovisioning/README.md)
   * [Device Defender Feature](source/devicedefender/README.md)
   * [Secure Tunneling Feature](source/tunneling/README.md)
-  * [MQTT Pub/Sub Sample Feature](source/samples/pubsub/README.md)
   * [Logging](source/logging/README.md)
+  * Samples:
+    - [MQTT Pub/Sub Sample Feature](source/samples/pubsub/README.md)
   * [Doxygen Documentation](docs/README.md)
   * [Additional Resources](#additional-resources)
   * [Security](#security)
