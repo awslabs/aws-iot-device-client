@@ -197,16 +197,20 @@ namespace Aws
 
                     static constexpr char CLI_ENABLE_FLEET_PROVISIONING[] = "--enable-fleet-provisioning";
                     static constexpr char CLI_FLEET_PROVISIONING_TEMPLATE_NAME[] = "--fleet-provisioning-template-name";
+                    static constexpr char CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS[] =
+                        "--fleet-provisioning-template-parameters";
                     static constexpr char CLI_FLEET_PROVISIONING_CSR_FILE[] = "--csr-file";
                     static constexpr char CLI_FLEET_PROVISIONING_DEVICE_KEY[] = "--device-key";
 
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
                     static constexpr char JSON_KEY_TEMPLATE_NAME[] = "template-name";
+                    static constexpr char JSON_KEY_TEMPLATE_PARAMETERS[] = "template-parameters";
                     static constexpr char JSON_KEY_CSR_FILE[] = "csr-file";
                     static constexpr char JSON_KEY_DEVICE_KEY[] = "device-key";
 
                     bool enabled{false};
                     Aws::Crt::Optional<std::string> templateName;
+                    Aws::Crt::Optional<std::string> templateParameters;
                     Aws::Crt::Optional<std::string> csrFile;
                     Aws::Crt::Optional<std::string> deviceKey;
                 };
