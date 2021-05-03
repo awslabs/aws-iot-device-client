@@ -30,6 +30,18 @@ namespace Aws
                      */
                     bool ProvisionDevice(std::shared_ptr<SharedCrtResourceManager> fpConnection, PlainConfig &config);
 
+                    /**
+                     * \brief Map template parameters from a JSON object specified as an escaped string
+                     *
+                     * Function must return boolean as we need to handle parsing error
+                     * Having an empty map is also valid, so we need to destinguish between parsing error and empty
+                     * parameters
+                     *
+                     * @param params Template parameters given as JSON escaped string
+                     * @return false if failed parsing template parameters
+                     */
+                    bool MapParameters(const Aws::Crt::Optional<std::string> params);
+
                   private:
                     /**
                      * \brief Used by the logger to specify that log messages are coming from the Fleet Provisioning
@@ -133,6 +145,11 @@ namespace Aws
                      * \brief stores Fleet Provisioning template name
                      */
                     Aws::Crt::String templateName;
+
+                    /**
+                     * \brief stores Fleet Provisioning template parameters map
+                     */
+                    Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> templateParameters;
 
                     /**
                      * \brief stores CSR file content

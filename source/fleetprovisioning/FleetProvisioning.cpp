@@ -464,6 +464,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
     RegisterThingRequest registerThingRequest;
     registerThingRequest.TemplateName = templateName;
     registerThingRequest.CertificateOwnershipToken = certificateOwnershipToken;
+    registerThingRequest.Parameters = templateParameters;
 
     identityClient.PublishRegisterThing(registerThingRequest, AWS_MQTT_QOS_AT_LEAST_ONCE, onRegisterPublishSubAck);
 
@@ -504,6 +505,10 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
 
     IotIdentityClient identityClient(fpConnection.get()->getConnection());
     templateName = config.fleetProvisioning.templateName.value().c_str();
+    if (!MapParameters(config.fleetProvisioning.templateParameters))
+    {
+        return false;
+    }
 
     if (config.fleetProvisioning.csrFile.has_value() && !config.fleetProvisioning.csrFile->empty() &&
         config.fleetProvisioning.deviceKey.has_value() && !config.fleetProvisioning.deviceKey->empty())
@@ -680,5 +685,28 @@ bool FleetProvisioning::ExportRuntimeConfig(
 
     chmod(file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     FileUtils::ValidateFilePermissions(file.c_str(), Permissions::RUNTIME_CONFIG_FILE, false);
+    return true;
+}
+
+bool FleetProvisioning::MapParameters(const Aws::Crt::Optional<std::string> params)
+{
+    if (params.has_value())
+    {
+        Aws::Crt::JsonObject jsonObj(params.value().c_str());
+        if (!jsonObj.WasParseSuccessful())
+        {
+            LOGM_ERROR(
+                Config::TAG,
+                "*** Couldn't parse template parameters JSON. GetErrorMessage returns: %s ***",
+                jsonObj.GetErrorMessage().c_str());
+            return false;
+        }
+
+        Aws::Crt::Map<Aws::Crt::String, Aws::Crt::JsonView> pm = jsonObj.View().GetAllObjects();
+        for (const auto &x : pm)
+        {
+            templateParameters.emplace(x.first, x.second.AsString());
+        }
+    }
     return true;
 }
