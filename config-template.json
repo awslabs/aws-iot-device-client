@@ -22,6 +22,7 @@
 	},
 	"fleet-provisioning": {
 		"enabled": false,
+		"template-parameters": "<replace_with_template_parameters>",
 		"template-name": "<replace_with_template_name>",
 		"csr-file": "<replace_with_csr_file_path>",
 		"device-key": "<replace_with_device_private_key_file_path>"

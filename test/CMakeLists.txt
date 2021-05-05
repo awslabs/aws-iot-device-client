@@ -50,6 +50,7 @@ endif ()
 file(GLOB CONFIG_TST "./config/*.cpp")
 file(GLOB UTIL_TST "./util/*.cpp")
 file(GLOB LOG_TST "./logging/*.cpp")
+file(GLOB FP_TST "./fleetprovisioning/*.cpp")
 file(GLOB DC_TST "./*.cpp" /
         ${CONFIG_TST}
         ${LOG_TST}
@@ -59,6 +60,10 @@ file(GLOB JOBS_TST "./jobs/*.cpp")
 
 if (NOT EXCLUDE_JOBS)
     list(APPEND DC_TST ${JOBS_TST})
+endif ()
+
+if (NOT EXCLUDE_FP)
+    list(APPEND DC_TST ${FP_TST})
 endif ()
 
 list(APPEND DC_SRC ${DC_TST})

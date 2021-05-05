@@ -18,11 +18,11 @@ TEST(Config, AllFeaturesEnabled)
 {
     constexpr char jsonString[] = R"(
 {
-	"endpoint": "endpoint value",
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
-	"thing-name": "thing-name value",
+    "endpoint": "endpoint value",
+    "cert": "cert",
+    "key": "key",
+    "root-ca": "root-ca",
+    "thing-name": "thing-name value",
     "logging": {
         "level": "debug",
         "type": "file",
@@ -41,8 +41,9 @@ TEST(Config, AllFeaturesEnabled)
     "fleet-provisioning": {
         "enabled": true,
         "template-name": "template-name",
-		"csr-file": "csr-file",
-		"device-key": "device-key"
+        "csr-file": "csr-file",
+        "device-key": "device-key",
+        "template-parameters": "{\"SerialNumber\": \"Device-SN\"}"
     }
 })";
     JsonObject jsonObject(jsonString);
@@ -66,6 +67,7 @@ TEST(Config, AllFeaturesEnabled)
     ASSERT_TRUE(config.fleetProvisioning.enabled);
     ASSERT_EQ(300, config.deviceDefender.interval);
     ASSERT_STREQ("template-name", config.fleetProvisioning.templateName->c_str());
+    ASSERT_STREQ("{\"SerialNumber\": \"Device-SN\"}", config.fleetProvisioning.templateParameters->c_str());
     ASSERT_STREQ("csr-file", config.fleetProvisioning.csrFile->c_str());
     ASSERT_STREQ("device-key", config.fleetProvisioning.deviceKey->c_str());
 }
@@ -74,11 +76,11 @@ TEST(Config, HappyCaseMinimumConfig)
 {
     constexpr char jsonString[] = R"(
 {
-	"endpoint": "endpoint value",
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
-	"thing-name": "thing-name value"
+    "endpoint": "endpoint value",
+    "cert": "cert",
+    "key": "key",
+    "root-ca": "root-ca",
+    "thing-name": "thing-name value"
 })";
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
@@ -127,10 +129,10 @@ TEST(Config, MissingSomeSettings)
     constexpr char jsonString[] = R"(
 {
     // endpoint is missing
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
-	"thing-name": "thing-name value"
+    "cert": "cert",
+    "key": "key",
+    "root-ca": "root-ca",
+    "thing-name": "thing-name value"
 })";
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
@@ -150,11 +152,11 @@ TEST(Config, SecureTunnelingMinimumConfig)
 {
     constexpr char jsonString[] = R"(
 {
-	"endpoint": "endpoint value",
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
-	"thing-name": "thing-name value",
+    "endpoint": "endpoint value",
+    "cert": "cert",
+    "key": "key",
+    "root-ca": "root-ca",
+    "thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
     }
@@ -174,11 +176,11 @@ TEST(Config, SecureTunnelingCli)
 {
     constexpr char jsonString[] = R"(
 {
-	"endpoint": "endpoint value",
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
-	"thing-name": "thing-name value",
+    "endpoint": "endpoint value",
+    "cert": "cert",
+    "key": "key",
+    "root-ca": "root-ca",
+    "thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
     }
@@ -213,11 +215,11 @@ TEST(Config, SecureTunnelingDisableSubscription)
 {
     constexpr char jsonString[] = R"(
 {
-	"endpoint": "endpoint value",
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
-	"thing-name": "thing-name value",
+    "endpoint": "endpoint value",
+    "cert": "cert",
+    "key": "key",
+    "root-ca": "root-ca",
+    "thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
     }
@@ -248,11 +250,11 @@ TEST(Config, LoggingConfigurationCLI)
 {
     constexpr char jsonString[] = R"(
 {
-	"endpoint": "endpoint value",
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
-	"thing-name": "thing-name value",
+    "endpoint": "endpoint value",
+    "cert": "cert",
+    "key": "key",
+    "root-ca": "root-ca",
+    "thing-name": "thing-name value",
     "logging": {
         "level": "DEBUG",
         "type": "STDOUT",
@@ -307,11 +309,11 @@ TEST(Config, SDKLoggingConfigurationJsonDefaults)
 {
     constexpr char jsonString[] = R"(
 {
-	"endpoint": "endpoint value",
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
-	"thing-name": "thing-name value",
+    "endpoint": "endpoint value",
+    "cert": "cert",
+    "key": "key",
+    "root-ca": "root-ca",
+    "thing-name": "thing-name value",
     "logging": {
         "level": "DEBUG",
         "type": "STDOUT",
@@ -333,11 +335,11 @@ TEST(Config, SDKLoggingConfigurationJson)
 {
     constexpr char jsonString[] = R"(
 {
-	"endpoint": "endpoint value",
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
-	"thing-name": "thing-name value",
+    "endpoint": "endpoint value",
+    "cert": "cert",
+    "key": "key",
+    "root-ca": "root-ca",
+    "thing-name": "thing-name value",
     "logging": {
         "level": "DEBUG",
         "type": "STDOUT",
@@ -367,11 +369,11 @@ TEST(Config, FleetProvisioningMinimumConfig)
 {
     constexpr char jsonString[] = R"(
 {
-	"endpoint": "endpoint value",
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
-	"thing-name": "thing-name value",
+    "endpoint": "endpoint value",
+    "cert": "cert",
+    "key": "key",
+    "root-ca": "root-ca",
+    "thing-name": "thing-name value",
     "fleet-provisioning": {
         "enabled": true,
         "template-name": "template-name"
@@ -392,11 +394,11 @@ TEST(Config, MissingFleetProvisioningConfig)
 {
     constexpr char jsonString[] = R"(
 {
-	"endpoint": "endpoint value",
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
-	"thing-name": "thing-name value"
+    "endpoint": "endpoint value",
+    "cert": "cert",
+    "key": "key",
+    "root-ca": "root-ca",
+    "thing-name": "thing-name value"
 })";
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
@@ -424,16 +426,17 @@ TEST(Config, FleetProvisioningCli)
 {
     constexpr char jsonString[] = R"(
 {
-	"endpoint": "endpoint value",
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
-	"thing-name": "thing-name value",
+    "endpoint": "endpoint value",
+    "cert": "cert",
+    "key": "key",
+    "root-ca": "root-ca",
+    "thing-name": "thing-name value",
     "fleet-provisioning": {
         "enabled": true,
         "template-name": "template-name",
-		"csr-file": "csr-file",
-		"device-key": "device-key"
+        "csr-file": "csr-file",
+        "device-key": "device-key",
+        "template-parameters": "{\"SerialNumber\": \"Device-SN\"}"
     }
 })";
     JsonObject jsonObject(jsonString);
@@ -441,6 +444,8 @@ TEST(Config, FleetProvisioningCli)
 
     CliArgs cliArgs;
     cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME] = "cli-template-name";
+    cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS] =
+        "{\"SerialNumber\": \"Device-SN\"}";
     cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE] = "cli-csr-file";
     cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY] = "cli-device-key";
 
@@ -451,6 +456,7 @@ TEST(Config, FleetProvisioningCli)
     ASSERT_TRUE(config.Validate());
     ASSERT_TRUE(config.fleetProvisioning.enabled);
     ASSERT_STREQ("cli-template-name", config.fleetProvisioning.templateName->c_str());
+    ASSERT_STREQ("{\"SerialNumber\": \"Device-SN\"}", config.fleetProvisioning.templateParameters->c_str());
     ASSERT_STREQ("cli-csr-file", config.fleetProvisioning.csrFile->c_str());
     ASSERT_STREQ("cli-device-key", config.fleetProvisioning.deviceKey->c_str());
 }

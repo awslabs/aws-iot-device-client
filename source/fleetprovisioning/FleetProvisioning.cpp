@@ -403,6 +403,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         {
             LOGM_INFO(TAG, "RegisterThingResponse ThingName: %s.", response->ThingName->c_str());
             thingName = response->ThingName->c_str();
+            deviceConfig = MapToString(response->DeviceConfiguration).c_str();
         }
         else
         {
@@ -463,6 +464,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
     RegisterThingRequest registerThingRequest;
     registerThingRequest.TemplateName = templateName;
     registerThingRequest.CertificateOwnershipToken = certificateOwnershipToken;
+    registerThingRequest.Parameters = templateParameters;
 
     identityClient.PublishRegisterThing(registerThingRequest, AWS_MQTT_QOS_AT_LEAST_ONCE, onRegisterPublishSubAck);
 
@@ -503,6 +505,10 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
 
     IotIdentityClient identityClient(fpConnection.get()->getConnection());
     templateName = config.fleetProvisioning.templateName.value().c_str();
+    if (!MapParameters(config.fleetProvisioning.templateParameters))
+    {
+        return false;
+    }
 
     if (config.fleetProvisioning.csrFile.has_value() && !config.fleetProvisioning.csrFile->empty() &&
         config.fleetProvisioning.deviceKey.has_value() && !config.fleetProvisioning.deviceKey->empty())
@@ -539,7 +545,8 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
                 Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
                 certPath.c_str(),
                 keyPath.c_str(),
-                thingName.c_str()))
+                thingName.c_str(),
+                deviceConfig.c_str()))
         {
             return false;
         }
@@ -638,17 +645,21 @@ bool FleetProvisioning::GetCsrFileContent(const string filePath)
 }
 
 bool FleetProvisioning::ExportRuntimeConfig(
-    const string &file,
-    const string &runtimeCertPath,
-    const string &runtimeKeyPath,
-    const string &runtimeThingName)
+    const std::string &file,
+    const std::string &runtimeCertPath,
+    const std::string &runtimeKeyPath,
+    const std::string &runtimeThingName,
+    const std::string &runtimeDeviceConfig)
 {
     string jsonTemplate = R"({
 "%s": {
     "%s": true,
     "%s": "%s",
     "%s": "%s",
-    "%s": "%s"
+    "%s": "%s",
+    "%s": {
+        %s
+        }
     }
 })";
     string expandedPath = FileUtils::ExtractExpandedPath(file.c_str());
@@ -667,11 +678,35 @@ bool FleetProvisioning::ExportRuntimeConfig(
         PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_KEY,
         runtimeKeyPath.c_str(),
         PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_THING_NAME,
-        runtimeThingName.c_str());
-    clientConfig.close();
+        runtimeThingName.c_str(),
+        PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_DEVICE_CONFIG,
+        runtimeDeviceConfig.c_str());
     LOGM_INFO(TAG, "Exported runtime configurations to: %s", file.c_str());
 
     chmod(file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     FileUtils::ValidateFilePermissions(file.c_str(), Permissions::RUNTIME_CONFIG_FILE, false);
+    return true;
+}
+
+bool FleetProvisioning::MapParameters(const Aws::Crt::Optional<std::string> params)
+{
+    if (params.has_value())
+    {
+        Aws::Crt::JsonObject jsonObj(params.value().c_str());
+        if (!jsonObj.WasParseSuccessful())
+        {
+            LOGM_ERROR(
+                Config::TAG,
+                "*** Couldn't parse template parameters JSON. GetErrorMessage returns: %s ***",
+                jsonObj.GetErrorMessage().c_str());
+            return false;
+        }
+
+        Aws::Crt::Map<Aws::Crt::String, Aws::Crt::JsonView> pm = jsonObj.View().GetAllObjects();
+        for (const auto &x : pm)
+        {
+            templateParameters.emplace(x.first, x.second.AsString());
+        }
+    }
     return true;
 }
