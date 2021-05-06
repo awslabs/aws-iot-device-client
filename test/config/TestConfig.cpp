@@ -2,13 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "../../source/config/Config.h"
+#include "../../source/util/FileUtils.h"
+#include "../../source/util/UniqueString.h"
 #include "gtest/gtest.h"
 #include <aws/crt/JsonObject.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 using namespace std;
 using namespace Aws::Crt;
 using namespace Aws::Iot::DeviceClient;
+using namespace Aws::Iot::DeviceClient::Util;
 
 TEST(Config, AllFeaturesEnabled)
 {
@@ -455,4 +459,77 @@ TEST(Config, FleetProvisioningCli)
     ASSERT_STREQ("{\"SerialNumber\": \"Device-SN\"}", config.fleetProvisioning.templateParameters->c_str());
     ASSERT_STREQ("cli-csr-file", config.fleetProvisioning.csrFile->c_str());
     ASSERT_STREQ("cli-device-key", config.fleetProvisioning.deviceKey->c_str());
+}
+
+TEST(Config, DeviceDefenderCli)
+{
+    constexpr char jsonString[] = R"(
+{
+	"endpoint": "endpoint value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
+	"thing-name": "thing-name value",
+    "device-defender": {
+        "enabled": true,
+		"interval": 6
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    CliArgs cliArgs;
+    cliArgs[PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL] = 6;
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_TRUE(config.deviceDefender.enabled);
+    ASSERT_EQ(6, config.deviceDefender.interval);
+}
+
+TEST(Config, PubSubSampleCli)
+{
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
+    FileUtils::StoreValueInFile("Test", filePath);
+    chmod(filePath.c_str(), 0600);
+    constexpr char jsonString[] = R"(
+{
+	"endpoint": "endpoint value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
+	"thing-name": "thing-name value",
+    "samples": {
+		"pub-sub": {
+			"enabled": true,
+			"publish-topic": "publish_topic",
+			"publish-file": "/tmp/file",
+			"subscribe-topic": "subscribe_topic",
+			"subscribe-file": "/tmp/file"
+		}
+	}
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    CliArgs cliArgs;
+    cliArgs[PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_TOPIC] = "publish_topic";
+    cliArgs[PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE] = filePath;
+    cliArgs[PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC] = "subscribe_topic";
+    cliArgs[PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE] = filePath;
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_TRUE(config.pubSub.enabled);
+    ASSERT_STREQ("publish_topic", config.pubSub.publishTopic->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.pubSub.publishFile->c_str());
+    ASSERT_STREQ("subscribe_topic", config.pubSub.subscribeTopic->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.pubSub.subscribeFile->c_str());
+    remove(filePath.c_str());
 }
