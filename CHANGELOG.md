@@ -8,11 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Device Client aborts on Red Hat Enterprise Linux ARM](https://github.com/awslabs/aws-iot-device-client/issues/87)
 - [Device Client crashes due to SIGSEGV on Ubuntu x86](https://github.com/awslabs/aws-iot-device-client/issues/86)
 
-## Unreleased
+## [1.2.X] - 2021-05-06
+### Added
+- Added support for storing FP device config from FP Template in runtime-config file
+- Support to pass parameters to the AWS IoT Fleet Provisioning RegisterThing MQTT request
 
 ### Fixed
 - Resolved issue where missing pub sub sample files (publish file and subscribe file) would cause a seg fault
 - Resolved issue where pub sub sample lost reference on the Default Publish Payload allocator, publishing a blank string
+- Fixed a bug with the pub sub sample CLI config
 
 ## [1.1.X] - 2021-04-14
 ### Added
