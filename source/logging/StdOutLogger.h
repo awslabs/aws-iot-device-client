@@ -30,7 +30,8 @@ namespace Aws
                      */
                     bool needsShutdown = false;
                     /**
-                     * \brief The default value in milliseconds for which Device client will wait after getting a log message from logQueue
+                     * \brief The default value in milliseconds for which Device client will wait after getting a
+                     * log message from logQueue
                      */
                     static constexpr int DEFAULT_WAIT_TIME_MILLISECONDS = 1;
                     /**
