@@ -30,6 +30,11 @@ namespace Aws
                      */
                     bool needsShutdown = false;
                     /**
+                     * \brief The default value in milliseconds for which Device client will wait after getting a
+                     * log message from logQueue
+                     */
+                    static constexpr int DEFAULT_WAIT_TIME_MILLISECONDS = 1;
+                    /**
                      * \brief a LogQueue instance used to queue incoming log messages for processing
                      */
                     std::unique_ptr<LogQueue> logQueue = std::unique_ptr<LogQueue>(new LogQueue);
