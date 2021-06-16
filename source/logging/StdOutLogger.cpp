@@ -31,6 +31,7 @@ void StdOutLogger::run()
         {
             writeLogMessage(std::move(message));
         }
+        this_thread::sleep_for(std::chrono::milliseconds(25));
     }
 }
 
