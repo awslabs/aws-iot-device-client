@@ -12,6 +12,8 @@
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Logging;
 
+constexpr int StdOutLogger::DEFAULT_WAIT_TIME_MILLISECONDS;
+
 void StdOutLogger::writeLogMessage(unique_ptr<LogMessage> message)
 {
     char time_buffer[TIMESTAMP_BUFFER_SIZE];
@@ -31,7 +33,7 @@ void StdOutLogger::run()
         {
             writeLogMessage(std::move(message));
         }
-        this_thread::sleep_for(std::chrono::milliseconds(25));
+        this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_WAIT_TIME_MILLISECONDS));
     }
 }
 
