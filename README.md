@@ -6,7 +6,7 @@
 *__Jump To:__*
   * [Introduction](#introduction)
   * [Installation](#installation)
-  * [Setup & Configuration](#setup-and-config)
+  * [Setup & Configuration](#setup-and-configuration)
   * [Jobs Feature](source/jobs/README.md)
   * [Fleet Provisioning Feature](source/fleetprovisioning/README.md)
   * [Device Defender Feature](source/devicedefender/README.md)
