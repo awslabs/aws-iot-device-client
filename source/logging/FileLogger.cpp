@@ -14,6 +14,8 @@ using namespace std;
 using namespace Aws::Iot::DeviceClient::Logging;
 using namespace Aws::Iot::DeviceClient::Util;
 
+constexpr int FileLogger::DEFAULT_WAIT_TIME_MILLISECONDS;
+
 bool FileLogger::start(const PlainConfig &config)
 {
     setLogLevel(config.logConfig.deviceClientlogLevel);
@@ -113,6 +115,7 @@ void FileLogger::run()
         {
             writeLogMessage(std::move(message));
         }
+        this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_WAIT_TIME_MILLISECONDS));
     }
 }
 
