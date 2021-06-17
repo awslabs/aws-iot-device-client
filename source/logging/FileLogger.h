@@ -41,6 +41,12 @@ namespace Aws
                     std::string logFile = DEFAULT_LOG_FILE;
 
                     /**
+                     * \brief The default value in milliseconds for which Device client will wait after getting a
+                     * log message from logQueue
+                     */
+                    static constexpr int DEFAULT_WAIT_TIME_MILLISECONDS = 1;
+
+                    /**
                      * \brief Flag used to notify underlying threads that they should discontinue any processing
                      * so that the application can safely shutdown
                      */
