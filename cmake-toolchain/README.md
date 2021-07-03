@@ -17,23 +17,11 @@ cmake ../ -DCMAKE_TOOLCHAIN_FILE=<Path/To/Build/Toolchain/File>
 This will allow the toolchain files to overwrite variables *(various paths, compilers, and flags)* required to execute cross compilation without changing the original **cmake** file.
 
 **Dependencies**:
-For your build to be successful you'll also need a cross compiled version of our dependencies ([aws-iot-device-sdk-cpp-v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2) and **openssl**), for the SDK this is automatically accomplished when running the **cmake** command above without the following flag `-DBUILD_SDK=OFF`.
+For your build to be successful you'll also need a cross compiled version of our dependencies ([aws-iot-device-sdk-cpp-v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2)), for the SDK this is automatically accomplished when running the **cmake** command above without the following flag `-DBUILD_SDK=OFF`.
 ```
 cmake ../ -DCMAKE_TOOLCHAIN_FILE=<Path/To/Build/Toolchain/File>
 ```
-The last dependency you'll need cross compiled is **openssl**.  This one is slightly more complicated but can be done as follows:  *(This example is from our build process, replace the information in carets.  While we happen to be linking against OpenSSL 1.1.1 in this example since our target device uses OpenSSL 1.1.1 for its TLS implementation, you'll want to replace this with whatever TLS implementation is present on your target device.)*
-```
-wget https://www.openssl.org/source/openssl-1.1.1.tar.gz
-tar -xvzf openssl-1.1.1.tar.gz
-export INSTALL_DIR=</Path/To/Install/Dir>
-cd openssl-1.1.1
-./Configure <Platform> shared \
-    --prefix=$INSTALL_DIR --openssldir=$INSTALL_DIR/openssl \
-    --cross-compile-prefix=</Compiler/Prefix/Path> 
-make depend
-make -j 4
-make install 
-```
+
 For a real example look into our [.github/build.sh](../.github/build.sh) script.
 
 **Other Architecture**:

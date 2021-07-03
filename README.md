@@ -61,7 +61,6 @@ The AWS IoT Device Client currently works on IoT devices with common microproces
 
 * C++ 11 or higher
 * [CMake](https://cmake.org/) 3.10+
-* OpenSSL 1.1.1
 * [aws-iot-device-sdk-cpp-v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2) commit hash located in `CMakeLists.txt.awssdk`
 
 *Note:* The TLS stack, and the version of the SDK mentioned above is what our CI uses.  You could potentially use a different TLS stack for example, we just don't actively test or support this.

@@ -104,11 +104,6 @@ include(CMakeLists.txt.versioning)
 configure_file("source/Version.h.in" "${PROJECT_BINARY_DIR}/Version.h")
 
 #########################################
-# OpenSSL dependency                    #
-#########################################
-find_package(OpenSSL REQUIRED)
-
-#########################################
 # AWS IoT v2 SDK C++ dependency         #
 #########################################
 
@@ -172,8 +167,6 @@ if (NOT EXCLUDE_FP)
 endif ()
 
 target_link_libraries(${DC_PROJECT_NAME} ${DEP_DC_LIBS})
-target_link_libraries(${DC_PROJECT_NAME} OpenSSL::SSL)
-target_link_libraries(${DC_PROJECT_NAME} OpenSSL::Crypto)
 
 # If you're linking statically against the SDK but dynamically against libraries such as OpenSSL,
 # you may need to link the device client against the dynamic loader provided by glib

@@ -78,8 +78,6 @@ endif ()
 
 target_link_libraries(${GTEST_PROJECT} gtest gtest_main)
 target_link_libraries(${GTEST_PROJECT} ${DEP_DC_LIBS})
-target_link_libraries(${GTEST_PROJECT} OpenSSL::SSL)
-target_link_libraries(${GTEST_PROJECT} OpenSSL::Crypto)
 
 if (LINK_DL)
     target_link_libraries(${GTEST_PROJECT} dl)
