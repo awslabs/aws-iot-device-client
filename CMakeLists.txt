@@ -167,7 +167,7 @@ if (NOT EXCLUDE_FP)
 endif ()
 
 target_link_libraries(${DC_PROJECT_NAME} ${DEP_DC_LIBS})
-target_link_libraries(${DC_PROJECT_NAME} crypto ssl)
+target_link_libraries(${DC_PROJECT_NAME} crypto)
 
 # If you're linking statically against the SDK but dynamically against libraries such as OpenSSL,
 # you may need to link the device client against the dynamic loader provided by glib
