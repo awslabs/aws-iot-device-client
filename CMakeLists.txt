@@ -143,6 +143,7 @@ endif ()
 
 if (TARGET crypto)
     message(STATUS "Using libcrypto from AWS-LC")
+endif()
 
 set(DEP_DC_LIBS ${DEP_DC_LIBS} aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io aws-c-cal aws-c-http aws-c-compression aws-c-common)
 
