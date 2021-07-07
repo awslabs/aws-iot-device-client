@@ -144,7 +144,7 @@ endif ()
 set(DEP_DC_LIBS ${DEP_DC_LIBS} aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io aws-c-cal aws-c-http aws-c-compression aws-c-common)
 
 if (UNIX AND NOT APPLE)
-    set (DEP_DC_LIBS ${DEP_DC_LIBS} s2n)
+    set (DEP_DC_LIBS ${DEP_DC_LIBS} s2n crypto ssl)
 endif()
 
 # Set SDK dependency libraries as needed

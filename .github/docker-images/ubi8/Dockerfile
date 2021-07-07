@@ -16,17 +16,17 @@ RUN yum --disableplugin=subscription-manager -y update \
     gcc-c++ \
     && yum clean all \
     && rm -rf /var/cache/yum
-    
+
 ###############################################################################
-# Install OpenSSL 1.1.1
+# Install pre-built CMake
 ###############################################################################
 WORKDIR /tmp
-RUN wget https://www.openssl.org/source/openssl-1.1.1i.tar.gz \
-    && tar -zxvf openssl-1.1.1i.tar.gz \
-    && cd openssl-1.1.1i \
-    && ./config \
-    && make \
-    && sudo make install
+RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3.10.0.tar.gz -o cmake-3.10.0.tar.gz \
+    && tar -zxvf cmake-3.10.0.tar.gz \
+    && cd cmake-3.10.0 \
+    && ./bootstrap \
+    && make -j 4 \
+    && make install
 
 ###############################################################################
 # Clone and build Google Test
