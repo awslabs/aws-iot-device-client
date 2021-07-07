@@ -141,10 +141,13 @@ else ()
     target_compile_options(${DC_PROJECT_NAME} PRIVATE -Wall -Wno-long-long -pedantic -Werror)
 endif ()
 
+if (TARGET crypto)
+    message(STATUS "Using libcrypto from AWS-LC")
+
 set(DEP_DC_LIBS ${DEP_DC_LIBS} aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io aws-c-cal aws-c-http aws-c-compression aws-c-common)
 
 if (UNIX AND NOT APPLE)
-    set (DEP_DC_LIBS ${DEP_DC_LIBS} s2n crypto ssl)
+    set (DEP_DC_LIBS ${DEP_DC_LIBS} s2n)
 endif()
 
 # Set SDK dependency libraries as needed
