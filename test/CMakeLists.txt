@@ -78,7 +78,6 @@ endif ()
 
 target_link_libraries(${GTEST_PROJECT} gtest gtest_main)
 target_link_libraries(${GTEST_PROJECT} ${DEP_DC_LIBS})
-target_link_libraries(${DC_PROJECT_NAME} crypto)
 
 if (LINK_DL)
     target_link_libraries(${GTEST_PROJECT} dl)
