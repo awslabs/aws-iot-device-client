@@ -2,6 +2,8 @@
 SET(CMAKE_SYSTEM_NAME Linux)
 #this one not so much
 SET(CMAKE_SYSTEM_VERSION 1)
+# manually set desired system architecture
+SET(CMAKE_SYSTEM_PROCESSOR aarch64)
 
 variable_watch(PKG_CONFIG_PATH)
 set(PKG_CONFIG_EXECUTABLE "/usr/bin/pkg-config")
