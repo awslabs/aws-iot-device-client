@@ -60,7 +60,7 @@ RUN mkdir sdk-cpp-workspace \
     && cd aws-iot-device-sdk-cpp-v2 \
     && git checkout f2d5c65334de5cc4937fd7115d1ada7787f0710d \
     && cd ../aws-iot-device-sdk-cpp-v2-build \
-    && cmake -DCMAKE_INSTALL_PREFIX="/usr" -DUSE_OPENSSL=ON -DBUILD_DEPS=ON ../aws-iot-device-sdk-cpp-v2 \
+    && cmake -DCMAKE_INSTALL_PREFIX="/usr" -DUSE_OPENSSL=ON -DSEARCH_LIBCRYPTO=ON -DBUILD_DEPS=ON ../aws-iot-device-sdk-cpp-v2 \
     && cmake --build . --target install
 
 ADD entry-script.sh /home/entry-script
