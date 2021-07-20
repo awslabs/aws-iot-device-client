@@ -114,7 +114,9 @@ find_package(OpenSSL REQUIRED)
 
 if (BUILD_SDK)
     # Download and unpack aws iot device sdk cpp v2 at configure time
+    set(SEARCH_LIBCRYPTO ON "Ask S2N search libcrypto" FORCE)
     set(BUILD_DEPS ON CACHE BOOL "Build dependencies for the AWS SDK" FORCE)
+    set(USE_OPENSSL ON CACHE BOOL "Use OpenSSL instead of aws-lc" FORCE)
     configure_file(CMakeLists.txt.awssdk
             aws-iot-device-sdk-cpp-v2-download/CMakeLists.txt)
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .

@@ -9,7 +9,6 @@ ExternalProject_Add(aws-iot-device-sdk-cpp-v2
         SOURCE_DIR              "${CMAKE_BINARY_DIR}/aws-iot-device-sdk-cpp-v2-src"
         BINARY_DIR              "${CMAKE_BINARY_DIR}/aws-iot-device-sdk-cpp-v2-build"
         CONFIGURE_COMMAND       ""
-        CMAKE_ARGS              "-DUSE_OPENSSL=ON"
         BUILD_COMMAND           ""
         INSTALL_COMMAND         ""
         TEST_COMMAND            ""
