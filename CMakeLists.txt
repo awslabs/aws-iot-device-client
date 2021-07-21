@@ -106,6 +106,7 @@ configure_file("source/Version.h.in" "${PROJECT_BINARY_DIR}/Version.h")
 #########################################
 # OpenSSL dependency                    #
 #########################################
+set(OPENSSL_USE_STATIC_LIBS TRUE)
 find_package(OpenSSL REQUIRED)
 
 #########################################
@@ -114,7 +115,6 @@ find_package(OpenSSL REQUIRED)
 
 if (BUILD_SDK)
     # Download and unpack aws iot device sdk cpp v2 at configure time
-    set(SEARCH_LIBCRYPTO ON "Ask S2N search libcrypto" FORCE)
     set(BUILD_DEPS ON CACHE BOOL "Build dependencies for the AWS SDK" FORCE)
     set(USE_OPENSSL ON CACHE BOOL "Use OpenSSL instead of aws-lc" FORCE)
     configure_file(CMakeLists.txt.awssdk
@@ -151,7 +151,7 @@ endif ()
 set(DEP_DC_LIBS ${DEP_DC_LIBS} aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io aws-c-cal aws-c-http aws-c-compression aws-c-common aws-c-s3 aws-c-event-stream aws-checksums)
 
 if (UNIX AND NOT APPLE)
-    set (DEP_DC_LIBS ${DEP_DC_LIBS} s2n crypto)
+    set (DEP_DC_LIBS ${DEP_DC_LIBS} s2n)
 endif()
 
 # Set SDK dependency libraries as needed
