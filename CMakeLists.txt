@@ -205,7 +205,6 @@ endif ()
 
 target_link_libraries(${DC_PROJECT_NAME} ${DEP_DC_LIBS})
 target_link_libraries(${DC_PROJECT_NAME} OpenSSL::SSL)
-target_link_libraries(${DC_PROJECT_NAME} OpenSSL::Crypto)
 
 # If you're linking statically against the SDK but dynamically against libraries such as OpenSSL,
 # you may need to link the device client against the dynamic loader provided by glib
