@@ -106,6 +106,7 @@ configure_file("source/Version.h.in" "${PROJECT_BINARY_DIR}/Version.h")
 #########################################
 # OpenSSL dependency                    #
 #########################################
+set(OPENSSL_USE_STATIC_LIBS TRUE)
 find_package(OpenSSL REQUIRED)
 
 #########################################
@@ -115,6 +116,7 @@ find_package(OpenSSL REQUIRED)
 if (BUILD_SDK)
     # Download and unpack aws iot device sdk cpp v2 at configure time
     set(BUILD_DEPS ON CACHE BOOL "Build dependencies for the AWS SDK" FORCE)
+    set(USE_OPENSSL ON CACHE BOOL "Use OpenSSL instead of aws-lc" FORCE)
     configure_file(CMakeLists.txt.awssdk
             aws-iot-device-sdk-cpp-v2-download/CMakeLists.txt)
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
@@ -146,7 +148,7 @@ else ()
     target_compile_options(${DC_PROJECT_NAME} PRIVATE -Wall -Wno-long-long -pedantic -Werror)
 endif ()
 
-set(DEP_DC_LIBS ${DEP_DC_LIBS} aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io aws-c-cal aws-c-http aws-c-compression aws-c-common)
+set(DEP_DC_LIBS ${DEP_DC_LIBS} aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io aws-c-cal aws-c-http aws-c-compression aws-c-common aws-c-s3 aws-c-event-stream aws-checksums)
 
 if (UNIX AND NOT APPLE)
     set (DEP_DC_LIBS ${DEP_DC_LIBS} s2n)
