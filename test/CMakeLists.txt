@@ -43,6 +43,18 @@ if (NOT EXCLUDE_FP)
     list(APPEND DC_SRC ${FP_SRC})
 endif ()
 
+
+if (NOT EXCLUDE_SHADOW)
+    if (NOT EXCLUDE_CONFIG_SHADOW)
+        file(GLOB CONFIG_SHADOW_SRC "../source/shadow/ConfigShadow.cpp")
+        list(APPEND DC_SRC ${CONFIG_SHADOW_SRC})
+    endif ()
+    if (NOT EXCLUDE_CONFIG_SHADOW)
+        file(GLOB SAMPLE_SHADOW_SRC "../source/shadow/SampleShadowFeature.cpp")
+        list(APPEND DC_SRC ${SAMPLE_SHADOW_SRC})
+    endif ()
+endif ()
+
 #########################################
 # Test Files                            #
 #########################################
@@ -51,6 +63,8 @@ file(GLOB CONFIG_TST "./config/*.cpp")
 file(GLOB UTIL_TST "./util/*.cpp")
 file(GLOB LOG_TST "./logging/*.cpp")
 file(GLOB FP_TST "./fleetprovisioning/*.cpp")
+file(GLOB CONFIG_SHADOW_TST "./shadow/TestConfigShadowFeature.cpp")
+file(GLOB SAMPLE_SHADOW_TST "./shadow/TestSampleShadowFeature.cpp")
 file(GLOB DC_TST "./*.cpp" /
         ${CONFIG_TST}
         ${LOG_TST}
@@ -64,6 +78,15 @@ endif ()
 
 if (NOT EXCLUDE_FP)
     list(APPEND DC_TST ${FP_TST})
+endif ()
+
+if (NOT EXCLUDE_SHADOW)
+    if (NOT EXCLUDE_CONFIG_SHADOW)
+        list(APPEND DC_TST ${CONFIG_SHADOW_TST})
+    endif()
+    if (NOT EXCLUDE_SAMPLE_SHADOW)
+        list(APPEND DC_TST ${SAMPLE_SHADOW_TST})
+    endif()
 endif ()
 
 list(APPEND DC_SRC ${DC_TST})

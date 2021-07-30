@@ -11,6 +11,9 @@ option(EXCLUDE_FP "Builds the device client without the IoT Fleet Provisioning F
 option(DISABLE_MQTT "WARNING: This flag is meant for internal use cases and will prevent Device Client features from operating. Builds the device client without MQTT Connection Management." OFF)
 option(EXCLUDE_SAMPLES "Builds the device client without any of the IoT Sample Features." OFF)
 option(EXCLUDE_PUBSUB "Builds the device client without the IoT Pub Sub Sample Feature." OFF)
+option(EXCLUDE_SHADOW "Builds the device client without the IoT Shadow Feature." OFF)
+option(EXCLUDE_CONFIG_SHADOW "Builds the device client without the IoT Config Shadow Feature." OFF)
+option(EXCLUDE_SAMPLE_SHADOW "Builds the device client without the IoT Sample Shadow Feature." OFF)
 option(GIT_VERSION "Updates the version number using the Git commit history" ON)
 
 if (EXCLUDE_JOBS)
@@ -40,6 +43,18 @@ endif ()
 if (EXCLUDE_PUBSUB)
     add_definitions(-DEXCLUDE_PUBSUB)
 endif ()
+
+if (EXCLUDE_SHASOW)
+    add_definitions(-DEXCLUDE_SHADOW)
+endif()
+
+if (EXCLUDE_CONFIG_SHASOW)
+    add_definitions(-DEXCLUDE_CONFIG_SHADOW)
+endif()
+
+if (EXCLUDE_SAMPLE_SHASOW)
+    add_definitions(-DEXCLUDE_SAMPLE_SHADOW)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH "./sdk-cpp-workspace/lib/cmake")
 
@@ -78,6 +93,17 @@ if (NOT EXCLUDE_SAMPLES)
     if (NOT EXCLUDE_PUBSUB)
         file(GLOB PUBSUB_SRC "source/samples/pubsub/*.cpp")
         list(APPEND DC_SRC ${PUBSUB_SRC})
+    endif ()
+endif ()
+
+if (NOT EXCLUDE_SHADOW)
+    if (NOT EXCLUDE_CONFIG_SHADOW)
+        file(GLOB CONFIG_SHADOW_SRC "source/shadow/ConfigShadow.cpp")
+        list(APPEND DC_SRC ${CONFIG_SHADOW_SRC})
+    endif ()
+    if (NOT EXCLUDE_CONFIG_SHADOW)
+        file(GLOB SAMPLE_SHADOW_SRC "source/shadow/SampleShadowFeature.cpp")
+        list(APPEND DC_SRC ${SAMPLE_SHADOW_SRC})
     endif ()
 endif ()
 
@@ -171,6 +197,10 @@ endif ()
 
 if (NOT EXCLUDE_FP)
     set(DEP_DC_LIBS ${DEP_DC_LIBS} IotIdentity-cpp)
+endif ()
+
+if(NOT EXCLUDE_SHADOW)
+    set(DEP_DC_LIBS ${DEP_DC_LIBS} IotShadow-cpp)
 endif ()
 
 target_link_libraries(${DC_PROJECT_NAME} ${DEP_DC_LIBS})
