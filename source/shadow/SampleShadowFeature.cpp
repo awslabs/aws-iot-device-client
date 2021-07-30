@@ -187,7 +187,9 @@ void SampleShadowFeature::runFileMonitor() {
     string fileName = inputFile.substr(fileDir.length());
     char buf[EVENT_BUFSIZE];
 
-    int fd, dir_wd, file_wd;
+    int fd = 0;
+    int dir_wd = 0;
+    int file_wd = 0;
 
     fd = inotify_init();
 
