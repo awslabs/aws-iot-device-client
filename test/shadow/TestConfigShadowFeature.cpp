@@ -95,7 +95,7 @@ TEST(ConfigShadowFeature, resetClientConfigWithValidJSON)
     JsonView newJsonView = jsonObject.View();
 
     ConfigShadow configShadow;
-    configShadow.resetClientConfigWithJSON(config, newJsonView);
+    configShadow.resetClientConfigWithJSON(config, newJsonView, newJsonView);
 
     ASSERT_FALSE(config.tunneling.enabled);
     ASSERT_TRUE(config.deviceDefender.enabled);
@@ -171,9 +171,9 @@ TEST(ConfigShadowFeature, resetClientConfigWithInvalidJSON)
     JsonView newJsonView = jsonObject.View();
 
     ConfigShadow configShadow;
-    configShadow.resetClientConfigWithJSON(config, newJsonView);
+    configShadow.resetClientConfigWithJSON(config, newJsonView, newJsonView);
 
-    ASSERT_FALSE(config.jobs.enabled);
+    ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
     ASSERT_TRUE(config.deviceDefender.enabled);
     ASSERT_EQ(300, config.deviceDefender.interval);
