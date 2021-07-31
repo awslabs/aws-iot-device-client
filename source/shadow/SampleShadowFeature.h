@@ -2,18 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #ifndef AWS_IOT_DEVICE_CLIENT_SAMPLESHADOW_H
-#define AWS_IOT_DEVICE_CLIENT_SAMPLESHADOW_H
+#    define AWS_IOT_DEVICE_CLIENT_SAMPLESHADOW_H
 
-#endif //AWS_IOT_DEVICE_CLIENT_SAMPLESHADOW_H
+#endif // AWS_IOT_DEVICE_CLIENT_SAMPLESHADOW_H
 
-#include <aws/iotshadow/IotShadowClient.h>
 #include "../ClientBaseNotifier.h"
 #include "../Feature.h"
 #include "../SharedCrtResourceManager.h"
 #include "../config/Config.h"
 #include "../util/FileUtils.h"
-
-
+#include <aws/iotshadow/IotShadowClient.h>
 
 namespace Aws
 {
@@ -23,7 +21,8 @@ namespace Aws
         {
             namespace Shadow
             {
-                class SampleShadowFeature : public Feature {
+                class SampleShadowFeature : public Feature
+                {
                   public:
                     int init(
                         std::shared_ptr<SharedCrtResourceManager> manager,
@@ -102,7 +101,8 @@ namespace Aws
                      */
                     std::promise<bool> subscribeShadowUpdateEventPromise;
                     /**
-                     * \brief Subscribe all pertinent shadow topic (update/delta; update/document; update/rejected; update/accepted)
+                     * \brief Subscribe all pertinent shadow topic (update/delta; update/document; update/rejected;
+                     * update/accepted)
                      */
                     bool subscribeToPertinentShadowTopics();
                     /**
@@ -111,16 +111,14 @@ namespace Aws
                      * @param response information about the updated shadow state
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    void updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response,
-                                                          int ioError);
+                    void updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError);
                     /**
                      * \brief Executed if our request to UpdateNamedShadow is rejected
                      *
                      * @param rejectedError information about the rejection
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    void updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse,
-                                                          int ioError);
+                    void updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError);
                     /**
                      * \brief Executed if our request to UpdateNamedShadow is accepted
                      * The response received on the shadow/update/document topic will be writen to the output file
@@ -128,37 +126,43 @@ namespace Aws
                      * @param response information about the latest shadow document
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    void updateNamedShadowEventHandler(Iotshadow::ShadowUpdatedEvent *shadowUpdatedEvent,
-                                                       int ioError);
+                    void updateNamedShadowEventHandler(Iotshadow::ShadowUpdatedEvent *shadowUpdatedEvent, int ioError);
                     /**
-                     * \brief Executed if our request to UpdateNamedShadow is accepted and the delta exists in current shadow
-                     * Will do the shadow sync after receiving the message from update/shadow/delta topic so a request will be sent to update the reported value to match desired ones
+                     * \brief Executed if our request to UpdateNamedShadow is accepted and the delta exists in current
+                     * shadow Will do the shadow sync after receiving the message from update/shadow/delta topic so a
+                     * request will be sent to update the reported value to match desired ones
                      *
-                     * @param response information including only the desired attributes that differ between the desired and reported sections in current shadow state.
+                     * @param response information including only the desired attributes that differ between the desired
+                     * and reported sections in current shadow state.
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    void updateNamedShadowDeltaHandler(Iotshadow::ShadowDeltaUpdatedEvent *shadowDeltaUpdatedEvent,
-                                                       int ioError);
+                    void updateNamedShadowDeltaHandler(
+                        Iotshadow::ShadowDeltaUpdatedEvent *shadowDeltaUpdatedEvent,
+                        int ioError);
                     /**
-                     * \brief Acknowledgement that IoT Core has received our request for subscription to UpdateNamedShadow Accepted
+                     * \brief Acknowledgement that IoT Core has received our request for subscription to
+                     * UpdateNamedShadow Accepted
                      *
                      * @param ioError a non-zero code here indicates a problem.
                      */
                     void ackSubscribeToUpdateNamedShadowAccepted(int ioError);
                     /**
-                     * \brief Acknowledgement that IoT Core has received our request for subscription to UpdateNamedShadow Rejected
+                     * \brief Acknowledgement that IoT Core has received our request for subscription to
+                     * UpdateNamedShadow Rejected
                      *
                      * @param ioError a non-zero code here indicates a problem.
                      */
                     void ackSubscribeToUpdateNamedShadowRejected(int ioError);
                     /**
-                     * \brief Acknowledgement that IoT Core has received our request for subscription to UpdateNamedShadow Document
+                     * \brief Acknowledgement that IoT Core has received our request for subscription to
+                     * UpdateNamedShadow Document
                      *
                      * @param ioError a non-zero code here indicates a problem.
                      */
                     void ackSubscribeToUpdateEvent(int ioError);
                     /**
-                     * \brief Acknowledgement that IoT Core has received our request for subscription to UpdateNamedShadow Delta
+                     * \brief Acknowledgement that IoT Core has received our request for subscription to
+                     * UpdateNamedShadow Delta
                      *
                      * @param ioError a non-zero code here indicates a problem.
                      */
@@ -177,11 +181,12 @@ namespace Aws
                     void readAndUpdateShadowFromFile();
                     /**
                      * \brief A file monitor to detect any changes related with input file and its parent directory
-                     * Once the any data is modified in input file, the shadow will be updated to sync with data in input file
+                     * Once the any data is modified in input file, the shadow will be updated to sync with data in
+                     * input file
                      */
                     void runFileMonitor();
                 };
-            }
-        }
-    }
-}
+            } // namespace Shadow
+        }     // namespace DeviceClient
+    }         // namespace Iot
+} // namespace Aws

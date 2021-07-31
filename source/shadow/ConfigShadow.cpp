@@ -1,8 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 #include "ConfigShadow.h"
-#include "../logging/LoggerFactory.h"
 #include "../config/Config.h"
+#include "../logging/LoggerFactory.h"
 #include <aws/crt/UUID.h>
 #include <aws/iotshadow/ErrorResponse.h>
 #include <aws/iotshadow/GetNamedShadowRequest.h>
@@ -19,7 +19,6 @@ using namespace Aws::Iotshadow;
 using namespace Aws::Iot::DeviceClient::Shadow;
 using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
-
 
 constexpr char ConfigShadow::TAG[];
 constexpr char ConfigShadow::DEFAULT_CONFIG_SHADOW_NAME[];
@@ -45,7 +44,8 @@ void ConfigShadow::getNamedShadowAcceptedHandler(Iotshadow::GetShadowResponse *r
         LOGM_ERROR(TAG, "Encountered ioError %d within getNamedShadowAcceptedHandler", ioError);
     }
 
-    if(response->State->Delta.has_value()){
+    if (response->State->Delta.has_value())
+    {
         configDelta = response->State->Delta.value();
     }
 
@@ -53,14 +53,16 @@ void ConfigShadow::getNamedShadowAcceptedHandler(Iotshadow::GetShadowResponse *r
     configShadowExistsPromise.set_value(ioError == AWS_OP_SUCCESS);
 }
 
-void ConfigShadow::updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError) {
+void ConfigShadow::updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError)
+{
     if (ioError)
     {
         LOGM_ERROR(TAG, "Encountered ioError %d within updateNamedShadowAcceptedHandler", ioError);
     }
 }
 
-void ConfigShadow::updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError) {
+void ConfigShadow::updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError)
+{
     if (ioError)
     {
         LOGM_ERROR(TAG, "Encountered ioError %d within updateNamedShadowRejectedHandler", ioError);
@@ -73,7 +75,8 @@ void ConfigShadow::updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *er
     }
 }
 
-void ConfigShadow::ackSubscribeToUpdateNamedShadowAccepted(int ioError) {
+void ConfigShadow::ackSubscribeToUpdateNamedShadowAccepted(int ioError)
+{
     LOGM_DEBUG(TAG, "Ack received for SubscribeToUpdateNamedShadowAccepted with code {%d}", ioError);
     if (ioError)
     {
@@ -83,7 +86,8 @@ void ConfigShadow::ackSubscribeToUpdateNamedShadowAccepted(int ioError) {
     subscribeShadowUpdateAcceptedPromise.set_value(ioError == AWS_OP_SUCCESS);
 }
 
-void ConfigShadow::ackSubscribeToUpdateNamedShadowRejected(int ioError) {
+void ConfigShadow::ackSubscribeToUpdateNamedShadowRejected(int ioError)
+{
     LOGM_DEBUG(TAG, "Ack received for SubscribeToUpdateNamedShadowRejected with code {%d}", ioError);
     if (ioError)
     {
@@ -121,7 +125,8 @@ void ConfigShadow::ackGetNamedShadowStatus(int ioError)
     shadowGetCompletedPromise.set_value(ioError == AWS_OP_SUCCESS);
 }
 
-void ConfigShadow::ackUpdateNamedShadowStatus(int ioError) {
+void ConfigShadow::ackUpdateNamedShadowStatus(int ioError)
+{
     LOGM_DEBUG(TAG, "Ack received for updateNamedShadowStatus with code {%d}", ioError);
     shadowUpdateCompletedPromise.set_value(ioError == AWS_OP_SUCCESS);
 }
@@ -148,17 +153,16 @@ bool ConfigShadow::subscribeGetAndUpdateNamedShadowTopics(Iotshadow::IotShadowCl
     auto futureSubscribeShadowGetRejectedPromise = subscribeShadowGetRejectedPromise.get_future();
 
     if (futureSubscribeShadowGetAcceptedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
-        future_status::timeout ||
+            future_status::timeout ||
         futureSubscribeShadowGetRejectedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
-        future_status::timeout)
+            future_status::timeout)
     {
-        LOGM_ERROR(
-            TAG,
-            "Subscribing to pertinent %s shadowGet topics timed out.", DEFAULT_CONFIG_SHADOW_NAME);
+        LOGM_ERROR(TAG, "Subscribing to pertinent %s shadowGet topics timed out.", DEFAULT_CONFIG_SHADOW_NAME);
         return false;
     }
 
-    if (!futureSubscribeShadowGetAcceptedPromise.get() || !futureSubscribeShadowGetRejectedPromise.get()){
+    if (!futureSubscribeShadowGetAcceptedPromise.get() || !futureSubscribeShadowGetRejectedPromise.get())
+    {
         return false;
     }
 
@@ -181,27 +185,29 @@ bool ConfigShadow::subscribeGetAndUpdateNamedShadowTopics(Iotshadow::IotShadowCl
     auto futureSubscribeShadowUpdateRejectedPromise = subscribeShadowUpdateRejectedPromise.get_future();
     auto futureSubscribeShadowUpdateAcceptedPromise = subscribeShadowUpdateAcceptedPromise.get_future();
 
-    if (futureSubscribeShadowUpdateAcceptedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) == future_status::timeout ||
-        futureSubscribeShadowUpdateRejectedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) == future_status::timeout){
-        LOGM_ERROR(
-            TAG,
-            "Subscribing to pertinent %s shadowUpdate topics timed out.", DEFAULT_CONFIG_SHADOW_NAME);
+    if (futureSubscribeShadowUpdateAcceptedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
+            future_status::timeout ||
+        futureSubscribeShadowUpdateRejectedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
+            future_status::timeout)
+    {
+        LOGM_ERROR(TAG, "Subscribing to pertinent %s shadowUpdate topics timed out.", DEFAULT_CONFIG_SHADOW_NAME);
         return false;
     }
 
-    if (!futureSubscribeShadowUpdateAcceptedPromise.get() || !futureSubscribeShadowUpdateRejectedPromise.get()){
+    if (!futureSubscribeShadowUpdateAcceptedPromise.get() || !futureSubscribeShadowUpdateRejectedPromise.get())
+    {
         return false;
     }
 
     return true;
 }
 
-bool ConfigShadow::fetchRemoteConfigShadow (Iotshadow::IotShadowClient iotShadowClient)
+bool ConfigShadow::fetchRemoteConfigShadow(Iotshadow::IotShadowClient iotShadowClient)
 {
     GetNamedShadowRequest getNamedShadowRequest;
     Aws::Crt::UUID uuid;
     getNamedShadowRequest.ShadowName = DEFAULT_CONFIG_SHADOW_NAME;
-    getNamedShadowRequest.ThingName  = thingName.c_str();
+    getNamedShadowRequest.ThingName = thingName.c_str();
     getNamedShadowRequest.ClientToken = uuid.ToString();
 
     iotShadowClient.PublishGetNamedShadow(
@@ -211,16 +217,14 @@ bool ConfigShadow::fetchRemoteConfigShadow (Iotshadow::IotShadowClient iotShadow
 
     auto futureShadowGetCompletedPromise = shadowGetCompletedPromise.get_future();
     if (futureShadowGetCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
-        future_status::timeout){
-        LOGM_ERROR(
-            TAG,
-            "Publishing to %s shadowGet topic timed out.", DEFAULT_CONFIG_SHADOW_NAME);
+        future_status::timeout)
+    {
+        LOGM_ERROR(TAG, "Publishing to %s shadowGet topic timed out.", DEFAULT_CONFIG_SHADOW_NAME);
         return false;
     }
 
     return futureShadowGetCompletedPromise.get();
 }
-
 
 void ConfigShadow::loadFeatureConfigIntoJsonObject(PlainConfig &config, Aws::Crt::JsonObject &jsonObj)
 {
@@ -246,63 +250,106 @@ void ConfigShadow::loadFeatureConfigIntoJsonObject(PlainConfig &config, Aws::Crt
     config.sampleShadow.SerializeToObject(sampleShadow);
 
     jsonObj.WithObject(PlainConfig::JSON_KEY_SAMPLE_SHADOW, sampleShadow);
-
 }
 
-void ConfigShadow::resetClientConfigWithJSON(PlainConfig &config, Crt::JsonView &deltaJsonView, Crt::JsonView &desiredJsonView)
+void ConfigShadow::resetClientConfigWithJSON(
+    PlainConfig &config,
+    Crt::JsonView &deltaJsonView,
+    Crt::JsonView &desiredJsonView)
 {
-    if(desiredJsonView.ValueExists(PlainConfig::JSON_KEY_JOBS) && deltaJsonView.ValueExists(PlainConfig::JSON_KEY_JOBS)){
+    if (desiredJsonView.ValueExists(PlainConfig::JSON_KEY_JOBS) &&
+        deltaJsonView.ValueExists(PlainConfig::JSON_KEY_JOBS))
+    {
         PlainConfig::Jobs jobs;
         jobs.LoadFromJson(desiredJsonView.GetJsonObject(PlainConfig::JSON_KEY_JOBS));
-        if(jobs.Validate()){
+        if (jobs.Validate())
+        {
             config.jobs = jobs;
         }
-        else{
-            LOGM_WARN(TAG, "Config shadow contains invalid configurations in %s feature, aborting this feature's configuration update now. Please check the error logs for more information", PlainConfig::JSON_KEY_JOBS);
+        else
+        {
+            LOGM_WARN(
+                TAG,
+                "Config shadow contains invalid configurations in %s feature, aborting this feature's configuration "
+                "update now. Please check the error logs for more information",
+                PlainConfig::JSON_KEY_JOBS);
         }
     }
 
-    if(desiredJsonView.ValueExists(PlainConfig::JSON_KEY_TUNNELING) && deltaJsonView.ValueExists(PlainConfig::JSON_KEY_TUNNELING)){
+    if (desiredJsonView.ValueExists(PlainConfig::JSON_KEY_TUNNELING) &&
+        deltaJsonView.ValueExists(PlainConfig::JSON_KEY_TUNNELING))
+    {
         PlainConfig::Tunneling tunneling;
         tunneling.LoadFromJson(desiredJsonView.GetJsonObject(PlainConfig::JSON_KEY_TUNNELING));
-        if(tunneling.Validate()){
+        if (tunneling.Validate())
+        {
             config.tunneling = tunneling;
         }
-        else{
-            LOGM_WARN(TAG, "Config shadow contains invalid configurations in %s feature, aborting this feature's configuration update now. Please check the error logs for more information", PlainConfig::JSON_KEY_TUNNELING);
+        else
+        {
+            LOGM_WARN(
+                TAG,
+                "Config shadow contains invalid configurations in %s feature, aborting this feature's configuration "
+                "update now. Please check the error logs for more information",
+                PlainConfig::JSON_KEY_TUNNELING);
         }
     }
 
-    if(desiredJsonView.ValueExists(PlainConfig::JSON_KEY_DEVICE_DEFENDER) && deltaJsonView.ValueExists(PlainConfig::JSON_KEY_DEVICE_DEFENDER)){
+    if (desiredJsonView.ValueExists(PlainConfig::JSON_KEY_DEVICE_DEFENDER) &&
+        deltaJsonView.ValueExists(PlainConfig::JSON_KEY_DEVICE_DEFENDER))
+    {
         PlainConfig::DeviceDefender deviceDefender;
         deviceDefender.LoadFromJson(desiredJsonView.GetJsonObject(PlainConfig::JSON_KEY_DEVICE_DEFENDER));
-        if(deviceDefender.Validate()){
+        if (deviceDefender.Validate())
+        {
             config.deviceDefender = deviceDefender;
         }
-        else{
-            LOGM_WARN(TAG, "Config shadow contains invalid configurations in %s feature, aborting this feature's configuration update now. Please check the error logs for more information", PlainConfig::JSON_KEY_DEVICE_DEFENDER);
+        else
+        {
+            LOGM_WARN(
+                TAG,
+                "Config shadow contains invalid configurations in %s feature, aborting this feature's configuration "
+                "update now. Please check the error logs for more information",
+                PlainConfig::JSON_KEY_DEVICE_DEFENDER);
         }
     }
 
-    if(desiredJsonView.ValueExists(PlainConfig::JSON_KEY_SAMPLES) && deltaJsonView.ValueExists(PlainConfig::JSON_KEY_SAMPLES)){
+    if (desiredJsonView.ValueExists(PlainConfig::JSON_KEY_SAMPLES) &&
+        deltaJsonView.ValueExists(PlainConfig::JSON_KEY_SAMPLES))
+    {
         PlainConfig::PubSub pubSub;
-        pubSub.LoadFromJson(desiredJsonView.GetJsonObject(PlainConfig::JSON_KEY_SAMPLES).GetJsonObject(PlainConfig::JSON_KEY_PUB_SUB));
-        if(pubSub.Validate()){
+        pubSub.LoadFromJson(
+            desiredJsonView.GetJsonObject(PlainConfig::JSON_KEY_SAMPLES).GetJsonObject(PlainConfig::JSON_KEY_PUB_SUB));
+        if (pubSub.Validate())
+        {
             config.pubSub = pubSub;
         }
-        else{
-            LOGM_WARN(TAG, "Config shadow contains invalid configurations in %s feature, aborting this feature's configuration update now. Please check the error logs for more information", PlainConfig::JSON_KEY_PUB_SUB);
+        else
+        {
+            LOGM_WARN(
+                TAG,
+                "Config shadow contains invalid configurations in %s feature, aborting this feature's configuration "
+                "update now. Please check the error logs for more information",
+                PlainConfig::JSON_KEY_PUB_SUB);
         }
     }
 
-    if(desiredJsonView.ValueExists(PlainConfig::JSON_KEY_SAMPLE_SHADOW) && deltaJsonView.ValueExists(PlainConfig::JSON_KEY_SAMPLE_SHADOW)){
+    if (desiredJsonView.ValueExists(PlainConfig::JSON_KEY_SAMPLE_SHADOW) &&
+        deltaJsonView.ValueExists(PlainConfig::JSON_KEY_SAMPLE_SHADOW))
+    {
         PlainConfig::SampleShadow sampleShadow;
         sampleShadow.LoadFromJson(desiredJsonView.GetJsonObject(PlainConfig::JSON_KEY_SAMPLE_SHADOW));
-        if(sampleShadow.Validate()){
+        if (sampleShadow.Validate())
+        {
             config.sampleShadow = sampleShadow;
         }
-        else{
-            LOGM_WARN(TAG, "Config shadow contains invalid configurations in %s feature, aborting this feature's configuration update now. Please check the error logs for more information", PlainConfig::JSON_KEY_SAMPLE_SHADOW);
+        else
+        {
+            LOGM_WARN(
+                TAG,
+                "Config shadow contains invalid configurations in %s feature, aborting this feature's configuration "
+                "update now. Please check the error logs for more information",
+                PlainConfig::JSON_KEY_SAMPLE_SHADOW);
         }
     }
 }
@@ -331,67 +378,84 @@ void ConfigShadow::updateShadowWithLocalConfig(Iotshadow::IotShadowClient iotSha
     auto futureShadowUpdateCompletedPromise = shadowUpdateCompletedPromise.get_future();
 
     if (futureShadowUpdateCompletedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
-        future_status::timeout){
-        LOGM_ERROR(
-            TAG,
-            "Publishing to shadowUpdate topic timed out.", DEFAULT_CONFIG_SHADOW_NAME);
+        future_status::timeout)
+    {
+        LOGM_ERROR(TAG, "Publishing to shadowUpdate topic timed out.", DEFAULT_CONFIG_SHADOW_NAME);
         return;
     }
 
-    if(!futureShadowUpdateCompletedPromise.get()){
+    if (!futureShadowUpdateCompletedPromise.get())
+    {
         LOGM_ERROR(
             TAG,
-            "Encountering unexpected error while publishing the request to %s updateNamedShadow topic", DEFAULT_CONFIG_SHADOW_NAME);
+            "Encountering unexpected error while publishing the request to %s updateNamedShadow topic",
+            DEFAULT_CONFIG_SHADOW_NAME);
     }
 }
 
-void ConfigShadow::reconfigureWithConfigShadow(std::shared_ptr<SharedCrtResourceManager> resourceManager, PlainConfig &config)
+void ConfigShadow::reconfigureWithConfigShadow(
+    std::shared_ptr<SharedCrtResourceManager> resourceManager,
+    PlainConfig &config)
 {
     IotShadowClient iotShadowClient(resourceManager.get()->getConnection());
     thingName = *config.thingName;
-    if(!subscribeGetAndUpdateNamedShadowTopics(iotShadowClient)){
+    if (!subscribeGetAndUpdateNamedShadowTopics(iotShadowClient))
+    {
         LOGM_ERROR(
-            TAG,
-            "Encounter error while subscribing pertinent %s shadow topic from cloud", DEFAULT_CONFIG_SHADOW_NAME);
+            TAG, "Encounter error while subscribing pertinent %s shadow topic from cloud", DEFAULT_CONFIG_SHADOW_NAME);
         return;
     }
 
-    if(!fetchRemoteConfigShadow(iotShadowClient)){
+    if (!fetchRemoteConfigShadow(iotShadowClient))
+    {
         LOGM_ERROR(
-            TAG,
-            "Encounter error while fetching device client config shadow from cloud", DEFAULT_CONFIG_SHADOW_NAME);
+            TAG, "Encounter error while fetching device client config shadow from cloud", DEFAULT_CONFIG_SHADOW_NAME);
         return;
     }
 
     auto futureConfigShadowExistsPromise = configShadowExistsPromise.get_future();
-    if (futureConfigShadowExistsPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) == future_status::timeout){
+    if (futureConfigShadowExistsPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
+        future_status::timeout)
+    {
         LOGM_ERROR(
             TAG,
-            "Waiting for %s getNamedShadow response time out or get unexpected error from service", DEFAULT_CONFIG_SHADOW_NAME);
+            "Waiting for %s getNamedShadow response time out or get unexpected error from service",
+            DEFAULT_CONFIG_SHADOW_NAME);
         return;
     }
 
-    if(futureConfigShadowExistsPromise.get() && configDelta.has_value()){
-        //config shadow and delta exists, resetting the local config first and then updating config shaodw
-        if(configDelta){
-            LOG_INFO(TAG, "Detect the delta of configuration in the config shadow, reconfiguring the device client now.");
+    if (futureConfigShadowExistsPromise.get() && configDelta.has_value())
+    {
+        // config shadow and delta exists, resetting the local config first and then updating config shaodw
+        if (configDelta)
+        {
+            LOG_INFO(
+                TAG, "Detect the delta of configuration in the config shadow, reconfiguring the device client now.");
 
-            if(!desiredConfig.has_value()){
-                LOG_ERROR(TAG, "Fail to fetch the desired value in config shaodw, aborting the configuration update now");
+            if (!desiredConfig.has_value())
+            {
+                LOG_ERROR(
+                    TAG, "Fail to fetch the desired value in config shaodw, aborting the configuration update now");
                 return;
             }
 
             JsonObject configDesiredObject = configDelta.value();
-            if(!configDesiredObject.WasParseSuccessful() ){
+            if (!configDesiredObject.WasParseSuccessful())
+            {
                 LOGM_ERROR(
-                    TAG, "Couldn't parse JSON config desired. GetErrorMessage returns: %s", configDesiredObject.GetErrorMessage().c_str());
+                    TAG,
+                    "Couldn't parse JSON config desired. GetErrorMessage returns: %s",
+                    configDesiredObject.GetErrorMessage().c_str());
                 return;
             }
 
             JsonObject configDeltaObject = configDelta.value();
-            if(!configDeltaObject.WasParseSuccessful() ){
+            if (!configDeltaObject.WasParseSuccessful())
+            {
                 LOGM_ERROR(
-                    TAG, "Couldn't parse JSON config delta. GetErrorMessage returns: %s", configDeltaObject.GetErrorMessage().c_str());
+                    TAG,
+                    "Couldn't parse JSON config delta. GetErrorMessage returns: %s",
+                    configDeltaObject.GetErrorMessage().c_str());
                 return;
             }
 
@@ -400,10 +464,10 @@ void ConfigShadow::reconfigureWithConfigShadow(std::shared_ptr<SharedCrtResource
             resetClientConfigWithJSON(config, deltaJsonView, desiredJsonView);
         }
         updateShadowWithLocalConfig(iotShadowClient, config);
-    }else{
-        //config shadow doesn't exists, store the device client configuration into config shadow
+    }
+    else
+    {
+        // config shadow doesn't exists, store the device client configuration into config shadow
         updateShadowWithLocalConfig(iotShadowClient, config);
     }
 }
-
-

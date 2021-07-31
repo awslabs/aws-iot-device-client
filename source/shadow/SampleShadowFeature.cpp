@@ -4,28 +4,27 @@
 #include "SampleShadowFeature.h"
 #include "../logging/LoggerFactory.h"
 #include <aws/common/byte_buf.h>
-#include <aws/iotdevicecommon/IotDevice.h>
-#include <iostream>
-#include <utility>
 #include <aws/crt/UUID.h>
-#include <unistd.h>
+#include <aws/iotdevicecommon/IotDevice.h>
 #include <chrono>
+#include <iostream>
 #include <string>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <utility>
 
-#include <aws/iotshadow/UpdateNamedShadowSubscriptionRequest.h>
-#include <aws/iotshadow/NamedShadowUpdatedSubscriptionRequest.h>
-#include <aws/iotshadow/NamedShadowDeltaUpdatedSubscriptionRequest.h>
-#include <aws/iotshadow/UpdateShadowRequest.h>
-#include <aws/iotshadow/ShadowUpdatedEvent.h>
-#include <aws/iotshadow/UpdateNamedShadowRequest.h>
-#include <aws/iotshadow/ShadowDeltaUpdatedEvent.h>
-#include <aws/iotshadow/UpdateShadowResponse.h>
 #include <aws/iotshadow/ErrorResponse.h>
 #include <aws/iotshadow/IotShadowClient.h>
+#include <aws/iotshadow/NamedShadowDeltaUpdatedSubscriptionRequest.h>
+#include <aws/iotshadow/NamedShadowUpdatedSubscriptionRequest.h>
+#include <aws/iotshadow/ShadowDeltaUpdatedEvent.h>
+#include <aws/iotshadow/ShadowUpdatedEvent.h>
+#include <aws/iotshadow/UpdateNamedShadowRequest.h>
+#include <aws/iotshadow/UpdateNamedShadowSubscriptionRequest.h>
+#include <aws/iotshadow/UpdateShadowRequest.h>
+#include <aws/iotshadow/UpdateShadowResponse.h>
 
 #include <sys/inotify.h>
-
 
 using namespace std;
 using namespace Aws;
@@ -40,10 +39,10 @@ constexpr char SampleShadowFeature::TAG[];
 constexpr char SampleShadowFeature::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[];
 constexpr int SampleShadowFeature::DEFAULT_WAIT_TIME_SECONDS;
 
-#define MAX_EVENTS 1000  /* Maximum number of events to process*/
-#define LEN_NAME 16  /* Assuming that the length of the filename won't exceed 16 bytes*/
-#define EVENT_SIZE  ( sizeof (struct inotify_event) ) /*size of one event*/
-#define EVENT_BUFSIZE     ( MAX_EVENTS * ( EVENT_SIZE + LEN_NAME )) /*size of buffer used to store the data of events*/
+#define MAX_EVENTS 1000 /* Maximum number of events to process*/
+#define LEN_NAME 16 /* Assuming that the length of the filename won't exceed 16 bytes*/
+#define EVENT_SIZE (sizeof(struct inotify_event)) /*size of one event*/
+#define EVENT_BUFSIZE (MAX_EVENTS * (EVENT_SIZE + LEN_NAME)) /*size of buffer used to store the data of events*/
 
 string SampleShadowFeature::getName()
 {
@@ -59,25 +58,29 @@ int SampleShadowFeature::init(
     baseNotifier = notifier;
     thingName = *config.thingName;
     shadowName = config.sampleShadow.shadowName.value();
-    if(config.sampleShadow.shadowInputFile.has_value()){
+    if (config.sampleShadow.shadowInputFile.has_value())
+    {
         inputFile = config.sampleShadow.shadowInputFile.value();
     }
 
-    if(config.sampleShadow.shadowOutputFile.has_value()){
+    if (config.sampleShadow.shadowOutputFile.has_value())
+    {
         outputFile = config.sampleShadow.shadowOutputFile.value();
     }
 
     return AWS_OP_SUCCESS;
 }
 
-void SampleShadowFeature::updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError) {
+void SampleShadowFeature::updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError)
+{
     if (ioError)
     {
         LOGM_ERROR(TAG, "Encountered ioError %d within updateNamedShadowAcceptedHandler", ioError);
     }
 }
 
-void SampleShadowFeature::updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError) {
+void SampleShadowFeature::updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError)
+{
     if (ioError)
     {
         LOGM_ERROR(TAG, "Encountered ioError %d within updateNamedShadowRejectedHandler", ioError);
@@ -90,26 +93,31 @@ void SampleShadowFeature::updateNamedShadowRejectedHandler(Iotshadow::ErrorRespo
     }
 }
 
-void SampleShadowFeature::updateNamedShadowEventHandler(Iotshadow::ShadowUpdatedEvent *shadowUpdatedEvent, int ioError) {
+void SampleShadowFeature::updateNamedShadowEventHandler(Iotshadow::ShadowUpdatedEvent *shadowUpdatedEvent, int ioError)
+{
     if (ioError)
     {
         LOGM_ERROR(TAG, "Encountered ioError %d within updateNamedShadowEventHandler", ioError);
         return;
     }
 
-    //write the response to output file
+    // write the response to output file
     Crt::JsonObject object;
     shadowUpdatedEvent->SerializeToObject(object);
-    if(FileUtils::StoreValueInFile(object.View().WriteReadable(true).c_str(), outputFile)){
+    if (FileUtils::StoreValueInFile(object.View().WriteReadable(true).c_str(), outputFile))
+    {
         LOGM_INFO(TAG, "Stored the latest %s shadow document to local successfully", shadowName.c_str());
     }
-    else{
+    else
+    {
         LOGM_ERROR(TAG, "Failed to store latest %s shadow document to local", shadowName.c_str());
     }
 }
 
-void SampleShadowFeature::updateNamedShadowDeltaHandler(Iotshadow::ShadowDeltaUpdatedEvent *shadowDeltaUpdatedEvent,
-                                                        int ioError) {
+void SampleShadowFeature::updateNamedShadowDeltaHandler(
+    Iotshadow::ShadowDeltaUpdatedEvent *shadowDeltaUpdatedEvent,
+    int ioError)
+{
     if (ioError)
     {
         LOGM_ERROR(TAG, "Encountered ioError %d within updateNamedShadowDeltaHandler", ioError);
@@ -129,15 +137,16 @@ void SampleShadowFeature::updateNamedShadowDeltaHandler(Iotshadow::ShadowDeltaUp
     shadowClient->PublishUpdateNamedShadow(
         updateNamedShadowRequest,
         AWS_MQTT_QOS_AT_LEAST_ONCE,
-        std::bind(&SampleShadowFeature::ackUpdateNamedShadowStatus, this, std::placeholders::_1)
-    );
+        std::bind(&SampleShadowFeature::ackUpdateNamedShadowStatus, this, std::placeholders::_1));
 }
 
-void SampleShadowFeature::ackUpdateNamedShadowStatus(int ioError) {
+void SampleShadowFeature::ackUpdateNamedShadowStatus(int ioError)
+{
     LOGM_DEBUG(TAG, "Ack received for updateNamedShadowStatus with code {%d}", ioError);
 }
 
-void SampleShadowFeature::ackSubscribeToUpdateNamedShadowAccepted(int ioError) {
+void SampleShadowFeature::ackSubscribeToUpdateNamedShadowAccepted(int ioError)
+{
     LOGM_DEBUG(TAG, "Ack received for SubscribeToUpdateNamedShadowAccepted with code {%d}", ioError);
     if (ioError)
     {
@@ -148,7 +157,8 @@ void SampleShadowFeature::ackSubscribeToUpdateNamedShadowAccepted(int ioError) {
     subscribeShadowUpdateAcceptedPromise.set_value(ioError == AWS_OP_SUCCESS);
 }
 
-void SampleShadowFeature::ackSubscribeToUpdateNamedShadowRejected(int ioError) {
+void SampleShadowFeature::ackSubscribeToUpdateNamedShadowRejected(int ioError)
+{
     LOGM_DEBUG(TAG, "Ack received for SubscribeToUpdateNamedShadowRejected with code {%d}", ioError);
     if (ioError)
     {
@@ -159,7 +169,8 @@ void SampleShadowFeature::ackSubscribeToUpdateNamedShadowRejected(int ioError) {
     subscribeShadowUpdateRejectedPromise.set_value(ioError == AWS_OP_SUCCESS);
 }
 
-void SampleShadowFeature::ackSubscribeToUpdateEvent(int ioError) {
+void SampleShadowFeature::ackSubscribeToUpdateEvent(int ioError)
+{
     LOGM_DEBUG(TAG, "Ack received for SubscribeToUpdateNamedShadowEvent with code {%d}", ioError);
     if (ioError)
     {
@@ -170,7 +181,8 @@ void SampleShadowFeature::ackSubscribeToUpdateEvent(int ioError) {
     subscribeShadowUpdateEventPromise.set_value(ioError == AWS_OP_SUCCESS);
 }
 
-void SampleShadowFeature::ackSubscribeToUpdateDelta(int ioError) {
+void SampleShadowFeature::ackSubscribeToUpdateDelta(int ioError)
+{
     LOGM_DEBUG(TAG, "Ack received for SubscribeToUpdateNamedShadowDelta with code {%d}", ioError);
     if (ioError)
     {
@@ -181,7 +193,8 @@ void SampleShadowFeature::ackSubscribeToUpdateDelta(int ioError) {
     subscribeShadowUpdateDeltaPromise.set_value(ioError == AWS_OP_SUCCESS);
 }
 
-void SampleShadowFeature::runFileMonitor() {
+void SampleShadowFeature::runFileMonitor()
+{
     int len = 0;
     string fileDir = FileUtils::ExtractParentDirectory(inputFile.c_str());
     string fileName = inputFile.substr(fileDir.length());
@@ -193,38 +206,41 @@ void SampleShadowFeature::runFileMonitor() {
 
     fd = inotify_init();
 
-    if (fd == -1) {
-        LOGM_ERROR(
-            TAG, "Encounter error %d while initializing the inode notify system return s%", fd);
+    if (fd == -1)
+    {
+        LOGM_ERROR(TAG, "Encounter error %d while initializing the inode notify system return s%", fd);
         return;
     }
 
     dir_wd = inotify_add_watch(fd, fileDir.c_str(), IN_CREATE);
-    if (dir_wd == -1) {
-        LOGM_ERROR(
-            TAG, "Encounter error %d while adding the watch for input file's parent directory", fd);
+    if (dir_wd == -1)
+    {
+        LOGM_ERROR(TAG, "Encounter error %d while adding the watch for input file's parent directory", fd);
         goto exit;
     }
 
     file_wd = inotify_add_watch(fd, inputFile.c_str(), IN_CLOSE_WRITE);
-    if (file_wd == -1) {
-        LOGM_ERROR(
-            TAG, "Encounter error %d while adding the watch for target file", fd);
+    if (file_wd == -1)
+    {
+        LOGM_ERROR(TAG, "Encounter error %d while adding the watch for target file", fd);
         goto exit;
     }
 
-    while(!needStop.load()){
+    while (!needStop.load())
+    {
         len = read(fd, buf, EVENT_BUFSIZE);
-        if (len <= 0) {
-            LOG_WARN(
-                TAG, "Couldn't monitor ant more target file modify events as it reaches max read buffer size");
+        if (len <= 0)
+        {
+            LOG_WARN(TAG, "Couldn't monitor ant more target file modify events as it reaches max read buffer size");
             goto exit;
         }
 
-        for ( int i=0; i<len; ) {
-            struct inotify_event* e = (struct inotify_event*) &buf[i];
+        for (int i = 0; i < len;)
+        {
+            struct inotify_event *e = (struct inotify_event *)&buf[i];
 
-            if (e->mask & IN_CREATE) {
+            if (e->mask & IN_CREATE)
+            {
                 if (strcmp(e->name, fileName.c_str()) != 0)
                     goto next;
 
@@ -236,14 +252,14 @@ void SampleShadowFeature::runFileMonitor() {
                 file_wd = inotify_add_watch(fd, inputFile.c_str(), IN_CLOSE_WRITE | IN_DELETE_SELF);
             }
 
-
-            if (e->mask & IN_CLOSE_WRITE){
+            if (e->mask & IN_CLOSE_WRITE)
+            {
                 LOG_DEBUG(TAG, "The target file is modified, start updating the shadow");
                 readAndUpdateShadowFromFile();
             }
 
-
-            if (e->mask & IN_DELETE_SELF) {
+            if (e->mask & IN_DELETE_SELF)
+            {
                 if (e->mask & IN_ISDIR)
                     goto next;
 
@@ -251,20 +267,21 @@ void SampleShadowFeature::runFileMonitor() {
                 inotify_rm_watch(fd, file_wd);
             }
 
-            next:
+        next:
             i += EVENT_SIZE + e->len;
         }
 
         this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
-    exit:
+exit:
     inotify_rm_watch(fd, file_wd);
     inotify_rm_watch(fd, dir_wd);
     close(fd);
 }
 
-bool SampleShadowFeature::subscribeToPertinentShadowTopics(){
+bool SampleShadowFeature::subscribeToPertinentShadowTopics()
+{
     UpdateNamedShadowSubscriptionRequest updateNamedShadowSubscriptionRequest;
     updateNamedShadowSubscriptionRequest.ThingName = thingName.c_str();
     updateNamedShadowSubscriptionRequest.ShadowName = shadowName.c_str();
@@ -272,13 +289,15 @@ bool SampleShadowFeature::subscribeToPertinentShadowTopics(){
     shadowClient->SubscribeToUpdateNamedShadowAccepted(
         updateNamedShadowSubscriptionRequest,
         AWS_MQTT_QOS_AT_LEAST_ONCE,
-        std::bind(&SampleShadowFeature::updateNamedShadowAcceptedHandler, this, std::placeholders::_1, std::placeholders::_2),
+        std::bind(
+            &SampleShadowFeature::updateNamedShadowAcceptedHandler, this, std::placeholders::_1, std::placeholders::_2),
         std::bind(&SampleShadowFeature::ackSubscribeToUpdateNamedShadowAccepted, this, std::placeholders::_1));
 
     shadowClient->SubscribeToUpdateNamedShadowRejected(
         updateNamedShadowSubscriptionRequest,
         AWS_MQTT_QOS_AT_LEAST_ONCE,
-        std::bind(&SampleShadowFeature::updateNamedShadowRejectedHandler, this, std::placeholders::_1, std::placeholders::_2),
+        std::bind(
+            &SampleShadowFeature::updateNamedShadowRejectedHandler, this, std::placeholders::_1, std::placeholders::_2),
         std::bind(&SampleShadowFeature::ackSubscribeToUpdateNamedShadowRejected, this, std::placeholders::_1));
 
     NamedShadowUpdatedSubscriptionRequest namedShadowUpdatedSubscriptionRequest;
@@ -288,7 +307,8 @@ bool SampleShadowFeature::subscribeToPertinentShadowTopics(){
     shadowClient->SubscribeToNamedShadowUpdatedEvents(
         namedShadowUpdatedSubscriptionRequest,
         AWS_MQTT_QOS_AT_LEAST_ONCE,
-        std::bind(&SampleShadowFeature::updateNamedShadowEventHandler, this, std::placeholders::_1, std::placeholders::_2),
+        std::bind(
+            &SampleShadowFeature::updateNamedShadowEventHandler, this, std::placeholders::_1, std::placeholders::_2),
         std::bind(&SampleShadowFeature::ackSubscribeToUpdateEvent, this, std::placeholders::_1));
 
     NamedShadowDeltaUpdatedSubscriptionRequest namedShadowDeltaUpdatedSubscriptionRequest;
@@ -298,31 +318,31 @@ bool SampleShadowFeature::subscribeToPertinentShadowTopics(){
     shadowClient->SubscribeToNamedShadowDeltaUpdatedEvents(
         namedShadowDeltaUpdatedSubscriptionRequest,
         AWS_MQTT_QOS_AT_LEAST_ONCE,
-        std::bind(&SampleShadowFeature::updateNamedShadowDeltaHandler, this, std::placeholders::_1, std::placeholders::_2),
+        std::bind(
+            &SampleShadowFeature::updateNamedShadowDeltaHandler, this, std::placeholders::_1, std::placeholders::_2),
         std::bind(&SampleShadowFeature::ackSubscribeToUpdateDelta, this, std::placeholders::_1));
 
-    //check if we have subscribed all update topic successfully before making the call
+    // check if we have subscribed all update topic successfully before making the call
     auto futureSubscribeShadowUpdateDeltaPromise = subscribeShadowUpdateDeltaPromise.get_future();
     auto futureSubscribeShadowUpdateEventPromise = subscribeShadowUpdateEventPromise.get_future();
     auto futureSubscribeShadowUpdateRejectedPromise = subscribeShadowUpdateRejectedPromise.get_future();
     auto futureSubscribeShadowUpdateAcceptedPromise = subscribeShadowUpdateAcceptedPromise.get_future();
 
     if (futureSubscribeShadowUpdateAcceptedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
-        future_status::timeout ||
+            future_status::timeout ||
         futureSubscribeShadowUpdateRejectedPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
-        future_status::timeout ||
+            future_status::timeout ||
         futureSubscribeShadowUpdateDeltaPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
-        future_status::timeout ||
+            future_status::timeout ||
         futureSubscribeShadowUpdateEventPromise.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
-        future_status::timeout)
+            future_status::timeout)
     {
-        LOGM_ERROR(
-            TAG,
-            "Subscribing to pertinent %s shadowUpdate topics timed out", shadowName.c_str());
+        LOGM_ERROR(TAG, "Subscribing to pertinent %s shadowUpdate topics timed out", shadowName.c_str());
         return false;
     }
 
-    if (!futureSubscribeShadowUpdateAcceptedPromise.get() || !futureSubscribeShadowUpdateRejectedPromise.get() || !futureSubscribeShadowUpdateDeltaPromise.get() || !futureSubscribeShadowUpdateEventPromise.get())
+    if (!futureSubscribeShadowUpdateAcceptedPromise.get() || !futureSubscribeShadowUpdateRejectedPromise.get() ||
+        !futureSubscribeShadowUpdateDeltaPromise.get() || !futureSubscribeShadowUpdateEventPromise.get())
     {
         return false;
     }
@@ -330,14 +350,17 @@ bool SampleShadowFeature::subscribeToPertinentShadowTopics(){
     return true;
 }
 
-void SampleShadowFeature::readAndUpdateShadowFromFile (){
+void SampleShadowFeature::readAndUpdateShadowFromFile()
+{
 
     Crt::JsonObject jsonObj;
 
-    if(inputFile.empty()){
-        jsonObj.WithString("welcome","aws-iot");
+    if (inputFile.empty())
+    {
+        jsonObj.WithString("welcome", "aws-iot");
     }
-    else{
+    else
+    {
         string expandedPath = FileUtils::ExtractExpandedPath(inputFile);
         if (!FileUtils::FileExists(expandedPath))
         {
@@ -368,7 +391,9 @@ void SampleShadowFeature::readAndUpdateShadowFromFile (){
         if (!jsonObj.WasParseSuccessful())
         {
             LOGM_ERROR(
-                TAG, "Couldn't parse JSON shadow data file. GetErrorMessage returns: %s", jsonObj.GetErrorMessage().c_str());
+                TAG,
+                "Couldn't parse JSON shadow data file. GetErrorMessage returns: %s",
+                jsonObj.GetErrorMessage().c_str());
             return;
         }
         setting.close();
@@ -392,26 +417,32 @@ void SampleShadowFeature::readAndUpdateShadowFromFile (){
         std::bind(&SampleShadowFeature::ackUpdateNamedShadowStatus, this, std::placeholders::_1));
 }
 
-int SampleShadowFeature::start() {
+int SampleShadowFeature::start()
+{
     LOGM_INFO(TAG, "Starting %s", getName().c_str());
 
-    if(outputFile.empty()){
-        if(!FileUtils::CreateDirectoryWithPermissions(Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR, S_IRWXU)){
+    if (outputFile.empty())
+    {
+        if (!FileUtils::CreateDirectoryWithPermissions(Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR, S_IRWXU))
+        {
             LOGM_ERROR(
                 TAG,
                 "Failed to access/create default directories: %s required for storage of shadow document",
                 Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR);
         }
-        else{
+        else
+        {
             ostringstream outputPathStream;
             outputPathStream << Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR << DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
             LOG_INFO(TAG, outputPathStream.str().c_str());
 
             string outputPath = FileUtils::ExtractExpandedPath(outputPathStream.str().c_str());
 
-            if(FileUtils::StoreValueInFile("", outputPath)){
+            if (FileUtils::StoreValueInFile("", outputPath))
+            {
                 chmod(outputPath.c_str(), S_IRUSR | S_IWUSR);
-                if(FileUtils::ValidateFilePermissions(outputPath.c_str(), Permissions::SAMPLE_SHADOW_FILES)){
+                if (FileUtils::ValidateFilePermissions(outputPath.c_str(), Permissions::SAMPLE_SHADOW_FILES))
+                {
                     outputFile = outputPath;
                     LOGM_INFO(
                         TAG,
@@ -419,25 +450,28 @@ int SampleShadowFeature::start() {
                         outputPath.c_str());
                 }
             }
-           else{
+            else
+            {
                 LOGM_ERROR(
                     TAG,
                     "Failed to access/create default file: %s required for storage of shadow document",
                     outputPath.c_str());
-           }
+            }
         }
     }
 
     shadowClient = unique_ptr<IotShadowClient>(new IotShadowClient(resourceManager.get()->getConnection()));
 
-    if(!subscribeToPertinentShadowTopics()){
+    if (!subscribeToPertinentShadowTopics())
+    {
         LOGM_ERROR(TAG, "Failed to subscribe to related %s shadow topics", shadowName.c_str());
         this->stop();
     }
 
     readAndUpdateShadowFromFile();
 
-    if(!inputFile.empty()){
+    if (!inputFile.empty())
+    {
         thread file_monitor_thread(&SampleShadowFeature::runFileMonitor, this);
         file_monitor_thread.detach();
     }
@@ -446,7 +480,8 @@ int SampleShadowFeature::start() {
     return AWS_OP_SUCCESS;
 }
 
-int SampleShadowFeature::stop() {
+int SampleShadowFeature::stop()
+{
     needStop.store(true);
     baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
     return AWS_OP_SUCCESS;

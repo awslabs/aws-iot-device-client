@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #ifndef AWS_IOT_DEVICE_CLIENT_CONFIGSHADOW_H
-#define AWS_IOT_DEVICE_CLIENT_CONFIGSHADOW_H
+#    define AWS_IOT_DEVICE_CLIENT_CONFIGSHADOW_H
 
 #endif // AWS_IOT_DEVICE_CLIENT_CONFIGSHADOW_H
 
-#include <aws/iotshadow/IotShadowClient.h>
 #include "../ClientBaseNotifier.h"
 #include "../Feature.h"
 #include "../SharedCrtResourceManager.h"
@@ -14,8 +13,7 @@
 #include "../util/FileUtils.h"
 #include <aws/crt/JsonObject.h>
 #include <aws/crt/Optional.h>
-
-
+#include <aws/iotshadow/IotShadowClient.h>
 
 namespace Aws
 {
@@ -32,18 +30,24 @@ namespace Aws
                      * \brief Updating Device Client Configuration using Shadow feature
                      *
                      * @param MqttConnectionManager
-                     * @param Device Client configuration passed in by the user via either the command line or configuration file
+                     * @param Device Client configuration passed in by the user via either the command line or
+                     * configuration file
                      *
                      */
-                    void reconfigureWithConfigShadow(std::shared_ptr<SharedCrtResourceManager> resourceManager, PlainConfig &config);
+                    void reconfigureWithConfigShadow(
+                        std::shared_ptr<SharedCrtResourceManager> resourceManager,
+                        PlainConfig &config);
                     /**
                      * \brief Updates the local device client configuration with delta information in the config shadow
                      *
                      * @param config device client local configuration
                      */
-                    void resetClientConfigWithJSON (PlainConfig &config, Crt::JsonView &deltaView, Crt::JsonView &desiredView);
-                  private:
+                    void resetClientConfigWithJSON(
+                        PlainConfig &config,
+                        Crt::JsonView &deltaView,
+                        Crt::JsonView &desiredView);
 
+                  private:
                     static constexpr char TAG[] = "ConfigShadow.cpp";
                     /**
                      * \brief the config shadow name to use
@@ -99,9 +103,11 @@ namespace Aws
                      */
                     std::promise<bool> subscribeShadowUpdateRejectedPromise;
                     /**
-                     * \brief fetches the information in config shadow from cloud by publishing a request to GetNamedShadow
+                     * \brief fetches the information in config shadow from cloud by publishing a request to
+                     * GetNamedShadow
                      * @param IotShadowClient used for subscribing and publishing request
-                     * @return return true if publishing request completed and received corresponding response from cloud successfully
+                     * @return return true if publishing request completed and received corresponding response from
+                     * cloud successfully
                      */
                     bool fetchRemoteConfigShadow(Iotshadow::IotShadowClient IotShadowClient);
                     /**
@@ -110,52 +116,52 @@ namespace Aws
                      * @param response information used to check if config shadow and config delta exists
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    void getNamedShadowAcceptedHandler(Iotshadow::GetShadowResponse *response,
-                                                       int ioError);
+                    void getNamedShadowAcceptedHandler(Iotshadow::GetShadowResponse *response, int ioError);
                     /**
                      * A handler function called by the CRT SDK when our request to
                      * get a named shadow is rejected
                      * @param response information about why the request is rejected
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    void getNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse,
-                                                       int ioError);
+                    void getNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError);
                     /**
                      * \brief Executed if our request to UpdateNamedShadow is accepted
                      *
                      * @param response information about the updated shadow state
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    void updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response,
-                                                          int ioError);
+                    void updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError);
                     /**
                      * \brief Executed if our request to UpdateNamedShadow is rejected
                      *
                      * @param rejectedError information about the rejection
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    void updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse,
-                                                          int ioError);
+                    void updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError);
                     /**
-                     * \brief Acknowledgement that IoT Core has received our request for subscription to UpdateNamedShadow Accepted
+                     * \brief Acknowledgement that IoT Core has received our request for subscription to
+                     * UpdateNamedShadow Accepted
                      *
                      * @param ioError a non-zero code here indicates a problem.
                      */
                     void ackSubscribeToUpdateNamedShadowAccepted(int ioError);
                     /**
-                     * \brief Acknowledgement that IoT Core has received our request for subscription to UpdateNamedShadow Rejected
+                     * \brief Acknowledgement that IoT Core has received our request for subscription to
+                     * UpdateNamedShadow Rejected
                      *
                      * @param ioError a non-zero code here indicates a problem.
                      */
                     void ackSubscribeToUpdateNamedShadowRejected(int ioError);
                     /**
-                     * \brief Acknowledgement that IoT Core has received our request for subscription to GetNamedShadow Accepted
+                     * \brief Acknowledgement that IoT Core has received our request for subscription to GetNamedShadow
+                     * Accepted
                      *
                      * @param ioError a non-zero code here indicates a problem.
                      */
                     void ackSubscribeToGetNamedShadowAccepted(int ioError);
                     /**
-                     * \brief Acknowledgement that IoT Core has received our request for subscription to GetNamedShadow Rejected
+                     * \brief Acknowledgement that IoT Core has received our request for subscription to GetNamedShadow
+                     * Rejected
                      *
                      * @param ioError a non-zero code here indicates a problem.
                      */
@@ -183,7 +189,8 @@ namespace Aws
                      */
                     bool subscribeGetAndUpdateNamedShadowTopics(Iotshadow::IotShadowClient iotShadowClient);
                     /**
-                     * \brief Sends the request to update config shadow with the latest features configuration in device client
+                     * \brief Sends the request to update config shadow with the latest features configuration in device
+                     * client
                      *
                      * @param iotShadowClient
                      * @param config device client local configuration
@@ -196,7 +203,7 @@ namespace Aws
                      */
                     void loadFeatureConfigIntoJsonObject(PlainConfig &config, Aws::Crt::JsonObject &jsonObj);
                 };
-            }
-        }
-    }
-}
+            } // namespace Shadow
+        }     // namespace DeviceClient
+    }         // namespace Iot
+} // namespace Aws

@@ -8,7 +8,6 @@
 #include <aws/crt/JsonObject.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-#include <iostream>
 
 using namespace std;
 using namespace Aws::Crt;

@@ -27,12 +27,12 @@
 #    endif
 #endif
 #if !defined(EXCLUDE_SHADOW)
-#   if !defined(EXCLUDE_CONFIG_SHADOW)
+#    if !defined(EXCLUDE_CONFIG_SHADOW)
 #        include "shadow/ConfigShadow.h"
-#   endif
-#   if !defined(EXCLUDE_SAMPLE_SHADOW)
+#    endif
+#    if !defined(EXCLUDE_SAMPLE_SHADOW)
 #        include "shadow/SampleShadowFeature.h"
-#   endif
+#    endif
 #endif
 
 #include <csignal>
@@ -146,27 +146,27 @@ void attemptConnection()
 {
     Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 900 * 1000, -1, nullptr};
     auto publishLambda = []() -> bool {
-      int connectionStatus = resourceManager.get()->establishConnection(config.config);
-      if (SharedCrtResourceManager::ABORT == connectionStatus)
-      {
-          LOGM_ERROR(
-              TAG,
-              "*** %s: Failed to establish the MQTT Client. Please verify your AWS "
-              "IoT credentials, "
-              "configuration and/or certificate policy. ***",
-              DC_FATAL_ERROR);
-          LoggerFactory::getLoggerInstance()->shutdown();
-          deviceClientAbort("Failed to establish MQTT connection due to credential/configuration error");
-          return true;
-      }
-      else if (SharedCrtResourceManager::SUCCESS == connectionStatus)
-      {
-          return true;
-      }
-      else
-      {
-          return false;
-      }
+        int connectionStatus = resourceManager.get()->establishConnection(config.config);
+        if (SharedCrtResourceManager::ABORT == connectionStatus)
+        {
+            LOGM_ERROR(
+                TAG,
+                "*** %s: Failed to establish the MQTT Client. Please verify your AWS "
+                "IoT credentials, "
+                "configuration and/or certificate policy. ***",
+                DC_FATAL_ERROR);
+            LoggerFactory::getLoggerInstance()->shutdown();
+            deviceClientAbort("Failed to establish MQTT connection due to credential/configuration error");
+            return true;
+        }
+        else if (SharedCrtResourceManager::SUCCESS == connectionStatus)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     };
     std::thread attemptConnectionThread(
         [retryConfig, publishLambda] { Retry::exponentialBackoff(retryConfig, publishLambda); });
@@ -233,7 +233,7 @@ namespace Aws
                         }
                     }
 #ifdef NDEBUG
-                    // DC in release mode - we should decide how we want to behave in this scenario
+                        // DC in release mode - we should decide how we want to behave in this scenario
 #else
                     // DC in debug mode
                     LOGM_ERROR(
@@ -335,14 +335,15 @@ int main(int argc, char *argv[])
 #endif
 
 #if !defined(EXCLUDE_SHADOW)
-#   if !defined(EXCLUDE_CONFIG_SHADOW)
-        if (config.config.configShadow.enabled){
-            LOG_INFO(TAG, "Config shadow is enabled");
-            ConfigShadow configShadow;
-            configShadow.reconfigureWithConfigShadow(resourceManager, config.config);
-            resourceManager->disconnect();
-            attemptConnection();
-        }
+#    if !defined(EXCLUDE_CONFIG_SHADOW)
+    if (config.config.configShadow.enabled)
+    {
+        LOG_INFO(TAG, "Config shadow is enabled");
+        ConfigShadow configShadow;
+        configShadow.reconfigureWithConfigShadow(resourceManager, config.config);
+        resourceManager->disconnect();
+        attemptConnection();
+    }
 #    endif
 #endif
 
@@ -394,19 +395,19 @@ int main(int argc, char *argv[])
 #endif
 
 #if !defined(EXCLUDE_SHADOW)
-#   if !defined(EXCLUDE_SAMPLE_SHADOW)
-        unique_ptr<SampleShadowFeature> sampleShadow;
-        if (config.config.sampleShadow.enabled)
-        {
-            LOG_INFO(TAG, "Sample shadow is enabled");
-            sampleShadow = unique_ptr<SampleShadowFeature>(new SampleShadowFeature());
-            sampleShadow->init(resourceManager, listener, config.config);
-            features.push_back(sampleShadow.get());
-        }
-        else
-        {
-            LOG_INFO(TAG, "Sample shadow is disabled");
-        }
+#    if !defined(EXCLUDE_SAMPLE_SHADOW)
+    unique_ptr<SampleShadowFeature> sampleShadow;
+    if (config.config.sampleShadow.enabled)
+    {
+        LOG_INFO(TAG, "Sample shadow is enabled");
+        sampleShadow = unique_ptr<SampleShadowFeature>(new SampleShadowFeature());
+        sampleShadow->init(resourceManager, listener, config.config);
+        features.push_back(sampleShadow.get());
+    }
+    else
+    {
+        LOG_INFO(TAG, "Sample shadow is disabled");
+    }
 #    endif
 #endif
 
