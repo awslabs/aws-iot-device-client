@@ -39,8 +39,8 @@ constexpr char SampleShadowFeature::TAG[];
 constexpr char SampleShadowFeature::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[];
 constexpr int SampleShadowFeature::DEFAULT_WAIT_TIME_SECONDS;
 
-#define MAX_EVENTS 1000 /* Maximum number of events to process*/
-#define LEN_NAME 16 /* Assuming that the length of the filename won't exceed 16 bytes*/
+#define MAX_EVENTS 1000                           /* Maximum number of events to process*/
+#define LEN_NAME 16                               /* Assuming that the length of the filename won't exceed 16 bytes*/
 #define EVENT_SIZE (sizeof(struct inotify_event)) /*size of one event*/
 #define EVENT_BUFSIZE (MAX_EVENTS * (EVENT_SIZE + LEN_NAME)) /*size of buffer used to store the data of events*/
 
