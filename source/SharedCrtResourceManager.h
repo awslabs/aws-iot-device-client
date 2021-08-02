@@ -27,6 +27,8 @@ namespace Aws
             {
               private:
                 const char *TAG = "SharedCrtResourceManager.cpp";
+                const char *BINARY_NAME = "IoTDeviceClient";
+                const char *BINARY_VERSION = "1.2";
 
                 static constexpr int DEFAULT_WAIT_TIME_SECONDS = 10;
                 bool initialized = false;
