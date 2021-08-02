@@ -1150,22 +1150,22 @@ void PlainConfig::PubSub::SerializeToObject(Crt::JsonObject &object) const
     (void)object;
     object.WithBool(JSON_ENABLE_PUB_SUB, enabled);
 
-    if (publishTopic->c_str())
+    if (publishTopic.has_value() && publishTopic->c_str())
     {
         object.WithString(JSON_PUB_SUB_PUBLISH_TOPIC, publishTopic->c_str());
     }
 
-    if (publishFile->c_str())
+    if (publishFile.has_value() && publishFile->c_str())
     {
         object.WithString(JSON_PUB_SUB_PUBLISH_FILE, publishFile->c_str());
     }
 
-    if (subscribeTopic->c_str())
+    if (subscribeTopic.has_value() && subscribeTopic->c_str())
     {
         object.WithString(JSON_PUB_SUB_SUBSCRIBE_TOPIC, subscribeTopic->c_str());
     }
 
-    if (subscribeFile->c_str())
+    if (subscribeFile.has_value() && subscribeFile->c_str())
     {
         object.WithString(JSON_PUB_SUB_SUBSCRIBE_FILE, subscribeFile->c_str());
     }
@@ -1314,12 +1314,12 @@ void PlainConfig::SampleShadow::SerializeToObject(Crt::JsonObject &object) const
         object.WithString(JSON_SAMPLE_SHADOW_NAME, shadowName->c_str());
     }
 
-    if (shadowInputFile->c_str())
+    if (shadowInputFile.has_value() && shadowInputFile->c_str())
     {
         object.WithString(JSON_SAMPLE_SHADOW_INPUT_FILE, shadowInputFile->c_str());
     }
 
-    if (shadowOutputFile->c_str())
+    if (shadowOutputFile.has_value() && shadowOutputFile->c_str())
     {
         object.WithString(JSON_SAMPLE_SHADOW_OUTPUT_FILE, shadowOutputFile->c_str());
     }
