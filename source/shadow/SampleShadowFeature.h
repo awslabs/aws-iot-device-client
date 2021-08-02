@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #ifndef AWS_IOT_DEVICE_CLIENT_SAMPLESHADOW_H
-#    define AWS_IOT_DEVICE_CLIENT_SAMPLESHADOW_H
+#define AWS_IOT_DEVICE_CLIENT_SAMPLESHADOW_H
 
 #include "../ClientBaseNotifier.h"
 #include "../Feature.h"
