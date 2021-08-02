@@ -13,7 +13,6 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Shadow;
 using namespace std;
 
-#define GTEST_COUT std::cerr << "[          ] [ INFO ]"
 TEST(ConfigShadowFeature, resetClientConfigWithValidJSON)
 {
     constexpr char oldJsonString[] = R"(

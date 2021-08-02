@@ -4,8 +4,6 @@
 #ifndef AWS_IOT_DEVICE_CLIENT_CONFIGSHADOW_H
 #    define AWS_IOT_DEVICE_CLIENT_CONFIGSHADOW_H
 
-#endif // AWS_IOT_DEVICE_CLIENT_CONFIGSHADOW_H
-
 #include "../ClientBaseNotifier.h"
 #include "../Feature.h"
 #include "../SharedCrtResourceManager.h"
@@ -207,3 +205,5 @@ namespace Aws
         }     // namespace DeviceClient
     }         // namespace Iot
 } // namespace Aws
+
+#endif // AWS_IOT_DEVICE_CLIENT_CONFIGSHADOW_H

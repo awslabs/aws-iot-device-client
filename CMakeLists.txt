@@ -11,7 +11,7 @@ option(EXCLUDE_FP "Builds the device client without the IoT Fleet Provisioning F
 option(DISABLE_MQTT "WARNING: This flag is meant for internal use cases and will prevent Device Client features from operating. Builds the device client without MQTT Connection Management." OFF)
 option(EXCLUDE_SAMPLES "Builds the device client without any of the IoT Sample Features." OFF)
 option(EXCLUDE_PUBSUB "Builds the device client without the IoT Pub Sub Sample Feature." OFF)
-option(EXCLUDE_SHADOW "Builds the device client without the IoT Shadow Feature." OFF)
+option(EXCLUDE_SHADOW "Builds the device client without any of the IoT Shadow Features (Config Shadow Feature and Sample Shadow feature)." OFF)
 option(EXCLUDE_CONFIG_SHADOW "Builds the device client without the IoT Config Shadow Feature." OFF)
 option(EXCLUDE_SAMPLE_SHADOW "Builds the device client without the IoT Sample Shadow Feature." OFF)
 option(GIT_VERSION "Updates the version number using the Git commit history" ON)
@@ -44,15 +44,15 @@ if (EXCLUDE_PUBSUB)
     add_definitions(-DEXCLUDE_PUBSUB)
 endif ()
 
-if (EXCLUDE_SHASOW)
+if (EXCLUDE_SHADOW)
     add_definitions(-DEXCLUDE_SHADOW)
 endif()
 
-if (EXCLUDE_CONFIG_SHASOW)
+if (EXCLUDE_CONFIG_SHADOW)
     add_definitions(-DEXCLUDE_CONFIG_SHADOW)
 endif()
 
-if (EXCLUDE_SAMPLE_SHASOW)
+if (EXCLUDE_SAMPLE_SHADOW)
     add_definitions(-DEXCLUDE_SAMPLE_SHADOW)
 endif()
 

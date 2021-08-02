@@ -94,6 +94,31 @@ TEST(Config, AllFeaturesEnabled)
     ASSERT_TRUE(config.pubSub.enabled);
     ASSERT_STREQ("publish_topic", config.pubSub.publishTopic->c_str());
     ASSERT_STREQ("subscribe_topic", config.pubSub.subscribeTopic->c_str());
+
+    JsonObject tunneling;
+    config.tunneling.SerializeToObject(tunneling);
+    ASSERT_TRUE(tunneling.View().GetBool(config.tunneling.JSON_KEY_ENABLED));
+
+    JsonObject jobs;
+    config.jobs.SerializeToObject(jobs);
+    ASSERT_TRUE(jobs.View().GetBool(config.jobs.JSON_KEY_ENABLED));
+
+    JsonObject deviceDefender;
+    config.deviceDefender.SerializeToObject(deviceDefender);
+    ASSERT_TRUE(deviceDefender.View().GetBool(config.deviceDefender.JSON_KEY_ENABLED));
+    ASSERT_EQ(300, deviceDefender.View().GetInteger(config.deviceDefender.JSON_KEY_INTERVAL));
+
+    JsonObject pubsub;
+    config.pubSub.SerializeToObject(pubsub);
+    ASSERT_TRUE(pubsub.View().GetBool(config.deviceDefender.JSON_KEY_ENABLED));
+    ASSERT_STREQ("publish_topic", pubsub.View().GetString(config.pubSub.JSON_PUB_SUB_PUBLISH_TOPIC).c_str());
+    ASSERT_STREQ("subscribe_topic", pubsub.View().GetString(config.pubSub.JSON_PUB_SUB_SUBSCRIBE_TOPIC).c_str());
+
+    JsonObject sampleShadow;
+    config.sampleShadow.SerializeToObject(sampleShadow);
+    ASSERT_STREQ("shadow-name", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_NAME).c_str());
+    ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_INPUT_FILE).c_str());
+    ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
 }
 
 TEST(Config, HappyCaseMinimumConfig)
