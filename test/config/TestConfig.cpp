@@ -44,7 +44,23 @@ TEST(Config, AllFeaturesEnabled)
         "csr-file": "csr-file",
         "device-key": "device-key",
         "template-parameters": "{\"SerialNumber\": \"Device-SN\"}"
-    }
+    },
+    "samples": {
+		"pub-sub": {
+			"enabled": true,
+			"publish-topic": "publish_topic",
+			"subscribe-topic": "subscribe_topic"
+		}
+	},
+    "config-shadow": {
+        "enabled": true
+      },
+    "sample-shadow": {
+        "enabled": true,
+        "shadow-name": "shadow-name",
+        "shadow-input-file": "",
+        "shadow-output-file": ""
+      }
 })";
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
@@ -70,6 +86,39 @@ TEST(Config, AllFeaturesEnabled)
     ASSERT_STREQ("{\"SerialNumber\": \"Device-SN\"}", config.fleetProvisioning.templateParameters->c_str());
     ASSERT_STREQ("csr-file", config.fleetProvisioning.csrFile->c_str());
     ASSERT_STREQ("device-key", config.fleetProvisioning.deviceKey->c_str());
+    ASSERT_TRUE(config.configShadow.enabled);
+    ASSERT_TRUE(config.sampleShadow.enabled);
+    ASSERT_STREQ("shadow-name", config.sampleShadow.shadowName->c_str());
+    ASSERT_FALSE(config.sampleShadow.shadowInputFile.has_value());
+    ASSERT_FALSE(config.sampleShadow.shadowOutputFile.has_value());
+    ASSERT_TRUE(config.pubSub.enabled);
+    ASSERT_STREQ("publish_topic", config.pubSub.publishTopic->c_str());
+    ASSERT_STREQ("subscribe_topic", config.pubSub.subscribeTopic->c_str());
+
+    JsonObject tunneling;
+    config.tunneling.SerializeToObject(tunneling);
+    ASSERT_TRUE(tunneling.View().GetBool(config.tunneling.JSON_KEY_ENABLED));
+
+    JsonObject jobs;
+    config.jobs.SerializeToObject(jobs);
+    ASSERT_TRUE(jobs.View().GetBool(config.jobs.JSON_KEY_ENABLED));
+
+    JsonObject deviceDefender;
+    config.deviceDefender.SerializeToObject(deviceDefender);
+    ASSERT_TRUE(deviceDefender.View().GetBool(config.deviceDefender.JSON_KEY_ENABLED));
+    ASSERT_EQ(300, deviceDefender.View().GetInteger(config.deviceDefender.JSON_KEY_INTERVAL));
+
+    JsonObject pubsub;
+    config.pubSub.SerializeToObject(pubsub);
+    ASSERT_TRUE(pubsub.View().GetBool(config.deviceDefender.JSON_KEY_ENABLED));
+    ASSERT_STREQ("publish_topic", pubsub.View().GetString(config.pubSub.JSON_PUB_SUB_PUBLISH_TOPIC).c_str());
+    ASSERT_STREQ("subscribe_topic", pubsub.View().GetString(config.pubSub.JSON_PUB_SUB_SUBSCRIBE_TOPIC).c_str());
+
+    JsonObject sampleShadow;
+    config.sampleShadow.SerializeToObject(sampleShadow);
+    ASSERT_STREQ("shadow-name", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_NAME).c_str());
+    ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_INPUT_FILE).c_str());
+    ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
 }
 
 TEST(Config, HappyCaseMinimumConfig)
@@ -532,4 +581,48 @@ TEST(Config, PubSubSampleCli)
     ASSERT_STREQ("subscribe_topic", config.pubSub.subscribeTopic->c_str());
     ASSERT_STREQ(filePath.c_str(), config.pubSub.subscribeFile->c_str());
     remove(filePath.c_str());
+}
+
+TEST(Config, SampleShadowCli)
+{
+    string inputFilePath = "/tmp/inputFile";
+    FileUtils::StoreValueInFile("Test", inputFilePath);
+    chmod(inputFilePath.c_str(), 0600);
+
+    string outputFilePath = "/tmp/inputFile";
+    FileUtils::StoreValueInFile("Test", outputFilePath);
+    chmod(outputFilePath.c_str(), 0600);
+    constexpr char jsonString[] = R"(
+{
+	"endpoint": "endpoint value",
+	"cert": "cert",
+	"key": "key",
+	"root-ca": "root-ca",
+	"thing-name": "thing-name value",
+    "sample-shadow": {
+        "enabled": true,
+        "shadow-name": "shadow-name",
+        "shadow-input-file": "/tmp/file",
+        "shadow-output-file": "/tmp/file"
+	}
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    CliArgs cliArgs;
+    cliArgs[PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME] = "shadow-name";
+    cliArgs[PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE] = inputFilePath;
+    cliArgs[PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE] = outputFilePath;
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_TRUE(config.sampleShadow.enabled);
+    ASSERT_STREQ("shadow-name", config.sampleShadow.shadowName->c_str());
+    ASSERT_STREQ(inputFilePath.c_str(), config.sampleShadow.shadowInputFile->c_str());
+    ASSERT_STREQ(outputFilePath.c_str(), config.sampleShadow.shadowOutputFile->c_str());
+    remove(inputFilePath.c_str());
+    remove(outputFilePath.c_str());
 }

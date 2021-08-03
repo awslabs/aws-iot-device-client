@@ -35,5 +35,14 @@
 			"subscribe-topic": "<replace_with_subscribe_topic>",
 			"subscribe-file": "<replace_with_subscribe_file_path>"
 		}
+	},
+	"config-shadow": {
+		"enabled": false
+	},
+	"sample-shadow": {
+		"enabled": false,
+		"shadow-name": "<replace_with_shadow_name>",
+		"shadow-input-file": "<replace_with_shadow_input_file_path>",
+		"shadow-output-file": "<replace_with_shadow_output_file_path>"
 	}
 }
