@@ -162,6 +162,32 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       PUBSUB_ENABLED="false"
     fi
 
+    ### ConfigShadow Config ###
+    printf ${PMPT} "Enable Config Shadow feature? y/n"
+    CONFIG_SHADOW_ENABLED=""
+    read -r ENABLE_CONFIG_SHADOW
+    if [ "$ENABLE_CONFIG_SHADOW" = "y" ]; then
+      CONFIG_SHADOW_ENABLED="true"
+    else
+      CONFIG_SHADOW_ENABLED="false"
+    fi
+
+    ### SampleShadow Config ###
+    printf ${PMPT} "Enable Sample Shadow feature? y/n"
+    SAMPLE_SHADOW_ENABLED=""
+    read -r ENABLE_SAMPLE_SHADOW
+    if [ "$ENABLE_SAMPLE_SHADOW" = "y" ]; then
+      SAMPLE_SHADOW_ENABLED="true"
+      printf ${PMPT} "Specify a shadow name for the feature to create or update:"
+      read -r SAMPLE_SHADOW_NAME
+      printf ${PMPT} "Specify the path of a file for the feature to read from:"
+      read -r SAMPLE_SHADOW_INPUT_FILE
+      printf ${PMPT} "Specify a the path of a file for the feature to write shadow document to:"
+      read -r SAMPLE_SHADOW_OUTPUT_FILE
+    else
+      SAMPLE_SHADOW_ENABLED="false"
+    fi
+
     CONFIG_OUTPUT="
     {
       \"endpoint\":	\"$ENDPOINT\",
@@ -200,6 +226,15 @@ if [ "$BUILD_CONFIG" = "y" ]; then
           \"subscribe-topic\": \"$SUB_TOPIC\",
           \"subscribe-file\": \"$SUB_FILE\"
         }
+      },
+      \"config-shadow\":	{
+        \"enabled\":	$CONFIG_SHADOW_ENABLED
+      },
+      \"sample-shadow\": {
+        \"enabled\": $SAMPLE_SHADOW_ENABLED,
+        \"shadow-name\": \"$SAMPLE_SHADOW_NAME\",
+        \"shadow-input-file\": \"$SAMPLE_SHADOW_INPUT_FILE\",
+        \"shadow-output-file\": \"$SAMPLE_SHADOW_OUTPUT_FILE\"
       }
     }"
 

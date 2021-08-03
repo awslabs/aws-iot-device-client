@@ -54,6 +54,8 @@ constexpr char PlainConfig::JSON_KEY_FLEET_PROVISIONING[];
 constexpr char PlainConfig::JSON_KEY_RUNTIME_CONFIG[];
 constexpr char PlainConfig::JSON_KEY_SAMPLES[];
 constexpr char PlainConfig::JSON_KEY_PUB_SUB[];
+constexpr char PlainConfig::JSON_KEY_SAMPLE_SHADOW[];
+constexpr char PlainConfig::JSON_KEY_CONFIG_SHADOW[];
 
 constexpr int Permissions::KEY_DIR;
 constexpr int Permissions::ROOT_CA_DIR;
@@ -67,6 +69,7 @@ constexpr int Permissions::CONFIG_FILE;
 constexpr int Permissions::RUNTIME_CONFIG_FILE;
 constexpr int Permissions::JOB_HANDLER;
 constexpr int Permissions::PUB_SUB_FILES;
+constexpr int Permissions::SAMPLE_SHADOW_FILES;
 
 bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
 {
@@ -181,6 +184,22 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
         }
     }
 
+    jsonKey = JSON_KEY_SAMPLE_SHADOW;
+    if (json.ValueExists(jsonKey))
+    {
+        SampleShadow temp;
+        temp.LoadFromJson(json.GetJsonObject(jsonKey));
+        sampleShadow = temp;
+    }
+
+    jsonKey = JSON_KEY_CONFIG_SHADOW;
+    if (json.ValueExists(jsonKey))
+    {
+        ConfigShadow temp;
+        temp.LoadFromJson(json.GetJsonObject(jsonKey));
+        configShadow = temp;
+    }
+
     return true;
 }
 
@@ -209,14 +228,16 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
 
     return logConfig.LoadFromCliArgs(cliArgs) && jobs.LoadFromCliArgs(cliArgs) && tunneling.LoadFromCliArgs(cliArgs) &&
            deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs) &&
-           pubSub.LoadFromCliArgs(cliArgs);
+           pubSub.LoadFromCliArgs(cliArgs) && sampleShadow.LoadFromCliArgs(cliArgs) &&
+           configShadow.LoadFromCliArgs(cliArgs);
 }
 
 bool PlainConfig::LoadFromEnvironment()
 {
     return logConfig.LoadFromEnvironment() && jobs.LoadFromEnvironment() && tunneling.LoadFromEnvironment() &&
            deviceDefender.LoadFromEnvironment() && fleetProvisioning.LoadFromEnvironment() &&
-           fleetProvisioningRuntimeConfig.LoadFromEnvironment() && pubSub.LoadFromEnvironment();
+           fleetProvisioningRuntimeConfig.LoadFromEnvironment() && pubSub.LoadFromEnvironment() &&
+           sampleShadow.LoadFromEnvironment() && configShadow.LoadFromEnvironment();
 }
 
 bool PlainConfig::Validate() const
@@ -282,6 +303,13 @@ bool PlainConfig::Validate() const
         return false;
     }
 #endif
+#if !defined(EXCLUDE_SHADOW)
+    if (!sampleShadow.Validate() || !configShadow.Validate())
+    {
+        return false;
+    }
+#endif
+
     return true;
 }
 
@@ -597,6 +625,18 @@ bool PlainConfig::Jobs::Validate() const
     return true;
 }
 
+void PlainConfig::Jobs::SerializeToObject(Crt::JsonObject &object) const
+{
+    (void)object;
+
+    object.WithBool(JSON_KEY_ENABLED, enabled);
+
+    if (handlerDir.c_str())
+    {
+        object.WithString(JSON_KEY_HANDLER_DIR, handlerDir.c_str());
+    }
+}
+
 constexpr char PlainConfig::Tunneling::CLI_ENABLE_TUNNELING[];
 constexpr char PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION[];
 constexpr char PlainConfig::Tunneling::CLI_TUNNELING_REGION[];
@@ -694,6 +734,13 @@ bool PlainConfig::Tunneling::Validate() const
     return true;
 }
 
+void PlainConfig::Tunneling::SerializeToObject(Crt::JsonObject &object) const
+{
+    (void)object;
+
+    object.WithBool(JSON_KEY_ENABLED, enabled);
+}
+
 constexpr char PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER[];
 constexpr char PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL[];
 
@@ -756,6 +803,13 @@ bool PlainConfig::DeviceDefender::Validate() const
     }
 
     return true;
+}
+
+void PlainConfig::DeviceDefender::SerializeToObject(Crt::JsonObject &object) const
+{
+    (void)object;
+    object.WithBool(JSON_KEY_ENABLED, enabled);
+    object.WithInteger(JSON_KEY_INTERVAL, interval);
 }
 
 constexpr char PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING[];
@@ -1062,6 +1116,10 @@ bool PlainConfig::PubSub::Validate() const
     {
         if (!FileUtils::ValidateFilePermissions(publishFile.value(), Permissions::PUB_SUB_FILES, true))
         {
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: publishFile field is not valid for the Pub-Sub sample feature ***",
+                DeviceClient::DC_FATAL_ERROR);
             return false;
         }
     }
@@ -1077,9 +1135,222 @@ bool PlainConfig::PubSub::Validate() const
     {
         if (!FileUtils::ValidateFilePermissions(subscribeFile.value(), Permissions::PUB_SUB_FILES, true))
         {
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: subscribeFile field is not valid for the Pub-Sub sample feature ***",
+                DeviceClient::DC_FATAL_ERROR);
             return false;
         }
     }
+    return true;
+}
+
+void PlainConfig::PubSub::SerializeToObject(Crt::JsonObject &object) const
+{
+    (void)object;
+    object.WithBool(JSON_ENABLE_PUB_SUB, enabled);
+
+    if (publishTopic.has_value() && publishTopic->c_str())
+    {
+        object.WithString(JSON_PUB_SUB_PUBLISH_TOPIC, publishTopic->c_str());
+    }
+
+    if (publishFile.has_value() && publishFile->c_str())
+    {
+        object.WithString(JSON_PUB_SUB_PUBLISH_FILE, publishFile->c_str());
+    }
+
+    if (subscribeTopic.has_value() && subscribeTopic->c_str())
+    {
+        object.WithString(JSON_PUB_SUB_SUBSCRIBE_TOPIC, subscribeTopic->c_str());
+    }
+
+    if (subscribeFile.has_value() && subscribeFile->c_str())
+    {
+        object.WithString(JSON_PUB_SUB_SUBSCRIBE_FILE, subscribeFile->c_str());
+    }
+}
+
+constexpr char PlainConfig::SampleShadow::CLI_ENABLE_SAMPLE_SHADOW[];
+constexpr char PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME[];
+constexpr char PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE[];
+constexpr char PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE[];
+
+constexpr char PlainConfig::SampleShadow::JSON_ENABLE_SAMPLE_SHADOW[];
+constexpr char PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_NAME[];
+constexpr char PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_INPUT_FILE[];
+constexpr char PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_OUTPUT_FILE[];
+
+bool PlainConfig::SampleShadow::LoadFromJson(const Crt::JsonView &json)
+{
+    const char *jsonKey = JSON_ENABLE_SAMPLE_SHADOW;
+    if (json.ValueExists(jsonKey))
+    {
+        enabled = json.GetBool(jsonKey);
+    }
+
+    jsonKey = JSON_SAMPLE_SHADOW_NAME;
+    if (!json.GetString(jsonKey).empty())
+    {
+        shadowName = json.GetString(jsonKey).c_str();
+    }
+    else
+    {
+        LOGM_WARN(
+            Config::TAG, "Shadow Name {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+    }
+
+    jsonKey = JSON_SAMPLE_SHADOW_INPUT_FILE;
+    if (json.ValueExists(jsonKey))
+    {
+        if (!json.GetString(jsonKey).empty())
+        {
+            shadowInputFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
+        else
+        {
+            LOGM_WARN(
+                Config::TAG,
+                "Input file {%s} was provided in the JSON configuration file with an empty value",
+                jsonKey);
+        }
+    }
+
+    jsonKey = JSON_SAMPLE_SHADOW_OUTPUT_FILE;
+    if (json.ValueExists(jsonKey))
+    {
+        if (!json.GetString(jsonKey).empty())
+        {
+            shadowOutputFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
+        else
+        {
+            LOGM_WARN(
+                Config::TAG,
+                "Output file {%s} was provided in the JSON configuration file with an empty value",
+                jsonKey);
+        }
+    }
+
+    return true;
+}
+
+bool PlainConfig::SampleShadow::LoadFromCliArgs(const CliArgs &cliArgs)
+{
+    if (cliArgs.count(PlainConfig::SampleShadow::CLI_ENABLE_SAMPLE_SHADOW))
+    {
+        enabled = cliArgs.at(CLI_ENABLE_SAMPLE_SHADOW).compare("true") == 0;
+    }
+    if (cliArgs.count(PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME))
+    {
+        shadowName = cliArgs.at(PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME).c_str();
+    }
+    if (cliArgs.count(PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE))
+    {
+        shadowInputFile =
+            FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE)).c_str();
+    }
+    if (cliArgs.count(PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE))
+    {
+        shadowOutputFile =
+            FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE))
+                .c_str();
+    }
+
+    return true;
+}
+
+bool PlainConfig::SampleShadow::Validate() const
+{
+    if (!enabled)
+    {
+        return true;
+    }
+
+    if (!shadowName.has_value() || shadowName->empty())
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: shadowName field must be specified if Shadow sample feature is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+
+    if (shadowInputFile.has_value() && !shadowInputFile->empty())
+    {
+        if (!FileUtils::ValidateFilePermissions(shadowInputFile.value(), Permissions::SAMPLE_SHADOW_FILES, true))
+        {
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: shadowInputFile field is not valid for the sample shadow feature ***",
+                DeviceClient::DC_FATAL_ERROR);
+            return false;
+        }
+    }
+
+    if (shadowOutputFile.has_value() && !shadowOutputFile->empty())
+    {
+        if (!FileUtils::ValidateFilePermissions(shadowOutputFile.value(), Permissions::SAMPLE_SHADOW_FILES, true))
+        {
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: shadowOutputFile field is not valid for the sample shadow feature ***",
+                DeviceClient::DC_FATAL_ERROR);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void PlainConfig::SampleShadow::SerializeToObject(Crt::JsonObject &object) const
+{
+    (void)object;
+
+    object.WithBool(JSON_ENABLE_SAMPLE_SHADOW, enabled);
+
+    if (shadowName->c_str())
+    {
+        object.WithString(JSON_SAMPLE_SHADOW_NAME, shadowName->c_str());
+    }
+
+    if (shadowInputFile.has_value() && shadowInputFile->c_str())
+    {
+        object.WithString(JSON_SAMPLE_SHADOW_INPUT_FILE, shadowInputFile->c_str());
+    }
+
+    if (shadowOutputFile.has_value() && shadowOutputFile->c_str())
+    {
+        object.WithString(JSON_SAMPLE_SHADOW_OUTPUT_FILE, shadowOutputFile->c_str());
+    }
+}
+
+constexpr char PlainConfig::ConfigShadow::JSON_ENABLE_CONFIG_SHADOW[];
+constexpr char PlainConfig::ConfigShadow::CLI_ENABLE_CONFIG_SHADOW[];
+
+bool PlainConfig::ConfigShadow::LoadFromJson(const Crt::JsonView &json)
+{
+    const char *jsonKey = JSON_ENABLE_CONFIG_SHADOW;
+    if (json.ValueExists(jsonKey))
+    {
+        enabled = json.GetBool(jsonKey);
+    }
+
+    return true;
+}
+
+bool PlainConfig::ConfigShadow::LoadFromCliArgs(const CliArgs &cliArgs)
+{
+    if (cliArgs.count(PlainConfig::ConfigShadow::CLI_ENABLE_CONFIG_SHADOW))
+    {
+        enabled = cliArgs.at(CLI_ENABLE_CONFIG_SHADOW).compare("true") == 0;
+    }
+
+    return true;
+}
+
+bool PlainConfig::ConfigShadow::Validate() const
+{
     return true;
 }
 
@@ -1091,6 +1362,7 @@ constexpr char Config::CLI_HELP[];
 constexpr char Config::CLI_EXPORT_DEFAULT_SETTINGS[];
 constexpr char Config::CLI_CONFIG_FILE[];
 constexpr char Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[];
+constexpr char Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[];
 
 bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 {
@@ -1138,7 +1410,13 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS, true, false, nullptr},
         {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE, true, false, nullptr},
         {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY, true, false, nullptr},
-    };
+
+        {PlainConfig::SampleShadow::CLI_ENABLE_SAMPLE_SHADOW, true, false, nullptr},
+        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME, true, false, nullptr},
+        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE, true, false, nullptr},
+        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE, true, false, nullptr},
+
+        {PlainConfig::ConfigShadow::CLI_ENABLE_CONFIG_SHADOW, true, false, nullptr}};
 
     map<string, ArgumentDefinition> argumentDefinitionMap;
     for (auto &i : argumentDefinitions)
@@ -1356,6 +1634,8 @@ void Config::PrintHelpMessage()
         "%s [true|false]:\t\t\t\t\tEnables/Disables Device Defender feature\n"
         "%s [true|false]:\t\t\t\tEnables/Disables Fleet Provisioning feature\n"
         "%s [true|false]:\t\t\t\t\t\tEnables/Disables Pub/Sub Sample feature\n"
+        "%s [true|false]:\t\t\t\t\t\tEnables/Disables Sample Shadow feature\n"
+        "%s [true|false]:\t\t\t\t\t\tEnables/Disables Config Shadow feature\n"
         "%s <endpoint-value>:\t\t\t\t\t\tUse Specified Endpoint\n"
         "%s <Cert-Location>:\t\t\t\t\t\t\tUse Specified Cert file\n"
         "%s <Key-Location>:\t\t\t\t\t\t\tUse Specified Key file\n"
@@ -1379,7 +1659,11 @@ void Config::PrintHelpMessage()
         "%s <publish-topic>:\t\t\t\t\tThe topic the Pub/Sub sample feature will publish to\n"
         "%s <path/to/publish/file>:\t\t\t\t\tThe file the Pub/Sub sample feature will read from when publishing\n"
         "%s <subscribe-topic>:\t\t\t\t\tThe topic the Pub/Sub sample feature will receive messages on\n"
-        "%s <path/to/sub/file>:\t\t\t\t\tThe file the Pub/Sub sample feature will write received messaged to\n";
+        "%s <path/to/sub/file>:\t\t\t\t\tThe file the Pub/Sub sample feature will write received messaged to\n"
+        "%s <shadow-name>:\t\t\t\t\tThe name of shadow SampleShadow feature will create or update\n"
+        "%s <shadow-input-file>:\t\t\t\t\tThe file the Sample Shadow feature will read from when updating shadow data\n"
+        "%s <shadow-output-file>:\t\t\t\t\tThe file the Sample Shadow feature will write the latest shadow document "
+        "to\n";
 
     cout << FormatMessage(
         helpMessageTemplate,
@@ -1397,6 +1681,8 @@ void Config::PrintHelpMessage()
         PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER,
         PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING,
         PlainConfig::PubSub::CLI_ENABLE_PUB_SUB,
+        PlainConfig::SampleShadow::CLI_ENABLE_SAMPLE_SHADOW,
+        PlainConfig::ConfigShadow::CLI_ENABLE_CONFIG_SHADOW,
         PlainConfig::CLI_ENDPOINT,
         PlainConfig::CLI_CERT,
         PlainConfig::CLI_KEY,
@@ -1414,7 +1700,10 @@ void Config::PrintHelpMessage()
         PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_TOPIC,
         PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE,
         PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC,
-        PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE);
+        PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE,
+        PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME,
+        PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE,
+        PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE);
 }
 
 bool Config::ExportDefaultSetting(const string &file)
@@ -1455,6 +1744,15 @@ bool Config::ExportDefaultSetting(const string &file)
             "%s": "<replace_with_subscribe_topic>",
             "%s": "<replace_with_subscribe_file_path>"
         }
+    },
+    "%s": {
+		"%s": false,
+		"%s": "<replace_with_shadow_name>",
+		"%s": "<replace_with_shaodw_input_file_path>",
+		"%s": "<replace_with_shaodw_output_file_path>"
+	},
+    "%s": {
+        "%s": false
     }
 }
 )";
@@ -1495,7 +1793,14 @@ bool Config::ExportDefaultSetting(const string &file)
         PlainConfig::PubSub::JSON_PUB_SUB_PUBLISH_TOPIC,
         PlainConfig::PubSub::JSON_PUB_SUB_PUBLISH_FILE,
         PlainConfig::PubSub::JSON_PUB_SUB_SUBSCRIBE_TOPIC,
-        PlainConfig::PubSub::JSON_PUB_SUB_SUBSCRIBE_FILE);
+        PlainConfig::PubSub::JSON_PUB_SUB_SUBSCRIBE_FILE,
+        PlainConfig::JSON_KEY_SAMPLE_SHADOW,
+        PlainConfig::SampleShadow::JSON_ENABLE_SAMPLE_SHADOW,
+        PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_NAME,
+        PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_INPUT_FILE,
+        PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_OUTPUT_FILE,
+        PlainConfig::JSON_KEY_CONFIG_SHADOW,
+        PlainConfig::ConfigShadow::JSON_ENABLE_CONFIG_SHADOW);
 
     clientConfig.close();
     LOGM_INFO(TAG, "Exported settings to: %s", Sanitize(file).c_str());

@@ -26,6 +26,14 @@
 #        include "samples/pubsub/PubSubFeature.h"
 #    endif
 #endif
+#if !defined(EXCLUDE_SHADOW)
+#    if !defined(EXCLUDE_CONFIG_SHADOW)
+#        include "shadow/ConfigShadow.h"
+#    endif
+#    if !defined(EXCLUDE_SAMPLE_SHADOW)
+#        include "shadow/SampleShadowFeature.h"
+#    endif
+#endif
 
 #include <csignal>
 #include <memory>
@@ -52,6 +60,9 @@ using namespace Aws::Iot::DeviceClient::FleetProvisioningNS;
 #    if !defined(EXCLUDE_PUBSUB)
 using namespace Aws::Iot::DeviceClient::Samples;
 #    endif
+#endif
+#if !defined(EXCLUDE_SHADOW)
+using namespace Aws::Iot::DeviceClient::Shadow;
 #endif
 
 const char *TAG = "Main.cpp";
@@ -322,6 +333,20 @@ int main(int argc, char *argv[])
 #if !defined(DISABLE_MQTT)
     attemptConnection();
 #endif
+
+#if !defined(EXCLUDE_SHADOW)
+#    if !defined(EXCLUDE_CONFIG_SHADOW)
+    if (config.config.configShadow.enabled)
+    {
+        LOG_INFO(TAG, "Config shadow is enabled");
+        ConfigShadow configShadow;
+        configShadow.reconfigureWithConfigShadow(resourceManager, config.config);
+        resourceManager->disconnect();
+        attemptConnection();
+    }
+#    endif
+#endif
+
     featuresReadWriteLock.lock(); // LOCK
 
 #if !defined(EXCLUDE_JOBS)
@@ -367,6 +392,23 @@ int main(int argc, char *argv[])
     {
         LOG_INFO(TAG, "Device Defender is disabled");
     }
+#endif
+
+#if !defined(EXCLUDE_SHADOW)
+#    if !defined(EXCLUDE_SAMPLE_SHADOW)
+    unique_ptr<SampleShadowFeature> sampleShadow;
+    if (config.config.sampleShadow.enabled)
+    {
+        LOG_INFO(TAG, "Sample shadow is enabled");
+        sampleShadow = unique_ptr<SampleShadowFeature>(new SampleShadowFeature());
+        sampleShadow->init(resourceManager, listener, config.config);
+        features.push_back(sampleShadow.get());
+    }
+    else
+    {
+        LOG_INFO(TAG, "Sample shadow is disabled");
+    }
+#    endif
 #endif
 
 #if !defined(EXCLUDE_SAMPLES)

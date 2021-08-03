@@ -51,6 +51,7 @@ namespace Aws
                 static constexpr int RUNTIME_CONFIG_FILE = 644;
                 static constexpr int JOB_HANDLER = 700;
                 static constexpr int PUB_SUB_FILES = 600;
+                static constexpr int SAMPLE_SHADOW_FILES = 600;
             };
 
             struct PlainConfig : public LoadableFromJsonAndCliAndEnvironment
@@ -80,6 +81,9 @@ namespace Aws
 
                 static constexpr char JSON_KEY_SAMPLES[] = "samples";
                 static constexpr char JSON_KEY_PUB_SUB[] = "pub-sub";
+
+                static constexpr char JSON_KEY_SAMPLE_SHADOW[] = "sample-shadow";
+                static constexpr char JSON_KEY_CONFIG_SHADOW[] = "config-shadow";
 
                 Aws::Crt::Optional<std::string> endpoint;
                 Aws::Crt::Optional<std::string> cert;
@@ -133,6 +137,8 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
+                    /** Serialize Job feature To Json Object **/
+                    void SerializeToObject(Crt::JsonObject &object) const;
 
                     static constexpr char CLI_ENABLE_JOBS[] = "--enable-jobs";
                     static constexpr char CLI_HANDLER_DIR[] = "--jobs-handler-dir";
@@ -150,6 +156,8 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override;
                     bool Validate() const override;
+                    /** Serialize Tunneling feature To Json Object **/
+                    void SerializeToObject(Crt::JsonObject &object) const;
 
                     static constexpr char CLI_ENABLE_TUNNELING[] = "--enable-tunneling";
                     static constexpr char CLI_TUNNELING_DISABLE_NOTIFICATION[] = "--tunneling-disable-notification";
@@ -176,6 +184,8 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
+                    /** Serialize Device Defender feature To Json Object **/
+                    void SerializeToObject(Crt::JsonObject &object) const;
 
                     static constexpr char CLI_ENABLE_DEVICE_DEFENDER[] = "--enable-device-defender";
                     static constexpr char CLI_DEVICE_DEFENDER_INTERVAL[] = "--device-defender-interval";
@@ -242,6 +252,8 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
+                    /** Serialize PubSub feature To Json Object **/
+                    void SerializeToObject(Crt::JsonObject &object) const;
 
                     static constexpr char CLI_ENABLE_PUB_SUB[] = "--enable-pub-sub";
                     static constexpr char CLI_PUB_SUB_PUBLISH_TOPIC[] = "--publish-topic";
@@ -262,6 +274,46 @@ namespace Aws
                     Aws::Crt::Optional<std::string> subscribeFile;
                 };
                 PubSub pubSub;
+
+                struct SampleShadow : public LoadableFromJsonAndCliAndEnvironment
+                {
+                    bool LoadFromJson(const Crt::JsonView &json) override;
+                    bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override { return true; }
+                    bool Validate() const override;
+                    /** Serialize SampleShadow feature To Json Object **/
+                    void SerializeToObject(Crt::JsonObject &object) const;
+
+                    static constexpr char CLI_ENABLE_SAMPLE_SHADOW[] = "--enable-sample-shadow";
+                    static constexpr char CLI_SAMPLE_SHADOW_NAME[] = "--shadow-name";
+                    static constexpr char CLI_SAMPLE_SHADOW_INPUT_FILE[] = "--shadow-input-file";
+                    static constexpr char CLI_SAMPLE_SHADOW_OUTPUT_FILE[] = "--shadow-output-file";
+
+                    static constexpr char JSON_ENABLE_SAMPLE_SHADOW[] = "enabled";
+                    static constexpr char JSON_SAMPLE_SHADOW_NAME[] = "shadow-name";
+                    static constexpr char JSON_SAMPLE_SHADOW_INPUT_FILE[] = "shadow-input-file";
+                    static constexpr char JSON_SAMPLE_SHADOW_OUTPUT_FILE[] = "shadow-output-file";
+
+                    bool enabled{false};
+                    Aws::Crt::Optional<std::string> shadowName;
+                    Aws::Crt::Optional<std::string> shadowInputFile;
+                    Aws::Crt::Optional<std::string> shadowOutputFile;
+                };
+                SampleShadow sampleShadow;
+
+                struct ConfigShadow : public LoadableFromJsonAndCliAndEnvironment
+                {
+                    bool LoadFromJson(const Crt::JsonView &json) override;
+                    bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override { return true; }
+                    bool Validate() const override;
+
+                    static constexpr char CLI_ENABLE_CONFIG_SHADOW[] = "--enable-config-shadow";
+                    static constexpr char JSON_ENABLE_CONFIG_SHADOW[] = "enabled";
+
+                    bool enabled{false};
+                };
+                ConfigShadow configShadow;
             };
 
             class Config
@@ -276,6 +328,7 @@ namespace Aws
                 static constexpr char DEFAULT_CONFIG_FILE[] = "~/.aws-iot-device-client/aws-iot-device-client.conf";
                 static constexpr char DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] =
                     "~/.aws-iot-device-client/aws-iot-device-client-runtime.conf";
+                static constexpr char DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[] = "~/.aws-iot-device-client/sample-shadow/";
 
                 static constexpr char CLI_HELP[] = "--help";
                 static constexpr char CLI_EXPORT_DEFAULT_SETTINGS[] = "--export-default-settings";
