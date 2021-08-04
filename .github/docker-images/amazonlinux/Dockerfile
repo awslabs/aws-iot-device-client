@@ -61,9 +61,9 @@ RUN mkdir sdk-cpp-workspace \
     && mkdir aws-iot-device-sdk-cpp-v2-build \
     && git clone --recursive https://github.com/aws/aws-iot-device-sdk-cpp-v2.git \
     && cd aws-iot-device-sdk-cpp-v2 \
-    && git checkout f2d5c65334de5cc4937fd7115d1ada7787f0710d \
+    && git checkout 9f78f83a9fe3d679d6fa5fdb6d0bd1263e801680 \
     && cd ../aws-iot-device-sdk-cpp-v2-build \
-    && cmake -DCMAKE_INSTALL_PREFIX="/usr" -DUSE_OPENSSL=ON -DSEARCH_LIBCRYPTO=ON -DBUILD_DEPS=ON ../aws-iot-device-sdk-cpp-v2 \
+    && cmake -DCMAKE_INSTALL_PREFIX="/usr" -DUSE_OPENSSL=ON -DBUILD_DEPS=ON ../aws-iot-device-sdk-cpp-v2 \
     && cmake --build . --target install
 
 ADD entry-script.sh /home/entry-script
