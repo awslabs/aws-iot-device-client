@@ -30,5 +30,6 @@ field by running `aws iot describe-endpoint` on the CLI.
 
 `thing-name` *or* `--thing-name`: This is the name for your thing. It should be unique across your regional AWS account. 
 
-Next [File and Directory Permission Requirements](docs/PERMISSIONS.md)
+**Next**: [File and Directory Permission Requirements](PERMISSIONS.md)
+
 [*Back To The Top*](#config)
