@@ -54,7 +54,7 @@ void DeviceDefenderFeature::startDeviceDefender()
     taskBuilder.WithTaskCancelledHandler(onCancelled);
     taskBuilder.WithTaskCancellationUserData(NULL);
     LOGM_INFO(TAG, "%s task builder interval: %i", getName().c_str(), interval);
-    task = unique_ptr<Iotdevicedefenderv1::ReportTask>(new Iotdevicedefenderv1::ReportTask(taskBuilder.Build()));
+    task = taskBuilder.Build();
     LOGM_DEBUG(TAG, "%s task build finished", getName().c_str());
     task->StartTask();
     LOGM_DEBUG(TAG, "%s StartTask() async called", getName().c_str());
