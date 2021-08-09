@@ -96,7 +96,7 @@ namespace Aws
                     /**
                      * \brief The Iot Device Defender SDK task responsible for publishing the reports
                      */
-                    std::unique_ptr<Aws::Iotdevicedefenderv1::ReportTask> task;
+                    std::shared_ptr<Aws::Iotdevicedefenderv1::ReportTask> task;
 
                     /**
                      * \brief Called by feature start, this will build the task, add it to the eventLoopGroup in
