@@ -130,7 +130,7 @@ namespace Aws
                      * \brief Used by the logger to specify that log messages are coming from the Secure Tunneling
                      * feature
                      */
-                    static constexpr char TAG[] = "SecureTunneling.cpp";
+                    static constexpr char TAG[] = "SecureTunnelingFeature.cpp";
 
                     /**
                      * \brief Format string for forming the secure tunneling data plain endpoint

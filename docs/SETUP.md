@@ -33,5 +33,5 @@ You can use the following command to see all of the CLI options available for th
 ./aws-iot-device-client --help
 ```
 
-Next [Configuring the AWS IoT Device Client](docs/CONFIG.md)  
+Next [Configuring the AWS IoT Device Client](CONFIG.md)  
 [*Back To The Top*](#setup)
