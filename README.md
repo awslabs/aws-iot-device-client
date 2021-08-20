@@ -11,7 +11,7 @@
   * [Fleet Provisioning Feature](source/fleetprovisioning/README.md)
   * [Device Defender Feature](source/devicedefender/README.md)
   * [Secure Tunneling Feature](source/tunneling/README.md)
-  * [Named Shdow Feature](source/shadow/README.md)
+  * [Named Shadow Feature](source/shadow/README.md)
     - [Sample Shadow Feature](source/shadow#sample-shadow)
     - [Config Shadow Feature](source/shadow#config-shadow)
   * [Logging](source/logging/README.md)

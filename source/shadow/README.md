@@ -5,8 +5,9 @@
 
 
 ## Shadow Feature
-The [AWS IoT Device Shadow service](https://docs.aws.amazon.com/iot/latest/developerguide/iot-device-shadows.html) adds shadows to AWS IoT thing objects, which provides a reliable data store for devices, apps, and other cloud services to share data.
-Device client provides two shadow examples to illustrate how you might take advantage of backend shadow sdk to store and interact with data in device shadow.
+The [AWS IoT Device Shadow service](https://docs.aws.amazon.com/iot/latest/developerguide/iot-device-shadows.html) adds shadows to AWS IoT thing objects, which provides a reliable data store for devices, apps, and other cloud services to share data. The client-side Named Shadows feature enables you to control your IoT device using AWS IoT Named Shadows. Shadows can store your device's state information and make it available to your device, AWS IoT services, your custom  apps and other AWS services whether the device is online and connected to AWS IoT or not.
+
+The following two shadow examples created in device client illustrate how you might take advantage of backend shadow sdk to store and interact with data in device shadow.
 
 ### Sample Shadow
 Sample shadow is a shadow in which you can store custom data. You can set custom name of shadow you want to create or update by editing `shadow-name` in the configuration. This feature takes a data file as input, updating the target shadow with all data in this source file and writing the latest shadow document to a shadow output file every time if there is a shadow update event occurring. You can use this file to track the latest shadow data stored in the cloud.
@@ -44,4 +45,4 @@ Device Client would also perform configuration validation check when detecting t
 ```
 *It is important to note that providing input and output files is optional.  If they are not configured or left blank, "{welcome","aws-iot}" will be published to this shadow and the `default-sample-shadow-document`file will be created under this path `~/.aws-iot-device-client/sample-shadow/` by default*
 
-[*Back To The Top*](#Shadow Feature)
+[*Back To The Top*](#Shadow_Feature)
