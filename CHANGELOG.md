@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Known Issues]
 - [Device Client aborts on Red Hat Enterprise Linux ARM](https://github.com/awslabs/aws-iot-device-client/issues/87)
 - [Device Client crashes due to SIGSEGV on Ubuntu x86](https://github.com/awslabs/aws-iot-device-client/issues/86)
+- [Device Client network crash resulting in not receiving notification from cloud](https://github.com/awslabs/aws-iot-device-client/issues/151)
+
+## [1.3.X] - 2021-08-19
+### Added
+- Added support for Telemetry data.
+- Added support for Named Shadow feature in Device Client.
+
+### Fixed
+- Resolved high CPU utilization issue.
+- Updated SDK version which resolves security vulnerability issue, and issues causing Device Defender and Secure Tunneling failures.
 
 ## [1.2.X] - 2021-05-06
 ### Added

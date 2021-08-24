@@ -11,7 +11,7 @@
   * [Fleet Provisioning Feature](source/fleetprovisioning/README.md)
   * [Device Defender Feature](source/devicedefender/README.md)
   * [Secure Tunneling Feature](source/tunneling/README.md)
-  * [Named Shdow Feature](source/shadow/README.md)
+  * [Named Shadow Feature](source/shadow/README.md)
     - [Sample Shadow Feature](source/shadow#sample-shadow)
     - [Config Shadow Feature](source/shadow#config-shadow)
   * [Logging](source/logging/README.md)
@@ -46,8 +46,9 @@ The modular IoT Device Client consists of a “base client” and discrete “cl
  [Secure Tunneling feature](https://aws.amazon.com/iot-device-management/features/#Secure_Tunneling) in the AWS IoT Device Management service.
 * The client-side Device Defender feature enables you to collect standard [Device Side Metrics](https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html) when you use the [Rules
  Detect feature](https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html) in the AWS IoT Device Defender service.
-* The client-side [Fleet Provisioning feature](https://docs.aws.amazon.com/iot/latest/developerguide/provision-wo-cert.html) enables you to replace provisional credentials with device-specific ones
-  when you onboard a fleet of devices to AWS IoT Core. It creates a device specific certificate and private key, and registers the device on AWS IoT Core.
+* The client-side Fleet Provisioning feature enables you to replace provisional credentials with device-specific ones
+  when you onboard a fleet of devices using the [Fleet Provisioning capability](https://docs.aws.amazon.com/iot/latest/developerguide/provision-wo-cert.html) of AWS IoT Core. It creates a device specific certificate and private key, and registers the device on AWS IoT Core.
+* The client-side Named Shadows feature enables you to control your IoT device using [AWS IoT Named Shadows](https://docs.aws.amazon.com/iot/latest/developerguide/iot-device-shadows.html). Shadows can store your device's state information and make it available to your device, AWS IoT services, your custom  apps and other AWS services whether the device is online and connected to AWS IoT or not.  
 ### List of Supported Platforms
 The AWS IoT Device Client currently works on IoT devices with common microprocessors (x86_64, ARM architectures), and common Linux software environments (Debian, Ubuntu, and RHEL).
 
@@ -114,8 +115,8 @@ cmake --build . --target test-aws-iot-device-client
 [Jobs Feature Readme](source/jobs/README.md)  
 [Fleet Provisioning Feature Readme](source/fleetprovisioning/README.md)  
 [Device Defender Feature Readme](source/devicedefender/README.md)  
-[Secure Tunneling Feature Readme](source/tunneling/README.md)
-[Name Shadow Feature Readme](source/shadow/README.md)
+[Secure Tunneling Feature Readme](source/tunneling/README.md)  
+[Named Shadow Feature Readme](source/shadow/README.md)
 
 ## AWS IoT Device Client Samples
 [MQTT Pub/Sub Sample Feature](source/samples/pubsub/README.md)
