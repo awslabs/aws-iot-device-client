@@ -12,6 +12,6 @@ then
       wget --quiet -O --quiet "$2" "$1"
     fi
 else
-    >&2 echo "wget software not installed on the device. Use install-packages operation for installing wget software on the target device."
+    >&2 echo "Wget software package not installed on the device. Use the \"install-packages.sh\" operation to install the wget software package on this device."
     exit 1
 fi
