@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
     shared_ptr<DefaultClientBaseNotifier> listener =
         shared_ptr<DefaultClientBaseNotifier>(new DefaultClientBaseNotifier);
     resourceManager = shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager);
-    if (!resourceManager.get()->initialize(config.config))
+    if (!resourceManager.get()->initialize(config.config, &features))
     {
         LOGM_ERROR(
             TAG,
@@ -300,7 +300,7 @@ int main(int argc, char *argv[])
     {
 
         /*
-         * Establish MQTT connection using claim certificates and private key to provision device/thing.
+         * Establish MQTT connection using claim certificates and private key to provision the device/thing.
          */
 #    if !defined(DISABLE_MQTT)
         attemptConnection();
@@ -316,7 +316,7 @@ int main(int argc, char *argv[])
         {
             LOGM_ERROR(
                 TAG,
-                "*** %s: Failed to Provision thing or Validate newly created resources. "
+                "*** %s: Failed to Provision thing or validate newly created resources. "
                 "Please verify your AWS IoT credentials, "
                 "configuration, Fleet Provisioning Template, claim certificate and policy used. ***",
                 DC_FATAL_ERROR);
@@ -427,11 +427,11 @@ int main(int argc, char *argv[])
     }
 #    endif
 #endif
-
-    for (auto &feature : features)
-    {
-        feature->start();
-    }
+    //    for (auto &feature : features)
+    //    {
+    //        feature->start();
+    //    }
+    resourceManager->startDeviceClientFeatures();
     featuresReadWriteLock.unlock(); // UNLOCK
 
     // Now allow this thread to sleep until it's interrupted by a signal

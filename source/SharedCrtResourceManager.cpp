@@ -21,8 +21,13 @@ using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr int SharedCrtResourceManager::DEFAULT_WAIT_TIME_SECONDS;
 
-bool SharedCrtResourceManager::initialize(const PlainConfig &config)
+bool SharedCrtResourceManager::initialize(const PlainConfig &config, vector<Feature *> *featuresList)
 {
+    features = featuresList;
+    for (auto *feature : *features)
+    {
+        LOGM_INFO(TAG, "Initialize FeatureList: %s", feature->getName().c_str());
+    }
     initializeAllocator();
     initialized = buildClient(config) == SharedCrtResourceManager::SUCCESS;
     return initialized;
@@ -167,6 +172,11 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     clientConfigBuilder.WithCertificateAuthority(config.rootCa->c_str());
     clientConfigBuilder.WithSdkName(SharedCrtResourceManager::BINARY_NAME);
     clientConfigBuilder.WithSdkVersion(SharedCrtResourceManager::BINARY_VERSION);
+    clientConfigBuilder.WithTcpKeepAlive();
+    clientConfigBuilder.WithTcpKeepAliveTimeout(60);
+    clientConfigBuilder.WithTcpKeepAliveInterval(50);
+    clientConfigBuilder.WithTcpKeepAliveMaxProbes(6);
+
     auto clientConfig = clientConfigBuilder.Build();
 
     if (!clientConfig)
@@ -222,8 +232,35 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
         }
     };
 
+    /*
+     * Invoked when connection is interrupted.
+     */
+    auto OnConnectionInterrupted = [&](Mqtt::MqttConnection &, int errorCode) {
+        {
+            if (errorCode)
+            {
+                LOGM_ERROR(TAG, "MQTT Connection interrupted with error: %s", ErrorDebugString(errorCode));
+            }
+        }
+    };
+
+    /*
+     * Invoked when connection is resumed.
+     */
+    auto OnConnectionResumed = [&](Mqtt::MqttConnection &, int returnCode, bool) {
+        {
+            if (returnCode)
+            {
+                LOGM_INFO(TAG, "MQTT connection resumed with return code: %d", returnCode);
+                startDeviceClientFeatures();
+            }
+        }
+    };
+
     connection->OnConnectionCompleted = move(onConnectionCompleted);
     connection->OnDisconnect = move(onDisconnect);
+    connection->OnConnectionInterrupted = move(OnConnectionInterrupted);
+    connection->OnConnectionResumed = move(OnConnectionResumed);
 
     LOGM_INFO(TAG, "Establishing MQTT connection with client id %s...", config.thingName->c_str());
     if (!connection->Connect(config.thingName->c_str(), true, 0))
@@ -231,6 +268,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
         LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(connection->LastError()));
         return RETRY;
     }
+    connection->SetReconnectTimeout(15,240);
 
     int connectionStatus = connectionCompletedPromise.get_future().get();
 
@@ -304,5 +342,14 @@ void SharedCrtResourceManager::disconnect()
     else
     {
         LOG_ERROR(TAG, "MQTT Connection failed to disconnect");
+    }
+}
+
+void SharedCrtResourceManager::startDeviceClientFeatures()
+{
+    LOG_INFO(TAG, "Starting Device Client features.");
+    for (auto *feature : *features)
+    {
+        feature->start();
     }
 }

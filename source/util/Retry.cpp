@@ -35,7 +35,7 @@ bool Retry::exponentialBackoff(
 
     if (config.maxRetries < 0)
     {
-        LOG_DEBUG(TAG, "Retryable function will retry until success");
+        LOG_DEBUG(TAG, "Retryable function starting, it will retry until success");
     }
 
     bool successful = false;
