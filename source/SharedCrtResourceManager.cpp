@@ -262,13 +262,13 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     connection->OnConnectionInterrupted = move(OnConnectionInterrupted);
     connection->OnConnectionResumed = move(OnConnectionResumed);
 
+    connection->SetReconnectTimeout(15, 240);
     LOGM_INFO(TAG, "Establishing MQTT connection with client id %s...", config.thingName->c_str());
-    if (!connection->Connect(config.thingName->c_str(), true, 0))
+    if (!connection->Connect(config.thingName->c_str(), true))
     {
         LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(connection->LastError()));
         return RETRY;
     }
-    connection->SetReconnectTimeout(15,240);
 
     int connectionStatus = connectionCompletedPromise.get_future().get();
 
