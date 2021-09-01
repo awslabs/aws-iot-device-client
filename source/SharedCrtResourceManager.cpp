@@ -249,11 +249,8 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
      */
     auto OnConnectionResumed = [&](Mqtt::MqttConnection &, int returnCode, bool) {
         {
-            if (returnCode)
-            {
-                LOGM_INFO(TAG, "MQTT connection resumed with return code: %d", returnCode);
-                startDeviceClientFeatures();
-            }
+            LOGM_INFO(TAG, "MQTT connection resumed with return code: %d", returnCode);
+            startDeviceClientFeatures();
         }
     };
 
@@ -262,8 +259,12 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     connection->OnConnectionInterrupted = move(OnConnectionInterrupted);
     connection->OnConnectionResumed = move(OnConnectionResumed);
 
-    connection->SetReconnectTimeout(15, 240);
     LOGM_INFO(TAG, "Establishing MQTT connection with client id %s...", config.thingName->c_str());
+    if (!connection->SetReconnectTimeout(15, 240))
+    {
+        LOG_ERROR(TAG, "Device Client is not able to set reconnection strategy");
+        return RETRY;
+    }
     if (!connection->Connect(config.thingName->c_str(), true))
     {
         LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(connection->LastError()));
