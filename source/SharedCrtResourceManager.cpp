@@ -99,7 +99,7 @@ int SharedCrtResourceManager::buildClient(const PlainConfig &config)
     // We MUST declare an instance of the ApiHandle to perform global initialization
     // of the SDK libraries
     apiHandle = unique_ptr<ApiHandle>(new ApiHandle());
-    if (config.logConfig.sdkLoggingEnabled)
+    if (true)
     {
         apiHandle->InitializeLogging(config.logConfig.sdkLogLevel, config.logConfig.sdkLogFile.c_str());
         LOGM_INFO(TAG, "SDK logging is enabled. Check %s for SDK logs.", Sanitize(config.logConfig.sdkLogFile).c_str());
@@ -172,10 +172,10 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     clientConfigBuilder.WithCertificateAuthority(config.rootCa->c_str());
     clientConfigBuilder.WithSdkName(SharedCrtResourceManager::BINARY_NAME);
     clientConfigBuilder.WithSdkVersion(SharedCrtResourceManager::BINARY_VERSION);
-    clientConfigBuilder.WithTcpKeepAlive();
-    clientConfigBuilder.WithTcpKeepAliveTimeout(60);
-    clientConfigBuilder.WithTcpKeepAliveInterval(50);
-    clientConfigBuilder.WithTcpKeepAliveMaxProbes(6);
+//    clientConfigBuilder.WithTcpKeepAlive();
+//    clientConfigBuilder.WithTcpKeepAliveTimeout(60);
+//    clientConfigBuilder.WithTcpKeepAliveInterval(50);
+//    clientConfigBuilder.WithTcpKeepAliveMaxProbes(6);
 
     auto clientConfig = clientConfigBuilder.Build();
 
@@ -250,7 +250,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     auto OnConnectionResumed = [&](Mqtt::MqttConnection &, int returnCode, bool) {
         {
             LOGM_INFO(TAG, "MQTT connection resumed with return code: %d", returnCode);
-            startDeviceClientFeatures();
+//            startDeviceClientFeatures();
         }
     };
 
@@ -265,7 +265,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
         LOG_ERROR(TAG, "Device Client is not able to set reconnection strategy");
         return RETRY;
     }
-    if (!connection->Connect(config.thingName->c_str(), true))
+    if (!connection->Connect(config.thingName->c_str(), false))
     {
         LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(connection->LastError()));
         return RETRY;
