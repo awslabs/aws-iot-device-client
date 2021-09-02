@@ -95,7 +95,7 @@ int SharedCrtResourceManager::buildClient(const PlainConfig &config)
     // We MUST declare an instance of the ApiHandle to perform global initialization
     // of the SDK libraries
     apiHandle = unique_ptr<ApiHandle>(new ApiHandle());
-    if (true)
+    if (config.logConfig.sdkLoggingEnabled)
     {
         apiHandle->InitializeLogging(config.logConfig.sdkLogLevel, config.logConfig.sdkLogFile.c_str());
         LOGM_INFO(TAG, "SDK logging is enabled. Check %s for SDK logs.", Sanitize(config.logConfig.sdkLogFile).c_str());
