@@ -24,10 +24,6 @@ constexpr int SharedCrtResourceManager::DEFAULT_WAIT_TIME_SECONDS;
 bool SharedCrtResourceManager::initialize(const PlainConfig &config, vector<Feature *> *featuresList)
 {
     features = featuresList;
-    for (auto *feature : *features)
-    {
-        LOGM_INFO(TAG, "Initialize FeatureList: %s", feature->getName().c_str());
-    }
     initializeAllocator();
     initialized = buildClient(config) == SharedCrtResourceManager::SUCCESS;
     return initialized;
@@ -172,10 +168,6 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     clientConfigBuilder.WithCertificateAuthority(config.rootCa->c_str());
     clientConfigBuilder.WithSdkName(SharedCrtResourceManager::BINARY_NAME);
     clientConfigBuilder.WithSdkVersion(SharedCrtResourceManager::BINARY_VERSION);
-//    clientConfigBuilder.WithTcpKeepAlive();
-//    clientConfigBuilder.WithTcpKeepAliveTimeout(60);
-//    clientConfigBuilder.WithTcpKeepAliveInterval(50);
-//    clientConfigBuilder.WithTcpKeepAliveMaxProbes(6);
 
     auto clientConfig = clientConfigBuilder.Build();
 
@@ -239,7 +231,11 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
         {
             if (errorCode)
             {
-                LOGM_ERROR(TAG, "MQTT Connection interrupted with error: %s", ErrorDebugString(errorCode));
+                LOGM_ERROR(
+                    TAG,
+                    "MQTT Connection interrupted with error: `%s`. Device Client will retry connection until it is "
+                    "successfully connected to the core. ",
+                    ErrorDebugString(errorCode));
             }
         }
     };
@@ -250,7 +246,6 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     auto OnConnectionResumed = [&](Mqtt::MqttConnection &, int returnCode, bool) {
         {
             LOGM_INFO(TAG, "MQTT connection resumed with return code: %d", returnCode);
-//            startDeviceClientFeatures();
         }
     };
 
@@ -262,7 +257,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     LOGM_INFO(TAG, "Establishing MQTT connection with client id %s...", config.thingName->c_str());
     if (!connection->SetReconnectTimeout(15, 240))
     {
-        LOG_ERROR(TAG, "Device Client is not able to set reconnection strategy");
+        LOG_ERROR(TAG, "Device Client is not able to set reconnection settings. Device Client will retry again.");
         return RETRY;
     }
     if (!connection->Connect(config.thingName->c_str(), false))

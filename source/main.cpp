@@ -427,10 +427,7 @@ int main(int argc, char *argv[])
     }
 #    endif
 #endif
-    //    for (auto &feature : features)
-    //    {
-    //        feature->start();
-    //    }
+
     resourceManager->startDeviceClientFeatures();
     featuresReadWriteLock.unlock(); // UNLOCK
 
