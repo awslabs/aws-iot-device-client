@@ -4,6 +4,7 @@
 #ifndef DEVICE_CLIENT_SHAREDCRTRESOURCEMANAGER_H
 #define DEVICE_CLIENT_SHAREDCRTRESOURCEMANAGER_H
 
+#include "Feature.h"
 #include "config/Config.h"
 
 #include <atomic>
@@ -41,6 +42,7 @@ namespace Aws
                 std::unique_ptr<Aws::Iot::MqttClient> mqttClient;
                 std::shared_ptr<Crt::Mqtt::MqttConnection> connection;
                 struct aws_allocator *allocator;
+                std::vector<Feature *> *features;
 
                 bool locateCredentials(const PlainConfig &config);
                 int buildClient(const PlainConfig &config);
@@ -50,9 +52,10 @@ namespace Aws
                 static const int SUCCESS = 0;
                 static const int RETRY = 1;
                 static const int ABORT = 2;
-                bool initialize(const PlainConfig &config);
+                bool initialize(const PlainConfig &config, std::vector<Feature *> *features);
                 void initializeAWSHttpLib();
                 int establishConnection(const PlainConfig &config);
+                void startDeviceClientFeatures();
                 std::shared_ptr<Crt::Mqtt::MqttConnection> getConnection();
                 Aws::Crt::Io::EventLoopGroup *getEventLoopGroup();
                 struct aws_allocator *getAllocator();
