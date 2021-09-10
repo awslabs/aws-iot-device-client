@@ -302,3 +302,25 @@ bool FileUtils::FileExists(const string &filename)
     ifstream f(expandedPath);
     return f.good();
 }
+
+bool FileUtils::IsValidFilePath(const string &filePath)
+{
+    wordexp_t word;
+    switch(wordexp(filePath.c_str(), &word, 0))
+    {
+        case 0:
+            break;
+        case WRDE_BADCHAR:
+            wordfree(&word);
+            return false;
+    }
+
+    string expandedPath = word.we_wordv[0];
+
+    if(!FileUtils::FileExists(expandedPath)){
+        wordfree(&word);
+        return false;
+    }
+    wordfree(&word);
+    return true;
+}

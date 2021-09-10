@@ -319,3 +319,21 @@ TEST(FileUtils, byteBufReadNonexistentFile)
     aws_byte_buf_init(&readDataByteBuf, aws_default_allocator(), 1);
     ASSERT_EQ(-1, FileUtils::ReadFromFile(filePath, &readDataByteBuf, 1));
 }
+
+TEST(FileUtils, IsValidFilePathForFileExistence)
+{
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
+    ofstream file(filePath, std::fstream::app);
+    file << "test message" << endl;
+    ASSERT_TRUE(FileUtils::IsValidFilePath(filePath));
+
+    std::remove(filePath.c_str());
+    ASSERT_FALSE(FileUtils::IsValidFilePath(filePath));
+}
+
+TEST(FileUtils, IsValidFilePathForBadInput)
+{
+    string filePath = "<" + UniqueString::GetRandomToken(10) + ">";
+
+    ASSERT_FALSE(FileUtils::IsValidFilePath(filePath));
+}
