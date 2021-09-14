@@ -311,7 +311,6 @@ bool FileUtils::IsValidFilePath(const string &filePath)
         case 0:
             break;
         case WRDE_BADCHAR:
-            wordfree(&word);
             return false;
     }
 
