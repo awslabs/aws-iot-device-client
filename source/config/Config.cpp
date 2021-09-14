@@ -622,10 +622,13 @@ bool PlainConfig::Jobs::LoadFromCliArgs(const CliArgs &cliArgs)
 
 bool PlainConfig::Jobs::Validate() const
 {
-    if(!FileUtils::IsValidFilePath(handlerDir.c_str()))
+    if (!handlerDir.empty())
     {
-        LOGM_ERROR(Config::TAG, "*** %s: Job Handler directory is invalid ***", DeviceClient::DC_FATAL_ERROR);
-        return false;
+        if (!FileUtils::IsValidFilePath(handlerDir.c_str()))
+        {
+            LOGM_ERROR(Config::TAG, "*** %s: Job Handler directory is invalid ***", DeviceClient::DC_FATAL_ERROR);
+            return false;
+        }
     }
 
     return true;
@@ -934,8 +937,10 @@ bool PlainConfig::FleetProvisioning::Validate() const
         return false;
     }
 
-    if(csrFile.has_value() && !csrFile->empty()){
-        if(!FileUtils::IsValidFilePath(csrFile->c_str())){
+    if (csrFile.has_value() && !csrFile->empty())
+    {
+        if (!FileUtils::IsValidFilePath(csrFile->c_str()))
+        {
             LOGM_ERROR(
                 Config::TAG,
                 "*** %s: The csr-file path provided is not valid "
@@ -945,8 +950,10 @@ bool PlainConfig::FleetProvisioning::Validate() const
         }
     }
 
-    if(deviceKey.has_value() && !deviceKey->empty()){
-        if(!FileUtils::IsValidFilePath(deviceKey->c_str())){
+    if (deviceKey.has_value() && !deviceKey->empty())
+    {
+        if (!FileUtils::IsValidFilePath(deviceKey->c_str()))
+        {
             LOGM_ERROR(
                 Config::TAG,
                 "*** %s: The device-key path provided is not valid "
@@ -1142,7 +1149,7 @@ bool PlainConfig::PubSub::Validate() const
     }
     if (publishFile.has_value() && !publishFile->empty())
     {
-        if(FileUtils::IsValidFilePath(publishFile->c_str()))
+        if (FileUtils::IsValidFilePath(publishFile->c_str()))
         {
             if (!FileUtils::ValidateFilePermissions(publishFile.value(), Permissions::PUB_SUB_FILES, true))
             {
@@ -1161,7 +1168,6 @@ bool PlainConfig::PubSub::Validate() const
                 DeviceClient::DC_FATAL_ERROR);
             return false;
         }
-
     }
     if (!subscribeTopic.has_value() || subscribeTopic->empty())
     {
@@ -1173,7 +1179,7 @@ bool PlainConfig::PubSub::Validate() const
     }
     if (subscribeFile.has_value() && !subscribeFile->empty())
     {
-        if(FileUtils::IsValidFilePath(subscribeFile->c_str()))
+        if (FileUtils::IsValidFilePath(subscribeFile->c_str()))
         {
             if (!FileUtils::ValidateFilePermissions(subscribeFile.value(), Permissions::PUB_SUB_FILES, true))
             {
@@ -1329,7 +1335,7 @@ bool PlainConfig::SampleShadow::Validate() const
 
     if (shadowInputFile.has_value() && !shadowInputFile->empty())
     {
-        if(FileUtils::IsValidFilePath(shadowInputFile->c_str()))
+        if (FileUtils::IsValidFilePath(shadowInputFile->c_str()))
         {
             if (!FileUtils::ValidateFilePermissions(shadowInputFile.value(), Permissions::SAMPLE_SHADOW_FILES, true))
             {
@@ -1352,7 +1358,7 @@ bool PlainConfig::SampleShadow::Validate() const
 
     if (shadowOutputFile.has_value() && !shadowOutputFile->empty())
     {
-        if(FileUtils::IsValidFilePath(shadowOutputFile->c_str()))
+        if (FileUtils::IsValidFilePath(shadowOutputFile->c_str()))
         {
             if (!FileUtils::ValidateFilePermissions(shadowOutputFile.value(), Permissions::SAMPLE_SHADOW_FILES, true))
             {

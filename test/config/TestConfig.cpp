@@ -14,14 +14,22 @@ using namespace Aws::Crt;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Util;
 
+TEST(Config, CreateTempFile)
+{
+    string filePath = "/tmp/test";
+    ofstream file(filePath, std::fstream::app);
+    file << "test message" << endl;
+    ASSERT_TRUE(FileUtils::FileExists(filePath));
+}
+
 TEST(Config, AllFeaturesEnabled)
 {
     constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
-    "cert": "cert",
-    "key": "key",
-    "root-ca": "root-ca",
+    "cert": "/tmp/test",
+    "key": "/tmp/test",
+    "root-ca": "/tmp/test",
     "thing-name": "thing-name value",
     "logging": {
         "level": "debug",
@@ -41,8 +49,8 @@ TEST(Config, AllFeaturesEnabled)
     "fleet-provisioning": {
         "enabled": true,
         "template-name": "template-name",
-        "csr-file": "csr-file",
-        "device-key": "device-key",
+        "csr-file": "/tmp/test",
+        "device-key": "/tmp/test",
         "template-parameters": "{\"SerialNumber\": \"Device-SN\"}"
     },
     "samples": {
@@ -70,9 +78,9 @@ TEST(Config, AllFeaturesEnabled)
 
     ASSERT_TRUE(config.Validate());
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
-    ASSERT_STREQ("cert", config.cert->c_str());
-    ASSERT_STREQ("key", config.key->c_str());
-    ASSERT_STREQ("root-ca", config.rootCa->c_str());
+    ASSERT_STREQ("/tmp/test", config.cert->c_str());
+    ASSERT_STREQ("/tmp/test", config.key->c_str());
+    ASSERT_STREQ("/tmp/test", config.rootCa->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_STREQ("file", config.logConfig.deviceClientLogtype.c_str());
     ASSERT_STREQ("./aws-iot-device-client.log", config.logConfig.deviceClientLogFile.c_str());
@@ -84,8 +92,8 @@ TEST(Config, AllFeaturesEnabled)
     ASSERT_EQ(300, config.deviceDefender.interval);
     ASSERT_STREQ("template-name", config.fleetProvisioning.templateName->c_str());
     ASSERT_STREQ("{\"SerialNumber\": \"Device-SN\"}", config.fleetProvisioning.templateParameters->c_str());
-    ASSERT_STREQ("csr-file", config.fleetProvisioning.csrFile->c_str());
-    ASSERT_STREQ("device-key", config.fleetProvisioning.deviceKey->c_str());
+    ASSERT_STREQ("/tmp/test", config.fleetProvisioning.csrFile->c_str());
+    ASSERT_STREQ("/tmp/test", config.fleetProvisioning.deviceKey->c_str());
     ASSERT_TRUE(config.configShadow.enabled);
     ASSERT_TRUE(config.sampleShadow.enabled);
     ASSERT_STREQ("shadow-name", config.sampleShadow.shadowName->c_str());
@@ -126,9 +134,9 @@ TEST(Config, HappyCaseMinimumConfig)
     constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
-    "cert": "cert",
-    "key": "key",
-    "root-ca": "root-ca",
+    "cert": "/tmp/test",
+    "key": "/tmp/test",
+    "root-ca": "/tmp/test",
     "thing-name": "thing-name value"
 })";
     JsonObject jsonObject(jsonString);
@@ -139,9 +147,9 @@ TEST(Config, HappyCaseMinimumConfig)
 
     ASSERT_TRUE(config.Validate());
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
-    ASSERT_STREQ("cert", config.cert->c_str());
-    ASSERT_STREQ("key", config.key->c_str());
-    ASSERT_STREQ("root-ca", config.rootCa->c_str());
+    ASSERT_STREQ("/tmp/test", config.cert->c_str());
+    ASSERT_STREQ("/tmp/test", config.key->c_str());
+    ASSERT_STREQ("/tmp/test", config.rootCa->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
@@ -153,9 +161,9 @@ TEST(Config, HappyCaseMinimumCli)
 {
     CliArgs cliArgs;
     cliArgs[PlainConfig::CLI_ENDPOINT] = "endpoint value";
-    cliArgs[PlainConfig::CLI_CERT] = "cert";
-    cliArgs[PlainConfig::CLI_KEY] = "key";
-    cliArgs[PlainConfig::CLI_ROOT_CA] = "root-ca";
+    cliArgs[PlainConfig::CLI_CERT] = "/tmp/test";
+    cliArgs[PlainConfig::CLI_KEY] = "/tmp/test";
+    cliArgs[PlainConfig::CLI_ROOT_CA] = "/tmp/test";
     cliArgs[PlainConfig::CLI_THING_NAME] = "thing-name value";
 
     PlainConfig config;
@@ -163,9 +171,9 @@ TEST(Config, HappyCaseMinimumCli)
 
     ASSERT_TRUE(config.Validate());
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
-    ASSERT_STREQ("cert", config.cert->c_str());
-    ASSERT_STREQ("key", config.key->c_str());
-    ASSERT_STREQ("root-ca", config.rootCa->c_str());
+    ASSERT_STREQ("/tmp/test", config.cert->c_str());
+    ASSERT_STREQ("/tmp/test", config.key->c_str());
+    ASSERT_STREQ("/tmp/test", config.rootCa->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
@@ -178,9 +186,9 @@ TEST(Config, MissingSomeSettings)
     constexpr char jsonString[] = R"(
 {
     // endpoint is missing
-    "cert": "cert",
-    "key": "key",
-    "root-ca": "root-ca",
+    "cert": "/tmp/test",
+    "key": "/tmp/test",
+    "root-ca": "/tmp/test",
     "thing-name": "thing-name value"
 })";
     JsonObject jsonObject(jsonString);
@@ -202,9 +210,9 @@ TEST(Config, SecureTunnelingMinimumConfig)
     constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
-    "cert": "cert",
-    "key": "key",
-    "root-ca": "root-ca",
+    "cert": "/tmp/test",
+    "key": "/tmp/test",
+    "root-ca": "/tmp/test",
     "thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
@@ -226,9 +234,9 @@ TEST(Config, SecureTunnelingCli)
     constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
-    "cert": "cert",
-    "key": "key",
-    "root-ca": "root-ca",
+    "cert": "/tmp/test",
+    "key": "/tmp/test",
+    "root-ca": "/tmp/test",
     "thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
@@ -265,9 +273,9 @@ TEST(Config, SecureTunnelingDisableSubscription)
     constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
-    "cert": "cert",
-    "key": "key",
-    "root-ca": "root-ca",
+    "cert": "/tmp/test",
+    "key": "/tmp/test",
+    "root-ca": "/tmp/test",
     "thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
@@ -300,9 +308,9 @@ TEST(Config, LoggingConfigurationCLI)
     constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
-    "cert": "cert",
-    "key": "key",
-    "root-ca": "root-ca",
+    "cert": "/tmp/test",
+    "key": "/tmp/test",
+    "root-ca": "/tmp/test",
     "thing-name": "thing-name value",
     "logging": {
         "level": "DEBUG",
@@ -359,9 +367,9 @@ TEST(Config, SDKLoggingConfigurationJsonDefaults)
     constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
-    "cert": "cert",
-    "key": "key",
-    "root-ca": "root-ca",
+    "cert": "/tmp/test",
+    "key": "/tmp/test",
+    "root-ca": "/tmp/test",
     "thing-name": "thing-name value",
     "logging": {
         "level": "DEBUG",
@@ -385,9 +393,9 @@ TEST(Config, SDKLoggingConfigurationJson)
     constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
-    "cert": "cert",
-    "key": "key",
-    "root-ca": "root-ca",
+    "cert": "/tmp/test",
+    "key": "/tmp/test",
+    "root-ca": "/tmp/test",
     "thing-name": "thing-name value",
     "logging": {
         "level": "DEBUG",
@@ -419,9 +427,9 @@ TEST(Config, FleetProvisioningMinimumConfig)
     constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
-    "cert": "cert",
-    "key": "key",
-    "root-ca": "root-ca",
+    "cert": "/tmp/test",
+    "key": "/tmp/test",
+    "root-ca": "/tmp/test",
     "thing-name": "thing-name value",
     "fleet-provisioning": {
         "enabled": true,
@@ -444,9 +452,9 @@ TEST(Config, MissingFleetProvisioningConfig)
     constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
-    "cert": "cert",
-    "key": "key",
-    "root-ca": "root-ca",
+    "cert": "/tmp/test",
+    "key": "/tmp/test",
+    "root-ca": "/tmp/test",
     "thing-name": "thing-name value"
 })";
     JsonObject jsonObject(jsonString);
@@ -476,15 +484,15 @@ TEST(Config, FleetProvisioningCli)
     constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
-    "cert": "cert",
-    "key": "key",
-    "root-ca": "root-ca",
+    "cert": "/tmp/test",
+    "key": "/tmp/test",
+    "root-ca": "/tmp/test",
     "thing-name": "thing-name value",
     "fleet-provisioning": {
         "enabled": true,
         "template-name": "template-name",
-        "csr-file": "csr-file",
-        "device-key": "device-key",
+        "csr-file": "/tmp/test",
+        "device-key": "/tmp/test",
         "template-parameters": "{\"SerialNumber\": \"Device-SN\"}"
     }
 })";
@@ -495,8 +503,8 @@ TEST(Config, FleetProvisioningCli)
     cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME] = "cli-template-name";
     cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS] =
         "{\"SerialNumber\": \"Device-SN\"}";
-    cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE] = "cli-csr-file";
-    cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY] = "cli-device-key";
+    cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE] = "/tmp/test";
+    cliArgs[PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY] = "/tmp/test";
 
     PlainConfig config;
     config.LoadFromJson(jsonView);
@@ -506,8 +514,8 @@ TEST(Config, FleetProvisioningCli)
     ASSERT_TRUE(config.fleetProvisioning.enabled);
     ASSERT_STREQ("cli-template-name", config.fleetProvisioning.templateName->c_str());
     ASSERT_STREQ("{\"SerialNumber\": \"Device-SN\"}", config.fleetProvisioning.templateParameters->c_str());
-    ASSERT_STREQ("cli-csr-file", config.fleetProvisioning.csrFile->c_str());
-    ASSERT_STREQ("cli-device-key", config.fleetProvisioning.deviceKey->c_str());
+    ASSERT_STREQ("/tmp/test", config.fleetProvisioning.csrFile->c_str());
+    ASSERT_STREQ("/tmp/test", config.fleetProvisioning.deviceKey->c_str());
 }
 
 TEST(Config, DeviceDefenderCli)
@@ -515,9 +523,9 @@ TEST(Config, DeviceDefenderCli)
     constexpr char jsonString[] = R"(
 {
 	"endpoint": "endpoint value",
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
+	"cert": "/tmp/test",
+	"key": "/tmp/test",
+	"root-ca": "/tmp/test",
 	"thing-name": "thing-name value",
     "device-defender": {
         "enabled": true,
@@ -547,9 +555,9 @@ TEST(Config, PubSubSampleCli)
     constexpr char jsonString[] = R"(
 {
 	"endpoint": "endpoint value",
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
+	"cert": "/tmp/test",
+	"key": "/tmp/test",
+	"root-ca": "/tmp/test",
 	"thing-name": "thing-name value",
     "samples": {
 		"pub-sub": {
@@ -595,9 +603,9 @@ TEST(Config, SampleShadowCli)
     constexpr char jsonString[] = R"(
 {
 	"endpoint": "endpoint value",
-	"cert": "cert",
-	"key": "key",
-	"root-ca": "root-ca",
+	"cert": "/tmp/test",
+	"key": "/tmp/test",
+	"root-ca": "/tmp/test",
 	"thing-name": "thing-name value",
     "sample-shadow": {
         "enabled": true,
@@ -625,4 +633,11 @@ TEST(Config, SampleShadowCli)
     ASSERT_STREQ(outputFilePath.c_str(), config.sampleShadow.shadowOutputFile->c_str());
     remove(inputFilePath.c_str());
     remove(outputFilePath.c_str());
+}
+
+TEST(Config, DeleteTempFile)
+{
+    string filePath = "/tmp/test";
+    std::remove(filePath.c_str());
+    ASSERT_FALSE(FileUtils::FileExists(filePath));
 }
