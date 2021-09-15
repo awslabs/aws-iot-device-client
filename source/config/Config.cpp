@@ -634,14 +634,6 @@ bool PlainConfig::Jobs::LoadFromCliArgs(const CliArgs &cliArgs)
 
 bool PlainConfig::Jobs::Validate() const
 {
-    if (!handlerDir.empty())
-    {
-        if (!FileUtils::IsValidFilePath(handlerDir.c_str()))
-        {
-            return false;
-        }
-    }
-
     return true;
 }
 
@@ -1154,10 +1146,6 @@ bool PlainConfig::PubSub::Validate() const
         {
             if (!FileUtils::ValidateFilePermissions(publishFile.value(), Permissions::PUB_SUB_FILES, true))
             {
-                LOGM_ERROR(
-                    Config::TAG,
-                    "*** %s: publishFile field is not valid for the Pub-Sub sample feature ***",
-                    DeviceClient::DC_FATAL_ERROR);
                 return false;
             }
         }
@@ -1180,10 +1168,6 @@ bool PlainConfig::PubSub::Validate() const
         {
             if (!FileUtils::ValidateFilePermissions(subscribeFile.value(), Permissions::PUB_SUB_FILES, true))
             {
-                LOGM_ERROR(
-                    Config::TAG,
-                    "*** %s: subscribeFile field is not valid for the Pub-Sub sample feature ***",
-                    DeviceClient::DC_FATAL_ERROR);
                 return false;
             }
         }
@@ -1332,10 +1316,6 @@ bool PlainConfig::SampleShadow::Validate() const
         {
             if (!FileUtils::ValidateFilePermissions(shadowInputFile.value(), Permissions::SAMPLE_SHADOW_FILES, true))
             {
-                LOGM_ERROR(
-                    Config::TAG,
-                    "*** %s: shadowInputFile field is not valid for the sample shadow feature ***",
-                    DeviceClient::DC_FATAL_ERROR);
                 return false;
             }
         }
@@ -1351,19 +1331,11 @@ bool PlainConfig::SampleShadow::Validate() const
         {
             if (!FileUtils::ValidateFilePermissions(shadowOutputFile.value(), Permissions::SAMPLE_SHADOW_FILES, true))
             {
-                LOGM_ERROR(
-                    Config::TAG,
-                    "*** %s: shadowOutputFile field is not valid for the sample shadow feature ***",
-                    DeviceClient::DC_FATAL_ERROR);
                 return false;
             }
         }
         else
         {
-            LOGM_ERROR(
-                Config::TAG,
-                "*** %s: shadowOutputFile path is not valid for the sample shadow feature ***",
-                DeviceClient::DC_FATAL_ERROR);
             return false;
         }
     }
