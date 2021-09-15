@@ -253,14 +253,26 @@ bool PlainConfig::Validate() const
         LOGM_ERROR(Config::TAG, "*** %s: Certificate is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
+    else if (!FileUtils::IsValidFilePath(cert->c_str()))
+    {
+        return false;
+    }
     if (!key.has_value() || key->empty())
     {
         LOGM_ERROR(Config::TAG, "*** %s: Private Key is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
+    else if (!FileUtils::IsValidFilePath(key->c_str()))
+    {
+        return false;
+    }
     if (!rootCa.has_value() || rootCa->empty())
     {
         LOGM_ERROR(Config::TAG, "*** %s: Root CA is missing ***", DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+    else if (!FileUtils::IsValidFilePath(rootCa->c_str()))
+    {
         return false;
     }
     if (!thingName.has_value() || thingName->empty())
@@ -626,7 +638,6 @@ bool PlainConfig::Jobs::Validate() const
     {
         if (!FileUtils::IsValidFilePath(handlerDir.c_str()))
         {
-            LOGM_ERROR(Config::TAG, "*** %s: Job Handler directory is invalid ***", DeviceClient::DC_FATAL_ERROR);
             return false;
         }
     }
@@ -941,11 +952,6 @@ bool PlainConfig::FleetProvisioning::Validate() const
     {
         if (!FileUtils::IsValidFilePath(csrFile->c_str()))
         {
-            LOGM_ERROR(
-                Config::TAG,
-                "*** %s: The csr-file path provided is not valid "
-                "***",
-                DeviceClient::DC_FATAL_ERROR);
             return false;
         }
     }
@@ -954,11 +960,6 @@ bool PlainConfig::FleetProvisioning::Validate() const
     {
         if (!FileUtils::IsValidFilePath(deviceKey->c_str()))
         {
-            LOGM_ERROR(
-                Config::TAG,
-                "*** %s: The device-key path provided is not valid "
-                "***",
-                DeviceClient::DC_FATAL_ERROR);
             return false;
         }
     }
@@ -1162,10 +1163,6 @@ bool PlainConfig::PubSub::Validate() const
         }
         else
         {
-            LOGM_ERROR(
-                Config::TAG,
-                "*** %s: publishFile path is not valid for the Pub-Sub sample feature ***",
-                DeviceClient::DC_FATAL_ERROR);
             return false;
         }
     }
@@ -1192,10 +1189,6 @@ bool PlainConfig::PubSub::Validate() const
         }
         else
         {
-            LOGM_ERROR(
-                Config::TAG,
-                "*** %s: subscribeFile path is not valid for the Pub-Sub sample feature ***",
-                DeviceClient::DC_FATAL_ERROR);
             return false;
         }
     }
@@ -1348,10 +1341,6 @@ bool PlainConfig::SampleShadow::Validate() const
         }
         else
         {
-            LOGM_ERROR(
-                Config::TAG,
-                "*** %s: shadowInputFile path is not valid for the sample shadow feature ***",
-                DeviceClient::DC_FATAL_ERROR);
             return false;
         }
     }
