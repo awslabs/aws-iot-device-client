@@ -136,10 +136,18 @@ namespace Aws
                     /**
                      * \brief Check if the given filename exists
                      *
-                     * @param filename Filename to check
+                     * @param filename File Path to the Filename to check
                      * @return True if the file exists. False otherwise.
                      */
                     static bool FileExists(const std::string &filename);
+
+                    /**
+                     * \brief Check if the given filepath is valid
+                     *
+                     * @param filePath FilePath to check
+                     * @return True if the filepath is valid. False otherwise.
+                     */
+                    static bool IsValidFilePath(const std::string &filePath);
                 };
             } // namespace Util
         }     // namespace DeviceClient
