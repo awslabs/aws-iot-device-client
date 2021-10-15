@@ -82,7 +82,7 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_CERT;
     if (json.ValueExists(jsonKey))
     {
-        if (!json.GetString(jsonKey).empty())
+        if (!json.GetString(jsonKey).empty() && FileUtils::IsValidFilePath(json.GetString(jsonKey).c_str()))
         {
             cert = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
@@ -95,7 +95,7 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_KEY;
     if (json.ValueExists(jsonKey))
     {
-        if (!json.GetString(jsonKey).empty())
+        if (!json.GetString(jsonKey).empty() && FileUtils::IsValidFilePath(json.GetString(jsonKey).c_str()))
         {
             key = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
@@ -108,7 +108,7 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_ROOT_CA;
     if (json.ValueExists(jsonKey))
     {
-        if (!json.GetString(jsonKey).empty())
+        if (!json.GetString(jsonKey).empty() && FileUtils::IsValidFilePath(json.GetString(jsonKey).c_str()))
         {
             rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
@@ -253,26 +253,14 @@ bool PlainConfig::Validate() const
         LOGM_ERROR(Config::TAG, "*** %s: Certificate is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
-    else if (!FileUtils::IsValidFilePath(cert->c_str()))
-    {
-        return false;
-    }
     if (!key.has_value() || key->empty())
     {
         LOGM_ERROR(Config::TAG, "*** %s: Private Key is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
-    else if (!FileUtils::IsValidFilePath(key->c_str()))
-    {
-        return false;
-    }
     if (!rootCa.has_value() || rootCa->empty())
     {
         LOGM_ERROR(Config::TAG, "*** %s: Root CA is missing ***", DeviceClient::DC_FATAL_ERROR);
-        return false;
-    }
-    else if (!FileUtils::IsValidFilePath(rootCa->c_str()))
-    {
         return false;
     }
     if (!thingName.has_value() || thingName->empty())
@@ -869,7 +857,7 @@ bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_CSR_FILE;
     if (json.ValueExists(jsonKey))
     {
-        if (!json.GetString(jsonKey).empty())
+        if (!json.GetString(jsonKey).empty() && FileUtils::IsValidFilePath(json.GetString(jsonKey).c_str()))
         {
             csrFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
@@ -881,7 +869,7 @@ bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_DEVICE_KEY;
     if (json.ValueExists(jsonKey))
     {
-        if (!json.GetString(jsonKey).empty())
+        if (!json.GetString(jsonKey).empty() && FileUtils::IsValidFilePath(json.GetString(jsonKey).c_str()))
         {
             deviceKey = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
@@ -940,22 +928,6 @@ bool PlainConfig::FleetProvisioning::Validate() const
         return false;
     }
 
-    if (csrFile.has_value() && !csrFile->empty())
-    {
-        if (!FileUtils::IsValidFilePath(csrFile->c_str()))
-        {
-            return false;
-        }
-    }
-
-    if (deviceKey.has_value() && !deviceKey->empty())
-    {
-        if (!FileUtils::IsValidFilePath(deviceKey->c_str()))
-        {
-            return false;
-        }
-    }
-
     return true;
 }
 
@@ -976,7 +948,7 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromJson(const Crt::JsonVi
     jsonKey = JSON_KEY_CERT;
     if (json.ValueExists(jsonKey))
     {
-        if (!json.GetString(jsonKey).empty())
+        if (!json.GetString(jsonKey).empty() && FileUtils::IsValidFilePath(json.GetString(jsonKey).c_str()))
         {
             cert = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
@@ -989,7 +961,7 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromJson(const Crt::JsonVi
     jsonKey = JSON_KEY_KEY;
     if (json.ValueExists(jsonKey))
     {
-        if (!json.GetString(jsonKey).empty())
+        if (!json.GetString(jsonKey).empty() && FileUtils::IsValidFilePath(json.GetString(jsonKey).c_str()))
         {
             key = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
@@ -1062,7 +1034,7 @@ bool PlainConfig::PubSub::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_PUB_SUB_PUBLISH_FILE;
     if (json.ValueExists(jsonKey))
     {
-        if (!json.GetString(jsonKey).empty())
+        if (!json.GetString(jsonKey).empty() && FileUtils::IsValidFilePath(json.GetString(jsonKey).c_str()))
         {
             publishFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
@@ -1088,7 +1060,7 @@ bool PlainConfig::PubSub::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_PUB_SUB_SUBSCRIBE_FILE;
     if (json.ValueExists(jsonKey))
     {
-        if (!json.GetString(jsonKey).empty())
+        if (!json.GetString(jsonKey).empty() && FileUtils::IsValidFilePath(json.GetString(jsonKey).c_str()))
         {
             subscribeFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
@@ -1142,14 +1114,7 @@ bool PlainConfig::PubSub::Validate() const
     }
     if (publishFile.has_value() && !publishFile->empty())
     {
-        if (FileUtils::IsValidFilePath(publishFile->c_str()))
-        {
-            if (!FileUtils::ValidateFilePermissions(publishFile.value(), Permissions::PUB_SUB_FILES, true))
-            {
-                return false;
-            }
-        }
-        else
+        if (!FileUtils::ValidateFilePermissions(publishFile.value(), Permissions::PUB_SUB_FILES, true))
         {
             return false;
         }
@@ -1164,14 +1129,7 @@ bool PlainConfig::PubSub::Validate() const
     }
     if (subscribeFile.has_value() && !subscribeFile->empty())
     {
-        if (FileUtils::IsValidFilePath(subscribeFile->c_str()))
-        {
-            if (!FileUtils::ValidateFilePermissions(subscribeFile.value(), Permissions::PUB_SUB_FILES, true))
-            {
-                return false;
-            }
-        }
-        else
+        if (!FileUtils::ValidateFilePermissions(subscribeFile.value(), Permissions::PUB_SUB_FILES, true))
         {
             return false;
         }
@@ -1237,7 +1195,7 @@ bool PlainConfig::SampleShadow::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_SAMPLE_SHADOW_INPUT_FILE;
     if (json.ValueExists(jsonKey))
     {
-        if (!json.GetString(jsonKey).empty())
+        if (!json.GetString(jsonKey).empty() && FileUtils::IsValidFilePath(json.GetString(jsonKey).c_str()))
         {
             shadowInputFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
@@ -1253,7 +1211,7 @@ bool PlainConfig::SampleShadow::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_SAMPLE_SHADOW_OUTPUT_FILE;
     if (json.ValueExists(jsonKey))
     {
-        if (!json.GetString(jsonKey).empty())
+        if (!json.GetString(jsonKey).empty() && FileUtils::IsValidFilePath(json.GetString(jsonKey).c_str()))
         {
             shadowOutputFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
@@ -1312,14 +1270,7 @@ bool PlainConfig::SampleShadow::Validate() const
 
     if (shadowInputFile.has_value() && !shadowInputFile->empty())
     {
-        if (FileUtils::IsValidFilePath(shadowInputFile->c_str()))
-        {
-            if (!FileUtils::ValidateFilePermissions(shadowInputFile.value(), Permissions::SAMPLE_SHADOW_FILES, true))
-            {
-                return false;
-            }
-        }
-        else
+        if (!FileUtils::ValidateFilePermissions(shadowInputFile.value(), Permissions::SAMPLE_SHADOW_FILES, true))
         {
             return false;
         }
@@ -1327,14 +1278,7 @@ bool PlainConfig::SampleShadow::Validate() const
 
     if (shadowOutputFile.has_value() && !shadowOutputFile->empty())
     {
-        if (FileUtils::IsValidFilePath(shadowOutputFile->c_str()))
-        {
-            if (!FileUtils::ValidateFilePermissions(shadowOutputFile.value(), Permissions::SAMPLE_SHADOW_FILES, true))
-            {
-                return false;
-            }
-        }
-        else
+        if (!FileUtils::ValidateFilePermissions(shadowOutputFile.value(), Permissions::SAMPLE_SHADOW_FILES, true))
         {
             return false;
         }

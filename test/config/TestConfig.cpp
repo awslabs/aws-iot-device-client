@@ -158,6 +158,66 @@ TEST(Config, HappyCaseMinimumConfig)
     ASSERT_FALSE(config.fleetProvisioning.enabled);
 }
 
+TEST(Config, ConfigWithPlaceholderValue)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "<replace_with_endpoint_value>",
+	"cert": "<replace_with_certificate_file_path>",
+	"key": "<replace_with_private_key_file_path>",
+	"root-ca": "<replace_with_root_ca_file_path>",
+	"thing-name": "<replace_with_thing_name>",
+	"logging": {
+		"level": "DEBUG",
+		"type": "FILE",
+		"file": "/var/log/aws-iot-device-client/aws-iot-device-client.log"
+	},
+	"jobs": {
+		"enabled": true,
+		"handler-directory": "<replace_with_job_handler_directory_path>"
+	},
+	"tunneling": {
+		"enabled": true
+	},
+	"device-defender": {
+		"enabled": true,
+		"interval": 300
+	},
+	"fleet-provisioning": {
+		"enabled": false,
+		"template-parameters": "<replace_with_template_parameters>",
+		"template-name": "<replace_with_template_name>",
+		"csr-file": "<replace_with_csr_file_path>",
+		"device-key": "<replace_with_device_private_key_file_path>"
+	},
+	"samples": {
+		"pub-sub": {
+			"enabled": false,
+			"publish-topic": "<replace_with_publish_topic>",
+			"publish-file": "<replace_with_publish_file_path>",
+			"subscribe-topic": "<replace_with_subscribe_topic>",
+			"subscribe-file": "<replace_with_subscribe_file_path>"
+		}
+	},
+	"config-shadow": {
+		"enabled": false
+	},
+	"sample-shadow": {
+		"enabled": false,
+		"shadow-name": "<replace_with_shadow_name>",
+		"shadow-input-file": "<replace_with_shadow_input_file_path>",
+		"shadow-output-file": "<replace_with_shadow_output_file_path>"
+	}
+    })";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate());
+}
+
 TEST(Config, HappyCaseMinimumCli)
 {
     CliArgs cliArgs;
