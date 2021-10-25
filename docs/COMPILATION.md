@@ -100,6 +100,9 @@ Available CMake flags for feature exclusion:
 * `EXCLUDE_FP`
 * `EXCLUDE_SAMPLES`
 * `EXCLUDE_PUBSUB`
+* `EXCLUDE_SHADOW`
+* `EXCLUDE_CONFIG_SHADOW`
+* `EXCLUDE_SAMPLE_SHADOW`
 
 Example CMake command to exclude only the Device Defender feature from the build:
 
