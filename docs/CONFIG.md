@@ -28,7 +28,7 @@ field by running `aws iot describe-endpoint` on the CLI.
 
 `root-ca` *or* `--root-ca`: This is the path to your device's [Root Certificate Authority](https://www.amazontrust.com/repository/AmazonRootCA1.pem).
 
-`thing-name` *or* `--thing-name`: This is the name for your thing. It should be unique across your regional AWS account. 
+`thing-name` *or* `--thing-name`: This is the name for your thing. It should be unique across your regional AWS account. Thing Name is also used as client id while connecting to the IoT core.
 
 **Next**: [File and Directory Permission Requirements](PERMISSIONS.md)
 

@@ -246,6 +246,8 @@ $ ./aws-iot-device-client --enable-fleet-provisioning [true|false] --fleet-provi
 }
 ```
 
-*Note: If the CSR file is specified without also specifying a device private key, the Device Client will use Claim Certificate and Private key to generate new Certificate and Private Key while provisioning the device*
+**Note**: *If the CSR file is specified without also specifying a device private key, the Device Client will use Claim Certificate and Private key to generate new Certificate and Private Key while provisioning the device*
+
+**Note**: *If Fleet Provisioning feature is enabled, the Device Client will use value of `thing-name` field only as `client-id` for connecting to IoT Core and once device provisioning is completed, the newly provisioned `thing-name` value will be used as `client-id` as well as `thing-name` to subscribe to correct topics for other enabled features.*
 
 [*Back To The Top*](#fleet-provisioning)
