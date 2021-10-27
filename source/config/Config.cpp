@@ -1680,7 +1680,7 @@ void Config::PrintHelpMessage()
         "%s <Cert-Location>:\t\t\t\t\t\t\tUse Specified Cert file\n"
         "%s <Key-Location>:\t\t\t\t\t\t\tUse Specified Key file\n"
         "%s <Root-CA-Location>:\t\t\t\t\t\tUse Specified Root-CA file\n"
-        "%s <thing-name-value>:\t\t\t\t\tUse Specified Thing Name\n"
+        "%s <thing-name-value/client-id-value>:\t\t\t\t\tUse Specified Thing Name (Also used as Client ID)\n"
         "%s <Jobs-handler-directory>:\t\t\t\tUse specified directory to find job handlers\n"
         "%s <region>:\t\t\t\t\t\tUse Specified AWS Region for Secure Tunneling\n"
         "%s <service>:\t\t\t\t\t\tConnect secure tunnel to specific service\n"
