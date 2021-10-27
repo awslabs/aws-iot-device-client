@@ -40,7 +40,7 @@ if [ "$BUILD_CONFIG" = "y" ]; then
     read -r PRIVATE_KEY
     printf ${PMPT} "Specify path to ROOT CA certificate:"
     read -r ROOT_CA
-    printf ${PMPT} "Specify thing name:"
+    printf ${PMPT} "Specify thing name (Also used as Client ID):"
     read -r THING_NAME
 
     ### Logging Config ###
