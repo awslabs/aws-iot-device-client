@@ -24,6 +24,8 @@ fi
 
 ### Config Defaults ###
 CONF_OUTPUT_PATH=${OUTPUT_DIR}aws-iot-device-client.conf
+SERVICE_DEBUG="N"
+BINARY_DESTINATION="/sbin/aws-iot-device-client"
 
 ###log defaults###
 LOG_TYPE="FILE"
@@ -170,7 +172,7 @@ read -r INSTALL_SERVICE
 
 if [ "$INSTALL_SERVICE" = "y" ]; then
   if ! [ $(id -u) = 0 ]; then
-    printf ${RED} "WARNING: You may need to rerun this setup script as root ('sudo ./workshop-setup.sh') \
+    printf ${RED} "WARNING: You may need to rerun this setup script as root ('sudo ./quick-setup.sh') \
     to successfully install the AWS IoT Device Client as a service"
   fi
   ### Get DeviceClient Artifact Location ###
@@ -207,8 +209,7 @@ if [ "$INSTALL_SERVICE" = "y" ]; then
     fi 
   done
 
-  BINARY_DESTINATION="/sbin/aws-iot-device-client"
-  
+   
   printf ${PMPT} "Installing AWS IoT Device Client..."
   if command -v "systemctl" &>/dev/null; then
     systemctl stop aws-iot-device-client.service || true
