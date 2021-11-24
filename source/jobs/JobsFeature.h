@@ -33,11 +33,6 @@ namespace Aws
                     const char *TAG = "JobsFeature.cpp";
 
                     /**
-                     * \brief A field within a job document that the Jobs feature uses to determine whether
-                     * STDOUT issued by the child process should be published when updating the job execution status
-                     */
-                    const char *JOB_ATTR_INCLUDE_STDOUT = "includeStdOut";
-                    /**
                      * \brief The default directory that the Jobs feature will use to find executables matching
                      * an incoming job document's operation attribute
                      */
