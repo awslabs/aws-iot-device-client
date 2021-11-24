@@ -38,7 +38,7 @@ Existing [Sample Job Handlers](../../sample-job-handlers)
  ...
  ```
 
- `includeStdOut` *boolean* (Optional): This field determines whether the standard output (STDOUT) of the child process is included in the statusDetails field while (updating the job execution)[This field determines whether the standard output (STDOUT) of the child process is included in the statusDetails field while updating the job execution].
+  `includeStdOut` *boolean* (Optional): This field determines whether the standard output (STDOUT) of the child process is included in the statusDetails field while (updating the job execution)[https://docs.aws.amazon.com/iot/latest/apireference/API_iot-jobs-data_UpdateJobExecution.html#iot-iot-jobs-data_UpdateJobExecution-request-statusDetails].
   For example:
  ```
  ...
