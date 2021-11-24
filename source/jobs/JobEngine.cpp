@@ -99,7 +99,8 @@ string JobEngine::buildCommand(Optional<string> path, std::string handler, std::
             "Using path {%s} supplied by job document for command execution",
             Util::Sanitize(path.value()).c_str());
         constexpr char separator = '/';
-        if (path.value().back() != separator) {
+        if (path.value().back() != separator)
+        {
             commandStream << separator;
         }
         commandStream << path.value();
@@ -157,7 +158,7 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, std::string jobH
     ostringstream argsStringForLogging;
     if (action.input.args.has_value())
     {
-        for (const auto& eachArgument : action.input.args.value())
+        for (const auto &eachArgument : action.input.args.value())
         {
             argsStringForLogging << eachArgument << " ";
         }
@@ -198,7 +199,7 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, std::string jobH
 int JobEngine::exec_steps(PlainJobDocument jobDocument, std::string jobHandlerDir)
 {
     int executionStatus = 0;
-    for (const auto& action : jobDocument.steps)
+    for (const auto &action : jobDocument.steps)
     {
         LOGM_INFO(TAG, "About to execute step with name: %s", Util::Sanitize(action.name.c_str()).c_str());
         exec_action(action, jobHandlerDir, executionStatus);
@@ -249,12 +250,12 @@ int JobEngine::exec_cmd(string operation, PlainJobDocument::JobAction action)
      * argv[1] Linux user name
      * argv[2:] arguments required for executing the executable file..
      */
-     size_t argSize = 0;
-     if(action.input.args.has_value())
-     {
+    size_t argSize = 0;
+    if (action.input.args.has_value())
+    {
         argSize = action.input.args->size();
-     }
-    std::unique_ptr<const char*[]> argv(new const char*[argSize + 3]);
+    }
+    std::unique_ptr<const char *[]> argv(new const char *[argSize + 3]);
     argv[0] = operation.c_str();
     argv[1] = action.runAsUser->c_str();
     argv[argSize + 2] = nullptr;

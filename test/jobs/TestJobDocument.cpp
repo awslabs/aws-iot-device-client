@@ -1,35 +1,34 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-
-
 #include "../../source/jobs/JobDocument.h"
 #include "../../source/util/UniqueString.h"
 #include "gtest/gtest.h"
-#include <aws/crt/JsonObject.h>
 #include <algorithm>
-
+#include <aws/crt/JsonObject.h>
 
 using namespace std;
 using namespace Aws::Crt;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Jobs;
 
-
-void AssertVectorEqual(const Optional<vector<string>>& vector1, const Optional<vector<string>>& vector2)
+void AssertVectorEqual(const Optional<vector<string>> &vector1, const Optional<vector<string>> &vector2)
 {
-    ASSERT_TRUE(vector1->size()== vector2->size());
+    ASSERT_TRUE(vector1->size() == vector2->size());
     ASSERT_TRUE(std::equal(vector1->begin(), vector1->end(), vector2->begin()));
 }
 
-void AssertConditionEqual(const vector<PlainJobDocument::JobCondition> condition1,
-                          const Optional<vector<PlainJobDocument::JobCondition>> condition2)
+void AssertConditionEqual(
+    const vector<PlainJobDocument::JobCondition> condition1,
+    const Optional<vector<PlainJobDocument::JobCondition>> condition2)
 {
-    ASSERT_TRUE(condition1.size()== condition2->size());
-    for(auto iterator1 = condition1.cbegin(), end1 = condition1.cend(),
-            iterator2 = condition2->cbegin(), end2 = condition2->cend();
-            iterator1 != end1 || iterator2 != end2;
-            ++ iterator1, ++ iterator2)
+    ASSERT_TRUE(condition1.size() == condition2->size());
+    for (auto iterator1 = condition1.cbegin(),
+              end1 = condition1.cend(),
+              iterator2 = condition2->cbegin(),
+              end2 = condition2->cend();
+         iterator1 != end1 || iterator2 != end2;
+         ++iterator1, ++iterator2)
     {
         ASSERT_STREQ(iterator1->conditionKey.c_str(), iterator2->conditionKey.c_str());
         AssertVectorEqual(iterator1->conditionValue, iterator2->conditionValue);
@@ -37,22 +36,21 @@ void AssertConditionEqual(const vector<PlainJobDocument::JobCondition> condition
     }
 }
 
-void AssertInputEqual(const PlainJobDocument::JobAction::ActionInput& input1,
-                      const PlainJobDocument::JobAction::ActionInput& input2)
+void AssertInputEqual(
+    const PlainJobDocument::JobAction::ActionInput &input1,
+    const PlainJobDocument::JobAction::ActionInput &input2)
 {
     ASSERT_STREQ(input1.handler.c_str(), input2.handler.c_str());
     AssertVectorEqual(input1.args, input2.args);
     ASSERT_STREQ(input1.path->c_str(), input2.path->c_str());
-
 }
 
-void AssertStepEqual(const vector<PlainJobDocument::JobAction>& step1, const vector<PlainJobDocument::JobAction>& step2)
+void AssertStepEqual(const vector<PlainJobDocument::JobAction> &step1, const vector<PlainJobDocument::JobAction> &step2)
 {
-    ASSERT_TRUE(step1.size()== step2.size());
-    for(auto iterator1 = step1.cbegin(), end1 = step1.cend(),
-            iterator2 = step2.cbegin(), end2 = step2.cend();
-            iterator1 != end1 || iterator2 != end2;
-            ++ iterator1, ++ iterator2)
+    ASSERT_TRUE(step1.size() == step2.size());
+    for (auto iterator1 = step1.cbegin(), end1 = step1.cend(), iterator2 = step2.cbegin(), end2 = step2.cend();
+         iterator1 != end1 || iterator2 != end2;
+         ++iterator1, ++iterator2)
     {
         ASSERT_STREQ(iterator1->name.c_str(), iterator2->name.c_str());
         ASSERT_STREQ(iterator1->type.c_str(), iterator2->type.c_str());
@@ -63,8 +61,8 @@ void AssertStepEqual(const vector<PlainJobDocument::JobAction>& step1, const vec
     }
 }
 
-
-TEST(JobDocument, SampleJobDocument){
+TEST(JobDocument, SampleJobDocument)
+{
     constexpr char jsonString[] = R"(
 {
     "version": "1.0",
@@ -153,12 +151,12 @@ TEST(JobDocument, SampleJobDocument){
     PlainJobDocument jobDocument;
     jobDocument.LoadFromJobDocument(jsonView);
 
-    for(const auto &i : jobDocument.steps)
+    for (const auto &i : jobDocument.steps)
     {
-        cout<<i.name.c_str()<<"\n";
-        for(const auto &j : *i.input.args)
+        cout << i.name.c_str() << "\n";
+        for (const auto &j : *i.input.args)
         {
-            cout<<j.c_str()<<"\n";
+            cout << j.c_str() << "\n";
         }
     }
 
@@ -169,7 +167,7 @@ TEST(JobDocument, SampleJobDocument){
     vector<PlainJobDocument::JobCondition> conditions;
     PlainJobDocument::JobCondition condition1, condition2;
     condition1.conditionKey = "operatingSystem";
-    condition1.conditionValue = {{"ubuntu"},{"redhat"}};
+    condition1.conditionValue = {{"ubuntu"}, {"redhat"}};
     condition1.type = "stringEqual";
     conditions.push_back(condition1);
 
@@ -180,11 +178,13 @@ TEST(JobDocument, SampleJobDocument){
 
     AssertConditionEqual(conditions, jobDocument.conditions);
 
-    for(const auto &i : conditions){
-        cout<<i.type->c_str()<<"\n";
+    for (const auto &i : conditions)
+    {
+        cout << i.type->c_str() << "\n";
     }
-    for(const auto &i: *jobDocument.conditions){
-        cout<<i.type->c_str()<<"\n";
+    for (const auto &i : *jobDocument.conditions)
+    {
+        cout << i.type->c_str() << "\n";
     }
 
     PlainJobDocument::JobAction action1, action2, action3;
@@ -238,10 +238,10 @@ TEST(JobDocument, SampleJobDocument){
     ASSERT_STREQ(finalAction.runAsUser->c_str(), jobDocument.finalStep->runAsUser->c_str());
     ASSERT_EQ(finalAction.allowStdErr.value(), jobDocument.finalStep->allowStdErr.value());
     ASSERT_TRUE(jobDocument.finalStep->ignoreStepFailure);
-
 }
 
-TEST(JobDocuemnt, MissingRequiredFields){
+TEST(JobDocuemnt, MissingRequiredFields)
+{
     constexpr char jsonString[] = R"(
 {
     //version is missing
@@ -331,10 +331,10 @@ TEST(JobDocuemnt, MissingRequiredFields){
     jobDocument.LoadFromJobDocument(jsonView);
 
     ASSERT_FALSE(jobDocument.Validate());
-
 }
 
-TEST(JobDocuemnt, MinimumJobDocument){
+TEST(JobDocuemnt, MinimumJobDocument)
+{
     constexpr char jsonString[] = R"(
 {
     "version": "1.0",
@@ -375,10 +375,10 @@ TEST(JobDocuemnt, MinimumJobDocument){
     jobDocument.LoadFromJobDocument(jsonView);
 
     ASSERT_TRUE(jobDocument.Validate());
-
 }
 
-TEST(JobDocuemnt, MissingRequiredFieldsValue){
+TEST(JobDocuemnt, MissingRequiredFieldsValue)
+{
     constexpr char jsonString[] = R"(
 {
     "version": "1.0",
@@ -468,5 +468,4 @@ TEST(JobDocuemnt, MissingRequiredFieldsValue){
     jobDocument.LoadFromJobDocument(jsonView);
 
     ASSERT_FALSE(jobDocument.Validate());
-
 }

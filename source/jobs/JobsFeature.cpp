@@ -550,7 +550,9 @@ void JobsFeature::executeJob(JobExecutionData job)
     {
         LOG_ERROR(TAG, "Unable to execute job, invalid job document provided!");
         publishUpdateJobExecutionStatus(
-            job, {Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!", "", ""}, shutdownHandler);
+            job,
+            {Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!", "", ""},
+            shutdownHandler);
         return;
     }
     else

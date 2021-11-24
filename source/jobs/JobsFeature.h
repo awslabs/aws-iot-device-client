@@ -9,9 +9,9 @@
 #include <aws/iotjobs/JobExecutionData.h>
 
 #include "../ClientBaseNotifier.h"
-#include "EphemeralPromise.h"
 #include "../Feature.h"
 #include "../SharedCrtResourceManager.h"
+#include "EphemeralPromise.h"
 
 namespace Aws
 {

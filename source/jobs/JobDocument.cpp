@@ -32,7 +32,7 @@ constexpr char PlainJobDocument::OLD_SCHEMA_VERSION[];
 void PlainJobDocument::LoadFromJobDocument(const JsonView &json)
 {
     const char *jsonKey = JSON_KEY_VERSION;
-    if (json.ValueExists(jsonKey)&& json.GetJsonObject(jsonKey).IsString())
+    if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsString())
     {
         version = json.GetString(jsonKey).c_str();
     }
@@ -217,7 +217,8 @@ bool PlainJobDocument::JobCondition::Validate() const
     }
     if (conditionValue.empty())
     {
-        LOGM_ERROR(TAG, "*** %s: Required field Condition Value is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
+        LOGM_ERROR(
+            TAG, "*** %s: Required field Condition Value is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
         return false;
     }
     return true;
@@ -332,7 +333,8 @@ bool PlainJobDocument::JobAction::ActionInput::Validate() const
 {
     if (handler.empty())
     {
-        LOGM_ERROR(TAG, "*** %s: Required field ActionInput Handler is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
+        LOGM_ERROR(
+            TAG, "*** %s: Required field ActionInput Handler is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
         return false;
     }
 

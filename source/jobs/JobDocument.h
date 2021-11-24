@@ -4,10 +4,8 @@
 #ifndef AWS_IOT_DEVICE_CLIENT_JOBDOCUMENT_H
 #define AWS_IOT_DEVICE_CLIENT_JOBDOCUMENT_H
 
-
-
-#include <aws/crt/JsonObject.h>
 #include <aws/crt/Api.h>
+#include <aws/crt/JsonObject.h>
 #include <aws/crt/Optional.h>
 #include <map>
 
@@ -48,7 +46,7 @@ namespace Aws
                     static constexpr char JSON_KEY_ACTION[] = "action";
                     static constexpr char JSON_KEY_FINALSTEP[] = "finalStep";
 
-                    //Old Schema Fields
+                    // Old Schema Fields
                     static constexpr char JSON_KEY_OPERATION[] = "operation";
                     static constexpr char JSON_KEY_ARGS[] = "args";
                     static constexpr char JSON_KEY_ALLOWSTDERR[] = "allowStdErr";
@@ -78,8 +76,6 @@ namespace Aws
                     {
                         void LoadFromJobDocument(const JsonView &json) override;
                         bool Validate() const override;
-
-
 
                         static constexpr char JSON_KEY_NAME[] = "name";
                         static constexpr char JSON_KEY_TYPE[] = "type";
@@ -114,9 +110,9 @@ namespace Aws
                     Optional<JobAction> finalStep;
                 };
 
-            }
-        }
-    }
-}
+            } // namespace Jobs
+        }     // namespace DeviceClient
+    }         // namespace Iot
+} // namespace Aws
 
-#endif //AWS_IOT_DEVICE_CLIENT_JOBDOCUMENT_H
+#endif // AWS_IOT_DEVICE_CLIENT_JOBDOCUMENT_H

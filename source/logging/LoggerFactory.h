@@ -9,7 +9,7 @@
  *
  * @param tag the tag to be attached with the log message (The tag string must be NULL terminated)
  * @param message the information message to be logged (The message string must be NULL terminated)
-*/
+ */
 #define LOG_INFO(tag, message)                                                                                         \
     LoggerFactory::getLoggerInstance().get()->info(tag, std::chrono::system_clock::now(), message)
 /**
@@ -17,7 +17,7 @@
  *
  * @param tag the tag to be attached with the log message (The tag string must be NULL terminated)
  * @param message the debug message to be logged (The message string must be NULL terminated)
-*/
+ */
 #define LOG_DEBUG(tag, message)                                                                                        \
     LoggerFactory::getLoggerInstance().get()->debug(tag, std::chrono::system_clock::now(), message)
 /**
@@ -25,7 +25,7 @@
  *
  * @param tag the tag to be attached with the log message (The tag string must be NULL terminated)
  * @param message the warning message to be logged (The message string must be NULL terminated)
-*/
+ */
 #define LOG_WARN(tag, message)                                                                                         \
     LoggerFactory::getLoggerInstance().get()->warn(tag, std::chrono::system_clock::now(), message)
 /**
@@ -33,7 +33,7 @@
  *
  * @param tag the tag to be attached with the log message (The tag string must be NULL terminated)
  * @param message the error message to be logged (The message string must be NULL terminated)
-*/
+ */
 #define LOG_ERROR(tag, message)                                                                                        \
     LoggerFactory::getLoggerInstance().get()->error(tag, std::chrono::system_clock::now(), message)
 
@@ -43,7 +43,7 @@
  * @param tag the tag to be attached with the log message (The tag string must be NULL terminated)
  * @param message the information message to be logged (The message string must be NULL terminated)
  * @param ... additional arguments used in the format string
-*/
+ */
 #define LOGM_INFO(tag, message, ...)                                                                                   \
     LoggerFactory::getLoggerInstance().get()->info(tag, std::chrono::system_clock::now(), message, __VA_ARGS__)
 /**
@@ -52,7 +52,7 @@
  * @param tag the tag to be attached with the log message (The tag string must be NULL terminated)
  * @param message the debug message to be logged (The message string must be NULL terminated)
  * @param ... additional arguments used in the format string
-*/
+ */
 #define LOGM_DEBUG(tag, message, ...)                                                                                  \
     LoggerFactory::getLoggerInstance().get()->debug(tag, std::chrono::system_clock::now(), message, __VA_ARGS__)
 /**
@@ -61,7 +61,7 @@
  * @param tag the tag to be attached with the log message (The tag string must be NULL terminated)
  * @param message the warning message to be logged (The message string must be NULL terminated)
  * @param ... additional arguments used in the format string
-*/
+ */
 #define LOGM_WARN(tag, message, ...)                                                                                   \
     LoggerFactory::getLoggerInstance().get()->warn(tag, std::chrono::system_clock::now(), message, __VA_ARGS__)
 /**
@@ -70,7 +70,7 @@
  * @param tag the tag to be attached with the log message (The tag string must be NULL terminated)
  * @param message the error message to be logged (The message string must be NULL terminated)
  * @param ... additional arguments used in the format string
-*/
+ */
 #define LOGM_ERROR(tag, message, ...)                                                                                  \
     LoggerFactory::getLoggerInstance().get()->error(tag, std::chrono::system_clock::now(), message, __VA_ARGS__)
 
