@@ -30,57 +30,57 @@ Existing [Sample Job Handlers](../../sample-job-handlers)
  The following fields are extracted from the incoming Job document by the Jobs feature within the AWS IoT Device Client when a 
  job is received.
  
- `version` *string* (Required): This field in the job specifies the version of the job document schema which is used in the Job. 
- The Device Client right now only provide support for the string value of `1.0` for the version field. 
+ `version` *string* (Required): This field specifies the version of the ***job document schema*** used to structure this job document. ***Please note, this is not the version of the Job document or Job handler.*** To version the job document or job handler, please use the filename of your job document json or handler script. 
+ Currently, the Device Client will only process your job document if it carries the string value of `"1.0"` in the `version` field 
  ```
  ...
  "version": "1.0",
  ...
  ```
 
- `includeStdOut` *boolean* (Optional): This field tells the Jobs feature whether the standard output (STDOUT) of the child process
- should be included in the job execution update that is published to the IoT Jobs service. For example:
+ `includeStdOut` *boolean* (Optional): This field determines whether the standard output (STDOUT) of the child process is included in the statusDetails field while (updating the job execution)[This field determines whether the standard output (STDOUT) of the child process is included in the statusDetails field while updating the job execution].
+  For example:
  ```
  ...
  "includeStdOut": true,
  ...
  ```
  
- `steps` *list of Actions* (Required): This field will define the set of actions the Device Client will execute. Steps field will store the list of actions. 
+ `steps` *list of Actions* (Required): This field defines the list of steps or actions you want to carry out remotely on your IoT device as part of a single Job execution.
  Each action in the list of actions will be executed in a sequential manner and will stop executing if any of the step fails to execute.
  
- `finalStep` *Action* (Optional): This field will define the final action the Device Client will execute. After each action in the list of actions (steps field) 
- are executed successfully, the Device Client will execute this `finalStep` action. User can use this final step for device cleanup purpose.
+ `finalStep` *Action* (Optional): This field defines the final step to be executed on your IoT device as part of a single Job execution. The Device client 
+ will execute `finalStep` only when all of the actions in the `steps` field are executed successfully. User can use this final step 
+ for device cleanup purpose.
  
- `action` *JSON* (Required): This field will define the action which will be executed on the device by the Device Client. 
- Each action user wants to execute on the device needs to be either specified in the `steps` field or in the `finalStep` field which is described above. The action field schema will have five fields in it I.E. `name`, `type`, `runAsUser`, `ignoreStepFailure` and `input`. 
+ `action` *JSON* (Required): This field defines the action to be executed on your IoT device by the Device Client. 
+ Each action you want to execute on the device needs to be specified either in the `steps` field or in the `finalStep` field as described above. The properties of each step or action are further described by 5 attributes: `name`, `type`, `runAsUser`, `ignoreStepFailure` and `input`. These attributes are explained in detail below 
   
-  `name` *string* (Required): This field will define the name for the action step which will be logged by the Device Client while executing the job. It will help user to debug any job execution failure on the device side.
+  `name` *string* (Required): This attribute defines the `name` of the step to be executed. We recommend you use an easily identifiable name for each step, since it will be reflected in the logs of the Device Client, and will help you debug any unexpected behavior.
   
   ```
   ...
   "name":"Install wget package on the device"
   ...
   ```
-  `type` *string* (Required): This field will define the type of action to be executed on the device. In `version` `1.0` of the job document schema, we only provide support for `runHandler` action type.
+  `type` *string* (Required): This attribute defines the type of step to be executed. We currently only support actions of the type `runHandler` in `version` `"1.0"` of the Job Document Schema.
     
   ```
   ...
   "type":"runHandler"
   ...
   ```  
-  `runAsUser` *string* (Optional): This field will define the user name with which user wishes to run job handler script on the device. 
-  User is responsible for creating users with required permissions to execute the job handlers on the device. It is important to note that If this field is omitted  in the Job Document, 
-  the Job Feature will run the job handler scripts with same user permissions with which the the client executable was started.
-    
+  `runAsUser` *string* (Optional): This attribute defines the name of the local user on the IoT device that executes this single step. 
+  You are responsible for creating local users on your IoT device OS. ***This directly impacts device security.*** We recommend you carefully create local users and assign permissions of least privilege to execute specific actions as a security best practice. If this field is omitted in the Job Document, 
+  the Device Client will execute the step in your Job document under the same set of permissions that govern the Device Client's execution on your IoT device. ***For instance, if you start the Device Client as root, and do not provide a `runAsUser` parameter for your step in the job document, your step will be run as root.***    
   ```
   ...
   "runAsUser":"root"
   ...
   ```
 
-  `ignoreStepFailure` *string* (Optional): This field will define if the Device Client should ignore the step/action failure or not. If the value for this field is `"true"`, even if execution of the action fails,
-   client will not stop and will continue executing the next job step. Default value of this field will be `"false"`. It is important to note that the `"true"` or `"false"` value for the field needs to be passed as a string.
+  `ignoreStepFailure` *string* (Optional): This attribute defines if the Device Client should ignore the failure of this specific step in the series of steps defined in your Job document. If you set this attribute to `"true"`, the Device Client will ignore the failure of your step, and continue executing any subsequent steps that are part of your Job document.
+   By default, this attribute is set to `"false"`. Note that `"true"` and `"false"` need to be passed as strings (not booleans)
     
   ```
   ...
@@ -88,11 +88,11 @@ Existing [Sample Job Handlers](../../sample-job-handlers)
   ...
   ```
 
-  `input` *JSON* (Required): This field will define the supporting parameters/arguments required for executing the action.
+  `input` *JSON* (Required): This attribute defines the supporting parameters / arguments required to execute your step as part of the Job execution.
 
-  The action type `runHandler` will have three fields in its `input` field I.E. `handler`, `args` and `path`. 
+  The `input` attribute further consists of three fields: `handler`, `args`, and `path`. 
   
-  `handler` *string* (Required): This field will define the handler script name user wants to run on the device.
+  `handler` *string* (Required): This field declares the name of the handler script to be executed for your step as part of the Job execution.
     
   ```
   ...
@@ -100,8 +100,8 @@ Existing [Sample Job Handlers](../../sample-job-handlers)
   ...
   ```
   
-  `args` *string array* (Optional): This is a JSON array of string arguments which will be passed to the specified handler script.
-   For example, to install `ifupdown` package, use `install-packages.sh` script with args as:
+  `args` *string array* (Optional): This is a JSON array of string arguments which will be passed to the specified handler script while executing the aforesaid step as part of your Job execution.
+   For example, to install `ifupdown` package, use `install-packages.sh` as your handler with `args` as follows:
     
   ```
   ...
@@ -109,16 +109,16 @@ Existing [Sample Job Handlers](../../sample-job-handlers)
   ...
   ```
 
- `path` *string* (Optional): This field stores the path to directory containing handler on device. If this field is omitted, the Jobs feature will assume that the executable can be found in the `PATH` environment variable. If
- you expect that the executable (operation) should be found in the Job feature's handler directory 
- (~/.aws-iot-device-client/jobs by default or specified via command line/json configuration values), then the path
- must be specified as part of the job document as follows:
+ `path` *string* (Optional): This field stores the local path to the directory containing your handlers. If you want to run a handler that is
+  ***not*** stored in the default Job handler directory for your Device Client installation, you can optionally use this field. If this field is omitted, the Device Client will assume that the right handler is already available in the default location, demarcated by the PATH environment variable.
+ ***default: ~/.aws-iot-device-client/jobs***
+ If you would like to explicitly use the default Job handler directory, you can declare that as follows (optional):
  ```
  ...
  "path": "default",
  ...
  ```
- The path could also be specified as a particular directory that is expected on the device, such as:
+Else you can also specify a different handler directory for your step in the following manner:
  ```
  ...
  "path": "/home/ubuntu/my-job-handler-folder"
@@ -232,11 +232,11 @@ Existing [Sample Job Handlers](../../sample-job-handlers)
 
 ### Creating a Job using Old Job Document Schema 
 
-***Note: This (Old) job document schema will deprecate by December 2022. We would request you to start using new job document schema which is described above.***
+***Note: This is the old Job document schema preserved here for backward compatibility. We will not continue active development using the old Job document schema. Therefore, we highly recommend using the new Job document schema described above.***
  
- [Deprecated Sample Job Docs using Old Schema](../../deprecated-job-docs-and-handlers/deprecated-job-docs)
+ [Sample Job Docs using Old Schema](../../old-schema-job-docs-and-handlers/old-schema-job-docs)
 
- [Deprecated Sample Job Handlers for Old Schema Docs](../../deprecated-job-docs-and-handlers/deprecated-job-handlers)
+ [Sample Job Handlers for Old Schema Docs](../../old-schema-job-docs-and-handlers/old-schema-job-handlers)
 
 
 The following fields are extracted from the incoming Job document by the Jobs feature within the AWS IoT Device Client when a 
@@ -246,8 +246,8 @@ job is received.
 in the Device Client's handler directory, such as `install-packages.sh`, or it could be a well known executable binary
 in the Device Client's environmentx path, such as `echo` or `apt-get`.
 
-`args` *string array* (Optional): This is a JSON array of string arguments which will be passed to the specified operation. 
-For example, to install `ifupdown` package, use `install-packages.sh` script with args as:
+`args` *string array* (Optional): This is a JSON array of string arguments which will be passed to the specified handler script while executing the aforesaid step as part of your Job execution.
+ For example, to install `ifupdown` package, use `install-packages.sh` as your handler with `args` as follows:
 ```
 ...
 "args": ["ifupdown"],
@@ -261,23 +261,21 @@ If we wanted our remote device to print out "Hello World", then our job document
 }
 ```
 
-`path` *string* (Optional): This field stores the path to directory containing handler on device.
- If this field is omitted, the Jobs feature will assume that the executable can be found in the `PATH` environment variable. If
-you expect that the executable (operation) should be found in the Job feature's handler directory 
-(~/.aws-iot-device-client/jobs by default or specified via command line/json configuration values), then the path
-must be specified as part of the job document as follows:
+`path` *string* (Optional): This field stores the local path to the directory containing your handlers. If you want to run a handler that is
+***not*** stored in the default Job handler directory for your Device Client installation, you can optionally use this field. If this field is omitted, the Device Client will assume that the right handler is already available in the default location, demarcated by the PATH environment variable.
+***default: ~/.aws-iot-device-client/jobs***
+If you would like to explicitly use the default Job handler directory, you can declare that as follows (optional):
 ```
 ...
 "path": "default",
 ...
 ```
-The path could also be specified as a particular directory that is expected on the device, such as:
+Else you can also specify a different handler directory for your step in the following manner:
 ```
 ...
 "path": "/home/ubuntu/my-job-handler-folder"
 ...
 ```
-
 `includeStdOut` *boolean* (Optional): This field tells the Jobs feature whether the standard output (STDOUT) of the child process
 should be included in the job execution update that is published to the IoT Jobs service. For example:
 ```
