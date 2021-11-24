@@ -31,11 +31,6 @@ namespace Aws
                      * \brief Used by the logger to specify that log messages are coming from the Jobs feature
                      */
                     const char *TAG = "JobsFeature.cpp";
-                    /**
-                     * \brief A field within a Job document that the Jobs feature uses to determine whether
-                     * STDERR output issued by the child process should be marked as a job failure in IoT Core
-                     */
-                    const char *JOB_ATTR_ALLOW_STDERR = "allowStdErr";
 
                     /**
                      * \brief A field within a job document that the Jobs feature uses to determine whether
