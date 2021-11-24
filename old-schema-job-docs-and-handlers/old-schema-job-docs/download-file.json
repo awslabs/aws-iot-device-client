@@ -1,0 +1,6 @@
+{
+  "_comment": "This sample JSON file can be used for downloading specific file from cloud storage. The arguments passed here in `args` are valid file URL and path where we want to store the downloaded file on the device.",
+  "operation": "download-file.sh",
+  "args": ["https://github.com/awslabs/aws-iot-device-client/archive/refs/tags/v1.3.tar.gz", "/tmp/Downloaded_File.tar.gz"],
+  "path": "default"
+}
