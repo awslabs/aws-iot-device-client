@@ -1,0 +1,5 @@
+{
+    "operation": "remove-packages.sh",
+    "args": ["lftp", "dos2unix"],
+    "path": "default"
+}

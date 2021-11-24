@@ -9,9 +9,9 @@
 #include <aws/iotjobs/JobExecutionData.h>
 
 #include "../ClientBaseNotifier.h"
+#include "EphemeralPromise.h"
 #include "../Feature.h"
 #include "../SharedCrtResourceManager.h"
-#include "EphemeralPromise.h"
 
 namespace Aws
 {
@@ -32,16 +32,6 @@ namespace Aws
                      */
                     const char *TAG = "JobsFeature.cpp";
                     /**
-                     * \brief A field within a Job document that the Jobs feature uses to determine which
-                     * job to run
-                     */
-                    const char *JOB_ATTR_OP = "operation";
-                    /**
-                     * \brief A field within a Job document that the Jobs feature uses to determine which
-                     * arguments to pass to the operation being run
-                     */
-                    const char *JOB_ATTR_ARGS = "args";
-                    /**
                      * \brief A field within a Job document that the Jobs feature uses to determine whether
                      * STDERR output issued by the child process should be marked as a job failure in IoT Core
                      */
@@ -52,21 +42,6 @@ namespace Aws
                      * STDOUT issued by the child process should be published when updating the job execution status
                      */
                     const char *JOB_ATTR_INCLUDE_STDOUT = "includeStdOut";
-                    /**
-                     * \brief A field within a Job document that the Jobs feature uses to determine the location of
-                     * the executable that should be run to handle this job
-                     *
-                     * If the path attribute is specified as "default", the Jobs feature will attempt to find the
-                     * executable in the path configured via the configuration file or command line arguments.
-                     * Otherwise, the Jobs feature will assume that the $PATH contains the executable
-                     */
-                    const char *JOB_ATTR_PATH = "path";
-                    /**
-                     * \brief A keyword that can be specified as the "path" in a job doc to tell the Jobs feature to
-                     * use the configured handler directory when looking for an executable matching the specified
-                     * operation
-                     */
-                    const char *DEFAULT_PATH_KEYWORD = "default";
                     /**
                      * \brief The default directory that the Jobs feature will use to find executables matching
                      * an incoming job document's operation attribute
@@ -268,17 +243,6 @@ namespace Aws
                      * @param job the job to execute
                      */
                     void executeJob(Iotjobs::JobExecutionData job);
-
-                    /**
-                     * \brief Builds the command that will be executed
-                     * @param path the provided path to the executable
-                     * @param operation the name of the executable
-                     * @return the full executable path.
-                     *
-                     * If this command is unable to find a given job handler and/or the permissions
-                     * for the given job handler are inappropriate, this function will thrown an exception.
-                     */
-                    std::string buildCommand(Aws::Crt::String path, Aws::Crt::String operation);
 
                     /**
                      * \brief Given a job notification, determines whether it's a duplicate message.

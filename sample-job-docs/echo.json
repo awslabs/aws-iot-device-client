@@ -1,4 +1,18 @@
 {
-    "operation": "echo",
-    "args": ["\"Hello world!\""]
+    "_comment": "This sample JSON file can be used for running the echo command on the device side.",
+    "version": "1.0",
+    "steps": [
+        {
+            "action": {
+                "name": "Echo Messages",
+                "type": "runHandler",
+                "input": {
+                    "handler": "echo",
+                    "args": [
+                        "Hello IoT World!"
+                    ]
+                }
+            }
+        }
+    ]
 }
