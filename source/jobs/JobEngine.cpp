@@ -98,12 +98,12 @@ string JobEngine::buildCommand(Optional<string> path, std::string handler, std::
             TAG,
             "Using path {%s} supplied by job document for command execution",
             Util::Sanitize(path.value()).c_str());
+        commandStream << path.value();
         constexpr char separator = '/';
         if (path.value().back() != separator)
         {
             commandStream << separator;
         }
-        commandStream << path.value();
     }
     else
     {
