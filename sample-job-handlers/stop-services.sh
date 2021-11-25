@@ -24,10 +24,10 @@ then
   for service in $services
   do
     if id "$user" 2>/dev/null && command -v "sudo" > /dev/null; then
-      sudo -u "$user" -n service stop "$service"
+      sudo -u "$user" -n service "$service" stop
     else
       echo "username or sudo command not found"
-      service stop "$service"
+      service "$service" stop
     fi
   done
 fi
