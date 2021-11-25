@@ -7,6 +7,7 @@
 #include <array>
 #include <cstring>
 #include <iterator>
+#include <memory>
 #include <thread>
 
 #include <sys/wait.h>
@@ -80,7 +81,149 @@ void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
     }
 }
 
-int JobEngine::exec_cmd(string action, vector<string> args)
+string JobEngine::buildCommand(Optional<string> path, std::string handler, std::string jobHandlerDir) const
+{
+    ostringstream commandStream;
+    bool operationOwnedByDeviceClient = false;
+    if (path.has_value() && DEFAULT_PATH_KEYWORD == path.value())
+    {
+        LOGM_DEBUG(
+            TAG, "Using DC default command path {%s} for command execution", Util::Sanitize(jobHandlerDir).c_str());
+        operationOwnedByDeviceClient = true;
+        commandStream << jobHandlerDir;
+    }
+    else if (path.has_value() && !path.value().empty())
+    {
+        LOGM_DEBUG(
+            TAG,
+            "Using path {%s} supplied by job document for command execution",
+            Util::Sanitize(path.value()).c_str());
+        commandStream << path.value();
+        constexpr char separator = '/';
+        if (path.value().back() != separator)
+        {
+            commandStream << separator;
+        }
+    }
+    else
+    {
+        LOG_DEBUG(TAG, "Assuming executable is in PATH");
+    }
+
+    commandStream << handler.c_str();
+
+    if (operationOwnedByDeviceClient)
+    {
+        const int actualPermissions = Util::FileUtils::GetFilePermissions(commandStream.str().c_str());
+        if (Permissions::JOB_HANDLER != actualPermissions)
+        {
+            string message = Util::FormatMessage(
+                "Unacceptable permissions found for job handler %s, permissions should be %d but found %d",
+                Util::Sanitize(commandStream.str()).c_str(),
+                Permissions::JOB_HANDLER,
+                actualPermissions);
+            LOG_ERROR(TAG, message.c_str());
+            throw std::runtime_error(message);
+        }
+    }
+    return commandStream.str();
+}
+
+void JobEngine::exec_action(PlainJobDocument::JobAction action, std::string jobHandlerDir, int &executionStatus)
+{
+    string command;
+    if (action.type == PlainJobDocument::ACTION_TYPE_RUN_HANDLER)
+    {
+        // build command
+        try
+        {
+            command = buildCommand(action.input.path, action.input.handler, jobHandlerDir);
+        }
+        catch (exception &e)
+        {
+            if (!action.ignoreStepFailure.value())
+            {
+                executionStatus = 1;
+            }
+            return;
+        }
+    }
+    else
+    {
+        LOG_ERROR(TAG, "Job Document received with invalid action type.");
+        executionStatus = 1;
+        return;
+    }
+
+    ostringstream argsStringForLogging;
+    if (action.input.args.has_value())
+    {
+        for (const auto &eachArgument : action.input.args.value())
+        {
+            argsStringForLogging << eachArgument << " ";
+        }
+    }
+    else
+    {
+        LOG_INFO(
+            TAG, "Did not find any arguments in the incoming job document. Value should be a JSON array of arguments");
+    }
+
+    LOGM_INFO(
+        TAG,
+        "About to execute: %s %s %s",
+        Util::Sanitize(command).c_str(),
+        Util::Sanitize(action.runAsUser->c_str()).c_str(),
+        Util::Sanitize(argsStringForLogging.str()).c_str());
+
+    int actionExecutionStatus = exec_cmd(command.c_str(), action);
+
+    if (!action.ignoreStepFailure.value())
+    {
+        if (action.allowStdErr.has_value())
+        {
+            if (!actionExecutionStatus && this->hasErrors() >= action.allowStdErr.value())
+            {
+                executionStatus = actionExecutionStatus;
+                return;
+            }
+        }
+        else
+        {
+            executionStatus = actionExecutionStatus;
+            return;
+        }
+    }
+}
+
+int JobEngine::exec_steps(PlainJobDocument jobDocument, std::string jobHandlerDir)
+{
+    int executionStatus = 0;
+    for (const auto &action : jobDocument.steps)
+    {
+        LOGM_INFO(TAG, "About to execute step with name: %s", Util::Sanitize(action.name.c_str()).c_str());
+        exec_action(action, jobHandlerDir, executionStatus);
+        if (this->hasErrors())
+        {
+            LOGM_WARN(
+                TAG, "While executing action %s, JobEngine reported receiving errors from STDERR", action.name.c_str());
+        }
+        if (executionStatus != 0)
+        {
+            return executionStatus;
+        }
+    }
+
+    if (jobDocument.finalStep.has_value())
+    {
+        exec_action(jobDocument.finalStep.value(), jobHandlerDir, executionStatus);
+        LOGM_INFO(
+            TAG, "About to execute step with name: %s", Util::Sanitize(jobDocument.finalStep->name.c_str()).c_str());
+    }
+    return executionStatus;
+}
+
+int JobEngine::exec_cmd(string operation, PlainJobDocument::JobAction action)
 {
     // Establish some file descriptors which we'll use to redirect stdout and
     // stderr from the child process back into our logger
@@ -101,12 +244,24 @@ int JobEngine::exec_cmd(string action, vector<string> args)
         return CMD_FAILURE;
     }
 
-    const char **argv = new const char *[args.size() + 2];
-    argv[0] = action.c_str();
-    argv[args.size() + 1] = nullptr;
-    for (size_t i = 0; i < args.size(); i++)
+    /**
+     * \brief Create char array argv[] storing arguments to pass to execvp() function.
+     * argv[0] executable path
+     * argv[1] Linux user name
+     * argv[2:] arguments required for executing the executable file..
+     */
+    size_t argSize = 0;
+    if (action.input.args.has_value())
     {
-        argv[i + 1] = args.at(i).c_str();
+        argSize = action.input.args->size();
+    }
+    std::unique_ptr<const char *[]> argv(new const char *[argSize + 3]);
+    argv[0] = operation.c_str();
+    argv[1] = action.runAsUser->c_str();
+    argv[argSize + 2] = nullptr;
+    for (size_t i = 0; i < argSize; i++)
+    {
+        argv[i + 2] = action.input.args->at(i).c_str();
     }
 
     int execResult;
@@ -143,7 +298,10 @@ int JobEngine::exec_cmd(string action, vector<string> args)
 
         LOG_DEBUG(TAG, "Child process about to call execvp");
 
-        execvp(action.c_str(), const_cast<char *const *>(argv));
+        if (execvp(operation.c_str(), const_cast<char *const *>(argv.get())) == -1)
+        {
+            LOGM_DEBUG(TAG, "Failed to invoke execvp system call to execute action step: %s ", strerror(errno));
+        }
         // If the exec fails we need to exit the child process
         _exit(1);
     }
@@ -163,6 +321,7 @@ int JobEngine::exec_cmd(string action, vector<string> args)
 
         do
         {
+            // TODO: do not wait for infinite time for child process to complete
             int waitReturn = waitpid(pid, &execResult, 0);
             if (waitReturn == -1)
             {

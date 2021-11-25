@@ -1,6 +1,21 @@
 {
-    "operation": "install-packages.sh",
-    "args": ["lftp", "dos2unix"],
-    "path": "default",
-    "allowStdErr": 2
+  "_comment": "This sample JSON file can be used for installing specific list of packages on device. The arguments passed here in `steps`->`action`->`args` are valid package names.",
+  "version": "1.0",
+  "steps": [
+    {
+      "action": {
+        "name": "Install Packages",
+        "type": "runHandler",
+        "input": {
+          "handler": "install-packages.sh",
+          "args": [
+            "lftp",
+            "dos2unix"
+          ],
+          "path": "default"
+        },
+        "runAsUser": "root"
+      }
+    }
+  ]
 }

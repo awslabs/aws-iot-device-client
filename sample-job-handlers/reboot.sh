@@ -1,5 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env sh
 set -e
+
+echo "Running reboot.sh"
+user=$1
+echo "Username: $user"
 
 GLOBAL_LAST_BOOT=""
 REBOOT_LOCK_FILE=/var/tmp/dc-reboot.lock
@@ -11,7 +15,8 @@ get_last_boot_time() {
   GLOBAL_LAST_BOOT=$(awk -v currentTime=$CURRENT -v uptime=$UPTIME 'BEGIN {printf "%.0f",currentTime-uptime}')
 }
 
-if sudo -n test -f "$REBOOT_LOCK_FILE"; then
+if id "$user" 2>/dev/null && command -v "sudo" > /dev/null; then
+  if sudo -u "$user" -n test -f "$REBOOT_LOCK_FILE"; then
     echo "Found lock file"
     LOCK_FILE_BOOT=$(cat $REBOOT_LOCK_FILE)
     rm $REBOOT_LOCK_FILE
@@ -23,8 +28,31 @@ if sudo -n test -f "$REBOOT_LOCK_FILE"; then
       echo "Reboot failed"
       exit 1
     fi
+  else
+    echo "Did not find $REBOOT_LOCK_FILE"
+    date "+%s" > $REBOOT_LOCK_FILE
+    sudo -u "$user" -n reboot || true
+    rm $REBOOT_LOCK_FILE
+    exit 1
+  fi
 else
-  echo "Did not find $REBOOT_LOCK_FILE"
-  date "+%s" > $REBOOT_LOCK_FILE
-  sudo -n reboot
+  echo "username or sudo command not found"
+  if test -f "$REBOOT_LOCK_FILE"; then
+    echo "Found lock file"
+    LOCK_FILE_BOOT=$(cat $REBOOT_LOCK_FILE)
+    rm $REBOOT_LOCK_FILE
+    get_last_boot_time
+    if [ "$LOCK_FILE_BOOT" -lt "$GLOBAL_LAST_BOOT" ]; then
+      echo "Reboot was successful"
+      exit 0
+    else
+      echo "Reboot failed"
+      exit 1
+    fi
+  else
+    echo "Did not find $REBOOT_LOCK_FILE"
+    date "+%s" > $REBOOT_LOCK_FILE
+    reboot || true
+    rm $REBOOT_LOCK_FILE
+  fi
 fi

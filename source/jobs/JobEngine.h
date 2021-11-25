@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+#include "../util/FileUtils.h"
+#include "JobDocument.h"
 #include "LimitedStreamBuffer.h"
 
 namespace Aws
@@ -41,6 +43,13 @@ namespace Aws
                     static constexpr size_t MAX_LOG_LINES = 1000;
 
                     /**
+                     * \brief A keyword that can be specified as the "path" in a job doc to tell the Jobs feature to
+                     * use the configured handler directory when looking for an executable matching the specified
+                     * operation
+                     */
+                    const char *DEFAULT_PATH_KEYWORD = "default";
+
+                    /**
                      * \brief The number of lines received on STDERR from the child process
                      *
                      * Used to determine whether the job was successful or not, since a script
@@ -60,6 +69,39 @@ namespace Aws
                      */
                     Aws::Iot::DeviceClient::Jobs::LimitedStreamBuffer stderrstream;
 
+                    /**
+                     * \brief Builds the command that will be executed
+                     * @param path the provided path to the executable
+                     * @param handler the name of the handler script or executable file
+                     * @return the full executable path.
+                     *
+                     * If this command is unable to find a given job handler and/or the permissions
+                     * for the given job handler are inappropriate, this function will thrown an exception.
+                     */
+                    std::string buildCommand(Optional<std::string> path, std::string handler, std::string jobHandlerDir)
+                        const;
+
+                    /**
+                     * \brief Executes the given command (action) and passes the provided vector of arguments to that
+                     * command
+                     * @param action the command to execute
+                     * @param args the arguments to pass to that command
+                     * @return an integer representing the return code of the executed process
+                     */
+                    int exec_cmd(std::string operation, PlainJobDocument::JobAction action);
+
+                    /**
+                     * \brief Executes the given set of steps (actions) in sequence as provided in the job document
+                     * @param action the action provided in job document to execute
+                     * @param jobHandlerDir the default job handler directory path
+                     * @param executionStatus job execution status
+                     * @return an integer representing the return code of the executed action
+                     */
+                    void exec_action(
+                        PlainJobDocument::JobAction action,
+                        std::string jobHandlerDir,
+                        int &executionStatus);
+
                   public:
                     /**
                      * \brief Used by output processing threads to assess output from the child process
@@ -71,13 +113,12 @@ namespace Aws
                     void processCmdOutput(int fd, bool isStdErr, int childPID);
 
                     /**
-                     * \brief Executes the given command (action) and passes the provided vector of arguments to that
-                     * command
-                     * @param action the command to execute
-                     * @param args the arguments to pass to that command
-                     * @return an integer representing the return code of the executed process
+                     * \brief Executes the given set of steps (actions) in sequence as provided in the job document
+                     * @param jobDocument the job document to execute
+                     * @param jobHandlerDir the default job handler directory path
+                     * @return an integer representing the return code of the executed action
                      */
-                    int exec_cmd(std::string action, std::vector<std::string> args);
+                    int exec_steps(PlainJobDocument jobDocument, std::string jobHandlerDir);
                     /**
                      * \brief Begin the execution of a command with the specified arguments
                      *
