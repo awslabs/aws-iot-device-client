@@ -29,6 +29,9 @@ DD_INTERVAL=300
 LOG_TYPE="STDOUT"
 LOG_LEVEL="DEBUG"
 LOG_LOCATION="/var/log/aws-iot-device-client/aws-iot-device-client.log"
+SDK_LOGS_ENABLED="false"
+SDK_LOG_LEVEL="TRACE"
+SDK_LOG_LOCATION="/var/log/aws-iot-device-client/sdk.log"
 
 if [ "$BUILD_CONFIG" = "y" ]; then
   while [ "$CONFIGURED" != 1 ]; do
@@ -70,7 +73,32 @@ if [ "$BUILD_CONFIG" = "y" ]; then
           chmod 745 /var/log/aws-iot-device-client/
         fi
       fi
+      ### SDK Logging Config ###
+      printf ${PMPT} "Would you like to configure the SDK logging? y/n"
+      read -r CONFIGURE_SDK_LOGS
+      if [ "$CONFIGURE_SDK_LOGS" = "y" ]; then
+        SDK_LOGS_ENABLED="true"
+        printf ${PMPT} "Specify desired SDK log level: TRACE/DEBUG/INFO/WARN/ERROR/FATAL"
+        read -r SDK_LOG_LEVEL
+        printf ${PMPT} "Specify path to desired SDK log file (if no path is provided, will default to ${SDK_LOG_LOCATION}:"
+        read -r SDK_LOG_LOCATION_TMP
+        if [ "${SDK_LOG_LOCATION_TMP}" ]; then
+          SDK_LOG_LOCATION=${SDK_LOG_LOCATION_TMP}
+        else
+          printf ${GREEN} "Creating default SDK log directory..."
+          if command -v "sudo" > /dev/null; then
+            sudo -n mkdir -p /var/log/aws-iot-device-client/ | true
+            CURRENT_USER=$(whoami)
+            sudo -n chown "$CURRENT_USER":"$CURRENT_USER" /var/log/aws-iot-device-client/
+          else
+            printf ${RED} "WARNING: sudo command not found"
+            mkdir -p /var/log/aws-iot-device-client/ | true
+          fi
+          chmod 745 /var/log/aws-iot-device-client/
+        fi
+      fi
     fi
+
 
     ### Jobs Config ###
     printf ${PMPT} "Enable Jobs feature? y/n"
@@ -198,7 +226,10 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       \"logging\":	{
         \"level\":	\"$LOG_LEVEL\",
         \"type\":	\"$LOG_TYPE\",
-        \"file\": \"$LOG_LOCATION\"
+        \"file\": \"$LOG_LOCATION\",
+        \"enable-sdk-logging\":	$SDK_LOGS_ENABLED,
+        \"sdk-log-level\":	\"$SDK_LOG_LEVEL,
+        \"sdk-log-file\": \"$SDK_LOG_LOCATION\"
       },
       \"jobs\":	{
         \"enabled\":	$JOBS_ENABLED,
