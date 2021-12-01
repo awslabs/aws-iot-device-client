@@ -228,7 +228,7 @@ if [ "$BUILD_CONFIG" = "y" ]; then
         \"type\":	\"$LOG_TYPE\",
         \"file\": \"$LOG_LOCATION\",
         \"enable-sdk-logging\":	$SDK_LOGS_ENABLED,
-        \"sdk-log-level\":	\"$SDK_LOG_LEVEL,
+        \"sdk-log-level\":	\"$SDK_LOG_LEVEL\",
         \"sdk-log-file\": \"$SDK_LOG_LOCATION\"
       },
       \"jobs\":	{
