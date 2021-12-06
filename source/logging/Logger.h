@@ -86,7 +86,7 @@ namespace Aws
                      * @param level the log level
                      * @param tag a tag that indicates where the log message is coming from
                      * @param t a timestamp representing the time the message was created
-                     * @param message the message to log
+                     * @param message the message to log (The message string must be NULL terminated)
                      * @param ... a variadic number of arguments that will be formatted against the log message
                      */
                     virtual void vlog(
@@ -108,7 +108,7 @@ namespace Aws
                      * message
                      * @param tag a tag indicating where in the source code the log message is coming from
                      * @param t a timestamp representing the time this message was created
-                     * @param message the log message
+                     * @param message the log message (The message string must be NULL terminated)
                      * @param args variadic number of arguments that may be passed in for formatting against the log
                      * message
                      */
@@ -135,7 +135,7 @@ namespace Aws
                      * message
                      * @param tag a tag indicating where in the source code the log message is coming from
                      * @param t a timestamp representing the time this message was created
-                     * @param message the log message
+                     * @param message the log message (The message string must be NULL terminated)
                      * @param args variadic number of arguments that may be passed in for formatting against the log
                      * message
                      */
@@ -162,7 +162,7 @@ namespace Aws
                      * message
                      * @param tag a tag indicating where in the source code the log message is coming from
                      * @param t a timestamp representing the time this message was created
-                     * @param message the log message
+                     * @param message the log message (The message string must be NULL terminated)
                      * @param args variadic number of arguments that may be passed in for formatting against the log
                      * message
                      */
@@ -189,7 +189,7 @@ namespace Aws
                      * message
                      * @param tag a tag indicating where in the source code the log message is coming from
                      * @param t a timestamp representing the time this message was created
-                     * @param message the log message
+                     * @param message the log message (The message string must be NULL terminated)
                      * @param args variadic number of arguments that may be passed in for formatting against the log
                      * message
                      */

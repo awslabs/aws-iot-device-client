@@ -1,5 +1,21 @@
 {
-    "operation": "remove-packages.sh",
-    "args": ["lftp", "dos2unix"],
-    "path": "default"
+  "_comment": "This sample JSON file can be used for removing specific list of packages from device. The arguments passed here in `steps`->`action`->`args` are valid package names.",
+  "version": "1.0",
+  "steps": [
+    {
+      "action": {
+        "name": "Remove Packages",
+        "type": "runHandler",
+        "input": {
+          "handler": "remove-packages.sh",
+          "args": [
+            "lftp",
+            "dos2unix"
+          ],
+          "path": "default"
+        },
+        "runAsUser": "root"
+      }
+    }
+  ]
 }

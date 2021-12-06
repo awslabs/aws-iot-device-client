@@ -16,7 +16,7 @@ namespace Aws
                  * \brief Given a message that expects to be formatted with a variable argument list (va_list), this
                  * function will format the message.
                  *
-                 * @param message the message to be formatted
+                 * @param message the message to be formatted (The message string must be NULL terminated)
                  * @param args a variable argument list used in the format string
                  * @return a string containing the formatted message
                  */
@@ -26,7 +26,7 @@ namespace Aws
                  * \brief Given a message that expects to be formatted with additional arguments, this function will
                  * format the message.
                  *
-                 * @param message the message to be formatted
+                 * @param message the message to be formatted (The message string must be NULL terminated)
                  * @param ... additional arguments used in the format string
                  * @return a string containing the formatted message
                  */

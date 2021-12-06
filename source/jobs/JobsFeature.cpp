@@ -7,6 +7,7 @@
 #include "../util/Retry.h"
 #include "../util/UniqueString.h"
 #include "EphemeralPromise.h"
+#include "JobDocument.h"
 #include "JobEngine.h"
 
 #include <aws/iotjobs/NextJobExecutionChangedEvent.h>
@@ -528,71 +529,9 @@ bool JobsFeature::isDuplicateNotification(JobExecutionData job)
     return true;
 }
 
-string JobsFeature::buildCommand(Aws::Crt::String path, Aws::Crt::String operation)
-{
-    ostringstream commandStream;
-    bool operationOwnedByDeviceClient = false;
-    if (DEFAULT_PATH_KEYWORD == path)
-    {
-        LOGM_DEBUG(TAG, "Using DC default command path {%s} for command execution", Sanitize(jobHandlerDir).c_str());
-        operationOwnedByDeviceClient = true;
-        commandStream << jobHandlerDir;
-    }
-    else if (!path.empty())
-    {
-        LOGM_DEBUG(
-            TAG, "Using path {%s} supplied by job document for command execution", Sanitize(path.c_str()).c_str());
-        commandStream << path;
-    }
-    else
-    {
-        LOG_DEBUG(TAG, "Assuming executable is in PATH");
-    }
-    commandStream << operation;
-
-    if (operationOwnedByDeviceClient)
-    {
-        const int actualPermissions = FileUtils::GetFilePermissions(commandStream.str().c_str());
-        if (Permissions::JOB_HANDLER != actualPermissions)
-        {
-            string message = FormatMessage(
-                "Unacceptable permissions found for job handler %s, permissions should be %d but found %d",
-                Sanitize(commandStream.str()).c_str(),
-                Permissions::JOB_HANDLER,
-                actualPermissions);
-            LOG_ERROR(TAG, message.c_str());
-            throw std::runtime_error(message);
-        }
-    }
-
-    return commandStream.str();
-}
-
 void JobsFeature::executeJob(JobExecutionData job)
 {
     LOGM_INFO(TAG, "Executing job: %s", job.JobId->c_str());
-    publishUpdateJobExecutionStatus(job, {Iotjobs::JobStatus::IN_PROGRESS, "", "", ""});
-
-    Aws::Crt::JsonView jobDoc = job.JobDocument->View();
-    Aws::Crt::String operation = jobDoc.GetString(JOB_ATTR_OP);
-    Aws::Crt::String path = jobDoc.GetString(JOB_ATTR_PATH);
-    bool includeStdOut = jobDoc.KeyExists(JOB_ATTR_INCLUDE_STDOUT) ? jobDoc.GetBool(JOB_ATTR_INCLUDE_STDOUT) : false;
-
-    vector<string> args;
-    ostringstream argsStringForLogging;
-    if (jobDoc.KeyExists(JOB_ATTR_ARGS) && jobDoc.GetJsonObject(JOB_ATTR_ARGS).IsListType())
-    {
-        for (Aws::Crt::JsonView view : jobDoc.GetArray(JOB_ATTR_ARGS))
-        {
-            args.push_back(view.AsString().c_str());
-            argsStringForLogging << view.AsString().c_str() << " ";
-        }
-    }
-    else
-    {
-        LOG_INFO(
-            TAG, "Did not find any arguments in the incoming job document. Value should be a JSON array of arguments");
-    }
 
     auto shutdownHandler = [this]() -> void {
         handlingJob.store(false);
@@ -602,37 +541,30 @@ void JobsFeature::executeJob(JobExecutionData job)
             baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
         }
     };
-
-    if (operation.empty())
+    Aws::Crt::JsonView jobDoc = job.JobDocument->View();
+    PlainJobDocument jobDocument;
+    // reject job document based on the validation status
+    // TODO: create init method and call it instead
+    jobDocument.LoadFromJobDocument(jobDoc);
+    if (!jobDocument.Validate())
     {
-        LOG_ERROR(TAG, "Unable to execute job, no operation provided!");
+        LOG_ERROR(TAG, "Unable to execute job, invalid job document provided!");
         publishUpdateJobExecutionStatus(
-            job, {Iotjobs::JobStatus::FAILED, "No operation provided", "", ""}, shutdownHandler);
+            job,
+            {Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!", "", ""},
+            shutdownHandler);
         return;
     }
-
-    int allowStdErr = 0;
-    if (jobDoc.KeyExists(JOB_ATTR_ALLOW_STDERR))
+    else
     {
-        allowStdErr = jobDoc.GetInteger(JOB_ATTR_ALLOW_STDERR);
+        publishUpdateJobExecutionStatus(job, {Iotjobs::JobStatus::IN_PROGRESS, "", "", ""});
     }
 
-    string command;
-    try
-    {
-        command = buildCommand(path, operation);
-    }
-    catch (exception &e)
-    {
-        publishUpdateJobExecutionStatus(job, {Iotjobs::JobStatus::FAILED, e.what(), "", ""}, shutdownHandler);
-        return;
-    }
-
-    LOGM_INFO(TAG, "About to execute: %s %s", Sanitize(command).c_str(), Sanitize(argsStringForLogging.str()).c_str());
-
-    auto runJob = [this, job, command, args, allowStdErr, includeStdOut, shutdownHandler]() {
+    // TODO: Add support for checking condition
+    auto runJob = [this, job, jobDocument, shutdownHandler]() {
         JobEngine engine;
-        int executionStatus = engine.exec_cmd(command.c_str(), args);
+        // execute all action steps in sequence as provided in job document
+        int executionStatus = engine.exec_steps(jobDocument, jobHandlerDir);
         string reason = engine.getReason(executionStatus);
 
         LOG_INFO(TAG, Sanitize(reason).c_str());
@@ -642,17 +574,17 @@ void JobsFeature::executeJob(JobExecutionData job)
             LOG_WARN(TAG, "JobEngine reported receiving errors from STDERR");
         }
 
-        if (!executionStatus && engine.hasErrors() <= allowStdErr)
+        if (!executionStatus)
         {
             LOG_INFO(TAG, "Job executed successfully!");
-            string standardOut = includeStdOut ? engine.getStdOut() : "";
+            string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
             publishUpdateJobExecutionStatus(
                 job, {JobStatus::SUCCEEDED, "", standardOut, engine.getStdErr()}, shutdownHandler);
         }
         else
         {
             LOG_WARN(TAG, "Job execution failed!");
-            string standardOut = includeStdOut ? engine.getStdOut() : "";
+            string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
             publishUpdateJobExecutionStatus(
                 job, {JobStatus::FAILED, reason, standardOut, engine.getStdErr()}, shutdownHandler);
         }

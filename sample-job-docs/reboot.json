@@ -1,0 +1,16 @@
+{
+  "_comment": "This sample JSON file can be used for rebooting the device.",
+  "version": "1.0",
+  "steps": [
+    {
+      "action": {
+        "name": "Reboot Device",
+        "type": "runHandler",
+        "input": {
+          "handler": "reboot.sh"
+        },
+        "runAsUser": "root"
+      }
+    }
+  ]
+}

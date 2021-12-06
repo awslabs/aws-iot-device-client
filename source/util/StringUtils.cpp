@@ -37,6 +37,7 @@ namespace Aws
                 {
                     va_list args;
                     va_start(args, message);
+                    //  The message string used over here must be NULL terminated
                     std::string s = vFormatMessage(message, args);
                     va_end(args);
                     return s;
@@ -65,6 +66,7 @@ namespace Aws
                 string addString(Aws::Crt::String first, Aws::Crt::String second)
                 {
                     string jsonTemplate = R"("%s": "%s")";
+                    //  The message string used over here must be NULL terminated
                     return FormatMessage(jsonTemplate.c_str(), first.c_str(), second.c_str());
                 }
 

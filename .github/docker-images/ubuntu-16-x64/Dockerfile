@@ -31,7 +31,7 @@ RUN wget https://www.openssl.org/source/openssl-1.1.1.tar.gz \
 WORKDIR /tmp
 RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3.10.0.tar.gz -o cmake-3.10.0.tar.gz \
     && tar -zxvf cmake-3.10.0.tar.gz \
-    && cd cmake-3.10.0 \ 
+    && cd cmake-3.10.0 \
     && ./bootstrap \
     && make -j 2 \
     && make install
@@ -55,11 +55,12 @@ RUN wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz \
 WORKDIR /home/aws-iot-device-client
 RUN mkdir sdk-cpp-workspace \
     && cd sdk-cpp-workspace \
-    && mkdir aws-iot-device-sdk-cpp-v2-build \
-    && git clone --recursive https://github.com/aws/aws-iot-device-sdk-cpp-v2.git \
-    && cd aws-iot-device-sdk-cpp-v2 \
+    && git clone https://github.com/aws/aws-iot-device-sdk-cpp-v2.git \
     && git checkout a73593d1003e2b231c6db53710aa6c75d8196b1f \
-    && cd ../aws-iot-device-sdk-cpp-v2-build \
+    && git submodule update --init --recursive \
+    && cd .. \
+    && mkdir aws-iot-device-sdk-cpp-v2-build \
+    && cd aws-iot-device-sdk-cpp-v2-build \
     && cmake -DCMAKE_INSTALL_PREFIX="/usr" -DUSE_OPENSSL=ON -DBUILD_DEPS=ON ../aws-iot-device-sdk-cpp-v2 \
     && cmake --build . --target install
 
