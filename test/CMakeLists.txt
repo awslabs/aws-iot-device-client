@@ -100,6 +100,7 @@ if (NOT EXCLUDE_JOBS)
 endif ()
 
 target_link_libraries(${GTEST_PROJECT} gtest gtest_main)
+target_link_libraries(${GTEST_PROJECT} gmock gmock_main)
 target_link_libraries(${GTEST_PROJECT} ${DEP_DC_LIBS})
 target_link_libraries(${GTEST_PROJECT} OpenSSL::SSL)
 target_link_libraries(${GTEST_PROJECT} OpenSSL::Crypto)

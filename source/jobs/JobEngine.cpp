@@ -99,16 +99,15 @@ string JobEngine::buildCommand(Optional<string> path, std::string handler, std::
             "Using path {%s} supplied by job document for command execution",
             Util::Sanitize(path.value()).c_str());
         commandStream << path.value();
+        constexpr char separator = '/';
+        if (path.value().back() != separator)
+        {
+            commandStream << separator;
+        }
     }
     else
     {
         LOG_DEBUG(TAG, "Assuming executable is in PATH");
-    }
-
-    constexpr char separator = '/';
-    if (path.value().back() != separator)
-    {
-        commandStream << separator;
     }
 
     commandStream << handler.c_str();
