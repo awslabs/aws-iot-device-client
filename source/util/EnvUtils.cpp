@@ -43,7 +43,7 @@ constexpr char PATH_DIRECTORY_SEPARATOR = '/'; // Unix-only.
 // Jobs directory name.
 constexpr char JOBS_DIRECTORY_NAME[] = "jobs";
 
-constexpr char TAG[] = __FILE__;
+constexpr char EnvUtils::TAG[];
 
 int EnvUtils::AppendCwdToPath()
 {
@@ -82,7 +82,7 @@ int EnvUtils::AppendCwdToPath()
             }
             else
             {
-                int errnum = errno != 0 ? errno : 1;
+                auto errnum = errno != 0 ? errno : 1;
                 LOGM_ERROR(TAG, "Unable to get current working directory errno: %d msg: %s", errnum, strerror(errnum));
                 return errnum;
             }
@@ -107,7 +107,7 @@ int EnvUtils::AppendCwdToPath()
     const std::string &newpath = oss.str();
     if (os->setenv(PATH_ENVIRONMENT, newpath.c_str(), 1) != 0)
     {
-        int errnum = errno != 0 ? errno : 1;
+        auto errnum = errno != 0 ? errno : 1;
         LOGM_ERROR(
             TAG,
             "Unable to overwrite %s environment variable errno: %d msg: %s",

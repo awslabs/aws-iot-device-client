@@ -60,6 +60,9 @@ namespace Aws
                  */
                 struct EnvUtils
                 {
+                  private:
+                    static constexpr char TAG[] = "EnvUtils.cpp";
+
                   public:
                     using OSInterfacePtr = std::unique_ptr<OSInterface>;
 
