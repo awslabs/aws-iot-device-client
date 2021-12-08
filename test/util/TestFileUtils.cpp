@@ -222,6 +222,59 @@ TEST(FileUtils, setupDirectoryDetectedSetupFailure)
     ASSERT_FALSE(didSetup);
 }
 
+TEST(FileUtils, DirectoryExistsTrue)
+{
+    string dirPath = "/tmp/" + UniqueString::GetRandomToken(10);
+    ASSERT_EQ(0, mkdir(dirPath.c_str(), S_IRWXU));
+
+    ASSERT_TRUE(FileUtils::DirectoryExists(dirPath));
+}
+
+TEST(FileUtils, DirectoryExistsFalse)
+{
+    string dirPath = "/tmp/" + UniqueString::GetRandomToken(10);
+
+    ASSERT_FALSE(FileUtils::DirectoryExists(dirPath));
+}
+
+TEST(FileUtils, DirectoryExistsFalseIsFile)
+{
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
+    {
+        std::ofstream ofs(filePath, ios::out);
+        ASSERT_TRUE(ofs.is_open());
+        // Close and flush file on exit.
+    }
+
+    ASSERT_FALSE(FileUtils::DirectoryExists(filePath));
+}
+
+TEST(FileUtils, canCreateEmptyFileWithPermissions)
+{
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
+
+    bool didCreate = FileUtils::CreateEmptyFileWithPermissions(filePath.c_str(), S_IRUSR);
+
+    ASSERT_TRUE(didCreate);
+    ASSERT_EQ(400, FileUtils::GetFilePermissions(filePath.c_str()));
+    ASSERT_EQ(0, FileUtils::GetFileSize(filePath.c_str()));
+}
+
+TEST(FileUtils, failCreateEmptyFileWithPermissionsFileExists)
+{
+    string filePath = "/tmp/" + UniqueString::GetRandomToken(10);
+    {
+        std::ofstream ofs(filePath, ios::out);
+        ASSERT_TRUE(ofs.is_open());
+        // Close and flush file on exit.
+    }
+    ASSERT_TRUE(FileUtils::FileExists(filePath));
+
+    bool didCreate = FileUtils::CreateEmptyFileWithPermissions(filePath.c_str(), S_IRUSR);
+
+    ASSERT_FALSE(didCreate);
+}
+
 TEST(FileUtils, FileExists)
 {
     string filePath = "/tmp/" + UniqueString::GetRandomToken(10);

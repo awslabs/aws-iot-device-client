@@ -344,8 +344,6 @@ constexpr char PlainConfig::LogConfig::JSON_KEY_ENABLE_SDK_LOGGING[];
 constexpr char PlainConfig::LogConfig::JSON_KEY_SDK_LOG_LEVEL[];
 constexpr char PlainConfig::LogConfig::JSON_KEY_SDK_LOG_FILE[];
 
-constexpr char PlainConfig::LogConfig::DEFAULT_SDK_LOG_FILE[];
-
 int PlainConfig::LogConfig::ParseDeviceClientLogLevel(string level)
 {
     string temp = level;
@@ -1763,7 +1761,10 @@ bool Config::ExportDefaultSetting(const string &file)
     "%s": {
         "%s": "DEBUG",
         "%s": "FILE",
-        "%s": "/var/log/aws-iot-device-client/aws-iot-device-client.log"
+        "%s": "/var/log/aws-iot-device-client/aws-iot-device-client.log",
+        "%s": false,
+        "%s": "TRACE",
+        "%s": "/var/log/aws-iot-device-client/sdk.log"
     },
     "%s": {
         "%s": true,
@@ -1819,6 +1820,9 @@ bool Config::ExportDefaultSetting(const string &file)
         PlainConfig::LogConfig::JSON_KEY_LOG_LEVEL,
         PlainConfig::LogConfig::JSON_KEY_LOG_TYPE,
         PlainConfig::LogConfig::JSON_KEY_LOG_FILE,
+        PlainConfig::LogConfig::JSON_KEY_ENABLE_SDK_LOGGING,
+        PlainConfig::LogConfig::JSON_KEY_SDK_LOG_LEVEL,
+        PlainConfig::LogConfig::JSON_KEY_SDK_LOG_FILE,
         PlainConfig::JSON_KEY_JOBS,
         PlainConfig::Jobs::JSON_KEY_ENABLED,
         PlainConfig::Jobs::JSON_KEY_HANDLER_DIR,

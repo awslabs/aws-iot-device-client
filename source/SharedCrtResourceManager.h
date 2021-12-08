@@ -31,6 +31,14 @@ namespace Aws
                 const char *BINARY_NAME = "IoTDeviceClient";
                 const char *BINARY_VERSION = "1.2";
 
+                /**
+                 * \brief Full path to the default log file used by the AWS CRT SDK.
+                 *
+                 * If the user does not specify a desired log location in either the command line arguments
+                 * or the Json configuration file, this is the default log that will be used
+                 */
+                static constexpr char DEFAULT_SDK_LOG_FILE[] = "/var/log/aws-iot-device-client/sdk.log";
+
                 static constexpr int DEFAULT_WAIT_TIME_SECONDS = 10;
                 bool initialized = false;
                 std::atomic<bool> initializedAWSHttpLib{false};
@@ -45,6 +53,7 @@ namespace Aws
                 std::vector<Feature *> *features;
 
                 bool locateCredentials(const PlainConfig &config);
+                bool setupLogging(const PlainConfig &config);
                 int buildClient(const PlainConfig &config);
                 void initializeAllocator();
 

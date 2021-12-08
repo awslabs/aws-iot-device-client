@@ -6,6 +6,8 @@
 
 #include <errno.h>
 #include <iostream>
+
+#include <fcntl.h>
 #include <limits.h> /* PATH_MAX */
 #include <string.h>
 #include <sys/stat.h>
@@ -280,6 +282,11 @@ bool FileUtils::CreateDirectoryWithPermissions(const char *dirPath, mode_t permi
                     actualPermissions);
                 return false;
             }
+            else
+            {
+                // Desired and actual permissions match.
+                return true;
+            }
         }
         else
         {
@@ -294,6 +301,35 @@ bool FileUtils::CreateDirectoryWithPermissions(const char *dirPath, mode_t permi
 
     LOGM_ERROR(TAG, "Failed to create directory %s", Sanitize(expandedPath).c_str());
     return false;
+}
+
+bool FileUtils::DirectoryExists(const std::string &dirPath)
+{
+    struct stat dirInfo;
+    if (stat(dirPath.c_str(), &dirInfo) != 0)
+    {
+        // Ignore permission errors.
+        return false;
+    }
+    return S_ISDIR(dirInfo.st_mode);
+}
+
+bool FileUtils::CreateEmptyFileWithPermissions(const string &filename, mode_t permissions)
+{
+    auto fd = open(filename.c_str(), O_CREAT | O_EXCL, permissions);
+    if (-1 == fd)
+    {
+        auto errnum = errno;
+        LOGM_ERROR(
+            TAG,
+            "Failed to create empty file: %s errno: %d msg: %s",
+            Sanitize(filename).c_str(),
+            errnum,
+            strerror(errnum));
+        return false;
+    }
+    close(fd);
+    return true;
 }
 
 bool FileUtils::FileExists(const string &filename)

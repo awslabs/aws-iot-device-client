@@ -134,6 +134,21 @@ namespace Aws
                     static bool CreateDirectoryWithPermissions(const char *dirPath, mode_t permissions);
 
                     /**
+                     * \brief Check if the path exists and refers to a directory
+                     * @param dirPath the path to the directory
+                     * @return true if the path exists and is a directory, false otherwise
+                     */
+                    static bool DirectoryExists(const std::string &dirPath);
+
+                    /**
+                     * \brief Create an empty file with the given permissions
+                     * @param filename the path to the file
+                     * @param permissions the permission mask that should be applied to the file
+                     * @return true if the file was successfully created with the given permissions, false otherwise
+                     */
+                    static bool CreateEmptyFileWithPermissions(const std::string &filename, mode_t permissions);
+
+                    /**
                      * \brief Check if the given filename exists
                      *
                      * @param filename File Path to the Filename to check

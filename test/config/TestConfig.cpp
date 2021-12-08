@@ -345,7 +345,6 @@ TEST(Config, SDKLoggingConfigurationCLIDefaults)
 
     ASSERT_FALSE(config.logConfig.sdkLoggingEnabled);
     ASSERT_EQ(Aws::Crt::LogLevel::Trace, config.logConfig.sdkLogLevel);
-    ASSERT_STREQ(PlainConfig::LogConfig::DEFAULT_SDK_LOG_FILE, config.logConfig.sdkLogFile.c_str());
 }
 
 TEST(Config, SDKLoggingConfigurationCLIOverride)
@@ -386,7 +385,6 @@ TEST(Config, SDKLoggingConfigurationJsonDefaults)
 
     ASSERT_FALSE(config.logConfig.sdkLoggingEnabled);
     ASSERT_EQ(Aws::Crt::LogLevel::Trace, config.logConfig.sdkLogLevel);
-    ASSERT_STREQ(PlainConfig::LogConfig::DEFAULT_SDK_LOG_FILE, config.logConfig.sdkLogFile.c_str());
 }
 
 TEST(Config, SDKLoggingConfigurationJson)
