@@ -4,6 +4,9 @@
 #include "../../source/config/Config.h"
 #include "../../source/util/FileUtils.h"
 #include "../../source/util/UniqueString.h"
+
+#include <regex>
+
 #include "gtest/gtest.h"
 #include <aws/crt/JsonObject.h>
 #include <stdlib.h>
@@ -16,14 +19,38 @@ using namespace Aws::Iot::DeviceClient::Util;
 
 const string filePath = "/tmp/aws-iot-device-client-test-file";
 
-TEST(Config, CreateTempFile)
+class ConfigTestFixture : public ::testing::Test
 {
-    ofstream file(filePath, std::fstream::app);
-    file << "test message" << endl;
-    ASSERT_TRUE(FileUtils::FileExists(filePath));
+  public:
+    ConfigTestFixture() = default;
+
+    void SetUp() override
+    {
+        // Config::Validate will check that cert, key, and root-ca files exist.
+        // Create a temporary file to use as a placeholder for this purpose.
+        ofstream file(filePath, std::fstream::app);
+        file << "test message" << endl;
+    }
+
+    void TearDown() override { std::remove(filePath.c_str()); }
+};
+
+/**
+ * \brief Return CLI populated with a minimum set of arguments and values.
+ * @return CLIArgs
+ */
+static CliArgs makeMinimumCliArgs()
+{
+    return CliArgs{
+        {PlainConfig::CLI_ENDPOINT, "endpoint value"},
+        {PlainConfig::CLI_CERT, filePath},
+        {PlainConfig::CLI_KEY, filePath},
+        {PlainConfig::CLI_ROOT_CA, filePath},
+        {PlainConfig::CLI_THING_NAME, "thing-name value"},
+    };
 }
 
-TEST(Config, AllFeaturesEnabled)
+TEST_F(ConfigTestFixture, AllFeaturesEnabled)
 {
     constexpr char jsonString[] = R"(
 {
@@ -130,7 +157,7 @@ TEST(Config, AllFeaturesEnabled)
     ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
 }
 
-TEST(Config, HappyCaseMinimumConfig)
+TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
 {
     constexpr char jsonString[] = R"(
 {
@@ -158,14 +185,9 @@ TEST(Config, HappyCaseMinimumConfig)
     ASSERT_FALSE(config.fleetProvisioning.enabled);
 }
 
-TEST(Config, HappyCaseMinimumCli)
+TEST_F(ConfigTestFixture, HappyCaseMinimumCli)
 {
-    CliArgs cliArgs;
-    cliArgs[PlainConfig::CLI_ENDPOINT] = "endpoint value";
-    cliArgs[PlainConfig::CLI_CERT] = filePath;
-    cliArgs[PlainConfig::CLI_KEY] = filePath;
-    cliArgs[PlainConfig::CLI_ROOT_CA] = filePath;
-    cliArgs[PlainConfig::CLI_THING_NAME] = "thing-name value";
+    CliArgs cliArgs = makeMinimumCliArgs();
 
     PlainConfig config;
     config.LoadFromCliArgs(cliArgs);
@@ -182,7 +204,7 @@ TEST(Config, HappyCaseMinimumCli)
     ASSERT_FALSE(config.fleetProvisioning.enabled);
 }
 
-TEST(Config, MissingSomeSettings)
+TEST_F(ConfigTestFixture, MissingSomeSettings)
 {
     constexpr char jsonString[] = R"(
 {
@@ -206,7 +228,7 @@ TEST(Config, MissingSomeSettings)
 #endif
 }
 
-TEST(Config, SecureTunnelingMinimumConfig)
+TEST_F(ConfigTestFixture, SecureTunnelingMinimumConfig)
 {
     constexpr char jsonString[] = R"(
 {
@@ -230,7 +252,7 @@ TEST(Config, SecureTunnelingMinimumConfig)
     ASSERT_TRUE(config.tunneling.subscribeNotification);
 }
 
-TEST(Config, SecureTunnelingCli)
+TEST_F(ConfigTestFixture, SecureTunnelingCli)
 {
     constexpr char jsonString[] = R"(
 {
@@ -269,7 +291,7 @@ TEST(Config, SecureTunnelingCli)
     ASSERT_FALSE(config.tunneling.subscribeNotification);
 }
 
-TEST(Config, SecureTunnelingDisableSubscription)
+TEST_F(ConfigTestFixture, SecureTunnelingDisableSubscription)
 {
     constexpr char jsonString[] = R"(
 {
@@ -304,7 +326,7 @@ TEST(Config, SecureTunnelingDisableSubscription)
     ASSERT_EQ(22, config.tunneling.port.value());
 }
 
-TEST(Config, LoggingConfigurationCLI)
+TEST_F(ConfigTestFixture, LoggingConfigurationCLI)
 {
     constexpr char jsonString[] = R"(
 {
@@ -336,7 +358,7 @@ TEST(Config, LoggingConfigurationCLI)
     ASSERT_STREQ("./client.log", config.logConfig.deviceClientLogFile.c_str());
 }
 
-TEST(Config, SDKLoggingConfigurationCLIDefaults)
+TEST_F(ConfigTestFixture, SDKLoggingConfigurationCLIDefaults)
 {
     CliArgs cliArgs;
 
@@ -348,7 +370,7 @@ TEST(Config, SDKLoggingConfigurationCLIDefaults)
     ASSERT_STREQ(PlainConfig::LogConfig::DEFAULT_SDK_LOG_FILE, config.logConfig.sdkLogFile.c_str());
 }
 
-TEST(Config, SDKLoggingConfigurationCLIOverride)
+TEST_F(ConfigTestFixture, SDKLoggingConfigurationCLIOverride)
 {
     CliArgs cliArgs;
     cliArgs[PlainConfig::LogConfig::CLI_ENABLE_SDK_LOGGING] = "";
@@ -363,7 +385,7 @@ TEST(Config, SDKLoggingConfigurationCLIOverride)
     ASSERT_STREQ("./sdk.log", config.logConfig.sdkLogFile.c_str());
 }
 
-TEST(Config, SDKLoggingConfigurationJsonDefaults)
+TEST_F(ConfigTestFixture, SDKLoggingConfigurationJsonDefaults)
 {
     constexpr char jsonString[] = R"(
 {
@@ -389,7 +411,7 @@ TEST(Config, SDKLoggingConfigurationJsonDefaults)
     ASSERT_STREQ(PlainConfig::LogConfig::DEFAULT_SDK_LOG_FILE, config.logConfig.sdkLogFile.c_str());
 }
 
-TEST(Config, SDKLoggingConfigurationJson)
+TEST_F(ConfigTestFixture, SDKLoggingConfigurationJson)
 {
     constexpr char jsonString[] = R"(
 {
@@ -423,7 +445,7 @@ TEST(Config, SDKLoggingConfigurationJson)
     ASSERT_STREQ("device-client.log", config.logConfig.deviceClientLogFile.c_str());
 }
 
-TEST(Config, FleetProvisioningMinimumConfig)
+TEST_F(ConfigTestFixture, FleetProvisioningMinimumConfig)
 {
     constexpr char jsonString[] = R"(
 {
@@ -448,7 +470,7 @@ TEST(Config, FleetProvisioningMinimumConfig)
     ASSERT_STREQ("template-name", config.fleetProvisioning.templateName->c_str());
 }
 
-TEST(Config, MissingFleetProvisioningConfig)
+TEST_F(ConfigTestFixture, MissingFleetProvisioningConfig)
 {
     constexpr char jsonString[] = R"(
 {
@@ -480,7 +502,7 @@ TEST(Config, MissingFleetProvisioningConfig)
 #endif
 }
 
-TEST(Config, FleetProvisioningCli)
+TEST_F(ConfigTestFixture, FleetProvisioningCli)
 {
     constexpr char jsonString[] = R"(
 {
@@ -519,7 +541,7 @@ TEST(Config, FleetProvisioningCli)
     ASSERT_STREQ(filePath.c_str(), config.fleetProvisioning.deviceKey->c_str());
 }
 
-TEST(Config, DeviceDefenderCli)
+TEST_F(ConfigTestFixture, DeviceDefenderCli)
 {
     constexpr char jsonString[] = R"(
 {
@@ -548,39 +570,60 @@ TEST(Config, DeviceDefenderCli)
     ASSERT_EQ(6, config.deviceDefender.interval);
 }
 
-TEST(Config, PubSubSampleCli)
+TEST_F(ConfigTestFixture, PubSubSampleConfig)
 {
     string samplesFilePath = "/tmp/" + UniqueString::GetRandomToken(10);
     FileUtils::StoreValueInFile("Test", samplesFilePath);
     chmod(samplesFilePath.c_str(), 0600);
-    constexpr char jsonString[] = R"(
+    auto jsonTemplate = R"(
 {
 	"endpoint": "endpoint value",
 	"cert": "/tmp/aws-iot-device-client-test-file",
 	"key": "/tmp/aws-iot-device-client-test-file",
 	"root-ca": "/tmp/aws-iot-device-client-test-file",
 	"thing-name": "thing-name value",
-    "samples": {
+	"samples": {
 		"pub-sub": {
 			"enabled": true,
 			"publish-topic": "publish_topic",
-			"publish-file": "/tmp/file",
+			"publish-file": "{samplesFilePath}",
 			"subscribe-topic": "subscribe_topic",
-			"subscribe-file": "/tmp/file"
+			"subscribe-file": "{samplesFilePath}"
 		}
 	}
 })";
-    JsonObject jsonObject(jsonString);
+    auto pattern = regex{R"(\{samplesFilePath\})"};
+    auto jsonString = regex_replace(jsonTemplate, pattern, samplesFilePath);
+
+    JsonObject jsonObject(jsonString.c_str());
     JsonView jsonView = jsonObject.View();
 
-    CliArgs cliArgs;
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_TRUE(config.pubSub.enabled);
+    ASSERT_STREQ("publish_topic", config.pubSub.publishTopic->c_str());
+    ASSERT_STREQ(samplesFilePath.c_str(), config.pubSub.publishFile->c_str());
+    ASSERT_STREQ("subscribe_topic", config.pubSub.subscribeTopic->c_str());
+    ASSERT_STREQ(samplesFilePath.c_str(), config.pubSub.subscribeFile->c_str());
+    remove(samplesFilePath.c_str());
+}
+
+TEST_F(ConfigTestFixture, PubSubSampleCli)
+{
+    string samplesFilePath = "/tmp/" + UniqueString::GetRandomToken(10);
+    FileUtils::StoreValueInFile("Test", samplesFilePath);
+    chmod(samplesFilePath.c_str(), 0600);
+
+    CliArgs cliArgs = makeMinimumCliArgs();
+    cliArgs[PlainConfig::PubSub::CLI_ENABLE_PUB_SUB] = "true";
     cliArgs[PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_TOPIC] = "publish_topic";
     cliArgs[PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE] = samplesFilePath;
     cliArgs[PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC] = "subscribe_topic";
     cliArgs[PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE] = samplesFilePath;
 
     PlainConfig config;
-    config.LoadFromJson(jsonView);
     config.LoadFromCliArgs(cliArgs);
 
     ASSERT_TRUE(config.Validate());
@@ -592,7 +635,7 @@ TEST(Config, PubSubSampleCli)
     remove(samplesFilePath.c_str());
 }
 
-TEST(Config, SampleShadowCli)
+TEST_F(ConfigTestFixture, SampleShadowCli)
 {
     string inputFilePath = "/tmp/inputFile";
     FileUtils::StoreValueInFile("Test", inputFilePath);
@@ -634,10 +677,4 @@ TEST(Config, SampleShadowCli)
     ASSERT_STREQ(outputFilePath.c_str(), config.sampleShadow.shadowOutputFile->c_str());
     remove(inputFilePath.c_str());
     remove(outputFilePath.c_str());
-}
-
-TEST(Config, DeleteTempFile)
-{
-    std::remove(filePath.c_str());
-    ASSERT_FALSE(FileUtils::FileExists(filePath));
 }
