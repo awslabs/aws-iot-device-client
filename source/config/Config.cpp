@@ -1761,10 +1761,10 @@ bool Config::ExportDefaultSetting(const string &file)
     "%s": {
         "%s": "DEBUG",
         "%s": "FILE",
-        "%s": "/var/log/aws-iot-device-client/aws-iot-device-client.log",
+        "%s": "%s",
         "%s": false,
         "%s": "TRACE",
-        "%s": "/var/log/aws-iot-device-client/sdk.log"
+        "%s": "%s"
     },
     "%s": {
         "%s": true,
@@ -1803,6 +1803,7 @@ bool Config::ExportDefaultSetting(const string &file)
     }
 }
 )";
+
     ofstream clientConfig(file);
     if (!clientConfig.is_open())
     {
@@ -1820,9 +1821,11 @@ bool Config::ExportDefaultSetting(const string &file)
         PlainConfig::LogConfig::JSON_KEY_LOG_LEVEL,
         PlainConfig::LogConfig::JSON_KEY_LOG_TYPE,
         PlainConfig::LogConfig::JSON_KEY_LOG_FILE,
+        FileLogger::DEFAULT_LOG_FILE,
         PlainConfig::LogConfig::JSON_KEY_ENABLE_SDK_LOGGING,
         PlainConfig::LogConfig::JSON_KEY_SDK_LOG_LEVEL,
         PlainConfig::LogConfig::JSON_KEY_SDK_LOG_FILE,
+        SharedCrtResourceManager::DEFAULT_SDK_LOG_FILE,
         PlainConfig::JSON_KEY_JOBS,
         PlainConfig::Jobs::JSON_KEY_ENABLED,
         PlainConfig::Jobs::JSON_KEY_HANDLER_DIR,

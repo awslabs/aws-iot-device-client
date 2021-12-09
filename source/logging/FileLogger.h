@@ -28,14 +28,6 @@ namespace Aws
                 {
                   private:
                     /**
-                     * \brief The full path to the default log file for the Device Client
-                     *
-                     * If the user does not specify a desired log location in either the command line arguments
-                     * or the Json configuration file, this is the default log that will be used
-                     */
-                    std::string DEFAULT_LOG_FILE = "/var/log/aws-iot-device-client/aws-iot-device-client.log";
-
-                    /**
                      * \brief Runtime configuration for which log file to log to.
                      */
                     std::string logFile = DEFAULT_LOG_FILE;
@@ -97,6 +89,15 @@ namespace Aws
                         std::string message) override;
 
                   public:
+                    /**
+                     * \brief The full path to the default log file for the Device Client
+                     *
+                     * If the user does not specify a desired log location in either the command line arguments
+                     * or the Json configuration file, this is the default log that will be used
+                     */
+                    static constexpr char DEFAULT_LOG_FILE[] =
+                        "/var/log/aws-iot-device-client/aws-iot-device-client.log";
+
                     virtual bool start(const PlainConfig &config) override;
 
                     virtual void stop() override;

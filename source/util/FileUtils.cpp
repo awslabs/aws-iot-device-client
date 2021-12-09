@@ -305,8 +305,9 @@ bool FileUtils::CreateDirectoryWithPermissions(const char *dirPath, mode_t permi
 
 bool FileUtils::DirectoryExists(const std::string &dirPath)
 {
+    auto expandedDirPath = ExtractExpandedPath(dirPath);
     struct stat dirInfo;
-    if (stat(dirPath.c_str(), &dirInfo) != 0)
+    if (stat(expandedDirPath.c_str(), &dirInfo) != 0)
     {
         // Ignore permission errors.
         return false;
@@ -316,14 +317,15 @@ bool FileUtils::DirectoryExists(const std::string &dirPath)
 
 bool FileUtils::CreateEmptyFileWithPermissions(const string &filename, mode_t permissions)
 {
-    auto fd = open(filename.c_str(), O_CREAT | O_EXCL, permissions);
+    auto expandedFilename = ExtractExpandedPath(filename);
+    auto fd = open(expandedFilename.c_str(), O_CREAT | O_EXCL, permissions);
     if (-1 == fd)
     {
         auto errnum = errno;
         LOGM_ERROR(
             TAG,
             "Failed to create empty file: %s errno: %d msg: %s",
-            Sanitize(filename).c_str(),
+            Sanitize(expandedFilename).c_str(),
             errnum,
             strerror(errnum));
         return false;
