@@ -15,6 +15,7 @@ using namespace Aws::Iot::DeviceClient::Logging;
 using namespace Aws::Iot::DeviceClient::Util;
 
 constexpr int FileLogger::DEFAULT_WAIT_TIME_MILLISECONDS;
+constexpr char FileLogger::DEFAULT_LOG_FILE[];
 
 bool FileLogger::start(const PlainConfig &config)
 {

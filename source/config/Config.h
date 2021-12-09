@@ -120,14 +120,13 @@ namespace Aws
                     static constexpr char JSON_KEY_SDK_LOG_LEVEL[] = "sdk-log-level";
                     static constexpr char JSON_KEY_SDK_LOG_FILE[] = "sdk-log-file";
 
-                    static constexpr char DEFAULT_SDK_LOG_FILE[] = "/var/log/aws-iot-device-client/sdk.log";
-
                     int deviceClientlogLevel{3};
                     std::string deviceClientLogtype;
                     std::string deviceClientLogFile;
+
                     bool sdkLoggingEnabled = false;
                     Aws::Crt::LogLevel sdkLogLevel = Aws::Crt::LogLevel::Trace;
-                    std::string sdkLogFile = DEFAULT_SDK_LOG_FILE;
+                    std::string sdkLogFile;
                 };
                 LogConfig logConfig;
 
