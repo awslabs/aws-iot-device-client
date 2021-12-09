@@ -1455,6 +1455,12 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE, true, false, nullptr},
         {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY, true, false, nullptr},
 
+        {PlainConfig::PubSub::CLI_ENABLE_PUB_SUB, true, false, nullptr},
+        {PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_TOPIC, true, false, nullptr},
+        {PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE, true, false, nullptr},
+        {PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC, true, false, nullptr},
+        {PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE, true, false, nullptr},
+
         {PlainConfig::SampleShadow::CLI_ENABLE_SAMPLE_SHADOW, true, false, nullptr},
         {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME, true, false, nullptr},
         {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE, true, false, nullptr},
