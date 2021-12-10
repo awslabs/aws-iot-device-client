@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
     if (envUtils.AppendCwdToPath())
     {
         // Failure to append current working directory is not a fatal error,
-        // but some features of device client such as standard job execution
+        // but some features of device client such as standard job action
         // might not work without explicitly setting path to handler in job document.
         LOG_WARN(TAG, "Unable to append current working directory to PATH environment variable.");
     }

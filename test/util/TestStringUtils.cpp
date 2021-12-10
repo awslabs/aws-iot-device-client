@@ -69,3 +69,45 @@ TEST(StringUtils, emptyMaptoString)
     string expected = "";
     ASSERT_STREQ(expected.c_str(), MapToString(map).c_str());
 }
+
+TEST(StringUtils, trimLeftSingleChar)
+{
+    ASSERT_EQ("a/b/c/", TrimLeftCopy("/a/b/c/", "/")); // Match.
+    ASSERT_EQ("a/b/c/", TrimLeftCopy("a/b/c/", "/"));  // No match.
+    ASSERT_EQ("", TrimLeftCopy("", "/"));              // Empty string.
+}
+
+TEST(StringUtils, trimLeftMultiChar)
+{
+    ASSERT_EQ("c/", TrimLeftCopy("/a/b/c/", "/ab"));   // Match.
+    ASSERT_EQ("/a/b/c", TrimLeftCopy("/a/b/c", "ab")); // No match.
+    ASSERT_EQ("", TrimLeftCopy("", "/"));              // Empty string.
+}
+
+TEST(StringUtils, trimRightSingleChar)
+{
+    ASSERT_EQ("/a/b/c", TrimRightCopy("/a/b/c/", "/")); // Match.
+    ASSERT_EQ("/a/b/c", TrimRightCopy("/a/b/c", "/"));  // No match.
+    ASSERT_EQ("", TrimRightCopy("", "/"));              // Empty string.
+}
+
+TEST(StringUtils, trimRightMultiChar)
+{
+    ASSERT_EQ("/a", TrimRightCopy("/a/b/c/", "/bc"));     // Match.
+    ASSERT_EQ("/a/b/c/", TrimRightCopy("/a/b/c/", "bc")); // No match.
+    ASSERT_EQ("", TrimRightCopy("", "/"));                // Empty string.
+}
+
+TEST(StringUtils, trimSingleChar)
+{
+    ASSERT_EQ("a/b/c", TrimCopy("/a/b/c/", "/")); // Match.
+    ASSERT_EQ("a/b/c", TrimCopy("a/b/c", "/"));   // No match.
+    ASSERT_EQ("", TrimCopy("", "/"));             // Empty string.
+}
+
+TEST(StringUtils, trimMultiChar)
+{
+    ASSERT_EQ("b", TrimCopy("/a/b/c/", "/ac"));      // Match.
+    ASSERT_EQ("/a/b/c/", TrimCopy("/a/b/c/", "ac")); // No match.
+    ASSERT_EQ("", TrimCopy("", "/"));                // Empty string.
+}

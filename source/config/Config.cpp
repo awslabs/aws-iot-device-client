@@ -1855,3 +1855,13 @@ bool Config::ExportDefaultSetting(const string &file)
     FileUtils::ValidateFilePermissions(file.c_str(), Permissions::CONFIG_FILE, false);
     return true;
 }
+
+string Config::ExpandDefaultConfigDir(bool removeTrailingSeparator)
+{
+    string expandedConfigDir = FileUtils::ExtractExpandedPath(DEFAULT_CONFIG_DIR);
+    if (removeTrailingSeparator)
+    {
+        return Util::TrimRightCopy(expandedConfigDir, string{Config::PATH_DIRECTORY_SEPARATOR});
+    }
+    return expandedConfigDir;
+}

@@ -31,7 +31,7 @@ namespace Aws
                 struct OSInterfacePosix : public OSInterface
                 {
                     /**
-                     * \brief Get get value of an environment variable.
+                     * \brief Get value of an environment variable.
                      * @param name Environment variable name
                      * @return Pointer to environment variable value or nullptr
                      */

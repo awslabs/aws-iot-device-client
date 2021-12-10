@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "EnvUtils.h"
+#include "../config/Config.h"
 #include "../logging/LoggerFactory.h"
+#include "FileUtils.h"
+#include "StringUtils.h"
 
 #include <cerrno>
 #include <cstdlib>
@@ -70,7 +73,11 @@ int EnvUtils::AppendCwdToPath()
         cwd.resize(path_max + 1, '\0');
     }
 
+    // Limit the number of times we resize the buffer to avoid infinite loop.
+    static constexpr const int maxCountResizes = 3;
+
     char *pcwd = nullptr;
+    int countResizes = 0;
     while (!pcwd)
     {
         pcwd = os->getcwd(cwd.data(), cwd.size() - 1); // Leave room for terminating null.
@@ -78,7 +85,20 @@ int EnvUtils::AppendCwdToPath()
         {
             if (errno == ERANGE)
             {
-                cwd.resize(cwd.size() * 2, '\0');
+                if (countResizes++ < maxCountResizes)
+                {
+                    cwd.resize(cwd.size() * 2, '\0');
+                }
+                else
+                {
+                    LOGM_ERROR(
+                        TAG,
+                        "Current working directory requires more than %d bytes. Skip update to %s environment "
+                        "variable.",
+                        cwd.size(),
+                        PATH_ENVIRONMENT);
+                    return ENAMETOOLONG;
+                }
             }
             else
             {
@@ -99,9 +119,18 @@ int EnvUtils::AppendCwdToPath()
     {
         oss << PATH_ENVIRONMENT_SEPARATOR;
     }
-    oss << cwd.data() // Current working directory.
-        << PATH_ENVIRONMENT_SEPARATOR << cwd.data() << PATH_DIRECTORY_SEPARATOR
-        << JOBS_DIRECTORY_NAME; // Jobs subdirectory.
+
+    // Copy of default config directory with trailing separator removed.
+    std::string defaultConfigDir = Config::ExpandDefaultConfigDir(true);
+
+    // Default config directory.
+    oss << defaultConfigDir;
+    // Jobs subdirectory of default config directory.
+    oss << PATH_ENVIRONMENT_SEPARATOR << defaultConfigDir << PATH_DIRECTORY_SEPARATOR << JOBS_DIRECTORY_NAME;
+    // Current working directory.
+    oss << PATH_ENVIRONMENT_SEPARATOR << cwd.data();
+    // Jobs subdirectory of current working directory.
+    oss << PATH_ENVIRONMENT_SEPARATOR << cwd.data() << PATH_DIRECTORY_SEPARATOR << JOBS_DIRECTORY_NAME;
 
     // Overwrite path environment variable.
     const std::string &newpath = oss.str();
