@@ -20,6 +20,7 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr int SharedCrtResourceManager::DEFAULT_WAIT_TIME_SECONDS;
+constexpr char SharedCrtResourceManager::DEFAULT_SDK_LOG_FILE[];
 
 bool SharedCrtResourceManager::initialize(const PlainConfig &config, vector<Feature *> *featuresList)
 {
@@ -85,6 +86,71 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     return locatedAll;
 }
 
+bool SharedCrtResourceManager::setupLogging(const PlainConfig &config)
+{
+    // Absolute path to the sdk log file.
+    std::string logFilePath{DEFAULT_SDK_LOG_FILE};
+    if (!config.logConfig.sdkLogFile.empty())
+    {
+        logFilePath = config.logConfig.sdkLogFile;
+    }
+
+    std::string logFileDir = FileUtils::ExtractParentDirectory(logFilePath);
+    if (!FileUtils::DirectoryExists(logFileDir))
+    {
+        // Create an empty directory with the expected permissions.
+        if (!FileUtils::CreateDirectoryWithPermissions(logFileDir.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        // Verify the directory permissions.
+        auto rcvDirPermissions = FileUtils::GetFilePermissions(logFileDir);
+        if (Permissions::LOG_DIR != rcvDirPermissions)
+        {
+            LOGM_ERROR(
+                TAG,
+                "Incorrect directory permissions for SDK log file: %s expected: %d received: %d",
+                Sanitize(logFileDir).c_str(),
+                Permissions::LOG_DIR,
+                rcvDirPermissions);
+            return false;
+        }
+    }
+
+    if (!FileUtils::FileExists(logFilePath))
+    {
+        // Create an empty file with the expected permissions.
+        if (!FileUtils::CreateEmptyFileWithPermissions(logFilePath, S_IRUSR | S_IWUSR))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        // Verify the file permissions.
+        auto rcvFilePermissions = FileUtils::GetFilePermissions(logFilePath);
+        if (Permissions::LOG_FILE != rcvFilePermissions)
+        {
+            LOGM_ERROR(
+                TAG,
+                "Incorrect file permissions for SDK log file: %s expected: %d received: %d",
+                Sanitize(logFilePath).c_str(),
+                Permissions::LOG_FILE,
+                rcvFilePermissions);
+            return false;
+        }
+    }
+
+    // Configure the SDK with the log file path.
+    apiHandle->InitializeLogging(config.logConfig.sdkLogLevel, logFilePath.c_str());
+    LOGM_INFO(TAG, "SDK logging is enabled. Check %s for SDK logs.", Sanitize(logFilePath).c_str());
+
+    return true;
+}
+
 void SharedCrtResourceManager::initializeAllocator()
 {
     allocator = aws_mem_tracer_new(aws_default_allocator(), nullptr, AWS_MEMTRACE_BYTES, 0);
@@ -97,8 +163,10 @@ int SharedCrtResourceManager::buildClient(const PlainConfig &config)
     apiHandle = unique_ptr<ApiHandle>(new ApiHandle());
     if (config.logConfig.sdkLoggingEnabled)
     {
-        apiHandle->InitializeLogging(config.logConfig.sdkLogLevel, config.logConfig.sdkLogFile.c_str());
-        LOGM_INFO(TAG, "SDK logging is enabled. Check %s for SDK logs.", Sanitize(config.logConfig.sdkLogFile).c_str());
+        if (!setupLogging(config))
+        {
+            return SharedCrtResourceManager::ABORT;
+        }
     }
     else
     {
