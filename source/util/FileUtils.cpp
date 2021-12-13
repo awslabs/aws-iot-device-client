@@ -61,7 +61,8 @@ string FileUtils::ExtractParentDirectory(const string &filePath)
 
 string FileUtils::ExtractExpandedPath(const string &filePath)
 {
-    if (filePath.empty()) {
+    if (filePath.empty())
+    {
         return "";
     }
     wordexp_t word;
