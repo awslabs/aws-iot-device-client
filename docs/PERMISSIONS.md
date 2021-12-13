@@ -34,6 +34,7 @@ Directory Storing Root Certificate Authority | 700 | **Yes**
 Directory Storing CSR File  | 700 | **Yes**
 Directory Storing Log File  | 745 | **Yes**
 Directory Storing Config Files | 745 | **Recommended**
+Directory Storing PubSub File  | 745 | **Yes**
 
 *Note: It is worth noting here that files are directories storing these files created by AWS IoT Device Client will have the above mentioned permissions set by default*
 

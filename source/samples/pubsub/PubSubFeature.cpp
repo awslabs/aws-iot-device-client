@@ -3,11 +3,13 @@
 
 #include "PubSubFeature.h"
 #include "../../logging/LoggerFactory.h"
+#include "../../util/FileUtils.h"
 
 #include <aws/common/byte_buf.h>
 #include <aws/crt/Api.h>
 #include <aws/iotdevicecommon/IotDevice.h>
 #include <iostream>
+#include <sys/stat.h>
 
 #include <utility>
 
@@ -22,12 +24,62 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char PubSubFeature::TAG[];
+constexpr char PubSubFeature::DEFAULT_PUBLISH_FILE[];
+constexpr char PubSubFeature::DEFAULT_SUBSCRIBE_FILE[];
 
 #define MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES 128000
 
 string PubSubFeature::getName()
 {
     return "Pub Sub Sample";
+}
+
+bool PubSubFeature::createPubSub(const PlainConfig &config, std::string absFilePath)
+{
+    std::string pubFileDir = FileUtils::ExtractParentDirectory(absFilePath);
+    if (!FileUtils::DirectoryExists(pubFileDir))
+    {
+        // Create an empty directory with the expected permissions.
+        FileUtils::CreateDirectoryWithPermissions(pubFileDir.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH);
+    }
+    else
+    {
+        // Verify the directory permissions.
+        auto rcvDirPermissions = FileUtils::GetFilePermissions(pubFileDir);
+        if (Permissions::PUBSUB_DIR != rcvDirPermissions)
+        {
+            LOGM_ERROR(
+                TAG,
+                "Incorrect directory permissions for pubsub file: %s expected: %d received: %d",
+                Sanitize(pubFileDir).c_str(),
+                Permissions::PUBSUB_DIR,
+                rcvDirPermissions);
+            return false;
+        }
+    }
+
+    if (!FileUtils::FileExists(absFilePath))
+    {
+        // Create an empty file with the expected permissions.
+        FileUtils::CreateEmptyFileWithPermissions(absFilePath, S_IRUSR | S_IWUSR);
+    }
+    else
+    {
+        // Verify the file permissions.
+        auto rcvFilePermissions = FileUtils::GetFilePermissions(absFilePath);
+        if (Permissions::PUB_SUB_FILES != rcvFilePermissions)
+        {
+            LOGM_ERROR(
+                TAG,
+                "Incorrect file permissions for pubsub file: %s expected: %d received: %d",
+                Sanitize(absFilePath).c_str(),
+                Permissions::PUB_SUB_FILES,
+                rcvFilePermissions);
+            return false;
+        }
+    }
+
+    return true;
 }
 
 int PubSubFeature::init(
@@ -40,8 +92,26 @@ int PubSubFeature::init(
     thingName = *config.thingName;
     pubTopic = config.pubSub.publishTopic.value();
     subTopic = config.pubSub.subscribeTopic.value();
-    pubFile = config.pubSub.publishFile.has_value() ? config.pubSub.publishFile.value() : "";
-    subFile = config.pubSub.subscribeFile.has_value() ? config.pubSub.subscribeFile.value() : "";
+
+    if (!config.pubSub.publishFile->empty())
+    {
+        pubFile = config.pubSub.publishFile->c_str();
+    }
+
+    if (!createPubSub(config, pubFile))
+    {
+        LOG_ERROR(TAG, "Failed to create publish directory or file");
+    }
+
+    if (!config.pubSub.subscribeFile->empty())
+    {
+        subFile = config.pubSub.subscribeFile->c_str();
+    }
+
+    if (!createPubSub(config, subFile))
+    {
+        LOG_ERROR(TAG, "Failed to create subscribe directory or file");
+    }
 
     return AWS_OP_SUCCESS;
 }
@@ -83,7 +153,8 @@ void PubSubFeature::publishFileData()
         LOG_ERROR(TAG, "Failed to read publish file... Skipping publish");
         return;
     }
-    auto onPublishComplete = [payload, this](Mqtt::MqttConnection &, uint16_t packetId, int errorCode) mutable {
+    auto onPublishComplete = [payload, this](Mqtt::MqttConnection &, uint16_t packetId, int errorCode) mutable
+    {
         LOGM_DEBUG(TAG, "PublishCompAck: PacketId:(%u), ErrorCode:%i", getName().c_str(), errorCode);
         aws_byte_buf_clean_up_secure(&payload);
     };
@@ -96,10 +167,10 @@ int PubSubFeature::start()
     LOGM_INFO(TAG, "Starting %s", getName().c_str());
 
     auto onSubAck =
-        [&](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void {
-        LOGM_DEBUG(TAG, "SubAck: PacketId:(%u), ErrorCode:%i", getName().c_str(), errorCode);
-    };
-    auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void {
+        [&](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void
+    { LOGM_DEBUG(TAG, "SubAck: PacketId:(%u), ErrorCode:%i", getName().c_str(), errorCode); };
+    auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void
+    {
         LOGM_DEBUG(TAG, "Message received on subscribe topic, size: %zu bytes", payload.len);
         if (string((char *)payload.buffer) == PUBLISH_TRIGGER_PAYLOAD)
         {
@@ -126,9 +197,8 @@ int PubSubFeature::start()
 
 int PubSubFeature::stop()
 {
-    auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void {
-        LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%u, ErrorCode:%i", packetId, errorCode);
-    };
+    auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void
+    { LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%u, ErrorCode:%i", packetId, errorCode); };
 
     resourceManager->getConnection()->Unsubscribe(subTopic.c_str(), onUnsubscribe);
     baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);

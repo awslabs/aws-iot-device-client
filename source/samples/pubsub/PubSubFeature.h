@@ -29,6 +29,10 @@ namespace Aws
                 class PubSubFeature : public Feature
                 {
                   public:
+                    static constexpr char DEFAULT_PUBLISH_FILE[] = "~/.aws-iot-device-client/pubsub/publish-file.txt";
+                    static constexpr char DEFAULT_SUBSCRIBE_FILE[] =
+                        "~/.aws-iot-device-client/pubsub/subscribe-file.txt";
+                    bool createPubSub(const PlainConfig &config, std::string absFilePath);
                     /**
                      * \brief Initializes the PubSub feature with all the required setup information, event
                      * handlers, and the SharedCrtResourceManager
@@ -73,7 +77,7 @@ namespace Aws
                     /**
                      * \brief Location of file containing data to publish
                      */
-                    std::string pubFile;
+                    std::string pubFile = DEFAULT_PUBLISH_FILE;
                     /**
                      * \brief Topic to subscribe to
                      */
@@ -81,8 +85,7 @@ namespace Aws
                     /**
                      * \brief Topic to write subscription payloads to
                      */
-                    std::string subFile;
-
+                    std::string subFile = DEFAULT_SUBSCRIBE_FILE;
                     /**
                      * \brief Default payload if no publish file was provided
                      */
