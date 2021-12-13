@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "JobEngine.h"
+#include "../config/Config.h"
 #include "../logging/LoggerFactory.h"
 
 #include <array>
@@ -91,6 +92,10 @@ string JobEngine::buildCommand(Optional<string> path, std::string handler, std::
             TAG, "Using DC default command path {%s} for command execution", Util::Sanitize(jobHandlerDir).c_str());
         operationOwnedByDeviceClient = true;
         commandStream << jobHandlerDir;
+        if (jobHandlerDir.back() != Config::PATH_DIRECTORY_SEPARATOR)
+        {
+            commandStream << Config::PATH_DIRECTORY_SEPARATOR;
+        }
     }
     else if (path.has_value() && !path.value().empty())
     {
@@ -99,16 +104,14 @@ string JobEngine::buildCommand(Optional<string> path, std::string handler, std::
             "Using path {%s} supplied by job document for command execution",
             Util::Sanitize(path.value()).c_str());
         commandStream << path.value();
+        if (path.value().back() != Config::PATH_DIRECTORY_SEPARATOR)
+        {
+            commandStream << Config::PATH_DIRECTORY_SEPARATOR;
+        }
     }
     else
     {
         LOG_DEBUG(TAG, "Assuming executable is in PATH");
-    }
-
-    constexpr char separator = '/';
-    if (path.value().back() != separator)
-    {
-        commandStream << separator;
     }
 
     commandStream << handler.c_str();
