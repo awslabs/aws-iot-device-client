@@ -613,19 +613,9 @@ bool PlainConfig::Jobs::LoadFromJson(const Crt::JsonView &json)
     }
 
     jsonKey = JSON_KEY_HANDLER_DIR;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
-        if (!json.GetString(jsonKey).empty())
-        {
-            handlerDir = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
-        }
-        else
-        {
-            LOGM_WARN(
-                Config::TAG,
-                "Jobs Handler Directory path {%s} was provided in the JSON configuration file with an empty value",
-                jsonKey);
-        }
+        handlerDir = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
 
     return true;
