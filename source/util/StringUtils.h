@@ -50,6 +50,7 @@ namespace Aws
                  */
 
                 std::string addString(Aws::Crt::String first, Aws::Crt::String second);
+
                 /**
                  * \brief Given an input map object, will return the string form of the map
                  *
@@ -57,6 +58,30 @@ namespace Aws
                  * @return string form of map
                  */
                 std::string MapToString(Crt::Optional<Crt::Map<Aws::Crt::String, Aws::Crt::String>>);
+
+                /**
+                 * \brief Return a copy of the string with the leftmost characters from a set removed.
+                 * @param s Input string
+                 * @param any Set of characters removed
+                 * @return string with leftmost characters removed
+                 */
+                std::string TrimLeftCopy(std::string s, const std::string &any);
+
+                /**
+                 * \brief Return a copy of the string with the rightmost characters from a set removed.
+                 * @param s Input string
+                 * @param any Set of characters removed
+                 * @return string with rightmost characters removed
+                 */
+                std::string TrimRightCopy(std::string s, const std::string &any);
+
+                /**
+                 * \brief Return a copy of the string with the leftmost and rightmost characters from a set removed.
+                 * @param s Input string
+                 * @param any Set of characters removed
+                 * @return string with leftmost and rightmost characters removed
+                 */
+                std::string TrimCopy(std::string s, const std::string &any);
             } // namespace Util
         }     // namespace DeviceClient
     }         // namespace Iot
