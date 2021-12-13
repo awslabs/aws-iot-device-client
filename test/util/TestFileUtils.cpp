@@ -56,6 +56,18 @@ TEST(FileUtils, handlesEmptyPath)
     ASSERT_STREQ("./", parentDir.c_str());
 }
 
+TEST(FileUtils, handlesRootDir)
+{
+    string rootDir = FileUtils::ExtractParentDirectory("/");
+    ASSERT_STREQ("/", rootDir.c_str());
+}
+
+TEST(FileUtils, handlesEmptyPathToExtractExpandedPath)
+{
+    string extendedPath = FileUtils::ExtractExpandedPath("");
+    ASSERT_STREQ("", extendedPath.c_str());
+}
+
 TEST(FileUtils, handlesEmptyPathForStoreValueInFile)
 {
     ASSERT_FALSE(FileUtils::StoreValueInFile("", ""));
@@ -65,11 +77,6 @@ TEST(FileUtils, testStoreValueInFile)
 {
     ASSERT_TRUE(FileUtils::StoreValueInFile(
         "This file was created as part of testStoreValueInFile unit test.", "/tmp/testStoreValueInFile.txt"));
-}
-TEST(FileUtils, handlesRootDir)
-{
-    string rootDir = FileUtils::ExtractParentDirectory("/");
-    ASSERT_STREQ("/", rootDir.c_str());
 }
 
 TEST(FileUtils, assertsCorrectFilePermissions)

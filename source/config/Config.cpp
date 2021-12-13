@@ -613,7 +613,7 @@ bool PlainConfig::Jobs::LoadFromJson(const Crt::JsonView &json)
     }
 
     jsonKey = JSON_KEY_HANDLER_DIR;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
         handlerDir = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
