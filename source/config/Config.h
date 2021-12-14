@@ -339,6 +339,17 @@ namespace Aws
                 bool ParseConfigFile(const std::string &file, bool isRuntimeConfig);
                 bool init(const CliArgs &cliArgs);
 
+                /**
+                 * \brief Separator between directories in path.
+                 */
+                static constexpr char PATH_DIRECTORY_SEPARATOR = '/';
+
+                /**
+                 * \brief Use path expansion to return absolute path to device client default configuration directory.
+                 * @return
+                 */
+                static std::string ExpandDefaultConfigDir(bool removeTrailingSeparator = false);
+
                 PlainConfig config;
 
               private:

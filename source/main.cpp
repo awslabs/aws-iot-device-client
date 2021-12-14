@@ -6,6 +6,7 @@
 #include "SharedCrtResourceManager.h"
 #include "Version.h"
 #include "config/Config.h"
+#include "util/EnvUtils.h"
 #include "util/Retry.h"
 
 #if !defined(EXCLUDE_DD)
@@ -264,6 +265,15 @@ int main(int argc, char *argv[])
         // We attempted to start a non-stdout logger and failed, so we should fall back to STDOUT
         config.config.logConfig.deviceClientLogtype = config.config.logConfig.LOG_TYPE_STDOUT;
         LoggerFactory::reconfigure(config.config);
+    }
+
+    EnvUtils envUtils;
+    if (envUtils.AppendCwdToPath())
+    {
+        // Failure to append current working directory is not a fatal error,
+        // but some features of device client such as standard job action
+        // might not work without explicitly setting path to handler in job document.
+        LOG_WARN(TAG, "Unable to append current working directory to PATH environment variable.");
     }
 
     LOGM_INFO(

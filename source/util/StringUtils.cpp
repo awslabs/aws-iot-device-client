@@ -87,6 +87,17 @@ namespace Aws
                     result.erase(remove(result.begin(), result.end(), '\0'), result.end());
                     return result;
                 }
+
+                string TrimLeftCopy(string s, const string &any) { return s.erase(0, s.find_first_not_of(any)); }
+
+                string TrimRightCopy(string s, const string &any) { return s.erase(s.find_last_not_of(any) + 1); }
+
+                string TrimCopy(string s, const string &any)
+                {
+                    s.erase(0, s.find_first_not_of(any));
+                    s.erase(s.find_last_not_of(any) + 1);
+                    return s;
+                }
             } // namespace Util
         }     // namespace DeviceClient
     }         // namespace Iot

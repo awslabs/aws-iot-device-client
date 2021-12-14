@@ -613,7 +613,7 @@ bool PlainConfig::Jobs::LoadFromJson(const Crt::JsonView &json)
     }
 
     jsonKey = JSON_KEY_HANDLER_DIR;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
         handlerDir = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
@@ -1841,4 +1841,14 @@ bool Config::ExportDefaultSetting(const string &file)
     chmod(file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     FileUtils::ValidateFilePermissions(file.c_str(), Permissions::CONFIG_FILE, false);
     return true;
+}
+
+string Config::ExpandDefaultConfigDir(bool removeTrailingSeparator)
+{
+    string expandedConfigDir = FileUtils::ExtractExpandedPath(DEFAULT_CONFIG_DIR);
+    if (removeTrailingSeparator)
+    {
+        return Util::TrimRightCopy(expandedConfigDir, string{Config::PATH_DIRECTORY_SEPARATOR});
+    }
+    return expandedConfigDir;
 }
