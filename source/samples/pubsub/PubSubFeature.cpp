@@ -34,45 +34,53 @@ string PubSubFeature::getName()
     return "Pub Sub Sample";
 }
 
-bool PubSubFeature::createPubSub(const PlainConfig &config, std::string absFilePath)
+bool PubSubFeature::createPubSub(const PlainConfig &config, std::string filePath)
 {
-    std::string pubFileDir = FileUtils::ExtractParentDirectory(absFilePath);
-    if (!FileUtils::DirectoryExists(pubFileDir))
+    std::string pubSubFileDir = FileUtils::ExtractParentDirectory(filePath);
+    LOGM_INFO(TAG, "Creating Pub/Sub file: %s", filePath.c_str());
+    if (!FileUtils::DirectoryExists(pubSubFileDir))
     {
         // Create an empty directory with the expected permissions.
-        FileUtils::CreateDirectoryWithPermissions(pubFileDir.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH);
+        if (!FileUtils::CreateDirectoryWithPermissions(pubSubFileDir.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH))
+        {
+            return false;
+        }
     }
     else
     {
         // Verify the directory permissions.
-        auto rcvDirPermissions = FileUtils::GetFilePermissions(pubFileDir);
+        auto rcvDirPermissions = FileUtils::GetFilePermissions(pubSubFileDir);
         if (Permissions::PUBSUB_DIR != rcvDirPermissions)
         {
             LOGM_ERROR(
                 TAG,
                 "Incorrect directory permissions for pubsub file: %s expected: %d received: %d",
-                Sanitize(pubFileDir).c_str(),
+                Sanitize(pubSubFileDir).c_str(),
                 Permissions::PUBSUB_DIR,
                 rcvDirPermissions);
             return false;
         }
     }
 
-    if (!FileUtils::FileExists(absFilePath))
+
+    if (!FileUtils::FileExists(filePath))
     {
         // Create an empty file with the expected permissions.
-        FileUtils::CreateEmptyFileWithPermissions(absFilePath, S_IRUSR | S_IWUSR);
+        if (!FileUtils::CreateEmptyFileWithPermissions(filePath, S_IRUSR | S_IWUSR))
+        {
+            return false;
+        }
     }
     else
     {
         // Verify the file permissions.
-        auto rcvFilePermissions = FileUtils::GetFilePermissions(absFilePath);
+        auto rcvFilePermissions = FileUtils::GetFilePermissions(filePath);
         if (Permissions::PUB_SUB_FILES != rcvFilePermissions)
         {
             LOGM_ERROR(
                 TAG,
                 "Incorrect file permissions for pubsub file: %s expected: %d received: %d",
-                Sanitize(absFilePath).c_str(),
+                Sanitize(filePath).c_str(),
                 Permissions::PUB_SUB_FILES,
                 rcvFilePermissions);
             return false;
@@ -93,20 +101,22 @@ int PubSubFeature::init(
     pubTopic = config.pubSub.publishTopic.value();
     subTopic = config.pubSub.subscribeTopic.value();
 
-    if (!config.pubSub.publishFile->empty())
+    if (config.pubSub.publishFile.has_value() && !config.pubSub.publishFile->empty())
     {
         pubFile = config.pubSub.publishFile->c_str();
     }
+    pubFile = FileUtils::ExtractExpandedPath(pubFile);
 
     if (!createPubSub(config, pubFile))
     {
         LOG_ERROR(TAG, "Failed to create publish directory or file");
     }
 
-    if (!config.pubSub.subscribeFile->empty())
+    if (config.pubSub.subscribeFile.has_value() && !config.pubSub.subscribeFile->empty())
     {
         subFile = config.pubSub.subscribeFile->c_str();
     }
+    subFile = FileUtils::ExtractExpandedPath(subFile);
 
     if (!createPubSub(config, subFile))
     {
@@ -122,7 +132,7 @@ int PubSubFeature::getPublishFileData(aws_byte_buf *buf)
     if (publishFileSize > MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES)
     {
         LOGM_ERROR(
-            TAG, "Publish file too large: %zu > %i bytes", publishFileSize, MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES);
+            TAG, "Publish file too large: %zu > %d bytes", publishFileSize, MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES);
         return AWS_OP_ERR;
     }
     if (publishFileSize == 0)
@@ -153,9 +163,8 @@ void PubSubFeature::publishFileData()
         LOG_ERROR(TAG, "Failed to read publish file... Skipping publish");
         return;
     }
-    auto onPublishComplete = [payload, this](Mqtt::MqttConnection &, uint16_t packetId, int errorCode) mutable
-    {
-        LOGM_DEBUG(TAG, "PublishCompAck: PacketId:(%u), ErrorCode:%i", getName().c_str(), errorCode);
+    auto onPublishComplete = [payload, this](Mqtt::MqttConnection &, uint16_t packetId, int errorCode) mutable {
+        LOGM_DEBUG(TAG, "PublishCompAck: PacketId:(%s), ErrorCode:%d", getName().c_str(), errorCode);
         aws_byte_buf_clean_up_secure(&payload);
     };
     resourceManager->getConnection()->Publish(
@@ -167,12 +176,12 @@ int PubSubFeature::start()
     LOGM_INFO(TAG, "Starting %s", getName().c_str());
 
     auto onSubAck =
-        [&](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void
-    { LOGM_DEBUG(TAG, "SubAck: PacketId:(%u), ErrorCode:%i", getName().c_str(), errorCode); };
-    auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void
-    {
+        [&](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void {
+        LOGM_DEBUG(TAG, "SubAck: PacketId:(%s), ErrorCode:%d", getName().c_str(), errorCode);
+    };
+    auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void {
         LOGM_DEBUG(TAG, "Message received on subscribe topic, size: %zu bytes", payload.len);
-        if (string((char *)payload.buffer) == PUBLISH_TRIGGER_PAYLOAD)
+        if (string((char *)payload.buffer, payload.len) == PUBLISH_TRIGGER_PAYLOAD)
         {
             publishFileData();
         }
@@ -197,8 +206,9 @@ int PubSubFeature::start()
 
 int PubSubFeature::stop()
 {
-    auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void
-    { LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%u, ErrorCode:%i", packetId, errorCode); };
+    auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void {
+        LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%u, ErrorCode:%d", packetId, errorCode);
+    };
 
     resourceManager->getConnection()->Unsubscribe(subTopic.c_str(), onUnsubscribe);
     baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);

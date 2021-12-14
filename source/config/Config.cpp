@@ -1068,7 +1068,7 @@ bool PlainConfig::PubSub::LoadFromJson(const Crt::JsonView &json)
     {
         if (!json.GetString(jsonKey).empty())
         {
-            publishFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            publishFile = json.GetString(jsonKey).c_str();
         }
         else
         {

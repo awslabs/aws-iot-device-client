@@ -289,6 +289,11 @@ bool FileUtils::CreateDirectoryWithPermissions(const char *dirPath, mode_t permi
             else
             {
                 // Desired and actual permissions match.
+                LOGM_INFO(
+                    TAG,
+                    "Successfully create directory %s with required permissions %d",
+                    Sanitize(expandedPath).c_str(),
+                    desiredPermissions);
                 return true;
             }
         }
