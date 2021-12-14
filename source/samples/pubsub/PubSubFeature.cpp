@@ -62,7 +62,6 @@ bool PubSubFeature::createPubSub(const PlainConfig &config, std::string filePath
         }
     }
 
-
     if (!FileUtils::FileExists(filePath))
     {
         // Create an empty file with the expected permissions.
