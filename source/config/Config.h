@@ -40,6 +40,7 @@ namespace Aws
                 static constexpr int CSR_DIR = 700;
                 static constexpr int CONFIG_DIR = 745;
                 static constexpr int LOG_DIR = 745;
+                static constexpr int PUBSUB_DIR = 745;
 
                 /** Files **/
                 static constexpr int PRIVATE_KEY = 600;

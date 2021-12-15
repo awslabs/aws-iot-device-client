@@ -1068,7 +1068,7 @@ bool PlainConfig::PubSub::LoadFromJson(const Crt::JsonView &json)
     {
         if (!json.GetString(jsonKey).empty())
         {
-            publishFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            publishFile = json.GetString(jsonKey).c_str();
         }
         else
         {
@@ -1144,20 +1144,7 @@ bool PlainConfig::PubSub::Validate() const
             DeviceClient::DC_FATAL_ERROR);
         return false;
     }
-    if (publishFile.has_value() && !publishFile->empty())
-    {
-        if (FileUtils::IsValidFilePath(publishFile->c_str()))
-        {
-            if (!FileUtils::ValidateFilePermissions(publishFile.value(), Permissions::PUB_SUB_FILES, true))
-            {
-                return false;
-            }
-        }
-        else
-        {
-            return false;
-        }
-    }
+
     if (!subscribeTopic.has_value() || subscribeTopic->empty())
     {
         LOGM_ERROR(
@@ -1166,20 +1153,7 @@ bool PlainConfig::PubSub::Validate() const
             DeviceClient::DC_FATAL_ERROR);
         return false;
     }
-    if (subscribeFile.has_value() && !subscribeFile->empty())
-    {
-        if (FileUtils::IsValidFilePath(subscribeFile->c_str()))
-        {
-            if (!FileUtils::ValidateFilePermissions(subscribeFile.value(), Permissions::PUB_SUB_FILES, true))
-            {
-                return false;
-            }
-        }
-        else
-        {
-            return false;
-        }
-    }
+
     return true;
 }
 

@@ -25,6 +25,11 @@ fi
 ### Config Defaults ###
 CONF_OUTPUT_PATH=${OUTPUT_DIR}aws-iot-device-client.conf
 HANDLER_DIR=${OUTPUT_DIR}jobs
+PUBSUB_DIR=${OUTPUT_DIR}pubsub/
+PUB_FILE=${PUBSUB_DIR}publish-file.txt
+SUB_FILE=${PUBSUB_DIR}subscribe-file.txt
+PUB_FILE_PROVIDED="n"
+SUB_FILE_PROVIDED="n"
 DD_INTERVAL=300
 LOG_TYPE="STDOUT"
 LOG_LEVEL="DEBUG"
@@ -180,12 +185,20 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       PUBSUB_ENABLED="true"
       printf ${PMPT} "Specify a topic for the feature to publish to:"
       read -r PUB_TOPIC
-      printf ${PMPT} "Specify the path of a file for the feature to publish (Leaving this blank will publish 'Hello World!'):"
-      read -r PUB_FILE
+      printf ${PMPT} "Specify the path of a file for the feature to publish (if no path is provided, will default to ${PUB_FILE}):"
+      read -r PUB_FILE_TMP
+      if [ "$PUB_FILE_TMP"]; then
+        PUB_FILE=$PUB_FILE_TMP
+        PUB_FILE_PROVIDED="y"
+      fi
       printf ${PMPT} "Specify a topic for the feature to subscribe to:"
       read -r SUB_TOPIC
-      printf ${PMPT} "Specify the path of a file for the feature to write to (Optional):"
-      read -r SUB_FILE
+      printf ${PMPT} "Specify the path of a file for the feature to write to (if no path is provided, will default to ${SUB_FILE}):"
+      read -r SUB_FILE_TMP
+      if [ "$SUB_FILE_TMP"]; then
+        SUB_FILE=$SUB_FILE_TMP
+        SUB_FILE_PROVIDED="y"
+      fi
     else
       PUBSUB_ENABLED="false"
     fi
@@ -282,6 +295,12 @@ if [ "$BUILD_CONFIG" = "y" ]; then
     fi
     tput sgr0
   done
+fi
+
+if [ "$PUB_FILE_PROVIDED" = "n" ] || [ "$SUB_FILE_PROVIDED" = "n" ]; then
+  printf ${GREEN} "Creating default pubsub directory..."
+  mkdir -p ${PUBSUB_DIR}
+  chmod 745 ${PUBSUB_DIR}
 fi
 
 printf ${PMPT} "Do you want to copy the sample job handlers to the specified handler directory (${HANDLER_DIR})? y/n"

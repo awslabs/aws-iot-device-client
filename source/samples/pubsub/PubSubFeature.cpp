@@ -3,11 +3,13 @@
 
 #include "PubSubFeature.h"
 #include "../../logging/LoggerFactory.h"
+#include "../../util/FileUtils.h"
 
 #include <aws/common/byte_buf.h>
 #include <aws/crt/Api.h>
 #include <aws/iotdevicecommon/IotDevice.h>
 #include <iostream>
+#include <sys/stat.h>
 
 #include <utility>
 
@@ -22,12 +24,69 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char PubSubFeature::TAG[];
+constexpr char PubSubFeature::DEFAULT_PUBLISH_FILE[];
+constexpr char PubSubFeature::DEFAULT_SUBSCRIBE_FILE[];
 
 #define MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES 128000
 
 string PubSubFeature::getName()
 {
     return "Pub Sub Sample";
+}
+
+bool PubSubFeature::createPubSub(const PlainConfig &config, std::string filePath)
+{
+    std::string pubSubFileDir = FileUtils::ExtractParentDirectory(filePath);
+    LOGM_INFO(TAG, "Creating Pub/Sub file: %s", filePath.c_str());
+    if (!FileUtils::DirectoryExists(pubSubFileDir))
+    {
+        // Create an empty directory with the expected permissions.
+        if (!FileUtils::CreateDirectoryWithPermissions(pubSubFileDir.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        // Verify the directory permissions.
+        auto rcvDirPermissions = FileUtils::GetFilePermissions(pubSubFileDir);
+        if (Permissions::PUBSUB_DIR != rcvDirPermissions)
+        {
+            LOGM_ERROR(
+                TAG,
+                "Incorrect directory permissions for pubsub file: %s expected: %d received: %d",
+                Sanitize(pubSubFileDir).c_str(),
+                Permissions::PUBSUB_DIR,
+                rcvDirPermissions);
+            return false;
+        }
+    }
+
+    if (!FileUtils::FileExists(filePath))
+    {
+        // Create an empty file with the expected permissions.
+        if (!FileUtils::CreateEmptyFileWithPermissions(filePath, S_IRUSR | S_IWUSR))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        // Verify the file permissions.
+        auto rcvFilePermissions = FileUtils::GetFilePermissions(filePath);
+        if (Permissions::PUB_SUB_FILES != rcvFilePermissions)
+        {
+            LOGM_ERROR(
+                TAG,
+                "Incorrect file permissions for pubsub file: %s expected: %d received: %d",
+                Sanitize(filePath).c_str(),
+                Permissions::PUB_SUB_FILES,
+                rcvFilePermissions);
+            return false;
+        }
+    }
+
+    return true;
 }
 
 int PubSubFeature::init(
@@ -40,8 +99,28 @@ int PubSubFeature::init(
     thingName = *config.thingName;
     pubTopic = config.pubSub.publishTopic.value();
     subTopic = config.pubSub.subscribeTopic.value();
-    pubFile = config.pubSub.publishFile.has_value() ? config.pubSub.publishFile.value() : "";
-    subFile = config.pubSub.subscribeFile.has_value() ? config.pubSub.subscribeFile.value() : "";
+
+    if (config.pubSub.publishFile.has_value() && !config.pubSub.publishFile->empty())
+    {
+        pubFile = config.pubSub.publishFile->c_str();
+    }
+    pubFile = FileUtils::ExtractExpandedPath(pubFile);
+
+    if (!createPubSub(config, pubFile))
+    {
+        LOG_ERROR(TAG, "Failed to create publish directory or file");
+    }
+
+    if (config.pubSub.subscribeFile.has_value() && !config.pubSub.subscribeFile->empty())
+    {
+        subFile = config.pubSub.subscribeFile->c_str();
+    }
+    subFile = FileUtils::ExtractExpandedPath(subFile);
+
+    if (!createPubSub(config, subFile))
+    {
+        LOG_ERROR(TAG, "Failed to create subscribe directory or file");
+    }
 
     return AWS_OP_SUCCESS;
 }
@@ -52,7 +131,7 @@ int PubSubFeature::getPublishFileData(aws_byte_buf *buf)
     if (publishFileSize > MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES)
     {
         LOGM_ERROR(
-            TAG, "Publish file too large: %zu > %i bytes", publishFileSize, MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES);
+            TAG, "Publish file too large: %zu > %d bytes", publishFileSize, MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES);
         return AWS_OP_ERR;
     }
     if (publishFileSize == 0)
@@ -84,7 +163,7 @@ void PubSubFeature::publishFileData()
         return;
     }
     auto onPublishComplete = [payload, this](Mqtt::MqttConnection &, uint16_t packetId, int errorCode) mutable {
-        LOGM_DEBUG(TAG, "PublishCompAck: PacketId:(%u), ErrorCode:%i", getName().c_str(), errorCode);
+        LOGM_DEBUG(TAG, "PublishCompAck: PacketId:(%s), ErrorCode:%d", getName().c_str(), errorCode);
         aws_byte_buf_clean_up_secure(&payload);
     };
     resourceManager->getConnection()->Publish(
@@ -97,11 +176,11 @@ int PubSubFeature::start()
 
     auto onSubAck =
         [&](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void {
-        LOGM_DEBUG(TAG, "SubAck: PacketId:(%u), ErrorCode:%i", getName().c_str(), errorCode);
+        LOGM_DEBUG(TAG, "SubAck: PacketId:(%s), ErrorCode:%d", getName().c_str(), errorCode);
     };
     auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void {
         LOGM_DEBUG(TAG, "Message received on subscribe topic, size: %zu bytes", payload.len);
-        if (string((char *)payload.buffer) == PUBLISH_TRIGGER_PAYLOAD)
+        if (string((char *)payload.buffer, payload.len) == PUBLISH_TRIGGER_PAYLOAD)
         {
             publishFileData();
         }
@@ -127,7 +206,7 @@ int PubSubFeature::start()
 int PubSubFeature::stop()
 {
     auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void {
-        LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%u, ErrorCode:%i", packetId, errorCode);
+        LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%u, ErrorCode:%d", packetId, errorCode);
     };
 
     resourceManager->getConnection()->Unsubscribe(subTopic.c_str(), onUnsubscribe);
