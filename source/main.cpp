@@ -295,13 +295,9 @@ int main(int argc, char *argv[])
     resourceManager = shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager);
     if (!resourceManager.get()->initialize(config.config, &features))
     {
-        LOGM_ERROR(
-            TAG,
-            "*** %s: Failed to initialize the MQTT Client. Please verify your AWS IoT credentials and/or "
-            "configuration. ***",
-            DC_FATAL_ERROR);
+        LOGM_ERROR(TAG, "*** %s: Failed to initialize AWS CRT SDK.", DC_FATAL_ERROR);
         LoggerFactory::getLoggerInstance()->shutdown();
-        deviceClientAbort("MQTT initialization failed due to credential/configuration error");
+        deviceClientAbort("Failed to initialize AWS CRT SDK");
     }
 
 #if !defined(EXCLUDE_FP)
