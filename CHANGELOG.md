@@ -6,8 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Known Issues]
 - [Device Client aborts on Red Hat Enterprise Linux ARM](https://github.com/awslabs/aws-iot-device-client/issues/87)
-- [Device Client crashes due to SIGSEGV on Ubuntu x86](https://github.com/awslabs/aws-iot-device-client/issues/86)
-- [Device Client network crash resulting in not receiving notification from cloud](https://github.com/awslabs/aws-iot-device-client/issues/151)
+- [Device Client stability issues when receiving signal interrupts](https://github.com/awslabs/aws-iot-device-client/issues/110)
+- [Device Client build failure with gcc v11](https://github.com/awslabs/aws-iot-device-client/issues/146)
+
+
+## [1.5.X] - 2021-12-16
+### Added
+- Added support for AWS Managed Job Templates aka Standard Job Actions.
+- Added validation checks for config file, cli inputs and empty job handler directory.
+- Added support for creating PubSub files. 
+
+### Fixed
+- Added support for enabling SDK logging using SDK and Config file
+- Updated documentation for Named Shadow feature, use of thing-name across Device Client and 
+- Updated docker image files to use latest code from SDK's submodule.  
+- Updated Device Client fatal error messages. 
+
 
 ## [1.3.X] - 2021-08-19
 ### Added
