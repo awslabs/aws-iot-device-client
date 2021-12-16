@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Added support for enabling SDK logging using SDK and Config file
-- Updated documentation for Named Shadow feature, use of thing-name across Device Client and 
+- Updated documentation for Named Shadow feature and use of thing-name across Device Client
 - Updated docker image files to use latest code from SDK's submodule.  
 - Updated Device Client fatal error messages. 
 
