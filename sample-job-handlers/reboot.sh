@@ -54,5 +54,6 @@ else
     date "+%s" > $REBOOT_LOCK_FILE
     reboot || true
     rm $REBOOT_LOCK_FILE
+    exit 1
   fi
 fi
