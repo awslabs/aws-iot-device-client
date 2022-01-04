@@ -6,6 +6,7 @@
 #include "util/FileUtils.h"
 #include "util/Retry.h"
 #include "util/StringUtils.h"
+#include "Version.h"
 
 #include <aws/crt/Api.h>
 #include <sys/stat.h>
@@ -235,7 +236,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     clientConfigBuilder.WithEndpoint(config.endpoint->c_str());
     clientConfigBuilder.WithCertificateAuthority(config.rootCa->c_str());
     clientConfigBuilder.WithSdkName(SharedCrtResourceManager::BINARY_NAME);
-    clientConfigBuilder.WithSdkVersion(SharedCrtResourceManager::BINARY_VERSION);
+    clientConfigBuilder.WithSdkVersion(DEVICE_CLIENT_VERSION);
 
     auto clientConfig = clientConfigBuilder.Build();
 

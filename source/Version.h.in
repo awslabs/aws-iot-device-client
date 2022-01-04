@@ -8,9 +8,7 @@
 #ifndef AWS_IOT_DEVICE_CLIENT_VERSION_H
 #define AWS_IOT_DEVICE_CLIENT_VERSION_H
 
-#define DEVICE_CLIENT_VERSION_FULL  @aws-iot-device-client_VERSION_STRING_FULL@
-#define DEVICE_CLIENT_VERSION_MAJOR @aws-iot-device-client_VERSION_MAJOR@
-#define DEVICE_CLIENT_VERSION_MINOR @aws-iot-device-client_VERSION_MINOR@
-#define DEVICE_CLIENT_VERSION_PATCH @aws-iot-device-client_VERSION_PATCH@
+#define DEVICE_CLIENT_VERSION_FULL  "@aws-iot-device-client_VERSION_STRING_FULL@"
+#define DEVICE_CLIENT_VERSION "@aws-iot-device-client_VERSION_STRING@"
 
 #endif // AWS_IOT_DEVICE_CLIENT_VERSION_H
