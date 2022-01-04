@@ -12,21 +12,17 @@
 #include <aws/iot/MqttClient.h>
 #include <iostream>
 
-namespace Aws
-{
-    namespace Iot
-    {
-        namespace DeviceClient
-        {
+namespace Aws {
+    namespace Iot {
+        namespace DeviceClient {
             /**
              * \brief Utility class for managing the CRT SDK Resources
              *
              * The SharedCrtResourceManager wraps around the handle to the MQTT connection
              * and other CRT resources and handles both initialization and maintenance of the connection.
              */
-            class SharedCrtResourceManager
-            {
-              private:
+            class SharedCrtResourceManager {
+            private:
                 const char *TAG = "SharedCrtResourceManager.cpp";
                 const char *BINARY_NAME = "IoTDeviceClient";
 
@@ -44,11 +40,14 @@ namespace Aws
                 std::vector<Feature *> *features;
 
                 bool locateCredentials(const PlainConfig &config);
+
                 bool setupLogging(const PlainConfig &config);
+
                 int buildClient(const PlainConfig &config);
+
                 void initializeAllocator();
 
-              public:
+            public:
                 /**
                  * \brief Full path to the default log file used by the AWS CRT SDK.
                  *
@@ -60,14 +59,23 @@ namespace Aws
                 static const int SUCCESS = 0;
                 static const int RETRY = 1;
                 static const int ABORT = 2;
+
                 bool initialize(const PlainConfig &config, std::vector<Feature *> *features);
+
                 void initializeAWSHttpLib();
+
                 int establishConnection(const PlainConfig &config);
+
                 void startDeviceClientFeatures();
+
                 std::shared_ptr<Crt::Mqtt::MqttConnection> getConnection();
+
                 Aws::Crt::Io::EventLoopGroup *getEventLoopGroup();
+
                 struct aws_allocator *getAllocator();
+
                 Aws::Crt::Io::ClientBootstrap *getClientBootstrap();
+
                 void disconnect();
             };
         } // namespace DeviceClient

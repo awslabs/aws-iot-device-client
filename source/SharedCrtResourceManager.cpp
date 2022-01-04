@@ -23,62 +23,48 @@ using namespace Aws::Iot::DeviceClient::Logging;
 constexpr int SharedCrtResourceManager::DEFAULT_WAIT_TIME_SECONDS;
 constexpr char SharedCrtResourceManager::DEFAULT_SDK_LOG_FILE[];
 
-bool SharedCrtResourceManager::initialize(const PlainConfig &config, vector<Feature *> *featuresList)
-{
+bool SharedCrtResourceManager::initialize(const PlainConfig &config, vector<Feature *> *featuresList) {
     features = featuresList;
     initializeAllocator();
     initialized = buildClient(config) == SharedCrtResourceManager::SUCCESS;
     return initialized;
 }
 
-bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
-{
+bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config) {
     struct stat fileInfo;
     bool locatedAll = true;
-    if (stat(config.key->c_str(), &fileInfo) != 0)
-    {
+    if (stat(config.key->c_str(), &fileInfo) != 0) {
         LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.key->c_str()).c_str());
         locatedAll = false;
-    }
-    else
-    {
+    } else {
         string parentDir = FileUtils::ExtractParentDirectory(config.key->c_str());
         if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::KEY_DIR) ||
-            !FileUtils::ValidateFilePermissions(config.key->c_str(), Permissions::PRIVATE_KEY))
-        {
+            !FileUtils::ValidateFilePermissions(config.key->c_str(), Permissions::PRIVATE_KEY)) {
             LOG_ERROR(TAG, "Incorrect permissions on private key file and/or parent directory");
             locatedAll = false;
         }
     }
 
-    if (stat(config.cert->c_str(), &fileInfo) != 0)
-    {
+    if (stat(config.cert->c_str(), &fileInfo) != 0) {
         LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.cert->c_str()).c_str());
         locatedAll = false;
-    }
-    else
-    {
+    } else {
         string parentDir = FileUtils::ExtractParentDirectory(config.cert->c_str());
         if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::CERT_DIR) ||
-            !FileUtils::ValidateFilePermissions(config.cert->c_str(), Permissions::PUBLIC_CERT))
-        {
+            !FileUtils::ValidateFilePermissions(config.cert->c_str(), Permissions::PUBLIC_CERT)) {
             LOG_ERROR(TAG, "Incorrect permissions on public cert file and/or parent directory");
             locatedAll = false;
         }
     }
 
-    if (stat(config.rootCa->c_str(), &fileInfo) != 0)
-    {
+    if (stat(config.rootCa->c_str(), &fileInfo) != 0) {
         LOGM_ERROR(
-            TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.rootCa->c_str()).c_str());
+                TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.rootCa->c_str()).c_str());
         locatedAll = false;
-    }
-    else
-    {
+    } else {
         string parentDir = FileUtils::ExtractParentDirectory(config.rootCa->c_str());
         if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::ROOT_CA_DIR) ||
-            !FileUtils::ValidateFilePermissions(config.rootCa->c_str(), Permissions::ROOT_CA))
-        {
+            !FileUtils::ValidateFilePermissions(config.rootCa->c_str(), Permissions::ROOT_CA)) {
             LOG_ERROR(TAG, "Incorrect permissions on Root CA file and/or parent directory");
             locatedAll = false;
         }
@@ -87,60 +73,48 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     return locatedAll;
 }
 
-bool SharedCrtResourceManager::setupLogging(const PlainConfig &config)
-{
+bool SharedCrtResourceManager::setupLogging(const PlainConfig &config) {
     // Absolute path to the sdk log file.
     std::string logFilePath{DEFAULT_SDK_LOG_FILE};
-    if (!config.logConfig.sdkLogFile.empty())
-    {
+    if (!config.logConfig.sdkLogFile.empty()) {
         logFilePath = config.logConfig.sdkLogFile;
     }
 
     std::string logFileDir = FileUtils::ExtractParentDirectory(logFilePath);
-    if (!FileUtils::DirectoryExists(logFileDir))
-    {
+    if (!FileUtils::DirectoryExists(logFileDir)) {
         // Create an empty directory with the expected permissions.
-        if (!FileUtils::CreateDirectoryWithPermissions(logFileDir.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH))
-        {
+        if (!FileUtils::CreateDirectoryWithPermissions(logFileDir.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH)) {
             return false;
         }
-    }
-    else
-    {
+    } else {
         // Verify the directory permissions.
         auto rcvDirPermissions = FileUtils::GetFilePermissions(logFileDir);
-        if (Permissions::LOG_DIR != rcvDirPermissions)
-        {
+        if (Permissions::LOG_DIR != rcvDirPermissions) {
             LOGM_ERROR(
-                TAG,
-                "Incorrect directory permissions for SDK log file: %s expected: %d received: %d",
-                Sanitize(logFileDir).c_str(),
-                Permissions::LOG_DIR,
-                rcvDirPermissions);
+                    TAG,
+                    "Incorrect directory permissions for SDK log file: %s expected: %d received: %d",
+                    Sanitize(logFileDir).c_str(),
+                    Permissions::LOG_DIR,
+                    rcvDirPermissions);
             return false;
         }
     }
 
-    if (!FileUtils::FileExists(logFilePath))
-    {
+    if (!FileUtils::FileExists(logFilePath)) {
         // Create an empty file with the expected permissions.
-        if (!FileUtils::CreateEmptyFileWithPermissions(logFilePath, S_IRUSR | S_IWUSR))
-        {
+        if (!FileUtils::CreateEmptyFileWithPermissions(logFilePath, S_IRUSR | S_IWUSR)) {
             return false;
         }
-    }
-    else
-    {
+    } else {
         // Verify the file permissions.
         auto rcvFilePermissions = FileUtils::GetFilePermissions(logFilePath);
-        if (Permissions::LOG_FILE != rcvFilePermissions)
-        {
+        if (Permissions::LOG_FILE != rcvFilePermissions) {
             LOGM_ERROR(
-                TAG,
-                "Incorrect file permissions for SDK log file: %s expected: %d received: %d",
-                Sanitize(logFilePath).c_str(),
-                Permissions::LOG_FILE,
-                rcvFilePermissions);
+                    TAG,
+                    "Incorrect file permissions for SDK log file: %s expected: %d received: %d",
+                    Sanitize(logFilePath).c_str(),
+                    Permissions::LOG_FILE,
+                    rcvFilePermissions);
             return false;
         }
     }
@@ -152,47 +126,41 @@ bool SharedCrtResourceManager::setupLogging(const PlainConfig &config)
     return true;
 }
 
-void SharedCrtResourceManager::initializeAllocator()
-{
+void SharedCrtResourceManager::initializeAllocator() {
     allocator = aws_mem_tracer_new(aws_default_allocator(), nullptr, AWS_MEMTRACE_BYTES, 0);
 }
 
-int SharedCrtResourceManager::buildClient(const PlainConfig &config)
-{
+int SharedCrtResourceManager::buildClient(const PlainConfig &config) {
     // We MUST declare an instance of the ApiHandle to perform global initialization
     // of the SDK libraries
     apiHandle = unique_ptr<ApiHandle>(new ApiHandle());
-    if (config.logConfig.sdkLoggingEnabled)
-    {
-        if (!setupLogging(config))
-        {
+    if (config.logConfig.sdkLoggingEnabled) {
+        if (!setupLogging(config)) {
             return SharedCrtResourceManager::ABORT;
         }
-    }
-    else
-    {
+    } else {
         LOG_INFO(
-            TAG,
-            "SDK logging is disabled. Enable it with --enable-sdk-logging on the command line or "
-            "logging::enable-sdk-logging in your configuration file");
+                TAG,
+                "SDK logging is disabled. Enable it with --enable-sdk-logging on the command line or "
+                "logging::enable-sdk-logging in your configuration file");
     }
 
     eventLoopGroup = unique_ptr<EventLoopGroup>(
-        new EventLoopGroup(1 // The number of threads used depends on your use-case. IF you have a maximum of less than
-                             // a few hundred connections 1 thread is the ideal threadCount.
-                           ));
-    if (!eventLoopGroup)
-    {
+            new EventLoopGroup(
+                    1 // The number of threads used depends on your use-case. IF you have a maximum of less than
+                    // a few hundred connections 1 thread is the ideal threadCount.
+            ));
+    if (!eventLoopGroup) {
         LOGM_ERROR(
-            TAG, "MQTT Event Loop Group Creation failed with error: %s", ErrorDebugString(eventLoopGroup->LastError()));
+                TAG, "MQTT Event Loop Group Creation failed with error: %s",
+                ErrorDebugString(eventLoopGroup->LastError()));
         return eventLoopGroup->LastError();
     }
 
     defaultHostResolver = unique_ptr<DefaultHostResolver>(new DefaultHostResolver(*eventLoopGroup, 2, 30));
     clientBootstrap = unique_ptr<ClientBootstrap>(new ClientBootstrap(*eventLoopGroup, *defaultHostResolver));
 
-    if (!clientBootstrap)
-    {
+    if (!clientBootstrap) {
         LOGM_ERROR(TAG, "MQTT ClientBootstrap failed with error: %s", ErrorDebugString(clientBootstrap->LastError()));
         return clientBootstrap->LastError();
     }
@@ -206,15 +174,12 @@ int SharedCrtResourceManager::buildClient(const PlainConfig &config)
     return SharedCrtResourceManager::SUCCESS;
 }
 
-void SharedCrtResourceManager::initializeAWSHttpLib()
-{
-    if (!initialized)
-    {
+void SharedCrtResourceManager::initializeAWSHttpLib() {
+    if (!initialized) {
         LOG_WARN(TAG, "Tried to aws_http_library_init but the SharedCrtResourceManager has not yet been initialized!");
         return;
     }
-    if (initializedAWSHttpLib)
-    {
+    if (initializedAWSHttpLib) {
         LOG_WARN(TAG, "Tried to aws_http_library_init but it was already initialized!");
         return;
     }
@@ -222,14 +187,12 @@ void SharedCrtResourceManager::initializeAWSHttpLib()
     initializedAWSHttpLib = true;
 }
 
-int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
-{
-    if (!locateCredentials(config))
-    {
+int SharedCrtResourceManager::establishConnection(const PlainConfig &config) {
+    if (!locateCredentials(config)) {
         LOGM_ERROR(
-            TAG,
-            "*** %s: Failed to find file(s) with correct permissions required for establishing the MQTT connection ***",
-            DeviceClient::DC_FATAL_ERROR);
+                TAG,
+                "*** %s: Failed to find file(s) with correct permissions required for establishing the MQTT connection ***",
+                DeviceClient::DC_FATAL_ERROR);
         return SharedCrtResourceManager::ABORT;
     }
     auto clientConfigBuilder = MqttClientConnectionConfigBuilder(config.cert->c_str(), config.key->c_str());
@@ -240,19 +203,17 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
 
     auto clientConfig = clientConfigBuilder.Build();
 
-    if (!clientConfig)
-    {
+    if (!clientConfig) {
         LOGM_ERROR(
-            TAG,
-            "MQTT Client Configuration initialization failed with error: %s",
-            ErrorDebugString(clientConfig.LastError()));
+                TAG,
+                "MQTT Client Configuration initialization failed with error: %s",
+                ErrorDebugString(clientConfig.LastError()));
         return ABORT;
     }
 
     connection = mqttClient->NewConnection(clientConfig);
 
-    if (!*connection)
-    {
+    if (!*connection) {
         LOGM_ERROR(TAG, "MQTT Connection Creation failed with error: %s", ErrorDebugString(connection->LastError()));
         return ABORT;
     }
@@ -263,21 +224,17 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
      * This will execute when an mqtt connect has completed or failed.
      */
     auto onConnectionCompleted = [&](Mqtt::MqttConnection &, int errorCode, Mqtt::ReturnCode returnCode, bool) {
-        if (errorCode)
-        {
+        if (errorCode) {
             LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(errorCode));
-            if (AWS_ERROR_MQTT_UNEXPECTED_HANGUP == errorCode)
-            {
+            if (AWS_ERROR_MQTT_UNEXPECTED_HANGUP == errorCode) {
                 LOG_ERROR(
-                    TAG,
-                    "*** Did you make sure you are using valid certificate with recommended policy attached to it? "
-                    "Please refer README->Fleet Provisioning Feature section for more details on recommended policies "
-                    "for AWS IoT Device Client. ***");
+                        TAG,
+                        "*** Did you make sure you are using valid certificate with recommended policy attached to it? "
+                        "Please refer README->Fleet Provisioning Feature section for more details on recommended policies "
+                        "for AWS IoT Device Client. ***");
             }
             connectionCompletedPromise.set_value(errorCode);
-        }
-        else
-        {
+        } else {
             LOGM_INFO(TAG, "MQTT connection established with return code: %d", returnCode);
             connectionCompletedPromise.set_value(0);
         }
@@ -298,13 +255,12 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
      */
     auto OnConnectionInterrupted = [&](Mqtt::MqttConnection &, int errorCode) {
         {
-            if (errorCode)
-            {
+            if (errorCode) {
                 LOGM_ERROR(
-                    TAG,
-                    "MQTT Connection interrupted with error: `%s`. Device Client will retry connection until it is "
-                    "successfully connected to the core. ",
-                    ErrorDebugString(errorCode));
+                        TAG,
+                        "MQTT Connection interrupted with error: `%s`. Device Client will retry connection until it is "
+                        "successfully connected to the core. ",
+                        ErrorDebugString(errorCode));
             }
         }
     };
@@ -324,35 +280,28 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     connection->OnConnectionResumed = move(OnConnectionResumed);
 
     LOGM_INFO(TAG, "Establishing MQTT connection with client id %s...", config.thingName->c_str());
-    if (!connection->SetReconnectTimeout(15, 240))
-    {
+    if (!connection->SetReconnectTimeout(15, 240)) {
         LOG_ERROR(TAG, "Device Client is not able to set reconnection settings. Device Client will retry again.");
         return RETRY;
     }
-    if (!connection->Connect(config.thingName->c_str(), false))
-    {
+    if (!connection->Connect(config.thingName->c_str(), false)) {
         LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(connection->LastError()));
         return RETRY;
     }
 
     int connectionStatus = connectionCompletedPromise.get_future().get();
 
-    if (SharedCrtResourceManager::SUCCESS == connectionStatus)
-    {
+    if (SharedCrtResourceManager::SUCCESS == connectionStatus) {
         LOG_INFO(TAG, "Shared MQTT connection is ready!");
         return SharedCrtResourceManager::SUCCESS;
-    }
-    else
-    {
+    } else {
         LOG_ERROR(TAG, "Failed to establish shared MQTT connection, but will attempt retry...");
         return SharedCrtResourceManager::RETRY;
     }
 }
 
-shared_ptr<MqttConnection> SharedCrtResourceManager::getConnection()
-{
-    if (!initialized)
-    {
+shared_ptr<MqttConnection> SharedCrtResourceManager::getConnection() {
+    if (!initialized) {
         LOG_WARN(TAG, "Tried to get connection but the SharedCrtResourceManager has not yet been initialized!");
         return nullptr;
     }
@@ -360,10 +309,8 @@ shared_ptr<MqttConnection> SharedCrtResourceManager::getConnection()
     return connection;
 }
 
-EventLoopGroup *SharedCrtResourceManager::getEventLoopGroup()
-{
-    if (!initialized)
-    {
+EventLoopGroup *SharedCrtResourceManager::getEventLoopGroup() {
+    if (!initialized) {
         LOG_WARN(TAG, "Tried to get eventLoopGroup but the SharedCrtResourceManager has not yet been initialized!");
         return nullptr;
     }
@@ -371,10 +318,8 @@ EventLoopGroup *SharedCrtResourceManager::getEventLoopGroup()
     return eventLoopGroup.get();
 }
 
-struct aws_allocator *SharedCrtResourceManager::getAllocator()
-{
-    if (!initialized)
-    {
+struct aws_allocator *SharedCrtResourceManager::getAllocator() {
+    if (!initialized) {
         LOG_WARN(TAG, "Tried to get allocator but the SharedCrtResourceManager has not yet been initialized!");
         return nullptr;
     }
@@ -382,10 +327,8 @@ struct aws_allocator *SharedCrtResourceManager::getAllocator()
     return allocator;
 }
 
-Aws::Crt::Io::ClientBootstrap *SharedCrtResourceManager::getClientBootstrap()
-{
-    if (!initialized)
-    {
+Aws::Crt::Io::ClientBootstrap *SharedCrtResourceManager::getClientBootstrap() {
+    if (!initialized) {
         LOG_WARN(TAG, "Tried to get clientBootstrap but the SharedCrtResourceManager has not yet been initialized!");
         return nullptr;
     }
@@ -393,28 +336,21 @@ Aws::Crt::Io::ClientBootstrap *SharedCrtResourceManager::getClientBootstrap()
     return clientBootstrap.get();
 }
 
-void SharedCrtResourceManager::disconnect()
-{
+void SharedCrtResourceManager::disconnect() {
     LOG_DEBUG(TAG, "Attempting to disconnect MQTT connection");
-    if (connection->Disconnect())
-    {
+    if (connection->Disconnect()) {
         if (connectionClosedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
-            future_status::timeout)
-        {
+            future_status::timeout) {
             LOG_ERROR(TAG, "MQTT Connection timed out to disconnect.");
         }
-    }
-    else
-    {
+    } else {
         LOG_ERROR(TAG, "MQTT Connection failed to disconnect");
     }
 }
 
-void SharedCrtResourceManager::startDeviceClientFeatures()
-{
+void SharedCrtResourceManager::startDeviceClientFeatures() {
     LOG_INFO(TAG, "Starting Device Client features.");
-    for (auto *feature : *features)
-    {
+    for (auto *feature : *features) {
         feature->start();
     }
 }
