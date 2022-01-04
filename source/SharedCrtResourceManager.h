@@ -12,17 +12,21 @@
 #include <aws/iot/MqttClient.h>
 #include <iostream>
 
-namespace Aws {
-    namespace Iot {
-        namespace DeviceClient {
+namespace Aws
+{
+    namespace Iot
+    {
+        namespace DeviceClient
+        {
             /**
              * \brief Utility class for managing the CRT SDK Resources
              *
              * The SharedCrtResourceManager wraps around the handle to the MQTT connection
              * and other CRT resources and handles both initialization and maintenance of the connection.
              */
-            class SharedCrtResourceManager {
-            private:
+            class SharedCrtResourceManager
+            {
+              private:
                 const char *TAG = "SharedCrtResourceManager.cpp";
                 const char *BINARY_NAME = "IoTDeviceClient";
 
@@ -47,7 +51,7 @@ namespace Aws {
 
                 void initializeAllocator();
 
-            public:
+              public:
                 /**
                  * \brief Full path to the default log file used by the AWS CRT SDK.
                  *
