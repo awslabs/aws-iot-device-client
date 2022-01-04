@@ -10,29 +10,45 @@
 #include "util/Retry.h"
 
 #if !defined(EXCLUDE_DD)
+
 #    include "devicedefender/DeviceDefenderFeature.h"
+
 #endif
 #if !defined(EXCLUDE_JOBS)
+
 #    include "jobs/JobsFeature.h"
+
 #endif
 #if !defined(EXCLUDE_FP)
+
 #    include "fleetprovisioning/FleetProvisioning.h"
+
 #endif
+
 #include "logging/LoggerFactory.h"
+
 #if !defined(EXCLUDE_ST)
+
 #    include "tunneling/SecureTunnelingFeature.h"
+
 #endif
 #if !defined(EXCLUDE_SAMPLES)
 #    if !defined(EXCLUDE_PUBSUB)
+
 #        include "samples/pubsub/PubSubFeature.h"
+
 #    endif
 #endif
 #if !defined(EXCLUDE_SHADOW)
 #    if !defined(EXCLUDE_CONFIG_SHADOW)
+
 #        include "shadow/ConfigShadow.h"
+
 #    endif
 #    if !defined(EXCLUDE_SAMPLE_SHADOW)
+
 #        include "shadow/SampleShadowFeature.h"
+
 #    endif
 #endif
 
@@ -276,12 +292,7 @@ int main(int argc, char *argv[])
         LOG_WARN(TAG, "Unable to append current working directory to PATH environment variable.");
     }
 
-    LOGM_INFO(
-        TAG,
-        "Now running AWS IoT Device Client version v%d.%d.%d",
-        DEVICE_CLIENT_VERSION_MAJOR,
-        DEVICE_CLIENT_VERSION_MINOR,
-        DEVICE_CLIENT_VERSION_PATCH);
+    LOGM_INFO(TAG, "Now running AWS IoT Device Client version %s", DEVICE_CLIENT_VERSION_FULL);
 
     // Register for listening to interrupt signals
     sigset_t sigset;

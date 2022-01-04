@@ -29,7 +29,6 @@ namespace Aws
               private:
                 const char *TAG = "SharedCrtResourceManager.cpp";
                 const char *BINARY_NAME = "IoTDeviceClient";
-                const char *BINARY_VERSION = "1.2";
 
                 static constexpr int DEFAULT_WAIT_TIME_SECONDS = 10;
                 bool initialized = false;
@@ -45,8 +44,11 @@ namespace Aws
                 std::vector<Feature *> *features;
 
                 bool locateCredentials(const PlainConfig &config);
+
                 bool setupLogging(const PlainConfig &config);
+
                 int buildClient(const PlainConfig &config);
+
                 void initializeAllocator();
 
               public:
@@ -61,14 +63,23 @@ namespace Aws
                 static const int SUCCESS = 0;
                 static const int RETRY = 1;
                 static const int ABORT = 2;
+
                 bool initialize(const PlainConfig &config, std::vector<Feature *> *features);
+
                 void initializeAWSHttpLib();
+
                 int establishConnection(const PlainConfig &config);
+
                 void startDeviceClientFeatures();
+
                 std::shared_ptr<Crt::Mqtt::MqttConnection> getConnection();
+
                 Aws::Crt::Io::EventLoopGroup *getEventLoopGroup();
+
                 struct aws_allocator *getAllocator();
+
                 Aws::Crt::Io::ClientBootstrap *getClientBootstrap();
+
                 void disconnect();
             };
         } // namespace DeviceClient
