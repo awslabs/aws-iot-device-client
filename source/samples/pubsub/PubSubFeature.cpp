@@ -152,7 +152,7 @@ int PubSubFeature::getPublishFileData(aws_byte_buf *buf)
 void PubSubFeature::publishFileData()
 {
     ByteBuf payload;
-    if (pubFile == "")
+    if (FileUtils::GetFileSize(pubFile) == 0)
     {
         aws_byte_buf_init(&payload, resourceManager->getAllocator(), DEFAULT_PUBLISH_PAYLOAD.size());
         aws_byte_buf_write(&payload, (uint8_t *)DEFAULT_PUBLISH_PAYLOAD.c_str(), DEFAULT_PUBLISH_PAYLOAD.size());
