@@ -32,7 +32,7 @@ namespace Aws
                     static constexpr char DEFAULT_PUBLISH_FILE[] = "~/.aws-iot-device-client/pubsub/publish-file.txt";
                     static constexpr char DEFAULT_SUBSCRIBE_FILE[] =
                         "~/.aws-iot-device-client/pubsub/subscribe-file.txt";
-                    bool createPubSub(const PlainConfig &config, std::string absFilePath);
+                    bool createPubSub(const PlainConfig &config, std::string absFilePath, const aws_byte_buf *payload);
                     /**
                      * \brief Initializes the PubSub feature with all the required setup information, event
                      * handlers, and the SharedCrtResourceManager
