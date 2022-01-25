@@ -69,7 +69,7 @@ bool PubSubFeature::createPubSub(const PlainConfig &config, std::string filePath
         {
             return false;
         }
-
+        // Write payload data in newly created empty file.
         if (payload != NULL)
         {
             FileUtils::WriteToFile(filePath, payload);
@@ -112,8 +112,7 @@ int PubSubFeature::init(
     pubFile = FileUtils::ExtractExpandedPath(pubFile);
 
     ByteBuf payload;
-    aws_byte_buf_init(&payload, resourceManager->getAllocator(), DEFAULT_PUBLISH_PAYLOAD.size());
-    aws_byte_buf_write(&payload, (uint8_t *)DEFAULT_PUBLISH_PAYLOAD.c_str(), DEFAULT_PUBLISH_PAYLOAD.size());
+    payload = aws_byte_buf_from_c_str(DEFAULT_PUBLISH_PAYLOAD.c_str());
 
     if (!createPubSub(config, pubFile, &payload))
     {
