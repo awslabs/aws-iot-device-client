@@ -270,7 +270,7 @@ int JobEngine::exec_cmd(string operation, PlainJobDocument::JobAction action)
 
     int execResult;
     int returnCode;
-    int pid = vfork();
+    int pid = fork();
     if (pid < 0)
     {
         LOGM_ERROR(TAG, "Failed to create child process, fork returned %d", pid);
