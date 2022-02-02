@@ -133,6 +133,26 @@ configure_file("source/Version.h.in" "${PROJECT_BINARY_DIR}/Version.h")
 # OpenSSL dependency                    #
 #########################################
 set(OPENSSL_USE_STATIC_LIBS TRUE)
+
+if(APPLE)
+    # Try to find OpenSSL on MacOS but don't fail immediately so we can fall back to alternate logic
+    find_package(OpenSSL)
+
+    IF(NOT OpenSSL_FOUND)
+        # OpenSSL was not found by pkg-config which can happen with Homebrew. Attempt to find OpenSSL in Homebrew locations.
+        file(GLOB openssl-candidates /usr/local/Cellar/openssl*/*/)
+
+        # Sort with compare natural to make sure we get numbers in the right order
+        list(SORT openssl-candidates COMPARE NATURAL)
+        # Reverse the list so that our first open is the highest version number
+        list(REVERSE openssl-candidates)
+
+        # Get the first result and set the OPENSSL_ROOT_DIR variable so that the next call to find_package(OpenSSL) finds it or fails
+        list(POP_FRONT openssl-candidates openssl-candidate)
+        set(OPENSSL_ROOT_DIR ${openssl-candidate})
+    endif()
+endif()
+
 find_package(OpenSSL REQUIRED)
 
 #########################################
