@@ -16,6 +16,13 @@ option(EXCLUDE_CONFIG_SHADOW "Builds the device client without the IoT Config Sh
 option(EXCLUDE_SAMPLE_SHADOW "Builds the device client without the IoT Sample Shadow Feature." OFF)
 option(GIT_VERSION "Updates the version number using the Git commit history" ON)
 
+if (APPLE)
+    # MacOS does not have inotify which the shadow sample requires
+    SET(EXCLUDE_SHADOW ON BOOL)
+    SET(EXCLUDE_CONFIG_SHADOW ON BOOL)
+    SET(EXCLUDE_SAMPLE_SHADOW ON BOOL)
+endif ()
+
 if (EXCLUDE_JOBS)
     add_definitions(-DEXCLUDE_JOBS)
 endif ()
