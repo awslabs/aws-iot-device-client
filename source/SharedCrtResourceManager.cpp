@@ -389,7 +389,18 @@ EventLoopGroup *SharedCrtResourceManager::getEventLoopGroup()
     return eventLoopGroup.get();
 }
 
-struct aws_allocator *SharedCrtResourceManager::getAllocator()
+aws_event_loop *SharedCrtResourceManager::getNextEventLoop()
+{
+    if (!initialized)
+    {
+        LOG_WARN(TAG, "Tried to get eventLoop but the SharedCrtResourceManager has not yet been initialized!");
+        return nullptr;
+    }
+
+    return aws_event_loop_group_get_next_loop(eventLoopGroup->GetUnderlyingHandle());
+}
+
+aws_allocator *SharedCrtResourceManager::getAllocator()
 {
     if (!initialized)
     {

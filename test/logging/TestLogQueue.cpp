@@ -42,13 +42,13 @@ class LogQueueTest : public ::testing::Test
 
         if (firstLock)
         {
-            unique_lock<mutex>(m);
+            unique_lock<mutex>{m};
             processed = true;
             cv.notify_all();
         }
         else
         {
-            unique_lock<mutex>(m2);
+            unique_lock<mutex>{m2};
             processed2 = true;
             cv2.notify_all();
         }

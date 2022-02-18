@@ -55,7 +55,7 @@ namespace Aws
               public:
                 SharedCrtResourceManager() = default;
 
-                ~SharedCrtResourceManager();
+                virtual ~SharedCrtResourceManager();
 
                 /**
                  * \brief Full path to the default log file used by the AWS CRT SDK.
@@ -77,11 +77,13 @@ namespace Aws
 
                 void startDeviceClientFeatures();
 
-                std::shared_ptr<Crt::Mqtt::MqttConnection> getConnection();
+                virtual std::shared_ptr<Crt::Mqtt::MqttConnection> getConnection();
 
                 Aws::Crt::Io::EventLoopGroup *getEventLoopGroup();
 
-                struct aws_allocator *getAllocator();
+                virtual aws_event_loop *getNextEventLoop();
+
+                virtual aws_allocator *getAllocator();
 
                 Aws::Crt::Io::ClientBootstrap *getClientBootstrap();
 

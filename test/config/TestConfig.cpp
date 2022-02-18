@@ -22,6 +22,8 @@ using namespace Aws::Iot::DeviceClient::Util;
 
 const string filePath = "/tmp/aws-iot-device-client-test-file";
 const string invalidFilePath = "/tmp/invalid-file-path";
+const string addrPathValid = "/tmp/sensors";
+const string addrPathInvalid = "/tmp/sensors-invalid-perms";
 
 class ConfigTestFixture : public ::testing::Test
 {
@@ -37,9 +39,19 @@ class ConfigTestFixture : public ::testing::Test
 
         // Ensure invalid-file does not exist
         std::remove(invalidFilePath.c_str());
+        mode_t validPerms = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
+        FileUtils::CreateDirectoryWithPermissions(addrPathValid.c_str(), validPerms);
+
+        mode_t invalidPerms = validPerms | S_IRWXO;
+        FileUtils::CreateDirectoryWithPermissions(addrPathInvalid.c_str(), invalidPerms);
     }
 
-    void TearDown() override { std::remove(filePath.c_str()); }
+    void TearDown() override
+    {
+        std::remove(filePath.c_str());
+        std::remove(addrPathValid.c_str());
+        std::remove(addrPathInvalid.c_str());
+    }
 };
 
 /**
@@ -730,6 +742,332 @@ TEST_F(ConfigTestFixture, SampleShadowCli)
     ASSERT_STREQ(outputFilePath.c_str(), config.sampleShadow.shadowOutputFile->c_str());
     remove(inputFilePath.c_str());
     remove(outputFilePath.c_str());
+}
+
+TEST_F(ConfigTestFixture, SensorPublishMinimumConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "sensor-publish": {
+        "sensors": [
+            {
+                "addr": "/tmp/sensors/my-sensor-server",
+                "eom_delimiter": "[\r\n]+",
+                "mqtt_topic": "my-sensor-data"
+            }
+        ]
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_TRUE(config.sensorPublish.enabled);
+    ASSERT_EQ(config.sensorPublish.settings.size(), 1);
+    const auto &settings = config.sensorPublish.settings[0];
+    ASSERT_TRUE(settings.enabled);
+    ASSERT_EQ(settings.addr.value(), "/tmp/sensors/my-sensor-server");
+    ASSERT_EQ(settings.eomDelimiter.value(), "[\r\n]+");
+    ASSERT_EQ(settings.mqttTopic.value(), "my-sensor-data");
+}
+
+TEST_F(ConfigTestFixture, SensorPublishMinimumConfigMultipleSensors)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "sensor-publish": {
+        "sensors": [
+            {
+                "enabled": true,
+                "addr": "/tmp/sensors/my-sensor-server-01",
+                "eom_delimiter": "[\r\n]+",
+                "mqtt_topic": "my-sensor-data-01"
+            },
+            {
+                "enabled": true,
+                "addr": "/tmp/sensors/my-sensor-server-02",
+                "eom_delimiter": "[\r\n]+",
+                "mqtt_topic": "my-sensor-data-02"
+            },
+            {
+                "enabled": false,
+                "addr": "/tmp/sensors/my-sensor-server-03",
+                "eom_delimiter": "[\r\n]+",
+                "mqtt_topic": "my-sensor-data-03"
+            }
+        ]
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_TRUE(config.sensorPublish.enabled);
+    ASSERT_EQ(config.sensorPublish.settings.size(), 3);
+    {
+        const auto &settings = config.sensorPublish.settings[0];
+        ASSERT_TRUE(settings.enabled);
+        ASSERT_EQ(settings.addr.value(), "/tmp/sensors/my-sensor-server-01");
+        ASSERT_EQ(settings.eomDelimiter.value(), "[\r\n]+");
+        ASSERT_EQ(settings.mqttTopic.value(), "my-sensor-data-01");
+    }
+    {
+        const auto &settings = config.sensorPublish.settings[1];
+        ASSERT_TRUE(settings.enabled);
+        ASSERT_EQ(settings.addr.value(), "/tmp/sensors/my-sensor-server-02");
+        ASSERT_EQ(settings.eomDelimiter.value(), "[\r\n]+");
+        ASSERT_EQ(settings.mqttTopic.value(), "my-sensor-data-02");
+    }
+    {
+        const auto &settings = config.sensorPublish.settings[2];
+        ASSERT_FALSE(settings.enabled);
+    }
+}
+
+TEST_F(ConfigTestFixture, SensorPublishInvalidConfigAddr)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "sensor-publish": {
+        "sensors": [
+            {
+                "addr": "/tmp/sensors-invalid-perms/my-sensor-server",
+                "eom_delimiter": "[\r\n]+",
+                "mqtt_topic": "my-sensor-data"
+            }
+        ]
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate()); // Invalid permissions on addr.
+    ASSERT_TRUE(config.sensorPublish.enabled);
+    ASSERT_EQ(config.sensorPublish.settings.size(), 1);
+    const auto &settings = config.sensorPublish.settings[0];
+    ASSERT_FALSE(settings.enabled);
+}
+
+TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopicEmpty)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "sensor-publish": {
+        "sensors": [
+            {
+                "addr": "/tmp/sensors/my-sensor-server",
+                "eom_delimiter": "[\r\n]+",
+                "mqtt_topic": ""
+            }
+        ]
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate()); // Empty mqtt_topic.
+    ASSERT_TRUE(config.sensorPublish.enabled);
+    ASSERT_EQ(config.sensorPublish.settings.size(), 1);
+    const auto &settings = config.sensorPublish.settings[0];
+    ASSERT_FALSE(settings.enabled);
+}
+
+TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopic)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "sensor-publish": {
+        "sensors": [
+            {
+                "addr": "/tmp/sensors/my-sensor-server",
+                "eom_delimiter": "[\r\n]+",
+                "mqtt_topic": "////////my-sensor-data"
+            }
+        ]
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate()); // Invalid mqtt_topic.
+    ASSERT_TRUE(config.sensorPublish.enabled);
+    ASSERT_EQ(config.sensorPublish.settings.size(), 1);
+    const auto &settings = config.sensorPublish.settings[0];
+    ASSERT_FALSE(settings.enabled);
+}
+
+TEST_F(ConfigTestFixture, SensorPublishInvalidConfigEomDelimiter)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "sensor-publish": {
+        "sensors": [
+            {
+                "addr": "/tmp/sensors/my-sensor-server",
+                "eom_delimiter": "[\r\n+",
+                "mqtt_topic": "my-sensor-data"
+            }
+        ]
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate()); // Invalid eom_delimiter.
+    ASSERT_TRUE(config.sensorPublish.enabled);
+    ASSERT_EQ(config.sensorPublish.settings.size(), 1);
+    const auto &settings = config.sensorPublish.settings[0];
+    ASSERT_FALSE(settings.enabled);
+}
+
+TEST_F(ConfigTestFixture, SensorPublishInvalidConfigNegativeIntegers)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "sensor-publish": {
+        "sensors": [
+            {
+                "addr": "/tmp/sensors/my-sensor-server",
+                "eom_delimiter": "[\r\n]+",
+                "mqtt_topic": "my-sensor-data",
+                "addr_poll_sec": -1,
+                "buffer_time_ms": -1,
+                "buffer_size": -1,
+                "heartbeat_time_sec": -1
+            }
+        ]
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate()); // Invalid integer values.
+    ASSERT_TRUE(config.sensorPublish.enabled);
+    ASSERT_EQ(config.sensorPublish.settings.size(), 1);
+    const auto &settings = config.sensorPublish.settings[0];
+    ASSERT_FALSE(settings.enabled);
+}
+
+TEST_F(ConfigTestFixture, SensorPublishInvalidConfigBufferCapacityTooSmall)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "sensor-publish": {
+        "sensors": [
+            {
+                "addr": "/tmp/sensors/my-sensor-server",
+                "eom_delimiter": "[\r\n]+",
+                "mqtt_topic": "my-sensor-data",
+                "buffer_capacity": 1
+            }
+        ]
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate()); // Buffer capacity too small.
+    ASSERT_TRUE(config.sensorPublish.enabled);
+    ASSERT_EQ(config.sensorPublish.settings.size(), 1);
+    const auto &settings = config.sensorPublish.settings[0];
+    ASSERT_FALSE(settings.enabled);
+}
+
+TEST_F(ConfigTestFixture, SensorPublishDisableFeature)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "sensor-publish": {
+        "sensors": [
+            {
+                "enabled": false,
+                "addr": "/tmp/sensors/my-sensor-server",
+                "eom_delimiter": "[\r\n]+",
+                "mqtt_topic": "my-sensor-data"
+            }
+        ]
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate()); // All sensors disabled, then disable feature.
+    ASSERT_FALSE(config.sensorPublish.enabled);
+    ASSERT_EQ(config.sensorPublish.settings.size(), 1);
+    const auto &settings = config.sensorPublish.settings[0];
+    ASSERT_FALSE(settings.enabled);
 }
 
 TEST(Config, MemoryTrace)

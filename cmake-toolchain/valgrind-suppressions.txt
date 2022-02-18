@@ -1,0 +1,16 @@
+{
+   SensorTest.ScanEomOneMatch.clangpp
+   Memcheck:Cond
+   fun:_ZNKSt7__cxx1114regex_iteratorIPKccNS_12regex_traitsIcEEEeqERKS5_
+   fun:_ZNKSt7__cxx1114regex_iteratorIPKccNS_12regex_traitsIcEEEneERKS5_
+   fun:_ZN3Aws3Iot12DeviceClient13SensorPublish6Sensor18onReadableCallbackEi
+   fun:_ZN10MockSensor23call_onReadableCallbackEi
+   fun:_ZN31SensorTest_ScanEomOneMatch_Test8TestBodyEv
+   fun:_ZN7testing8internal38HandleSehExceptionsInMethodIfSupportedINS_4TestEvEET0_PT_MS4_FS3_vEPKc
+   fun:_ZN7testing8internal35HandleExceptionsInMethodIfSupportedINS_4TestEvEET0_PT_MS4_FS3_vEPKc
+   fun:_ZN7testing4Test3RunEv
+   fun:_ZN7testing8TestInfo3RunEv
+   fun:_ZN7testing9TestSuite3RunEv
+   fun:_ZN7testing8internal12UnitTestImpl11RunAllTestsEv
+   fun:_ZN7testing8internal38HandleSehExceptionsInMethodIfSupportedINS0_12UnitTestImplEbEET0_PT_MS4_FS3_vEPKc
+}

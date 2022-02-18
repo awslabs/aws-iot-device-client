@@ -25,6 +25,12 @@ namespace Aws
             {
               public:
                 virtual ~Feature() {}
+
+                /**
+                 * \brief Status code returned when feature is successfully started or stopped
+                 */
+                static constexpr int SUCCESS = 0;
+
                 /**
                  * \brief Start the feature
                  *
@@ -38,6 +44,7 @@ namespace Aws
                  * @return an integer representing the SUCCESS or FAILURE of the stop() operation on the feature
                  */
                 virtual int stop() = 0;
+
                 /**
                  * \brief For a given feature, returns its name
                  *

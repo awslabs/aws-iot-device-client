@@ -23,7 +23,7 @@ Log File  | 600 | **Yes**
 Job Handler | 700 | **Yes**
 Config File | 644 | **Recommended**
 Pub/Sub Files | 600 | **yes**
-
+Sensor Pubilsh Pathname Socket | 660 | **Yes**
 
 #### Recommended and Required permissions on directories storing respective files
 Directory     | Chmod Permissions | Required |

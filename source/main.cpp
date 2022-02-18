@@ -53,6 +53,12 @@
 #    endif
 #endif
 
+#if !defined(EXCLUDE_SENSOR_PUBLISH)
+
+#    include "sensor-publish/SensorPublishFeature.h"
+
+#endif
+
 #include <csignal>
 #include <memory>
 #include <thread>
@@ -81,6 +87,9 @@ using namespace Aws::Iot::DeviceClient::Samples;
 #endif
 #if !defined(EXCLUDE_SHADOW)
 using namespace Aws::Iot::DeviceClient::Shadow;
+#endif
+#if !defined(EXCLUDE_SENSOR_PUBLISH)
+using namespace Aws::Iot::DeviceClient::SensorPublish;
 #endif
 
 const char *TAG = "Main.cpp";
@@ -481,6 +490,31 @@ int main(int argc, char *argv[])
         LOG_INFO(TAG, "Pub Sub is disabled");
     }
 #    endif
+#endif
+
+#if !defined(EXCLUDE_SENSOR_PUBLISH)
+    unique_ptr<SensorPublishFeature> sensorPublish;
+    if (config.config.sensorPublish.enabled)
+    {
+        LOG_INFO(TAG, "Sensor Publish is enabled");
+        sensorPublish = unique_ptr<SensorPublishFeature>(new SensorPublishFeature());
+        sensorPublish->init(resourceManager, listener, config.config);
+        features.push_back(sensorPublish.get());
+    }
+    else
+    {
+        LOG_INFO(TAG, "Sensor Publish is disabled");
+    }
+#else
+    if (config.config.sensorPublish.enabled)
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Sensor Publish configuration is enabled but feature is not compiled into binary.",
+            DC_FATAL_ERROR);
+        LoggerFactory::getLoggerInstance()->shutdown();
+        deviceClientAbort("Invalid configuration");
+    }
 #endif
 
     resourceManager->startDeviceClientFeatures();
