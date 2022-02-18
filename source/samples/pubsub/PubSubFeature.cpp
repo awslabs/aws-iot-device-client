@@ -34,7 +34,7 @@ string PubSubFeature::getName()
     return "Pub Sub Sample";
 }
 
-bool PubSubFeature::createPubSub(const PlainConfig &config, std::string filePath)
+bool PubSubFeature::createPubSub(const PlainConfig &config, std::string filePath, const aws_byte_buf *payload)
 {
     std::string pubSubFileDir = FileUtils::ExtractParentDirectory(filePath);
     LOGM_INFO(TAG, "Creating Pub/Sub file: %s", filePath.c_str());
@@ -68,6 +68,11 @@ bool PubSubFeature::createPubSub(const PlainConfig &config, std::string filePath
         if (!FileUtils::CreateEmptyFileWithPermissions(filePath, S_IRUSR | S_IWUSR))
         {
             return false;
+        }
+        // Write payload data in newly created empty file.
+        if (payload != NULL)
+        {
+            FileUtils::WriteToFile(filePath, payload);
         }
     }
     else
@@ -106,7 +111,10 @@ int PubSubFeature::init(
     }
     pubFile = FileUtils::ExtractExpandedPath(pubFile);
 
-    if (!createPubSub(config, pubFile))
+    ByteBuf payload;
+    payload = aws_byte_buf_from_c_str(DEFAULT_PUBLISH_PAYLOAD.c_str());
+
+    if (!createPubSub(config, pubFile, &payload))
     {
         LOG_ERROR(TAG, "Failed to create publish directory or file");
     }
@@ -117,7 +125,7 @@ int PubSubFeature::init(
     }
     subFile = FileUtils::ExtractExpandedPath(subFile);
 
-    if (!createPubSub(config, subFile))
+    if (!createPubSub(config, subFile, NULL))
     {
         LOG_ERROR(TAG, "Failed to create subscribe directory or file");
     }
@@ -152,12 +160,8 @@ int PubSubFeature::getPublishFileData(aws_byte_buf *buf)
 void PubSubFeature::publishFileData()
 {
     ByteBuf payload;
-    if (pubFile == "")
-    {
-        aws_byte_buf_init(&payload, resourceManager->getAllocator(), DEFAULT_PUBLISH_PAYLOAD.size());
-        aws_byte_buf_write(&payload, (uint8_t *)DEFAULT_PUBLISH_PAYLOAD.c_str(), DEFAULT_PUBLISH_PAYLOAD.size());
-    }
-    else if (getPublishFileData(&payload) != AWS_OP_SUCCESS)
+
+    if (getPublishFileData(&payload) != AWS_OP_SUCCESS)
     {
         LOG_ERROR(TAG, "Failed to read publish file... Skipping publish");
         return;
