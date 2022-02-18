@@ -174,7 +174,7 @@ else ()
     target_compile_options(${DC_PROJECT_NAME} PRIVATE -Wall -Wno-long-long -pedantic -Werror)
 endif ()
 
-set(DEP_DC_LIBS ${DEP_DC_LIBS} aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io aws-c-cal aws-c-http aws-c-compression aws-c-common aws-c-s3 aws-c-event-stream aws-checksums)
+set(DEP_DC_LIBS ${DEP_DC_LIBS} aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io aws-c-cal aws-c-http aws-c-compression aws-c-common aws-c-s3 aws-c-event-stream aws-checksums aws-c-sdkutils)
 
 if (UNIX AND NOT APPLE)
     set (DEP_DC_LIBS ${DEP_DC_LIBS} s2n)
