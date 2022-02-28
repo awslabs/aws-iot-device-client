@@ -23,10 +23,18 @@ using namespace Aws::Iot::DeviceClient::Logging;
 constexpr int SharedCrtResourceManager::DEFAULT_WAIT_TIME_SECONDS;
 constexpr char SharedCrtResourceManager::DEFAULT_SDK_LOG_FILE[];
 
+SharedCrtResourceManager::~SharedCrtResourceManager()
+{
+    if (memTraceLevel != AWS_MEMTRACE_NONE)
+    {
+        allocator = aws_mem_tracer_destroy(allocator);
+    }
+}
+
 bool SharedCrtResourceManager::initialize(const PlainConfig &config, vector<Feature *> *featuresList)
 {
     features = featuresList;
-    initializeAllocator();
+    initializeAllocator(config);
     initialized = buildClient(config) == SharedCrtResourceManager::SUCCESS;
     return initialized;
 }
@@ -152,9 +160,14 @@ bool SharedCrtResourceManager::setupLogging(const PlainConfig &config)
     return true;
 }
 
-void SharedCrtResourceManager::initializeAllocator()
+void SharedCrtResourceManager::initializeAllocator(const PlainConfig &config)
 {
-    allocator = aws_mem_tracer_new(aws_default_allocator(), nullptr, AWS_MEMTRACE_BYTES, 0);
+    allocator = aws_default_allocator();
+    if (config.memTraceLevel != AWS_MEMTRACE_NONE)
+    {
+        // If memTraceLevel == AWS_MEMTRACE_STACKS(2), then by default 8 frames per stack are used.
+        allocator = aws_mem_tracer_new(allocator, nullptr, config.memTraceLevel, 0);
+    }
 }
 
 int SharedCrtResourceManager::buildClient(const PlainConfig &config)

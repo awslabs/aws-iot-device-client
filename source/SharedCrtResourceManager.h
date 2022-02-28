@@ -40,7 +40,8 @@ namespace Aws
                 std::unique_ptr<Aws::Crt::Io::ClientBootstrap> clientBootstrap;
                 std::unique_ptr<Aws::Iot::MqttClient> mqttClient;
                 std::shared_ptr<Crt::Mqtt::MqttConnection> connection;
-                struct aws_allocator *allocator;
+                aws_allocator *allocator{nullptr};
+                aws_mem_trace_level memTraceLevel{AWS_MEMTRACE_NONE};
                 std::vector<Feature *> *features;
 
                 bool locateCredentials(const PlainConfig &config);
@@ -49,9 +50,11 @@ namespace Aws
 
                 int buildClient(const PlainConfig &config);
 
-                void initializeAllocator();
+                void initializeAllocator(const PlainConfig &config);
 
               public:
+                ~SharedCrtResourceManager();
+
                 /**
                  * \brief Full path to the default log file used by the AWS CRT SDK.
                  *
