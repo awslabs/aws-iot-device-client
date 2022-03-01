@@ -231,4 +231,4 @@ fi
 cmake --build . --target test-aws-iot-device-client
 
 ### Run Tests ###
-./test/test-aws-iot-device-client
+env AWS_CRT_MEMORY_TRACING=1 ./test/test-aws-iot-device-client
