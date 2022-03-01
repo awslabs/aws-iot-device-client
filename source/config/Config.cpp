@@ -1777,6 +1777,7 @@ bool Config::ExportDefaultSetting(const string &file)
     "%s": {
         "%s": false,
         "%s": "<replace_with_template_name>",
+        "%s": "<replace_with_template_parameters>",
         "%s": "<replace_with_csr_file_path>",
         "%s": "<replace_with_device_private_key_file_path>"
     },
