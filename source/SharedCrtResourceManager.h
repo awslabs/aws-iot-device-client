@@ -84,6 +84,8 @@ namespace Aws
                 Aws::Crt::Io::ClientBootstrap *getClientBootstrap();
 
                 void disconnect();
+
+                void dumpMemTrace();
             };
         } // namespace DeviceClient
     }     // namespace Iot

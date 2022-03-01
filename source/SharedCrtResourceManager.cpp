@@ -163,10 +163,11 @@ bool SharedCrtResourceManager::setupLogging(const PlainConfig &config)
 void SharedCrtResourceManager::initializeAllocator(const PlainConfig &config)
 {
     allocator = aws_default_allocator();
-    if (config.memTraceLevel != AWS_MEMTRACE_NONE)
+    memTraceLevel = config.memTraceLevel;
+    if (memTraceLevel != AWS_MEMTRACE_NONE)
     {
         // If memTraceLevel == AWS_MEMTRACE_STACKS(2), then by default 8 frames per stack are used.
-        allocator = aws_mem_tracer_new(allocator, nullptr, config.memTraceLevel, 0);
+        allocator = aws_mem_tracer_new(allocator, nullptr, memTraceLevel, 0);
     }
 }
 
@@ -429,5 +430,13 @@ void SharedCrtResourceManager::startDeviceClientFeatures()
     for (auto *feature : *features)
     {
         feature->start();
+    }
+}
+
+void SharedCrtResourceManager::dumpMemTrace()
+{
+    if (memTraceLevel != AWS_MEMTRACE_NONE)
+    {
+        aws_mem_tracer_dump(allocator);
     }
 }
