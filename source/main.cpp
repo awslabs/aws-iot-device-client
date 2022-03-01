@@ -87,7 +87,7 @@ const char *TAG = "Main.cpp";
 vector<Feature *> features;
 shared_ptr<SharedCrtResourceManager> resourceManager;
 mutex featuresReadWriteLock;
-bool attemptingShutdown;
+bool attemptingShutdown{false};
 Config config;
 
 /**
@@ -110,6 +110,8 @@ void shutdown()
             LOGM_DEBUG(TAG, "Attempting shutdown of %s", feature->getName().c_str());
             feature->stop();
         }
+
+        resourceManager->dumpMemTrace();
     }
     else
     {
@@ -299,6 +301,7 @@ int main(int argc, char *argv[])
     memset(&sigset, 0, sizeof(sigset_t));
     int received_signal;
     sigaddset(&sigset, SIGINT);
+    sigaddset(&sigset, SIGHUP);
     sigprocmask(SIG_BLOCK, &sigset, 0);
 
     shared_ptr<DefaultClientBaseNotifier> listener =
@@ -453,9 +456,14 @@ int main(int argc, char *argv[])
     {
         sigwait(&sigset, &received_signal);
         LOGM_INFO(TAG, "Received signal: (%d)", received_signal);
-        if (SIGINT == received_signal)
+        switch (received_signal)
         {
-            shutdown();
+            case SIGINT:
+                shutdown();
+                break;
+            case SIGHUP:
+                resourceManager->dumpMemTrace();
+                break;
         }
     }
 

@@ -92,6 +92,8 @@ namespace Aws
                 Aws::Crt::Optional<std::string> rootCa;
                 Aws::Crt::Optional<std::string> thingName;
 
+                aws_mem_trace_level memTraceLevel{AWS_MEMTRACE_NONE};
+
                 struct LogConfig : public LoadableFromJsonAndCliAndEnvironment
                 {
                     bool LoadFromJson(const Crt::JsonView &json) override;

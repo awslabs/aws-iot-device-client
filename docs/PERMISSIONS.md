@@ -27,7 +27,7 @@ Pub/Sub Files | 600 | **yes**
 
 #### Recommended and Required permissions on directories storing respective files
 Directory     | Chmod Permissions | Required |
-------------- | ------------- | ------------- 
+------------- | ------------- | -------------
 Directory Storing Private Key | 700 | **Yes**
 Directory Storing Public Certificates   | 700 | **Yes**
 Directory Storing Root Certificate Authority | 700 | **Yes**
@@ -37,5 +37,7 @@ Directory Storing Config Files | 745 | **Recommended**
 Directory Storing PubSub File  | 745 | **Yes**
 
 *Note: It is worth noting here that files are directories storing these files created by AWS IoT Device Client will have the above mentioned permissions set by default*
+
+**Next**: [Environment Variables](ENV.md)
 
 [*Back To The Top*](#permissions)
