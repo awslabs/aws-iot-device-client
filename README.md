@@ -107,17 +107,17 @@ cmake --build . --target test-aws-iot-device-client
 [Advanced Compilation](docs/COMPILATION.md)
 
 ## Setup and Configuration
-[Setting Up The Device Client](docs/SETUP.md)
-[Configuring the AWS IoT Device Client](docs/CONFIG.md)
-[File and Directory Permission Requirements](docs/PERMISSIONS.md)
-[Environment Variables](docs/ENV.md)
+* [Setting Up The Device Client](docs/SETUP.md)
+* [Configuring the AWS IoT Device Client](docs/CONFIG.md)
+* [File and Directory Permission Requirements](docs/PERMISSIONS.md)
+* [Environment Variables](docs/ENV.md)
 
 ## AWS IoT Features
-[Jobs Feature Readme](source/jobs/README.md)
-[Fleet Provisioning Feature Readme](source/fleetprovisioning/README.md)
-[Device Defender Feature Readme](source/devicedefender/README.md)
-[Secure Tunneling Feature Readme](source/tunneling/README.md)
-[Named Shadow Feature Readme](source/shadow/README.md)
+* [Jobs Feature Readme](source/jobs/README.md)
+* [Fleet Provisioning Feature Readme](source/fleetprovisioning/README.md)
+* [Device Defender Feature Readme](source/devicedefender/README.md)
+* [Secure Tunneling Feature Readme](source/tunneling/README.md)
+* [Named Shadow Feature Readme](source/shadow/README.md)
 
 ## AWS IoT Device Client Samples
 [MQTT Pub/Sub Sample Feature](source/samples/pubsub/README.md)
