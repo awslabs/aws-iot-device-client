@@ -6,8 +6,11 @@
 #include "../../source/util/UniqueString.h"
 
 #include <regex>
+#include <string>
+#include <vector>
 
 #include "gtest/gtest.h"
+#include <aws/common/allocator.h>
 #include <aws/crt/JsonObject.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -675,4 +678,24 @@ TEST_F(ConfigTestFixture, SampleShadowCli)
     ASSERT_STREQ(outputFilePath.c_str(), config.sampleShadow.shadowOutputFile->c_str());
     remove(inputFilePath.c_str());
     remove(outputFilePath.c_str());
+}
+
+TEST(Config, MemoryTrace)
+{
+    PlainConfig config;
+
+    // Test all permutations of memory trace set through the environment.
+    vector<aws_mem_trace_level> levels{
+        AWS_MEMTRACE_NONE,
+        AWS_MEMTRACE_BYTES,
+        AWS_MEMTRACE_STACKS,
+    };
+
+    for (const auto &level : levels)
+    {
+        auto levelstr = std::to_string(level);
+        ::setenv("AWS_CRT_MEMORY_TRACING", levelstr.c_str(), 1);
+        ASSERT_TRUE(config.LoadFromEnvironment()) << "read AWS_CRT_MEMORY_TRACING=" << level;
+        ASSERT_EQ(config.memTraceLevel, level);
+    }
 }

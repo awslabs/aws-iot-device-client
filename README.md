@@ -21,10 +21,10 @@
   * [Additional Resources](#additional-resources)
   * [Security](#security)
   * [License](#license)
-    
+
 ## Introduction
 *__Sections:__*
-* [Current Capabilities](#current-capabilities) 
+* [Current Capabilities](#current-capabilities)
 * [List of Supported Platforms](#list-of-supported-platforms)
 
 [*Back To The Top*](#aws-iot-device-client)
@@ -35,7 +35,7 @@ The AWS IoT Device Client is free, open-source, modular software written in C++ 
   Management](https://aws.amazon.com/iot-device-management/), and [AWS IoT Device
   Defender](https://aws.amazon.com/iot-device-defender) features by default. It serves as a reference implementation for your IoT devices to work with AWS IoT
    services, with operational best practices baked in – using it is the easiest way to create a proof-of-concept (PoC) for your IoT project. What’s more, since it is open-source, you can modify it to fit your business needs, or optimize it when you wish to scale up from a PoC to production.
-    
+
 ### Current Capabilities
 The modular IoT Device Client consists of a “base client” and discrete “client-side features” that support the following:
 * The base client handles MQTT connectivity with AWS IoT core - it enables your IoT device to automatically
@@ -48,7 +48,7 @@ The modular IoT Device Client consists of a “base client” and discrete “cl
  Detect feature](https://docs.aws.amazon.com/iot/latest/developerguide/detect-device-side-metrics.html) in the AWS IoT Device Defender service.
 * The client-side Fleet Provisioning feature enables you to replace provisional credentials with device-specific ones
   when you onboard a fleet of devices using the [Fleet Provisioning capability](https://docs.aws.amazon.com/iot/latest/developerguide/provision-wo-cert.html) of AWS IoT Core. It creates a device specific certificate and private key, and registers the device on AWS IoT Core.
-* The client-side Named Shadows feature enables you to control your IoT device using [AWS IoT Named Shadows](https://docs.aws.amazon.com/iot/latest/developerguide/iot-device-shadows.html). Shadows can store your device's state information and make it available to your device, AWS IoT services, your custom  apps and other AWS services whether the device is online and connected to AWS IoT or not.  
+* The client-side Named Shadows feature enables you to control your IoT device using [AWS IoT Named Shadows](https://docs.aws.amazon.com/iot/latest/developerguide/iot-device-shadows.html). Shadows can store your device's state information and make it available to your device, AWS IoT services, your custom  apps and other AWS services whether the device is online and connected to AWS IoT or not.
 ### List of Supported Platforms
 The AWS IoT Device Client currently works on IoT devices with common microprocessors (x86_64, ARM architectures), and common Linux software environments (Debian, Ubuntu, and RHEL).
 
@@ -73,8 +73,8 @@ The AWS IoT Device Client currently works on IoT devices with common microproces
 ### Building from source
 
 To use the AWS IoT Device Client, you'll need to compile an executable using the source code provided by this
-repository. Below, you'll find instructions for how to build the AWS IoT Device Client for your target machine. 
- 
+repository. Below, you'll find instructions for how to build the AWS IoT Device Client for your target machine.
+
 ### Quick Start
 
 The following commands should work for most users when you plan to run the AWS IoT Device Client on the same machine
@@ -101,22 +101,23 @@ cd ../
 ```
 cmake ../
 cmake --build . --target test-aws-iot-device-client
-./build/test/test-aws-iot-device-client 
+./build/test/test-aws-iot-device-client
 ```
 ### Advanced Compilation
 [Advanced Compilation](docs/COMPILATION.md)
 
 ## Setup and Configuration
-[Setting Up The Device Client](docs/SETUP.md)  
-[Configuring the AWS IoT Device Client](docs/CONFIG.md)  
-[File and Directory Permission Requirements](docs/PERMISSIONS.md)
+* [Setting Up The Device Client](docs/SETUP.md)
+* [Configuring the AWS IoT Device Client](docs/CONFIG.md)
+* [File and Directory Permission Requirements](docs/PERMISSIONS.md)
+* [Environment Variables](docs/ENV.md)
 
 ## AWS IoT Features
-[Jobs Feature Readme](source/jobs/README.md)  
-[Fleet Provisioning Feature Readme](source/fleetprovisioning/README.md)  
-[Device Defender Feature Readme](source/devicedefender/README.md)  
-[Secure Tunneling Feature Readme](source/tunneling/README.md)  
-[Named Shadow Feature Readme](source/shadow/README.md)
+* [Jobs Feature Readme](source/jobs/README.md)
+* [Fleet Provisioning Feature Readme](source/fleetprovisioning/README.md)
+* [Device Defender Feature Readme](source/devicedefender/README.md)
+* [Secure Tunneling Feature Readme](source/tunneling/README.md)
+* [Named Shadow Feature Readme](source/shadow/README.md)
 
 ## AWS IoT Device Client Samples
 [MQTT Pub/Sub Sample Feature](source/samples/pubsub/README.md)
