@@ -77,8 +77,8 @@
 #include "../config/Config.h"
 #include "FileLogger.h"
 #include "Logger.h"
-#include "StdOutLogger.h"
 #include "StdOutFileLogger.h"
+#include "StdOutLogger.h"
 #include <chrono>
 #include <memory>
 

@@ -125,8 +125,8 @@ void StdOutFileLogger::writeLogMessage(unique_ptr<LogMessage> message)
 
     *outputStream << time_buffer << " " << LogLevelMarshaller::ToString(message->getLevel()) << " {"
                   << message->getTag() << "}: " << message->getMessage() << endl;
-    cout << time_buffer << " " << LogLevelMarshaller::ToString(message->getLevel()) << " {"
-         << message->getTag() << "}: " << message->getMessage() << endl;
+    cout << time_buffer << " " << LogLevelMarshaller::ToString(message->getLevel()) << " {" << message->getTag()
+         << "}: " << message->getMessage() << endl;
     outputStream->flush();
 }
 
@@ -181,5 +181,3 @@ void StdOutFileLogger::flush()
         }
     }
 }
-
-

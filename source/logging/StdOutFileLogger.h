@@ -83,7 +83,6 @@ namespace Aws
                     void run();
 
                   protected:
-
                     virtual void queueLog(
                         LogLevel level,
                         const char *tag,
@@ -114,7 +113,7 @@ namespace Aws
                 };
             } // namespace Logging
         }     // namespace DeviceClient
-    }  // namespace IoT
-}  // namespace AWS
+    }         // namespace Iot
+} // namespace Aws
 
 #endif // DEVICE_CLIENT_STDOUTFILELOGGER_H
