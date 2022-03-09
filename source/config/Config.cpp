@@ -344,6 +344,7 @@ bool PlainConfig::Validate() const
 
 constexpr char PlainConfig::LogConfig::LOG_TYPE_FILE[];
 constexpr char PlainConfig::LogConfig::LOG_TYPE_STDOUT[];
+constexpr char PlainConfig::LogConfig::LOG_TYPE_STDOUT_FILE[];
 
 constexpr char PlainConfig::LogConfig::CLI_LOG_LEVEL[];
 constexpr char PlainConfig::LogConfig::CLI_LOG_TYPE[];
@@ -438,13 +439,18 @@ string PlainConfig::LogConfig::ParseDeviceClientLogType(string value)
     {
         return LOG_TYPE_STDOUT;
     }
+    else if (LOG_TYPE_STDOUT_FILE == temp)
+    {
+        return LOG_TYPE_STDOUT_FILE;
+    }
     else
     {
         throw std::invalid_argument(FormatMessage(
-            "Provided log type %s is not a known log type. Acceptable values are: [%s, %s]",
+            "Provided log type %s is not a known log type. Acceptable values are: [%s, %s, %s]",
             Sanitize(value).c_str(),
             LOG_TYPE_FILE,
-            LOG_TYPE_STDOUT));
+            LOG_TYPE_STDOUT,
+            LOG_TYPE_STDOUT_FILE));
     }
 }
 

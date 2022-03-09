@@ -106,6 +106,7 @@ namespace Aws
 
                     static constexpr char LOG_TYPE_FILE[] = "file";
                     static constexpr char LOG_TYPE_STDOUT[] = "stdout";
+                    static constexpr char LOG_TYPE_STDOUT_FILE[] = "stdout_file";
 
                     static constexpr char CLI_LOG_LEVEL[] = "--log-level";
                     static constexpr char CLI_LOG_TYPE[] = "--log-type";

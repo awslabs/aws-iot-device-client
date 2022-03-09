@@ -78,6 +78,7 @@
 #include "FileLogger.h"
 #include "Logger.h"
 #include "StdOutLogger.h"
+#include "StdOutFileLogger.h"
 #include <chrono>
 #include <memory>
 

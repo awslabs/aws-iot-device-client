@@ -33,5 +33,14 @@ bool LoggerFactory::reconfigure(const PlainConfig &config)
         logger.reset(new StdOutLogger);
         logger->setLogQueue(std::move(logQueue));
     }
+    else if (
+        config.logConfig.deviceClientLogtype == config.logConfig.LOG_TYPE_STDOUT_FILE &&
+        dynamic_cast<StdOutFileLogger *>(logger.get()) == nullptr)
+    {
+        logger->stop();
+        unique_ptr<LogQueue> logQueue = logger->takeLogQueue();
+        logger.reset(new StdOutFileLogger);
+        logger->setLogQueue(std::move(logQueue));
+    }
     return logger->start(config);
 }
