@@ -73,7 +73,7 @@ void DeviceDefenderFeature::startDeviceDefender()
         onRecvData,
         onSubAck);
     resourceManager->getConnection()->Subscribe(
-        FormatMessage(messageFormat, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_ACCEPTED).c_str(),
+        FormatMessage(messageFormat, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_REJECTED).c_str(),
         AWS_MQTT_QOS_AT_LEAST_ONCE,
         onRecvData,
         onSubAck);
@@ -90,7 +90,7 @@ void DeviceDefenderFeature::stopDeviceDefender()
     resourceManager->getConnection()->Unsubscribe(
         FormatMessage(messageFormat, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_ACCEPTED).c_str(), onUnsubscribe);
     resourceManager->getConnection()->Unsubscribe(
-        FormatMessage(messageFormat, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_ACCEPTED).c_str(), onUnsubscribe);
+        FormatMessage(messageFormat, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_REJECTED).c_str(), onUnsubscribe);
     LOGM_DEBUG(TAG, "%s StopTask() async called", getName().c_str());
 }
 
