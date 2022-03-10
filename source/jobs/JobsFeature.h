@@ -41,7 +41,6 @@ namespace Aws
                      * to be provided in a StatusDetail entry when calling the UpdateJobExecution API
                      */
                     const size_t MAX_STATUS_DETAIL_LENGTH = 1024;
-                    const int UPDATE_JOB_EXECUTION_REJECTED_CODE = -1;
                     const std::string DEFAULT_JOBS_HANDLER_DIR = "~/.aws-iot-device-client/jobs/";
 
                     /**
