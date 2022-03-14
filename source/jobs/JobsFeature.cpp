@@ -326,7 +326,7 @@ void JobsFeature::updateJobExecutionStatusAcceptedHandler(Iotjobs::UpdateJobExec
     }
 
     LOGM_DEBUG(TAG, "Removing ClientToken %s from the updateJobExecution promises map", clientToken.c_str());
-    keyValuePair->second.set_value(0);
+    keyValuePair->second.set_value(ACCEPTED);
 }
 
 void JobsFeature::updateJobExecutionStatusRejectedHandler(Iotjobs::RejectedError *rejectedError, int ioError)
@@ -342,14 +342,14 @@ void JobsFeature::updateJobExecutionStatusRejectedHandler(Iotjobs::RejectedError
         LOG_WARN(TAG, "Received an UpdateJobExecution rejected error with no ClientToken! Unable to update promise");
         return;
     }
-    int responseCode = -1;
+    UpdateJobExecutionResponseType responseCode = NON_RETRYABLE_ERROR;
     Iotjobs::RejectedErrorCode rejectedErrorCode = rejectedError->Code.value();
 
     if (rejectedErrorCode != Iotjobs::RejectedErrorCode::RequestThrottled &&
         rejectedErrorCode != Iotjobs::RejectedErrorCode::ResourceNotFound &&
         rejectedErrorCode != Iotjobs::RejectedErrorCode::InternalError)
     {
-        responseCode = 1;
+        responseCode = RETRYABLE_ERROR;
     }
 
     Aws::Crt::String clientToken = rejectedError->ClientToken.value();
@@ -448,8 +448,8 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         string clientToken = UniqueString::GetRandomToken(10);
         request.ClientToken = Aws::Crt::Optional<Aws::Crt::String>(clientToken.c_str());
         unique_lock<mutex> writeLock(updateJobExecutionPromisesLock);
-        this->updateJobExecutionPromises.insert(std::pair<Aws::Crt::String, EphemeralPromise<int>>(
-            clientToken.c_str(), EphemeralPromise<int>(std::chrono::milliseconds(15 * 1000))));
+        this->updateJobExecutionPromises.insert(std::pair<Aws::Crt::String, EphemeralPromise<UpdateJobExecutionResponseType>>(
+            clientToken.c_str(), EphemeralPromise<UpdateJobExecutionResponseType>(std::chrono::milliseconds(15 * 1000))));
         writeLock.unlock();
         LOGM_DEBUG(
             TAG,
@@ -461,7 +461,7 @@ void JobsFeature::publishUpdateJobExecutionStatus(
             AWS_MQTT_QOS_AT_LEAST_ONCE,
             std::bind(&JobsFeature::ackUpdateJobExecutionStatus, this, std::placeholders::_1));
         unique_lock<mutex> futureLock(updateJobExecutionPromisesLock);
-        future<int> updateFuture = this->updateJobExecutionPromises.at(clientToken.c_str()).get_future();
+        future<UpdateJobExecutionResponseType> updateFuture = this->updateJobExecutionPromises.at(clientToken.c_str()).get_future();
         futureLock.unlock();
         bool finished = false;
         // Although this entire block will be retried based on the retryConfig, we're only waiting for a maximum of 10
@@ -473,9 +473,9 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         else
         {
             int responseCode = updateFuture.get();
-            if (responseCode != 0)
+            if (responseCode != ACCEPTED)
             {
-                if (responseCode == 1)
+                if (responseCode == NON_RETRYABLE_ERROR)
                 {
                     LOGM_ERROR(
                         TAG,
