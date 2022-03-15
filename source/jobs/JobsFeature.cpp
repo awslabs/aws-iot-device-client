@@ -326,7 +326,7 @@ void JobsFeature::updateJobExecutionStatusAcceptedHandler(Iotjobs::UpdateJobExec
     }
 
     LOGM_DEBUG(TAG, "Removing ClientToken %s from the updateJobExecution promises map", clientToken.c_str());
-    keyValuePair->second.set_value(0);
+    keyValuePair->second.set_value(ACCEPTED);
 }
 
 void JobsFeature::updateJobExecutionStatusRejectedHandler(Iotjobs::RejectedError *rejectedError, int ioError)
@@ -342,6 +342,15 @@ void JobsFeature::updateJobExecutionStatusRejectedHandler(Iotjobs::RejectedError
         LOG_WARN(TAG, "Received an UpdateJobExecution rejected error with no ClientToken! Unable to update promise");
         return;
     }
+    UpdateJobExecutionResponseType responseCode = NON_RETRYABLE_ERROR;
+    Iotjobs::RejectedErrorCode rejectedErrorCode = rejectedError->Code.value();
+
+    if (rejectedErrorCode != Iotjobs::RejectedErrorCode::RequestThrottled &&
+        rejectedErrorCode != Iotjobs::RejectedErrorCode::ResourceNotFound &&
+        rejectedErrorCode != Iotjobs::RejectedErrorCode::InternalError)
+    {
+        responseCode = RETRYABLE_ERROR;
+    }
 
     Aws::Crt::String clientToken = rejectedError->ClientToken.value();
     unique_lock<mutex> readLock(updateJobExecutionPromisesLock);
@@ -350,7 +359,7 @@ void JobsFeature::updateJobExecutionStatusRejectedHandler(Iotjobs::RejectedError
         LOGM_ERROR(TAG, "Could not find matching promise for ClientToken: %s", clientToken.c_str());
     }
 
-    updateJobExecutionPromises.at(clientToken).set_value(UPDATE_JOB_EXECUTION_REJECTED_CODE);
+    updateJobExecutionPromises.at(clientToken).set_value(responseCode);
 }
 
 void JobsFeature::publishUpdateJobExecutionStatus(
@@ -439,12 +448,14 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         string clientToken = UniqueString::GetRandomToken(10);
         request.ClientToken = Aws::Crt::Optional<Aws::Crt::String>(clientToken.c_str());
         unique_lock<mutex> writeLock(updateJobExecutionPromisesLock);
-        this->updateJobExecutionPromises.insert(std::pair<Aws::Crt::String, EphemeralPromise<int>>(
-            clientToken.c_str(), EphemeralPromise<int>(std::chrono::milliseconds(15 * 1000))));
+        this->updateJobExecutionPromises.insert(
+            std::pair<Aws::Crt::String, EphemeralPromise<UpdateJobExecutionResponseType>>(
+                clientToken.c_str(),
+                EphemeralPromise<UpdateJobExecutionResponseType>(std::chrono::milliseconds(15 * 1000))));
         writeLock.unlock();
         LOGM_DEBUG(
             TAG,
-            "Created EphermalPromise for ClientToken %s in the updateJobExecution promises map",
+            "Created EphemeralPromise for ClientToken %s in the updateJobExecution promises map",
             clientToken.c_str());
 
         this->jobsClient->PublishUpdateJobExecution(
@@ -452,34 +463,47 @@ void JobsFeature::publishUpdateJobExecutionStatus(
             AWS_MQTT_QOS_AT_LEAST_ONCE,
             std::bind(&JobsFeature::ackUpdateJobExecutionStatus, this, std::placeholders::_1));
         unique_lock<mutex> futureLock(updateJobExecutionPromisesLock);
-        future<int> updateFuture = this->updateJobExecutionPromises.at(clientToken.c_str()).get_future();
+        future<UpdateJobExecutionResponseType> updateFuture =
+            this->updateJobExecutionPromises.at(clientToken.c_str()).get_future();
         futureLock.unlock();
-        bool success = false;
+        bool finished = false;
         // Although this entire block will be retried based on the retryConfig, we're only waiting for a maximum of 10
         // seconds for each individual response
         if (std::future_status::timeout == updateFuture.wait_for(std::chrono::seconds(10)))
         {
-            LOG_WARN(TAG, "Timeout waiting for ack from PublishUpdateJobExecution");
+            LOGM_WARN(TAG, "Timeout waiting for ack from PublishUpdateJobExecution for job %s", data.JobId->c_str());
         }
         else
         {
             int responseCode = updateFuture.get();
-            if (responseCode != 0)
+            if (responseCode != ACCEPTED)
             {
-                LOGM_WARN(
-                    TAG,
-                    "Received a non-zero response after publishing an UpdateJobExecution request: %d",
-                    responseCode);
+                if (responseCode == NON_RETRYABLE_ERROR)
+                {
+                    LOGM_ERROR(
+                        TAG,
+                        "Received a non-retryable error response after publishing an UpdateJobExecution request for "
+                        "job %s",
+                        data.JobId->c_str());
+                    finished = true;
+                }
+                else
+                {
+                    LOGM_WARN(
+                        TAG,
+                        "Received a retryable error response after publishing an UpdateJobExecution request for job %s",
+                        data.JobId->c_str());
+                }
             }
             else
             {
                 LOGM_DEBUG(TAG, "Success response after UpdateJobExecution for job %s", data.JobId->c_str());
-                success = true;
+                finished = true;
             }
         }
         unique_lock<mutex> eraseLock(updateJobExecutionPromisesLock);
         this->updateJobExecutionPromises.erase(clientToken.c_str());
-        return success;
+        return finished;
     };
     std::thread updateJobExecutionThread([retryConfig, publishLambda, onCompleteCallback] {
         Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);

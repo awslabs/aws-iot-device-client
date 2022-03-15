@@ -41,7 +41,6 @@ namespace Aws
                      * to be provided in a StatusDetail entry when calling the UpdateJobExecution API
                      */
                     const size_t MAX_STATUS_DETAIL_LENGTH = 1024;
-                    const int UPDATE_JOB_EXECUTION_REJECTED_CODE = -1;
                     const std::string DEFAULT_JOBS_HANDLER_DIR = "~/.aws-iot-device-client/jobs/";
 
                     /**
@@ -57,10 +56,23 @@ namespace Aws
                      * \brief A lock used to control access to the map of EphemeralPromise
                      */
                     std::mutex updateJobExecutionPromisesLock;
+
+                    /**
+                     * \brief An enum used for UpdateJobExecution responses
+                     */
+                    enum UpdateJobExecutionResponseType
+                    {
+                        ACCEPTED,
+                        RETRYABLE_ERROR,
+                        NON_RETRYABLE_ERROR
+                    };
+
                     /**
                      * \brief Allows us to map UpdateJobExecution responses back to their original request
                      */
-                    Aws::Crt::Map<Aws::Crt::String, Aws::Iot::DeviceClient::Jobs::EphemeralPromise<int>>
+                    Aws::Crt::Map<
+                        Aws::Crt::String,
+                        Aws::Iot::DeviceClient::Jobs::EphemeralPromise<UpdateJobExecutionResponseType>>
                         updateJobExecutionPromises;
 
                     std::mutex latestJobsNotificationLock;
