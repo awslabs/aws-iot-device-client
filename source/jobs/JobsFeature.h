@@ -60,7 +60,7 @@ namespace Aws
                     /**
                      * \brief An enum used for UpdateJobExecution responses
                      */
-                     enum UpdateJobExecutionResponseType
+                    enum UpdateJobExecutionResponseType
                     {
                         ACCEPTED,
                         RETRYABLE_ERROR,
@@ -70,7 +70,9 @@ namespace Aws
                     /**
                      * \brief Allows us to map UpdateJobExecution responses back to their original request
                      */
-                    Aws::Crt::Map<Aws::Crt::String, Aws::Iot::DeviceClient::Jobs::EphemeralPromise<UpdateJobExecutionResponseType>>
+                    Aws::Crt::Map<
+                        Aws::Crt::String,
+                        Aws::Iot::DeviceClient::Jobs::EphemeralPromise<UpdateJobExecutionResponseType>>
                         updateJobExecutionPromises;
 
                     std::mutex latestJobsNotificationLock;
