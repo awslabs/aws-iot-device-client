@@ -23,10 +23,10 @@ cmake ../ -DCMAKE_TOOLCHAIN_FILE=<Path/To/Build/Toolchain/File>
 ```
 The last dependency you'll need cross compiled is **openssl**.  This one is slightly more complicated but can be done as follows:  *(This example is from our build process, replace the information in carets.  While we happen to be linking against OpenSSL 1.1.1 in this example since our target device uses OpenSSL 1.1.1 for its TLS implementation, you'll want to replace this with whatever TLS implementation is present on your target device.)*
 ```
-wget https://www.openssl.org/source/openssl-1.1.1.tar.gz
-tar -xvzf openssl-1.1.1.tar.gz
+wget https://www.openssl.org/source/openssl-1.1.1n.tar.gz
+tar -xvzf openssl-1.1.1n.tar.gz
 export INSTALL_DIR=</Path/To/Install/Dir>
-cd openssl-1.1.1
+cd openssl-1.1.1n
 ./Configure <Platform> shared \
     --prefix=$INSTALL_DIR --openssldir=$INSTALL_DIR/openssl \
     --cross-compile-prefix=</Compiler/Prefix/Path> 

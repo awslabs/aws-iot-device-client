@@ -17,9 +17,9 @@ RUN apt-get update -qq \
 # Install OpenSSL 1.1.1
 ###############################################################################
 WORKDIR /tmp
-RUN wget https://www.openssl.org/source/openssl-1.1.1.tar.gz \
-    && tar -zxvf openssl-1.1.1.tar.gz \
-    && cd openssl-1.1.1 \
+RUN wget https://www.openssl.org/source/openssl-1.1.1n.tar.gz \
+    && tar -zxvf openssl-1.1.1n.tar.gz \
+    && cd openssl-1.1.1n \
     && ./config \
     && make \
     && make install \
@@ -57,7 +57,7 @@ RUN mkdir sdk-cpp-workspace \
     && cd sdk-cpp-workspace \
     && git clone https://github.com/aws/aws-iot-device-sdk-cpp-v2.git \
     && cd aws-iot-device-sdk-cpp-v2 \
-    && git checkout 15bb0b2123b0ab0a85e866c6e8d5b2713a923370 \
+    && git checkout 3223ce81919bff882014bcc57fd5348f758397bc \
     && git submodule update --init --recursive \
     && cd .. \
     && mkdir aws-iot-device-sdk-cpp-v2-build \

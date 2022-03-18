@@ -111,10 +111,10 @@ case $compileMode in
     apt-get install --assume-yes g++-arm-linux-gnueabihf
     apt-get install --assume-yes gcc-arm-linux-gnueabihf
     apt-get install --assume-yes gdb-multiarch
-    wget https://www.openssl.org/source/openssl-1.1.1.tar.gz
-    tar -xvzf openssl-1.1.1.tar.gz
+    wget https://www.openssl.org/source/openssl-1.1.1n.tar.gz
+    tar -xvzf openssl-1.1.1n.tar.gz
     export INSTALL_DIR=/usr/lib/arm-linux-gnueabihf
-    cd openssl-1.1.1
+    cd openssl-1.1.1n
     ./Configure linux-generic32 shared \
       --prefix=$INSTALL_DIR --openssldir=$INSTALL_DIR/openssl \
       --cross-compile-prefix=/usr/bin/arm-linux-gnueabihf-
@@ -149,10 +149,10 @@ case $compileMode in
     apt-get install --assume-yes g++-mips-linux-gnu
     apt-get install --assume-yes gcc-mips-linux-gnu
     apt-get install --assume-yes gdb-multiarch
-    wget https://www.openssl.org/source/openssl-1.1.1.tar.gz
-    tar -xvzf openssl-1.1.1.tar.gz
+    wget https://www.openssl.org/source/openssl-1.1.1n.tar.gz
+    tar -xvzf openssl-1.1.1n.tar.gz
     export INSTALL_DIR=/usr/lib/mips-linux-gnu
-    cd openssl-1.1.1
+    cd openssl-1.1.1n
     ./Configure linux-mips32 shared \
       --prefix=$INSTALL_DIR --openssldir=$INSTALL_DIR/openssl \
       --cross-compile-prefix=/usr/bin/mips-linux-gnu-
@@ -182,10 +182,10 @@ case $compileMode in
     apt-get install --assume-yes g++-aarch64-linux-gnu
     apt-get install --assume-yes gcc-aarch64-linux-gnu
     apt-get install --assume-yes gdb-multiarch
-    wget https://www.openssl.org/source/openssl-1.1.1.tar.gz
-    tar -xvzf openssl-1.1.1.tar.gz
+    wget https://www.openssl.org/source/openssl-1.1.1n.tar.gz
+    tar -xvzf openssl-1.1.1n.tar.gz
     export INSTALL_DIR=/usr/lib/aarch64-linux-gnu
-    cd openssl-1.1.1
+    cd openssl-1.1.1n
     ./Configure linux-aarch64 shared \
       --prefix=$INSTALL_DIR --openssldir=$INSTALL_DIR/openssl \
       --cross-compile-prefix=/usr/bin/aarch64-linux-gnu-
