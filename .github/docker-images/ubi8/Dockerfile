@@ -1,5 +1,7 @@
 FROM registry.redhat.io/ubi8/ubi
 
+ARG OPENSSL_VERSION=1.1.1n
+
 ###############################################################################
 # Install prereqs
 ###############################################################################
@@ -32,9 +34,9 @@ RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3
 # Install OpenSSL 1.1.1
 ###############################################################################
 WORKDIR /tmp
-RUN wget https://www.openssl.org/source/openssl-1.1.1n.tar.gz \
-    && tar -zxvf openssl-1.1.1n.tar.gz \
-    && cd openssl-1.1.1n \
+RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
+    && tar -zxvf openssl-${OPENSSL_VERSION}.tar.gz \
+    && cd openssl-${OPENSSL_VERSION} \
     && ./config \
     && make \
     && sudo make install

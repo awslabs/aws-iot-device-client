@@ -2,6 +2,8 @@ FROM ubuntu:16.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+ARG OPENSSL_VERSION=1.1.1n
+
 ###############################################################################
 # Install prereqs
 ###############################################################################
@@ -17,9 +19,9 @@ RUN apt-get update -qq \
 # Install OpenSSL 1.1.1
 ###############################################################################
 WORKDIR /tmp
-RUN wget https://www.openssl.org/source/openssl-1.1.1n.tar.gz \
-    && tar -zxvf openssl-1.1.1n.tar.gz \
-    && cd openssl-1.1.1n \
+RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
+    && tar -zxvf openssl-${OPENSSL_VERSION}.tar.gz \
+    && cd openssl-${OPENSSL_VERSION} \
     && ./config \
     && make \
     && make install \
