@@ -14,6 +14,14 @@ The components of the version are derived at build time from the [CMakeLists.ver
 * `COMMIT` is derived by obtaining the short sha of the current commit.
     * Equivalent to the output from `git rev-parse --short HEAD`.
 
+### Process
+* Changes to the `MAJOR` and/or `MINOR` version require the following steps.
+    * Tag your commit in the repostory with `vMAJOR.MINOR`.
+    * Update the `.version` file with updated `vMAJOR.MINOR` version.
+        * Although `PATCH` and `COMMIT` are derived at build time, we follow a convention to set `PATCH` to 0 and `COMMIT` to the short sha associated with the tag.
+* Changes to the `PATCH` or `COMMIT` require no action.
+    * Do not update the `.version` file as these components of the version are determined at build time.
+
 ### FAQ
 
 #### Under what circumstances will the `MAJOR` version increment?
