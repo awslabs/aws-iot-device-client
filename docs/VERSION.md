@@ -43,14 +43,14 @@ The application `MAJOR` version will increment when any of the following are tru
 * Some other unanticipated major change to the device client not captured by the previous bullets.
 
 #### Under what circumstances will the `MINOR` version increment?
-The application `MINOR` version will increment when any of the following are true:
+The application `MINOR` version will increment when all of the following are true:
 * The device client introduces a new feature, but this feature does not introduce any backwards incompatible changes to the behavior of other features.
 * The device client introduces new configuration, but this configuration does not introduce any backwards incompatible changes to the configuration of other features.
 * Some other significant change to the device client or its' dependencies that deserves more significant consideration by our users.
 * See the discussion under `MAJOR` version for examples of changes that are considered backwards compatible and backwards incompatible.
 
 #### Under what circumstances will the `PATCH` version increment?
-The application `PATCH` version will increment when any of the following are true:
+The application `PATCH` version will increment when all of the following are true:
 * Update to any dependency of the device client such as the AWS IoT Device SDK.
 * Bugfixes to existing features that are resolved without introducing any backwards incompatible changes to the public interface or configuration.
 * Changes to other artifacts in the repo such as documentation, code samples, or tests.
