@@ -111,6 +111,7 @@ cmake --build . --target test-aws-iot-device-client
 * [Configuring the AWS IoT Device Client](docs/CONFIG.md)
 * [File and Directory Permission Requirements](docs/PERMISSIONS.md)
 * [Environment Variables](docs/ENV.md)
+* [Version](docs/VERSION.md)
 
 ## AWS IoT Features
 * [Jobs Feature Readme](source/jobs/README.md)
