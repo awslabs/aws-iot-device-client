@@ -19,6 +19,7 @@
 
 #include "../util/FileUtils.h"
 #include "../util/StringUtils.h"
+#include "Version.h"
 
 #include <algorithm>
 #include <aws/crt/JsonObject.h>
@@ -1394,6 +1395,7 @@ constexpr char Config::DEFAULT_CONFIG_DIR[];
 constexpr char Config::DEFAULT_KEY_DIR[];
 constexpr char Config::DEFAULT_CONFIG_FILE[];
 constexpr char Config::CLI_HELP[];
+constexpr char Config::CLI_VERSION[];
 constexpr char Config::CLI_EXPORT_DEFAULT_SETTINGS[];
 constexpr char Config::CLI_CONFIG_FILE[];
 constexpr char Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[];
@@ -1410,6 +1412,7 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
     };
     ArgumentDefinition argumentDefinitions[] = {
         {CLI_HELP, false, true, [](const string &additionalArg) { PrintHelpMessage(); }},
+        {CLI_VERSION, false, true, [](const string &additionalArg) { PrintVersion(); }},
         {CLI_EXPORT_DEFAULT_SETTINGS,
          true,
          true,
@@ -1659,6 +1662,7 @@ void Config::PrintHelpMessage()
         "Available sub-commands:\n"
         "\n"
         "%s:\t\t\t\t\t\t\t\t\tGet more help on commands\n"
+        "%s:\t\t\t\t\t\t\t\t\tOutput current version\n"
         "%s <JSON-File-Location>:\t\t\t\tExport default settings for the AWS IoT Device Client binary to the specified "
         "file "
         "and exit "
@@ -1709,6 +1713,7 @@ void Config::PrintHelpMessage()
     cout << FormatMessage(
         helpMessageTemplate,
         CLI_HELP,
+        CLI_VERSION,
         CLI_EXPORT_DEFAULT_SETTINGS,
         CLI_CONFIG_FILE,
         PlainConfig::LogConfig::CLI_LOG_LEVEL,
@@ -1745,6 +1750,10 @@ void Config::PrintHelpMessage()
         PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME,
         PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE,
         PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE);
+}
+
+void Config::PrintVersion(){
+    cout << DEVICE_CLIENT_VERSION_FULL << endl;
 }
 
 bool Config::ExportDefaultSetting(const string &file)
