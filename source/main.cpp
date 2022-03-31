@@ -352,6 +352,7 @@ int main(int argc, char *argv[])
      */
 #if !defined(DISABLE_MQTT)
     attemptConnection();
+
 #endif
 
 #if !defined(EXCLUDE_SHADOW)

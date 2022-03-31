@@ -359,6 +359,8 @@ namespace Aws
                 static void PrintHelpMessage();
                 static void PrintVersion();
                 static bool ExportDefaultSetting(const std::string &file);
+
+
             };
         } // namespace DeviceClient
     }     // namespace Iot
