@@ -1752,7 +1752,8 @@ void Config::PrintHelpMessage()
         PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE);
 }
 
-void Config::PrintVersion(){
+void Config::PrintVersion()
+{
     cout << DEVICE_CLIENT_VERSION_FULL << endl;
 }
 
