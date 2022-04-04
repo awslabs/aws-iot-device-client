@@ -59,7 +59,7 @@ $ ssh -p 8080 <remote_user_name>@localhost
 ### Policy Permissions
 In order to use the Secure Tunneling feature the device must first have permission to connect to IoT Core. 
 The device must also be able to subscribe to and receive messages on the Secure Tunneling notify topic in order to receive the destination token.
-The example policy below demonstrates the minimum permissions required. Simply replace the `<region>` and `<accountId`> with the correct values.
+The example policy below demonstrates the minimum permissions required to run the Secure Tunneling feature. Simply replace the `<region>` and `<accountId`> with the correct values.
 ```
 {
   "Version": "2012-10-17",
