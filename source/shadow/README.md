@@ -48,7 +48,8 @@ Device Client would also perform configuration validation check when detecting t
 ### Policy Permissions
 In order to use the Shadow feature the device must first have permission to connect to IoT Core.
 The device must also be able to publish, subscribe, and receive messages on the Shadow topics. You can read more [here](https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html).
-The example policy below demonstrates the minimum permissions required. Simply replace the `<region>` and `<accountId`> with the correct values.
+The example policy below demonstrates the minimum permissions required for the Named Shadow feature. 
+Replace the `<region>`, `<accountId`> and `<shadowName>` with the correct values.
 ```
 {
   "Version": "2012-10-17",
@@ -56,116 +57,28 @@ The example policy below demonstrates the minimum permissions required. Simply r
     {
       "Effect": "Allow",
       "Action": "iot:Connect",
+      "Resource": "arn:aws:iot:<region>:<accountId>:client/${iot:Connection.Thing.ThingName}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iot:Publish",
       "Resource": [
-      "arn:aws:iot:<region>:<accountId>:client/${iot:Connection.Thing.ThingName}"
+        "arn:aws:iot:<region>:<accountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/name/<shadowName>/get",
+        "arn:aws:iot:<region>:<accountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/name/<shadowName>/update"
       ]
     },
     {
       "Effect": "Allow",
-      "Action": [
-        "iot:Publish"
-      ],
+      "Action": "iot:Subscribe",
       "Resource": [
-        "arn:aws:iot:<region>:<accountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/get"
+        "arn:aws:iot:<region>:<accountId>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/shadow/name/<shadowName>*"
       ]
     },
     {
       "Effect": "Allow",
-      "Action": [
-        "iot:Subscribe"
-      ],
+      "Action": "iot:Receive",
       "Resource": [
-        "arn:aws:iot:<region>:<account>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/shadow/get/accepted"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iot:Receive"
-      ],
-      "Resource": [
-        "arn:aws:iot:<region>:<account>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/get/accepted"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iot:Subscribe"
-      ],
-      "Resource": [
-        "arn:aws:iot:<region>:<account>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/shadow/get/rejected"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iot:Receive"
-      ],
-      "Resource": [
-        "arn:aws:iot:<region>:<account>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/get/rejected"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iot:Publish"
-      ],
-      "Resource": [
-        "arn:aws:iot:<region>:<account>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/update"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iot:Subscribe"
-      ],
-      "Resource": [
-        "arn:aws:iot:<region>:<account>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/shadow/update/accepted"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iot:Receive"
-      ],
-      "Resource": [
-        "arn:aws:iot:<region>:<account>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/update/accepted"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iot:Subscribe"
-      ],
-      "Resource": [
-        "arn:aws:iot:<region>:<account>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/shadow/update/rejected"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iot:Receive"
-      ],
-      "Resource": [
-        "arn:aws:iot:<region>:<account>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/update/rejected"
-      ]
-    }
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iot:Subscribe"
-      ],
-      "Resource": [
-        "arn:aws:iot:<region>:<account>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/shadow/update/delta"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iot:Receive"
-      ],
-      "Resource": [
-        "arn:aws:iot:<region>:<account>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/update/delta"
+        "arn:aws:iot:<region>:<accountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/name/<shadowName>/*"
       ]
     }
   ]
