@@ -6,6 +6,7 @@
       - [Configuring the Secure Tunneling feature via the command line](#configuring-the-secure-tunneling-feature-via-the-command-line)
       - [Configuring the Secure Tunneling feature via the JSON configuration file](#configuring-the-secure-tunneling-feature-via-the-json-configuration-file)
     + [Example steps to use the Secure Tunneling feature](#example-steps-to-use-the-secure-tunneling-feature)
+    + [Policy Permissions](#policy-permissions)
     + [Limitation](#limitation)
 
 [*Back To The Main Readme*](../../README.md)
@@ -53,6 +54,34 @@ $ ./localproxy -r us-east-1 -s 8080 -t <source token>
 4. Start the SSH client but connect to the local proxy listening port. For example:
 ```
 $ ssh -p 8080 <remote_user_name>@localhost
+```
+
+### Policy Permissions
+In order to use the Secure Tunneling feature the device must first have permission to connect to IoT Core. 
+The device must also be able to subscribe to and receive messages on the Secure Tunneling notify topic in order to receive the destination token.
+The example policy below demonstrates the minimum permissions required. Simply replace the `<region>` and `<accountId`> with the correct values.
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "iot:Connect",
+      "Resource": "arn:aws:iot:<region>:<accountId>:client/${iot:Connection.Thing.ThingName}"
+    },
+
+    {
+      "Effect": "Allow",
+      "Action": "iot:Subscribe",
+      "Resource": "arn:aws:iot:<region>:<accountId>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/tunnels/notify"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iot:Receive",
+      "Resource": "arn:aws:iot:<region>:<accountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/tunnels/notify"
+    }
+  ]
+}
 ```
 
 ### Limitation
