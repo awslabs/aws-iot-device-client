@@ -67,18 +67,24 @@ The example policy below demonstrates the minimum permissions required. Simply r
     {
       "Effect": "Allow",
       "Action": "iot:Connect",
-      "Resource": "arn:aws:iot:<region>:<accountId>:client/${iot:Connection.Thing.ThingName}"
+      "Resource": [
+      "arn:aws:iot:<region>:<accountId>:client/${iot:Connection.Thing.ThingName}"
+      ]
     },
 
     {
       "Effect": "Allow",
       "Action": "iot:Subscribe",
-      "Resource": "arn:aws:iot:<region>:<accountId>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/tunnels/notify"
+      "Resource": [
+      "arn:aws:iot:<region>:<accountId>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/tunnels/notify"
+      ]
     },
     {
       "Effect": "Allow",
       "Action": "iot:Receive",
-      "Resource": "arn:aws:iot:<region>:<accountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/tunnels/notify"
+      "Resource": [
+      "arn:aws:iot:<region>:<accountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/tunnels/notify"
+      ]
     }
   ]
 }
