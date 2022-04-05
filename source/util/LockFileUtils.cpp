@@ -1,11 +1,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+#include "LockFileUtils.h"
 #include <csignal>
 #include <fstream>
-#include <unistd.h>
 #include <iostream>
-#include "LockFileUtils.h"
+#include <unistd.h>
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Util;
@@ -25,7 +25,7 @@ int LockFileUtils::ProcessLock()
         string storedPid;
         if (fileIn >> storedPid)
         {
-            //sets flag if process exists and contains name
+            // sets flag if process exists and contains name
             if (!(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
             {
                 string path = "/proc/" + storedPid + "/cmdline";
@@ -62,9 +62,8 @@ void LockFileUtils::WriteToLockFile(const std::string &pid)
 {
     FILE *lockfile;
     lockfile = fopen(FILE_NAME, "w");
-    flockfile(lockfile); //flock
+    flockfile(lockfile); // flock
     fputs(pid.c_str(), lockfile);
     funlockfile(lockfile);
     fclose(lockfile);
 }
-

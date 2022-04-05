@@ -7,8 +7,8 @@
 #include "Version.h"
 #include "config/Config.h"
 #include "util/EnvUtils.h"
-#include "util/Retry.h"
 #include "util/LockFileUtils.h"
+#include "util/Retry.h"
 
 #if !defined(EXCLUDE_DD)
 
@@ -57,7 +57,6 @@
 #include <memory>
 #include <thread>
 #include <vector>
-#include <unistd.h>
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient;

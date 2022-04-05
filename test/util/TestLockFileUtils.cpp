@@ -28,5 +28,3 @@ TEST(LockFileUtils, unlockProcess)
     int res = LockFileUtils::ProcessUnlock();
     ASSERT_EQ(res, 0);
 }
-
-
