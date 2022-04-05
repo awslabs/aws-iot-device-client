@@ -8,6 +8,7 @@
 #include "config/Config.h"
 #include "util/EnvUtils.h"
 #include "util/Retry.h"
+#include "util/LockFileUtils.h"
 
 #if !defined(EXCLUDE_DD)
 
@@ -56,6 +57,7 @@
 #include <memory>
 #include <thread>
 #include <vector>
+#include <unistd.h>
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient;
@@ -120,6 +122,7 @@ void shutdown()
         resourceManager.get()->disconnect();
 #endif
         LoggerFactory::getLoggerInstance().get()->shutdown();
+        LockFileUtils::ProcessUnlock();
         exit(0);
     }
 }
@@ -135,6 +138,62 @@ void deviceClientAbort(string reason)
     cout << "AWS IoT Device Client must abort execution, reason: " << reason << endl;
     cout << "Please check the AWS IoT Device Client logs for more information" << endl;
     abort();
+}
+
+void writeToLockFile(string filename, string pid){
+    FILE *lockfile;
+    lockfile = fopen(filename.c_str(), "w");
+    flockfile(lockfile);
+    fputs(pid.c_str(), lockfile);
+    funlockfile(lockfile);
+    fclose(lockfile);
+}
+
+void processLock(){
+    //LOG_INFO(TAG, "locking process");
+    bool running = false;
+    string filename = "/var/run/devicecl.lock";
+    string processname = "aws-iot-device-client";
+    string storedpid;
+    string pid;
+    ifstream fileIn;
+
+    pid = to_string(getpid());
+    fileIn.open(filename);
+    if (!fileIn.fail())
+    {
+        if (fileIn >> storedpid)
+        {
+            if (!(kill(stoi(storedpid), 0) == -1 && errno == ESRCH))
+            {
+                string path = "/proc/" + storedpid + "/cmdline";
+                string cmdline;
+                ifstream cmd;
+
+                cmd.open(path.c_str());
+                if (cmd >> cmdline && cmdline.find(processname) != string::npos)
+                {
+                    running = true;
+                }
+                cmd.close();
+            }
+        }
+    }
+    fileIn.close();
+
+    if(running)
+    {
+        deviceClientAbort("process is already running.");
+    }
+    else
+    {
+        writeToLockFile(filename, pid);
+    }
+}
+
+void processUnlock(){
+    string filename = "/var/run/devicecl.lock";
+    remove(filename.c_str());
 }
 
 void handle_feature_stopped(Feature *feature)
@@ -270,6 +329,7 @@ namespace Aws
 
 int main(int argc, char *argv[])
 {
+    LockFileUtils::ProcessLock();
     CliArgs cliArgs;
     if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
     {
