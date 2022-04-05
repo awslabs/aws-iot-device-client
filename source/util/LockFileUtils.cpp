@@ -16,23 +16,21 @@ constexpr char LockFileUtils::PROCESS_NAME[];
 int LockFileUtils::ProcessLock()
 {
     bool running = false;
-    string storedPid;
-    string pid;
-    ifstream fileIn;
 
-    pid = to_string(getpid());
-    fileIn.open(FILE_NAME);
+    string pid = to_string(getpid());
+    ifstream fileIn(FILE_NAME);
+
     if (!fileIn.fail())
     {
+        string storedPid;
         if (fileIn >> storedPid)
         {
+            //sets flag if process exists and contains name
             if (!(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
             {
                 string path = "/proc/" + storedPid + "/cmdline";
+                ifstream cmd(path.c_str());
                 string cmdline;
-                ifstream cmd;
-
-                cmd.open(path.c_str());
                 if (cmd >> cmdline && cmdline.find(PROCESS_NAME) != string::npos)
                 {
                     running = true;
@@ -64,7 +62,7 @@ void LockFileUtils::WriteToLockFile(const std::string &pid)
 {
     FILE *lockfile;
     lockfile = fopen(FILE_NAME, "w");
-    flockfile(lockfile);
+    flockfile(lockfile); //flock
     fputs(pid.c_str(), lockfile);
     funlockfile(lockfile);
     fclose(lockfile);

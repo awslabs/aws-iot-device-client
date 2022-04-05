@@ -15,7 +15,7 @@ namespace Aws
             namespace Util
             {
                 /**
-                 * \brief Utility functions for creating/deleting the
+                 * \brief Utility functions for creating/deleting the lock file
                  */
                 class LockFileUtils
                 {
@@ -25,23 +25,21 @@ namespace Aws
                     static constexpr char PROCESS_NAME[] = "aws-iot-device-client";
 
                     /**
-                     * \brief
+                     * \brief Gives the current process exclusive write access and writes the pid into the lock file
                      * @param pid
                      */
                     static void WriteToLockFile(const std::string &pid);
 
                 public:
                     /**
-                     * \brief Creates each of the directories in the provided path if they do not exist
-                     * @param path the full path to assess
-                     * @return 0 upon success, some other number indicating an error otherwise
+                     * \brief Creates a lock file in the default directory if it does not exist, aborts execution if another process is running.
+                     * @return 0 upon success
                      */
                     static int ProcessLock();
 
                     /**
-                     * \brief Given a path to a file, attempts to extract the parent directory
-                     * @param filePath a path to a file
-                     * @return 0 upon success, some other number indicating an error otherwise
+                     * \brief Deletes the lock file when device client shuts down
+                     * @return 0 upon success
                      */
                     static int ProcessUnlock();
 
