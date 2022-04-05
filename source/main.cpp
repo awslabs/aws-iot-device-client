@@ -140,62 +140,6 @@ void deviceClientAbort(string reason)
     abort();
 }
 
-void writeToLockFile(string filename, string pid){
-    FILE *lockfile;
-    lockfile = fopen(filename.c_str(), "w");
-    flockfile(lockfile);
-    fputs(pid.c_str(), lockfile);
-    funlockfile(lockfile);
-    fclose(lockfile);
-}
-
-void processLock(){
-    //LOG_INFO(TAG, "locking process");
-    bool running = false;
-    string filename = "/var/run/devicecl.lock";
-    string processname = "aws-iot-device-client";
-    string storedpid;
-    string pid;
-    ifstream fileIn;
-
-    pid = to_string(getpid());
-    fileIn.open(filename);
-    if (!fileIn.fail())
-    {
-        if (fileIn >> storedpid)
-        {
-            if (!(kill(stoi(storedpid), 0) == -1 && errno == ESRCH))
-            {
-                string path = "/proc/" + storedpid + "/cmdline";
-                string cmdline;
-                ifstream cmd;
-
-                cmd.open(path.c_str());
-                if (cmd >> cmdline && cmdline.find(processname) != string::npos)
-                {
-                    running = true;
-                }
-                cmd.close();
-            }
-        }
-    }
-    fileIn.close();
-
-    if(running)
-    {
-        deviceClientAbort("process is already running.");
-    }
-    else
-    {
-        writeToLockFile(filename, pid);
-    }
-}
-
-void processUnlock(){
-    string filename = "/var/run/devicecl.lock";
-    remove(filename.c_str());
-}
-
 void handle_feature_stopped(Feature *feature)
 {
     featuresReadWriteLock.lock(); // LOCK

@@ -44,8 +44,6 @@ namespace Aws
                     static int ProcessUnlock();
 
 
-
-
                 };
             } // namespace Util
         } // namespace DeviceClient
