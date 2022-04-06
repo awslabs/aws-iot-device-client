@@ -17,9 +17,7 @@ int LockFileUtils::ProcessLock()
 {
     bool running = false;
 
-    string pid = to_string(getpid());
     ifstream fileIn(FILE_NAME);
-
     if (!fileIn.fail())
     {
         string storedPid;
@@ -29,8 +27,8 @@ int LockFileUtils::ProcessLock()
             if (!(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
             {
                 string path = "/proc/" + storedPid + "/cmdline";
-                ifstream cmd(path.c_str());
                 string cmdline;
+                ifstream cmd(path.c_str());
                 if (cmd >> cmdline && cmdline.find(PROCESS_NAME) != string::npos)
                 {
                     running = true;
@@ -48,6 +46,7 @@ int LockFileUtils::ProcessLock()
     }
     else
     {
+        string pid = to_string(getpid());
         WriteToLockFile(pid);
     }
     return 0;
