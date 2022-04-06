@@ -12,6 +12,7 @@
     + [Jobs Feature Configuration Options](#jobs-feature-configuration-options)
       - [Configuring the Jobs feature via the command line](#configuring-the-jobs-feature-via-the-command-line)
       - [Configuring the Jobs feature via the JSON configuration file](#configuring-the-jobs-feature-via-the-json-configuration-file)
+    + [Policy Permissions](#policy-permissions)
 
 [*Back To The Main Readme*](../../README.md)
 
@@ -450,6 +451,55 @@ Example:
         }
         ...
     }
+```
+
+### Policy Permissions
+In order to use the Jobs feature the device must first have permission to connect to IoT Core.
+The device must also be able to publish, subscribe, and receive messages on the Jobs MQTT topics.
+The example policy below demonstrates the minimum permissions required for the Jobs feature. 
+Here we have left the JobId as a wildcard so any Job targeting the device can be run. 
+Replace the `<region>` and `<accountId`> with the correct values.
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "iot:Connect",
+      "Resource": "arn:aws:<region>:<accountId>:client/${iot:Connection.Thing.ThingName}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iot:Publish",
+      "Resource": [
+        "arn:aws:iot:<region>:<accountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/jobs/start-next",
+        "arn:aws:iot:<region>:<accountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/jobs/*/update"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iot:Subscribe",
+      "Resource": [
+        "arn:aws:iot:<region>:<accountId>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/jobs/start-next/accepted",
+        "arn:aws:iot:<region>:<accountId>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/jobs/start-next/rejected",
+        "arn:aws:iot:<region>:<accountId>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/jobs/*/update/accepted",
+        "arn:aws:iot:<region>:<accountId>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/jobs/*/update/rejected",
+        "arn:aws:iot:<region>:<accountId>:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/jobs/notify-next"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iot:Receive",
+      "Resource": [
+        "arn:aws:iot:<region>:<accountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/jobs/start-next/accepted",
+        "arn:aws:iot:<region>:<accountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/jobs/start-next/rejected",
+        "arn:aws:iot:<region>:<accountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/jobs/*/update/accepted",
+        "arn:aws:iot:<region>:<accountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/jobs/*/update/rejected",
+        "arn:aws:iot:<region>:<accountId>:topic/$aws/things/${iot:Connection.Thing.ThingName}/jobs/notify-next"
+      ]
+    }
+  ]
+}
 ```
 
 [*Back To The Top*](#jobs)
