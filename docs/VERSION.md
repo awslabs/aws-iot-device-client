@@ -6,6 +6,12 @@
 
 The device client application version conforms to the [semantic version](https://semver.org/) naming convention and consists of the following components: `MAJOR.MINOR.PATCH-COMMIT`.
 
+To retrieve the current installed version of Device Client, use the --version argument.
+
+ ```
+./aws-iot-device-client --version
+```
+
 The components of the version are derived at build time from the [CMakeLists.versioning](../CMakeLists.txt.versioning) script in the repo. This script is invoked from the toplevel CMakeLists.txt file used to build the software. The logic for obtaining each component of the version is described below:
 * `MAJOR.MINOR` is derived from the prior tag associated with the current commit in the repository.
     * Equivalent to the output from `git describe --abbrev=0 --tags --match "v[0-9]*"`.
