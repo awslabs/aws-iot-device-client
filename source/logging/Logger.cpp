@@ -20,7 +20,7 @@ void LogUtil::generateTimestamp(
 {
     auto ms = duration_cast<milliseconds>(t.time_since_epoch()) % 1000;
     auto timer = system_clock::to_time_t(t);
-    std::tm bt = *std::localtime(&timer);
+    std::tm bt = *std::gmtime(&timer);
 
     std::ostringstream time_stream;
     time_stream << std::put_time(&bt, TIMESTAMP_FORMAT);
