@@ -19,6 +19,7 @@
 
 #include "../util/FileUtils.h"
 #include "../util/StringUtils.h"
+#include "Version.h"
 
 #include <algorithm>
 #include <aws/crt/JsonObject.h>
@@ -1394,6 +1395,7 @@ constexpr char Config::DEFAULT_CONFIG_DIR[];
 constexpr char Config::DEFAULT_KEY_DIR[];
 constexpr char Config::DEFAULT_CONFIG_FILE[];
 constexpr char Config::CLI_HELP[];
+constexpr char Config::CLI_VERSION[];
 constexpr char Config::CLI_EXPORT_DEFAULT_SETTINGS[];
 constexpr char Config::CLI_CONFIG_FILE[];
 constexpr char Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[];
@@ -1410,6 +1412,7 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
     };
     ArgumentDefinition argumentDefinitions[] = {
         {CLI_HELP, false, true, [](const string &additionalArg) { PrintHelpMessage(); }},
+        {CLI_VERSION, false, true, [](const string &additionalArg) { PrintVersion(); }},
         {CLI_EXPORT_DEFAULT_SETTINGS,
          true,
          true,
@@ -1659,6 +1662,7 @@ void Config::PrintHelpMessage()
         "Available sub-commands:\n"
         "\n"
         "%s:\t\t\t\t\t\t\t\t\tGet more help on commands\n"
+        "%s:\t\t\t\t\t\t\t\tOutput current version\n"
         "%s <JSON-File-Location>:\t\t\t\tExport default settings for the AWS IoT Device Client binary to the specified "
         "file "
         "and exit "
@@ -1675,13 +1679,13 @@ void Config::PrintHelpMessage()
         "%s [true|false]:\t\t\t\t\tEnables/Disables Device Defender feature\n"
         "%s [true|false]:\t\t\t\tEnables/Disables Fleet Provisioning feature\n"
         "%s [true|false]:\t\t\t\t\t\tEnables/Disables Pub/Sub Sample feature\n"
-        "%s [true|false]:\t\t\t\t\t\tEnables/Disables Sample Shadow feature\n"
-        "%s [true|false]:\t\t\t\t\t\tEnables/Disables Config Shadow feature\n"
+        "%s [true|false]:\t\t\t\t\tEnables/Disables Sample Shadow feature\n"
+        "%s [true|false]:\t\t\t\t\tEnables/Disables Config Shadow feature\n"
         "%s <endpoint-value>:\t\t\t\t\t\tUse Specified Endpoint\n"
         "%s <Cert-Location>:\t\t\t\t\t\t\tUse Specified Cert file\n"
         "%s <Key-Location>:\t\t\t\t\t\t\tUse Specified Key file\n"
         "%s <Root-CA-Location>:\t\t\t\t\t\tUse Specified Root-CA file\n"
-        "%s <thing-name-value/client-id-value>:\t\t\t\t\tUse Specified Thing Name (Also used as Client ID)\n"
+        "%s <thing-name-value/client-id-value>:\t\t\tUse Specified Thing Name (Also used as Client ID)\n"
         "%s <Jobs-handler-directory>:\t\t\t\tUse specified directory to find job handlers\n"
         "%s <region>:\t\t\t\t\t\tUse Specified AWS Region for Secure Tunneling\n"
         "%s <service>:\t\t\t\t\t\tConnect secure tunnel to specific service\n"
@@ -1701,14 +1705,15 @@ void Config::PrintHelpMessage()
         "%s <path/to/publish/file>:\t\t\t\t\tThe file the Pub/Sub sample feature will read from when publishing\n"
         "%s <subscribe-topic>:\t\t\t\t\tThe topic the Pub/Sub sample feature will receive messages on\n"
         "%s <path/to/sub/file>:\t\t\t\t\tThe file the Pub/Sub sample feature will write received messaged to\n"
-        "%s <shadow-name>:\t\t\t\t\tThe name of shadow SampleShadow feature will create or update\n"
-        "%s <shadow-input-file>:\t\t\t\t\tThe file the Sample Shadow feature will read from when updating shadow data\n"
-        "%s <shadow-output-file>:\t\t\t\t\tThe file the Sample Shadow feature will write the latest shadow document "
+        "%s <shadow-name>:\t\t\t\t\t\tThe name of shadow SampleShadow feature will create or update\n"
+        "%s <shadow-input-file>:\t\t\t\tThe file the Sample Shadow feature will read from when updating shadow data\n"
+        "%s <shadow-output-file>:\t\t\t\tThe file the Sample Shadow feature will write the latest shadow document "
         "to\n";
 
     cout << FormatMessage(
         helpMessageTemplate,
         CLI_HELP,
+        CLI_VERSION,
         CLI_EXPORT_DEFAULT_SETTINGS,
         CLI_CONFIG_FILE,
         PlainConfig::LogConfig::CLI_LOG_LEVEL,
@@ -1745,6 +1750,11 @@ void Config::PrintHelpMessage()
         PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME,
         PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE,
         PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE);
+}
+
+void Config::PrintVersion()
+{
+    cout << DEVICE_CLIENT_VERSION_FULL << endl;
 }
 
 bool Config::ExportDefaultSetting(const string &file)
