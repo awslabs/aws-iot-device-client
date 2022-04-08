@@ -336,6 +336,7 @@ TEST(FileUtils, byteBufReadWrite)
     {
         ASSERT_EQ((uint8_t)someData[i], readDataByteBuf.buffer[i]);
     }
+    aws_byte_buf_clean_up(&readDataByteBuf);
     remove(filePath.c_str());
 }
 
@@ -358,6 +359,7 @@ TEST(FileUtils, byteBufReadWriteAppend)
     {
         ASSERT_EQ((uint8_t)someData[i], readDataByteBuf.buffer[i]);
     }
+    aws_byte_buf_clean_up(&readDataByteBuf);
     remove(filePath.c_str());
 }
 
@@ -369,6 +371,7 @@ TEST(FileUtils, byteBufReadSizeLargerThanBuffer)
     aws_byte_buf_init(&readDataByteBuf, aws_default_allocator(), 10);
 
     ASSERT_EQ(-1, FileUtils::ReadFromFile(filePath, &readDataByteBuf, 500));
+    aws_byte_buf_clean_up(&readDataByteBuf);
 }
 
 TEST(FileUtils, byteBufReadNonexistentFile)
@@ -378,6 +381,7 @@ TEST(FileUtils, byteBufReadNonexistentFile)
     aws_byte_buf readDataByteBuf;
     aws_byte_buf_init(&readDataByteBuf, aws_default_allocator(), 1);
     ASSERT_EQ(-1, FileUtils::ReadFromFile(filePath, &readDataByteBuf, 1));
+    aws_byte_buf_clean_up(&readDataByteBuf);
 }
 
 TEST(FileUtils, IsValidFilePathForFileExistence)
