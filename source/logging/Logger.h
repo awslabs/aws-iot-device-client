@@ -80,6 +80,9 @@ namespace Aws
                     void setLogLevel(int level) { logLevel = level; }
 
                   public:
+                    // Logger inherited by FileLogger. Make destructor virtual to avoid memory leak.
+                    virtual ~Logger() = default;
+
                     /**
                      * \brief Formats the provided log message against variadic arguments and then
                      * passes the message to the underlying logger implementation for processing
