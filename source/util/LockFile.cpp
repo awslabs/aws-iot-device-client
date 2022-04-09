@@ -11,7 +11,8 @@ LockFile::LockFile(const std::string &filename) : filename(filename), file(fopen
 {
     if (!file)
     {
-        throw std::runtime_error{"Unable to open lockfile... please check permissions and if device client is already running."};
+        throw std::runtime_error{
+            "Unable to open lockfile... please check permissions and if device client is already running."};
     }
     flockfile(file);
 }
