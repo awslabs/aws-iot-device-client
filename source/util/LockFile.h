@@ -22,7 +22,7 @@ namespace Aws
                     FILE *file{nullptr};
 
                   public:
-                    LockFile(const std::string& filename);
+                    LockFile(const std::string &filename);
                     ~LockFile();
 
                     // Non-copyable.

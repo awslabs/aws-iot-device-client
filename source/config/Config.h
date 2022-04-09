@@ -93,6 +93,7 @@ namespace Aws
                 Aws::Crt::Optional<std::string> thingName;
 
                 aws_mem_trace_level memTraceLevel{AWS_MEMTRACE_NONE};
+                std::string lockFilePath;
 
                 struct LogConfig : public LoadableFromJsonAndCliAndEnvironment
                 {

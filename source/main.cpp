@@ -7,7 +7,7 @@
 #include "Version.h"
 #include "config/Config.h"
 #include "util/EnvUtils.h"
-#include "util/LockFileUtils.h"
+#include "util/LockFile.h"
 #include "util/Retry.h"
 
 #if !defined(EXCLUDE_DD)
@@ -87,9 +87,33 @@ const char *TAG = "Main.cpp";
 
 vector<Feature *> features;
 shared_ptr<SharedCrtResourceManager> resourceManager;
+unique_ptr<LockFile> lockFile;
 mutex featuresReadWriteLock;
 bool attemptingShutdown{false};
 Config config;
+
+/**
+ * TODO: For future expandability of main
+ * Currently creates a lockfile to prevent the creation of multiple Device Client processes.
+ * @return true if no exception is caught, false otherwise
+ */
+bool init()
+{
+    try
+    {
+        string filename = config.config.lockFilePath;
+        if (!filename.empty())
+        {
+            lockFile = unique_ptr<LockFile>(new LockFile{filename});
+        }
+    }
+    catch (std::runtime_error &e)
+    {
+        std::cout << e.what() << std::endl;
+        return false;
+    }
+    return true;
+}
 
 /**
  * Attempts to perform a graceful shutdown of each running feature. If this function is
@@ -121,7 +145,6 @@ void shutdown()
         resourceManager.get()->disconnect();
 #endif
         LoggerFactory::getLoggerInstance().get()->shutdown();
-        LockFileUtils::ProcessUnlock();
         exit(0);
     }
 }
@@ -166,7 +189,8 @@ void handle_feature_stopped(Feature *feature)
 void attemptConnection()
 {
     Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 900 * 1000, -1, nullptr};
-    auto publishLambda = []() -> bool {
+    auto publishLambda = []() -> bool
+    {
         int connectionStatus = resourceManager.get()->establishConnection(config.config);
         if (SharedCrtResourceManager::ABORT == connectionStatus)
         {
@@ -189,8 +213,8 @@ void attemptConnection()
             return false;
         }
     };
-    std::thread attemptConnectionThread(
-        [retryConfig, publishLambda] { Retry::exponentialBackoff(retryConfig, publishLambda); });
+    std::thread attemptConnectionThread([retryConfig, publishLambda]
+                                        { Retry::exponentialBackoff(retryConfig, publishLambda); });
     attemptConnectionThread.join();
 }
 
@@ -272,7 +296,6 @@ namespace Aws
 
 int main(int argc, char *argv[])
 {
-    LockFileUtils::ProcessLock();
     CliArgs cliArgs;
     if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
     {
@@ -295,6 +318,11 @@ int main(int argc, char *argv[])
         // but some features of device client such as standard job action
         // might not work without explicitly setting path to handler in job document.
         LOG_WARN(TAG, "Unable to append current working directory to PATH environment variable.");
+    }
+
+    if (!init())
+    {
+        return -1;
     }
 
     LOGM_INFO(TAG, "Now running AWS IoT Device Client version %s", DEVICE_CLIENT_VERSION_FULL);
@@ -469,6 +497,5 @@ int main(int argc, char *argv[])
                 break;
         }
     }
-
     return 0;
 }

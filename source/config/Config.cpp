@@ -252,6 +252,12 @@ bool PlainConfig::LoadFromEnvironment()
         }
     }
 
+    const char *lockFilePathStr = std::getenv("LOCK_FILE_PATH");
+    if (lockFilePathStr)
+    {
+        lockFilePath = lockFilePathStr;
+    }
+
     return logConfig.LoadFromEnvironment() && jobs.LoadFromEnvironment() && tunneling.LoadFromEnvironment() &&
            deviceDefender.LoadFromEnvironment() && fleetProvisioning.LoadFromEnvironment() &&
            fleetProvisioningRuntimeConfig.LoadFromEnvironment() && pubSub.LoadFromEnvironment() &&
