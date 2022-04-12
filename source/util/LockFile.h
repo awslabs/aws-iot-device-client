@@ -19,10 +19,9 @@ namespace Aws
                   private:
                     static constexpr char TAG[] = "LockFile.cpp";
                     std::string filename;
-                    FILE *file{nullptr};
 
                   public:
-                    LockFile(const std::string &filename);
+                    explicit LockFile(const std::string &filename);
                     ~LockFile();
 
                     // Non-copyable.

@@ -14,37 +14,33 @@ using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char LockFile::TAG[];
 
-LockFile::LockFile(const std::string &filename) : filename(filename), file(fopen(filename.c_str(), "r"))
+LockFile::LockFile(const std::string &filename) : filename(filename)
 {
-    if (file)
+    ifstream fileIn(filename);
+    string storedPid;
+    if (fileIn && fileIn >> storedPid)
     {
-        ifstream fileIn(filename);
-        string storedPid;
-        if (fileIn && fileIn >> storedPid)
+        // sets flag if process exists
+        if (!(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
         {
-            // sets flag if process exists
-            if (!(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
+            string processPath = "/proc/" + storedPid + "/cmdline";
+            string cmdline;
+            ifstream cmd(processPath.c_str());
+            // check if process contains name
+            if (cmd && cmd >> cmdline && cmdline.find("aws-iot-device-client") != string::npos)
             {
-                string path = "/proc/" + storedPid + "/cmdline";
-                string cmdline;
-                ifstream cmd(path.c_str());
-                // check if process contains name
-                if (cmd && cmd >> cmdline && cmdline.find("aws-iot-device-client") != string::npos)
-                {
-                    LOGM_ERROR(TAG, "Unable to open lockfile", filename.c_str());
+                LOGM_ERROR(TAG, "Unable to open lockfile", filename.c_str());
 
-                    throw runtime_error{"Device Client is already running."};
-                }
-                cmd.close();
+                throw runtime_error{"Device Client is already running."};
             }
+            cmd.close();
         }
-        // remove stale pid file
-        remove(filename.c_str());
-        fileIn.close();
-        fclose(file);
     }
+    // remove stale pid file
+    remove(filename.c_str());
+    fileIn.close();
 
-    file = fopen(filename.c_str(), "wx");
+    FILE *file = fopen(filename.c_str(), "wx");
     if (!file || lockf(fileno(file), F_LOCK, 0))
     {
         LOGM_ERROR(TAG, "Unable to open lockfile", filename.c_str());
