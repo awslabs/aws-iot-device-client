@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "LockFile.h"
-#include <stdexcept>
+#include "../logging/LoggerFactory.h"
+
 #include <csignal>
+#include <stdexcept>
 #include <unistd.h>
-#include <fstream>
-#include <sstream>
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Util;
+using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char LockFile::TAG[];
 
@@ -17,8 +18,6 @@ LockFile::LockFile(const std::string &filename) : filename(filename), file(fopen
 {
     if (file)
     {
-        bool running = false;
-
         ifstream fileIn(filename);
         string storedPid;
         if (fileIn && fileIn >> storedPid)
@@ -30,41 +29,29 @@ LockFile::LockFile(const std::string &filename) : filename(filename), file(fopen
                 string cmdline;
                 ifstream cmd(path.c_str());
                 // check if process contains name
-                if (cmd >> cmdline && cmdline.find("aws-iot-device-client") != string::npos)
+                if (cmd && cmd >> cmdline && cmdline.find("aws-iot-device-client") != string::npos)
                 {
-                    running = true;
+                    LOGM_ERROR(TAG, "Unable to open lockfile", filename.c_str());
+
+                    throw runtime_error{"Device Client is already running."};
                 }
                 cmd.close();
             }
         }
-        if (running)
-        {
-            std::ostringstream oss;
-            oss << "Unable to open lockfile "
-                << filename
-                << "Device client is already running.";
-            throw std::runtime_error{oss.str()};
-        }
-        else
-        {
-            // remove stale pid file
-            remove(filename.c_str());
-        }
+        // remove stale pid file
+        remove(filename.c_str());
         fileIn.close();
         fclose(file);
     }
 
     file = fopen(filename.c_str(), "wx");
-
-    if (!file)
+    if (!file || lockf(fileno(file), F_LOCK, 0))
     {
-        std::ostringstream oss;
-        oss << "Unable to open lockfile "
-            << filename
-            << "Can not write to file.";
-        throw std::runtime_error{oss.str()};
+        LOGM_ERROR(TAG, "Unable to open lockfile", filename.c_str());
+
+        throw runtime_error{"Can not write to lockfile."};
     }
-    lockf(fileno(file), F_LOCK, 0);
+
     string pid = to_string(getpid());
     fputs(pid.c_str(), file);
     fclose(file);

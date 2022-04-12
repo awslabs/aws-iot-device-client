@@ -109,7 +109,8 @@ bool init()
     }
     catch (std::runtime_error &e)
     {
-        std::cout << e.what() << std::endl;
+        LoggerFactory::getLoggerInstance().get()->shutdown();
+        cout << e.what() << endl;
         return false;
     }
     return true;
@@ -159,6 +160,10 @@ void deviceClientAbort(string reason)
 {
     cout << "AWS IoT Device Client must abort execution, reason: " << reason << endl;
     cout << "Please check the AWS IoT Device Client logs for more information" << endl;
+    if (lockFile)
+    {
+        lockFile.reset();
+    }
     abort();
 }
 
