@@ -6,7 +6,7 @@ user=$1
 shift 1
 services=$@
 echo "Username: $user"
-echo "Services to start: $services"
+echo "Services to stop: $services"
 
 if command -v "systemctl" > /dev/null;
 then
