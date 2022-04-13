@@ -14,36 +14,40 @@ using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char LockFile::TAG[];
 
-LockFile::LockFile(const std::string &filename) : filename(filename)
+LockFile::LockFile(const std::string &filename, const std::string &process) : filename(filename)
 {
     ifstream fileIn(filename);
-    string storedPid;
-    if (fileIn && fileIn >> storedPid)
+    if (fileIn)
     {
-        // sets flag if process exists
-        if (!(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
+        string storedPid;
+        if (fileIn >> storedPid && !(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
         {
             string processPath = "/proc/" + storedPid + "/cmdline";
             string cmdline;
             ifstream cmd(processPath.c_str());
             // check if process contains name
-            if (cmd && cmd >> cmdline && cmdline.find("aws-iot-device-client") != string::npos)
+            if (cmd && cmd >> cmdline && cmdline.find(process) != string::npos)
             {
-                LOGM_ERROR(TAG, "Unable to open lockfile", filename.c_str());
+                LOGM_ERROR(TAG, "Pid associated with active process found in lockfile: %s", filename.c_str());
 
                 throw runtime_error{"Device Client is already running."};
             }
-            cmd.close();
+        }
+        // remove stale pid file
+        if (remove(filename.c_str()))
+        {
+            LOGM_ERROR(TAG, "Unable to remove stale lockfile: %s", filename.c_str());
+
+            throw runtime_error{"File has not been closed."};
         }
     }
-    // remove stale pid file
-    remove(filename.c_str());
     fileIn.close();
 
     FILE *file = fopen(filename.c_str(), "wx");
-    if (!file || lockf(fileno(file), F_LOCK, 0))
+    if (!file)
     {
-        LOGM_ERROR(TAG, "Unable to open lockfile", filename.c_str());
+        LOGM_ERROR(TAG, "Unable to open lockfile: %s", filename.c_str());
+        fclose(file);
 
         throw runtime_error{"Can not write to lockfile."};
     }

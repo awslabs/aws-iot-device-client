@@ -255,6 +255,7 @@ bool PlainConfig::LoadFromEnvironment()
     const char *lockFilePathStr = std::getenv("LOCK_FILE_PATH");
     if (lockFilePathStr)
     {
+        LOGM_DEBUG(Config::TAG, "Set LOCK_FILE_PATH=%s", lockFilePathStr);
         lockFilePath = lockFilePathStr;
     }
 

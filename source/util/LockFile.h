@@ -21,7 +21,7 @@ namespace Aws
                     std::string filename;
 
                   public:
-                    explicit LockFile(const std::string &filename);
+                    explicit LockFile(const std::string &filename, const std::string &process);
                     ~LockFile();
 
                     // Non-copyable.
