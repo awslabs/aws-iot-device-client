@@ -28,7 +28,7 @@ LockFile::LockFile(const std::string &filename, const std::string &process) : fi
             // check if process contains name
             if (cmd && cmd >> cmdline && cmdline.find(process) != string::npos)
             {
-                LOGM_ERROR(TAG, "Pid associated with active process found in lockfile: %s", filename.c_str());
+                LOGM_ERROR(TAG, "Pid associated with active process %s in lockfile: %s", process.c_str(), filename.c_str());
 
                 throw runtime_error{"Device Client is already running."};
             }
@@ -47,7 +47,6 @@ LockFile::LockFile(const std::string &filename, const std::string &process) : fi
     if (!file)
     {
         LOGM_ERROR(TAG, "Unable to open lockfile: %s", filename.c_str());
-        fclose(file);
 
         throw runtime_error{"Can not write to lockfile."};
     }
