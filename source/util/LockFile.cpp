@@ -5,6 +5,7 @@
 #include "../logging/LoggerFactory.h"
 
 #include <csignal>
+#include <iostream>
 #include <stdexcept>
 #include <unistd.h>
 
@@ -23,10 +24,12 @@ LockFile::LockFile(const std::string &filename, const std::string &process) : fi
         if (fileIn >> storedPid && !(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
         {
             string processPath = "/proc/" + storedPid + "/cmdline";
+            string basename = process.substr(process.find_last_of("/\\") + 1);
             string cmdline;
             ifstream cmd(processPath.c_str());
+
             // check if process contains name
-            if (cmd && cmd >> cmdline && cmdline.find(process) != string::npos)
+            if (cmd && cmd >> cmdline && cmdline.find(basename) != string::npos)
             {
                 LOGM_ERROR(TAG, "Pid associated with active process %s in lockfile: %s", process.c_str(), filename.c_str());
 
