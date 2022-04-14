@@ -50,6 +50,7 @@ TEST(LockFile, multipleFiles)
     try
     {
         unique_ptr<LockFile> lockFile2 = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
+        ASSERT_TRUE(false);
     }
     catch (exception &e)
     {
