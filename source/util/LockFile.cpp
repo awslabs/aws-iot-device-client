@@ -31,7 +31,12 @@ LockFile::LockFile(const std::string &filename, const std::string &process) : fi
             // check if process contains name
             if (cmd && cmd >> cmdline && cmdline.find(basename) != string::npos)
             {
-                LOGM_ERROR(TAG, "Pid associated with active process %s in lockfile: %s", process.c_str(), filename.c_str());
+                LOGM_ERROR(
+                    TAG,
+                    "Pid %s associated with active process %s in lockfile: %s",
+                    storedPid.c_str(),
+                    process.c_str(),
+                    filename.c_str());
 
                 throw runtime_error{"Device Client is already running."};
             }

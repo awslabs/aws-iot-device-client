@@ -4,9 +4,9 @@
 #include "../../source/util/LockFile.h"
 #include "gtest/gtest.h"
 
-#include <unistd.h>
-#include <thread>
 #include <fstream>
+#include <thread>
+#include <unistd.h>
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Util;
@@ -66,7 +66,8 @@ TEST(LockFile, multipleFilesWithExtendedPath)
 
     try
     {
-        unique_ptr<LockFile> lockFile2 = unique_ptr<LockFile>(new LockFile{path, "directory/test-aws-iot-device-client"});
+        unique_ptr<LockFile> lockFile2 =
+            unique_ptr<LockFile>(new LockFile{path, "directory/test-aws-iot-device-client"});
         ASSERT_TRUE(false);
     }
     catch (exception &e)
@@ -99,4 +100,3 @@ TEST(LockFile, staleFile)
         ASSERT_STREQ(to_string(getpid()).c_str(), storedPid.c_str());
     }
 }
-
