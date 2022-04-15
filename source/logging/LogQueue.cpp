@@ -26,7 +26,7 @@ std::unique_ptr<LogMessage> LogQueue::getNextLog()
     while (logQueue.empty() && !isShutdown)
     {
         newLogNotifier.wait(readLock);
-        //newLogNotifier.wait_for(readLock, chrono::milliseconds (100));
+        // newLogNotifier.wait_for(readLock, chrono::milliseconds (100));
     }
     if (logQueue.empty())
     {
