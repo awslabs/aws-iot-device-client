@@ -13,10 +13,12 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char LockFile::TAG[];
+constexpr char LockFile::FILE_NAME[];
 
-LockFile::LockFile(const std::string &filename, const std::string &process) : filename(filename)
+LockFile::LockFile(const std::string &filedir, const std::string &process) : dir(filedir)
 {
-    ifstream fileIn(filename);
+    string fullPath = dir + FILE_NAME;
+    ifstream fileIn(fullPath);
     if (fileIn)
     {
         string storedPid;
@@ -35,25 +37,25 @@ LockFile::LockFile(const std::string &filename, const std::string &process) : fi
                     "Pid %s associated with active process %s in lockfile: %s",
                     storedPid.c_str(),
                     process.c_str(),
-                    filename.c_str());
+                    fullPath.c_str());
 
                 throw runtime_error{"Device Client is already running."};
             }
         }
         // remove stale pid file
-        if (remove(filename.c_str()))
+        if (remove(fullPath.c_str()))
         {
-            LOGM_ERROR(TAG, "Unable to remove stale lockfile: %s", filename.c_str());
+            LOGM_ERROR(TAG, "Unable to remove stale lockfile: %s", fullPath.c_str());
 
             throw runtime_error{"Error removing stale lockfile."};
         }
     }
     fileIn.close();
 
-    FILE *file = fopen(filename.c_str(), "wx");
+    FILE *file = fopen(fullPath.c_str(), "wx");
     if (!file)
     {
-        LOGM_ERROR(TAG, "Unable to open lockfile: %s", filename.c_str());
+        LOGM_ERROR(TAG, "Unable to open lockfile: %s", fullPath.c_str());
 
         throw runtime_error{"Can not write to lockfile."};
     }
@@ -65,5 +67,6 @@ LockFile::LockFile(const std::string &filename, const std::string &process) : fi
 
 LockFile::~LockFile()
 {
-    remove(filename.c_str());
+    string fullPath = dir + FILE_NAME;
+    remove(fullPath.c_str());
 }

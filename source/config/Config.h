@@ -86,6 +86,8 @@ namespace Aws
                 static constexpr char JSON_KEY_SAMPLE_SHADOW[] = "sample-shadow";
                 static constexpr char JSON_KEY_CONFIG_SHADOW[] = "config-shadow";
 
+                static constexpr char DEFAULT_LOCK_FILE_PATH[] = "/run/lock/";
+
                 Aws::Crt::Optional<std::string> endpoint;
                 Aws::Crt::Optional<std::string> cert;
                 Aws::Crt::Optional<std::string> key;
@@ -93,7 +95,7 @@ namespace Aws
                 Aws::Crt::Optional<std::string> thingName;
 
                 aws_mem_trace_level memTraceLevel{AWS_MEMTRACE_NONE};
-                std::string lockFilePath{"/run/lock/devicecl.lock"};
+                std::string lockFilePath{DEFAULT_LOCK_FILE_PATH};
 
                 struct LogConfig : public LoadableFromJsonAndCliAndEnvironment
                 {

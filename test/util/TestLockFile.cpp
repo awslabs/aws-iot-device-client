@@ -13,7 +13,7 @@ using namespace Aws::Iot::DeviceClient::Util;
 
 TEST(LockFile, normalCreation)
 {
-    string path = "/run/lock/devicecl.lock";
+    string path = "/run/lock/";
     unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "./aws-iot-device-client"});
 
     ifstream fileIn(path);
@@ -28,17 +28,17 @@ TEST(LockFile, normalCreation)
 
 TEST(LockFile, earlyDeletion)
 {
-    string path = "/run/lock/devicecl.lock";
+    string path = "/run/lock/";
     unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
     lockFile.reset();
 
-    ifstream fileIn(path);
+    ifstream fileIn(path + "devicecl.lock");
     ASSERT_FALSE(fileIn);
 }
 
 TEST(LockFile, multipleFiles)
 {
-    string path = "/run/lock/devicecl.lock";
+    string path = "/run/lock/";
     unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
 
     EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"}), std::runtime_error);
@@ -46,7 +46,7 @@ TEST(LockFile, multipleFiles)
 
 TEST(LockFile, multipleFilesWithExtendedPath)
 {
-    string path = "/run/lock/devicecl.lock";
+    string path = "/run/lock/";
     unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
 
     EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "directory/test-aws-iot-device-client"}), std::runtime_error);
@@ -54,7 +54,7 @@ TEST(LockFile, multipleFilesWithExtendedPath)
 
 TEST(LockFile, staleFile)
 {
-    string path = "/run/lock/devicecl.lock";
+    string path = "/run/lock/";
     string pidMax;
     ifstream pidFile("/proc/sys/kernel/pid_max");
     if (pidFile && pidFile >> pidMax)

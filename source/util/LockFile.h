@@ -18,10 +18,24 @@ namespace Aws
                 {
                   private:
                     static constexpr char TAG[] = "LockFile.cpp";
-                    std::string filename;
+                    static constexpr char FILE_NAME[] = "devicecl.lock";
+                    std::string dir;
 
                   public:
-                    explicit LockFile(const std::string &filename, const std::string &process);
+                    /**
+                     * \brief Constructor will enforce single process creation by writing a file to a specified
+                     * directory. If lockfile already exists, reads the pid from the file and checks if a process is
+                     * currently running with the pid. If the running process is device client, throw an exception, else
+                     * delete the file and rewrite the current pid.
+                     *
+                     * @param filedir directory the lockfile will be written to
+                     * @param process the executable path passed in by argv[0], usually aws-iot-device-client
+                     */
+                    explicit LockFile(const std::string &filedir, const std::string &process);
+                    /**
+                     * This class uses RAII for resource management. Destructor will be called on program exit and the
+                     * file will be deleted.
+                     */
                     ~LockFile();
 
                     // Non-copyable.

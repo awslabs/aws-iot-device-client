@@ -19,9 +19,8 @@ In addition to the application configuration settings described in [Configuring 
     * Enabling memory allocation tracing has a nontrivial cost and we do not recommend that customers enable this by default for production deployments.
     
 * `LOCK_FILE_PATH`
-  * To enforce single instance creation, set `LOCK_FILE_PATH` to a file in a writeable directory. For example, if you want to write to a file named devicecl.lock in /run/lock, then `LOCK_FILE_PATH=/run/lock/devicecl.lock`. Permissions still apply when writing to restricted directories.
-  * This feature is disabled until the environment variable is set.
-  * This feature is not needed when running device client as a service.
+  * To enforce single instance creation, device client writes a file to a specific directory. By default, the device client will write the lockfile to `/run/lock/` and name it "devicecl.lock". 
+  * To override the default directory, set `LOCK_FILE_PATH` to a writable directory e.g. `LOCK_FILE_PATH=/my/dir/`. Permissions still apply when writing to restricted directories.
   * While this should in theory enforce a single instance of device client, double check with `ps` if device client is not starting properly.
   
 * `AWSIOT_TUNNEL_ACCESS_TOKEN`
