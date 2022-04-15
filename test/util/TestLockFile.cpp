@@ -16,7 +16,7 @@ TEST(LockFile, normalCreation)
     string path = "/run/lock/";
     unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "./aws-iot-device-client"});
 
-    ifstream fileIn(path);
+    ifstream fileIn(path + "devicecl.lock");
     ASSERT_TRUE(fileIn);
 
     string storedPid;
@@ -68,7 +68,7 @@ TEST(LockFile, staleFile)
 
         unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
 
-        ifstream fileIn(path);
+        ifstream fileIn(path + "devicecl.lock");
         ASSERT_TRUE(fileIn);
 
         string storedPid;
