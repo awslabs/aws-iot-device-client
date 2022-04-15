@@ -256,7 +256,8 @@ bool PlainConfig::LoadFromEnvironment()
     const char *lockFilePathIn = std::getenv("LOCK_FILE_PATH");
     if (lockFilePathIn)
     {
-        string lockFilePathStr = FileUtils::ExtractParentDirectory(FileUtils::ExtractExpandedPath(Sanitize(lockFilePathIn)));
+        string lockFilePathStr =
+            FileUtils::ExtractParentDirectory(FileUtils::ExtractExpandedPath(Sanitize(lockFilePathIn)));
         cout << lockFilePathStr << endl;
 
         LOGM_DEBUG(Config::TAG, "Set LOCK_FILE_PATH=%s", lockFilePathStr.c_str());
@@ -277,7 +278,8 @@ bool PlainConfig::Validate() const
     }
     if (lockFilePath.empty() || !FileUtils::IsValidFilePath(lockFilePath))
     {
-        LOGM_ERROR(Config::TAG, "*** %s: Invalid Lock File Path %s ***", DeviceClient::DC_FATAL_ERROR, lockFilePath.c_str());
+        LOGM_ERROR(
+            Config::TAG, "*** %s: Invalid Lock File Path %s ***", DeviceClient::DC_FATAL_ERROR, lockFilePath.c_str());
         return false;
     }
 #if !defined(DISABLE_MQTT)
