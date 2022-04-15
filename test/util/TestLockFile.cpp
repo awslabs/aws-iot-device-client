@@ -13,9 +13,7 @@ using namespace Aws::Iot::DeviceClient::Util;
 
 TEST(LockFile, normalCreation)
 {
-    char buf[FILENAME_MAX];
-    string path = getcwd(buf, FILENAME_MAX);
-    path += "/devicecl.lock";
+    string path = "/run/lock/devicecl.lock";
     unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "./aws-iot-device-client"});
 
     ifstream fileIn(path);
@@ -30,9 +28,7 @@ TEST(LockFile, normalCreation)
 
 TEST(LockFile, earlyDeletion)
 {
-    char buf[FILENAME_MAX];
-    string path = getcwd(buf, FILENAME_MAX);
-    path += "/devicecl.lock";
+    string path = "/run/lock/devicecl.lock";
     unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
     lockFile.reset();
 
@@ -42,62 +38,43 @@ TEST(LockFile, earlyDeletion)
 
 TEST(LockFile, multipleFiles)
 {
-    char buf[FILENAME_MAX];
-    string path = getcwd(buf, FILENAME_MAX);
-    path += "/devicecl.lock";
+    string path = "/run/lock/devicecl.lock";
     unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
 
-    try
-    {
-        unique_ptr<LockFile> lockFile2 = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
-        ASSERT_TRUE(false);
-    }
-    catch (exception &e)
-    {
-        ASSERT_STREQ(e.what(), "Device Client is already running.");
-    }
+    EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"}), std::runtime_error);
 }
 
 TEST(LockFile, multipleFilesWithExtendedPath)
 {
-    char buf[FILENAME_MAX];
-    string path = getcwd(buf, FILENAME_MAX);
-    path += "/devicecl.lock";
+    string path = "/run/lock/devicecl.lock";
     unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
 
-    try
-    {
-        unique_ptr<LockFile> lockFile2 =
-            unique_ptr<LockFile>(new LockFile{path, "directory/test-aws-iot-device-client"});
-        ASSERT_TRUE(false);
-    }
-    catch (exception &e)
-    {
-        ASSERT_STREQ(e.what(), "Device Client is already running.");
-    }
+    EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "directory/test-aws-iot-device-client"}), std::runtime_error);
 }
 
 TEST(LockFile, staleFile)
 {
-    char buf[FILENAME_MAX];
-    string path = getcwd(buf, FILENAME_MAX);
-    path += "/devicecl.lock";
-
-    ofstream fileOut(path);
-    if (fileOut)
+    string path = "/run/lock/devicecl.lock";
+    string pidMax;
+    ifstream pidFile("/proc/sys/kernel/pid_max");
+    if (pidFile && pidFile >> pidMax)
     {
-        fileOut << "1234";
-    }
-    fileOut.close();
+        ofstream fileOut(path);
+        if (fileOut)
+        {
+            fileOut << pidMax;
+        }
+        fileOut.close();
 
-    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
+        unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
 
-    ifstream fileIn(path);
-    ASSERT_TRUE(fileIn);
+        ifstream fileIn(path);
+        ASSERT_TRUE(fileIn);
 
-    string storedPid;
-    if (fileIn >> storedPid)
-    {
-        ASSERT_STREQ(to_string(getpid()).c_str(), storedPid.c_str());
+        string storedPid;
+        if (fileIn >> storedPid)
+        {
+            ASSERT_STREQ(to_string(getpid()).c_str(), storedPid.c_str());
+        }
     }
 }

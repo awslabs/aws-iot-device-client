@@ -5,7 +5,6 @@
 #include "../logging/LoggerFactory.h"
 
 #include <csignal>
-#include <iostream>
 #include <stdexcept>
 #include <unistd.h>
 
@@ -46,7 +45,7 @@ LockFile::LockFile(const std::string &filename, const std::string &process) : fi
         {
             LOGM_ERROR(TAG, "Unable to remove stale lockfile: %s", filename.c_str());
 
-            throw runtime_error{"File has not been closed."};
+            throw runtime_error{"Error removing stale lockfile."};
         }
     }
     fileIn.close();
