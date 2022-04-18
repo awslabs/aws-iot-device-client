@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "LockFile.h"
+#include "StringUtils.h"
 #include "../logging/LoggerFactory.h"
 
 #include <csignal>
@@ -35,9 +36,9 @@ LockFile::LockFile(const std::string &filedir, const std::string &process) : dir
                 LOGM_ERROR(
                     TAG,
                     "Pid %s associated with active process %s in lockfile: %s",
-                    storedPid.c_str(),
-                    process.c_str(),
-                    fullPath.c_str());
+                    Sanitize(storedPid).c_str(),
+                    Sanitize(process).c_str(),
+                    Sanitize(fullPath).c_str());
 
                 throw runtime_error{"Device Client is already running."};
             }
@@ -45,7 +46,7 @@ LockFile::LockFile(const std::string &filedir, const std::string &process) : dir
         // remove stale pid file
         if (remove(fullPath.c_str()))
         {
-            LOGM_ERROR(TAG, "Unable to remove stale lockfile: %s", fullPath.c_str());
+            LOGM_ERROR(TAG, "Unable to remove stale lockfile: %s", Sanitize(fullPath).c_str());
 
             throw runtime_error{"Error removing stale lockfile."};
         }
@@ -55,7 +56,7 @@ LockFile::LockFile(const std::string &filedir, const std::string &process) : dir
     FILE *file = fopen(fullPath.c_str(), "wx");
     if (!file)
     {
-        LOGM_ERROR(TAG, "Unable to open lockfile: %s", fullPath.c_str());
+        LOGM_ERROR(TAG, "Unable to open lockfile: %s", Sanitize(fullPath).c_str());
 
         throw runtime_error{"Can not write to lockfile."};
     }
