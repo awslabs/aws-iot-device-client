@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "LockFile.h"
-#include "StringUtils.h"
 #include "../logging/LoggerFactory.h"
+#include "StringUtils.h"
 
 #include <csignal>
 #include <stdexcept>
