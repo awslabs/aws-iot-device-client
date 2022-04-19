@@ -85,8 +85,8 @@ TEST_F(LogQueueTest, notifyAllOnShutdown)
 
     logQueue->shutdown();
 
-    cv.wait_for(lock1, chrono::milliseconds(200));
-    cv2.wait_for(lock2, chrono::milliseconds(200));
+    cv.wait_for(lock1, chrono::milliseconds(400));
+    cv2.wait_for(lock2, chrono::milliseconds(400));
 
     ASSERT_TRUE(processed && processed2);
 }
