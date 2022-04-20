@@ -1998,14 +1998,14 @@ bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
     }
 
     size_t incomingFileSize = FileUtils::GetFileSize(file);
-    if (5000 < incomingFileSize)
+    if (incomingFileSize > Config::MAX_CONFIG_SIZE)
     {
         LOGM_WARN(
             TAG,
             "Refusing to open config file %s, file size %zu bytes is greater than allowable limit of %zu bytes",
             Sanitize(file).c_str(),
             incomingFileSize,
-            5000);
+            Config::MAX_CONFIG_SIZE);
         return false;
     }
 
