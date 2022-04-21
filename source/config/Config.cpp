@@ -256,7 +256,11 @@ bool PlainConfig::LoadFromEnvironment()
     const char *lockFilePathIn = std::getenv("LOCK_FILE_PATH");
     if (lockFilePathIn)
     {
-        string lockFilePathStr = FileUtils::ExtractParentDirectory(FileUtils::ExtractExpandedPath(lockFilePathIn));
+        string lockFilePathStr = FileUtils::ExtractExpandedPath(lockFilePathIn);
+        if (lockFilePathStr.back() != '/')
+        {
+            lockFilePathStr += '/';
+        }
 
         LOGM_DEBUG(Config::TAG, "Set LOCK_FILE_PATH=%s", Sanitize(lockFilePathStr).c_str());
         lockFilePath = lockFilePathStr;
