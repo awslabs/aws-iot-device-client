@@ -233,3 +233,4 @@ cmake --build . --target test-aws-iot-device-client
 
 ### Run Tests ###
 env AWS_CRT_MEMORY_TRACING=1 ./test/test-aws-iot-device-client
+./test/test-aws-iot-device-client --gtest_filter=LogQueueTest.notifyAllOnShutdown --gtest_repeat=1000

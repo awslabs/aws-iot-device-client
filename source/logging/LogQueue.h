@@ -5,6 +5,7 @@
 #define DEVICE_CLIENT_LOGQUEUE_H
 
 #include "LogMessage.h"
+#include <atomic>
 #include <condition_variable>
 #include <deque>
 #include <mutex>
@@ -27,7 +28,12 @@ namespace Aws
                     /**
                      * \brief Whether the LogQueue has been shutdown or not.
                      */
-                    bool isShutdown = false;
+                    std::atomic<bool> isShutdown{false};
+                    /**
+                     * \brief The default value in milliseconds for which Device client will wait after blocking when
+                     * the queue is empty.
+                     */
+                    static constexpr int EMPTY_WAIT_TIME_MILLISECONDS = 200;
                     /**
                      * \brief a Mutex used to control multi-threaded access to the LogQueue
                      */

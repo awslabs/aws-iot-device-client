@@ -85,8 +85,9 @@ TEST_F(LogQueueTest, notifyAllOnShutdown)
 
     logQueue->shutdown();
 
-    cv.wait_for(lock1, chrono::seconds(1));
-    cv2.wait_for(lock2, chrono::seconds(1));
+    // 400ms is 2 * EMPTY_WAIT_TIME_MILLISECONDS as defined in LogQueue.h
+    cv.wait_for(lock1, chrono::milliseconds(400));
+    cv2.wait_for(lock2, chrono::milliseconds(400));
 
     ASSERT_TRUE(processed && processed2);
 }
