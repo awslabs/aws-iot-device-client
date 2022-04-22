@@ -125,8 +125,7 @@ void shutdown()
 }
 
 /**
- * \brief This function is a wrapper around abort() which makes sure we let the user know
- * that we are aborting execution due to some type of configuration issue
+ * \brief This function shuts down device client when aborting execution due to some type of configuration issue
  *
  * @param reason the reason why the abort is happening
  */
@@ -134,7 +133,7 @@ void deviceClientAbort(string reason)
 {
     cout << "AWS IoT Device Client must abort execution, reason: " << reason << endl;
     cout << "Please check the AWS IoT Device Client logs for more information" << endl;
-    abort();
+    exit(EXIT_FAILURE);
 }
 
 void handle_feature_stopped(Feature *feature)
