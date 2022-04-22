@@ -14,9 +14,10 @@ using namespace Aws::Iot::DeviceClient::Util;
 TEST(LockFile, normalCreation)
 {
     string path = "/run/lock/";
+    string filename = "devicecl.lock";
     unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "./aws-iot-device-client"});
 
-    ifstream fileIn(path + "devicecl.lock");
+    ifstream fileIn(path + filename);
     ASSERT_TRUE(fileIn);
 
     string storedPid;
@@ -29,10 +30,11 @@ TEST(LockFile, normalCreation)
 TEST(LockFile, earlyDeletion)
 {
     string path = "/run/lock/";
+    string filename = "devicecl.lock";
     unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
     lockFile.reset();
 
-    ifstream fileIn(path + "devicecl.lock");
+    ifstream fileIn(path + filename);
     ASSERT_FALSE(fileIn);
 }
 
@@ -55,11 +57,12 @@ TEST(LockFile, multipleFilesWithExtendedPath)
 TEST(LockFile, staleFile)
 {
     string path = "/run/lock/";
+    string filename = "devicecl.lock";
     string pidMax;
     ifstream pidFile("/proc/sys/kernel/pid_max");
     if (pidFile && pidFile >> pidMax)
     {
-        ofstream fileOut(path);
+        ofstream fileOut(path + filename);
         if (fileOut)
         {
             fileOut << pidMax;
@@ -68,7 +71,7 @@ TEST(LockFile, staleFile)
 
         unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
 
-        ifstream fileIn(path + "devicecl.lock");
+        ifstream fileIn(path + filename);
         ASSERT_TRUE(fileIn);
 
         string storedPid;

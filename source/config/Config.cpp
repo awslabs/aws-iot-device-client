@@ -257,7 +257,7 @@ bool PlainConfig::LoadFromEnvironment()
     if (lockFilePathIn)
     {
         string lockFilePathStr = FileUtils::ExtractExpandedPath(lockFilePathIn);
-        if (lockFilePathStr.back() != '/')
+        if (!lockFilePathStr.empty() && lockFilePathStr.back() != '/')
         {
             lockFilePathStr += '/';
         }
