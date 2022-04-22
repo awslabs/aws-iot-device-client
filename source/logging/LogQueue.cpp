@@ -2,9 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "LogQueue.h"
+#include <iostream>
+#include <thread>
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Logging;
+
+constexpr int LogQueue::EMPTY_WAIT_TIME_MILLISECONDS;
 
 void LogQueue::addLog(unique_ptr<LogMessage> log)
 {
@@ -23,10 +27,12 @@ bool LogQueue::hasNextLog()
 std::unique_ptr<LogMessage> LogQueue::getNextLog()
 {
     unique_lock<mutex> readLock(queueLock);
+
     while (logQueue.empty() && !isShutdown)
     {
-        newLogNotifier.wait(readLock);
+        newLogNotifier.wait_for(readLock, chrono::milliseconds(EMPTY_WAIT_TIME_MILLISECONDS));
     }
+
     if (logQueue.empty())
     {
         return NULL;
