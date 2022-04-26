@@ -158,6 +158,21 @@ else ()
     link_directories(/lib)
 endif ()
 
+#########################################
+# cppcheck                              #
+#########################################
+option(ENABLE_CPPCHECK "Enable static analysis with cppcheck" ON)
+
+if (ENABLE_CPPCHECK)
+    find_program(CPPCHECK cppcheck)
+    if (CPPCHECK)
+        # Run cppcheck on source files, excluding test subdirectory and build dependencies.
+        set(CMAKE_CXX_CPPCHECK ${CPPCHECK} --enable=all --suppress=missingIncludeSystem --suppress=preprocessorErrorDirective -i ${CMAKE_CURRENT_SOURCE_DIR}/test)
+    else()
+        message(SEND_ERROR "cppcheck executable not found")
+    endif()
+endif()
+
 ###############################################
 ## Build the AWS IoT Device Client Executable #
 ###############################################
