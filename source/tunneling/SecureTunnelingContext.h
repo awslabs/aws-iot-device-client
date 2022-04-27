@@ -40,7 +40,7 @@ namespace Aws
                      */
                     SecureTunnelingContext(
                         std::shared_ptr<SharedCrtResourceManager> manager,
-                        const std::string &rootCa,
+                        Aws::Crt::Optional<std::string> &rootCa,
                         const std::string &accessToken,
                         const std::string &endpoint,
                         uint16_t port,

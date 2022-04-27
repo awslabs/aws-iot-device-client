@@ -22,21 +22,27 @@ namespace Aws
 
                 SecureTunnelingContext::SecureTunnelingContext(
                     shared_ptr<SharedCrtResourceManager> manager,
-                    const string &rootCa,
+                    Aws::Crt::Optional<std::string> &rootCa,
                     const string &accessToken,
                     const string &endpoint,
                     uint16_t port,
                     OnConnectionShutdownFn onConnectionShutdown)
                 {
                     mSharedCrtResourceManager = manager;
-                    mRootCa = rootCa;
+                    mRootCa = rootCa.has_value() ? rootCa.value() : basic_string<char>("");
                     mAccessToken = accessToken;
                     mEndpoint = endpoint;
                     mPort = port;
                     mOnConnectionShutdown = onConnectionShutdown;
                 }
 
-                SecureTunnelingContext::~SecureTunnelingContext() { mSecureTunnel->Close(); }
+                SecureTunnelingContext::~SecureTunnelingContext()
+                {
+                    if(mSecureTunnel->GetUnderlyingHandle() != nullptr)
+                    {
+                        mSecureTunnel->Close();
+                    }
+                }
 
                 template <typename T>
                 static bool operator==(const Aws::Crt::Optional<T> &lhs, const Aws::Crt::Optional<T> &rhs)
@@ -77,9 +83,15 @@ namespace Aws
 
                 bool SecureTunnelingContext::ConnectToSecureTunnel()
                 {
-                    if (mAccessToken.empty() || mEndpoint.empty())
+                    if (mAccessToken.empty())
                     {
-                        LOG_ERROR(TAG, "Cannot connect to secure tunnel. Either access token or endpoint is empty");
+                        LOG_ERROR(TAG, "Cannot connect to secure tunnel. Access token is missing.");
+                        return false;
+                    }
+
+                    if(mEndpoint.empty())
+                    {
+                        LOG_ERROR(TAG, "Cannot connect to secure tunnel. Endpoint is missing.");
                         return false;
                     }
 
@@ -101,12 +113,12 @@ namespace Aws
                         bind(&SecureTunnelingContext::OnStreamReset, this),
                         bind(&SecureTunnelingContext::OnSessionReset, this)));
 
-                    bool ok = mSecureTunnel->Connect() == AWS_OP_SUCCESS;
-                    if (!ok)
+                    bool success = mSecureTunnel->GetUnderlyingHandle() != nullptr && mSecureTunnel->Connect() == AWS_OP_SUCCESS;
+                    if (!success)
                     {
                         LOG_ERROR(TAG, "Cannot connect to secure tunnel. Please see the SDK log for detail.");
                     }
-                    return ok;
+                    return success;
                 }
 
                 void SecureTunnelingContext::ConnectToTcpForward()
