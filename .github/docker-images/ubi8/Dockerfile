@@ -21,7 +21,7 @@ RUN yum --disableplugin=subscription-manager -y update \
 
 ###############################################################################
 # Install cppcheck
-# cppcheck package is not available from amazonlinux default repositories
+# cppcheck package is not available from Redhat Linux default repositories
 # Install and enable epel repository.
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/add-repositories.html
 ###############################################################################
