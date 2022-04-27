@@ -88,10 +88,12 @@ namespace Aws
                     return result;
                 }
 
+                // cppcheck-suppress unusedFunction
                 string TrimLeftCopy(string s, const string &any) { return s.erase(0, s.find_first_not_of(any)); }
 
                 string TrimRightCopy(string s, const string &any) { return s.erase(s.find_last_not_of(any) + 1); }
 
+                // cppcheck-suppress unusedFunction
                 string TrimCopy(string s, const string &any)
                 {
                     s.erase(0, s.find_first_not_of(any));
