@@ -205,7 +205,7 @@ namespace Aws
                      * @param filePath CSR file location
                      * @return returns false if client is not able to open the file or if file is empty
                      */
-                    bool GetCsrFileContent(const std::string filePath);
+                    bool GetCsrFileContent(const std::string &filePath);
 
                     /**
                      * \brief locate and validate device private key
@@ -213,7 +213,7 @@ namespace Aws
                      * @param filePath device private key location
                      * @return returns false if client is not able to find the file or if valid permissions are not set
                      */
-                    bool LocateDeviceKey(const std::string filePath);
+                    bool LocateDeviceKey(const std::string &filePath);
                 };
             } // namespace FleetProvisioningNS
         }     // namespace DeviceClient
