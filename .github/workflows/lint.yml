@@ -28,7 +28,9 @@ jobs:
     steps:
     - name: Checkout Sources
       uses: actions/checkout@v1
-
     - name: cppcheck script
-      run: "${GITHUB_WORKSPACE}/run-cppcheck.sh"
-      shell: bash
+      run: |
+        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
+        export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/amazonlinux:latest
+        docker pull $DOCKER_IMAGE
+        docker run --mount type=bind,source=$(pwd),target=/root/aws-iot-device-client /root/aws-iot-device-client/run-cppcheck.sh
