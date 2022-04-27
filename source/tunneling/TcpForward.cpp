@@ -22,7 +22,8 @@ namespace Aws
                     std::shared_ptr<SharedCrtResourceManager> sharedCrtResourceManager,
                     uint16_t port,
                     OnTcpForwardDataReceive onTcpForwardDataReceive)
-                    : mSharedCrtResourceManager(sharedCrtResourceManager), mPort(port), mOnTcpForwardDataReceive(onTcpForwardDataReceive)
+                    : mSharedCrtResourceManager(sharedCrtResourceManager), mPort(port),
+                      mOnTcpForwardDataReceive(onTcpForwardDataReceive)
                 {
                     AWS_ZERO_STRUCT(mSocket);
                     Aws::Crt::Io::SocketOptions socketOptions;

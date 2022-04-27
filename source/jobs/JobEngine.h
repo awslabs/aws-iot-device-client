@@ -78,8 +78,10 @@ namespace Aws
                      * If this command is unable to find a given job handler and/or the permissions
                      * for the given job handler are inappropriate, this function will thrown an exception.
                      */
-                    std::string buildCommand(Optional<std::string> path, std::string handler, const std::string &jobHandlerDir)
-                        const;
+                    std::string buildCommand(
+                        Optional<std::string> path,
+                        std::string handler,
+                        const std::string &jobHandlerDir) const;
 
                     /**
                      * \brief Executes the given command (action) and passes the provided vector of arguments to that
