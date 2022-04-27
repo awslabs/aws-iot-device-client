@@ -46,7 +46,7 @@ namespace Aws
                   public:
                     LogMessage(
                         LogLevel level,
-                        std::string tag,
+                        const std::string &tag,
                         std::chrono::time_point<std::chrono::system_clock> time,
                         std::string message)
                     {
