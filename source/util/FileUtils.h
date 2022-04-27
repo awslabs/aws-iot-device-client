@@ -51,7 +51,7 @@ namespace Aws
                      * @param filePath a path to a file
                      * @return true on success
                      */
-                    static bool StoreValueInFile(std::string value, std::string filePath);
+                    static bool StoreValueInFile(const std::string &value, const std::string &filePath);
 
                     /**
                      * \brief Reads data of size into buffer

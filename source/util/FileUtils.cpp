@@ -72,7 +72,7 @@ string FileUtils::ExtractExpandedPath(const string &filePath)
     return expandedPath;
 }
 
-bool FileUtils::StoreValueInFile(string value, string filePath)
+bool FileUtils::StoreValueInFile(const string &value, const string &filePath)
 {
     ofstream file(filePath);
     if (!file.is_open())
@@ -167,7 +167,7 @@ bool FileUtils::ValidateFileOwnershipPermissions(const std::string &path)
 
 bool FileUtils::ValidateFilePermissions(const std::string &path, const int filePermissions, bool fatalError)
 {
-    string expandedPath = ExtractExpandedPath(path.c_str());
+    string expandedPath = ExtractExpandedPath(path);
 
     if (fatalError && !ValidateFileOwnershipPermissions(expandedPath))
     {
@@ -254,7 +254,7 @@ int FileUtils::PermissionsMaskToInt(mode_t mask)
 
 size_t FileUtils::GetFileSize(const std::string &filePath)
 {
-    string expandedPath = ExtractExpandedPath(filePath.c_str());
+    string expandedPath = ExtractExpandedPath(filePath);
 
     struct stat file_info;
     if (stat(expandedPath.c_str(), &file_info) == 0)
@@ -345,7 +345,7 @@ bool FileUtils::CreateEmptyFileWithPermissions(const string &filename, mode_t pe
 
 bool FileUtils::FileExists(const string &filename)
 {
-    string expandedPath = FileUtils::ExtractExpandedPath(filename.c_str());
+    string expandedPath = FileUtils::ExtractExpandedPath(filename);
     ifstream f(expandedPath);
     return f.good();
 }
