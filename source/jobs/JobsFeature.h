@@ -270,7 +270,7 @@ namespace Aws
                     void runJobs();
 
                   public:
-                    virtual std::string getName();
+                    virtual std::string getName() override;
                     /**
                      * \brief Initializes the Jobs feature with all the required setup information, event handlers, and
                      * the shared MqttConnection
@@ -287,8 +287,8 @@ namespace Aws
                         const PlainConfig &config);
 
                     // Interface methods defined in Feature.h
-                    virtual int start();
-                    virtual int stop();
+                    virtual int start() override;
+                    virtual int stop() override;
                 };
             } // namespace Jobs
         }     // namespace DeviceClient
