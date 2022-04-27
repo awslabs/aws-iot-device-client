@@ -19,4 +19,4 @@
 #       Return 1 when any error is detected. This will cause build to fail.
 #       NOTE(marcoaz): Not set due to failure of wildcard suppressions to suppress all errors.
 #
-cppcheck --enable=all --suppress=missingIncludeSystem:* --suppress=preprocessorErrorDirective:* --suppress=unusedFunction:* --output-file=/src/build-debug/cppcheck-results.txt -i /src/test /src/source
+cppcheck --enable=all --suppress=missingIncludeSystem:* --suppress=preprocessorErrorDirective:* --suppress=unusedFunction:* --output-file=/src/build-debug/cppcheck-results.txt -i test source
