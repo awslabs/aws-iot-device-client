@@ -6,6 +6,7 @@
 
 #include <aws/common/byte_buf.h>
 #include <string>
+#include <sys/stat.h>
 
 namespace Aws
 {
