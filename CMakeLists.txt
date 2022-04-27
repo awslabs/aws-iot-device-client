@@ -167,7 +167,50 @@ if (ENABLE_CPPCHECK)
     find_program(CPPCHECK cppcheck)
     if (CPPCHECK)
         # Run cppcheck on source files, excluding test subdirectory and build dependencies.
-        set(CMAKE_CXX_CPPCHECK ${CPPCHECK} --enable=all --suppress=missingIncludeSystem --suppress=preprocessorErrorDirective -i ${CMAKE_CURRENT_SOURCE_DIR}/test)
+        #
+        # Options
+        # --enable=warning,performance,portability,information
+        #       Enable all checks, exclude explicit suppressions below, use --doc to obtain list of all checks.
+        #
+        # --suppress=unusedFunction
+        #       Suppress errors about unused functions.
+        #
+        # --suppress=missingIncludeSystem
+        #       Suppress errors about missing includes, cppcheck is not good at locating system headers.
+        #
+        # --suppress=preprocessorErrorDirective
+        #       Suppress errors about #error preprocessor directives from AWS CRT, example: aws/common/math.h
+        #
+        # --error-exitcode=1
+        #       Return 1 when any error is detected. This will cause build to fail.
+        #
+        # -i ${CMAKE_CURRENT_SOURCE_DIR}/test
+        #       Exclude test source files from check.
+        #   --suppressions-list=${CMAKE_CURRENT_SOURCE_DIR}/suppressions.txt
+        #   --suppressions-list=${CMAKE_CURRENT_SOURCE_DIR}/suppressions.txt
+        #   --suppress=missingIncludeSystem:${CMAKE_CURRENT_SOURCE_DIR}/source/logging/LogLevel.cpp:-1:0
+        #   --suppress=preprocessorErrorDirective:${CMAKE_CURRENT_SOURCE_DIR}/source/logging/LogLevel.cpp:-1:0
+        #   --suppress=preprocessorErrorDirective:${CMAKE_CURRENT_SOURCE_DIR}/source/logging/LogQueue.cpp
+        #   --error-exitcode=1
+        #   --enable=warning,performance,portability,information
+        #   --suppressions-list=${CMAKE_CURRENT_SOURCE_DIR}/suppressions.txt
+        #   --suppress=missingIncludeSystem:*
+        #   --suppress=preprocessorErrorDirective:*
+        #   --suppress=missingIncludeSystem:${CMAKE_CURRENT_SOURCE_DIR}/source/logging/LogLevel.cpp:-1:0
+        #   --suppress=preprocessorErrorDirective:${CMAKE_CURRENT_SOURCE_DIR}/source/logging/LogLevel.cpp:-1:0
+        #   --suppress=preprocessorErrorDirective:${CMAKE_CURRENT_SOURCE_DIR}/source/logging/LogQueue.cpp:-1:0
+        #   --suppress=preprocessorErrorDirective:${CMAKE_CURRENT_SOURCE_DIR}/source/util/UniqueString.cpp:-1:0
+        #   --suppress=preprocessorErrorDirective:${CMAKE_CURRENT_SOURCE_DIR}/source/jobs/LimitedStreamBuffer.cpp:-1:0
+        #   --suppress=preprocessorErrorDirective:${CMAKE_CURRENT_BINARY_DIR}/aws-iot-device-sdk-cpp-v2-src/crt/aws-crt-cpp/crt/aws-c-common/include/aws/common/math.h:21:0
+        #   --enable=performance,portability
+        #
+        set(CMAKE_CXX_CPPCHECK
+            ${CPPCHECK}
+            --enable=all
+            --suppress=missingIncludeSystem:*
+            --suppress=preprocessorErrorDirective:*
+            --suppress=unusedFunction:*
+            -i ${CMAKE_CURRENT_SOURCE_DIR}/test)
     else()
         message(SEND_ERROR "cppcheck executable not found")
     endif()
