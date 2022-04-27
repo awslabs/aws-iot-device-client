@@ -78,7 +78,7 @@ namespace Aws
                      * If this command is unable to find a given job handler and/or the permissions
                      * for the given job handler are inappropriate, this function will thrown an exception.
                      */
-                    std::string buildCommand(Optional<std::string> path, std::string handler, std::string jobHandlerDir)
+                    std::string buildCommand(Optional<std::string> path, std::string handler, const std::string &jobHandlerDir)
                         const;
 
                     /**
@@ -99,7 +99,7 @@ namespace Aws
                      */
                     void exec_action(
                         PlainJobDocument::JobAction action,
-                        std::string jobHandlerDir,
+                        const std::string &jobHandlerDir,
                         int &executionStatus);
 
                   public:
@@ -118,7 +118,7 @@ namespace Aws
                      * @param jobHandlerDir the default job handler directory path
                      * @return an integer representing the return code of the executed action
                      */
-                    int exec_steps(PlainJobDocument jobDocument, std::string jobHandlerDir);
+                    int exec_steps(PlainJobDocument jobDocument, const std::string &jobHandlerDir);
                     /**
                      * \brief Begin the execution of a command with the specified arguments
                      *

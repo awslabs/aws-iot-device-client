@@ -82,7 +82,7 @@ void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
     }
 }
 
-string JobEngine::buildCommand(Optional<string> path, std::string handler, std::string jobHandlerDir) const
+string JobEngine::buildCommand(Optional<string> path, std::string handler, const std::string &jobHandlerDir) const
 {
     ostringstream commandStream;
     bool operationOwnedByDeviceClient = false;
@@ -133,7 +133,7 @@ string JobEngine::buildCommand(Optional<string> path, std::string handler, std::
     return commandStream.str();
 }
 
-void JobEngine::exec_action(PlainJobDocument::JobAction action, std::string jobHandlerDir, int &executionStatus)
+void JobEngine::exec_action(PlainJobDocument::JobAction action, const std::string &jobHandlerDir, int &executionStatus)
 {
     string command;
     if (action.type == PlainJobDocument::ACTION_TYPE_RUN_HANDLER)
@@ -180,7 +180,7 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, std::string jobH
         Util::Sanitize(action.runAsUser->c_str()).c_str(),
         Util::Sanitize(argsStringForLogging.str()).c_str());
 
-    int actionExecutionStatus = exec_cmd(command.c_str(), action);
+    int actionExecutionStatus = exec_cmd(command, action);
 
     if (!action.ignoreStepFailure.value())
     {
@@ -200,7 +200,7 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, std::string jobH
     }
 }
 
-int JobEngine::exec_steps(PlainJobDocument jobDocument, std::string jobHandlerDir)
+int JobEngine::exec_steps(PlainJobDocument jobDocument, const std::string &jobHandlerDir)
 {
     int executionStatus = 0;
     for (const auto &action : jobDocument.steps)
