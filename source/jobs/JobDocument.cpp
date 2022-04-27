@@ -133,7 +133,8 @@ vector<string> PlainJobDocument::ParseToVectorString(const JsonView &json)
 
     for (const auto &i : json.AsArray())
     {
-        plainVector.push_back(i.AsString().c_str());
+        // cppcheck-suppress useStlAlgorithm
+        plainVector.push_back(i.AsString());
     }
     return plainVector;
 }
@@ -151,6 +152,7 @@ bool PlainJobDocument::Validate() const
         for (const auto &condition : *conditions)
         {
             if (!condition.Validate())
+            // cppcheck-suppress useStlAlgorithm
             {
                 return false;
             }
@@ -167,6 +169,7 @@ bool PlainJobDocument::Validate() const
         for (const auto &action : steps)
         {
             if (!action.Validate())
+            // cppcheck-suppress useStlAlgorithm
             {
                 return false;
             }
