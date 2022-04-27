@@ -6,17 +6,24 @@
 # --enable=all
 #       Enable all checks, exclude explicit suppressions below, use --doc to obtain list of all checks.
 #
-# --suppress=missingIncludeSystem
+# --suppress=toomanyconfigs:source/main.cpp
+#       Cppcheck emits an error if a source file contains more than 12 #ifdefs.
+#
+# --suppress=missingInclude:*
 #       Suppress errors about missing includes, cppcheck is not good at locating system headers.
+#       Since include paths depend on the target system, we choose to suppress rather than providing explicit include paths to cppcheck.
 #
-# --suppress=preprocessorErrorDirective
-#       Suppress errors about #error preprocessor directives from AWS CRT, example: aws/common/math.h
-#
-# --suppress=unusedFunction
-#       Suppress errors about unused functions.
+# --inline-suppr
+#       Enable inline suppressions of specific lines in source code.
 #
 # --error-exitcode=1
 #       Return 1 when any error is detected. This will cause build to fail.
-#       NOTE(marcoaz): Not set due to failure of wildcard suppressions to suppress all errors.
 #
-cppcheck --enable=all --suppress=missingIncludeSystem:* --suppress=preprocessorErrorDirective:* --suppress=unusedFunction:* --output-file=/src/build-debug/cppcheck-results.txt -i test source
+cppcheck \
+    --enable=all \
+    --suppress=toomanyconfigs:source/main.cpp \
+    --suppress=missingInclude:* \
+    --inline-suppr \
+    --error-exitcode=1 \
+    -i test \
+    source
