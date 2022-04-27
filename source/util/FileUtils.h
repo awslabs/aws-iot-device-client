@@ -60,7 +60,7 @@ namespace Aws
                      * @param size Size of data to read
                      * @return 0 on success
                      */
-                    static int ReadFromFile(const std::string pathToFile, aws_byte_buf *data, size_t size);
+                    static int ReadFromFile(const std::string &pathToFile, aws_byte_buf *data, size_t size);
 
                     /**
                      * \brief Write data into file in append mode
@@ -68,7 +68,7 @@ namespace Aws
                      * @param data Buffer containing data
                      * @return 0 on success
                      */
-                    static int WriteToFile(const std::string pathToFile, const aws_byte_buf *data);
+                    static int WriteToFile(const std::string &pathToFile, const aws_byte_buf *data);
 
                     /**
                      * \brief Returns an integer representing the permissions of the specified file.

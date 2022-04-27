@@ -85,7 +85,7 @@ bool FileUtils::StoreValueInFile(string value, string filePath)
     return true;
 }
 
-int FileUtils::ReadFromFile(const std::string pathToFile, aws_byte_buf *data, size_t size)
+int FileUtils::ReadFromFile(const std::string &pathToFile, aws_byte_buf *data, size_t size)
 {
     ifstream file(pathToFile);
     if (data->capacity < size)
@@ -113,7 +113,7 @@ int FileUtils::ReadFromFile(const std::string pathToFile, aws_byte_buf *data, si
     }
 }
 
-int FileUtils::WriteToFile(const std::string pathToFile, const aws_byte_buf *data)
+int FileUtils::WriteToFile(const std::string &pathToFile, const aws_byte_buf *data)
 {
     ofstream file(pathToFile, std::ios::app);
     if (!file.is_open())
