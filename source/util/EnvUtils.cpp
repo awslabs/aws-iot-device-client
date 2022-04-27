@@ -133,7 +133,7 @@ int EnvUtils::AppendCwdToPath()
     oss << PATH_ENVIRONMENT_SEPARATOR << cwd.data() << PATH_DIRECTORY_SEPARATOR << JOBS_DIRECTORY_NAME;
 
     // Overwrite path environment variable.
-    const std::string &newpath = oss.str();
+    const std::string newpath = oss.str();
     if (os->setenv(PATH_ENVIRONMENT, newpath.c_str(), 1) != 0)
     {
         auto errnum = errno != 0 ? errno : 1;
