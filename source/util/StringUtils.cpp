@@ -75,7 +75,7 @@ namespace Aws
                     std::map<Aws::Crt::String, Aws::Crt::String>::iterator it;
                     string result = "";
                     unsigned int count = 0;
-                    for (it = map->begin(); it != map->end(); it++)
+                    for (it = map->begin(); it != map->end(); ++it)
                     {
                         count++;
                         result = result.append(addString(it->first, it->second));
