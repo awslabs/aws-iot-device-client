@@ -275,7 +275,9 @@ bool FileUtils::CreateDirectoryWithPermissions(const char *dirPath, mode_t permi
         if (desiredPermissions != actualPermissions)
         {
             chmod(expandedPath.c_str(), permissions);
+            // Repeat permission check for verification.
             actualPermissions = GetFilePermissions(expandedPath);
+            // cppcheck-suppress knownConditionTrueFalse
             if (desiredPermissions != actualPermissions)
             {
                 LOGM_ERROR(
