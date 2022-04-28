@@ -38,10 +38,7 @@ namespace Aws
 
                 SecureTunnelingContext::~SecureTunnelingContext()
                 {
-                    if(mSecureTunnel->GetUnderlyingHandle() != nullptr)
-                    {
-                        mSecureTunnel->Close();
-                    }
+                    mSecureTunnel->Close();
                 }
 
                 template <typename T>
