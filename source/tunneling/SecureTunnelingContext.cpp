@@ -83,7 +83,7 @@ namespace Aws
                         return false;
                     }
 
-                    if(mEndpoint.empty())
+                    if (mEndpoint.empty())
                     {
                         LOG_ERROR(TAG, "Cannot connect to secure tunnel. Endpoint is missing.");
                         return false;
