@@ -82,7 +82,8 @@ void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
     }
 }
 
-string JobEngine::buildCommand(Optional<string> path, const std::string &handler, const std::string &jobHandlerDir) const
+string JobEngine::buildCommand(Optional<string> path, const std::string &handler, const std::string &jobHandlerDir)
+    const
 {
     ostringstream commandStream;
     bool operationOwnedByDeviceClient = false;
