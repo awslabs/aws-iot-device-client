@@ -197,8 +197,10 @@ int SharedCrtResourceManager::buildClient(const PlainConfig &config)
                            ));
     if (!eventLoopGroup)
     {
+        // cppcheck-suppress nullPointerRedundantCheck
         LOGM_ERROR(
             TAG, "MQTT Event Loop Group Creation failed with error: %s", ErrorDebugString(eventLoopGroup->LastError()));
+        // cppcheck-suppress nullPointerRedundantCheck
         return eventLoopGroup->LastError();
     }
 
@@ -207,7 +209,9 @@ int SharedCrtResourceManager::buildClient(const PlainConfig &config)
 
     if (!clientBootstrap)
     {
+        // cppcheck-suppress nullPointerRedundantCheck
         LOGM_ERROR(TAG, "MQTT ClientBootstrap failed with error: %s", ErrorDebugString(clientBootstrap->LastError()));
+        // cppcheck-suppress nullPointerRedundantCheck
         return clientBootstrap->LastError();
     }
 

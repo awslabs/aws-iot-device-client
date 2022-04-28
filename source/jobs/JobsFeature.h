@@ -187,14 +187,14 @@ namespace Aws
                      * @param jobId the job ID to listen for. Use "+" to subscribe for all job executions for this
                      * thing.
                      */
-                    void subscribeToUpdateJobExecutionStatusAccepted(std::string jobId);
+                    void subscribeToUpdateJobExecutionStatusAccepted(const std::string &jobId);
                     /**
                      * \brief Enables the Jobs feature to receive response information from the IoT Jobs service when an
                      * update is rejected
                      * @param jobId the job ID to listen for. Use "+" to subscribe for all job executions for this
                      * thing.
                      */
-                    void subscribeToUpdateJobExecutionStatusRejected(std::string jobId);
+                    void subscribeToUpdateJobExecutionStatusRejected(const std::string &jobId);
 
                     // Incoming Mqtt message handlers
                     /**
@@ -270,7 +270,7 @@ namespace Aws
                     void runJobs();
 
                   public:
-                    virtual std::string getName();
+                    virtual std::string getName() override;
                     /**
                      * \brief Initializes the Jobs feature with all the required setup information, event handlers, and
                      * the shared MqttConnection
@@ -287,8 +287,8 @@ namespace Aws
                         const PlainConfig &config);
 
                     // Interface methods defined in Feature.h
-                    virtual int start();
-                    virtual int stop();
+                    virtual int start() override;
+                    virtual int stop() override;
                 };
             } // namespace Jobs
         }     // namespace DeviceClient

@@ -178,7 +178,7 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     if (json.ValueExists(jsonKey))
     {
         const char *jsonKeyTwo = JSON_KEY_PUB_SUB;
-        if (json.ValueExists(jsonKey))
+        if (json.GetJsonObject(jsonKey).ValueExists(jsonKeyTwo))
         {
             PubSub temp;
             temp.LoadFromJson(json.GetJsonObject(jsonKey).GetJsonObject(jsonKeyTwo));
@@ -507,12 +507,9 @@ bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
     }
 
     jsonKey = JSON_KEY_ENABLE_SDK_LOGGING;
-    if (json.ValueExists(jsonKey) && json.GetBool(jsonKey))
+    if (json.ValueExists(jsonKey))
     {
-        if (json.GetBool(jsonKey))
-        {
-            sdkLoggingEnabled = true;
-        }
+        sdkLoggingEnabled = json.GetBool(jsonKey);
     }
 
     jsonKey = JSON_KEY_SDK_LOG_LEVEL;
@@ -711,8 +708,8 @@ bool PlainConfig::Tunneling::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::Tunneling::CLI_TUNNELING_SERVICE))
     {
-        auto service = cliArgs.at(PlainConfig::Tunneling::CLI_TUNNELING_SERVICE);
 #if !defined(EXCLUDE_ST)
+        auto service = cliArgs.at(PlainConfig::Tunneling::CLI_TUNNELING_SERVICE);
         port = SecureTunnelingFeature::GetPortFromService(service);
 #else
         port = 0;
@@ -1407,7 +1404,8 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
     {
         string cliFlag;     // Cli flag to look for
         bool additionalArg; // Does this take an addition argument?
-        bool stopIfFound;   // Should we stop processing more arguments if this is found?
+        // cppcheck-suppress unusedStructMember
+        bool stopIfFound; // Should we stop processing more arguments if this is found?
         std::function<void(const string &additionalArg)> extraSteps; // Function to call if this is found
     };
     ArgumentDefinition argumentDefinitions[] = {

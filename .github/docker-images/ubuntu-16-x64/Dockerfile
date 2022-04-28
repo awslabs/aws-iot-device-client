@@ -13,6 +13,7 @@ RUN apt-get update -qq \
     curl \
     build-essential \
     wget \
+    cppcheck \
     && apt-get clean
 
 ###############################################################################

@@ -26,6 +26,8 @@ namespace Aws
                 class DeviceDefenderFeature : public Feature
                 {
                   public:
+                    DeviceDefenderFeature() = default;
+
                     /**
                      * \brief Initializes the Device Defender feature with all the required setup information, event
                      * handlers, and the shared MqttConnection
