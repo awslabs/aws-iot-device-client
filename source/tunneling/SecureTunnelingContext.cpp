@@ -22,18 +22,15 @@ namespace Aws
 
                 SecureTunnelingContext::SecureTunnelingContext(
                     shared_ptr<SharedCrtResourceManager> manager,
-                    Aws::Crt::Optional<std::string> &rootCa,
+                    const Aws::Crt::Optional<std::string> &rootCa,
                     const string &accessToken,
                     const string &endpoint,
                     uint16_t port,
-                    OnConnectionShutdownFn onConnectionShutdown)
+                    const OnConnectionShutdownFn &onConnectionShutdown)
+                    : mSharedCrtResourceManager(manager), mRootCa(rootCa.has_value() ? rootCa.value() : ""),
+                      mAccessToken(accessToken), mEndpoint(endpoint), mPort(port),
+                      mOnConnectionShutdown(onConnectionShutdown)
                 {
-                    mSharedCrtResourceManager = manager;
-                    mRootCa = rootCa.has_value() ? rootCa.value() : basic_string<char>("");
-                    mAccessToken = accessToken;
-                    mEndpoint = endpoint;
-                    mPort = port;
-                    mOnConnectionShutdown = onConnectionShutdown;
                 }
 
                 SecureTunnelingContext::~SecureTunnelingContext() { mSecureTunnel->Close(); }
@@ -107,13 +104,13 @@ namespace Aws
                         bind(&SecureTunnelingContext::OnStreamReset, this),
                         bind(&SecureTunnelingContext::OnSessionReset, this)));
 
-                    bool success =
+                    bool connectionSuccess =
                         mSecureTunnel->GetUnderlyingHandle() != nullptr && mSecureTunnel->Connect() == AWS_OP_SUCCESS;
-                    if (!success)
+                    if (!connectionSuccess)
                     {
                         LOG_ERROR(TAG, "Cannot connect to secure tunnel. Please see the SDK log for detail.");
                     }
-                    return success;
+                    return connectionSuccess;
                 }
 
                 void SecureTunnelingContext::ConnectToTcpForward()
