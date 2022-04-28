@@ -136,7 +136,7 @@ void deviceClientAbort(const string &reason)
     exit(EXIT_FAILURE);
 }
 
-void handle_feature_stopped(Feature *feature)
+void handle_feature_stopped(const Feature *feature)
 {
     featuresReadWriteLock.lock(); // LOCK
 
