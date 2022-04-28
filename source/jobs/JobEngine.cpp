@@ -82,7 +82,7 @@ void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
     }
 }
 
-string JobEngine::buildCommand(Optional<string> path, std::string handler, const std::string &jobHandlerDir) const
+string JobEngine::buildCommand(Optional<string> path, const std::string &handler, const std::string &jobHandlerDir) const
 {
     ostringstream commandStream;
     bool operationOwnedByDeviceClient = false;
@@ -118,7 +118,7 @@ string JobEngine::buildCommand(Optional<string> path, std::string handler, const
 
     if (operationOwnedByDeviceClient)
     {
-        const int actualPermissions = Util::FileUtils::GetFilePermissions(commandStream.str().c_str());
+        const int actualPermissions = Util::FileUtils::GetFilePermissions(commandStream.str());
         if (Permissions::JOB_HANDLER != actualPermissions)
         {
             string message = Util::FormatMessage(
@@ -205,7 +205,7 @@ int JobEngine::exec_steps(PlainJobDocument jobDocument, const std::string &jobHa
     int executionStatus = 0;
     for (const auto &action : jobDocument.steps)
     {
-        LOGM_INFO(TAG, "About to execute step with name: %s", Util::Sanitize(action.name.c_str()).c_str());
+        LOGM_INFO(TAG, "About to execute step with name: %s", Util::Sanitize(action.name).c_str());
         exec_action(action, jobHandlerDir, executionStatus);
         if (this->hasErrors())
         {
@@ -227,7 +227,7 @@ int JobEngine::exec_steps(PlainJobDocument jobDocument, const std::string &jobHa
     return executionStatus;
 }
 
-int JobEngine::exec_cmd(string operation, PlainJobDocument::JobAction action)
+int JobEngine::exec_cmd(const string &operation, PlainJobDocument::JobAction action)
 {
     // Establish some file descriptors which we'll use to redirect stdout and
     // stderr from the child process back into our logger
