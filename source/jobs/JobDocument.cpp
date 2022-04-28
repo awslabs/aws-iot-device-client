@@ -134,7 +134,7 @@ vector<string> PlainJobDocument::ParseToVectorString(const JsonView &json)
     for (const auto &i : json.AsArray())
     {
         // cppcheck-suppress useStlAlgorithm
-        plainVector.push_back(i.AsString());
+        plainVector.push_back(i.AsString().c_str());
     }
     return plainVector;
 }
