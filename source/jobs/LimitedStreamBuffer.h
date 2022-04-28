@@ -50,7 +50,7 @@ namespace Aws
                      * \brief We provide an additional constructor with a configurable sizeLimit for testing
                      * @param sizeLimit the maximum size of the LimitedStreamBuffer
                      */
-                    LimitedStreamBuffer(size_t sizeLimit) { this->contentsSizeLimit = sizeLimit; }
+                    explicit LimitedStreamBuffer(size_t sizeLimit) { this->contentsSizeLimit = sizeLimit; }
 
                     /**
                      * \brief Add the given string to the LimitedStreamBuffer

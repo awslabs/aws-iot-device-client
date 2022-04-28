@@ -55,7 +55,8 @@ namespace Aws
                 int SecureTunnelingFeature::start()
                 {
                     RunSecureTunneling();
-                    mClientBaseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STARTED);
+                    auto self = static_cast<Feature *>(this);
+                    mClientBaseNotifier->onEvent(self, ClientBaseEventNotification::FEATURE_STARTED);
                     return 0;
                 }
 
@@ -66,7 +67,8 @@ namespace Aws
                         c.reset();
                     }
 
-                    mClientBaseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
+                    auto self = static_cast<Feature *>(this);
+                    mClientBaseNotifier->onEvent(self, ClientBaseEventNotification::FEATURE_STOPPED);
                     return 0;
                 }
 

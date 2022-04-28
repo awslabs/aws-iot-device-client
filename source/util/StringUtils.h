@@ -39,7 +39,7 @@ namespace Aws
                  * @param value the value to sanitize
                  * @return the sanitized value
                  */
-                std::string Sanitize(std::string value);
+                std::string Sanitize(const std::string &value);
 
                 /**
                  * \brief helper method to concat strings with ':' in between

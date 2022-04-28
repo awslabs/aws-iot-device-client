@@ -562,7 +562,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
  * Helper methods
  */
 
-bool FleetProvisioning::LocateDeviceKey(const string filePath)
+bool FleetProvisioning::LocateDeviceKey(const string &filePath)
 {
     struct stat info;
     bool locatedDeviceKey = true;
@@ -587,7 +587,7 @@ bool FleetProvisioning::LocateDeviceKey(const string filePath)
     return locatedDeviceKey;
 }
 
-bool FleetProvisioning::GetCsrFileContent(const string filePath)
+bool FleetProvisioning::GetCsrFileContent(const string &filePath)
 {
     string expandedPath = FileUtils::ExtractExpandedPath(filePath.c_str());
 

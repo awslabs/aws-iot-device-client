@@ -68,7 +68,7 @@ namespace Aws
 
                     EnvUtils() : os(new OSInterfacePosix) {}
 
-                    EnvUtils(OSInterfacePtr os) : os(std::move(os)) {}
+                    explicit EnvUtils(OSInterfacePtr os) : os(std::move(os)) {}
 
                     /**
                      * \brief Append the current working directory to PATH environment variable.
