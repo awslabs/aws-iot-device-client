@@ -158,45 +158,6 @@ else ()
     link_directories(/lib)
 endif ()
 
-#########################################
-# cppcheck                              #
-#########################################
-option(ENABLE_CPPCHECK "Enable static analysis with cppcheck" ON)
-
-if (ENABLE_CPPCHECK)
-    find_program(CPPCHECK cppcheck)
-    if (CPPCHECK)
-        # Run cppcheck on source files, excluding test subdirectory and build dependencies.
-        #
-        # Options
-        # --enable=all
-        #       Enable all checks, exclude explicit suppressions below, use --doc to obtain list of all checks.
-        #
-        # --suppress=missingIncludeSystem
-        #       Suppress errors about missing includes, cppcheck is not good at locating system headers.
-        #
-        # --suppress=preprocessorErrorDirective
-        #       Suppress errors about #error preprocessor directives from AWS CRT, example: aws/common/math.h
-        #
-        # --suppress=unusedFunction
-        #       Suppress errors about unused functions.
-        #
-        # --error-exitcode=1
-        #       Return 1 when any error is detected. This will cause build to fail.
-        #       NOTE(marcoaz): Not set due to failure of wildcard suppressions to suppress all errors.
-        #
-        set(CMAKE_CXX_CPPCHECK
-            ${CPPCHECK}
-            --enable=all
-            --suppress=missingIncludeSystem:*
-            --suppress=preprocessorErrorDirective:*
-            --suppress=unusedFunction:*
-            -i ${CMAKE_CURRENT_SOURCE_DIR}/test)
-    else()
-        message(SEND_ERROR "cppcheck executable not found")
-    endif()
-endif()
-
 ###############################################
 ## Build the AWS IoT Device Client Executable #
 ###############################################
