@@ -43,7 +43,7 @@ namespace Aws
                     return s;
                 }
 
-                string Sanitize(std::string value)
+                string Sanitize(const std::string &value)
                 {
                     const char *input = value.c_str();
                     ostringstream output;
