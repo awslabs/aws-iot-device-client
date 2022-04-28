@@ -187,14 +187,14 @@ namespace Aws
                      * @param jobId the job ID to listen for. Use "+" to subscribe for all job executions for this
                      * thing.
                      */
-                    void subscribeToUpdateJobExecutionStatusAccepted(std::string jobId);
+                    void subscribeToUpdateJobExecutionStatusAccepted(const std::string &jobId);
                     /**
                      * \brief Enables the Jobs feature to receive response information from the IoT Jobs service when an
                      * update is rejected
                      * @param jobId the job ID to listen for. Use "+" to subscribe for all job executions for this
                      * thing.
                      */
-                    void subscribeToUpdateJobExecutionStatusRejected(std::string jobId);
+                    void subscribeToUpdateJobExecutionStatusRejected(const std::string &jobId);
 
                     // Incoming Mqtt message handlers
                     /**
