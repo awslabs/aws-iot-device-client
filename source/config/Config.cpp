@@ -178,7 +178,7 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     if (json.ValueExists(jsonKey))
     {
         const char *jsonKeyTwo = JSON_KEY_PUB_SUB;
-        if (json.ValueExists(jsonKeyTwo))
+        if (json.GetJsonObject(jsonKey).ValueExists(jsonKeyTwo))
         {
             PubSub temp;
             temp.LoadFromJson(json.GetJsonObject(jsonKey).GetJsonObject(jsonKeyTwo));
