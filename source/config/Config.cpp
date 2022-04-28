@@ -1404,6 +1404,7 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
     {
         string cliFlag;     // Cli flag to look for
         bool additionalArg; // Does this take an addition argument?
+        // cppcheck-suppress unusedStructMember
         bool stopIfFound;   // Should we stop processing more arguments if this is found?
         std::function<void(const string &additionalArg)> extraSteps; // Function to call if this is found
     };
