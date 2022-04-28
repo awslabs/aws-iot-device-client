@@ -36,10 +36,7 @@ namespace Aws
                     mOnConnectionShutdown = onConnectionShutdown;
                 }
 
-                SecureTunnelingContext::~SecureTunnelingContext()
-                {
-                    mSecureTunnel->Close();
-                }
+                SecureTunnelingContext::~SecureTunnelingContext() { mSecureTunnel->Close(); }
 
                 template <typename T>
                 static bool operator==(const Aws::Crt::Optional<T> &lhs, const Aws::Crt::Optional<T> &rhs)
@@ -110,7 +107,8 @@ namespace Aws
                         bind(&SecureTunnelingContext::OnStreamReset, this),
                         bind(&SecureTunnelingContext::OnSessionReset, this)));
 
-                    bool success = mSecureTunnel->GetUnderlyingHandle() != nullptr && mSecureTunnel->Connect() == AWS_OP_SUCCESS;
+                    bool success =
+                        mSecureTunnel->GetUnderlyingHandle() != nullptr && mSecureTunnel->Connect() == AWS_OP_SUCCESS;
                     if (!success)
                     {
                         LOG_ERROR(TAG, "Cannot connect to secure tunnel. Please see the SDK log for detail.");
