@@ -228,7 +228,7 @@ namespace Aws
                     }
                 }
 
-                void onError(Feature *feature, ClientBaseErrorNotification error, string msg) override
+                void onError(Feature *feature, ClientBaseErrorNotification error, const string &msg) override
                 {
                     switch (error)
                     {
