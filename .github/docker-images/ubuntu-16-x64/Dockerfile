@@ -14,6 +14,7 @@ RUN apt-get update -qq \
     build-essential \
     wget \
     cppcheck \
+    valgrind \
     && apt-get clean
 
 ###############################################################################

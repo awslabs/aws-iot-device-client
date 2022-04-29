@@ -9,6 +9,7 @@ RUN subscription-manager config --rhsm.manage_repos=0
 RUN yum --disableplugin=subscription-manager -y update \
     && yum --disableplugin=subscription-manager -y install \
     tar \
+    bzip2 \
     git \
     wget \
     curl \
@@ -36,7 +37,7 @@ RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3
     && tar -zxvf cmake-3.10.0.tar.gz \
     && cd cmake-3.10.0 \
     && ./bootstrap \
-    && make -j 4 \
+    && make \
     && make install
 
 ###############################################################################
@@ -48,7 +49,7 @@ RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
     && cd openssl-${OPENSSL_VERSION} \
     && ./config \
     && make \
-    && sudo make install
+    && make install
 
 ###############################################################################
 # Clone and build Google Test
@@ -64,9 +65,20 @@ RUN curl -sSL https://github.com/google/googletest/archive/release-1.10.0.tar.gz
     && cp -a lib/* /usr/lib64/ \
     && rm -f /tmp/release-1.10.0.tar.gz
 
-# ###############################################################################
-# # Install Aws Iot Device Sdk Cpp v2
-# ###############################################################################
+###############################################################################
+# Clone and build valgrind
+###############################################################################
+WORKDIR /tmp
+RUN wget https://sourceware.org/pub/valgrind/valgrind-3.19.0.tar.bz2 \
+    && tar jxvf valgrind-3.19.0.tar.bz2 \
+    && cd valgrind-3.19.0 \
+    && ./configure \
+    && make \
+    && make install
+
+################################################################################
+# Install Aws Iot Device Sdk Cpp v2
+################################################################################
 WORKDIR /home/aws-iot-device-client
 RUN mkdir sdk-cpp-workspace \
     && cd sdk-cpp-workspace \
