@@ -141,7 +141,7 @@ namespace Aws
                     /**
                      * \brief Is the socket connected yet?
                      */
-                    bool mConnected;
+                    bool mConnected{false};
 
                     /**
                      * \brief A buffer to store data from the secure tunnel. This is only used before the socket is

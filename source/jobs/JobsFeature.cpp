@@ -163,7 +163,7 @@ void JobsFeature::subscribeToNextJobChangedEvents()
         std::bind(&JobsFeature::ackSubscribeToNextJobChanged, this, std::placeholders::_1));
 }
 
-void JobsFeature::subscribeToUpdateJobExecutionStatusAccepted(string jobId)
+void JobsFeature::subscribeToUpdateJobExecutionStatusAccepted(const string &jobId)
 {
     LOGM_DEBUG(TAG, "Attempting to subscribe to updateJobExecutionStatusAccepted for jobId %s", jobId.c_str());
     UpdateJobExecutionSubscriptionRequest request;
@@ -186,7 +186,7 @@ void JobsFeature::subscribeToUpdateJobExecutionStatusAccepted(string jobId)
     }
 }
 
-void JobsFeature::subscribeToUpdateJobExecutionStatusRejected(string jobId)
+void JobsFeature::subscribeToUpdateJobExecutionStatusRejected(const string &jobId)
 {
     LOGM_DEBUG(TAG, "Attempting to subscribe to updateJobExecutionStatusRejected for jobId %s", jobId.c_str());
     UpdateJobExecutionSubscriptionRequest request;
@@ -386,6 +386,8 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         // process output. The valid values for a statusDetail value are '[^\p{C}]+ which translates into
         // "everything other than invisible control characters and unused code points" (See
         // http://www.unicode.org/reports/tr18/#General_Category_Property)
+        // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
+        // cppcheck-suppress danglingTemporaryLifetime
         statusDetails["stdout"] = statusInfo.stdoutput.substr(startPos, statusInfo.stdoutput.size()).c_str();
     }
     else
@@ -397,6 +399,8 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         int startPos = statusInfo.stderror.size() > MAX_STATUS_DETAIL_LENGTH
                            ? statusInfo.stderror.size() - MAX_STATUS_DETAIL_LENGTH
                            : 0;
+        // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
+        // cppcheck-suppress danglingTemporaryLifetime
         statusDetails["stderr"] = statusInfo.stderror.substr(startPos, statusInfo.stderror.size()).c_str();
     }
     else
@@ -417,6 +421,8 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         retryConfig.needStopFlag = nullptr;
     }
 
+    // NOTE(marcoaz): statusDetails is captured by value
+    // cppcheck-suppress danglingTemporaryLifetime
     auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool {
         // We first need to make sure that we haven't previously leaked any promises into our map
         unique_lock<mutex> leakLock(updateJobExecutionPromisesLock);
@@ -442,10 +448,13 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         request.JobId = data.JobId->c_str();
         request.ThingName = this->thingName.c_str();
         request.Status = statusInfo.status;
+        // cppcheck-suppress danglingTemporaryLifetime
         request.StatusDetails = statusDetails;
 
         // Create a unique client token each time we attempt the request since the promise has to be fresh
         string clientToken = UniqueString::GetRandomToken(10);
+        // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
+        // cppcheck-suppress danglingTemporaryLifetime
         request.ClientToken = Aws::Crt::Optional<Aws::Crt::String>(clientToken.c_str());
         unique_lock<mutex> writeLock(updateJobExecutionPromisesLock);
         this->updateJobExecutionPromises.insert(
@@ -506,6 +515,8 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         return finished;
     };
     std::thread updateJobExecutionThread([retryConfig, publishLambda, onCompleteCallback] {
+        // NOTE(marcoaz): publishLambda is captured by value
+        // cppcheck-suppress danglingTemporaryLifetime
         Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);
     });
     updateJobExecutionThread.detach();

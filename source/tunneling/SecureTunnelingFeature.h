@@ -166,7 +166,7 @@ namespace Aws
                     /**
                      * \brief Path to the Amazon root CA
                      */
-                    std::string mRootCa;
+                    Aws::Crt::Optional<std::string> mRootCa;
 
                     /**
                      * \brief Should the Secure Tunneling feature subscribe to MQTT new tunnel notification?

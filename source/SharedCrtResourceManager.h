@@ -53,6 +53,8 @@ namespace Aws
                 void initializeAllocator(const PlainConfig &config);
 
               public:
+                SharedCrtResourceManager() = default;
+
                 ~SharedCrtResourceManager();
 
                 /**

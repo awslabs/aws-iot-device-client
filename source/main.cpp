@@ -155,14 +155,14 @@ void shutdown()
  *
  * @param reason the reason why the abort is happening
  */
-void deviceClientAbort(string reason)
+void deviceClientAbort(const string &reason)
 {
     cout << "AWS IoT Device Client must abort execution, reason: " << reason << endl;
     cout << "Please check the AWS IoT Device Client logs for more information" << endl;
     exit(EXIT_FAILURE);
 }
 
-void handle_feature_stopped(Feature *feature)
+void handle_feature_stopped(const Feature *feature)
 {
     featuresReadWriteLock.lock(); // LOCK
 
@@ -228,7 +228,7 @@ namespace Aws
              */
             class DefaultClientBaseNotifier final : public ClientBaseNotifier
             {
-                void onEvent(Feature *feature, ClientBaseEventNotification notification)
+                void onEvent(Feature *feature, ClientBaseEventNotification notification) override
                 {
                     switch (notification)
                     {
@@ -254,7 +254,7 @@ namespace Aws
                     }
                 }
 
-                void onError(Feature *feature, ClientBaseErrorNotification error, string msg)
+                void onError(Feature *feature, ClientBaseErrorNotification error, const string &msg) override
                 {
                     switch (error)
                     {
