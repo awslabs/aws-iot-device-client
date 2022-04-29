@@ -576,7 +576,7 @@ TEST_F(ConfigTestFixture, PubSubSampleConfig)
     string samplesFilePath = "/tmp/" + UniqueString::GetRandomToken(10);
     FileUtils::StoreValueInFile("Test", samplesFilePath);
     chmod(samplesFilePath.c_str(), 0600);
-    auto jsonTemplate = R"(
+    std::string jsonTemplate = R"(
 {
 	"endpoint": "endpoint value",
 	"cert": "/tmp/aws-iot-device-client-test-file",
