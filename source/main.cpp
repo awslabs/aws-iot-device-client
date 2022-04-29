@@ -7,6 +7,7 @@
 #include "Version.h"
 #include "config/Config.h"
 #include "util/EnvUtils.h"
+#include "util/LockFile.h"
 #include "util/Retry.h"
 
 #if !defined(EXCLUDE_DD)
@@ -86,9 +87,34 @@ const char *TAG = "Main.cpp";
 
 vector<Feature *> features;
 shared_ptr<SharedCrtResourceManager> resourceManager;
+unique_ptr<LockFile> lockFile;
 mutex featuresReadWriteLock;
 bool attemptingShutdown{false};
 Config config;
+
+/**
+ * TODO: For future expandability of main
+ * Currently creates a lockfile to prevent the creation of multiple Device Client processes.
+ * @return true if no exception is caught, false otherwise
+ */
+bool init(int argc, char *argv[])
+{
+    try
+    {
+        string filename = config.config.lockFilePath;
+        if (!filename.empty())
+        {
+            lockFile = unique_ptr<LockFile>(new LockFile{filename, argv[0]});
+        }
+    }
+    catch (std::runtime_error &e)
+    {
+        LOGM_ERROR(TAG, "*** %s: Error obtaining lockfile: %s", DC_FATAL_ERROR, e.what());
+        LoggerFactory::getLoggerInstance().get()->shutdown();
+        return false;
+    }
+    return true;
+}
 
 /**
  * Attempts to perform a graceful shutdown of each running feature. If this function is
@@ -293,6 +319,16 @@ int main(int argc, char *argv[])
         LOG_WARN(TAG, "Unable to append current working directory to PATH environment variable.");
     }
 
+    /**
+     * init() is currently responsible for making sure only 1 instance of Device Client is running at a given time.
+     * In the future, we may want to move other Device Client startup logic into this function.
+     * returns false if an exception is thrown
+     */
+    if (!init(argc, argv))
+    {
+        return -1;
+    }
+
     LOGM_INFO(TAG, "Now running AWS IoT Device Client version %s", DEVICE_CLIENT_VERSION_FULL);
 
     // Register for listening to interrupt signals
@@ -465,6 +501,5 @@ int main(int argc, char *argv[])
                 break;
         }
     }
-
     return 0;
 }

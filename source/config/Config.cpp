@@ -58,6 +58,7 @@ constexpr char PlainConfig::JSON_KEY_SAMPLES[];
 constexpr char PlainConfig::JSON_KEY_PUB_SUB[];
 constexpr char PlainConfig::JSON_KEY_SAMPLE_SHADOW[];
 constexpr char PlainConfig::JSON_KEY_CONFIG_SHADOW[];
+constexpr char PlainConfig::DEFAULT_LOCK_FILE_PATH[];
 
 constexpr int Permissions::KEY_DIR;
 constexpr int Permissions::ROOT_CA_DIR;
@@ -252,6 +253,19 @@ bool PlainConfig::LoadFromEnvironment()
         }
     }
 
+    const char *lockFilePathIn = std::getenv("LOCK_FILE_PATH");
+    if (lockFilePathIn)
+    {
+        string lockFilePathStr = FileUtils::ExtractExpandedPath(lockFilePathIn);
+        if (!lockFilePathStr.empty() && lockFilePathStr.back() != '/')
+        {
+            lockFilePathStr += '/';
+        }
+
+        LOGM_DEBUG(Config::TAG, "Set LOCK_FILE_PATH=%s", Sanitize(lockFilePathStr).c_str());
+        lockFilePath = lockFilePathStr;
+    }
+
     return logConfig.LoadFromEnvironment() && jobs.LoadFromEnvironment() && tunneling.LoadFromEnvironment() &&
            deviceDefender.LoadFromEnvironment() && fleetProvisioning.LoadFromEnvironment() &&
            fleetProvisioningRuntimeConfig.LoadFromEnvironment() && pubSub.LoadFromEnvironment() &&
@@ -260,6 +274,19 @@ bool PlainConfig::LoadFromEnvironment()
 
 bool PlainConfig::Validate() const
 {
+    if (!logConfig.Validate())
+    {
+        return false;
+    }
+    if (lockFilePath.empty() || !FileUtils::IsValidFilePath(lockFilePath))
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Invalid Lock File Path %s ***",
+            DeviceClient::DC_FATAL_ERROR,
+            Sanitize(lockFilePath).c_str());
+        return false;
+    }
 #if !defined(DISABLE_MQTT)
     if (!endpoint.has_value() || endpoint->empty())
     {
@@ -299,10 +326,6 @@ bool PlainConfig::Validate() const
         return false;
     }
 #endif
-    if (!logConfig.Validate())
-    {
-        return false;
-    }
 #if !defined(EXCLUDE_JOBS)
     if (!jobs.Validate())
     {
