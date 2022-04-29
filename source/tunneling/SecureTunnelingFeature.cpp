@@ -95,7 +95,7 @@ namespace Aws
                 void SecureTunnelingFeature::LoadFromConfig(const PlainConfig &config)
                 {
                     mThingName = *config.thingName;
-                    mRootCa = *config.rootCa;
+                    mRootCa = config.rootCa;
                     mSubscribeNotification = config.tunneling.subscribeNotification;
                     mEndpoint = config.tunneling.endpoint;
 
@@ -104,7 +104,7 @@ namespace Aws
                         std::unique_ptr<SecureTunnelingContext> context =
                             unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
                                 mSharedCrtResourceManager,
-                                *config.rootCa,
+                                mRootCa,
                                 *config.tunneling.destinationAccessToken,
                                 GetEndpoint(*config.tunneling.region),
                                 static_cast<uint16_t>(config.tunneling.port.value()),
