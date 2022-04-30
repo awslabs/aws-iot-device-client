@@ -113,7 +113,9 @@ set_tests_properties(${GTEST_PROJECT} PROPERTIES ENVIRONMENT AWS_CRT_MEMORY_TRAC
 
 # Add custom target for detecting memory leaks while running unit tests.
 find_program(VALGRIND_PATH valgrind)
-add_custom_target(
-    ${GTEST_PROJECT}-leak-check
-    COMMAND ${VALGRIND_PATH} --leak-check=yes --error-exitcode=1 ./${GTEST_PROJECT}
-    DEPENDS ${GTEST_PROJECT})
+if (VALGRIND_PATH)
+    add_custom_target(
+        ${GTEST_PROJECT}-leak-check
+        COMMAND ${VALGRIND_PATH} --leak-check=yes --error-exitcode=1 ./${GTEST_PROJECT}
+        DEPENDS ${GTEST_PROJECT})
+endif()
