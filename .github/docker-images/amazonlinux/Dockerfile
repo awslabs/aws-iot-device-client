@@ -8,6 +8,7 @@ ARG OPENSSL_VERSION=1.1.1n
 RUN yum -y update \
     && yum -y install \
     tar \
+    bzip2 \
     git \
     wget \
     curl \
@@ -62,6 +63,17 @@ RUN curl -sSL https://github.com/google/googletest/archive/release-1.10.0.tar.gz
     && cp -a googlemock/include/gmock /usr/include/ \
     && cp -a lib/* /usr/lib64/ \
     && rm -f /tmp/release-1.10.0.tar.gz
+
+###############################################################################
+# Clone and build valgrind
+###############################################################################
+WORKDIR /tmp
+RUN wget https://sourceware.org/pub/valgrind/valgrind-3.19.0.tar.bz2 \
+    && tar jxvf valgrind-3.19.0.tar.bz2 \
+    && cd valgrind-3.19.0 \
+    && ./configure \
+    && make \
+    && make install
 
 # ###############################################################################
 # # Install Aws Iot Device Sdk Cpp v2

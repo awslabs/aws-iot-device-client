@@ -14,6 +14,7 @@ RUN apt-get update -qq \
     build-essential \
     wget \
     cppcheck \
+    libc6-dbg \
     && apt-get clean
 
 ###############################################################################
@@ -51,6 +52,17 @@ RUN wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz \
     && cp -a googletest/include/gtest /usr/include/ \
     && cp -a googlemock/include/gmock /usr/include/ \
     && cp -a lib/* /usr/lib/
+
+###############################################################################
+# Clone and build valgrind
+###############################################################################
+WORKDIR /tmp
+RUN wget https://sourceware.org/pub/valgrind/valgrind-3.19.0.tar.bz2 \
+    && tar jxvf valgrind-3.19.0.tar.bz2 \
+    && cd valgrind-3.19.0 \
+    && ./configure \
+    && make \
+    && make install
 
 ###############################################################################
 # Install Aws Iot Device Sdk Cpp v2
