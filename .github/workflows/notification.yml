@@ -1,0 +1,43 @@
+name: GitHub Issue notifications
+
+on:
+  issue_comment:
+
+  issues:
+
+jobs:
+  issue:
+    # This job only runs for issue comments
+    name: Issue created or updated
+    id: slack
+      uses: slackapi/slack-github-action@v1.18.0
+      with:
+        # This data can be any valid JSON from a previous step in the GitHub Action
+        payload: |
+          {
+            "action": "ACTION",
+            "issueNumber": "NUMBER"
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        NUMBER: ${{ github.event.issue.number }}
+        ACTION: ${{ github.event.number }}
+
+
+  issue_commented:
+    # This job only runs for issue comments
+    if: ${{ !github.event.issue.pull_request }}
+    name: Issue comment
+    id: slack
+      uses: slackapi/slack-github-action@v1.18.0
+      with:
+        # This data can be any valid JSON from a previous step in the GitHub Action
+        payload: |
+          {
+            "action": "ACTION",
+            "issueNumber": "NUMBER"
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        NUMBER: ${{ github.event.issue.number }}
+        ACTION: ${{ github.event.number }}
