@@ -11,8 +11,14 @@ jobs:
       with:
         payload: |
           {
-            "action": "actionName",
-            "issueNumber": "issueNumber"
+            "action": "ACTION_NAME",
+            "eventName": "EVENT_NAME",
+            "issueNumber": "ISSUE_NUMBER",
+            "issueTitle": "ISSUE_TITLE"
           }
       env:
+        ACTION_NAME: ${{ github.event.action }}
+        EVENT_NAME: ${{ github.event_name }}
+        ISSUE_NUMBER: ${{ github.event.issue.number }}
+        ISSUE_TITLE: ${{ github.event.issue.title }}
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
