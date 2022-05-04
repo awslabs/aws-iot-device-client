@@ -8,10 +8,13 @@ ARG OPENSSL_VERSION=1.1.1n
 # Install prereqs
 ###############################################################################
 RUN apt-get update -qq \
+    && add-apt-repository ppa:ubuntu-toolchain-r/test \
     && apt-get -y install \
     git \
     curl \
     build-essential \
+    gcc-11 \
+    g++-11 \
     wget \
     cppcheck \
     libc6-dbg \
