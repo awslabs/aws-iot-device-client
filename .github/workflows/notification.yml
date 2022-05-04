@@ -11,7 +11,7 @@ jobs:
       with:
         payload: |
           {
-            "action": "actionName",
+            "action": "ACTION_NAME",
             "eventName": "EVENT_NAME",
             "issueNumber": "ISSUE_NUMBER",
             "issueTitle": "ISSUE_TITLE"
