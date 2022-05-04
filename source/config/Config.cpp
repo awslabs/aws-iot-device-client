@@ -113,7 +113,16 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     {
         if (!json.GetString(jsonKey).empty())
         {
-            rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            basic_string<char> path = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            if (!FileUtils::FileExists(path))
+            {
+                LOGM_ERROR(Config::TAG, "Path %s to RootCA is invalid. Ignoring... Will attempt to use default trust store.", path.c_str());
+                rootCa = "";
+            }
+            else
+            {
+                rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            }
         }
         else
         {
