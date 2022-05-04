@@ -119,7 +119,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     strategy:
       matrix:
-        version: [ 5,6,7,8,11 ]
+        version: [ 5, 6, 7, 8, 11 ]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -136,7 +136,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     strategy:
       matrix:
-        version: [ 5.0, 6.0, 7, 8, 9 ]
+        version: [ 5.0, 6.0, 7, 8, 9, 11 ]
     steps:
       - uses: actions/checkout@v2
         with:
