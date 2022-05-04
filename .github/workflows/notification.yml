@@ -1,24 +1,18 @@
 name: GitHub Issue notifications
 
-on:
-  issue_comment:
-  issues:
+on: [issue_comment,issues]
 
 jobs:
   issue-notification:
     runs-on: ubuntu-latest
-    if: ${{ !github.event.issue.pull_request }}
     steps:
-      - name: Send Notification on Slack
-      id: slack
-      uses: slackapi/slack-github-action@v1.18.0
+    - name: Send notifications on Slack
+      uses: slackapi/slack-github-action@v1.19.0
       with:
         payload: |
           {
-            "action": "ACTION",
-            "issueNumber": "NUMBER"
+            "action": "actionName",
+            "issueNumber": "issueNumber"
           }
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        NUMBER: ${{ github.event.issue.number }}
-        ACTION: ${{ github.event.number }}
