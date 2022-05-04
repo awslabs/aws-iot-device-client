@@ -113,18 +113,17 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     {
         if (!json.GetString(jsonKey).empty())
         {
-            basic_string<char> path = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
-            if (!FileUtils::FileExists(path))
+            auto path = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            if (FileUtils::FileExists(path))
             {
-                LOGM_ERROR(
-                    Config::TAG,
-                    "Path %s to RootCA is invalid. Ignoring... Will attempt to use default trust store.",
-                    path.c_str());
-                rootCa = "";
+                rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
             }
             else
             {
-                rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+                LOGM_WARN(
+                    Config::TAG,
+                    "Path %s to RootCA is invalid. Ignoring... Will attempt to use default trust store.",
+                    path.c_str());
             }
         }
         else
@@ -234,7 +233,18 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::CLI_ROOT_CA))
     {
-        rootCa = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::CLI_ROOT_CA).c_str());
+        auto path = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::CLI_ROOT_CA).c_str());
+        if (FileUtils::IsValidFilePath(path))
+        {
+            rootCa = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::CLI_ROOT_CA).c_str());
+        }
+        else
+        {
+            LOGM_WARN(
+                Config::TAG,
+                "Path %s to RootCA is invalid. Ignoring... Will attempt to use default trust store.",
+                path.c_str());
+        }
     }
     if (cliArgs.count(PlainConfig::CLI_THING_NAME))
     {
@@ -320,15 +330,6 @@ bool PlainConfig::Validate() const
         return false;
     }
     else if (!FileUtils::IsValidFilePath(key->c_str()))
-    {
-        return false;
-    }
-    if (!rootCa.has_value() || rootCa->empty())
-    {
-        LOGM_ERROR(Config::TAG, "*** %s: Root CA is missing ***", DeviceClient::DC_FATAL_ERROR);
-        return false;
-    }
-    else if (!FileUtils::IsValidFilePath(rootCa->c_str()))
     {
         return false;
     }

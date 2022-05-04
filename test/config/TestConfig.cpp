@@ -21,6 +21,7 @@ using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Util;
 
 const string filePath = "/tmp/aws-iot-device-client-test-file";
+const string invalidFilePath = "/tmp/invalid-file-path";
 
 class ConfigTestFixture : public ::testing::Test
 {
@@ -48,7 +49,6 @@ static CliArgs makeMinimumCliArgs()
         {PlainConfig::CLI_ENDPOINT, "endpoint value"},
         {PlainConfig::CLI_CERT, filePath},
         {PlainConfig::CLI_KEY, filePath},
-        {PlainConfig::CLI_ROOT_CA, filePath},
         {PlainConfig::CLI_THING_NAME, "thing-name value"},
     };
 }
@@ -167,7 +167,6 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value"
 })";
     JsonObject jsonObject(jsonString);
@@ -180,7 +179,6 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
-    ASSERT_STREQ(filePath.c_str(), config.rootCa->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
@@ -199,7 +197,58 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumCli)
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
-    ASSERT_STREQ(filePath.c_str(), config.rootCa->c_str());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    ASSERT_TRUE(config.jobs.enabled);
+    ASSERT_TRUE(config.tunneling.enabled);
+    ASSERT_TRUE(config.deviceDefender.enabled);
+    ASSERT_FALSE(config.fleetProvisioning.enabled);
+}
+
+TEST_F(ConfigTestFixture, InvalidRootCaPathConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/invalid-file-path",
+    "thing-name": "thing-name value"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_FALSE(config.rootCa.has_value());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    ASSERT_TRUE(config.jobs.enabled);
+    ASSERT_TRUE(config.tunneling.enabled);
+    ASSERT_TRUE(config.deviceDefender.enabled);
+    ASSERT_FALSE(config.fleetProvisioning.enabled);
+}
+
+TEST_F(ConfigTestFixture, InvalidRootCaPathConfigCli)
+{
+    CliArgs cliArgs;
+    cliArgs[PlainConfig::CLI_ENDPOINT] = "endpoint value";
+    cliArgs[PlainConfig::CLI_CERT] = filePath;
+    cliArgs[PlainConfig::CLI_KEY] = filePath;
+    cliArgs[PlainConfig::CLI_THING_NAME] = "thing-name value";
+    cliArgs[PlainConfig::CLI_ROOT_CA] = invalidFilePath;
+
+    PlainConfig config;
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
