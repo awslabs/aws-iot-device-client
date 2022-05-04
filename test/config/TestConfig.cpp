@@ -34,6 +34,9 @@ class ConfigTestFixture : public ::testing::Test
         // Create a temporary file to use as a placeholder for this purpose.
         ofstream file(filePath, std::fstream::app);
         file << "test message" << endl;
+
+        // Ensure invalid-file does not exist
+        std::remove(invalidFilePath.c_str());
     }
 
     void TearDown() override { std::remove(filePath.c_str()); }
