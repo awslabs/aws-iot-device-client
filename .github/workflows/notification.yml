@@ -11,10 +11,10 @@ jobs:
       with:
         payload: |
           {
-            "action": "ACTION_NAME",
-            "eventName": "EVENT_NAME",
-            "issueNumber": "ISSUE_NUMBER",
-            "issueTitle": "ISSUE_TITLE"
+            "action": "$ACTION_NAME",
+            "eventName": "$EVENT_NAME",
+            "issueNumber": "$ISSUE_NUMBER",
+            "issueTitle": "$ISSUE_TITLE"
           }
       env:
         ACTION_NAME: ${{ github.event.action }}
