@@ -112,7 +112,7 @@ case $compileMode in
     apt-get install --assume-yes g++-arm-linux-gnueabihf
     apt-get install --assume-yes gcc-arm-linux-gnueabihf
     apt-get install --assume-yes gdb-multiarch
-    wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
+    wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
     tar -xvzf openssl-${OPENSSL_VERSION}.tar.gz
     export INSTALL_DIR=/usr/lib/arm-linux-gnueabihf
     cd openssl-${OPENSSL_VERSION}
@@ -150,7 +150,7 @@ case $compileMode in
     apt-get install --assume-yes g++-mips-linux-gnu
     apt-get install --assume-yes gcc-mips-linux-gnu
     apt-get install --assume-yes gdb-multiarch
-    wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
+    wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
     tar -xvzf openssl-${OPENSSL_VERSION}.tar.gz
     export INSTALL_DIR=/usr/lib/mips-linux-gnu
     cd openssl-${OPENSSL_VERSION}
@@ -183,7 +183,7 @@ case $compileMode in
     apt-get install --assume-yes g++-aarch64-linux-gnu
     apt-get install --assume-yes gcc-aarch64-linux-gnu
     apt-get install --assume-yes gdb-multiarch
-    wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
+    wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
     tar -xvzf openssl-${OPENSSL_VERSION}.tar.gz
     export INSTALL_DIR=/usr/lib/aarch64-linux-gnu
     cd openssl-${OPENSSL_VERSION}
