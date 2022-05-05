@@ -44,7 +44,7 @@ RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3
 # Clone and build Google Test
 ###############################################################################
 WORKDIR /tmp
-RUN wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz --no-check-certificate \
+RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://github.com/google/googletest/archive/release-1.10.0.tar.gz \
     && tar xf release-1.10.0.tar.gz \
     && cd googletest-release-1.10.0 \
     && cmake -DBUILD_SHARED_LIBS=ON . \
@@ -57,7 +57,7 @@ RUN wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz --no
 # Clone and build valgrind
 ###############################################################################
 WORKDIR /tmp
-RUN wget https://sourceware.org/pub/valgrind/valgrind-3.19.0.tar.bz2 --no-check-certificate \
+RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://sourceware.org/pub/valgrind/valgrind-3.19.0.tar.bz2 \
     && tar jxvf valgrind-3.19.0.tar.bz2 \
     && cd valgrind-3.19.0 \
     && ./configure \
