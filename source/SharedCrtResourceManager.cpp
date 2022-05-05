@@ -9,6 +9,7 @@
 #include "util/StringUtils.h"
 
 #include <aws/crt/Api.h>
+#include <aws/crt/io/Pkcs11.h>
 #include <sys/stat.h>
 
 using namespace std;
@@ -43,19 +44,40 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
 {
     struct stat fileInfo;
     bool locatedAll = true;
-    if (stat(config.key->c_str(), &fileInfo) != 0)
+    if(config.secureElement.enabled)
     {
-        LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.key->c_str()).c_str());
-        locatedAll = false;
+        if (stat(config.secureElement.pkcs11Lib->c_str(), &fileInfo) != 0)
+        {
+            LOGM_ERROR(TAG, "Failed to find PKCS#11 library file: %s, cannot establish MQTT connection", Sanitize(config.secureElement.pkcs11Lib->c_str()).c_str());
+            locatedAll = false;
+        }
+        else
+        {
+            string parentDir = FileUtils::ExtractParentDirectory(config.secureElement.pkcs11Lib->c_str());
+            if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::KEY_DIR) ||
+                !FileUtils::ValidateFilePermissions(config.secureElement.pkcs11Lib->c_str(), Permissions::PRIVATE_KEY))
+            {
+                LOG_ERROR(TAG, "Incorrect permissions on PKCS#11 library file and/or it's parent directory");
+                locatedAll = false;
+            }
+        }
     }
     else
     {
-        string parentDir = FileUtils::ExtractParentDirectory(config.key->c_str());
-        if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::KEY_DIR) ||
-            !FileUtils::ValidateFilePermissions(config.key->c_str(), Permissions::PRIVATE_KEY))
+        if (stat(config.key->c_str(), &fileInfo) != 0)
         {
-            LOG_ERROR(TAG, "Incorrect permissions on private key file and/or parent directory");
+            LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.key->c_str()).c_str());
             locatedAll = false;
+        }
+        else
+        {
+            string parentDir = FileUtils::ExtractParentDirectory(config.key->c_str());
+            if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::KEY_DIR) ||
+                !FileUtils::ValidateFilePermissions(config.key->c_str(), Permissions::PRIVATE_KEY))
+            {
+                LOG_ERROR(TAG, "Incorrect permissions on private key file and/or parent directory");
+                locatedAll = false;
+            }
         }
     }
 
@@ -246,7 +268,48 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
             DeviceClient::DC_FATAL_ERROR);
         return SharedCrtResourceManager::ABORT;
     }
-    auto clientConfigBuilder = MqttClientConnectionConfigBuilder(config.cert->c_str(), config.key->c_str());
+    Aws::Iot::MqttClientConnectionConfigBuilder clientConfigBuilder;
+    if(config.secureElement.enabled)
+    {
+
+        LOGM_INFO(TAG,"Inside MQTT client PKCS11: %s",config.secureElement.pkcs11Lib.value().c_str());
+        std::shared_ptr<Io::Pkcs11Lib> pkcs11Lib = Aws::Crt::Io::Pkcs11Lib::Create(FileUtils::ExtractExpandedPath(config.secureElement.pkcs11Lib.value().c_str()).c_str(), allocator);
+        if (!pkcs11Lib)
+        {
+            LOGM_INFO(TAG,"Pkcs11Lib failed: %s",ErrorDebugString(Aws::Crt::LastError()));
+            return ABORT;
+        }
+
+        LOG_INFO(TAG,"Inside MQTT client PKCS11: setting tls connection");
+        Io::TlsContextPkcs11Options pkcs11Options(pkcs11Lib);
+        pkcs11Options.SetCertificateFilePath(config.cert->c_str());
+        pkcs11Options.SetUserPin(config.secureElement.secureElementPin->c_str());
+
+        if (config.secureElement.secureElementTokenLabel.has_value() && !config.secureElement.secureElementTokenLabel->empty())
+        {
+            pkcs11Options.SetTokenLabel(config.secureElement.secureElementTokenLabel->c_str());
+        }
+
+        if (config.secureElement.secureElementSlotId.has_value() && !config.secureElement.secureElementSlotId->empty())
+        {
+            uint64_t slotId = std::stoull(config.secureElement.secureElementSlotId->c_str());
+            pkcs11Options.SetSlotId(slotId);
+        }
+
+        if (config.secureElement.secureElementKeyLabel.has_value() && !config.secureElement.secureElementKeyLabel->empty())
+        {
+            pkcs11Options.SetPrivateKeyObjectLabel(config.secureElement.secureElementKeyLabel->c_str());
+        }
+
+        LOG_INFO(TAG,"Inside MQTT client PKCS11: Establishing connection");
+        clientConfigBuilder = MqttClientConnectionConfigBuilder(pkcs11Options);
+    }
+    else
+    {
+        LOG_INFO(TAG,"Inside MQTT client NON PKCS11: Establishing connection");
+        clientConfigBuilder = MqttClientConnectionConfigBuilder(config.cert->c_str(), config.key->c_str());
+    }
+
     clientConfigBuilder.WithEndpoint(config.endpoint->c_str());
     clientConfigBuilder.WithCertificateAuthority(config.rootCa->c_str());
     clientConfigBuilder.WithSdkName(SharedCrtResourceManager::BINARY_NAME);

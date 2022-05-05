@@ -10,6 +10,7 @@
 #include <atomic>
 #include <aws/crt/Api.h>
 #include <aws/iot/MqttClient.h>
+#include <aws/crt/io/Pkcs11.h>
 #include <iostream>
 
 namespace Aws

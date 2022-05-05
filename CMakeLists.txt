@@ -14,6 +14,7 @@ option(EXCLUDE_PUBSUB "Builds the device client without the IoT Pub Sub Sample F
 option(EXCLUDE_SHADOW "Builds the device client without any of the IoT Shadow Features (Config Shadow Feature and Sample Shadow feature)." OFF)
 option(EXCLUDE_CONFIG_SHADOW "Builds the device client without the IoT Config Shadow Feature." OFF)
 option(EXCLUDE_SAMPLE_SHADOW "Builds the device client without the IoT Sample Shadow Feature." OFF)
+option(EXCLUDE_SECURE_ELEMENT "Builds the device client without the support for storing/accessing keys stored in a secure module using PKCS#11." ON)
 option(GIT_VERSION "Updates the version number using the Git commit history" ON)
 
 if (EXCLUDE_JOBS)
@@ -54,6 +55,10 @@ endif()
 
 if (EXCLUDE_SAMPLE_SHADOW)
     add_definitions(-DEXCLUDE_SAMPLE_SHADOW)
+endif()
+
+if (EXCLUDE_SECURE_ELEMENT)
+    add_definitions(-DEXCLUDE_SECURE_ELEMENT)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "./sdk-cpp-workspace/lib/cmake")
