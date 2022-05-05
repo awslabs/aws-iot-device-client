@@ -84,7 +84,7 @@ else
           echo "ver"
           echo $ver
           apt-get --assume-yes install apt-transport-https
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add
+          wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add
           apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-$ver main" -y
           apt-get update
           apt-get --assume-yes install clang-$ver
