@@ -2485,7 +2485,7 @@ bool Config::ExportDefaultSetting(const string &file)
         PlainConfig::SecureElement::JSON_SECURE_ELEMENT_PIN,
         PlainConfig::SecureElement::JSON_SECURE_ELEMENT_KEY_LABEL,
         PlainConfig::SecureElement::JSON_SECURE_ELEMENT_SLOT_ID,
-        PlainConfig::SecureElement::JSON_SECURE_ELEMENT_TOKEN_LABEL);
+        PlainConfig::SecureElement::JSON_SECURE_ELEMENT_TOKEN_LABEL,
         PlainConfig::PlainConfig::JSON_KEY_SENSOR_PUBLISH,
         PlainConfig::SensorPublish::JSON_SENSORS,
         PlainConfig::SensorPublish::JSON_ENABLED,
