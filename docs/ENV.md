@@ -17,7 +17,12 @@ In addition to the application configuration settings described in [Configuring 
     * The device client will also print the contents of the trace during shutdown when memory tracing is enabled.
     * When there are no pending allocations or memory trace is not enabled, then nothing is printed to the SDK log file.
     * Enabling memory allocation tracing has a nontrivial cost and we do not recommend that customers enable this by default for production deployments.
-
+    
+* `LOCK_FILE_PATH`
+  * To enforce single instance creation, device client writes a file to a specific directory. By default, the device client will write the lockfile to `/run/lock/` and name it "devicecl.lock". 
+  * To override the default directory, set `LOCK_FILE_PATH` to a writable directory e.g. `LOCK_FILE_PATH=/my/dir/`. Permissions still apply when writing to restricted directories.
+  * While this should in theory enforce a single instance of device client, double check with `ps` if device client is not starting properly.
+  
 * `AWSIOT_TUNNEL_ACCESS_TOKEN`
     * The [Secure Tunneling Feature](../source/tunneling/README.md) allows customers to gain remote access to the device client.
     * When the secure tunneling feature is enabled, the device client will obtain the destination access token used to communicate with the secure tunnel proxy by listening for a notification on an MQTT topic.  More details are available at [Secure Tunneling Feature](../source/tunneling/README.md).

@@ -1,0 +1,26 @@
+name: GitHub Issue notifications
+
+on: [issue_comment,issues]
+
+env:
+  ACTION_NAME: ${{ github.event.action }}
+  EVENT_NAME: ${{ github.event_name }}
+  ISSUE_NUMBER: ${{ github.event.issue.number }}
+  ISSUE_TITLE: ${{ github.event.issue.title }}
+
+
+jobs:
+  issue-notification:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Send notifications on Slack
+      uses: slackapi/slack-github-action@v1.19.0
+      with:
+        payload: |
+          {
+            "action": "${{env.ACTION_NAME}}",
+            "eventName": "${{env.EVENT_NAME}}",
+            "issueNumber": "${{env.ISSUE_NUMBER}}"
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

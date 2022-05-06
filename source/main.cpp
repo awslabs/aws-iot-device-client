@@ -7,6 +7,7 @@
 #include "Version.h"
 #include "config/Config.h"
 #include "util/EnvUtils.h"
+#include "util/LockFile.h"
 #include "util/Retry.h"
 
 #if !defined(EXCLUDE_DD)
@@ -52,6 +53,12 @@
 #    endif
 #endif
 
+#if !defined(EXCLUDE_SENSOR_PUBLISH)
+
+#    include "sensor-publish/SensorPublishFeature.h"
+
+#endif
+
 #include <csignal>
 #include <memory>
 #include <thread>
@@ -81,14 +88,42 @@ using namespace Aws::Iot::DeviceClient::Samples;
 #if !defined(EXCLUDE_SHADOW)
 using namespace Aws::Iot::DeviceClient::Shadow;
 #endif
+#if !defined(EXCLUDE_SENSOR_PUBLISH)
+using namespace Aws::Iot::DeviceClient::SensorPublish;
+#endif
 
 const char *TAG = "Main.cpp";
 
 vector<Feature *> features;
 shared_ptr<SharedCrtResourceManager> resourceManager;
+unique_ptr<LockFile> lockFile;
 mutex featuresReadWriteLock;
 bool attemptingShutdown{false};
 Config config;
+
+/**
+ * TODO: For future expandability of main
+ * Currently creates a lockfile to prevent the creation of multiple Device Client processes.
+ * @return true if no exception is caught, false otherwise
+ */
+bool init(int argc, char *argv[])
+{
+    try
+    {
+        string filename = config.config.lockFilePath;
+        if (!filename.empty())
+        {
+            lockFile = unique_ptr<LockFile>(new LockFile{filename, argv[0]});
+        }
+    }
+    catch (std::runtime_error &e)
+    {
+        LOGM_ERROR(TAG, "*** %s: Error obtaining lockfile: %s", DC_FATAL_ERROR, e.what());
+        LoggerFactory::getLoggerInstance().get()->shutdown();
+        return false;
+    }
+    return true;
+}
 
 /**
  * Attempts to perform a graceful shutdown of each running feature. If this function is
@@ -125,19 +160,18 @@ void shutdown()
 }
 
 /**
- * \brief This function is a wrapper around abort() which makes sure we let the user know
- * that we are aborting execution due to some type of configuration issue
+ * \brief This function shuts down device client when aborting execution due to some type of configuration issue
  *
  * @param reason the reason why the abort is happening
  */
-void deviceClientAbort(string reason)
+void deviceClientAbort(const string &reason)
 {
     cout << "AWS IoT Device Client must abort execution, reason: " << reason << endl;
     cout << "Please check the AWS IoT Device Client logs for more information" << endl;
-    abort();
+    exit(EXIT_FAILURE);
 }
 
-void handle_feature_stopped(Feature *feature)
+void handle_feature_stopped(const Feature *feature)
 {
     featuresReadWriteLock.lock(); // LOCK
 
@@ -203,7 +237,7 @@ namespace Aws
              */
             class DefaultClientBaseNotifier final : public ClientBaseNotifier
             {
-                void onEvent(Feature *feature, ClientBaseEventNotification notification)
+                void onEvent(Feature *feature, ClientBaseEventNotification notification) override
                 {
                     switch (notification)
                     {
@@ -229,7 +263,7 @@ namespace Aws
                     }
                 }
 
-                void onError(Feature *feature, ClientBaseErrorNotification error, string msg)
+                void onError(Feature *feature, ClientBaseErrorNotification error, const string &msg) override
                 {
                     switch (error)
                     {
@@ -292,6 +326,16 @@ int main(int argc, char *argv[])
         // but some features of device client such as standard job action
         // might not work without explicitly setting path to handler in job document.
         LOG_WARN(TAG, "Unable to append current working directory to PATH environment variable.");
+    }
+
+    /**
+     * init() is currently responsible for making sure only 1 instance of Device Client is running at a given time.
+     * In the future, we may want to move other Device Client startup logic into this function.
+     * returns false if an exception is thrown
+     */
+    if (!init(argc, argv))
+    {
+        return -1;
     }
 
     LOGM_INFO(TAG, "Now running AWS IoT Device Client version %s", DEVICE_CLIENT_VERSION_FULL);
@@ -448,6 +492,31 @@ int main(int argc, char *argv[])
 #    endif
 #endif
 
+#if !defined(EXCLUDE_SENSOR_PUBLISH)
+    unique_ptr<SensorPublishFeature> sensorPublish;
+    if (config.config.sensorPublish.enabled)
+    {
+        LOG_INFO(TAG, "Sensor Publish is enabled");
+        sensorPublish = unique_ptr<SensorPublishFeature>(new SensorPublishFeature());
+        sensorPublish->init(resourceManager, listener, config.config);
+        features.push_back(sensorPublish.get());
+    }
+    else
+    {
+        LOG_INFO(TAG, "Sensor Publish is disabled");
+    }
+#else
+    if (config.config.sensorPublish.enabled)
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Sensor Publish configuration is enabled but feature is not compiled into binary.",
+            DC_FATAL_ERROR);
+        LoggerFactory::getLoggerInstance()->shutdown();
+        deviceClientAbort("Invalid configuration");
+    }
+#endif
+
     resourceManager->startDeviceClientFeatures();
     featuresReadWriteLock.unlock(); // UNLOCK
 
@@ -466,6 +535,5 @@ int main(int argc, char *argv[])
                 break;
         }
     }
-
     return 0;
 }

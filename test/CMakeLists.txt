@@ -55,6 +55,11 @@ if (NOT EXCLUDE_SHADOW)
     endif ()
 endif ()
 
+if (NOT EXCLUDE_SENSOR_PUBLISH)
+    file(GLOB SENSOR_PUBLISH_SRC "../source/sensor-publish/*.cpp")
+    list(APPEND DC_SRC ${SENSOR_PUBLISH_SRC})
+endif ()
+
 #########################################
 # Test Files                            #
 #########################################
@@ -89,6 +94,11 @@ if (NOT EXCLUDE_SHADOW)
     endif()
 endif ()
 
+if (NOT EXCLUDE_SENSOR_PUBLISH)
+    file(GLOB SENSOR_PUBLISH_TST "./sensor-publish/*.cpp")
+    list(APPEND DC_TST ${SENSOR_PUBLISH_TST})
+endif ()
+
 list(APPEND DC_SRC ${DC_TST})
 list(FILTER DC_SRC EXCLUDE REGEX ".*main.cpp$")
 
@@ -100,6 +110,7 @@ if (NOT EXCLUDE_JOBS)
 endif ()
 
 target_link_libraries(${GTEST_PROJECT} gtest gtest_main)
+target_link_libraries(${GTEST_PROJECT} gmock gmock_main)
 target_link_libraries(${GTEST_PROJECT} ${DEP_DC_LIBS})
 target_link_libraries(${GTEST_PROJECT} OpenSSL::SSL)
 target_link_libraries(${GTEST_PROJECT} OpenSSL::Crypto)
@@ -110,3 +121,12 @@ endif ()
 
 add_test(${GTEST_PROJECT} ${GTEST_PROJECT})
 set_tests_properties(${GTEST_PROJECT} PROPERTIES ENVIRONMENT AWS_CRT_MEMORY_TRACING=1)
+
+# Add custom target for detecting memory leaks while running unit tests.
+find_program(VALGRIND_PATH valgrind)
+if (VALGRIND_PATH)
+    add_custom_target(
+        ${GTEST_PROJECT}-leak-check
+        COMMAND ${VALGRIND_PATH} --leak-check=yes --error-exitcode=1 ./${GTEST_PROJECT}
+        DEPENDS ${GTEST_PROJECT})
+endif()

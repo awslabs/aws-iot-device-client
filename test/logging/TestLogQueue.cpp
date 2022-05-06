@@ -42,13 +42,13 @@ class LogQueueTest : public ::testing::Test
 
         if (firstLock)
         {
-            unique_lock<mutex>(m);
+            unique_lock<mutex>{m};
             processed = true;
             cv.notify_all();
         }
         else
         {
-            unique_lock<mutex>(m2);
+            unique_lock<mutex>{m2};
             processed2 = true;
             cv2.notify_all();
         }
@@ -85,8 +85,9 @@ TEST_F(LogQueueTest, notifyAllOnShutdown)
 
     logQueue->shutdown();
 
-    cv.wait_for(lock1, chrono::seconds(1));
-    cv2.wait_for(lock2, chrono::seconds(1));
+    // 400ms is 2 * EMPTY_WAIT_TIME_MILLISECONDS as defined in LogQueue.h
+    cv.wait_for(lock1, chrono::milliseconds(400));
+    cv2.wait_for(lock2, chrono::milliseconds(400));
 
     ASSERT_TRUE(processed && processed2);
 }

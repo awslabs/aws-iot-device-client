@@ -25,6 +25,8 @@ namespace Aws
             class ClientBaseNotifier
             {
               public:
+                virtual ~ClientBaseNotifier() = default;
+
                 /**
                  * \brief Indicates an event has occurred within a feature
                  *
@@ -45,7 +47,7 @@ namespace Aws
                 virtual void onError(
                     Aws::Iot::DeviceClient::Feature *feature,
                     Aws::Iot::DeviceClient::ClientBaseErrorNotification notification,
-                    std::string message) = 0;
+                    const std::string &message) = 0;
             };
         } // namespace DeviceClient
     }     // namespace Iot

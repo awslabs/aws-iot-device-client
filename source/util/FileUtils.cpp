@@ -72,7 +72,7 @@ string FileUtils::ExtractExpandedPath(const string &filePath)
     return expandedPath;
 }
 
-bool FileUtils::StoreValueInFile(string value, string filePath)
+bool FileUtils::StoreValueInFile(const string &value, const string &filePath)
 {
     ofstream file(filePath);
     if (!file.is_open())
@@ -85,7 +85,7 @@ bool FileUtils::StoreValueInFile(string value, string filePath)
     return true;
 }
 
-int FileUtils::ReadFromFile(const std::string pathToFile, aws_byte_buf *data, size_t size)
+int FileUtils::ReadFromFile(const std::string &pathToFile, aws_byte_buf *data, size_t size)
 {
     ifstream file(pathToFile);
     if (data->capacity < size)
@@ -113,7 +113,7 @@ int FileUtils::ReadFromFile(const std::string pathToFile, aws_byte_buf *data, si
     }
 }
 
-int FileUtils::WriteToFile(const std::string pathToFile, const aws_byte_buf *data)
+int FileUtils::WriteToFile(const std::string &pathToFile, const aws_byte_buf *data)
 {
     ofstream file(pathToFile, std::ios::app);
     if (!file.is_open())
@@ -167,7 +167,7 @@ bool FileUtils::ValidateFileOwnershipPermissions(const std::string &path)
 
 bool FileUtils::ValidateFilePermissions(const std::string &path, const int filePermissions, bool fatalError)
 {
-    string expandedPath = ExtractExpandedPath(path.c_str());
+    string expandedPath = ExtractExpandedPath(path);
 
     if (fatalError && !ValidateFileOwnershipPermissions(expandedPath))
     {
@@ -254,7 +254,7 @@ int FileUtils::PermissionsMaskToInt(mode_t mask)
 
 size_t FileUtils::GetFileSize(const std::string &filePath)
 {
-    string expandedPath = ExtractExpandedPath(filePath.c_str());
+    string expandedPath = ExtractExpandedPath(filePath);
 
     struct stat file_info;
     if (stat(expandedPath.c_str(), &file_info) == 0)
@@ -275,7 +275,9 @@ bool FileUtils::CreateDirectoryWithPermissions(const char *dirPath, mode_t permi
         if (desiredPermissions != actualPermissions)
         {
             chmod(expandedPath.c_str(), permissions);
+            // Repeat permission check for verification.
             actualPermissions = GetFilePermissions(expandedPath);
+            // cppcheck-suppress knownConditionTrueFalse
             if (desiredPermissions != actualPermissions)
             {
                 LOGM_ERROR(
@@ -345,7 +347,7 @@ bool FileUtils::CreateEmptyFileWithPermissions(const string &filename, mode_t pe
 
 bool FileUtils::FileExists(const string &filename)
 {
-    string expandedPath = FileUtils::ExtractExpandedPath(filename.c_str());
+    string expandedPath = FileUtils::ExtractExpandedPath(filename);
     ifstream f(expandedPath);
     return f.good();
 }
@@ -360,7 +362,6 @@ bool FileUtils::IsValidFilePath(const string &filePath)
         case WRDE_NOSPACE:
             wordfree(&word);
         default:
-            LOGM_ERROR(TAG, "%s is an invalid file path", Sanitize(filePath).c_str());
             return false;
     }
 
@@ -368,7 +369,6 @@ bool FileUtils::IsValidFilePath(const string &filePath)
 
     if (!FileUtils::FileExists(expandedPath))
     {
-        LOGM_ERROR(TAG, "%s is an invalid file path", Sanitize(filePath).c_str());
         wordfree(&word);
         return false;
     }

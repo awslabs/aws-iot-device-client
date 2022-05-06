@@ -43,7 +43,7 @@ namespace Aws
                     return s;
                 }
 
-                string Sanitize(std::string value)
+                string Sanitize(const std::string &value)
                 {
                     const char *input = value.c_str();
                     ostringstream output;
@@ -75,7 +75,7 @@ namespace Aws
                     std::map<Aws::Crt::String, Aws::Crt::String>::iterator it;
                     string result = "";
                     unsigned int count = 0;
-                    for (it = map->begin(); it != map->end(); it++)
+                    for (it = map->begin(); it != map->end(); ++it)
                     {
                         count++;
                         result = result.append(addString(it->first, it->second));
@@ -88,10 +88,12 @@ namespace Aws
                     return result;
                 }
 
+                // cppcheck-suppress unusedFunction
                 string TrimLeftCopy(string s, const string &any) { return s.erase(0, s.find_first_not_of(any)); }
 
                 string TrimRightCopy(string s, const string &any) { return s.erase(s.find_last_not_of(any) + 1); }
 
+                // cppcheck-suppress unusedFunction
                 string TrimCopy(string s, const string &any)
                 {
                     s.erase(0, s.find_first_not_of(any));

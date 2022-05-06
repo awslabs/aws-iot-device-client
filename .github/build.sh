@@ -232,4 +232,4 @@ fi
 cmake --build . --target test-aws-iot-device-client
 
 ### Run Tests ###
-env AWS_CRT_MEMORY_TRACING=1 ./test/test-aws-iot-device-client
+env AWS_CRT_MEMORY_TRACING=1 valgrind --suppressions=./../cmake-toolchain/valgrind-suppressions.txt --leak-check=yes --error-exitcode=1 ./test/test-aws-iot-device-client
