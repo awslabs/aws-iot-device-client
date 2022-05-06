@@ -40,7 +40,7 @@ jobs:
         branch: gh-pages
         force: true
 
-  build-ubuntu-16-x64:
+  build-ubuntu-18-x64:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
@@ -50,10 +50,10 @@ jobs:
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
-      - name: Archive ubuntu-16-x64 Build Artifact
+      - name: Archive ubuntu-18-x64 Build Artifact
         uses: actions/upload-artifact@v2
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
@@ -119,7 +119,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     strategy:
       matrix:
-        version: [ 5,6,7,8 ]
+        version: [ 5, 6, 7, 8, 11 ]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -127,7 +127,7 @@ jobs:
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compiler=g++-${{ matrix.version }}
 
@@ -136,7 +136,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     strategy:
       matrix:
-        version: [ 5.0, 6.0, 7, 8, 9 ]
+        version: [ 5.0, 6.0, 7, 8, 9, 11 ]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -144,7 +144,7 @@ jobs:
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compiler=clang-${{ matrix.version }}
 
@@ -158,7 +158,7 @@ jobs:
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=armhf_cross_mode
       - name: Archive armhf32 Build Artifact
@@ -188,7 +188,7 @@ jobs:
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=mips_cross_mode
       - name: Archive mips32 Build Artifact
@@ -218,7 +218,7 @@ jobs:
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=aarch64_cross_mode
       - name: Archive aarch64 Build Artifact
@@ -238,7 +238,7 @@ jobs:
           path: |
             ./setup/
 
-  build-shared-libs-ubuntu-16-x64:
+  build-shared-libs-ubuntu-18-x64:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
@@ -248,10 +248,10 @@ jobs:
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=shared_lib_mode
-      - name: Archive ubuntu-16-x64 Build Artifact
+      - name: Archive ubuntu-18-x64 Build Artifact
         uses: actions/upload-artifact@v2
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
@@ -338,7 +338,7 @@ jobs:
         - name: Build ${{ env.PACKAGE_NAME }}
           run: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-            export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+            export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
             docker pull $DOCKER_IMAGE
             docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=armhf_cross_mode_shared_libs
         - name: Archive armhf32 Build Artifact
@@ -376,7 +376,7 @@ jobs:
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=mips_cross_mode_shared_libs
       - name: Archive mips32 Build Artifact
@@ -414,7 +414,7 @@ jobs:
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=aarch64_cross_mode_shared_libs
       - name: Archive aarch64 Build Artifact
@@ -442,7 +442,7 @@ jobs:
           path: |
             ./setup/
 
-  build-st-ubuntu-16-x64:
+  build-st-ubuntu-18-x64:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
@@ -452,7 +452,7 @@ jobs:
       - name: Build ${{ env.PACKAGE_NAME }} ST Component Mode
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_component_mode
       - name: Archive ST Component Mode Build Artifact
@@ -464,7 +464,7 @@ jobs:
           path: |
             ./build/${{ env.PACKAGE_NAME }}
 
-  build-st-ubuntu-16-aarch64:
+  build-st-ubuntu-18-aarch64:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
@@ -474,7 +474,7 @@ jobs:
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_aarch64_cross_mode
       - name: Archive ST Ubuntu aarch64 Build Artifact
@@ -486,7 +486,7 @@ jobs:
           path: |
             ./build/${{ env.PACKAGE_NAME }}
 
-  build-st-ubuntu-16-armhf32:
+  build-st-ubuntu-18-armhf32:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
@@ -496,7 +496,7 @@ jobs:
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-16-x64:latest
+          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_armhf_cross_mode
       - name: Archive st armhf32 Build Artifact
