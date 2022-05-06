@@ -14,6 +14,8 @@ option(EXCLUDE_PUBSUB "Builds the device client without the IoT Pub Sub Sample F
 option(EXCLUDE_SHADOW "Builds the device client without any of the IoT Shadow Features (Config Shadow Feature and Sample Shadow feature)." OFF)
 option(EXCLUDE_CONFIG_SHADOW "Builds the device client without the IoT Config Shadow Feature." OFF)
 option(EXCLUDE_SAMPLE_SHADOW "Builds the device client without the IoT Sample Shadow Feature." OFF)
+option(EXCLUDE_SENSOR_PUBLISH "Builds the device client without the Sensor Publish over MQTT Feature." OFF)
+option(EXCLUDE_SENSOR_PUBLISH_SAMPLES "Builds the device client without the Sensor Publish sample servers." OFF)
 option(GIT_VERSION "Updates the version number using the Git commit history" ON)
 
 if (EXCLUDE_JOBS)
@@ -54,6 +56,14 @@ endif()
 
 if (EXCLUDE_SAMPLE_SHADOW)
     add_definitions(-DEXCLUDE_SAMPLE_SHADOW)
+endif()
+
+if (EXCLUDE_SENSOR_PUBLISH)
+    add_definitions(-DEXCLUDE_SENSOR_PUBLISH)
+endif()
+
+if (EXCLUDE_SENSOR_PUBLISH_SAMPLES)
+    add_definitions(-DEXCLUDE_SENSOR_PUBLISH_SAMPLES)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "./sdk-cpp-workspace/lib/cmake")
@@ -106,6 +116,15 @@ if (NOT EXCLUDE_SHADOW)
         list(APPEND DC_SRC ${SAMPLE_SHADOW_SRC})
     endif ()
 endif ()
+
+if (NOT EXCLUDE_SENSOR_PUBLISH)
+    file(GLOB SENSOR_PUBLISH_SRC "source/sensor-publish/*.cpp")
+    list(APPEND DC_SRC ${SENSOR_PUBLISH_SRC})
+endif()
+
+if (NOT EXCLUDE_SENSOR_PUBLISH_SAMPLES)
+    add_subdirectory(source/samples/sensor-publish)
+endif()
 
 set(DC_PROJECT_NAME aws-iot-device-client)
 set(CMAKE_CXX_STANDARD 11)

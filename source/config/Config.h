@@ -7,8 +7,11 @@
 #include <aws/crt/Api.h>
 #include <aws/crt/JsonObject.h>
 #include <aws/crt/Optional.h>
+#include <cstddef>
+#include <cstdint>
 #include <fstream>
 #include <map>
+#include <vector>
 
 namespace Aws
 {
@@ -53,6 +56,7 @@ namespace Aws
                 static constexpr int JOB_HANDLER = 700;
                 static constexpr int PUB_SUB_FILES = 600;
                 static constexpr int SAMPLE_SHADOW_FILES = 600;
+                static constexpr int SENSOR_PUBLISH_ADDR_FILE = 660;
             };
 
             struct PlainConfig : public LoadableFromJsonAndCliAndEnvironment
@@ -85,6 +89,7 @@ namespace Aws
 
                 static constexpr char JSON_KEY_SAMPLE_SHADOW[] = "sample-shadow";
                 static constexpr char JSON_KEY_CONFIG_SHADOW[] = "config-shadow";
+                static constexpr char JSON_KEY_SENSOR_PUBLISH[] = "sensor-publish";
 
                 static constexpr char DEFAULT_LOCK_FILE_PATH[] = "/run/lock/";
 
@@ -319,6 +324,70 @@ namespace Aws
                     bool enabled{false};
                 };
                 ConfigShadow configShadow;
+
+                struct SensorPublish : public LoadableFromJsonAndCliAndEnvironment
+                {
+                    bool LoadFromJson(const Crt::JsonView &json) override;
+                    bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override;
+                    bool Validate() const override;
+
+                    static constexpr char JSON_SENSORS[] = "sensors";
+                    static constexpr char JSON_ENABLED[] = "enabled";
+                    static constexpr char JSON_NAME[] = "name";
+                    static constexpr char JSON_ADDR[] = "addr";
+                    static constexpr char JSON_ADDR_POLL_SEC[] = "addr_poll_sec";
+                    static constexpr char JSON_BUFFER_TIME_MS[] = "buffer_time_ms";
+                    static constexpr char JSON_BUFFER_SIZE[] = "buffer_size";
+                    static constexpr char JSON_BUFFER_CAPACITY[] = "buffer_capacity";
+                    static constexpr char JSON_EOM_DELIMITER[] = "eom_delimiter";
+                    static constexpr char JSON_MQTT_TOPIC[] = "mqtt_topic";
+                    static constexpr char JSON_MQTT_DEAD_LETTER_TOPIC[] = "mqtt_dead_letter_topic";
+                    static constexpr char JSON_MQTT_HEARTBEAT_TOPIC[] = "mqtt_heartbeat_topic";
+                    static constexpr char JSON_HEARTBEAT_TIME_SEC[] = "heartbeat_time_sec";
+
+                    // MAX_SENSOR_SIZE is the maximum number of sensor entries in a valid configuration.
+                    //
+                    // Increasing this limit will likely also require a user to increase the 5k limit on
+                    // the total size of the configuration.
+                    static constexpr std::size_t MAX_SENSOR_SIZE = 10;
+
+                    // BUF_CAPACITY_BYTES is the default number of bytes buffered for a single sensor.
+                    // When this limit is reached, we will publish all buffered complete messages.
+                    //
+                    // This limit is based on AWS IoT message broker message size limit of 128KB as of 2022/02.
+                    // https://docs.aws.amazon.com/general/latest/gr/iot-core.html#message-broker-limits
+                    static constexpr std::int64_t BUF_CAPACITY_BYTES = 128000;
+
+                    // BUF_CAPACITY_BYTES_MIN is the minimum buffer capacity.
+                    // The buffer capacity should be configured to be large enough to hold at least a few
+                    // multiples of buffer_size messages.
+                    static constexpr std::int64_t BUF_CAPACITY_BYTES_MIN = 1024;
+
+                    bool enabled{false};
+
+                    struct SensorSettings
+                    {
+                        bool enabled{true};
+                        Aws::Crt::Optional<std::string> name;
+                        Aws::Crt::Optional<std::string> addr;
+                        Aws::Crt::Optional<int64_t> addrPollSec{10};
+                        Aws::Crt::Optional<int64_t> bufferTimeMs{0};
+                        Aws::Crt::Optional<int64_t> bufferSize{0};
+                        Aws::Crt::Optional<int64_t> bufferCapacity{BUF_CAPACITY_BYTES};
+                        Aws::Crt::Optional<std::string> eomDelimiter;
+                        Aws::Crt::Optional<std::string> mqttTopic;
+                        Aws::Crt::Optional<std::string> mqttDeadLetterTopic;
+                        Aws::Crt::Optional<std::string> mqttHeartbeatTopic;
+                        Aws::Crt::Optional<int64_t> heartbeatTimeSec{300};
+                    };
+                    // If any setting associated with a sensor is found invalid during validation,
+                    // then we will disable only that sensor. In order to do this we must modify
+                    // the sensor enabled flag. Since Validate() is const member function, the
+                    // settings array must be declared mutable to allow this flag to be changed.
+                    mutable std::vector<SensorSettings> settings;
+                };
+                SensorPublish sensorPublish;
             };
 
             class Config

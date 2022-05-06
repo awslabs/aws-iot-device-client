@@ -25,6 +25,8 @@ namespace Aws
             class ClientBaseNotifier
             {
               public:
+                virtual ~ClientBaseNotifier() = default;
+
                 /**
                  * \brief Indicates an event has occurred within a feature
                  *

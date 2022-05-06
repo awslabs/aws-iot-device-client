@@ -18,15 +18,19 @@
 #endif
 
 #include "../util/FileUtils.h"
+#include "../util/MqttUtils.h"
 #include "../util/StringUtils.h"
 #include "Version.h"
 
 #include <algorithm>
 #include <aws/crt/JsonObject.h>
+#include <aws/io/socket.h>
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <regex>
 #include <stdexcept>
+#include <string>
 #include <sys/stat.h>
 
 using namespace std;
@@ -58,6 +62,7 @@ constexpr char PlainConfig::JSON_KEY_SAMPLES[];
 constexpr char PlainConfig::JSON_KEY_PUB_SUB[];
 constexpr char PlainConfig::JSON_KEY_SAMPLE_SHADOW[];
 constexpr char PlainConfig::JSON_KEY_CONFIG_SHADOW[];
+constexpr char PlainConfig::JSON_KEY_SENSOR_PUBLISH[];
 constexpr char PlainConfig::DEFAULT_LOCK_FILE_PATH[];
 
 constexpr int Permissions::KEY_DIR;
@@ -212,6 +217,14 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
         ConfigShadow temp;
         temp.LoadFromJson(json.GetJsonObject(jsonKey));
         configShadow = temp;
+    }
+
+    jsonKey = JSON_KEY_SENSOR_PUBLISH;
+    if (json.ValueExists(jsonKey))
+    {
+        SensorPublish temp;
+        temp.LoadFromJson(json.GetJsonObject(jsonKey));
+        sensorPublish = temp;
     }
 
     return true;
@@ -371,6 +384,12 @@ bool PlainConfig::Validate() const
 #endif
 #if !defined(EXCLUDE_SHADOW)
     if (!sampleShadow.Validate() || !configShadow.Validate())
+    {
+        return false;
+    }
+#endif
+#if !defined(EXCLUDE_SENSOR_PUBLISH)
+    if (!sensorPublish.Validate())
     {
         return false;
     }
@@ -1423,6 +1442,328 @@ bool PlainConfig::ConfigShadow::Validate() const
     return true;
 }
 
+constexpr char PlainConfig::SensorPublish::JSON_SENSORS[];
+constexpr char PlainConfig::SensorPublish::JSON_ENABLED[];
+constexpr char PlainConfig::SensorPublish::JSON_NAME[];
+constexpr char PlainConfig::SensorPublish::JSON_ADDR[];
+constexpr char PlainConfig::SensorPublish::JSON_ADDR_POLL_SEC[];
+constexpr char PlainConfig::SensorPublish::JSON_BUFFER_TIME_MS[];
+constexpr char PlainConfig::SensorPublish::JSON_BUFFER_SIZE[];
+constexpr char PlainConfig::SensorPublish::JSON_BUFFER_CAPACITY[];
+constexpr char PlainConfig::SensorPublish::JSON_EOM_DELIMITER[];
+constexpr char PlainConfig::SensorPublish::JSON_MQTT_TOPIC[];
+constexpr char PlainConfig::SensorPublish::JSON_MQTT_DEAD_LETTER_TOPIC[];
+constexpr char PlainConfig::SensorPublish::JSON_MQTT_HEARTBEAT_TOPIC[];
+constexpr char PlainConfig::SensorPublish::JSON_HEARTBEAT_TIME_SEC[];
+
+constexpr int64_t PlainConfig::SensorPublish::BUF_CAPACITY_BYTES;
+constexpr int64_t PlainConfig::SensorPublish::BUF_CAPACITY_BYTES_MIN;
+
+bool PlainConfig::SensorPublish::LoadFromJson(const Crt::JsonView &json)
+{
+    const char *sensorsKey = JSON_SENSORS;
+    if (json.ValueExists(sensorsKey) && json.GetJsonObject(sensorsKey).IsListType())
+    {
+        int entryId = 1;
+        for (const auto &entry : json.GetArray(sensorsKey))
+        {
+            SensorPublish::SensorSettings sensorSettings;
+
+            const char *jsonKey = JSON_ENABLED;
+            if (entry.ValueExists(jsonKey))
+            {
+                sensorSettings.enabled = entry.GetBool(jsonKey);
+            }
+
+            // If at least one sensor is enabled, then enable the feature.
+            if (sensorSettings.enabled)
+            {
+                enabled = true;
+            }
+
+            jsonKey = JSON_NAME;
+            if (entry.ValueExists(jsonKey))
+            {
+                sensorSettings.name = entry.GetString(jsonKey).c_str();
+            }
+            else
+            {
+                sensorSettings.name = to_string(entryId);
+            }
+
+            jsonKey = JSON_ADDR;
+            if (entry.ValueExists(jsonKey))
+            {
+                sensorSettings.addr = entry.GetString(jsonKey).c_str();
+            }
+
+            jsonKey = JSON_ADDR_POLL_SEC;
+            if (entry.ValueExists(jsonKey))
+            {
+                sensorSettings.addrPollSec = entry.GetInt64(jsonKey);
+            }
+
+            jsonKey = JSON_BUFFER_TIME_MS;
+            if (entry.ValueExists(jsonKey))
+            {
+                sensorSettings.bufferTimeMs = entry.GetInt64(jsonKey);
+            }
+
+            jsonKey = JSON_BUFFER_SIZE;
+            if (entry.ValueExists(jsonKey))
+            {
+                sensorSettings.bufferSize = entry.GetInt64(jsonKey);
+            }
+
+            jsonKey = JSON_BUFFER_CAPACITY;
+            if (entry.ValueExists(jsonKey))
+            {
+                sensorSettings.bufferCapacity = entry.GetInt64(jsonKey);
+            }
+
+            jsonKey = JSON_EOM_DELIMITER;
+            if (entry.ValueExists(jsonKey))
+            {
+                sensorSettings.eomDelimiter = entry.GetString(jsonKey).c_str();
+            }
+
+            jsonKey = JSON_MQTT_TOPIC;
+            if (entry.ValueExists(jsonKey))
+            {
+                sensorSettings.mqttTopic = entry.GetString(jsonKey).c_str();
+            }
+
+            jsonKey = JSON_MQTT_DEAD_LETTER_TOPIC;
+            if (entry.ValueExists(jsonKey))
+            {
+                sensorSettings.mqttDeadLetterTopic = entry.GetString(jsonKey).c_str();
+            }
+
+            jsonKey = JSON_MQTT_HEARTBEAT_TOPIC;
+            if (entry.ValueExists(jsonKey))
+            {
+                sensorSettings.mqttHeartbeatTopic = entry.GetString(jsonKey).c_str();
+            }
+
+            jsonKey = JSON_HEARTBEAT_TIME_SEC;
+            if (entry.ValueExists(jsonKey))
+            {
+                sensorSettings.heartbeatTimeSec = entry.GetInt64(jsonKey);
+            }
+
+            settings.push_back(sensorSettings);
+            ++entryId;
+        }
+    }
+
+    return true;
+}
+
+bool PlainConfig::SensorPublish::LoadFromCliArgs(const CliArgs &cliArgs)
+{
+    return true;
+}
+
+bool PlainConfig::SensorPublish::LoadFromEnvironment()
+{
+    return true;
+}
+
+bool PlainConfig::SensorPublish::Validate() const
+{
+    if (settings.empty())
+    {
+        return true; // Nothing to validate.
+    }
+
+    // Check the number of sensor entries in the configuration does not exceed maximum.
+    if (settings.size() > MAX_SENSOR_SIZE)
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Number of sensor entries in config (%ld) exceeds maximum (%ld)",
+            DeviceClient::DC_FATAL_ERROR,
+            settings.size(),
+            MAX_SENSOR_SIZE);
+        // Disable every sensor entry and disable the feature.
+        for (auto &setting : settings)
+        {
+            setting.enabled = false;
+        }
+        return false;
+    }
+
+    bool atLeastOneValidSensor{false};
+
+    // Validate the settings associated with each sensor.
+    // If at least one setting associated with the sensor is invalid, then we disable the sensor.
+    for (auto &setting : settings)
+    {
+        if (!setting.enabled)
+        {
+            continue; // Skip validation
+        }
+
+        // Validate the pathname socket path exists and satisfies permissions.
+        if (FileUtils::FileExists(setting.addr.value()))
+        {
+            // If the path points to an existing file,
+            // then check the path satisfies permissions.
+            if (!FileUtils::ValidateFilePermissions(setting.addr.value(), Permissions::SENSOR_PUBLISH_ADDR_FILE))
+            {
+                setting.enabled = false;
+            }
+        }
+        else
+        {
+            // If the path does not point to an existing file,
+            // then check the parent directory exists and has required permissions.
+            auto addrParentDir = FileUtils::ExtractParentDirectory(setting.addr.value());
+            if (!FileUtils::ValidateFilePermissions(addrParentDir, Permissions::SENSOR_PUBLISH_ADDR_FILE))
+            {
+                setting.enabled = false;
+            }
+        }
+
+        // Validate the pathname socket does not exceed max address size.
+        // Include extra character for terminating null byte.
+        if (setting.addr.value().length() + 1 > AWS_ADDRESS_MAX_LEN)
+        {
+            setting.enabled = false;
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: Config %s length (%ld) exceeds maximum (%ld)",
+                DeviceClient::DC_FATAL_ERROR,
+                JSON_ADDR,
+                setting.addr.value().length() + 1,
+                AWS_ADDRESS_MAX_LEN);
+        }
+
+        // Validate that mqtt topic name is non-empty.
+        if (!setting.mqttTopic.has_value() || setting.mqttTopic.value().empty())
+        {
+            setting.enabled = false;
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: Config %s value must be non-empty",
+                DeviceClient::DC_FATAL_ERROR,
+                JSON_MQTT_TOPIC);
+        }
+
+        // Validate that mqtt topic names conform to AWS Iot spec.
+        if (!MqttUtils::ValidateAwsIotMqttTopicName(setting.mqttTopic.value()))
+        {
+            setting.enabled = false;
+        }
+        if (setting.mqttDeadLetterTopic.has_value() && !setting.mqttDeadLetterTopic.value().empty())
+        {
+            if (!MqttUtils::ValidateAwsIotMqttTopicName(setting.mqttDeadLetterTopic.value()))
+            {
+                setting.enabled = false;
+            }
+        }
+        if (setting.mqttHeartbeatTopic.has_value() && !setting.mqttHeartbeatTopic.value().empty())
+        {
+            if (!MqttUtils::ValidateAwsIotMqttTopicName(setting.mqttHeartbeatTopic.value()))
+            {
+                setting.enabled = false;
+            }
+        }
+
+        // Validate that delimiter is non-empty and valid.
+        if (!setting.eomDelimiter.has_value() || setting.eomDelimiter.value().empty())
+        {
+            setting.enabled = false;
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: Config %s value must be non-empty",
+                DeviceClient::DC_FATAL_ERROR,
+                JSON_EOM_DELIMITER);
+        }
+        else
+        {
+            // Validate the regular expression by checking for exceptions when compiling the pattern.
+            try
+            {
+                std::regex re(setting.eomDelimiter.value());
+            }
+            catch (const std::regex_error &e)
+            {
+                setting.enabled = false;
+                LOGM_ERROR(
+                    Config::TAG,
+                    "*** %s: Config %s value is not a valid regular expression: %s",
+                    DeviceClient::DC_FATAL_ERROR,
+                    JSON_EOM_DELIMITER,
+                    e.what());
+            }
+        }
+
+        // Validate that numeric values are non-negative.
+        if (setting.addrPollSec.value() < 0)
+        {
+            setting.enabled = false;
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: Config %s value %ld must be non-negative",
+                DeviceClient::DC_FATAL_ERROR,
+                JSON_ADDR_POLL_SEC,
+                setting.addrPollSec.value());
+        }
+        if (setting.bufferTimeMs.value() < 0)
+        {
+            setting.enabled = false;
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: Config %s value %ld must be non-negative",
+                DeviceClient::DC_FATAL_ERROR,
+                JSON_BUFFER_TIME_MS,
+                setting.bufferTimeMs.value());
+        }
+        if (setting.bufferSize.value() < 0)
+        {
+            setting.enabled = false;
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: Config %s value %ld must be non-negative",
+                DeviceClient::DC_FATAL_ERROR,
+                JSON_BUFFER_SIZE,
+                setting.bufferSize.value());
+        }
+        if (setting.heartbeatTimeSec.value() < 0)
+        {
+            setting.enabled = false;
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: Config %s value %ld must be non-negative",
+                DeviceClient::DC_FATAL_ERROR,
+                JSON_HEARTBEAT_TIME_SEC,
+                setting.heartbeatTimeSec.value());
+        }
+
+        // Validate the buffer capcity.
+        if (setting.bufferCapacity.value() < BUF_CAPACITY_BYTES_MIN)
+        {
+            setting.enabled = false;
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: Config %s value %ld is less than minimum %ld",
+                DeviceClient::DC_FATAL_ERROR,
+                JSON_BUFFER_CAPACITY,
+                setting.bufferCapacity.value(),
+                BUF_CAPACITY_BYTES_MIN);
+        }
+
+        // If at least one sensor is valid, then enable the feature.
+        if (setting.enabled)
+        {
+            atLeastOneValidSensor = true;
+        }
+    }
+
+    return atLeastOneValidSensor;
+}
+
 constexpr char Config::TAG[];
 constexpr char Config::DEFAULT_CONFIG_DIR[];
 constexpr char Config::DEFAULT_KEY_DIR[];
@@ -1842,6 +2183,22 @@ bool Config::ExportDefaultSetting(const string &file)
 	},
     "%s": {
         "%s": false
+    },
+    "%s": {
+        "%s": [
+            "%s": false,
+            "%s": "<replace>",
+            "%s": "<replace>",
+            "%s": replace,
+            "%s": replace,
+            "%s": replace,
+            "%s": replace,
+            "%s": "<replace>",
+            "%s": "<replace>",
+            "%s": "<replace>",
+            "%s": "<replace>",
+            "%s": replace
+        ]
     }
 }
 )";
@@ -1895,7 +2252,21 @@ bool Config::ExportDefaultSetting(const string &file)
         PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_INPUT_FILE,
         PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_OUTPUT_FILE,
         PlainConfig::JSON_KEY_CONFIG_SHADOW,
-        PlainConfig::ConfigShadow::JSON_ENABLE_CONFIG_SHADOW);
+        PlainConfig::ConfigShadow::JSON_ENABLE_CONFIG_SHADOW,
+        PlainConfig::PlainConfig::JSON_KEY_SENSOR_PUBLISH,
+        PlainConfig::SensorPublish::JSON_SENSORS,
+        PlainConfig::SensorPublish::JSON_ENABLED,
+        PlainConfig::SensorPublish::JSON_NAME,
+        PlainConfig::SensorPublish::JSON_ADDR,
+        PlainConfig::SensorPublish::JSON_ADDR_POLL_SEC,
+        PlainConfig::SensorPublish::JSON_BUFFER_TIME_MS,
+        PlainConfig::SensorPublish::JSON_BUFFER_SIZE,
+        PlainConfig::SensorPublish::JSON_BUFFER_CAPACITY,
+        PlainConfig::SensorPublish::JSON_EOM_DELIMITER,
+        PlainConfig::SensorPublish::JSON_MQTT_TOPIC,
+        PlainConfig::SensorPublish::JSON_MQTT_DEAD_LETTER_TOPIC,
+        PlainConfig::SensorPublish::JSON_MQTT_HEARTBEAT_TOPIC,
+        PlainConfig::SensorPublish::JSON_HEARTBEAT_TIME_SEC);
 
     clientConfig.close();
     LOGM_INFO(TAG, "Exported settings to: %s", Sanitize(file).c_str());
