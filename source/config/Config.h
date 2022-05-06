@@ -348,7 +348,6 @@ namespace Aws
                     Aws::Crt::Optional<std::string> secureElementKeyLabel;
                     Aws::Crt::Optional<std::string> secureElementSlotId;
                     Aws::Crt::Optional<std::string> secureElementTokenLabel;
-
                 };
                 SecureElement secureElement;
             };

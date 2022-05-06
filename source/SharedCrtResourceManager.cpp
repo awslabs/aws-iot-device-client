@@ -44,11 +44,14 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
 {
     struct stat fileInfo;
     bool locatedAll = true;
-    if(config.secureElement.enabled)
+    if (config.secureElement.enabled)
     {
         if (stat(config.secureElement.pkcs11Lib->c_str(), &fileInfo) != 0)
         {
-            LOGM_ERROR(TAG, "Failed to find PKCS#11 library file: %s, cannot establish MQTT connection", Sanitize(config.secureElement.pkcs11Lib->c_str()).c_str());
+            LOGM_ERROR(
+                TAG,
+                "Failed to find PKCS#11 library file: %s, cannot establish MQTT connection",
+                Sanitize(config.secureElement.pkcs11Lib->c_str()).c_str());
             locatedAll = false;
         }
         else
@@ -66,7 +69,8 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     {
         if (stat(config.key->c_str(), &fileInfo) != 0)
         {
-            LOGM_ERROR(TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.key->c_str()).c_str());
+            LOGM_ERROR(
+                TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.key->c_str()).c_str());
             locatedAll = false;
         }
         else
@@ -269,23 +273,25 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
         return SharedCrtResourceManager::ABORT;
     }
     Aws::Iot::MqttClientConnectionConfigBuilder clientConfigBuilder;
-    if(config.secureElement.enabled)
+    if (config.secureElement.enabled)
     {
 
-        LOGM_INFO(TAG,"Inside MQTT client PKCS11: %s",config.secureElement.pkcs11Lib.value().c_str());
-        std::shared_ptr<Io::Pkcs11Lib> pkcs11Lib = Aws::Crt::Io::Pkcs11Lib::Create(FileUtils::ExtractExpandedPath(config.secureElement.pkcs11Lib.value().c_str()).c_str(), allocator);
+        LOGM_INFO(TAG, "Inside MQTT client PKCS11: %s", config.secureElement.pkcs11Lib.value().c_str());
+        std::shared_ptr<Io::Pkcs11Lib> pkcs11Lib = Aws::Crt::Io::Pkcs11Lib::Create(
+            FileUtils::ExtractExpandedPath(config.secureElement.pkcs11Lib.value().c_str()).c_str(), allocator);
         if (!pkcs11Lib)
         {
-            LOGM_INFO(TAG,"Pkcs11Lib failed: %s",ErrorDebugString(Aws::Crt::LastError()));
+            LOGM_INFO(TAG, "Pkcs11Lib failed: %s", ErrorDebugString(Aws::Crt::LastError()));
             return ABORT;
         }
 
-        LOG_INFO(TAG,"Inside MQTT client PKCS11: setting tls connection");
+        LOG_INFO(TAG, "Inside MQTT client PKCS11: setting tls connection");
         Io::TlsContextPkcs11Options pkcs11Options(pkcs11Lib);
         pkcs11Options.SetCertificateFilePath(config.cert->c_str());
         pkcs11Options.SetUserPin(config.secureElement.secureElementPin->c_str());
 
-        if (config.secureElement.secureElementTokenLabel.has_value() && !config.secureElement.secureElementTokenLabel->empty())
+        if (config.secureElement.secureElementTokenLabel.has_value() &&
+            !config.secureElement.secureElementTokenLabel->empty())
         {
             pkcs11Options.SetTokenLabel(config.secureElement.secureElementTokenLabel->c_str());
         }
@@ -296,17 +302,18 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
             pkcs11Options.SetSlotId(slotId);
         }
 
-        if (config.secureElement.secureElementKeyLabel.has_value() && !config.secureElement.secureElementKeyLabel->empty())
+        if (config.secureElement.secureElementKeyLabel.has_value() &&
+            !config.secureElement.secureElementKeyLabel->empty())
         {
             pkcs11Options.SetPrivateKeyObjectLabel(config.secureElement.secureElementKeyLabel->c_str());
         }
 
-        LOG_INFO(TAG,"Inside MQTT client PKCS11: Establishing connection");
+        LOG_INFO(TAG, "Inside MQTT client PKCS11: Establishing connection");
         clientConfigBuilder = MqttClientConnectionConfigBuilder(pkcs11Options);
     }
     else
     {
-        LOG_INFO(TAG,"Inside MQTT client NON PKCS11: Establishing connection");
+        LOG_INFO(TAG, "Inside MQTT client NON PKCS11: Establishing connection");
         clientConfigBuilder = MqttClientConnectionConfigBuilder(config.cert->c_str(), config.key->c_str());
     }
 
@@ -339,7 +346,8 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     /*
      * This will execute when an mqtt connect has completed or failed.
      */
-    auto onConnectionCompleted = [&](Mqtt::MqttConnection &, int errorCode, Mqtt::ReturnCode returnCode, bool) {
+    auto onConnectionCompleted = [&](Mqtt::MqttConnection &, int errorCode, Mqtt::ReturnCode returnCode, bool)
+    {
         if (errorCode)
         {
             LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(errorCode));
@@ -363,7 +371,8 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     /*
      * Invoked when a disconnect message has completed.
      */
-    auto onDisconnect = [&](Mqtt::MqttConnection & /*conn*/) {
+    auto onDisconnect = [&](Mqtt::MqttConnection & /*conn*/)
+    {
         {
             LOG_INFO(TAG, "MQTT Connection is now disconnected");
             connectionClosedPromise.set_value();
@@ -373,7 +382,8 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     /*
      * Invoked when connection is interrupted.
      */
-    auto OnConnectionInterrupted = [&](Mqtt::MqttConnection &, int errorCode) {
+    auto OnConnectionInterrupted = [&](Mqtt::MqttConnection &, int errorCode)
+    {
         {
             if (errorCode)
             {
@@ -389,7 +399,8 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     /*
      * Invoked when connection is resumed.
      */
-    auto OnConnectionResumed = [&](Mqtt::MqttConnection &, int returnCode, bool) {
+    auto OnConnectionResumed = [&](Mqtt::MqttConnection &, int returnCode, bool)
+    {
         {
             LOGM_INFO(TAG, "MQTT connection resumed with return code: %d", returnCode);
         }

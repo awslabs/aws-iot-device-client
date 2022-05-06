@@ -286,7 +286,7 @@ bool PlainConfig::Validate() const
     {
         return false;
     }
-#if defined(EXCLUDE_SECURE_ELEMENT)
+#    if defined(EXCLUDE_SECURE_ELEMENT)
     if (!key.has_value() || key->empty())
     {
         LOGM_ERROR(Config::TAG, "*** %s: Private Key is missing ***", DeviceClient::DC_FATAL_ERROR);
@@ -296,7 +296,7 @@ bool PlainConfig::Validate() const
     {
         return false;
     }
-#endif
+#    endif
     if (!rootCa.has_value() || rootCa->empty())
     {
         LOGM_ERROR(Config::TAG, "*** %s: Root CA is missing ***", DeviceClient::DC_FATAL_ERROR);
@@ -1457,7 +1457,6 @@ bool PlainConfig::SecureElement::LoadFromJson(const Crt::JsonView &json)
         }
     }
 
-
     jsonKey = JSON_SECURE_ELEMENT_KEY_LABEL;
     if (json.ValueExists(jsonKey))
     {
@@ -1520,11 +1519,13 @@ bool PlainConfig::SecureElement::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID))
     {
-        secureElementSlotId = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID));
+        secureElementSlotId =
+            FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID));
     }
     if (cliArgs.count(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL))
     {
-        secureElementTokenLabel = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL));
+        secureElementTokenLabel =
+            FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL));
     }
     return true;
 }
@@ -1537,13 +1538,19 @@ bool PlainConfig::SecureElement::Validate() const
     }
     if (!pkcs11Lib.has_value() || pkcs11Lib->empty())
     {
-        LOGM_ERROR(Config::TAG,"*** %s: PKCS11 Library path field must be specified if Secure Element Configuration is enabled ***", DeviceClient::DC_FATAL_ERROR);
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: PKCS11 Library path field must be specified if Secure Element Configuration is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
         return false;
     }
 
     if (!secureElementPin.has_value() || secureElementPin->empty())
     {
-        LOGM_ERROR(Config::TAG,"*** %s: Secure Element Pin field must be specified if Secure Element Configuration is enabled ***",DeviceClient::DC_FATAL_ERROR);
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Secure Element Pin field must be specified if Secure Element Configuration is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
         return false;
     }
 
@@ -1903,7 +1910,8 @@ void Config::PrintHelpMessage()
         "%s <path/to/sub/file>:\t\t\t\t\tThe file the Pub/Sub sample feature will write received messaged to\n"
         "%s <shadow-name>:\t\t\t\t\tThe name of shadow SampleShadow feature will create or update\n"
         "%s <shadow-input-file>:\t\t\t\t\tThe file the Sample Shadow feature will read from when updating shadow data\n"
-        "%s <shadow-output-file>:\t\t\t\t\tThe file the Sample Shadow feature will write the latest shadow document to\n"
+        "%s <shadow-output-file>:\t\t\t\t\tThe file the Sample Shadow feature will write the latest shadow document "
+        "to\n"
         "%s <pkcs11-lib-path>:\t\t\t\t\tThe file path to PKCS#11 library\n"
         "%s <secure-element-pin>:\t\t\t\t\tThe user PIN for logging into PKCS#11 token.\n"
         "%s <secure-element-key-label>:\t\t\t\t\tThe Label of private key on the PKCS#11 token (optional). \n"

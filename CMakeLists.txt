@@ -47,19 +47,19 @@ endif ()
 
 if (EXCLUDE_SHADOW)
     add_definitions(-DEXCLUDE_SHADOW)
-endif()
+endif ()
 
 if (EXCLUDE_CONFIG_SHADOW)
     add_definitions(-DEXCLUDE_CONFIG_SHADOW)
-endif()
+endif ()
 
 if (EXCLUDE_SAMPLE_SHADOW)
     add_definitions(-DEXCLUDE_SAMPLE_SHADOW)
-endif()
+endif ()
 
 if (EXCLUDE_SECURE_ELEMENT)
     add_definitions(-DEXCLUDE_SECURE_ELEMENT)
-endif()
+endif ()
 
 list(APPEND CMAKE_MODULE_PATH "./sdk-cpp-workspace/lib/cmake")
 
@@ -124,7 +124,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ldl")
-endif()
+endif ()
 
 #########################################
 # Generate Version Information from Git #
@@ -182,8 +182,8 @@ endif ()
 set(DEP_DC_LIBS ${DEP_DC_LIBS} aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io aws-c-cal aws-c-http aws-c-compression aws-c-common aws-c-s3 aws-c-event-stream aws-checksums aws-c-sdkutils)
 
 if (UNIX AND NOT APPLE)
-    set (DEP_DC_LIBS ${DEP_DC_LIBS} s2n)
-endif()
+    set(DEP_DC_LIBS ${DEP_DC_LIBS} s2n)
+endif ()
 
 # Set SDK dependency libraries as needed
 
@@ -204,7 +204,7 @@ if (NOT EXCLUDE_FP)
     set(DEP_DC_LIBS ${DEP_DC_LIBS} IotIdentity-cpp)
 endif ()
 
-if(NOT EXCLUDE_SHADOW)
+if (NOT EXCLUDE_SHADOW)
     set(DEP_DC_LIBS ${DEP_DC_LIBS} IotShadow-cpp)
 endif ()
 
