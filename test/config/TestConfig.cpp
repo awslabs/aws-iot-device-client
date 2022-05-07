@@ -239,7 +239,7 @@ TEST_F(ConfigTestFixture, InvalidRootCaPathConfig)
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
-    ASSERT_STREQ(invalidFilePath.c_str(),config.rootCa->c_str());
+    ASSERT_STREQ(invalidFilePath.c_str(), config.rootCa->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
@@ -263,7 +263,7 @@ TEST_F(ConfigTestFixture, InvalidRootCaPathConfigCli)
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
-    ASSERT_STREQ(invalidFilePath.c_str(),config.rootCa->c_str());
+    ASSERT_STREQ(invalidFilePath.c_str(), config.rootCa->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
