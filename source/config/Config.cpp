@@ -118,18 +118,7 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     {
         if (!json.GetString(jsonKey).empty())
         {
-            auto path = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
-            if (FileUtils::FileExists(path))
-            {
-                rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
-            }
-            else
-            {
-                LOGM_WARN(
-                    Config::TAG,
-                    "Path %s to RootCA is invalid. Ignoring... Will attempt to use default trust store.",
-                    path.c_str());
-            }
+            rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
         else
         {
@@ -246,18 +235,7 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::CLI_ROOT_CA))
     {
-        auto path = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::CLI_ROOT_CA).c_str());
-        if (FileUtils::IsValidFilePath(path))
-        {
-            rootCa = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::CLI_ROOT_CA).c_str());
-        }
-        else
-        {
-            LOGM_WARN(
-                Config::TAG,
-                "Path %s to RootCA is invalid. Ignoring... Will attempt to use default trust store.",
-                path.c_str());
-        }
+        rootCa = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::CLI_ROOT_CA).c_str());
     }
     if (cliArgs.count(PlainConfig::CLI_THING_NAME))
     {
@@ -352,6 +330,11 @@ bool PlainConfig::Validate() const
         return false;
     }
 #endif
+    if (rootCa.has_value() && !rootCa->empty() && !FileUtils::IsValidFilePath(rootCa->c_str()))
+    {
+        LOGM_ERROR(Config::TAG, "*** %s: Root CA file path is invalid. ***", DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
 #if !defined(EXCLUDE_JOBS)
     if (!jobs.Validate())
     {

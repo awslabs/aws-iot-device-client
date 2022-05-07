@@ -235,11 +235,11 @@ TEST_F(ConfigTestFixture, InvalidRootCaPathConfig)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
-    ASSERT_TRUE(config.Validate());
+    ASSERT_FALSE(config.Validate());
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
-    ASSERT_FALSE(config.rootCa.has_value());
+    ASSERT_STREQ(invalidFilePath.c_str(),config.rootCa->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
@@ -255,6 +255,56 @@ TEST_F(ConfigTestFixture, InvalidRootCaPathConfigCli)
     cliArgs[PlainConfig::CLI_KEY] = filePath;
     cliArgs[PlainConfig::CLI_THING_NAME] = "thing-name value";
     cliArgs[PlainConfig::CLI_ROOT_CA] = invalidFilePath;
+
+    PlainConfig config;
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_FALSE(config.Validate());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_STREQ(invalidFilePath.c_str(),config.rootCa->c_str());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    ASSERT_TRUE(config.jobs.enabled);
+    ASSERT_TRUE(config.tunneling.enabled);
+    ASSERT_TRUE(config.deviceDefender.enabled);
+    ASSERT_FALSE(config.fleetProvisioning.enabled);
+}
+
+TEST_F(ConfigTestFixture, MissingRootCaPathConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_FALSE(config.rootCa.has_value());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    ASSERT_TRUE(config.jobs.enabled);
+    ASSERT_TRUE(config.tunneling.enabled);
+    ASSERT_TRUE(config.deviceDefender.enabled);
+    ASSERT_FALSE(config.fleetProvisioning.enabled);
+}
+
+TEST_F(ConfigTestFixture, MissingCaPathConfigCli)
+{
+    CliArgs cliArgs;
+    cliArgs[PlainConfig::CLI_ENDPOINT] = "endpoint value";
+    cliArgs[PlainConfig::CLI_CERT] = filePath;
+    cliArgs[PlainConfig::CLI_KEY] = filePath;
+    cliArgs[PlainConfig::CLI_THING_NAME] = "thing-name value";
 
     PlainConfig config;
     config.LoadFromCliArgs(cliArgs);

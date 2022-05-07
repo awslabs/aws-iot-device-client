@@ -362,6 +362,7 @@ bool FileUtils::IsValidFilePath(const string &filePath)
         case WRDE_NOSPACE:
             wordfree(&word);
         default:
+            LOGM_ERROR(TAG, "%s is an invalid file path", Sanitize(filePath).c_str());
             return false;
     }
 
@@ -369,6 +370,7 @@ bool FileUtils::IsValidFilePath(const string &filePath)
 
     if (!FileUtils::FileExists(expandedPath))
     {
+        LOGM_ERROR(TAG, "%s is an invalid file path", Sanitize(filePath).c_str());
         wordfree(&word);
         return false;
     }
