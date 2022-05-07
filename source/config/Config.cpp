@@ -359,15 +359,6 @@ bool PlainConfig::Validate() const
         return false;
     }
 #    endif
-    if (!rootCa.has_value() || rootCa->empty())
-    {
-        LOGM_ERROR(Config::TAG, "*** %s: Root CA is missing ***", DeviceClient::DC_FATAL_ERROR);
-        return false;
-    }
-    else if (!FileUtils::IsValidFilePath(rootCa->c_str()))
-    {
-        return false;
-    }
     if (!thingName.has_value() || thingName->empty())
     {
         LOGM_ERROR(Config::TAG, "*** %s: Thing name is missing ***", DeviceClient::DC_FATAL_ERROR);

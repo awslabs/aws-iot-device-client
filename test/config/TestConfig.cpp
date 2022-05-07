@@ -64,7 +64,6 @@ static CliArgs makeMinimumCliArgs()
         {PlainConfig::CLI_ENDPOINT, "endpoint value"},
         {PlainConfig::CLI_CERT, filePath},
         {PlainConfig::CLI_KEY, filePath},
-        {PlainConfig::CLI_ROOT_CA, filePath},
         {PlainConfig::CLI_THING_NAME, "thing-name value"},
     };
 }
@@ -183,7 +182,6 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value"
 })";
     JsonObject jsonObject(jsonString);
@@ -237,7 +235,7 @@ TEST_F(ConfigTestFixture, InvalidRootCaPathConfig)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
-    ASSERT_FALSE(config.Validate());
+    ASSERT_TRUE(config.Validate());
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
@@ -261,7 +259,7 @@ TEST_F(ConfigTestFixture, InvalidRootCaPathConfigCli)
     PlainConfig config;
     config.LoadFromCliArgs(cliArgs);
 
-    ASSERT_FALSE(config.Validate());
+    ASSERT_TRUE(config.Validate());
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
