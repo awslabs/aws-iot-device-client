@@ -70,6 +70,7 @@ constexpr int Permissions::ROOT_CA_DIR;
 constexpr int Permissions::CERT_DIR;
 constexpr int Permissions::CONFIG_DIR;
 constexpr int Permissions::LOG_DIR;
+constexpr int Permissions::PKCS11_LIB_DIR;
 constexpr int Permissions::PRIVATE_KEY;
 constexpr int Permissions::PUBLIC_CERT;
 constexpr int Permissions::LOG_FILE;
@@ -78,6 +79,7 @@ constexpr int Permissions::RUNTIME_CONFIG_FILE;
 constexpr int Permissions::JOB_HANDLER;
 constexpr int Permissions::PUB_SUB_FILES;
 constexpr int Permissions::SAMPLE_SHADOW_FILES;
+constexpr int Permissions::PKCS11_LIB_FILE;
 
 bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
 {
@@ -100,7 +102,6 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
         }
     }
 
-#if defined(EXCLUDE_SECURE_ELEMENT)
     jsonKey = JSON_KEY_KEY;
     if (json.ValueExists(jsonKey))
     {
@@ -113,7 +114,6 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
             LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
         }
     }
-#endif
 
     jsonKey = JSON_KEY_ROOT_CA;
     if (json.ValueExists(jsonKey))
@@ -220,7 +220,7 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
         temp.LoadFromJson(json.GetJsonObject(jsonKey));
         configShadow = temp;
     }
-#if !defined(EXCLUDE_SECURE_ELEMENT)
+
     jsonKey = JSON_KEY_SECURE_ELEMENT;
     if (json.ValueExists(jsonKey))
     {
@@ -228,7 +228,6 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
         temp.LoadFromJson(json.GetJsonObject(jsonKey));
         secureElement = temp;
     }
-#endif
 
     jsonKey = JSON_KEY_SENSOR_PUBLISH;
     if (json.ValueExists(jsonKey))
@@ -348,17 +347,20 @@ bool PlainConfig::Validate() const
     {
         return false;
     }
-#    if defined(EXCLUDE_SECURE_ELEMENT)
-    if (!key.has_value() || key->empty())
+
+    if (!secureElement.enabled)
     {
-        LOGM_ERROR(Config::TAG, "*** %s: Private Key is missing ***", DeviceClient::DC_FATAL_ERROR);
-        return false;
+        if (!key.has_value() || key->empty())
+        {
+            LOGM_ERROR(Config::TAG, "*** %s: Private Key is missing ***", DeviceClient::DC_FATAL_ERROR);
+            return false;
+        }
+        else if (!FileUtils::IsValidFilePath(key->c_str()))
+        {
+            return false;
+        }
     }
-    else if (!FileUtils::IsValidFilePath(key->c_str()))
-    {
-        return false;
-    }
-#    endif
+
     if (!thingName.has_value() || thingName->empty())
     {
         LOGM_ERROR(Config::TAG, "*** %s: Thing name is missing ***", DeviceClient::DC_FATAL_ERROR);
@@ -404,7 +406,6 @@ bool PlainConfig::Validate() const
 #if !defined(EXCLUDE_SECURE_ELEMENT)
     if (!secureElement.Validate())
     {
-        LOG_INFO(Config::TAG, "SECURE ELEMENT");
         return false;
     }
 #endif

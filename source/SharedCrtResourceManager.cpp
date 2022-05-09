@@ -57,8 +57,9 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
         else
         {
             string parentDir = FileUtils::ExtractParentDirectory(config.secureElement.pkcs11Lib->c_str());
-            if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::KEY_DIR) ||
-                !FileUtils::ValidateFilePermissions(config.secureElement.pkcs11Lib->c_str(), Permissions::PRIVATE_KEY))
+            if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::PKCS11_LIB_DIR) ||
+                !FileUtils::ValidateFilePermissions(
+                    config.secureElement.pkcs11Lib->c_str(), Permissions::PKCS11_LIB_FILE))
             {
                 LOG_ERROR(TAG, "Incorrect permissions on PKCS#11 library file and/or it's parent directory");
                 locatedAll = false;

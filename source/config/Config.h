@@ -44,6 +44,7 @@ namespace Aws
                 static constexpr int CONFIG_DIR = 745;
                 static constexpr int LOG_DIR = 745;
                 static constexpr int PUBSUB_DIR = 745;
+                static constexpr int PKCS11_LIB_DIR = 700;
 
                 /** Files **/
                 static constexpr int PRIVATE_KEY = 600;
@@ -57,6 +58,7 @@ namespace Aws
                 static constexpr int PUB_SUB_FILES = 600;
                 static constexpr int SAMPLE_SHADOW_FILES = 600;
                 static constexpr int SENSOR_PUBLISH_ADDR_FILE = 660;
+                static constexpr int PKCS11_LIB_FILE = 600;
             };
 
             struct PlainConfig : public LoadableFromJsonAndCliAndEnvironment
