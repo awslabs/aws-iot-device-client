@@ -15,7 +15,7 @@ To configure the AWS IoT Device Client via the JSON configuration file, you can 
 where `~/` refers to the home directory of the user running the Device Client. If you'd like to specify a different location
 for your configuration file, you can pass the `--config-file <your-path>` flag to the AWS IoT Device Client. 
 
-There are five (4) fields that MUST be passed to the AWS IoT Device Client through some combination of either CLI arguments, 
+There are four (4) fields that MUST be passed to the AWS IoT Device Client through some combination of either CLI arguments, 
 JSON configuration, or both:
 
 `endpoint` *or* `--endpoint`: This is the IoT Core endpoint that your device should connect to. This can be found by navigating to the settings
