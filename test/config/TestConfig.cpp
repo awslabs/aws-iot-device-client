@@ -1191,6 +1191,7 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopicEmpty)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
