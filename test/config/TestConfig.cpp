@@ -21,6 +21,7 @@ using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Util;
 
 const string filePath = "/tmp/aws-iot-device-client-test-file";
+const string filePathOpenPerms = "/tmp/aws-iot-device-client-perm-test-file";
 const string invalidFilePath = "/tmp/invalid-file-path";
 const string addrPathValid = "/tmp/sensors";
 const string addrPathInvalid = "/tmp/sensors-invalid-perms";
@@ -37,6 +38,10 @@ class ConfigTestFixture : public ::testing::Test
         ofstream file(filePath, std::fstream::app);
         file << "test message" << endl;
 
+        ofstream openPermFile(filePathOpenPerms, std::fstream::app);
+        openPermFile << "test message" << endl;
+        chmod(filePathOpenPerms.c_str(), 0777);
+
         // Ensure invalid-file does not exist
         std::remove(invalidFilePath.c_str());
         mode_t validPerms = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
@@ -48,6 +53,7 @@ class ConfigTestFixture : public ::testing::Test
 
     void TearDown() override
     {
+        std::remove(filePathOpenPerms.c_str());
         std::remove(filePath.c_str());
         std::remove(addrPathValid.c_str());
         std::remove(addrPathInvalid.c_str());
@@ -75,7 +81,7 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/invalid-file-path",
     "thing-name": "thing-name value",
     "logging": {
         "level": "debug",
@@ -126,7 +132,7 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
-    ASSERT_STREQ(filePath.c_str(), config.rootCa->c_str());
+    ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_STREQ("file", config.logConfig.deviceClientLogtype.c_str());
     ASSERT_STREQ("./aws-iot-device-client.log", config.logConfig.deviceClientLogFile.c_str());
@@ -247,6 +253,53 @@ TEST_F(ConfigTestFixture, InvalidRootCaPathConfig)
     ASSERT_FALSE(config.fleetProvisioning.enabled);
 }
 
+TEST_F(ConfigTestFixture, rootCaBadPermissions)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-perm-test-file",
+    "thing-name": "thing-name value"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate());
+}
+
+TEST_F(ConfigTestFixture, emptyRootCaPathConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "",
+    "thing-name": "thing-name value"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_FALSE(config.rootCa.has_value());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    ASSERT_TRUE(config.jobs.enabled);
+    ASSERT_TRUE(config.tunneling.enabled);
+    ASSERT_TRUE(config.deviceDefender.enabled);
+    ASSERT_FALSE(config.fleetProvisioning.enabled);
+}
+
 TEST_F(ConfigTestFixture, InvalidRootCaPathConfigCli)
 {
     CliArgs cliArgs;
@@ -302,7 +355,6 @@ TEST_F(ConfigTestFixture, SecureTunnelingMinimumConfig)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
@@ -326,7 +378,6 @@ TEST_F(ConfigTestFixture, SecureTunnelingCli)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
@@ -365,7 +416,6 @@ TEST_F(ConfigTestFixture, SecureTunnelingDisableSubscription)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
@@ -517,7 +567,6 @@ TEST_F(ConfigTestFixture, FleetProvisioningMinimumConfig)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "fleet-provisioning": {
         "enabled": true,
@@ -542,7 +591,6 @@ TEST_F(ConfigTestFixture, MissingFleetProvisioningConfig)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value"
 })";
     JsonObject jsonObject(jsonString);
@@ -574,7 +622,6 @@ TEST_F(ConfigTestFixture, FleetProvisioningCli)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "fleet-provisioning": {
         "enabled": true,
@@ -613,7 +660,6 @@ TEST_F(ConfigTestFixture, DeviceDefenderCli)
 	"endpoint": "endpoint value",
 	"cert": "/tmp/aws-iot-device-client-test-file",
 	"key": "/tmp/aws-iot-device-client-test-file",
-	"root-ca": "/tmp/aws-iot-device-client-test-file",
 	"thing-name": "thing-name value",
     "device-defender": {
         "enabled": true,
@@ -645,7 +691,6 @@ TEST_F(ConfigTestFixture, PubSubSampleConfig)
 	"endpoint": "endpoint value",
 	"cert": "/tmp/aws-iot-device-client-test-file",
 	"key": "/tmp/aws-iot-device-client-test-file",
-	"root-ca": "/tmp/aws-iot-device-client-test-file",
 	"thing-name": "thing-name value",
 	"samples": {
 		"pub-sub": {
@@ -714,7 +759,6 @@ TEST_F(ConfigTestFixture, SampleShadowCli)
 	"endpoint": "endpoint value",
 	"cert": "/tmp/aws-iot-device-client-test-file",
 	"key": "/tmp/aws-iot-device-client-test-file",
-	"root-ca": "/tmp/aws-iot-device-client-test-file",
 	"thing-name": "thing-name value",
     "sample-shadow": {
         "enabled": true,
@@ -751,7 +795,6 @@ TEST_F(ConfigTestFixture, SensorPublishMinimumConfig)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -786,7 +829,6 @@ TEST_F(ConfigTestFixture, SensorPublishMinimumConfigMultipleSensors)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -847,7 +889,6 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigAddr)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -879,7 +920,6 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopicEmpty)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -911,7 +951,6 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopic)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -943,7 +982,6 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigEomDelimiter)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -975,7 +1013,6 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigNegativeIntegers)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -1011,7 +1048,6 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigBufferCapacityTooSmall)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -1044,7 +1080,6 @@ TEST_F(ConfigTestFixture, SensorPublishDisableFeature)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [

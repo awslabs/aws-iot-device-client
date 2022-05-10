@@ -35,8 +35,6 @@ static PlainConfig getConfig(string certPath, string keyPath)
                              "\"cert\": \"" +
                              certPath + "\",\n\"key\": \"" + keyPath + "\"}";
 
-    cout << jsonString << endl;
-
     JsonObject jsonObject(jsonString.c_str());
     JsonView jsonView = jsonObject.View();
 
