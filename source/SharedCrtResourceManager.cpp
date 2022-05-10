@@ -235,7 +235,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     }
     auto clientConfigBuilder = MqttClientConnectionConfigBuilder(config.cert->c_str(), config.key->c_str());
     clientConfigBuilder.WithEndpoint(config.endpoint->c_str());
-    if (config.rootCa.has_value())
+    if (config.rootCa.has_value() && !config.rootCa->empty())
     {
         clientConfigBuilder.WithCertificateAuthority(config.rootCa->c_str());
     }

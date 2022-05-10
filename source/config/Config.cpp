@@ -121,11 +121,7 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
             auto path = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
             if (FileUtils::FileExists(path))
             {
-                FileUtils::ValidateFilePermissions(
-                    FileUtils::ExtractParentDirectory(path), Permissions::ROOT_CA_DIR, false);
-                FileUtils::ValidateFilePermissions(path, Permissions::ROOT_CA, false);
-
-                rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+                rootCa = path;
             }
             else
             {
@@ -355,7 +351,7 @@ bool PlainConfig::Validate() const
         LOGM_ERROR(Config::TAG, "*** %s: Thing name is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
-    if (rootCa.has_value() && FileUtils::FileExists(rootCa->c_str()))
+    if (rootCa.has_value() && !rootCa->empty() && FileUtils::FileExists(rootCa->c_str()))
     {
         string parentDir = FileUtils::ExtractParentDirectory(rootCa->c_str());
         if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::ROOT_CA_DIR) ||
