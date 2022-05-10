@@ -44,8 +44,6 @@ namespace Aws
                 aws_mem_trace_level memTraceLevel{AWS_MEMTRACE_NONE};
                 std::vector<Feature *> *features;
 
-                bool locateCredentials(const PlainConfig &config);
-
                 bool setupLogging(const PlainConfig &config);
 
                 int buildClient(const PlainConfig &config);
@@ -68,6 +66,8 @@ namespace Aws
                 static const int SUCCESS = 0;
                 static const int RETRY = 1;
                 static const int ABORT = 2;
+
+                bool locateCredentials(const PlainConfig &config);
 
                 bool initialize(const PlainConfig &config, std::vector<Feature *> *features);
 
