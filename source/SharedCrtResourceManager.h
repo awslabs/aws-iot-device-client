@@ -50,6 +50,12 @@ namespace Aws
 
                 void initializeAllocator(const PlainConfig &config);
 
+              protected:
+                /**
+                 * inheritable for testing
+                 */
+                bool locateCredentials(const PlainConfig &config);
+
               public:
                 SharedCrtResourceManager() = default;
 
@@ -66,8 +72,6 @@ namespace Aws
                 static const int SUCCESS = 0;
                 static const int RETRY = 1;
                 static const int ABORT = 2;
-
-                bool locateCredentials(const PlainConfig &config);
 
                 bool initialize(const PlainConfig &config, std::vector<Feature *> *features);
 

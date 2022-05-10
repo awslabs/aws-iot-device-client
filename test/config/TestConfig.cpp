@@ -22,6 +22,8 @@ using namespace Aws::Iot::DeviceClient::Util;
 
 const string filePath = "/tmp/aws-iot-device-client-test-file";
 const string filePathOpenPerms = "/tmp/aws-iot-device-client-perm-test-file";
+const string nonStandardDir = "/tmp/aws-iot-device-client-test/";
+const string rootCaPath = nonStandardDir + "AmazonRootCA1.pem";
 const string invalidFilePath = "/tmp/invalid-file-path";
 const string addrPathValid = "/tmp/sensors";
 const string addrPathInvalid = "/tmp/sensors-invalid-perms";
@@ -42,6 +44,10 @@ class ConfigTestFixture : public ::testing::Test
         openPermFile << "test message" << endl;
         chmod(filePathOpenPerms.c_str(), 0777);
 
+        FileUtils::CreateDirectoryWithPermissions(nonStandardDir.c_str(), 0700);
+        ofstream rootCa(rootCaPath, std::fstream::app);
+        chmod(rootCaPath.c_str(), 0644);
+
         // Ensure invalid-file does not exist
         std::remove(invalidFilePath.c_str());
         mode_t validPerms = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
@@ -53,10 +59,19 @@ class ConfigTestFixture : public ::testing::Test
 
     void TearDown() override
     {
+        std::remove(rootCaPath.c_str());
+        std::remove(nonStandardDir.c_str());
         std::remove(filePathOpenPerms.c_str());
         std::remove(filePath.c_str());
         std::remove(addrPathValid.c_str());
         std::remove(addrPathInvalid.c_str());
+    }
+
+    static void DefaultFeaturesEnabled(const PlainConfig &config)
+    {
+        ASSERT_TRUE(config.jobs.enabled);
+        ASSERT_TRUE(config.tunneling.enabled);
+        ASSERT_TRUE(config.deviceDefender.enabled);
     }
 };
 
@@ -81,7 +96,6 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/invalid-file-path",
     "thing-name": "thing-name value",
     "logging": {
         "level": "debug",
@@ -201,10 +215,8 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_TRUE(config.jobs.enabled);
-    ASSERT_TRUE(config.tunneling.enabled);
-    ASSERT_TRUE(config.deviceDefender.enabled);
     ASSERT_FALSE(config.fleetProvisioning.enabled);
+    DefaultFeaturesEnabled(config);
 }
 
 TEST_F(ConfigTestFixture, HappyCaseMinimumCli)
@@ -219,10 +231,205 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumCli)
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    ASSERT_FALSE(config.fleetProvisioning.enabled);
+    DefaultFeaturesEnabled(config);
+}
+
+TEST_F(ConfigTestFixture, HappyCaseExplicitRootCaConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    ASSERT_FALSE(config.fleetProvisioning.enabled);
+    DefaultFeaturesEnabled(config);
+}
+
+TEST_F(ConfigTestFixture, HappyCaseExplicitRootCaCli)
+{
+    CliArgs cliArgs = CliArgs{
+        {PlainConfig::CLI_ENDPOINT, "endpoint value"},
+        {PlainConfig::CLI_ROOT_CA, rootCaPath},
+        {PlainConfig::CLI_CERT, filePath},
+        {PlainConfig::CLI_KEY, filePath},
+        {PlainConfig::CLI_THING_NAME, "thing-name value"},
+    };
+
+    PlainConfig config;
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    ASSERT_FALSE(config.fleetProvisioning.enabled);
+    DefaultFeaturesEnabled(config);
+}
+
+TEST_F(ConfigTestFixture, ExplicitRootCaBadPermissionsConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    chmod(nonStandardDir.c_str(), 0777);
+
+    ASSERT_FALSE(config.Validate());
+}
+
+TEST_F(ConfigTestFixture, ExplicitRootCaBadPermissionsCli)
+{
+    CliArgs cliArgs = CliArgs{
+        {PlainConfig::CLI_ENDPOINT, "endpoint value"},
+        {PlainConfig::CLI_ROOT_CA, rootCaPath},
+        {PlainConfig::CLI_CERT, filePath},
+        {PlainConfig::CLI_KEY, filePath},
+        {PlainConfig::CLI_THING_NAME, "thing-name value"},
+    };
+
+    PlainConfig config;
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    ASSERT_FALSE(config.fleetProvisioning.enabled);
+    DefaultFeaturesEnabled(config);
+}
+
+TEST_F(ConfigTestFixture, AllFeaturesEnabledInvalidRootCa)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/invalid-file-path",
+    "thing-name": "thing-name value",
+    "logging": {
+        "level": "debug",
+        "type": "file",
+        "file": "./aws-iot-device-client.log"
+    },
+    "jobs": {
+        "enabled": true
+    },
+    "tunneling": {
+        "enabled": true
+    },
+    "device-defender": {
+        "enabled": true,
+        "interval": 300
+    },
+    "fleet-provisioning": {
+        "enabled": true,
+        "template-name": "template-name",
+        "csr-file": "/tmp/aws-iot-device-client-test-file",
+        "device-key": "/tmp/aws-iot-device-client-test-file",
+        "template-parameters": "{\"SerialNumber\": \"Device-SN\"}"
+    },
+    "samples": {
+		"pub-sub": {
+			"enabled": true,
+			"publish-topic": "publish_topic",
+			"subscribe-topic": "subscribe_topic"
+		}
+	},
+    "config-shadow": {
+        "enabled": true
+      },
+    "sample-shadow": {
+        "enabled": true,
+        "shadow-name": "shadow-name",
+        "shadow-input-file": "",
+        "shadow-output-file": ""
+      }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_FALSE(config.rootCa.has_value());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    ASSERT_STREQ("file", config.logConfig.deviceClientLogtype.c_str());
+    ASSERT_STREQ("./aws-iot-device-client.log", config.logConfig.deviceClientLogFile.c_str());
+    ASSERT_EQ(3, config.logConfig.deviceClientlogLevel); // Expect DEBUG log level, which is 3
     ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
     ASSERT_TRUE(config.deviceDefender.enabled);
-    ASSERT_FALSE(config.fleetProvisioning.enabled);
+    ASSERT_TRUE(config.fleetProvisioning.enabled);
+    ASSERT_EQ(300, config.deviceDefender.interval);
+    ASSERT_STREQ("template-name", config.fleetProvisioning.templateName->c_str());
+    ASSERT_STREQ("{\"SerialNumber\": \"Device-SN\"}", config.fleetProvisioning.templateParameters->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.fleetProvisioning.csrFile->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.fleetProvisioning.deviceKey->c_str());
+    ASSERT_TRUE(config.configShadow.enabled);
+    ASSERT_TRUE(config.sampleShadow.enabled);
+    ASSERT_STREQ("shadow-name", config.sampleShadow.shadowName->c_str());
+    ASSERT_FALSE(config.sampleShadow.shadowInputFile.has_value());
+    ASSERT_FALSE(config.sampleShadow.shadowOutputFile.has_value());
+    ASSERT_TRUE(config.pubSub.enabled);
+    ASSERT_STREQ("publish_topic", config.pubSub.publishTopic->c_str());
+    ASSERT_STREQ("subscribe_topic", config.pubSub.subscribeTopic->c_str());
+
+    JsonObject tunneling;
+    config.tunneling.SerializeToObject(tunneling);
+    ASSERT_TRUE(tunneling.View().GetBool(config.tunneling.JSON_KEY_ENABLED));
+
+    JsonObject jobs;
+    config.jobs.SerializeToObject(jobs);
+    ASSERT_TRUE(jobs.View().GetBool(config.jobs.JSON_KEY_ENABLED));
+
+    JsonObject deviceDefender;
+    config.deviceDefender.SerializeToObject(deviceDefender);
+    ASSERT_TRUE(deviceDefender.View().GetBool(config.deviceDefender.JSON_KEY_ENABLED));
+    ASSERT_EQ(300, deviceDefender.View().GetInteger(config.deviceDefender.JSON_KEY_INTERVAL));
+
+    JsonObject pubsub;
+    config.pubSub.SerializeToObject(pubsub);
+    ASSERT_TRUE(pubsub.View().GetBool(config.deviceDefender.JSON_KEY_ENABLED));
+    ASSERT_STREQ("publish_topic", pubsub.View().GetString(config.pubSub.JSON_PUB_SUB_PUBLISH_TOPIC).c_str());
+    ASSERT_STREQ("subscribe_topic", pubsub.View().GetString(config.pubSub.JSON_PUB_SUB_SUBSCRIBE_TOPIC).c_str());
+
+    JsonObject sampleShadow;
+    config.sampleShadow.SerializeToObject(sampleShadow);
+    ASSERT_STREQ("shadow-name", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_NAME).c_str());
+    ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_INPUT_FILE).c_str());
+    ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
 }
 
 TEST_F(ConfigTestFixture, InvalidRootCaPathConfig)
@@ -247,10 +454,8 @@ TEST_F(ConfigTestFixture, InvalidRootCaPathConfig)
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_TRUE(config.jobs.enabled);
-    ASSERT_TRUE(config.tunneling.enabled);
-    ASSERT_TRUE(config.deviceDefender.enabled);
     ASSERT_FALSE(config.fleetProvisioning.enabled);
+    DefaultFeaturesEnabled(config);
 }
 
 TEST_F(ConfigTestFixture, rootCaBadPermissions)
@@ -294,10 +499,8 @@ TEST_F(ConfigTestFixture, emptyRootCaPathConfig)
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_TRUE(config.jobs.enabled);
-    ASSERT_TRUE(config.tunneling.enabled);
-    ASSERT_TRUE(config.deviceDefender.enabled);
     ASSERT_FALSE(config.fleetProvisioning.enabled);
+    DefaultFeaturesEnabled(config);
 }
 
 TEST_F(ConfigTestFixture, InvalidRootCaPathConfigCli)
@@ -318,10 +521,8 @@ TEST_F(ConfigTestFixture, InvalidRootCaPathConfigCli)
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_TRUE(config.jobs.enabled);
-    ASSERT_TRUE(config.tunneling.enabled);
-    ASSERT_TRUE(config.deviceDefender.enabled);
     ASSERT_FALSE(config.fleetProvisioning.enabled);
+    DefaultFeaturesEnabled(config);
 }
 
 TEST_F(ConfigTestFixture, MissingSomeSettings)

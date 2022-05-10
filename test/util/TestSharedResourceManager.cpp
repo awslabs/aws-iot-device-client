@@ -44,6 +44,12 @@ static PlainConfig getConfig(string certPath, string keyPath)
     return config;
 }
 
+class SharedCrtResourceManagerWrapper : public SharedCrtResourceManager
+{
+  public:
+    bool locateCredentialsWrapper(const PlainConfig &config) { return locateCredentials(config); }
+};
+
 class SharedResourceManagerTest : public ::testing::Test
 {
   public:
@@ -87,65 +93,61 @@ class SharedResourceManagerTest : public ::testing::Test
         std::remove(badPermissionsCertFilePath.c_str());
         std::remove(badPermissionsKeyFilePath.c_str());
     }
+
+    SharedCrtResourceManagerWrapper manager;
 };
 
 TEST_F(SharedResourceManagerTest, locateCredentialsHappy)
 {
-    SharedCrtResourceManager manager;
 
     PlainConfig config;
     config = getConfig(certFilePath, keyFilePath);
 
-    ASSERT_TRUE(manager.locateCredentials(config));
+    ASSERT_TRUE(manager.locateCredentialsWrapper(config));
 }
 
 TEST_F(SharedResourceManagerTest, badPermissionsCert)
 {
-    SharedCrtResourceManager manager;
 
     PlainConfig config;
     config = getConfig(badPermissionsCertFilePath, keyFilePath);
 
-    ASSERT_FALSE(manager.locateCredentials(config));
+    ASSERT_FALSE(manager.locateCredentialsWrapper(config));
 }
 
 TEST_F(SharedResourceManagerTest, badPermissionsKey)
 {
-    SharedCrtResourceManager manager;
 
     PlainConfig config;
     config = getConfig(certFilePath, badPermissionsKeyFilePath);
 
-    ASSERT_FALSE(manager.locateCredentials(config));
+    ASSERT_FALSE(manager.locateCredentialsWrapper(config));
 }
 
 TEST_F(SharedResourceManagerTest, invalidCert)
 {
-    SharedCrtResourceManager manager;
 
     PlainConfig config;
     config = getConfig(invalidCertFilePath, keyFilePath);
 
-    ASSERT_FALSE(manager.locateCredentials(config));
+    ASSERT_FALSE(manager.locateCredentialsWrapper(config));
 }
 
 TEST_F(SharedResourceManagerTest, invalidKey)
 {
-    SharedCrtResourceManager manager;
 
     PlainConfig config;
     config = getConfig(invalidCertFilePath, keyFilePath);
 
-    ASSERT_FALSE(manager.locateCredentials(config));
+    ASSERT_FALSE(manager.locateCredentialsWrapper(config));
 }
 
 TEST_F(SharedResourceManagerTest, badPermissionsDirectory)
 {
-    SharedCrtResourceManager manager;
 
     PlainConfig config;
     config = getConfig(certFilePath, keyFilePath);
     chmod(certDir.c_str(), 0777);
 
-    ASSERT_FALSE(manager.locateCredentials(config));
+    ASSERT_FALSE(manager.locateCredentialsWrapper(config));
 }
