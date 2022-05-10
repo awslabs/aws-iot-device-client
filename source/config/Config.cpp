@@ -121,7 +121,8 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
             auto path = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
             if (FileUtils::FileExists(path))
             {
-                FileUtils::ValidateFilePermissions(FileUtils::ExtractParentDirectory(path), Permissions::ROOT_CA_DIR, false);
+                FileUtils::ValidateFilePermissions(
+                    FileUtils::ExtractParentDirectory(path), Permissions::ROOT_CA_DIR, false);
                 FileUtils::ValidateFilePermissions(path, Permissions::ROOT_CA, false);
 
                 rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
