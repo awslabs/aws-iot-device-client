@@ -254,7 +254,8 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
         if (FileUtils::IsValidFilePath(path))
         {
             // Log warnings if root-ca permissions are incorrect
-            FileUtils::ValidateFilePermissions(FileUtils::ExtractParentDirectory(path), Permissions::ROOT_CA_DIR, false);
+            FileUtils::ValidateFilePermissions(
+                FileUtils::ExtractParentDirectory(path), Permissions::ROOT_CA_DIR, false);
             FileUtils::ValidateFilePermissions(path, Permissions::ROOT_CA, false);
 
             rootCa = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::CLI_ROOT_CA).c_str());
