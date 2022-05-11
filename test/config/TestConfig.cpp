@@ -293,7 +293,7 @@ TEST_F(ConfigTestFixture, HappyCaseExplicitRootCaCli)
     DefaultFeaturesEnabled(config);
 }
 
-#if !defined(MQTT_DISABLED)
+#if defined(MQTT_DISABLED)
 /**
  * Explicitly pass root-ca path via JSON with invalid permissions on parent directory
  * Expect validation to fail
@@ -315,7 +315,6 @@ TEST_F(ConfigTestFixture, ExplicitRootCaBadParentPermissionsConfig)
     config.LoadFromJson(jsonView);
 
     chmod(nonStandardDir.c_str(), 0777);
-
     ASSERT_FALSE(config.Validate());
 }
 
@@ -387,6 +386,7 @@ TEST_F(ConfigTestFixture, ExplicitRootCaBadPermissionsCli)
 
     ASSERT_FALSE(config.Validate());
 }
+
 #endif
 
 /**
