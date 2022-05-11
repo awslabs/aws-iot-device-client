@@ -293,7 +293,6 @@ TEST_F(ConfigTestFixture, HappyCaseExplicitRootCaCli)
     DefaultFeaturesEnabled(config);
 }
 
-#if defined(MQTT_DISABLED)
 /**
  * Explicitly pass root-ca path via JSON with invalid permissions on parent directory
  * Expect validation to fail
@@ -386,8 +385,6 @@ TEST_F(ConfigTestFixture, ExplicitRootCaBadPermissionsCli)
 
     ASSERT_FALSE(config.Validate());
 }
-
-#endif
 
 /**
  * Explicitly pass root-ca path to non-existent file via JSON

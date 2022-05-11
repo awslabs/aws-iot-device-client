@@ -322,6 +322,16 @@ bool PlainConfig::Validate() const
             Sanitize(lockFilePath).c_str());
         return false;
     }
+    if (rootCa.has_value() && !rootCa->empty() && FileUtils::FileExists(rootCa->c_str()))
+    {
+        string parentDir = FileUtils::ExtractParentDirectory(rootCa->c_str());
+        if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::ROOT_CA_DIR) ||
+            !FileUtils::ValidateFilePermissions(rootCa->c_str(), Permissions::ROOT_CA))
+        {
+            LOG_ERROR(Config::TAG, "Incorrect permissions on Root CA file and/or parent directory");
+            return false;
+        }
+    }
 #if !defined(DISABLE_MQTT)
     if (!endpoint.has_value() || endpoint->empty())
     {
@@ -350,16 +360,6 @@ bool PlainConfig::Validate() const
     {
         LOGM_ERROR(Config::TAG, "*** %s: Thing name is missing ***", DeviceClient::DC_FATAL_ERROR);
         return false;
-    }
-    if (rootCa.has_value() && !rootCa->empty() && FileUtils::FileExists(rootCa->c_str()))
-    {
-        string parentDir = FileUtils::ExtractParentDirectory(rootCa->c_str());
-        if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::ROOT_CA_DIR) ||
-            !FileUtils::ValidateFilePermissions(rootCa->c_str(), Permissions::ROOT_CA))
-        {
-            LOG_ERROR(Config::TAG, "Incorrect permissions on Root CA file and/or parent directory");
-            return false;
-        }
     }
 #endif
 #if !defined(EXCLUDE_JOBS)
