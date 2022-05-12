@@ -121,7 +121,7 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
             auto path = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
             if (FileUtils::FileExists(path))
             {
-                rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+                rootCa = path;
             }
             else
             {
@@ -321,6 +321,16 @@ bool PlainConfig::Validate() const
             DeviceClient::DC_FATAL_ERROR,
             Sanitize(lockFilePath).c_str());
         return false;
+    }
+    if (rootCa.has_value() && !rootCa->empty() && FileUtils::FileExists(rootCa->c_str()))
+    {
+        string parentDir = FileUtils::ExtractParentDirectory(rootCa->c_str());
+        if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::ROOT_CA_DIR) ||
+            !FileUtils::ValidateFilePermissions(rootCa->c_str(), Permissions::ROOT_CA))
+        {
+            LOG_ERROR(Config::TAG, "Incorrect permissions on Root CA file and/or parent directory");
+            return false;
+        }
     }
 #if !defined(DISABLE_MQTT)
     if (!endpoint.has_value() || endpoint->empty())
