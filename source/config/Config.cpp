@@ -1516,7 +1516,7 @@ bool PlainConfig::SecureElement::LoadFromJson(const Crt::JsonView &json)
     {
         if (!json.GetString(jsonKey).empty())
         {
-            secureElementKeyLabel = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            secureElementKeyLabel = json.GetString(jsonKey).c_str();
         }
         else
         {
@@ -1529,7 +1529,7 @@ bool PlainConfig::SecureElement::LoadFromJson(const Crt::JsonView &json)
     {
         if (!json.GetString(jsonKey).empty())
         {
-            secureElementSlotId = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            secureElementSlotId = static_cast<int64_t>(json.GetInt64(jsonKey));
         }
         else
         {
@@ -1574,12 +1574,11 @@ bool PlainConfig::SecureElement::LoadFromCliArgs(const CliArgs &cliArgs)
     if (cliArgs.count(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID))
     {
         secureElementSlotId =
-            FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID));
+            static_cast<int64_t>(stoul(cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID)));
     }
     if (cliArgs.count(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL))
     {
-        secureElementTokenLabel =
-            FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL));
+        secureElementTokenLabel = cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL)
     }
     return true;
 }
@@ -1631,9 +1630,9 @@ void PlainConfig::SecureElement::SerializeToObject(Crt::JsonObject &object) cons
         object.WithString(JSON_SECURE_ELEMENT_KEY_LABEL, secureElementKeyLabel->c_str());
     }
 
-    if (secureElementSlotId.has_value() && secureElementSlotId->c_str())
+    if (secureElementSlotId.has_value())
     {
-        object.WithString(JSON_SECURE_ELEMENT_SLOT_ID, secureElementSlotId->c_str());
+        object.WithInt64(JSON_SECURE_ELEMENT_SLOT_ID, secureElementSlotId.value());
     }
 
     if (secureElementTokenLabel.has_value() && secureElementTokenLabel->c_str())

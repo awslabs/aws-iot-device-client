@@ -283,7 +283,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
 
         LOGM_INFO(TAG, "Inside MQTT client PKCS11: %s", config.secureElement.pkcs11Lib.value().c_str());
         std::shared_ptr<Io::Pkcs11Lib> pkcs11Lib = Aws::Crt::Io::Pkcs11Lib::Create(
-            FileUtils::ExtractExpandedPath(config.secureElement.pkcs11Lib.value().c_str()).c_str(), allocator);
+            config.secureElement.pkcs11Lib.value().c_str(), allocator);
         if (!pkcs11Lib)
         {
             LOGM_INFO(TAG, "Pkcs11Lib failed: %s", ErrorDebugString(Aws::Crt::LastError()));
@@ -301,10 +301,9 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
             pkcs11Options.SetTokenLabel(config.secureElement.secureElementTokenLabel->c_str());
         }
 
-        if (config.secureElement.secureElementSlotId.has_value() && !config.secureElement.secureElementSlotId->empty())
+        if (config.secureElement.secureElementSlotId.has_value())
         {
-            uint64_t slotId = std::stoull(config.secureElement.secureElementSlotId->c_str());
-            pkcs11Options.SetSlotId(slotId);
+            pkcs11Options.SetSlotId(config.secureElement.secureElementSlotId.value());
         }
 
         if (config.secureElement.secureElementKeyLabel.has_value() &&

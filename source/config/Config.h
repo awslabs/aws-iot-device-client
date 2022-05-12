@@ -58,7 +58,7 @@ namespace Aws
                 static constexpr int PUB_SUB_FILES = 600;
                 static constexpr int SAMPLE_SHADOW_FILES = 600;
                 static constexpr int SENSOR_PUBLISH_ADDR_FILE = 660;
-                static constexpr int PKCS11_LIB_FILE = 600;
+                static constexpr int PKCS11_LIB_FILE = 644;
             };
 
             struct PlainConfig : public LoadableFromJsonAndCliAndEnvironment
@@ -356,7 +356,7 @@ namespace Aws
                     Aws::Crt::Optional<std::string> pkcs11Lib;
                     Aws::Crt::Optional<std::string> secureElementPin;
                     Aws::Crt::Optional<std::string> secureElementKeyLabel;
-                    Aws::Crt::Optional<std::string> secureElementSlotId;
+                    Aws::Crt::Optional<uint64_t> secureElementSlotId;
                     Aws::Crt::Optional<std::string> secureElementTokenLabel;
                 };
                 SecureElement secureElement;

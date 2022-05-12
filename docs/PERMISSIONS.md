@@ -14,17 +14,17 @@ The AWS IoT Device Client requires specific permissions on files and directory s
 
 #### Recommended and Required permissions on files
 File          | Chmod Permissions | Required |
-------------- |------------------| -------------
-Private Keys  | 600              | **Yes**
-Public Certificates | 644              | **Yes**
-Root Certificate Authority | 644              | **Yes**
-CSR File  | 600              | **Yes**
-Log File  | 600              | **Yes**
-Job Handler | 700              | **Yes**
-Config File | 644              | **Recommended**
-Pub/Sub Files | 600              | **yes**
-Sensor Pubilsh Pathname Socket | 660              | **Yes**
-PKCS11 Library File | 600              | **Yes**
+------------- |-------------------| -------------
+Private Keys  | 600               | **Yes**
+Public Certificates | 644               | **Yes**
+Root Certificate Authority | 644               | **Yes**
+CSR File  | 600               | **Yes**
+Log File  | 600               | **Yes**
+Job Handler | 700               | **Yes**
+Config File | 644               | **Recommended**
+Pub/Sub Files | 600               | **yes**
+Sensor Pubilsh Pathname Socket | 660               | **Yes**
+PKCS11 Library File | 644               | **Yes**
 
 #### Recommended and Required permissions on directories storing respective files
 Directory     | Chmod Permissions | Required |

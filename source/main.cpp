@@ -198,7 +198,8 @@ void handle_feature_stopped(const Feature *feature)
 void attemptConnection()
 {
     Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 900 * 1000, -1, nullptr};
-    auto publishLambda = []() -> bool {
+    auto publishLambda = []() -> bool
+    {
         int connectionStatus = resourceManager.get()->establishConnection(config.config);
         if (SharedCrtResourceManager::ABORT == connectionStatus)
         {
@@ -221,8 +222,8 @@ void attemptConnection()
             return false;
         }
     };
-    std::thread attemptConnectionThread(
-        [retryConfig, publishLambda] { Retry::exponentialBackoff(retryConfig, publishLambda); });
+    std::thread attemptConnectionThread([retryConfig, publishLambda]
+                                        { Retry::exponentialBackoff(retryConfig, publishLambda); });
     attemptConnectionThread.join();
 }
 
@@ -511,6 +512,18 @@ int main(int argc, char *argv[])
         LOGM_ERROR(
             TAG,
             "*** %s: Sensor Publish configuration is enabled but feature is not compiled into binary.",
+            DC_FATAL_ERROR);
+        LoggerFactory::getLoggerInstance()->shutdown();
+        deviceClientAbort("Invalid configuration");
+    }
+#endif
+
+#if defined(EXCLUDE_SECURE_ELEMENT)
+    if (config.config.secureElement.enabled)
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Secure Element configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
         LoggerFactory::getLoggerInstance()->shutdown();
         deviceClientAbort("Invalid configuration");
