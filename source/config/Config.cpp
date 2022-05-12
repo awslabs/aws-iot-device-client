@@ -1578,7 +1578,7 @@ bool PlainConfig::SecureElement::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL))
     {
-        secureElementTokenLabel = cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL)
+        secureElementTokenLabel = cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL);
     }
     return true;
 }
