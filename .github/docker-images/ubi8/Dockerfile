@@ -16,6 +16,7 @@ RUN yum --disableplugin=subscription-manager -y update \
     sudo \
     make \
     gcc \
+    softhsm \
     gcc-c++ \
     && yum clean all \
     && rm -rf /var/cache/yum
