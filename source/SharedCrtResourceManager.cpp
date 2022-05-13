@@ -280,10 +280,9 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     Aws::Iot::MqttClientConnectionConfigBuilder clientConfigBuilder;
     if (config.secureElement.enabled)
     {
-
         LOGM_INFO(TAG, "Inside MQTT client PKCS11: %s", config.secureElement.pkcs11Lib.value().c_str());
-        std::shared_ptr<Io::Pkcs11Lib> pkcs11Lib = Aws::Crt::Io::Pkcs11Lib::Create(
-            config.secureElement.pkcs11Lib.value().c_str(), allocator);
+        std::shared_ptr<Io::Pkcs11Lib> pkcs11Lib =
+            Aws::Crt::Io::Pkcs11Lib::Create(config.secureElement.pkcs11Lib.value().c_str(), allocator);
         if (!pkcs11Lib)
         {
             LOGM_INFO(TAG, "Pkcs11Lib failed: %s", ErrorDebugString(Aws::Crt::LastError()));
