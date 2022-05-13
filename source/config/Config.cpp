@@ -1527,7 +1527,7 @@ bool PlainConfig::SecureElement::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_SECURE_ELEMENT_SLOT_ID;
     if (json.ValueExists(jsonKey))
     {
-        if (!json.GetString(jsonKey).empty())
+        if (json.GetInt64(jsonKey))
         {
             secureElementSlotId = static_cast<int64_t>(json.GetInt64(jsonKey));
         }

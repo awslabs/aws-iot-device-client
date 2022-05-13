@@ -50,7 +50,7 @@
 		"pkcs11-lib": "<replace_with_pkcs11_lib_path>",
 		"secure-element-pin": "<replace_with_secure_element_pin>",
 		"secure-element-key-label": "<replace_with_secure_element_key_label>",
-		"secure-element-slot-id": "<replace_with_secure_element_slot_id>",
+		"secure-element-slot-id": "<replace_with_secure_element_slot_id_integer>",
 		"secure-element-token-label": "<replace_with_secure_element_token_label>"
 	}
 }

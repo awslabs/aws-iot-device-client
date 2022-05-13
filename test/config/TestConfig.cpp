@@ -114,6 +114,14 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
         "shadow-name": "shadow-name",
         "shadow-input-file": "",
         "shadow-output-file": ""
+      },
+    "secure-element": {
+        "enabled": true,
+        "pkcs11-lib": "/tmp/aws-iot-device-client-test-file",
+        "secure-element-pin": "0000",
+        "secure-element-key-label": "key-label",
+        "secure-element-slot-id": 1111,
+        "secure-element-token-label": "token-label"
       }
 })";
     JsonObject jsonObject(jsonString);
@@ -148,6 +156,13 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     ASSERT_TRUE(config.pubSub.enabled);
     ASSERT_STREQ("publish_topic", config.pubSub.publishTopic->c_str());
     ASSERT_STREQ("subscribe_topic", config.pubSub.subscribeTopic->c_str());
+    ASSERT_TRUE(config.secureElement.enabled);
+    ASSERT_STREQ(filePath.c_str(), config.secureElement.pkcs11Lib->c_str());
+    ASSERT_STREQ("0000", config.secureElement.secureElementPin->c_str());
+    ASSERT_STREQ("key-label", config.secureElement.secureElementKeyLabel->c_str());
+    ASSERT_TRUE(config.secureElement.secureElementSlotId.has_value());
+    ASSERT_EQ(1111, config.secureElement.secureElementSlotId.value());
+    ASSERT_STREQ("token-label", config.secureElement.secureElementTokenLabel->c_str());
 
     JsonObject tunneling;
     config.tunneling.SerializeToObject(tunneling);
@@ -173,6 +188,17 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     ASSERT_STREQ("shadow-name", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_NAME).c_str());
     ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_INPUT_FILE).c_str());
     ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
+
+    JsonObject secureElement;
+    config.secureElement.SerializeToObject(secureElement);
+    ASSERT_TRUE(secureElement.View().GetBool(config.secureElement.JSON_ENABLE_SECURE_ELEMENT));
+    ASSERT_STREQ(filePath.c_str(), secureElement.View().GetString(config.secureElement.JSON_PKCS11_LIB).c_str());
+    ASSERT_STREQ("0000", secureElement.View().GetString(config.secureElement.JSON_SECURE_ELEMENT_PIN).c_str());
+    ASSERT_STREQ(
+        "key-label", secureElement.View().GetString(config.secureElement.JSON_SECURE_ELEMENT_KEY_LABEL).c_str());
+    ASSERT_EQ(1111, secureElement.View().GetInteger(config.secureElement.JSON_SECURE_ELEMENT_SLOT_ID));
+    ASSERT_STREQ(
+        "token-label", secureElement.View().GetString(config.secureElement.JSON_SECURE_ELEMENT_TOKEN_LABEL).c_str());
 }
 
 TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
@@ -1069,6 +1095,159 @@ TEST_F(ConfigTestFixture, SensorPublishDisableFeature)
     const auto &settings = config.sensorPublish.settings[0];
     ASSERT_FALSE(settings.enabled);
 }
+#if !defined(EXCLUDE_SECURE_ELEMENT)
+TEST_F(ConfigTestFixture, SecureElementMinimumConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "secure-element": {
+        "enabled": true,
+        "pkcs11-lib": "/tmp/aws-iot-device-client-test-file",
+        "secure-element-pin": "0000"
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_TRUE(config.secureElement.enabled);
+    ASSERT_STREQ(filePath.c_str(), config.secureElement.pkcs11Lib->c_str());
+    ASSERT_STREQ("0000", config.secureElement.secureElementPin->c_str());
+}
+
+TEST_F(ConfigTestFixture, SecureElementWithFleetProvisioningEnabled)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "secure-element": {
+        "enabled": true,
+        "pkcs11-lib": "/tmp/aws-iot-device-client-test-file",
+        "secure-element-pin": "0000"
+    },
+    "fleet-provisioning": {
+        "enabled": true,
+        "template-name": "template-name",
+        "csr-file": "/tmp/aws-iot-device-client-test-file"
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_TRUE(config.secureElement.enabled);
+    ASSERT_FALSE(config.key.has_value());
+    ASSERT_STREQ(filePath.c_str(), config.secureElement.pkcs11Lib->c_str());
+    ASSERT_STREQ("0000", config.secureElement.secureElementPin->c_str());
+
+    ASSERT_TRUE(config.fleetProvisioning.enabled);
+    ASSERT_STREQ("template-name", config.fleetProvisioning.templateName->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.fleetProvisioning.csrFile->c_str());
+    ASSERT_FALSE(config.fleetProvisioning.deviceKey.has_value());
+}
+
+TEST_F(ConfigTestFixture, SecureElementInvalidConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "secure-element": {
+        "enabled": true,
+        "pkcs11-lib": "/tmp/aws-iot-device-client-test-file"
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate()); // secure element pin missing
+    ASSERT_TRUE(config.secureElement.enabled);
+    ASSERT_STREQ(filePath.c_str(), config.secureElement.pkcs11Lib->c_str());
+    ASSERT_FALSE(config.secureElement.secureElementPin.has_value());
+}
+
+TEST_F(ConfigTestFixture, SecureElementDisableFeature)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "secure-element": {
+        "enabled": false
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate()); // key value is required if secure element is disabled
+    ASSERT_FALSE(config.secureElement.enabled);
+    ASSERT_FALSE(config.key.has_value());
+
+    CliArgs cliArgs;
+    cliArgs[PlainConfig::CLI_KEY] = "/tmp/aws-iot-device-client-test-file";
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_FALSE(config.secureElement.enabled);
+    ASSERT_TRUE(config.key.has_value());
+}
+
+TEST_F(ConfigTestFixture, SecureElementCli)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "secure-element": {
+        "enabled": false
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate()); // key value is required if secure element is disabled
+    ASSERT_FALSE(config.secureElement.enabled);
+    ASSERT_FALSE(config.key.has_value());
+
+    CliArgs cliArgs;
+    cliArgs[PlainConfig::SecureElement::CLI_ENABLE_SECURE_ELEMENT] = "true";
+    cliArgs[PlainConfig::SecureElement::CLI_PKCS11_LIB] = filePath.c_str();
+    cliArgs[PlainConfig::SecureElement::CLI_SECURE_ELEMENT_PIN] = "0000";
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_TRUE(config.secureElement.enabled);
+    ASSERT_FALSE(config.key.has_value());
+    ASSERT_STREQ(filePath.c_str(), config.secureElement.pkcs11Lib->c_str());
+    ASSERT_EQ("0000", config.secureElement.secureElementPin.value());
+    ASSERT_TRUE(config.Validate());
+}
+#endif
 
 TEST(Config, MemoryTrace)
 {
