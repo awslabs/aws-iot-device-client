@@ -40,7 +40,7 @@ The Device Client uses combination of certificate and private key registered wit
 
 With Secure Element feature enabled, Fleet Provisioning can only be done using certificate signing request (CSR). This is because the client **does not** provide support for importing private key into security module since it is not considered a security best practice.
 
-More details about the Secure Element feature can be found here: [Secure Element Feature README](../secureelement/README.md)
+More details about the Secure Element feature can be found here: [Secure Element Feature README](../secure-element/README.md)
 
 *Note: In the above-mentioned scenario, the runtime config file will store empty file path for **key** if no file path is provided.*
 
