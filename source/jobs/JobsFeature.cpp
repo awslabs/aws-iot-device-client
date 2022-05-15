@@ -241,7 +241,7 @@ void JobsFeature::startNextPendingJobReceivedHandler(StartNextJobExecutionRespon
                 handlingJob.store(true);
 
                 copyJobsNotification(response->Execution.value());
-                executeJob(response->Execution.value());
+                initJob(response->Execution.value());
             }
         }
     }
@@ -292,7 +292,7 @@ void JobsFeature::nextJobChangedHandler(NextJobExecutionChangedEvent *event, int
                 handlingJob.store(true);
 
                 copyJobsNotification(event->Execution.value());
-                executeJob(event->Execution.value());
+                initJob(event->Execution.value());
             }
         }
     }
@@ -407,7 +407,15 @@ void JobsFeature::publishUpdateJobExecutionStatus(
     {
         LOG_DEBUG(TAG, "Not including stderr with the status details");
     }
+    publishUpdateJobExecutionStatusWithRetry(data, statusInfo, statusDetails, onCompleteCallback);
+}
 
+void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
+    Aws::Iotjobs::JobExecutionData data,
+    JobsFeature::JobExecutionStatusInfo statusInfo,
+    Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> statusDetails,
+    std::function<void(void)> onCompleteCallback)
+{
     /** When we update the job execution status, we need to perform an exponential
      * backoff in case our request gets throttled. Otherwise, if we never properly
      * update the job execution status, we'll never receive the next job
@@ -515,10 +523,10 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         return finished;
     };
     std::thread updateJobExecutionThread([retryConfig, publishLambda, onCompleteCallback] {
-        // NOTE(marcoaz): publishLambda is captured by value
-        // cppcheck-suppress danglingTemporaryLifetime
-        Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);
-    });
+                                             // NOTE(marcoaz): publishLambda is captured by value
+                                             // cppcheck-suppress danglingTemporaryLifetime
+                                             Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);
+                                         });
     updateJobExecutionThread.detach();
 }
 
@@ -564,7 +572,35 @@ bool JobsFeature::isDuplicateNotification(JobExecutionData job)
     return true;
 }
 
-void JobsFeature::executeJob(JobExecutionData job)
+void JobsFeature::initJob(const JobExecutionData &job)
+{
+    auto shutdownHandler = [this]() -> void {
+        handlingJob.store(false);
+        if (needStop.load())
+        {
+            LOGM_INFO(TAG, "Shutting down %s now that job execution is complete", getName().c_str());
+            baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
+        }
+    };
+
+    Aws::Crt::JsonView jobDoc = job.JobDocument->View();
+    PlainJobDocument jobDocument;
+    // reject job document based on the validation status
+    jobDocument.LoadFromJobDocument(jobDoc);
+    if (!jobDocument.Validate())
+    {
+        LOG_ERROR(TAG, "Unable to execute job, invalid job document provided!");
+        publishUpdateJobExecutionStatus(
+            job,
+            {Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!", "", ""},
+            shutdownHandler);
+        return;
+    }
+    publishUpdateJobExecutionStatus(job, {Iotjobs::JobStatus::IN_PROGRESS, "", "", ""});
+    executeJob(job, jobDocument);
+}
+
+void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJobDocument &jobDocument)
 {
     LOGM_INFO(TAG, "Executing job: %s", job.JobId->c_str());
 
@@ -576,27 +612,9 @@ void JobsFeature::executeJob(JobExecutionData job)
             baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
         }
     };
-    Aws::Crt::JsonView jobDoc = job.JobDocument->View();
-    PlainJobDocument jobDocument;
-    // reject job document based on the validation status
-    // TODO: create init method and call it instead
-    jobDocument.LoadFromJobDocument(jobDoc);
-    if (!jobDocument.Validate())
-    {
-        LOG_ERROR(TAG, "Unable to execute job, invalid job document provided!");
-        publishUpdateJobExecutionStatus(
-            job,
-            {Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!", "", ""},
-            shutdownHandler);
-        return;
-    }
-    else
-    {
-        publishUpdateJobExecutionStatus(job, {Iotjobs::JobStatus::IN_PROGRESS, "", "", ""});
-    }
-
     // TODO: Add support for checking condition
-    auto runJob = [this, job, jobDocument, shutdownHandler]() {
+    auto runJob = [this, job, jobDocument, shutdownHandler]()
+    {
         JobEngine engine;
         // execute all action steps in sequence as provided in job document
         int executionStatus = engine.exec_steps(jobDocument, jobHandlerDir);
@@ -607,32 +625,32 @@ void JobsFeature::executeJob(JobExecutionData job)
         if (engine.hasErrors())
         {
             LOG_WARN(TAG, "JobEngine reported receiving errors from STDERR");
-        }
+            }
 
-        if (!executionStatus)
-        {
-            LOG_INFO(TAG, "Job executed successfully!");
-            string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
-            publishUpdateJobExecutionStatus(
-                job, {JobStatus::SUCCEEDED, "", standardOut, engine.getStdErr()}, shutdownHandler);
-        }
-        else
-        {
-            LOG_WARN(TAG, "Job execution failed!");
-            string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
-            publishUpdateJobExecutionStatus(
-                job, {JobStatus::FAILED, reason, standardOut, engine.getStdErr()}, shutdownHandler);
-        }
-    };
-    thread jobEngineThread(runJob);
-    jobEngineThread.detach();
+            if (!executionStatus)
+            {
+                LOG_INFO(TAG, "Job executed successfully!");
+                string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
+                publishUpdateJobExecutionStatus(
+                    job, {JobStatus::SUCCEEDED, "", standardOut, engine.getStdErr()}, shutdownHandler);
+            }
+            else
+            {
+                LOG_WARN(TAG, "Job execution failed!");
+                string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
+                publishUpdateJobExecutionStatus(
+                    job, {JobStatus::FAILED, reason, standardOut, engine.getStdErr()}, shutdownHandler);
+            }
+        };
+        thread jobEngineThread(runJob);
+        jobEngineThread.detach();
 }
 
 void JobsFeature::runJobs()
 {
     LOGM_INFO(TAG, "Running %s!", getName().c_str());
 
-    jobsClient = unique_ptr<IotJobsClient>(new IotJobsClient(resourceManager.get()->getConnection()));
+    jobsClient = getJobsClient();
 
     // Create subscriptions to important MQTT topics
     subscribeToStartNextPendingJobExecution();
@@ -646,11 +664,11 @@ void JobsFeature::runJobs()
 }
 
 int JobsFeature::init(
-    shared_ptr<SharedCrtResourceManager> manager,
+    shared_ptr<Mqtt::MqttConnection> connection,
     shared_ptr<ClientBaseNotifier> notifier,
     const PlainConfig &config)
 {
-    resourceManager = manager;
+    mqttConnection = connection;
     baseNotifier = notifier;
     thingName = config.thingName->c_str();
 
@@ -688,4 +706,9 @@ int JobsFeature::stop()
     }
 
     return 0;
+}
+
+std::shared_ptr<AbstractIotJobsClient> JobsFeature::getJobsClient()
+{
+    return std::shared_ptr<AbstractIotJobsClient>(new IotJobsClientWrapper(thingName, mqttConnection));
 }
