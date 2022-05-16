@@ -520,9 +520,7 @@ void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
     };
     std::thread updateJobExecutionThread(
         [retryConfig, publishLambda, onCompleteCallback]
-        {
-            Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);
-        });
+        { Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback); });
     updateJobExecutionThread.detach();
 }
 
