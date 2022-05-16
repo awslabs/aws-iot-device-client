@@ -21,6 +21,7 @@ jobs:
       with:
         # List of extensions to check
         extensions: cpp,h
+        langFormatVersion: 13.0.0
 
   cppcheck:
     runs-on: ubuntu-latest
