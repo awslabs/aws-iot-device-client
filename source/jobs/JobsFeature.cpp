@@ -429,9 +429,8 @@ void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
         retryConfig.needStopFlag = nullptr;
     }
 
-    // NOTE(marcoaz): statusDetails is captured by value
-    // cppcheck-suppress danglingTemporaryLifetime
-    auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool {
+    auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool
+    {
         // We first need to make sure that we haven't previously leaked any promises into our map
         unique_lock<mutex> leakLock(updateJobExecutionPromisesLock);
         for (auto keyPromise = updateJobExecutionPromises.cbegin(); keyPromise != updateJobExecutionPromises.cend();
@@ -456,13 +455,10 @@ void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
         request.JobId = data.JobId->c_str();
         request.ThingName = this->thingName.c_str();
         request.Status = statusInfo.status;
-        // cppcheck-suppress danglingTemporaryLifetime
         request.StatusDetails = statusDetails;
 
         // Create a unique client token each time we attempt the request since the promise has to be fresh
         string clientToken = UniqueString::GetRandomToken(10);
-        // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
-        // cppcheck-suppress danglingTemporaryLifetime
         request.ClientToken = Aws::Crt::Optional<Aws::Crt::String>(clientToken.c_str());
         unique_lock<mutex> writeLock(updateJobExecutionPromisesLock);
         this->updateJobExecutionPromises.insert(
@@ -522,11 +518,11 @@ void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
         this->updateJobExecutionPromises.erase(clientToken.c_str());
         return finished;
     };
-    std::thread updateJobExecutionThread([retryConfig, publishLambda, onCompleteCallback] {
-                                             // NOTE(marcoaz): publishLambda is captured by value
-                                             // cppcheck-suppress danglingTemporaryLifetime
-                                             Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);
-                                         });
+    std::thread updateJobExecutionThread(
+        [retryConfig, publishLambda, onCompleteCallback]
+        {
+            Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);
+        });
     updateJobExecutionThread.detach();
 }
 
@@ -574,7 +570,8 @@ bool JobsFeature::isDuplicateNotification(JobExecutionData job)
 
 void JobsFeature::initJob(const JobExecutionData &job)
 {
-    auto shutdownHandler = [this]() -> void {
+    auto shutdownHandler = [this]() -> void
+    {
         handlingJob.store(false);
         if (needStop.load())
         {
@@ -604,7 +601,8 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
 {
     LOGM_INFO(TAG, "Executing job: %s", job.JobId->c_str());
 
-    auto shutdownHandler = [this]() -> void {
+    auto shutdownHandler = [this]() -> void
+    {
         handlingJob.store(false);
         if (needStop.load())
         {
@@ -625,25 +623,25 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
         if (engine.hasErrors())
         {
             LOG_WARN(TAG, "JobEngine reported receiving errors from STDERR");
-            }
+        }
 
-            if (!executionStatus)
-            {
-                LOG_INFO(TAG, "Job executed successfully!");
-                string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
-                publishUpdateJobExecutionStatus(
-                    job, {JobStatus::SUCCEEDED, "", standardOut, engine.getStdErr()}, shutdownHandler);
-            }
-            else
-            {
-                LOG_WARN(TAG, "Job execution failed!");
-                string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
-                publishUpdateJobExecutionStatus(
-                    job, {JobStatus::FAILED, reason, standardOut, engine.getStdErr()}, shutdownHandler);
-            }
-        };
-        thread jobEngineThread(runJob);
-        jobEngineThread.detach();
+        if (!executionStatus)
+        {
+            LOG_INFO(TAG, "Job executed successfully!");
+            string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
+            publishUpdateJobExecutionStatus(
+                job, {JobStatus::SUCCEEDED, "", standardOut, engine.getStdErr()}, shutdownHandler);
+        }
+        else
+        {
+            LOG_WARN(TAG, "Job execution failed!");
+            string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
+            publishUpdateJobExecutionStatus(
+                job, {JobStatus::FAILED, reason, standardOut, engine.getStdErr()}, shutdownHandler);
+        }
+    };
+    thread jobEngineThread(runJob);
+    jobEngineThread.detach();
 }
 
 void JobsFeature::runJobs()

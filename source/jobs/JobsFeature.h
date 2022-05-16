@@ -54,6 +54,7 @@ namespace Aws
                         std::string stdoutput;
                         std::string stderror;
                     };
+
                   private:
                     /**
                      * \brief Used by the logger to specify that log messages are coming from the Jobs feature
@@ -185,8 +186,7 @@ namespace Aws
                         Aws::Iotjobs::JobExecutionData data,
                         JobExecutionStatusInfo statusInfo,
                         Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> statusDetails,
-                        std::function<void(void)> onCompleteCallback
-                        );
+                        std::function<void(void)> onCompleteCallback);
                     /**
                      * \brief Creates a subscription to the startNextPendingJobExecution topic
                      */
@@ -251,7 +251,9 @@ namespace Aws
                      * @param response information used to determine which job execution was updated
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    virtual void updateJobExecutionStatusRejectedHandler(Iotjobs::RejectedError *rejectedError, int ioError);
+                    virtual void updateJobExecutionStatusRejectedHandler(
+                        Iotjobs::RejectedError *rejectedError,
+                        int ioError);
 
                     /**
                      * \brief Called to begin the execution of a job on the device
