@@ -402,7 +402,10 @@ TEST_F(TestJobsFeature, DuplicateJobNotification)
         *mockClient,
         SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
-        .WillOnce(DoAll(InvokeArgument<3>(0), InvokeArgument<2>(startNextJobExecutionResponse, 0), InvokeArgument<2>(startNextJobExecutionResponse, 0)));
+        .WillOnce(DoAll(
+            InvokeArgument<3>(0),
+            InvokeArgument<2>(startNextJobExecutionResponse, 0),
+            InvokeArgument<2>(startNextJobExecutionResponse, 0)));
 
     EXPECT_CALL(
         *mockClient,
