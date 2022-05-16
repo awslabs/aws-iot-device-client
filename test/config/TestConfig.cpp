@@ -1095,7 +1095,7 @@ TEST_F(ConfigTestFixture, SensorPublishDisableFeature)
     const auto &settings = config.sensorPublish.settings[0];
     ASSERT_FALSE(settings.enabled);
 }
-#if !defined(EXCLUDE_SECURE_ELEMENT)
+
 TEST_F(ConfigTestFixture, SecureElementMinimumConfig)
 {
     constexpr char jsonString[] = R"(
@@ -1247,7 +1247,6 @@ TEST_F(ConfigTestFixture, SecureElementCli)
     ASSERT_EQ("0000", config.secureElement.secureElementPin.value());
     ASSERT_TRUE(config.Validate());
 }
-#endif
 
 TEST(Config, MemoryTrace)
 {

@@ -403,12 +403,13 @@ bool PlainConfig::Validate() const
         return false;
     }
 #endif
-#if !defined(EXCLUDE_SECURE_ELEMENT)
-    if (!secureElement.Validate())
+    if (secureElement.enabled)
     {
-        return false;
+        if (!secureElement.Validate())
+        {
+            return false;
+        }
     }
-#endif
 #if !defined(EXCLUDE_SENSOR_PUBLISH)
     if (!sensorPublish.Validate())
     {
@@ -1573,7 +1574,7 @@ bool PlainConfig::SecureElement::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID))
     {
-        secureElementSlotId =stoul(cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID));
+        secureElementSlotId = stoul(cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID));
     }
     if (cliArgs.count(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL))
     {
