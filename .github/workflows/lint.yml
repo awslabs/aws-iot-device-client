@@ -13,24 +13,26 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
-    - name: Checkout Sources
-      uses: actions/checkout@v1
+      - name: Checkout Sources
+        uses: actions/checkout@v1
 
-    - name: clang-format lint
-      uses: DoozyX/clang-format-lint-action@v0.3.1
-      with:
-        # List of extensions to check
-        extensions: cpp,h
+      - name: clang-format lint
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
+          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/amazonlinux:latest
+          docker pull $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/src --workdir /src --entrypoint /src/format-check.sh $DOCKER_IMAGE
+
 
   cppcheck:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
-    - name: Checkout Sources
-      uses: actions/checkout@v1
-    - name: cppcheck script
-      run: |
-        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-        export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/amazonlinux:latest
-        docker pull $DOCKER_IMAGE
-        docker run --mount type=bind,source=$(pwd),target=/src --workdir /src --entrypoint /src/run-cppcheck.sh $DOCKER_IMAGE
+      - name: Checkout Sources
+        uses: actions/checkout@v1
+      - name: cppcheck script
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
+          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/amazonlinux:latest
+          docker pull $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/src --workdir /src --entrypoint /src/run-cppcheck.sh $DOCKER_IMAGE
