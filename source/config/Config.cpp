@@ -1529,7 +1529,7 @@ bool PlainConfig::SecureElement::LoadFromJson(const Crt::JsonView &json)
     {
         if (json.GetInt64(jsonKey))
         {
-            secureElementSlotId = static_cast<int64_t>(json.GetInt64(jsonKey));
+            secureElementSlotId = json.GetInt64(jsonKey);
         }
         else
         {
@@ -1573,8 +1573,7 @@ bool PlainConfig::SecureElement::LoadFromCliArgs(const CliArgs &cliArgs)
     }
     if (cliArgs.count(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID))
     {
-        secureElementSlotId =
-            static_cast<int64_t>(stoul(cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID)));
+        secureElementSlotId =stoul(cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID));
     }
     if (cliArgs.count(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL))
     {
@@ -2399,8 +2398,8 @@ bool Config::ExportDefaultSetting(const string &file)
 		"%s": "<replace_with_pkcs11_lib_path>",
 		"%s": "<replace_with_secure_element_pin>",
 		"%s": "<replace_with_secure_element_key_label>",
-        "%s": "<replace_with_secure_element_slot_id>",
-        "%s": "<replace_with_secure_element_token_label>"
+		"%s": replace_with_secure_element_slot_id_integer,
+		"%s": "<replace_with_secure_element_token_label>"
 	}
         "%s": [
             "%s": false,

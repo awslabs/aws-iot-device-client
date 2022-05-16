@@ -55,7 +55,7 @@ To get started with the feature you will need to set the right configuration. Th
 
 `secure-element-key-label`: Label of private key on the PKCS#11 token (optional).
 
-`secure-element-slot-id`: Slot ID containing PKCS#11 token to use (optional).
+`secure-element-slot-id`: Numeric Slot ID containing PKCS#11 token to use (optional).
 
 `secure-element-token-label`: Label of the PKCS#11 token to use (optional).
 
@@ -72,7 +72,7 @@ $ ./aws-iot-device-client --enable-secure-element [true|false] --pkcs11-lib [you
 		"pkcs11-lib": "<replace_with_pkcs11_lib_path>",
 		"secure-element-pin": "<replace_with_secure_element_pin>",
 		"secure-element-key-label": "<replace_with_secure_element_key_label>",
-		"secure-element-slot-id": "<replace_with_secure_element_slot_id>",
+		"secure-element-slot-id": replace_with_secure_element_slot_id_integer,
 		"secure-element-token-label": "<replace_with_secure_element_token_label>"
 	}
     ...
