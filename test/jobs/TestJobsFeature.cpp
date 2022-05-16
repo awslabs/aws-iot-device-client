@@ -259,6 +259,7 @@ class TestJobsFeature : public ::testing::Test
     unique_ptr<JobsFeature> jobs;
     unique_ptr<MockJobsFeature> jobsMock;
     shared_ptr<MockJobsClient> mockClient;
+    StartNextJobExecutionResponse *startNextJobExecutionResponse;
 };
 
 MATCHER_P(ThingNameEq, ThingName, "Matcher ThingName for all Aws request Objects using Aws::Crt::String")
@@ -274,11 +275,6 @@ MATCHER_P(StatusEq, status, "Matches JobExecutionStatusInfo status")
 MATCHER_P(JobExecutionEq, job, "Matches JobExecutionData JobId & ExecutionNumber")
 {
     return arg.JobId.value() == job.JobId.value() && arg.ExecutionNumber.value() == job.ExecutionNumber.value();
-}
-
-ACTION_P(Notify, promise)
-{
-    promise.set_value();
 }
 
 TEST_F(TestJobsFeature, GetName)
@@ -345,8 +341,8 @@ TEST_F(TestJobsFeature, ExecuteJobHappy)
      * MockJobsFeature Mocks functions which start new threads so we simply verify their invocation here
      */
     const JobExecutionData job = getSampleJobExecution("job1", 1);
-    auto *response = new StartNextJobExecutionResponse();
-    response->Execution = Aws::Crt::Optional<JobExecutionData>(job);
+    startNextJobExecutionResponse = new StartNextJobExecutionResponse();
+    startNextJobExecutionResponse->Execution = Aws::Crt::Optional<JobExecutionData>(job);
 
     EXPECT_CALL(*jobsMock, getJobsClient()).Times(1).WillOnce(Return(mockClient));
 
@@ -354,7 +350,7 @@ TEST_F(TestJobsFeature, ExecuteJobHappy)
         *mockClient,
         SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
-        .WillOnce(DoAll(InvokeArgument<3>(0), InvokeArgument<2>(response, 0)));
+        .WillOnce(DoAll(InvokeArgument<3>(0), InvokeArgument<2>(startNextJobExecutionResponse, 0)));
     EXPECT_CALL(
         *mockClient,
         SubscribeToStartNextPendingJobExecutionRejected(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
@@ -385,6 +381,8 @@ TEST_F(TestJobsFeature, ExecuteJobHappy)
 
     jobsMock->init(std::shared_ptr<Mqtt::MqttConnection>(), notifier, config);
     jobsMock->invokeRunJobs();
+
+    delete startNextJobExecutionResponse;
 }
 
 TEST_F(TestJobsFeature, DuplicateJobNotification)
@@ -394,8 +392,8 @@ TEST_F(TestJobsFeature, DuplicateJobNotification)
      * JobExecution
      */
     const JobExecutionData job = getSampleJobExecution("job1", 1);
-    auto *response = new StartNextJobExecutionResponse();
-    response->Execution = Aws::Crt::Optional<JobExecutionData>(job);
+    startNextJobExecutionResponse = new StartNextJobExecutionResponse();
+    startNextJobExecutionResponse->Execution = Aws::Crt::Optional<JobExecutionData>(job);
 
     EXPECT_CALL(*jobsMock, getJobsClient()).Times(1).WillOnce(Return(mockClient));
 
@@ -404,7 +402,7 @@ TEST_F(TestJobsFeature, DuplicateJobNotification)
         *mockClient,
         SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
-        .WillOnce(DoAll(InvokeArgument<3>(0), InvokeArgument<2>(response, 0), InvokeArgument<2>(response, 0)));
+        .WillOnce(DoAll(InvokeArgument<3>(0), InvokeArgument<2>(startNextJobExecutionResponse, 0), InvokeArgument<2>(startNextJobExecutionResponse, 0)));
 
     EXPECT_CALL(
         *mockClient,
@@ -437,6 +435,8 @@ TEST_F(TestJobsFeature, DuplicateJobNotification)
 
     jobsMock->init(std::shared_ptr<Mqtt::MqttConnection>(), notifier, config);
     jobsMock->invokeRunJobs();
+
+    delete startNextJobExecutionResponse;
 }
 
 TEST_F(TestJobsFeature, InvalidJobDocument)
@@ -448,8 +448,8 @@ TEST_F(TestJobsFeature, InvalidJobDocument)
     job.JobDocument = Aws::Crt::Optional<JsonObject>(JsonObject("{invalid}"));
     job.JobId = Aws::Crt::Optional<basic_string<char, char_traits<char>, StlAllocator<char>>>("invalid-job");
     job.ExecutionNumber = Aws::Crt::Optional<int64_t>(1);
-    auto *response = new StartNextJobExecutionResponse();
-    response->Execution = Aws::Crt::Optional<JobExecutionData>(job);
+    startNextJobExecutionResponse = new StartNextJobExecutionResponse();
+    startNextJobExecutionResponse->Execution = Aws::Crt::Optional<JobExecutionData>(job);
 
     EXPECT_CALL(*jobsMock, getJobsClient()).Times(1).WillOnce(Return(mockClient));
 
@@ -457,7 +457,7 @@ TEST_F(TestJobsFeature, InvalidJobDocument)
         *mockClient,
         SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
-        .WillOnce(DoAll(InvokeArgument<3>(0), InvokeArgument<2>(response, 0)));
+        .WillOnce(DoAll(InvokeArgument<3>(0), InvokeArgument<2>(startNextJobExecutionResponse, 0)));
     EXPECT_CALL(
         *mockClient,
         SubscribeToStartNextPendingJobExecutionRejected(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
@@ -486,4 +486,6 @@ TEST_F(TestJobsFeature, InvalidJobDocument)
 
     jobsMock->init(std::shared_ptr<Mqtt::MqttConnection>(), notifier, config);
     jobsMock->invokeRunJobs();
+
+    delete startNextJobExecutionResponse;
 }
