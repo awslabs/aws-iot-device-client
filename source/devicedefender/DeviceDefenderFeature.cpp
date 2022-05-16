@@ -39,7 +39,8 @@ void DeviceDefenderFeature::startDeviceDefender()
 {
     LOGM_INFO(TAG, "Starting %s", getName().c_str());
 
-    auto onCancelled = [&](void *userData) -> void {
+    auto onCancelled = [&](void *userData) -> void
+    {
         LOGM_DEBUG(TAG, "task called onCancelled for thing: %s", thingName.c_str());
         stop();
     };
@@ -59,13 +60,11 @@ void DeviceDefenderFeature::startDeviceDefender()
     task->StartTask();
     LOGM_DEBUG(TAG, "%s StartTask() async called", getName().c_str());
 
-    auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void {
-        LOGM_DEBUG(TAG, "Recv: Topic:(%s), Payload:%s", topic.c_str(), (char *)payload.buffer);
-    };
+    auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void
+    { LOGM_DEBUG(TAG, "Recv: Topic:(%s), Payload:%s", topic.c_str(), (char *)payload.buffer); };
     auto onSubAck =
-        [&](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void {
-        LOGM_DEBUG(TAG, "SubAck: PacketId:(%s), ErrorCode:%i", getName().c_str(), errorCode);
-    };
+        [&](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void
+    { LOGM_DEBUG(TAG, "SubAck: PacketId:(%s), ErrorCode:%i", getName().c_str(), errorCode); };
     const char *messageFormat = "%s%s%s%s";
     resourceManager->getConnection()->Subscribe(
         FormatMessage(messageFormat, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_ACCEPTED).c_str(),
@@ -83,9 +82,8 @@ void DeviceDefenderFeature::stopDeviceDefender()
 {
     LOGM_INFO(TAG, "Stopping %s", getName().c_str());
     task->StopTask();
-    auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void {
-        LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%i, ErrorCode:%i", packetId, errorCode);
-    };
+    auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void
+    { LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%i, ErrorCode:%i", packetId, errorCode); };
     const char *messageFormat = "%s%s%s%s";
     resourceManager->getConnection()->Unsubscribe(
         FormatMessage(messageFormat, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_ACCEPTED).c_str(), onUnsubscribe);

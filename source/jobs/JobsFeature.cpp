@@ -423,7 +423,8 @@ void JobsFeature::publishUpdateJobExecutionStatus(
 
     // NOTE(marcoaz): statusDetails is captured by value
     // cppcheck-suppress danglingTemporaryLifetime
-    auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool {
+    auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool
+    {
         // We first need to make sure that we haven't previously leaked any promises into our map
         unique_lock<mutex> leakLock(updateJobExecutionPromisesLock);
         for (auto keyPromise = updateJobExecutionPromises.cbegin(); keyPromise != updateJobExecutionPromises.cend();
@@ -514,11 +515,13 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         this->updateJobExecutionPromises.erase(clientToken.c_str());
         return finished;
     };
-    std::thread updateJobExecutionThread([retryConfig, publishLambda, onCompleteCallback] {
-        // NOTE(marcoaz): publishLambda is captured by value
-        // cppcheck-suppress danglingTemporaryLifetime
-        Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);
-    });
+    std::thread updateJobExecutionThread(
+        [retryConfig, publishLambda, onCompleteCallback]
+        {
+            // NOTE(marcoaz): publishLambda is captured by value
+            // cppcheck-suppress danglingTemporaryLifetime
+            Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);
+        });
     updateJobExecutionThread.detach();
 }
 
@@ -568,7 +571,8 @@ void JobsFeature::executeJob(JobExecutionData job)
 {
     LOGM_INFO(TAG, "Executing job: %s", job.JobId->c_str());
 
-    auto shutdownHandler = [this]() -> void {
+    auto shutdownHandler = [this]() -> void
+    {
         handlingJob.store(false);
         if (needStop.load())
         {
@@ -596,7 +600,8 @@ void JobsFeature::executeJob(JobExecutionData job)
     }
 
     // TODO: Add support for checking condition
-    auto runJob = [this, job, jobDocument, shutdownHandler]() {
+    auto runJob = [this, job, jobDocument, shutdownHandler]()
+    {
         JobEngine engine;
         // execute all action steps in sequence as provided in job document
         int executionStatus = engine.exec_steps(jobDocument, jobHandlerDir);
