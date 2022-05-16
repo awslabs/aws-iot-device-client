@@ -280,7 +280,6 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     Aws::Iot::MqttClientConnectionConfigBuilder clientConfigBuilder;
     if (config.secureElement.enabled)
     {
-        LOGM_INFO(TAG, "Inside MQTT client PKCS11: %s", config.secureElement.pkcs11Lib.value().c_str());
         std::shared_ptr<Io::Pkcs11Lib> pkcs11Lib =
             Aws::Crt::Io::Pkcs11Lib::Create(config.secureElement.pkcs11Lib.value().c_str(), allocator);
         if (!pkcs11Lib)
@@ -289,7 +288,6 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
             return ABORT;
         }
 
-        LOG_INFO(TAG, "Inside MQTT client PKCS11: setting tls connection");
         Io::TlsContextPkcs11Options pkcs11Options(pkcs11Lib);
         pkcs11Options.SetCertificateFilePath(config.cert->c_str());
         pkcs11Options.SetUserPin(config.secureElement.secureElementPin->c_str());
@@ -311,12 +309,10 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
             pkcs11Options.SetPrivateKeyObjectLabel(config.secureElement.secureElementKeyLabel->c_str());
         }
 
-        LOG_INFO(TAG, "Inside MQTT client PKCS11: Establishing connection");
         clientConfigBuilder = MqttClientConnectionConfigBuilder(pkcs11Options);
     }
     else
     {
-        LOG_INFO(TAG, "Inside MQTT client NON PKCS11: Establishing connection");
         clientConfigBuilder = MqttClientConnectionConfigBuilder(config.cert->c_str(), config.key->c_str());
     }
 
