@@ -15,6 +15,7 @@ RUN apt-get update -qq \
     wget \
     cppcheck \
     libc6-dbg \
+    softhsm \
     && apt-get clean
 
 ###############################################################################
