@@ -419,7 +419,7 @@ int main(int argc, char *argv[])
     {
         LOG_INFO(TAG, "Jobs is enabled");
         jobs = unique_ptr<JobsFeature>(new JobsFeature());
-        jobs->init(resourceManager, listener, config.config);
+        jobs->init(resourceManager->getConnection(), listener, config.config);
         features.push_back(jobs.get());
     }
     else
