@@ -17,6 +17,7 @@ namespace Aws
                 class AbstractIotSecureTunnelingClient
                 {
                   public:
+                    virtual ~AbstractIotSecureTunnelingClient() = default;
                     virtual void SubscribeToTunnelsNotify(
                         const Aws::Iotsecuretunneling::SubscribeToTunnelsNotifyRequest &request,
                         Aws::Crt::Mqtt::QOS qos,
