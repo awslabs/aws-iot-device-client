@@ -7,9 +7,9 @@
 #include "../ClientBaseNotifier.h"
 #include "../Feature.h"
 #include "../SharedCrtResourceManager.h"
+#include "IotSecureTunnelingClientWrapper.h"
 #include <aws/iotdevicecommon/IotDevice.h>
 #include <aws/iotsecuretunneling/SecureTunnelingNotifyResponse.h>
-#include "IotSecureTunnelingClientWrapper.h"
 
 namespace Aws
 {
@@ -48,8 +48,8 @@ namespace Aws
                      * @return a non-zero return code indicates a problem. The logs can be checked for more info
                      */
                     int init(
-                        std::shared_ptr<SharedCrtResourceManager> manager,
-                        std::shared_ptr<ClientBaseNotifier> notifier,
+                        const std::shared_ptr<SharedCrtResourceManager> manager,
+                        const std::shared_ptr<ClientBaseNotifier> notifier,
                         const PlainConfig &config);
 
                     // Interface methods defined in Feature.h
@@ -124,7 +124,11 @@ namespace Aws
                      * \brief a helper function to get SecureTunnelingContext in order to facilitate testing
                      * Pass an empty unique_ptr and set value in order to allow mocking
                      */
-                    virtual void getContext(std::unique_ptr<SecureTunnelingContext> &context, const std::string &accessToken, const std::string &region, const uint16_t port);
+                    virtual void getContext(
+                        std::unique_ptr<SecureTunnelingContext> &context,
+                        const std::string &accessToken,
+                        const std::string &region,
+                        const uint16_t &port);
 
                     /**
                      * \brief Callback when a secure tunnel is shutdown

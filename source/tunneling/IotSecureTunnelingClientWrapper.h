@@ -33,14 +33,13 @@ namespace Aws
                         const Aws::Iotsecuretunneling::SubscribeToTunnelsNotifyRequest &request,
                         Aws::Crt::Mqtt::QOS qos,
                         const Iotsecuretunneling::OnSubscribeToTunnelsNotifyResponse &handler,
-                        const Iotsecuretunneling::OnSubscribeComplete &onSubAck);
+                        const Iotsecuretunneling::OnSubscribeComplete &onSubAck) override;
 
                     std::unique_ptr<Iotsecuretunneling::IotSecureTunnelingClient> iotSecureTunnelingClient;
                 };
-            }
-        }
-    }
-}
-
+            } // namespace SecureTunneling
+        }     // namespace DeviceClient
+    }         // namespace Iot
+} // namespace Aws
 
 #endif // AWS_IOT_DEVICE_CLIENT_IOTSECURETUNNELINGCLIENTWRAPPER_H

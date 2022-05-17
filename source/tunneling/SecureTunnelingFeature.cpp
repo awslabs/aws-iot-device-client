@@ -33,15 +33,13 @@ namespace Aws
                 SecureTunnelingFeature::~SecureTunnelingFeature() { aws_http_library_clean_up(); }
 
                 int SecureTunnelingFeature::init(
-                    shared_ptr<SharedCrtResourceManager> sharedCrtResourceManager,
-                    shared_ptr<ClientBaseNotifier> notifier,
+                    const shared_ptr<SharedCrtResourceManager> sharedCrtResourceManager,
+                    const shared_ptr<ClientBaseNotifier> notifier,
                     const PlainConfig &config)
                 {
                     sharedCrtResourceManager->initializeAWSHttpLib();
 
                     this->mSharedCrtResourceManager = sharedCrtResourceManager;
-//                    mDeviceApiHandle = unique_ptr<Aws::Iotdevicecommon::DeviceApiHandle>(
-//                        new Aws::Iotdevicecommon::DeviceApiHandle(sharedCrtResourceManager->getAllocator()));
                     mClientBaseNotifier = notifier;
 
                     LoadFromConfig(config);
@@ -172,13 +170,12 @@ namespace Aws
                         return;
                     }
 
-                    size_t nServices = response->Services->size();
-                    if (nServices == 0)
+                    if (!response->Services.has_value() || response->Services->empty())
                     {
                         LOG_ERROR(TAG, "no service requested");
                         return;
                     }
-                    if (nServices > 1)
+                    if (response->Services->size() > 1)
                     {
                         LOG_ERROR(
                             TAG,
@@ -187,19 +184,19 @@ namespace Aws
                         return;
                     }
 
-                    string accessToken = response->ClientAccessToken->c_str();
-                    if (accessToken.empty())
+                    if (!response->ClientAccessToken.has_value() || response->ClientAccessToken->empty())
                     {
                         LOG_ERROR(TAG, "access token cannot be empty");
                         return;
                     }
+                    string accessToken = response->ClientAccessToken->c_str();
 
-                    string region = response->Region->c_str();
-                    if (region.empty())
+                    if (!response->Region.has_value() || response->Region->empty())
                     {
                         LOG_ERROR(TAG, "region cannot be empty");
                         return;
                     }
+                    string region = response->Region.value().c_str();
 
                     string service = response->Services->at(0).c_str();
                     uint16_t port = GetPortFromService(service);
@@ -256,7 +253,7 @@ namespace Aws
                     std::unique_ptr<SecureTunnelingContext> &context,
                     const std::string &accessToken,
                     const std::string &region,
-                    const uint16_t port)
+                    const uint16_t &port)
                 {
                     context = std::unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
                         mSharedCrtResourceManager,
@@ -269,7 +266,8 @@ namespace Aws
 
                 std::shared_ptr<AbstractIotSecureTunnelingClient> SecureTunnelingFeature::getClient()
                 {
-                    return std::shared_ptr<AbstractIotSecureTunnelingClient>(new IotSecureTunnelingClientWrapper(mSharedCrtResourceManager->getConnection()));
+                    return std::shared_ptr<AbstractIotSecureTunnelingClient>(
+                        new IotSecureTunnelingClientWrapper(mSharedCrtResourceManager->getConnection()));
                 }
 
                 void SecureTunnelingFeature::OnConnectionShutdown(SecureTunnelingContext *contextToRemove)

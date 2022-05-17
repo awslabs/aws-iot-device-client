@@ -57,7 +57,7 @@ namespace Aws
                      * @param response MQTT notification
                      * @return True if the given MQTT notification is a duplication. False otherwise.
                      */
-                    bool IsDuplicateNotification(
+                    virtual bool IsDuplicateNotification(
                         const Aws::Iotsecuretunneling::SecureTunnelingNotifyResponse &response);
 
                     /**
@@ -65,7 +65,13 @@ namespace Aws
                      *
                      * @return True if successfully connected to the tunnel. False otherwise.
                      */
-                    bool ConnectToSecureTunnel();
+                    virtual bool ConnectToSecureTunnel();
+
+                  protected:
+                    /**
+                     * Protected constructor to facilitate mocking
+                     */
+                    SecureTunnelingContext();
 
                     /**
                      * \brief Stop and close secure tunnel

@@ -16,9 +16,11 @@ namespace Aws
             {
                 IotSecureTunnelingClientWrapper::IotSecureTunnelingClientWrapper(
                     std::shared_ptr<Aws::Crt::Mqtt::MqttConnection> connection)
+                    : iotSecureTunnelingClient(
+                          std::unique_ptr<IotSecureTunnelingClient>(new IotSecureTunnelingClient(connection)))
                 {
-                    iotSecureTunnelingClient = std::unique_ptr<IotSecureTunnelingClient>(new IotSecureTunnelingClient(connection));
                 }
+
                 void IotSecureTunnelingClientWrapper::SubscribeToTunnelsNotify(
                     const Aws::Iotsecuretunneling::SubscribeToTunnelsNotifyRequest &request,
                     Aws::Crt::Mqtt::QOS qos,
@@ -26,14 +28,9 @@ namespace Aws
                     const Iotsecuretunneling::OnSubscribeComplete &onSubAck)
                 {
                     iotSecureTunnelingClient->SubscribeToTunnelsNotify(
-                        request,
-                        AWS_MQTT_QOS_AT_LEAST_ONCE,
-                        handler,
-                        onSubAck);
+                        request, AWS_MQTT_QOS_AT_LEAST_ONCE, handler, onSubAck);
                 }
-            }
-        }
-    }
-}
-
-
+            } // namespace SecureTunneling
+        }     // namespace DeviceClient
+    }         // namespace Iot
+} // namespace Aws

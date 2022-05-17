@@ -20,6 +20,8 @@ namespace Aws
             {
                 constexpr char SecureTunnelingContext::TAG[];
 
+                SecureTunnelingContext::SecureTunnelingContext() {}
+
                 SecureTunnelingContext::SecureTunnelingContext(
                     shared_ptr<SharedCrtResourceManager> manager,
                     const Aws::Crt::Optional<std::string> &rootCa,
