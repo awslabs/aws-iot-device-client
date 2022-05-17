@@ -431,8 +431,6 @@ void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
         retryConfig.needStopFlag = nullptr;
     }
 
-    // NOTE(marcoaz): statusDetails is captured by value
-    // cppcheck-suppress danglingTemporaryLifetime
     auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool {
         // We first need to make sure that we haven't previously leaked any promises into our map
         unique_lock<mutex> leakLock(updateJobExecutionPromisesLock);
@@ -522,8 +520,6 @@ void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
         return finished;
     };
     std::thread updateJobExecutionThread([retryConfig, publishLambda, onCompleteCallback] {
-        // NOTE(marcoaz): publishLambda is captured by value
-        // cppcheck-suppress danglingTemporaryLifetime
         Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);
     });
     updateJobExecutionThread.detach();
