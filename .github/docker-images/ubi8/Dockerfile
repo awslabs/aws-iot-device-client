@@ -16,7 +16,6 @@ RUN yum --disableplugin=subscription-manager -y update \
     sudo \
     make \
     gcc \
-    softhsm \
     gcc-c++ \
     && yum clean all \
     && rm -rf /var/cache/yum
@@ -49,6 +48,18 @@ RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
     && tar -zxvf openssl-${OPENSSL_VERSION}.tar.gz \
     && cd openssl-${OPENSSL_VERSION} \
     && ./config \
+    && make \
+    && make install
+
+###############################################################################
+# Install softhsm v2.3.0 from source
+###############################################################################
+
+WORKDIR /tmp 
+RUN wget https://dist.opendnssec.org/source/softhsm-2.3.0.tar.gz \
+    && tar -xzf softhsm-2.3.0.tar.gz \
+    && cd softhsm-2.3.0 \
+    && ./configure --disable-gost \
     && make \
     && make install
 
