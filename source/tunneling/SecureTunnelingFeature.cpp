@@ -6,7 +6,6 @@
 #include "SecureTunnelingContext.h"
 #include "TcpForward.h"
 #include <aws/crt/mqtt/MqttClient.h>
-#include <aws/iotsecuretunneling/IotSecureTunnelingClient.h>
 #include <aws/iotsecuretunneling/SubscribeToTunnelsNotifyRequest.h>
 #include <map>
 #include <memory>
@@ -41,8 +40,8 @@ namespace Aws
                     sharedCrtResourceManager->initializeAWSHttpLib();
 
                     this->mSharedCrtResourceManager = sharedCrtResourceManager;
-                    mDeviceApiHandle = unique_ptr<Aws::Iotdevicecommon::DeviceApiHandle>(
-                        new Aws::Iotdevicecommon::DeviceApiHandle(sharedCrtResourceManager->getAllocator()));
+//                    mDeviceApiHandle = unique_ptr<Aws::Iotdevicecommon::DeviceApiHandle>(
+//                        new Aws::Iotdevicecommon::DeviceApiHandle(sharedCrtResourceManager->getAllocator()));
                     mClientBaseNotifier = notifier;
 
                     LoadFromConfig(config);
@@ -123,8 +122,9 @@ namespace Aws
                         SubscribeToTunnelsNotifyRequest request;
                         request.ThingName = mThingName.c_str();
 
-                        IotSecureTunnelingClient client(mSharedCrtResourceManager->getConnection());
-                        client.SubscribeToTunnelsNotify(
+                        iotSecureTunnelingClient = getClient();
+
+                        iotSecureTunnelingClient->SubscribeToTunnelsNotify(
                             request,
                             AWS_MQTT_QOS_AT_LEAST_ONCE,
                             bind(
@@ -211,14 +211,8 @@ namespace Aws
 
                     LOGM_DEBUG(TAG, "Region=%s, Service=%s", region.c_str(), service.c_str());
 
-                    std::unique_ptr<SecureTunnelingContext> context =
-                        unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
-                            mSharedCrtResourceManager,
-                            mRootCa,
-                            accessToken,
-                            GetEndpoint(region),
-                            port,
-                            bind(&SecureTunnelingFeature::OnConnectionShutdown, this, placeholders::_1)));
+                    auto context = std::unique_ptr<SecureTunnelingContext>();
+                    getContext(context, accessToken, region, port);
                     if (context->ConnectToSecureTunnel())
                     {
                         mContexts.push_back(std::move(context));
@@ -256,6 +250,26 @@ namespace Aws
                     }
 
                     return endpoint;
+                }
+
+                void SecureTunnelingFeature::getContext(
+                    std::unique_ptr<SecureTunnelingContext> &context,
+                    const std::string &accessToken,
+                    const std::string &region,
+                    const uint16_t port)
+                {
+                    context = std::unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
+                        mSharedCrtResourceManager,
+                        mRootCa,
+                        accessToken,
+                        GetEndpoint(region),
+                        port,
+                        bind(&SecureTunnelingFeature::OnConnectionShutdown, this, placeholders::_1)));
+                }
+
+                std::shared_ptr<AbstractIotSecureTunnelingClient> SecureTunnelingFeature::getClient()
+                {
+                    return std::shared_ptr<AbstractIotSecureTunnelingClient>(new IotSecureTunnelingClientWrapper(mSharedCrtResourceManager->getConnection()));
                 }
 
                 void SecureTunnelingFeature::OnConnectionShutdown(SecureTunnelingContext *contextToRemove)

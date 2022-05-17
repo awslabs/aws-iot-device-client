@@ -35,6 +35,11 @@ endif ()
 
 if (NOT EXCLUDE_ST)
     file(GLOB ST_SRC "../source/tunneling/*.cpp")
+    list(APPEND ST_SRC ${ST_SRC})
+endif ()
+
+if (NOT EXCLUDE_ST)
+    file(GLOB ST_SRC "../source/tunneling/*.cpp")
     list(APPEND DC_SRC ${ST_SRC})
 endif ()
 
@@ -79,6 +84,11 @@ file(GLOB JOBS_TST "./jobs/*.cpp")
 
 if (NOT EXCLUDE_JOBS)
     list(APPEND DC_TST ${JOBS_TST})
+endif ()
+
+if (NOT EXCLUDE_ST)
+    file(GLOB ST_TST "./tunneling/*.cpp")
+    list(APPEND DC_TST ${ST_TST})
 endif ()
 
 if (NOT EXCLUDE_FP)
