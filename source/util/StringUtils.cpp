@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "StringUtils.h"
+#include "../config/Config.h"
 #include <cstdarg>
 #include <map>
-#include <sstream>
 
 using namespace std;
 
@@ -20,8 +20,12 @@ namespace Aws
                 {
                     va_list copy;
                     va_copy(copy, args);
-                    int formattedMsgSize = vsnprintf(nullptr, 0, message, copy) + 1;
+                    size_t formattedMsgSize = vsnprintf(nullptr, 0, message, copy);
                     va_end(copy);
+
+                    // will format up to MAX_CONFIG_SIZE, the maximum buffer size after which log messages will get
+                    // truncated
+                    formattedMsgSize = std::min(formattedMsgSize, Config::MAX_CONFIG_SIZE - 1) + 1;
 
                     std::string buffer;
                     buffer.resize(formattedMsgSize);
@@ -89,9 +93,15 @@ namespace Aws
                 }
 
                 // cppcheck-suppress unusedFunction
-                string TrimLeftCopy(string s, const string &any) { return s.erase(0, s.find_first_not_of(any)); }
+                string TrimLeftCopy(string s, const string &any)
+                {
+                    return s.erase(0, s.find_first_not_of(any));
+                }
 
-                string TrimRightCopy(string s, const string &any) { return s.erase(s.find_last_not_of(any) + 1); }
+                string TrimRightCopy(string s, const string &any)
+                {
+                    return s.erase(s.find_last_not_of(any) + 1);
+                }
 
                 // cppcheck-suppress unusedFunction
                 string TrimCopy(string s, const string &any)

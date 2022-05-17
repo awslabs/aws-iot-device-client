@@ -415,6 +415,11 @@ namespace Aws
                 bool init(const CliArgs &cliArgs);
 
                 /**
+                 * \brief Maximum accepted size for the config file.
+                 */
+                static constexpr size_t MAX_CONFIG_SIZE = 5000;
+
+                /**
                  * \brief Separator between directories in path.
                  */
                 static constexpr char PATH_DIRECTORY_SEPARATOR = '/';

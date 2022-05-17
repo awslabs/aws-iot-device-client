@@ -198,7 +198,8 @@ void handle_feature_stopped(const Feature *feature)
 void attemptConnection()
 {
     Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 900 * 1000, -1, nullptr};
-    auto publishLambda = []() -> bool {
+    auto publishLambda = []() -> bool
+    {
         int connectionStatus = resourceManager.get()->establishConnection(config.config);
         if (SharedCrtResourceManager::ABORT == connectionStatus)
         {
@@ -221,8 +222,8 @@ void attemptConnection()
             return false;
         }
     };
-    std::thread attemptConnectionThread(
-        [retryConfig, publishLambda] { Retry::exponentialBackoff(retryConfig, publishLambda); });
+    std::thread attemptConnectionThread([retryConfig, publishLambda]
+                                        { Retry::exponentialBackoff(retryConfig, publishLambda); });
     attemptConnectionThread.join();
 }
 
