@@ -20,6 +20,8 @@ namespace Aws
             {
                 constexpr char SecureTunnelingContext::TAG[];
 
+                SecureTunnelingContext::SecureTunnelingContext() {}
+
                 SecureTunnelingContext::SecureTunnelingContext(
                     shared_ptr<SharedCrtResourceManager> manager,
                     const Aws::Crt::Optional<std::string> &rootCa,
@@ -33,7 +35,13 @@ namespace Aws
                 {
                 }
 
-                SecureTunnelingContext::~SecureTunnelingContext() { mSecureTunnel->Close(); }
+                SecureTunnelingContext::~SecureTunnelingContext()
+                {
+                    if (mSecureTunnel)
+                    {
+                        mSecureTunnel->Close();
+                    }
+                }
 
                 template <typename T>
                 static bool operator==(const Aws::Crt::Optional<T> &lhs, const Aws::Crt::Optional<T> &rhs)
