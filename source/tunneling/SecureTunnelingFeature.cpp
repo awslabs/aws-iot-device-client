@@ -31,10 +31,7 @@ namespace Aws
 
                 SecureTunnelingFeature::SecureTunnelingFeature() = default;
 
-                SecureTunnelingFeature::~SecureTunnelingFeature()
-                {
-                    aws_http_library_clean_up();
-                }
+                SecureTunnelingFeature::~SecureTunnelingFeature() { aws_http_library_clean_up(); }
 
                 int SecureTunnelingFeature::init(
                     shared_ptr<SharedCrtResourceManager> sharedCrtResourceManager,
@@ -53,10 +50,7 @@ namespace Aws
                     return 0;
                 }
 
-                string SecureTunnelingFeature::getName()
-                {
-                    return "Secure Tunneling";
-                }
+                string SecureTunnelingFeature::getName() { return "Secure Tunneling"; }
 
                 int SecureTunnelingFeature::start()
                 {
@@ -96,10 +90,7 @@ namespace Aws
                     return result->second;
                 }
 
-                bool SecureTunnelingFeature::IsValidPort(int port)
-                {
-                    return 1 <= port && port <= 65535;
-                }
+                bool SecureTunnelingFeature::IsValidPort(int port) { return 1 <= port && port <= 65535; }
 
                 void SecureTunnelingFeature::LoadFromConfig(const PlainConfig &config)
                 {
@@ -270,10 +261,9 @@ namespace Aws
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingFeature::OnConnectionShutdown");
 
-                    auto it = find_if(
-                        mContexts.begin(),
-                        mContexts.end(),
-                        [&](unique_ptr<SecureTunnelingContext> &c) { return c.get() == contextToRemove; });
+                    auto it = find_if(mContexts.begin(), mContexts.end(), [&](unique_ptr<SecureTunnelingContext> &c) {
+                        return c.get() == contextToRemove;
+                    });
                     mContexts.erase(std::remove(mContexts.begin(), mContexts.end(), *it));
 
 #if defined(DISABLE_MQTT)
