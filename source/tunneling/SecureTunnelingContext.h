@@ -49,7 +49,7 @@ namespace Aws
                     /**
                      * \brief Destructor
                      */
-                    ~SecureTunnelingContext();
+                    virtual ~SecureTunnelingContext();
 
                     /**
                      * \brief Check to see if we have seen and processed the given MQTT notification

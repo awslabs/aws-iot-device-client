@@ -35,7 +35,7 @@ namespace Aws
                     /**
                      * \brief Destructor
                      */
-                    ~SecureTunnelingFeature() override;
+                    virtual ~SecureTunnelingFeature() override;
 
                     /**
                      * \brief Initializes the Secure Tunneling feature with all the required setup information, event
