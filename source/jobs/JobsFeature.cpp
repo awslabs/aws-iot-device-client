@@ -605,8 +605,7 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
 {
     LOGM_INFO(TAG, "Executing job: %s", job.JobId->c_str());
 
-    auto shutdownHandler = [this]() -> void
-    {
+    auto shutdownHandler = [this]() -> void {
         handlingJob.store(false);
         if (needStop.load())
         {
