@@ -19,8 +19,6 @@ if id "$user" 2>/dev/null && command -v "sudo" > /dev/null; then
     if command -v "dpkg" >/dev/null; then
       if sudo -u "$user" -n dpkg -s "$package"; then
         continue
-      else
-        exit 1
       fi
     fi
     echo "No suitable package manager found"
