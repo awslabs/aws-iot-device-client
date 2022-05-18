@@ -410,7 +410,7 @@ Example:
 cmake ../ -DEXCLUDE_JOBS=ON
 ```
 ### Jobs Feature Configuration Options
-`enabled`: Whether or not the jobs feature is enabled (True/False).
+`enabled`: Whether or not the Jobs feature is enabled (True/False). If not specified, Jobs feature is enabled by default.
  
 `handler-directory`: A path to a directory containing scripts or executables that the Jobs feature should look in
 when receiving an incoming job. If there is a script or executable in the directory that matches the name of the

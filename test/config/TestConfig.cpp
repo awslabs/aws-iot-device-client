@@ -71,7 +71,6 @@ class ConfigTestFixture : public ::testing::Test
     {
         ASSERT_TRUE(config.jobs.enabled);
         ASSERT_TRUE(config.tunneling.enabled);
-        ASSERT_TRUE(config.deviceDefender.enabled);
     }
 };
 
@@ -217,6 +216,10 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_FALSE(config.fleetProvisioning.enabled);
+    ASSERT_FALSE(config.deviceDefender.enabled);
+    ASSERT_FALSE(config.sampleShadow.enabled);
+    ASSERT_FALSE(config.sensorPublish.enabled);
+    ASSERT_FALSE(config.pubSub.enabled);
     DefaultFeaturesEnabled(config);
 }
 
@@ -233,6 +236,10 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumCli)
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_FALSE(config.fleetProvisioning.enabled);
+    ASSERT_FALSE(config.deviceDefender.enabled);
+    ASSERT_FALSE(config.sampleShadow.enabled);
+    ASSERT_FALSE(config.sensorPublish.enabled);
+    ASSERT_FALSE(config.pubSub.enabled);
     DefaultFeaturesEnabled(config);
 }
 
@@ -263,6 +270,10 @@ TEST_F(ConfigTestFixture, HappyCaseExplicitRootCaConfig)
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_FALSE(config.fleetProvisioning.enabled);
+    ASSERT_FALSE(config.deviceDefender.enabled);
+    ASSERT_FALSE(config.sampleShadow.enabled);
+    ASSERT_FALSE(config.sensorPublish.enabled);
+    ASSERT_FALSE(config.pubSub.enabled);
     DefaultFeaturesEnabled(config);
 }
 
@@ -290,6 +301,10 @@ TEST_F(ConfigTestFixture, HappyCaseExplicitRootCaCli)
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_FALSE(config.fleetProvisioning.enabled);
+    ASSERT_FALSE(config.deviceDefender.enabled);
+    ASSERT_FALSE(config.sampleShadow.enabled);
+    ASSERT_FALSE(config.sensorPublish.enabled);
+    ASSERT_FALSE(config.pubSub.enabled);
     DefaultFeaturesEnabled(config);
 }
 
@@ -524,6 +539,10 @@ TEST_F(ConfigTestFixture, emptyRootCaPathConfig)
     ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_FALSE(config.fleetProvisioning.enabled);
+    ASSERT_FALSE(config.deviceDefender.enabled);
+    ASSERT_FALSE(config.sampleShadow.enabled);
+    ASSERT_FALSE(config.sensorPublish.enabled);
+    ASSERT_FALSE(config.pubSub.enabled);
     DefaultFeaturesEnabled(config);
 }
 
@@ -550,6 +569,10 @@ TEST_F(ConfigTestFixture, InvalidRootCaPathConfigCli)
     ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_FALSE(config.fleetProvisioning.enabled);
+    ASSERT_FALSE(config.deviceDefender.enabled);
+    ASSERT_FALSE(config.sampleShadow.enabled);
+    ASSERT_FALSE(config.sensorPublish.enabled);
+    ASSERT_FALSE(config.pubSub.enabled);
     DefaultFeaturesEnabled(config);
 }
 
@@ -580,6 +603,10 @@ TEST_F(ConfigTestFixture, InvalidRootCaPathConfig)
     ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_FALSE(config.fleetProvisioning.enabled);
+    ASSERT_FALSE(config.deviceDefender.enabled);
+    ASSERT_FALSE(config.sampleShadow.enabled);
+    ASSERT_FALSE(config.sensorPublish.enabled);
+    ASSERT_FALSE(config.pubSub.enabled);
     DefaultFeaturesEnabled(config);
 }
 
