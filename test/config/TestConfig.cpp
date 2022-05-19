@@ -1497,7 +1497,7 @@ TEST_F(ConfigTestFixture, SecureElementDisableFeature)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "thing-name": "thing-name value",
     "secure-element": {
         "enabled": false
@@ -1528,7 +1528,7 @@ TEST_F(ConfigTestFixture, SecureElementCli)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "thing-name": "thing-name value",
     "secure-element": {
         "enabled": false
