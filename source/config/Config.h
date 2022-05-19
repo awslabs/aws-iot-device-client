@@ -203,7 +203,7 @@ namespace Aws
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
                     static constexpr char JSON_KEY_INTERVAL[] = "interval";
 
-                    bool enabled{true};
+                    bool enabled{false};
                     int interval{300};
                 };
                 DeviceDefender deviceDefender;

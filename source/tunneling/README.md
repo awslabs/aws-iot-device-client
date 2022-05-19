@@ -20,7 +20,7 @@ Without the Device Client, if you wanted secure privileged access to a device by
 
 You can enable or disable the Secure Tunneling feature by a CLI argument or in the configuration file.
 
-`enabled`: Whether or not the Secure Tunneling feature is enabled (True/False).
+`enabled`: Whether or not the Secure Tunneling feature is enabled (True/False). If not specified, Secure Tunneling feature is enabled by default.
 
 #### Configuring the Secure Tunneling feature via the command line
 ```
