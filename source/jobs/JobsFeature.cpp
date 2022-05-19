@@ -569,8 +569,6 @@ bool JobsFeature::isDuplicateNotification(JobExecutionData job)
 
 void JobsFeature::initJob(const JobExecutionData &job)
 {
-    LOGM_INFO(TAG, "Executing job: %s", job.JobId->c_str());
-
     auto shutdownHandler = [this]() -> void {
         handlingJob.store(false);
         if (needStop.load())
@@ -589,11 +587,12 @@ void JobsFeature::initJob(const JobExecutionData &job)
         LOG_ERROR(TAG, "Unable to execute job, invalid job document provided!");
         publishUpdateJobExecutionStatus(
             job,
-            {Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!", "", ""},
+            JobExecutionStatusInfo(
+                Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!"),
             shutdownHandler);
         return;
     }
-    publishUpdateJobExecutionStatus(job, {Iotjobs::JobStatus::IN_PROGRESS, "", "", ""});
+    publishUpdateJobExecutionStatus(job, JobExecutionStatusInfo(Iotjobs::JobStatus::IN_PROGRESS));
     executeJob(job, jobDocument);
 }
 
@@ -628,14 +627,18 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
             LOG_INFO(TAG, "Job executed successfully!");
             string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
             publishUpdateJobExecutionStatus(
-                job, {JobStatus::SUCCEEDED, "", standardOut, engine.getStdErr()}, shutdownHandler);
+                job,
+                JobExecutionStatusInfo(JobStatus::SUCCEEDED, "", standardOut, engine.getStdErr()),
+                shutdownHandler);
         }
         else
         {
             LOG_WARN(TAG, "Job execution failed!");
             string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
             publishUpdateJobExecutionStatus(
-                job, {JobStatus::FAILED, reason, standardOut, engine.getStdErr()}, shutdownHandler);
+                job,
+                JobExecutionStatusInfo(JobStatus::FAILED, reason, standardOut, engine.getStdErr()),
+                shutdownHandler);
         }
     };
     thread jobEngineThread(runJob);
@@ -646,7 +649,7 @@ void JobsFeature::runJobs()
 {
     LOGM_INFO(TAG, "Running %s!", getName().c_str());
 
-    jobsClient = getJobsClient();
+    jobsClient = createJobsClient();
 
     // Create subscriptions to important MQTT topics
     subscribeToStartNextPendingJobExecution();
@@ -704,7 +707,7 @@ int JobsFeature::stop()
     return 0;
 }
 
-std::shared_ptr<AbstractIotJobsClient> JobsFeature::getJobsClient()
+std::shared_ptr<AbstractIotJobsClient> JobsFeature::createJobsClient()
 {
-    return std::shared_ptr<AbstractIotJobsClient>(new IotJobsClientWrapper(thingName, mqttConnection));
+    return std::shared_ptr<AbstractIotJobsClient>(new IotJobsClientWrapper(mqttConnection));
 }

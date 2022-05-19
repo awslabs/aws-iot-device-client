@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "IotJobsClientWrapper.h"
-#include "JobsFeature.h"
-#include "aws/iotjobs/NextJobExecutionChangedSubscriptionRequest.h"
-#include "aws/iotjobs/StartNextPendingJobExecutionRequest.h"
-#include "aws/iotjobs/StartNextPendingJobExecutionSubscriptionRequest.h"
-#include "aws/iotjobs/UpdateJobExecutionRequest.h"
-#include "aws/iotjobs/UpdateJobExecutionSubscriptionRequest.h"
+#include <aws/iotjobs/NextJobExecutionChangedSubscriptionRequest.h>
+#include <aws/iotjobs/StartNextPendingJobExecutionRequest.h>
+#include <aws/iotjobs/StartNextPendingJobExecutionSubscriptionRequest.h>
+#include <aws/iotjobs/UpdateJobExecutionRequest.h>
+#include <aws/iotjobs/UpdateJobExecutionSubscriptionRequest.h>
 
 using namespace std;
 using namespace Aws::Iot;
@@ -15,12 +14,9 @@ using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Jobs;
 using namespace Aws::Iotjobs;
 
-IotJobsClientWrapper::IotJobsClientWrapper(
-    const std::string &thingName,
-    const std::shared_ptr<Aws::Crt::Mqtt::MqttConnection> connection)
-    : thingName(thingName), mqttConnection(connection)
+IotJobsClientWrapper::IotJobsClientWrapper(std::shared_ptr<Aws::Crt::Mqtt::MqttConnection> connection)
+    : jobsClient(std::unique_ptr<Aws::Iotjobs::IotJobsClient>(new IotJobsClient(connection)))
 {
-    jobsClient = std::unique_ptr<Aws::Iotjobs::IotJobsClient>(new IotJobsClient(mqttConnection));
 }
 void IotJobsClientWrapper::PublishStartNextPendingJobExecution(
     const StartNextPendingJobExecutionRequest &request,

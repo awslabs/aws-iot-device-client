@@ -53,6 +53,15 @@ namespace Aws
                         std::string reason;
                         std::string stdoutput;
                         std::string stderror;
+
+                        explicit JobExecutionStatusInfo(
+                            Iotjobs::JobStatus status,
+                            const std::string &reason = "",
+                            const std::string &stdoutput = "",
+                            const std::string &stderror = "")
+                            : status(status), reason(reason), stdoutput(stdoutput), stderror(stderror)
+                        {
+                        }
                     };
 
                   private:
@@ -98,7 +107,7 @@ namespace Aws
                     Aws::Iotjobs::JobExecutionData latestJobsNotification;
 
                     /**
-                     * \brief The resource manager used to manage CRT resources
+                     * \brief Mqtt Connection for IotJobsClient
                      */
                     std::shared_ptr<Crt::Mqtt::MqttConnection> mqttConnection;
                     /**
@@ -286,7 +295,7 @@ namespace Aws
                     /**
                      * \brief Made virtual to facilitate injecting mock for testing
                      */
-                    virtual std::shared_ptr<AbstractIotJobsClient> getJobsClient();
+                    virtual std::shared_ptr<AbstractIotJobsClient> createJobsClient();
 
                   public:
                     virtual std::string getName() override;

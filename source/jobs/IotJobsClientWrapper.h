@@ -1,10 +1,15 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 #ifndef AWS_IOT_DEVICE_CLIENT_IOTJOBSCLIENTWRAPPER_H
 #define AWS_IOT_DEVICE_CLIENT_IOTJOBSCLIENTWRAPPER_H
 
 #include "../SharedCrtResourceManager.h"
 #include "JobsFeature.h"
-#include "aws/iotjobs/JobStatus.h"
 #include <aws/iotjobs/IotJobsClient.h>
+#include <aws/iotjobs/JobStatus.h>
+#include <memory>
+#include <string>
 
 namespace Aws
 {
@@ -62,10 +67,7 @@ namespace Aws
                 class IotJobsClientWrapper : public AbstractIotJobsClient
                 {
                   public:
-                    IotJobsClientWrapper() = default;
-                    IotJobsClientWrapper(
-                        const std::string &thingName,
-                        const std::shared_ptr<Aws::Crt::Mqtt::MqttConnection> connection);
+                    explicit IotJobsClientWrapper(std::shared_ptr<Aws::Crt::Mqtt::MqttConnection> connection);
                     void PublishStartNextPendingJobExecution(
                         const Iotjobs::StartNextPendingJobExecutionRequest &request,
                         Aws::Crt::Mqtt::QOS qos,
@@ -107,8 +109,6 @@ namespace Aws
                         const Iotjobs::OnPublishComplete &onPubAck) override;
 
                   private:
-                    std::string thingName;
-                    std::shared_ptr<Aws::Crt::Mqtt::MqttConnection> mqttConnection;
                     std::unique_ptr<Aws::Iotjobs::IotJobsClient> jobsClient;
                 };
             } // namespace Jobs
