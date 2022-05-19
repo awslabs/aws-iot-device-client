@@ -3,11 +3,11 @@
 
 #include "../../source/tunneling/SecureTunnelingContext.h"
 #include "../../source/tunneling/SecureTunnelingFeature.h"
-#include <aws/iotsecuretunneling/IotSecureTunnelingClient.h>
-#include <aws/iotsecuretunneling/SubscribeToTunnelsNotifyRequest.h>
 #include "inttypes.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include <aws/iotsecuretunneling/IotSecureTunnelingClient.h>
+#include <aws/iotsecuretunneling/SubscribeToTunnelsNotifyRequest.h>
 
 using namespace testing;
 using namespace std;
@@ -164,7 +164,6 @@ TEST_F(TestSecureTunnelingFeature, CreateSSHContextHappy)
     secureTunnelingFeature->init(manager, notifier, config);
     secureTunnelingFeature->start();
     secureTunnelingFeature->stop();
-
 }
 
 TEST_F(TestSecureTunnelingFeature, CreateVNCContextHappy)
@@ -264,12 +263,12 @@ TEST_F(TestSecureTunnelingFeature, DuplicateResponse)
     EXPECT_CALL(*secureTunnelingFeature, getClient()).Times(1).WillOnce(Return(mockClient));
     EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
-        .WillOnce(DoAll(InvokeArgument<2>(response.get(), 0), InvokeArgument<2>(response.get(), 0), InvokeArgument<3>(0)));
+        .WillOnce(
+            DoAll(InvokeArgument<2>(response.get(), 0), InvokeArgument<2>(response.get(), 0), InvokeArgument<3>(0)));
     EXPECT_CALL(*notifier, onEvent(_, _)).Times(2);
     secureTunnelingFeature->init(manager, notifier, config);
     secureTunnelingFeature->start();
     secureTunnelingFeature->stop();
-
 }
 
 TEST_F(TestSecureTunnelingFeature, MultipleServices)
@@ -299,7 +298,6 @@ TEST_F(TestSecureTunnelingFeature, MultipleServices)
     secureTunnelingFeature->init(manager, notifier, config);
     secureTunnelingFeature->start();
     secureTunnelingFeature->stop();
-
 }
 
 TEST_F(TestSecureTunnelingFeature, UnsupportedService)
@@ -328,7 +326,6 @@ TEST_F(TestSecureTunnelingFeature, UnsupportedService)
     secureTunnelingFeature->init(manager, notifier, config);
     secureTunnelingFeature->start();
     secureTunnelingFeature->stop();
-
 }
 
 TEST_F(TestSecureTunnelingFeature, NoServices)
@@ -356,7 +353,6 @@ TEST_F(TestSecureTunnelingFeature, NoServices)
     secureTunnelingFeature->init(manager, notifier, config);
     secureTunnelingFeature->start();
     secureTunnelingFeature->stop();
-
 }
 
 TEST_F(TestSecureTunnelingFeature, SourceMode)
@@ -385,5 +381,4 @@ TEST_F(TestSecureTunnelingFeature, SourceMode)
     secureTunnelingFeature->init(manager, notifier, config);
     secureTunnelingFeature->start();
     secureTunnelingFeature->stop();
-
 }
