@@ -17,7 +17,7 @@ printf ${PMPT} "Do you want to interactively generate a configuration file for t
 read -r BUILD_CONFIG
 
 if [ $(id -u) = 0 ]; then
-  OUTPUT_DIR=/root/.aws-iot-device-client/
+  OUTPUT_DIR=/etc/.aws-iot-device-client/
 else
   OUTPUT_DIR=/home/$(whoami)/.aws-iot-device-client/
 fi
@@ -282,17 +282,22 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       }
     }"
 
-    printf ${PMPT} "Does the following configuration appear correct? If yes, configuration will be written to ${CONF_OUTPUT_PATH}: y/n"
-    printf ${GREEN} "${CONFIG_OUTPUT}"
-    read -r GOOD_TO_GO
-    if [ "$GOOD_TO_GO" = "y" ]; then
-      CONFIGURED=1
-      mkdir -p "$OUTPUT_DIR"
-      echo "$CONFIG_OUTPUT" | tee "$CONF_OUTPUT_PATH" >/dev/null
-      chmod 745 "$OUTPUT_DIR"
-      chmod 644 "$CONF_OUTPUT_PATH"
-      printf ${GREEN} "Configuration has been successfully written to ${CONF_OUTPUT_PATH}"
-    fi
+    while [ "$CONFIRMED" != 1 ]; do
+      printf ${PMPT} "Does the following configuration appear correct? If yes, configuration will be written to ${CONF_OUTPUT_PATH}: y/n"
+      printf ${GREEN} "${CONFIG_OUTPUT}"
+      read -r GOOD_TO_GO
+      if [ "$GOOD_TO_GO" = "y" ] || [ "$GOOD_TO_GO" = "n" ]; then
+        CONFIRMED=1
+      fi
+      if [ "$GOOD_TO_GO" = "y" ]; then
+        CONFIGURED=1
+        mkdir -p "$OUTPUT_DIR"
+        echo "$CONFIG_OUTPUT" | tee "$CONF_OUTPUT_PATH" >/dev/null
+        chmod 745 "$OUTPUT_DIR"
+        chmod 644 "$CONF_OUTPUT_PATH"
+        printf ${GREEN} "Configuration has been successfully written to ${CONF_OUTPUT_PATH}"
+      fi
+    done
     tput sgr0
   done
 fi

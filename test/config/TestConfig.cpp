@@ -67,11 +67,15 @@ class ConfigTestFixture : public ::testing::Test
         std::remove(addrPathInvalid.c_str());
     }
 
-    static void DefaultFeaturesEnabled(const PlainConfig &config)
+    static void AssertDefaultFeaturesEnabled(const PlainConfig &config)
     {
         ASSERT_TRUE(config.jobs.enabled);
         ASSERT_TRUE(config.tunneling.enabled);
-        ASSERT_TRUE(config.deviceDefender.enabled);
+        ASSERT_FALSE(config.fleetProvisioning.enabled);
+        ASSERT_FALSE(config.deviceDefender.enabled);
+        ASSERT_FALSE(config.sampleShadow.enabled);
+        ASSERT_FALSE(config.sensorPublish.enabled);
+        ASSERT_FALSE(config.pubSub.enabled);
     }
 };
 
@@ -216,8 +220,7 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_FALSE(config.fleetProvisioning.enabled);
-    DefaultFeaturesEnabled(config);
+    AssertDefaultFeaturesEnabled(config);
 }
 
 TEST_F(ConfigTestFixture, HappyCaseMinimumCli)
@@ -232,8 +235,7 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumCli)
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_FALSE(config.fleetProvisioning.enabled);
-    DefaultFeaturesEnabled(config);
+    AssertDefaultFeaturesEnabled(config);
 }
 
 /**
@@ -262,8 +264,7 @@ TEST_F(ConfigTestFixture, HappyCaseExplicitRootCaConfig)
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_FALSE(config.fleetProvisioning.enabled);
-    DefaultFeaturesEnabled(config);
+    AssertDefaultFeaturesEnabled(config);
 }
 
 /**
@@ -289,8 +290,7 @@ TEST_F(ConfigTestFixture, HappyCaseExplicitRootCaCli)
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_FALSE(config.fleetProvisioning.enabled);
-    DefaultFeaturesEnabled(config);
+    AssertDefaultFeaturesEnabled(config);
 }
 
 /**
@@ -523,8 +523,7 @@ TEST_F(ConfigTestFixture, emptyRootCaPathConfig)
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_FALSE(config.fleetProvisioning.enabled);
-    DefaultFeaturesEnabled(config);
+    AssertDefaultFeaturesEnabled(config);
 }
 
 /**
@@ -549,8 +548,7 @@ TEST_F(ConfigTestFixture, InvalidRootCaPathConfigCli)
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_FALSE(config.fleetProvisioning.enabled);
-    DefaultFeaturesEnabled(config);
+    AssertDefaultFeaturesEnabled(config);
 }
 
 /**
@@ -579,8 +577,7 @@ TEST_F(ConfigTestFixture, InvalidRootCaPathConfig)
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_FALSE(config.fleetProvisioning.enabled);
-    DefaultFeaturesEnabled(config);
+    AssertDefaultFeaturesEnabled(config);
 }
 
 TEST_F(ConfigTestFixture, MissingSomeSettings)
