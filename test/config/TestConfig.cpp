@@ -1491,6 +1491,8 @@ TEST_F(ConfigTestFixture, SecureElementInvalidConfig)
     ASSERT_FALSE(config.secureElement.secureElementPin.has_value());
 }
 
+#if !defined(DISABLE_MQTT)
+// These tests are not applicable if MQTT is disabled.
 TEST_F(ConfigTestFixture, SecureElementDisableFeature)
 {
     constexpr char jsonString[] = R"(
@@ -1556,6 +1558,7 @@ TEST_F(ConfigTestFixture, SecureElementCli)
     ASSERT_EQ("0000", config.secureElement.secureElementPin.value());
     ASSERT_TRUE(config.Validate());
 }
+#endif
 
 TEST(Config, MemoryTrace)
 {
