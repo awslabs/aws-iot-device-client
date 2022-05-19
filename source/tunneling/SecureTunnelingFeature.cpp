@@ -208,8 +208,8 @@ namespace Aws
 
                     LOGM_DEBUG(TAG, "Region=%s, Service=%s", region.c_str(), service.c_str());
 
-                    auto context = std::unique_ptr<SecureTunnelingContext>();
-                    getContext(context, accessToken, region, port);
+                    auto context = createContext(accessToken, region, port);
+
                     if (context->ConnectToSecureTunnel())
                     {
                         mContexts.push_back(std::move(context));
@@ -249,13 +249,12 @@ namespace Aws
                     return endpoint;
                 }
 
-                void SecureTunnelingFeature::getContext(
-                    std::unique_ptr<SecureTunnelingContext> &context,
+                std::unique_ptr<SecureTunnelingContext> SecureTunnelingFeature::createContext(
                     const std::string &accessToken,
                     const std::string &region,
                     const uint16_t &port)
                 {
-                    context = std::unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
+                    return std::unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
                         mSharedCrtResourceManager,
                         mRootCa,
                         accessToken,
