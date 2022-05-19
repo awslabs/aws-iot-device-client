@@ -44,13 +44,17 @@ namespace Aws
                 aws_mem_trace_level memTraceLevel{AWS_MEMTRACE_NONE};
                 std::vector<Feature *> *features;
 
-                bool locateCredentials(const PlainConfig &config);
-
                 bool setupLogging(const PlainConfig &config);
 
                 int buildClient(const PlainConfig &config);
 
                 void initializeAllocator(const PlainConfig &config);
+
+              protected:
+                /**
+                 * inheritable for testing
+                 */
+                bool locateCredentials(const PlainConfig &config);
 
               public:
                 SharedCrtResourceManager() = default;

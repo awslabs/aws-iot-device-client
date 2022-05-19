@@ -102,23 +102,6 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
         }
     }
 
-    if (stat(config.rootCa->c_str(), &fileInfo) != 0)
-    {
-        LOGM_ERROR(
-            TAG, "Failed to find %s, cannot establish MQTT connection", Sanitize(config.rootCa->c_str()).c_str());
-        locatedAll = false;
-    }
-    else
-    {
-        string parentDir = FileUtils::ExtractParentDirectory(config.rootCa->c_str());
-        if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::ROOT_CA_DIR) ||
-            !FileUtils::ValidateFilePermissions(config.rootCa->c_str(), Permissions::ROOT_CA))
-        {
-            LOG_ERROR(TAG, "Incorrect permissions on Root CA file and/or parent directory");
-            locatedAll = false;
-        }
-    }
-
     return locatedAll;
 }
 
@@ -317,7 +300,10 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     }
 
     clientConfigBuilder.WithEndpoint(config.endpoint->c_str());
-    clientConfigBuilder.WithCertificateAuthority(config.rootCa->c_str());
+    if (config.rootCa.has_value() && !config.rootCa->empty())
+    {
+        clientConfigBuilder.WithCertificateAuthority(config.rootCa->c_str());
+    }
     clientConfigBuilder.WithSdkName(SharedCrtResourceManager::BINARY_NAME);
     clientConfigBuilder.WithSdkVersion(DEVICE_CLIENT_VERSION);
 

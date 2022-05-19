@@ -52,6 +52,18 @@ RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
     && make install
 
 ###############################################################################
+# Install softhsm v2.3.0 from source
+###############################################################################
+
+WORKDIR /tmp 
+RUN wget https://dist.opendnssec.org/source/softhsm-2.3.0.tar.gz \
+    && tar -xzf softhsm-2.3.0.tar.gz \
+    && cd softhsm-2.3.0 \
+    && ./configure --disable-gost \
+    && make \
+    && make install
+
+###############################################################################
 # Clone and build Google Test
 ###############################################################################
 WORKDIR /tmp

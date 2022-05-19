@@ -123,7 +123,7 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
             auto path = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
             if (FileUtils::FileExists(path))
             {
-                rootCa = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+                rootCa = path;
             }
             else
             {
@@ -331,6 +331,16 @@ bool PlainConfig::Validate() const
             DeviceClient::DC_FATAL_ERROR,
             Sanitize(lockFilePath).c_str());
         return false;
+    }
+    if (rootCa.has_value() && !rootCa->empty() && FileUtils::FileExists(rootCa->c_str()))
+    {
+        string parentDir = FileUtils::ExtractParentDirectory(rootCa->c_str());
+        if (!FileUtils::ValidateFilePermissions(parentDir, Permissions::ROOT_CA_DIR) ||
+            !FileUtils::ValidateFilePermissions(rootCa->c_str(), Permissions::ROOT_CA))
+        {
+            LOG_ERROR(Config::TAG, "Incorrect permissions on Root CA file and/or parent directory");
+            return false;
+        }
     }
 #if !defined(DISABLE_MQTT)
     if (!endpoint.has_value() || endpoint->empty())
@@ -2192,14 +2202,14 @@ bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
     }
 
     size_t incomingFileSize = FileUtils::GetFileSize(file);
-    if (5000 < incomingFileSize)
+    if (incomingFileSize > Config::MAX_CONFIG_SIZE)
     {
         LOGM_WARN(
             TAG,
             "Refusing to open config file %s, file size %zu bytes is greater than allowable limit of %zu bytes",
             Sanitize(file).c_str(),
             incomingFileSize,
-            5000);
+            Config::MAX_CONFIG_SIZE);
         return false;
     }
 

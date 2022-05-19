@@ -207,7 +207,7 @@ namespace Aws
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
                     static constexpr char JSON_KEY_INTERVAL[] = "interval";
 
-                    bool enabled{true};
+                    bool enabled{false};
                     int interval{300};
                 };
                 DeviceDefender deviceDefender;
@@ -448,6 +448,11 @@ namespace Aws
                 bool ValidateAndStoreRuntimeConfig();
                 bool ParseConfigFile(const std::string &file, bool isRuntimeConfig);
                 bool init(const CliArgs &cliArgs);
+
+                /**
+                 * \brief Maximum accepted size for the config file.
+                 */
+                static constexpr size_t MAX_CONFIG_SIZE = 5000;
 
                 /**
                  * \brief Separator between directories in path.

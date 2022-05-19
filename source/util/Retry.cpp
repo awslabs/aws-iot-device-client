@@ -3,6 +3,7 @@
 
 #include "Retry.h"
 #include "../logging/LoggerFactory.h"
+#include <thread>
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Logging;

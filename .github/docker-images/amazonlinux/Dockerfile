@@ -16,6 +16,7 @@ RUN yum -y update \
     make \
     gcc \
     gcc-c++ \
+    softhsm \
     && yum clean all \
     && rm -rf /var/cache/yum
 
