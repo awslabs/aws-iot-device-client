@@ -4,7 +4,7 @@ Wants=network-online.target
 After=network.target network-online.target
 
 [Service]
-ExecStart=/sbin/aws-iot-device-client
+ExecStart=/sbin/aws-iot-device-client --config-file /etc/.aws-iot-device-client/aws-iot-device-client.conf
 
 [Install]
 WantedBy=multi-user.target
