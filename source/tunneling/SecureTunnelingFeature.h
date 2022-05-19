@@ -124,8 +124,7 @@ namespace Aws
                      * \brief a helper function to get SecureTunnelingContext in order to facilitate testing
                      * Pass an empty unique_ptr and set value in order to allow mocking
                      */
-                    virtual void getContext(
-                        std::unique_ptr<SecureTunnelingContext> &context,
+                    virtual std::unique_ptr<SecureTunnelingContext> createContext(
                         const std::string &accessToken,
                         const std::string &region,
                         const uint16_t &port);

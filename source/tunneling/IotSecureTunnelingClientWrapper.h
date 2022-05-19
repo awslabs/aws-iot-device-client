@@ -4,7 +4,7 @@
 #ifndef AWS_IOT_DEVICE_CLIENT_IOTSECURETUNNELINGCLIENTWRAPPER_H
 #define AWS_IOT_DEVICE_CLIENT_IOTSECURETUNNELINGCLIENTWRAPPER_H
 
-#include "aws/iotsecuretunneling/IotSecureTunnelingClient.h"
+#include <aws/iotsecuretunneling/IotSecureTunnelingClient.h>
 
 namespace Aws
 {
