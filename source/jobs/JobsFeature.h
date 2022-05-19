@@ -49,19 +49,19 @@ namespace Aws
                      */
                     struct JobExecutionStatusInfo
                     {
-                        Aws::Iotjobs::JobStatus status;
+                        Iotjobs::JobStatus status;
                         std::string reason;
-                        std::string stdoutput;
-                        std::string stderror;
+                        std::string output;
 
-                        explicit JobExecutionStatusInfo(
+                        JobExecutionStatusInfo(
                             Iotjobs::JobStatus status,
-                            const std::string &reason = "",
-                            const std::string &stdoutput = "",
-                            const std::string &stderror = "")
-                            : status(status), reason(reason), stdoutput(stdoutput), stderror(stderror)
+                            const std::string &reason,
+                            const std::string &output)
+                            : status(status), reason(reason), output(output)
                         {
                         }
+
+                        explicit JobExecutionStatusInfo(Iotjobs::JobStatus status) : status(status) {}
                     };
 
                   private:

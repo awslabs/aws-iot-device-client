@@ -376,37 +376,31 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         statusDetails["reason"] = statusInfo.reason.substr(0, MAX_STATUS_DETAIL_LENGTH).c_str();
     }
 
-    if (!statusInfo.stdoutput.empty())
+    if (statusInfo.status == Iotjobs::JobStatus::SUCCEEDED && !statusInfo.output.empty())
     {
         // We want the most recent output since we can only include 1024 characters in the job execution update
-        int startPos = statusInfo.stdoutput.size() > MAX_STATUS_DETAIL_LENGTH
-                           ? statusInfo.stdoutput.size() - MAX_STATUS_DETAIL_LENGTH
+        int startPos = statusInfo.output.size() > MAX_STATUS_DETAIL_LENGTH
+                           ? statusInfo.output.size() - MAX_STATUS_DETAIL_LENGTH
                            : 0;
         // TODO We need to add filtering of invalid characters for the status details that may come from weird
         // process output. The valid values for a statusDetail value are '[^\p{C}]+ which translates into
         // "everything other than invisible control characters and unused code points" (See
         // http://www.unicode.org/reports/tr18/#General_Category_Property)
+
         // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
         // cppcheck-suppress danglingTemporaryLifetime
-        statusDetails["stdout"] = statusInfo.stdoutput.substr(startPos, statusInfo.stdoutput.size()).c_str();
+        statusDetails["stdout"] = statusInfo.output.substr(startPos, statusInfo.output.size()).c_str();
     }
-    else
+    else if (!statusInfo.output.empty())
     {
-        LOG_DEBUG(TAG, "Not including stdout with the status details");
-    }
-    if (!statusInfo.stderror.empty())
-    {
-        int startPos = statusInfo.stderror.size() > MAX_STATUS_DETAIL_LENGTH
-                           ? statusInfo.stderror.size() - MAX_STATUS_DETAIL_LENGTH
+        int startPos = statusInfo.output.size() > MAX_STATUS_DETAIL_LENGTH
+                           ? statusInfo.output.size() - MAX_STATUS_DETAIL_LENGTH
                            : 0;
         // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
         // cppcheck-suppress danglingTemporaryLifetime
-        statusDetails["stderr"] = statusInfo.stderror.substr(startPos, statusInfo.stderror.size()).c_str();
+        statusDetails["stderr"] = statusInfo.output.substr(startPos, statusInfo.output.size()).c_str();
     }
-    else
-    {
-        LOG_DEBUG(TAG, "Not including stderr with the status details");
-    }
+
     // NOTE(marcoaz): statusDetails is captured by value
     // cppcheck-suppress danglingTemporaryLifetime
     publishUpdateJobExecutionStatusWithRetry(data, statusInfo, statusDetails, onCompleteCallback);
@@ -588,7 +582,7 @@ void JobsFeature::initJob(const JobExecutionData &job)
         publishUpdateJobExecutionStatus(
             job,
             JobExecutionStatusInfo(
-                Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!"),
+                Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!", ""),
             shutdownHandler);
         return;
     }
@@ -625,20 +619,23 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
         if (!executionStatus)
         {
             LOG_INFO(TAG, "Job executed successfully!");
-            string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
+            string standardOut;
+            if (jobDocument.includeStdOut)
+            {
+                standardOut = engine.getStdOut();
+            }
+            else
+            {
+                LOG_DEBUG(TAG, "Not including stdout with the status details");
+            }
             publishUpdateJobExecutionStatus(
-                job,
-                JobExecutionStatusInfo(JobStatus::SUCCEEDED, "", standardOut, engine.getStdErr()),
-                shutdownHandler);
+                job, JobExecutionStatusInfo(JobStatus::SUCCEEDED, "", standardOut), shutdownHandler);
         }
         else
         {
             LOG_WARN(TAG, "Job execution failed!");
-            string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
             publishUpdateJobExecutionStatus(
-                job,
-                JobExecutionStatusInfo(JobStatus::FAILED, reason, standardOut, engine.getStdErr()),
-                shutdownHandler);
+                job, JobExecutionStatusInfo(JobStatus::FAILED, reason, engine.getStdErr()), shutdownHandler);
         }
     };
     thread jobEngineThread(runJob);
