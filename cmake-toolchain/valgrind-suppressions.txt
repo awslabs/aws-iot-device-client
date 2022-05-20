@@ -14,3 +14,907 @@
    fun:_ZN7testing8internal12UnitTestImpl11RunAllTestsEv
    fun:_ZN7testing8internal38HandleSehExceptionsInMethodIfSupportedINS0_12UnitTestImplEbEET0_PT_MS4_FS3_vEPKc
 }
+{
+   Cond_1
+   Memcheck:Cond
+   fun:rawmemchr
+   fun:_IO_str_init_static_internal
+   fun:_IO_strfile_read
+   fun:__isoc99_sscanf
+   fun:get_net_connections_from_proc_buf
+   fun:get_network_connections
+   fun:s_reporting_task_fn
+   fun:aws_task_run
+   fun:s_run_all
+   fun:aws_task_scheduler_run_all
+   fun:s_main_loop
+   fun:thread_fn
+   fun:start_thread
+}
+{
+   direct_1
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:ossl_init_thread_start
+   fun:ERR_get_state
+   fun:ERR_set_mark
+   fun:pubkey_cb
+   fun:asn1_item_embed_d2i
+   fun:asn1_template_noexp_d2i
+   fun:asn1_template_ex_d2i
+   fun:asn1_item_embed_d2i
+   fun:asn1_template_noexp_d2i
+   fun:asn1_template_ex_d2i
+}
+{
+   direct_2
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:s2n_drbg_instantiate
+   fun:s2n_defend_if_forked
+   fun:s2n_get_private_random_data
+   fun:s2n_openssl_compat_rand
+   fun:RSA_padding_add_PKCS1_type_2
+   fun:rsa_ossl_public_encrypt
+   fun:s2n_rsa_encrypt
+   fun:s2n_rsa_keys_match
+   fun:s2n_pkey_match
+   fun:s2n_cert_chain_and_key_load
+}
+{
+   direct_3
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:ERR_get_state
+   fun:ERR_set_mark
+   fun:pubkey_cb
+   fun:asn1_item_embed_d2i
+   fun:asn1_template_noexp_d2i
+   fun:asn1_template_ex_d2i
+   fun:asn1_item_embed_d2i
+   fun:asn1_template_noexp_d2i
+   fun:asn1_template_ex_d2i
+   fun:ASN1_item_ex_d2i
+}
+{
+   direct_4
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:s2n_mem_malloc_no_mlock_impl
+   fun:s2n_realloc
+   fun:s2n_alloc
+   fun:s2n_config_new
+   fun:s_tls_ctx_new
+   fun:aws_tls_client_ctx_new
+   fun:_ZN3Aws3Crt2Io10TlsContextC1ERNS1_17TlsContextOptionsENS1_7TlsModeEP13aws_allocator
+   fun:_ZN3Aws3Iot33MqttClientConnectionConfigBuilder5BuildEv
+   fun:_ZN3Aws3Iot12DeviceClient24SharedCrtResourceManager19establishConnectionERKNS1_11PlainConfigE
+   fun:_ZZ17attemptConnectionvENKUlvE_clEv
+   fun:_ZNSt17_Function_handlerIFbvEZ17attemptConnectionvEUlvE_E9_M_invokeERKSt9_Any_data
+}
+{
+   direct_5
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:__libc_alloc_buffer_allocate
+   fun:alloc_buffer_allocate
+   fun:__resolv_conf_allocate
+   fun:__resolv_conf_load
+   fun:__resolv_conf_get_current
+   fun:__res_vinit
+   fun:maybe_init
+   fun:context_get
+   fun:context_get
+   fun:__resolv_context_get
+   fun:gaih_inet.constprop.0
+   fun:getaddrinfo
+   fun:aws_default_dns_resolve
+   fun:resolver_thread_fn
+   fun:thread_fn
+}
+{
+   indirect_1
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:bn_expand2
+   fun:BN_copy
+   fun:BN_dup
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_decrypt
+   fun:s2n_rsa_decrypt
+   fun:s2n_rsa_keys_match
+   fun:s2n_pkey_match
+   fun:s2n_cert_chain_and_key_load
+}
+{
+   indirect_2
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:bn_expand2
+   fun:BN_copy
+   fun:BN_dup
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_encrypt
+   fun:RSA_sign
+   fun:s2n_rsa_pkcs1v15_sign_digest
+   fun:s2n_rsa_pkcs1v15_sign
+   fun:s2n_rsa_sign
+}
+{
+   indirect_3
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:s2n_mem_malloc_no_mlock_impl
+   fun:s2n_realloc
+   fun:s2n_protocol_preferences_append
+   fun:s2n_protocol_preferences_set
+   fun:s2n_config_set_protocol_preferences
+   fun:s_tls_ctx_new
+   fun:aws_tls_client_ctx_new
+   fun:_ZN3Aws3Crt2Io10TlsContextC1ERNS1_17TlsContextOptionsENS1_7TlsModeEP13aws_allocator
+   fun:_ZN3Aws3Iot33MqttClientConnectionConfigBuilder5BuildEv
+   fun:_ZN3Aws3Iot12DeviceClient24SharedCrtResourceManager19establishConnectionERKNS1_11PlainConfigE
+   fun:_ZZ17attemptConnectionvENKUlvE_clEv
+}
+{
+   indirect_4
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:s2n_mem_malloc_no_mlock_impl
+   fun:s2n_realloc
+   fun:s2n_alloc
+   fun:s2n_cert_chain_and_key_new
+   fun:s2n_config_add_cert_chain_and_key
+   fun:s_tls_ctx_new
+   fun:aws_tls_client_ctx_new
+   fun:_ZN3Aws3Crt2Io10TlsContextC1ERNS1_17TlsContextOptionsENS1_7TlsModeEP13aws_allocator
+   fun:_ZN3Aws3Iot33MqttClientConnectionConfigBuilder5BuildEv
+   fun:_ZN3Aws3Iot12DeviceClient24SharedCrtResourceManager19establishConnectionERKNS1_11PlainConfigE
+   fun:_ZZ17attemptConnectionvENKUlvE_clEv
+}
+{
+   indirect_5
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:s2n_mem_malloc_no_mlock_impl
+   fun:s2n_realloc
+   fun:s2n_alloc
+   fun:s2n_cert_chain_and_key_load_cns
+   fun:s2n_cert_chain_and_key_set_names
+   fun:s2n_cert_chain_and_key_load
+   fun:s2n_cert_chain_and_key_load_pem
+   fun:s2n_config_add_cert_chain_and_key
+   fun:s_tls_ctx_new
+   fun:aws_tls_client_ctx_new
+   fun:_ZN3Aws3Crt2Io10TlsContextC1ERNS1_17TlsContextOptionsENS1_7TlsModeEP13aws_allocator
+}
+{
+   indirect_6
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:s2n_mem_malloc_no_mlock_impl
+   fun:s2n_realloc
+   fun:s2n_alloc
+   fun:s2n_dup
+   fun:s2n_map_add
+   fun:s2n_config_update_domain_name_to_cert_map
+   fun:s2n_config_build_domain_name_to_cert_map
+   fun:s2n_config_add_cert_chain_and_key_to_store
+   fun:s2n_config_add_cert_chain_and_key
+   fun:s_tls_ctx_new
+   fun:aws_tls_client_ctx_new
+}
+{
+   indirect_7
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:s2n_mem_malloc_no_mlock_impl
+   fun:s2n_realloc
+   fun:s2n_alloc
+   fun:s2n_map_new_with_initial_capacity
+   fun:s2n_config_init
+   fun:s2n_config_new
+   fun:s_tls_ctx_new
+   fun:aws_tls_client_ctx_new
+   fun:_ZN3Aws3Crt2Io10TlsContextC1ERNS1_17TlsContextOptionsENS1_7TlsModeEP13aws_allocator
+   fun:_ZN3Aws3Iot33MqttClientConnectionConfigBuilder5BuildEv
+   fun:_ZN3Aws3Iot12DeviceClient24SharedCrtResourceManager19establishConnectionERKNS1_11PlainConfigE
+}
+{
+   indirect_8
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:BN_new
+   fun:BN_dup
+   fun:BN_BLINDING_new
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_decrypt
+   fun:s2n_rsa_decrypt
+   fun:s2n_rsa_keys_match
+   fun:s2n_pkey_match
+   fun:s2n_cert_chain_and_key_load
+}
+{
+   indirect_9
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:BN_new
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_decrypt
+   fun:s2n_rsa_decrypt
+   fun:s2n_rsa_keys_match
+   fun:s2n_pkey_match
+   fun:s2n_cert_chain_and_key_load
+   fun:s2n_cert_chain_and_key_load_pem
+   fun:s2n_config_add_cert_chain_and_key
+}
+{
+   indirect_10
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:BN_new
+   fun:BN_dup
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_decrypt
+   fun:s2n_rsa_decrypt
+   fun:s2n_rsa_keys_match
+   fun:s2n_pkey_match
+   fun:s2n_cert_chain_and_key_load
+   fun:s2n_cert_chain_and_key_load_pem
+}
+{
+   indirect_11
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:BN_new
+   fun:BN_dup
+   fun:BN_BLINDING_new
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_encrypt
+   fun:RSA_sign
+   fun:s2n_rsa_pkcs1v15_sign_digest
+   fun:s2n_rsa_pkcs1v15_sign
+   fun:s2n_rsa_sign
+}
+{
+   indirect_12
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:BN_new
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_encrypt
+   fun:RSA_sign
+   fun:s2n_rsa_pkcs1v15_sign_digest
+   fun:s2n_rsa_pkcs1v15_sign
+   fun:s2n_rsa_sign
+   fun:s2n_pkey_sign
+   fun:s2n_async_pkey_sign_sync
+}
+{
+   indirect_13
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:BN_new
+   fun:BN_dup
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_encrypt
+   fun:RSA_sign
+   fun:s2n_rsa_pkcs1v15_sign_digest
+   fun:s2n_rsa_pkcs1v15_sign
+   fun:s2n_rsa_sign
+   fun:s2n_pkey_sign
+}
+{
+   indirect_14
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:s2n_mem_malloc_no_mlock_impl
+   fun:s2n_realloc
+   fun:s2n_alloc
+   fun:s2n_array_new
+   fun:s2n_cert_chain_and_key_new
+   fun:s2n_config_add_cert_chain_and_key
+   fun:s_tls_ctx_new
+   fun:aws_tls_client_ctx_new
+   fun:_ZN3Aws3Crt2Io10TlsContextC1ERNS1_17TlsContextOptionsENS1_7TlsModeEP13aws_allocator
+   fun:_ZN3Aws3Iot33MqttClientConnectionConfigBuilder5BuildEv
+   fun:_ZN3Aws3Iot12DeviceClient24SharedCrtResourceManager19establishConnectionERKNS1_11PlainConfigE
+}
+{
+   indirect_15
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:s2n_mem_malloc_no_mlock_impl
+   fun:s2n_realloc
+   fun:s2n_alloc
+   fun:s2n_map_embiggen
+   fun:s2n_map_new_with_initial_capacity
+   fun:s2n_config_init
+   fun:s2n_config_new
+   fun:s_tls_ctx_new
+   fun:aws_tls_client_ctx_new
+   fun:_ZN3Aws3Crt2Io10TlsContextC1ERNS1_17TlsContextOptionsENS1_7TlsModeEP13aws_allocator
+   fun:_ZN3Aws3Iot33MqttClientConnectionConfigBuilder5BuildEv
+}
+{
+   indirect_16
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:BN_new
+   fun:bn_c2i
+   fun:asn1_d2i_ex_primitive
+   fun:asn1_item_embed_d2i
+   fun:asn1_template_noexp_d2i
+   fun:asn1_template_ex_d2i
+   fun:ASN1_item_ex_d2i
+   fun:ASN1_item_d2i
+   fun:old_rsa_priv_decode
+   fun:d2i_PrivateKey
+}
+{
+   indirect_17
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:CRYPTO_THREAD_lock_new
+   fun:EVP_PKEY_new
+   fun:d2i_PrivateKey
+   fun:d2i_AutoPrivateKey
+   fun:s2n_asn1der_to_private_key
+   fun:s2n_cert_chain_and_key_set_private_key_from_stuffer
+   fun:s2n_cert_chain_and_key_set_private_key
+   fun:s2n_cert_chain_and_key_load_pem
+   fun:s2n_config_add_cert_chain_and_key
+   fun:s_tls_ctx_new
+}
+{
+   indirect_18
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:CRYPTO_THREAD_lock_new
+   fun:RSA_new_method
+   fun:rsa_cb
+   fun:ASN1_item_ex_new
+   fun:ASN1_item_ex_d2i
+   fun:ASN1_item_d2i
+   fun:old_rsa_priv_decode
+   fun:d2i_PrivateKey
+   fun:d2i_AutoPrivateKey
+   fun:s2n_asn1der_to_private_key
+}
+{
+   indirect_19
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:CRYPTO_THREAD_lock_new
+   fun:BN_BLINDING_new
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_decrypt
+   fun:s2n_rsa_decrypt
+   fun:s2n_rsa_keys_match
+   fun:s2n_pkey_match
+   fun:s2n_cert_chain_and_key_load
+   fun:s2n_cert_chain_and_key_load_pem
+}
+{
+   indirect_20
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:CRYPTO_THREAD_lock_new
+   fun:BN_BLINDING_new
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_encrypt
+   fun:RSA_sign
+   fun:s2n_rsa_pkcs1v15_sign_digest
+   fun:s2n_rsa_pkcs1v15_sign
+   fun:s2n_rsa_sign
+   fun:s2n_pkey_sign
+}
+{
+   indirect_21
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EVP_PKEY_new
+   fun:d2i_PrivateKey
+   fun:d2i_AutoPrivateKey
+   fun:s2n_asn1der_to_private_key
+   fun:s2n_cert_chain_and_key_set_private_key_from_stuffer
+   fun:s2n_cert_chain_and_key_set_private_key
+   fun:s2n_cert_chain_and_key_load_pem
+   fun:s2n_config_add_cert_chain_and_key
+   fun:s_tls_ctx_new
+   fun:aws_tls_client_ctx_new
+}
+{
+   indirect_22
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:BN_BLINDING_new
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_decrypt
+   fun:s2n_rsa_decrypt
+   fun:s2n_rsa_keys_match
+   fun:s2n_pkey_match
+   fun:s2n_cert_chain_and_key_load
+   fun:s2n_cert_chain_and_key_load_pem
+   fun:s2n_config_add_cert_chain_and_key
+}
+{
+   indirect_23
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:BN_BLINDING_new
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_encrypt
+   fun:RSA_sign
+   fun:s2n_rsa_pkcs1v15_sign_digest
+   fun:s2n_rsa_pkcs1v15_sign
+   fun:s2n_rsa_sign
+   fun:s2n_pkey_sign
+   fun:s2n_async_pkey_sign_sync
+}
+{
+   indirect_24
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:BN_MONT_CTX_new
+   fun:BN_MONT_CTX_set_locked
+   fun:rsa_ossl_mod_exp
+   fun:rsa_ossl_private_decrypt
+   fun:s2n_rsa_decrypt
+   fun:s2n_rsa_keys_match
+   fun:s2n_pkey_match
+   fun:s2n_cert_chain_and_key_load
+   fun:s2n_cert_chain_and_key_load_pem
+   fun:s2n_config_add_cert_chain_and_key
+   fun:s_tls_ctx_new
+}
+{
+   indirect_25
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:s2n_mem_malloc_no_mlock_impl
+   fun:s2n_realloc
+   fun:s2n_alloc
+   fun:s2n_create_cert_chain_from_stuffer
+   fun:s2n_cert_chain_and_key_set_cert_chain_from_stuffer
+   fun:s2n_cert_chain_and_key_set_cert_chain
+   fun:s2n_cert_chain_and_key_load_pem
+   fun:s2n_config_add_cert_chain_and_key
+   fun:s_tls_ctx_new
+   fun:aws_tls_client_ctx_new
+   fun:_ZN3Aws3Crt2Io10TlsContextC1ERNS1_17TlsContextOptionsENS1_7TlsModeEP13aws_allocator
+}
+{
+   indirect_26
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:bn_expand2
+   fun:BN_copy
+   fun:BN_MONT_CTX_set
+   fun:BN_MONT_CTX_set_locked
+   fun:rsa_ossl_mod_exp
+   fun:rsa_ossl_private_decrypt
+   fun:s2n_rsa_decrypt
+   fun:s2n_rsa_keys_match
+   fun:s2n_pkey_match
+   fun:s2n_cert_chain_and_key_load
+}
+{
+   indirect_27
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:BN_new
+   fun:BN_secure_new
+   fun:bn_secure_c2i
+   fun:asn1_d2i_ex_primitive
+   fun:asn1_item_embed_d2i
+   fun:asn1_template_noexp_d2i
+   fun:asn1_template_ex_d2i
+   fun:ASN1_item_ex_d2i
+   fun:ASN1_item_d2i
+   fun:old_rsa_priv_decode
+}
+{
+   indirect_28
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:RSA_new_method
+   fun:rsa_cb
+   fun:ASN1_item_ex_new
+   fun:ASN1_item_ex_d2i
+   fun:ASN1_item_d2i
+   fun:old_rsa_priv_decode
+   fun:d2i_PrivateKey
+   fun:d2i_AutoPrivateKey
+   fun:s2n_asn1der_to_private_key
+   fun:s2n_cert_chain_and_key_set_private_key_from_stuffer
+}
+{
+   indirect_29
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:bn_expand2
+   fun:BN_copy
+   fun:BN_dup
+   fun:BN_BLINDING_new
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_decrypt
+   fun:s2n_rsa_decrypt
+   fun:s2n_rsa_keys_match
+   fun:s2n_pkey_match
+}
+{
+   indirect_30
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:bn_expand2
+   fun:BN_bin2bn
+   fun:bnrand.part.0
+   fun:bnrand_range.part.0
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_decrypt
+   fun:s2n_rsa_decrypt
+   fun:s2n_rsa_keys_match
+   fun:s2n_pkey_match
+}
+{
+   indirect_31
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:bn_expand2
+   fun:BN_copy
+   fun:int_bn_mod_inverse
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_decrypt
+   fun:s2n_rsa_decrypt
+   fun:s2n_rsa_keys_match
+   fun:s2n_pkey_match
+   fun:s2n_cert_chain_and_key_load
+}
+{
+   indirect_32
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:bn_expand2
+   fun:BN_copy
+   fun:BN_dup
+   fun:BN_BLINDING_new
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_encrypt
+   fun:RSA_sign
+   fun:s2n_rsa_pkcs1v15_sign_digest
+   fun:s2n_rsa_pkcs1v15_sign
+}
+{
+   indirect_33
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:bn_expand2
+   fun:BN_bin2bn
+   fun:bnrand.part.0
+   fun:bnrand_range.part.0
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_encrypt
+   fun:RSA_sign
+   fun:s2n_rsa_pkcs1v15_sign_digest
+   fun:s2n_rsa_pkcs1v15_sign
+}
+{
+   indirect_34
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:bn_expand2
+   fun:BN_copy
+   fun:int_bn_mod_inverse
+   fun:BN_BLINDING_create_param
+   fun:RSA_setup_blinding
+   fun:rsa_ossl_private_encrypt
+   fun:RSA_sign
+   fun:s2n_rsa_pkcs1v15_sign_digest
+   fun:s2n_rsa_pkcs1v15_sign
+   fun:s2n_rsa_sign
+}
+{
+   indirect_35
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EVP_CipherInit_ex
+   fun:s2n_drbg_instantiate
+   fun:s2n_defend_if_forked
+   fun:s2n_get_private_random_data
+   fun:s2n_openssl_compat_rand
+   fun:RSA_padding_add_PKCS1_type_2
+   fun:rsa_ossl_public_encrypt
+   fun:s2n_rsa_encrypt
+   fun:s2n_rsa_keys_match
+   fun:s2n_pkey_match
+}
+{
+   indirect_36
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:bn_expand2
+   fun:BN_set_bit
+   fun:BN_MONT_CTX_set
+   fun:BN_MONT_CTX_set_locked
+   fun:rsa_ossl_mod_exp
+   fun:rsa_ossl_private_decrypt
+   fun:s2n_rsa_decrypt
+   fun:s2n_rsa_keys_match
+   fun:s2n_pkey_match
+   fun:s2n_cert_chain_and_key_load
+}
+{
+   indirect_37
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:bn_expand2
+   fun:BN_bin2bn
+   fun:bn_c2i
+   fun:asn1_d2i_ex_primitive
+   fun:asn1_item_embed_d2i
+   fun:asn1_template_noexp_d2i
+   fun:asn1_template_ex_d2i
+   fun:ASN1_item_ex_d2i
+   fun:ASN1_item_d2i
+   fun:old_rsa_priv_decode
+}
+{
+   indirect_38
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:s2n_mem_malloc_no_mlock_impl
+   fun:s2n_realloc
+   fun:s2n_array_enlarge
+   fun:s2n_array_new
+   fun:s2n_cert_chain_and_key_new
+   fun:s2n_config_add_cert_chain_and_key
+   fun:s_tls_ctx_new
+   fun:aws_tls_client_ctx_new
+   fun:_ZN3Aws3Crt2Io10TlsContextC1ERNS1_17TlsContextOptionsENS1_7TlsModeEP13aws_allocator
+   fun:_ZN3Aws3Iot33MqttClientConnectionConfigBuilder5BuildEv
+   fun:_ZN3Aws3Iot12DeviceClient24SharedCrtResourceManager19establishConnectionERKNS1_11PlainConfigE
+}
+{
+   indirect_39
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:bn_expand2
+   fun:BN_bin2bn
+   fun:bn_secure_c2i
+   fun:asn1_d2i_ex_primitive
+   fun:asn1_item_embed_d2i
+   fun:asn1_template_noexp_d2i
+   fun:asn1_template_ex_d2i
+   fun:ASN1_item_ex_d2i
+   fun:ASN1_item_d2i
+   fun:old_rsa_priv_decode
+}
+{
+   possible_1
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:allocate_dtv
+   fun:_dl_allocate_tls
+   fun:allocate_stack
+   fun:pthread_create@@GLIBC_2.2.5
+   fun:aws_thread_launch
+   fun:s_run
+   fun:aws_event_loop_run
+   fun:s_event_loop_group_new
+   fun:aws_event_loop_group_new
+   fun:aws_event_loop_group_new_default
+   fun:_ZN3Aws3Crt2Io14EventLoopGroupC1EtP13aws_allocator
+   fun:_ZN3Aws3Iot12DeviceClient24SharedCrtResourceManager11buildClientERKNS1_11PlainConfigE
+   fun:_ZN3Aws3Iot12DeviceClient24SharedCrtResourceManager10initializeERKNS1_11PlainConfigEPSt6vectorIPNS1_7FeatureESaIS8_EE
+}
+{
+   possible_2
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:allocate_dtv
+   fun:_dl_allocate_tls
+   fun:allocate_stack
+   fun:pthread_create@@GLIBC_2.2.5
+   fun:aws_thread_launch
+   fun:create_and_init_host_entry
+   fun:default_resolve_host
+   fun:aws_host_resolver_resolve_host
+   fun:aws_client_bootstrap_new_socket_channel
+   fun:s_mqtt_client_connect
+   fun:aws_mqtt_client_connection_connect
+   fun:_ZN3Aws3Crt4Mqtt14MqttConnection7ConnectEPKcbtjj
+   fun:_ZN3Aws3Iot12DeviceClient24SharedCrtResourceManager19establishConnectionERKNS1_11PlainConfigE
+}
+{
+   possible_3
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:allocate_dtv
+   fun:_dl_allocate_tls
+   fun:allocate_stack
+   fun:pthread_create@@GLIBC_2.2.5
+   fun:_ZNSt6thread15_M_start_threadESt10unique_ptrINS_6_StateESt14default_deleteIS1_EEPFvvE
+   fun:_ZNSt6threadC1IMN3Aws3Iot12DeviceClient7Logging12StdOutLoggerEFvvEJPS5_EvEEOT_DpOT0_
+   fun:_ZN3Aws3Iot12DeviceClient7Logging12StdOutLogger5startERKNS1_11PlainConfigE
+   fun:_ZN3Aws3Iot12DeviceClient7Logging13LoggerFactory11reconfigureERKNS1_11PlainConfigE
+   fun:main
+}
+{
+   possible_4
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:memalign
+   fun:posix_memalign
+   fun:s_default_malloc
+   fun:s_default_calloc
+   fun:aws_mem_calloc
+   fun:mqtt_disconnect_impl
+   fun:aws_mqtt_client_connection_disconnect
+   fun:_ZN3Aws3Crt4Mqtt14MqttConnection10DisconnectEv
+   fun:_ZN3Aws3Iot12DeviceClient24SharedCrtResourceManager10disconnectEv
+   fun:_Z8shutdownv
+   fun:_Z22handle_feature_stoppedPKN3Aws3Iot12DeviceClient7FeatureE
+   fun:_ZN3Aws3Iot12DeviceClient25DefaultClientBaseNotifier7onEventEPNS1_7FeatureENS1_27ClientBaseEventNotificationE
+}
+{
+   possible_5
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:memalign
+   fun:posix_memalign
+   fun:s_default_malloc
+   fun:s_default_calloc
+   fun:aws_mem_calloc
+   fun:aws_socket_write
+   fun:s_socket_process_write_message
+   fun:aws_channel_handler_process_write_message
+   fun:aws_channel_slot_send_message
+   fun:s_generic_send
+   fun:s_s2n_handler_send
+   fun:s2n_connection_send_stuffer
+}
+{
+   possible_6
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:_Znwm
+   fun:_ZNSs4_Rep9_S_createEmmRKSaIcE
+   fun:_ZNSs12_S_constructIPKcEEPcT_S3_RKSaIcESt20forward_iterator_tag
+   fun:_ZNSsC1EPKcmRKSaIcE
+   obj:/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28
+   fun:_ZNSt11logic_errorC1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   obj:/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28
+   fun:_ZSt20__throw_future_errori
+   fun:_ZNSt13__future_base13_State_baseV221_M_set_retrieved_flagEv
+   fun:_ZNSt14__basic_futureIvEC1ERKSt10shared_ptrINSt13__future_base13_State_baseV2EE
+   fun:_ZNSt6futureIvEC1ERKSt10shared_ptrINSt13__future_base13_State_baseV2EE
+   fun:_ZNSt7promiseIvE10get_futureEv
+}
+{
+   possible_7
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:memalign
+   fun:posix_memalign
+   fun:s_default_malloc
+   fun:aws_mem_acquire
+   fun:aws_mem_acquire_many
+   fun:s_schedule_timeout_task
+   fun:s_unsubscribe_send
+   fun:s_request_outgoing_task
+   fun:s_channel_task_run
+   fun:aws_task_run
+   fun:s_run_all
+   fun:aws_task_scheduler_run_all
+}
+{
+   possible_8
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:allocate_dtv
+   fun:_dl_allocate_tls
+   fun:allocate_stack
+   fun:pthread_create@@GLIBC_2.2.5
+   fun:_ZNSt6thread15_M_start_threadESt10unique_ptrINS_6_StateESt14default_deleteIS1_EEPFvvE
+   fun:_ZNSt6threadC1IZ17attemptConnectionvEUlvE0_JEvEEOT_DpOT0_
+   fun:_Z17attemptConnectionv
+   fun:main
+}
