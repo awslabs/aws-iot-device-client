@@ -241,7 +241,7 @@ void JobsFeature::startNextPendingJobReceivedHandler(StartNextJobExecutionRespon
                 handlingJob.store(true);
 
                 copyJobsNotification(response->Execution.value());
-                executeJob(response->Execution.value());
+                initJob(response->Execution.value());
             }
         }
     }
@@ -292,7 +292,7 @@ void JobsFeature::nextJobChangedHandler(NextJobExecutionChangedEvent *event, int
                 handlingJob.store(true);
 
                 copyJobsNotification(event->Execution.value());
-                executeJob(event->Execution.value());
+                initJob(event->Execution.value());
             }
         }
     }
@@ -376,38 +376,42 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         statusDetails["reason"] = statusInfo.reason.substr(0, MAX_STATUS_DETAIL_LENGTH).c_str();
     }
 
-    if (!statusInfo.stdoutput.empty())
+    if (statusInfo.status == Iotjobs::JobStatus::SUCCEEDED && !statusInfo.output.empty())
     {
         // We want the most recent output since we can only include 1024 characters in the job execution update
-        int startPos = statusInfo.stdoutput.size() > MAX_STATUS_DETAIL_LENGTH
-                           ? statusInfo.stdoutput.size() - MAX_STATUS_DETAIL_LENGTH
+        int startPos = statusInfo.output.size() > MAX_STATUS_DETAIL_LENGTH
+                           ? statusInfo.output.size() - MAX_STATUS_DETAIL_LENGTH
                            : 0;
         // TODO We need to add filtering of invalid characters for the status details that may come from weird
         // process output. The valid values for a statusDetail value are '[^\p{C}]+ which translates into
         // "everything other than invisible control characters and unused code points" (See
         // http://www.unicode.org/reports/tr18/#General_Category_Property)
+
         // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
         // cppcheck-suppress danglingTemporaryLifetime
-        statusDetails["stdout"] = statusInfo.stdoutput.substr(startPos, statusInfo.stdoutput.size()).c_str();
+        statusDetails["stdout"] = statusInfo.output.substr(startPos, statusInfo.output.size()).c_str();
     }
-    else
+    else if (!statusInfo.output.empty())
     {
-        LOG_DEBUG(TAG, "Not including stdout with the status details");
-    }
-    if (!statusInfo.stderror.empty())
-    {
-        int startPos = statusInfo.stderror.size() > MAX_STATUS_DETAIL_LENGTH
-                           ? statusInfo.stderror.size() - MAX_STATUS_DETAIL_LENGTH
+        int startPos = statusInfo.output.size() > MAX_STATUS_DETAIL_LENGTH
+                           ? statusInfo.output.size() - MAX_STATUS_DETAIL_LENGTH
                            : 0;
         // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
         // cppcheck-suppress danglingTemporaryLifetime
-        statusDetails["stderr"] = statusInfo.stderror.substr(startPos, statusInfo.stderror.size()).c_str();
-    }
-    else
-    {
-        LOG_DEBUG(TAG, "Not including stderr with the status details");
+        statusDetails["stderr"] = statusInfo.output.substr(startPos, statusInfo.output.size()).c_str();
     }
 
+    // NOTE(marcoaz): statusDetails is captured by value
+    // cppcheck-suppress danglingTemporaryLifetime
+    publishUpdateJobExecutionStatusWithRetry(data, statusInfo, statusDetails, onCompleteCallback);
+}
+
+void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
+    Aws::Iotjobs::JobExecutionData data,
+    JobsFeature::JobExecutionStatusInfo statusInfo,
+    Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> statusDetails,
+    std::function<void(void)> onCompleteCallback)
+{
     /** When we update the job execution status, we need to perform an exponential
      * backoff in case our request gets throttled. Otherwise, if we never properly
      * update the job execution status, we'll never receive the next job
@@ -421,8 +425,6 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         retryConfig.needStopFlag = nullptr;
     }
 
-    // NOTE(marcoaz): statusDetails is captured by value
-    // cppcheck-suppress danglingTemporaryLifetime
     auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool {
         // We first need to make sure that we haven't previously leaked any promises into our map
         unique_lock<mutex> leakLock(updateJobExecutionPromisesLock);
@@ -448,13 +450,10 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         request.JobId = data.JobId->c_str();
         request.ThingName = this->thingName.c_str();
         request.Status = statusInfo.status;
-        // cppcheck-suppress danglingTemporaryLifetime
         request.StatusDetails = statusDetails;
 
         // Create a unique client token each time we attempt the request since the promise has to be fresh
         string clientToken = UniqueString::GetRandomToken(10);
-        // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
-        // cppcheck-suppress danglingTemporaryLifetime
         request.ClientToken = Aws::Crt::Optional<Aws::Crt::String>(clientToken.c_str());
         unique_lock<mutex> writeLock(updateJobExecutionPromisesLock);
         this->updateJobExecutionPromises.insert(
@@ -515,8 +514,6 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         return finished;
     };
     std::thread updateJobExecutionThread([retryConfig, publishLambda, onCompleteCallback] {
-        // NOTE(marcoaz): publishLambda is captured by value
-        // cppcheck-suppress danglingTemporaryLifetime
         Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);
     });
     updateJobExecutionThread.detach();
@@ -564,7 +561,36 @@ bool JobsFeature::isDuplicateNotification(JobExecutionData job)
     return true;
 }
 
-void JobsFeature::executeJob(JobExecutionData job)
+void JobsFeature::initJob(const JobExecutionData &job)
+{
+    auto shutdownHandler = [this]() -> void {
+        handlingJob.store(false);
+        if (needStop.load())
+        {
+            LOGM_INFO(TAG, "Shutting down %s now that job execution is complete", getName().c_str());
+            baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
+        }
+    };
+
+    Aws::Crt::JsonView jobDoc = job.JobDocument->View();
+    PlainJobDocument jobDocument;
+    // reject job document based on the validation status
+    jobDocument.LoadFromJobDocument(jobDoc);
+    if (!jobDocument.Validate())
+    {
+        LOG_ERROR(TAG, "Unable to execute job, invalid job document provided!");
+        publishUpdateJobExecutionStatus(
+            job,
+            JobExecutionStatusInfo(
+                Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!", ""),
+            shutdownHandler);
+        return;
+    }
+    publishUpdateJobExecutionStatus(job, JobExecutionStatusInfo(Iotjobs::JobStatus::IN_PROGRESS));
+    executeJob(job, jobDocument);
+}
+
+void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJobDocument &jobDocument)
 {
     LOGM_INFO(TAG, "Executing job: %s", job.JobId->c_str());
 
@@ -576,25 +602,6 @@ void JobsFeature::executeJob(JobExecutionData job)
             baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
         }
     };
-    Aws::Crt::JsonView jobDoc = job.JobDocument->View();
-    PlainJobDocument jobDocument;
-    // reject job document based on the validation status
-    // TODO: create init method and call it instead
-    jobDocument.LoadFromJobDocument(jobDoc);
-    if (!jobDocument.Validate())
-    {
-        LOG_ERROR(TAG, "Unable to execute job, invalid job document provided!");
-        publishUpdateJobExecutionStatus(
-            job,
-            {Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!", "", ""},
-            shutdownHandler);
-        return;
-    }
-    else
-    {
-        publishUpdateJobExecutionStatus(job, {Iotjobs::JobStatus::IN_PROGRESS, "", "", ""});
-    }
-
     // TODO: Add support for checking condition
     auto runJob = [this, job, jobDocument, shutdownHandler]() {
         JobEngine engine;
@@ -612,16 +619,23 @@ void JobsFeature::executeJob(JobExecutionData job)
         if (!executionStatus)
         {
             LOG_INFO(TAG, "Job executed successfully!");
-            string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
+            string standardOut;
+            if (jobDocument.includeStdOut)
+            {
+                standardOut = engine.getStdOut();
+            }
+            else
+            {
+                LOG_DEBUG(TAG, "Not including stdout with the status details");
+            }
             publishUpdateJobExecutionStatus(
-                job, {JobStatus::SUCCEEDED, "", standardOut, engine.getStdErr()}, shutdownHandler);
+                job, JobExecutionStatusInfo(JobStatus::SUCCEEDED, "", standardOut), shutdownHandler);
         }
         else
         {
             LOG_WARN(TAG, "Job execution failed!");
-            string standardOut = jobDocument.includeStdOut ? engine.getStdOut() : "";
             publishUpdateJobExecutionStatus(
-                job, {JobStatus::FAILED, reason, standardOut, engine.getStdErr()}, shutdownHandler);
+                job, JobExecutionStatusInfo(JobStatus::FAILED, reason, engine.getStdErr()), shutdownHandler);
         }
     };
     thread jobEngineThread(runJob);
@@ -632,7 +646,7 @@ void JobsFeature::runJobs()
 {
     LOGM_INFO(TAG, "Running %s!", getName().c_str());
 
-    jobsClient = unique_ptr<IotJobsClient>(new IotJobsClient(resourceManager.get()->getConnection()));
+    jobsClient = createJobsClient();
 
     // Create subscriptions to important MQTT topics
     subscribeToStartNextPendingJobExecution();
@@ -646,11 +660,11 @@ void JobsFeature::runJobs()
 }
 
 int JobsFeature::init(
-    shared_ptr<SharedCrtResourceManager> manager,
+    shared_ptr<Mqtt::MqttConnection> connection,
     shared_ptr<ClientBaseNotifier> notifier,
     const PlainConfig &config)
 {
-    resourceManager = manager;
+    mqttConnection = connection;
     baseNotifier = notifier;
     thingName = config.thingName->c_str();
 
@@ -688,4 +702,9 @@ int JobsFeature::stop()
     }
 
     return 0;
+}
+
+std::shared_ptr<AbstractIotJobsClient> JobsFeature::createJobsClient()
+{
+    return std::shared_ptr<AbstractIotJobsClient>(new IotJobsClientWrapper(mqttConnection));
 }

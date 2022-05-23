@@ -456,19 +456,19 @@ int PlainConfig::LogConfig::ParseDeviceClientLogLevel(string level)
 
     if ("DEBUG" == temp)
     {
-        return (int)LogLevel::DEBUG;
+        return (int)Aws::Iot::DeviceClient::Logging::LogLevel::DEBUG;
     }
     else if ("INFO" == temp)
     {
-        return (int)LogLevel::INFO;
+        return (int)Aws::Iot::DeviceClient::Logging::LogLevel::INFO;
     }
     else if ("WARN" == temp)
     {
-        return (int)LogLevel::WARN;
+        return (int)Aws::Iot::DeviceClient::Logging::LogLevel::WARN;
     }
     else if ("ERROR" == temp)
     {
-        return (int)LogLevel::ERROR;
+        return (int)Aws::Iot::DeviceClient::Logging::LogLevel::ERROR;
     }
     else
     {
