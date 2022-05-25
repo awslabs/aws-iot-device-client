@@ -164,14 +164,14 @@ case $compileMode in
     # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
     rm -rf CMakeCache.txt /CMakeFiles
     if [ "$sharedLibs" = true ]; then
-      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake -DS2N_NO_PQ=1 ../ || true
+      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
 #      cat CMakeCache.txt
 #      rm -rf CMakeCache.txt
 #      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../
       make install DESTDIR=./shared_install_dir
       chmod 0777 ./shared_install_dir
     else
-      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake -DS2N_NO_PQ=1 ../ || true
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
 #      cat CMakeCache.txt
 #      rm -rf CMakeCache.txt
 #      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../
@@ -199,6 +199,7 @@ case $compileMode in
     make -j 4
     make install
     cd ..
+    rm -rf CMakeCache.txt /CMakeFiles
     if [ "$stMode" = true ]; then
       # Set CMake flags for ST mode
       # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
