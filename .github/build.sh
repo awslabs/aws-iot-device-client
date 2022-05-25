@@ -158,7 +158,7 @@ case $compileMode in
     cd ..
     # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
     if [ "$sharedLibs" = true ]; then
-      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake -DBUILD_SDK=ON ../
+      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake -DBUILD_SDK=ON ../
       make install DESTDIR=./shared_install_dir
       chmod 0777 ./shared_install_dir
     else
