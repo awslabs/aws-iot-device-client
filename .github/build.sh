@@ -165,14 +165,14 @@ case $compileMode in
     export S2N_NO_PQ=1
     export S2N_NO_PQ_ASM=1
     if [ "$sharedLibs" = true ]; then
-      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
+      cmake -E env S2N_NO_PQ=1 -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
 #      cat CMakeCache.txt
 #      rm -rf CMakeCache.txt
 #      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../
       make install DESTDIR=./shared_install_dir
       chmod 0777 ./shared_install_dir
     else
-      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
+      cmake -E env S2N_NO_PQ=1 -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
 #      cat CMakeCache.txt
 #      rm -rf CMakeCache.txt
 #      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../
