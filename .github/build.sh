@@ -163,6 +163,7 @@ case $compileMode in
     cd ..
     # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
     export S2N_NO_PQ=1
+    export S2N_NO_PQ_ASM=1
     if [ "$sharedLibs" = true ]; then
       cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
 #      cat CMakeCache.txt
