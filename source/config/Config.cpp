@@ -2411,7 +2411,7 @@ bool Config::ExportDefaultSetting(const string &file)
 		"%s": "<replace_with_secure_element_key_label>",
 		"%s": replace_with_secure_element_slot_id_integer,
 		"%s": "<replace_with_secure_element_token_label>"
-	}
+	},
         "%s": [
             "%s": false,
             "%s": "<replace>",
