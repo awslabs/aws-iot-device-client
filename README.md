@@ -15,7 +15,7 @@
     - [Sample Shadow Feature](source/shadow#sample-shadow)
     - [Config Shadow Feature](source/shadow#config-shadow)
   * [Sensor Publish Feature](source/sensor-publish/README.md)
-  * [Secure Element Feature](source/secure-element/README.md)
+  * [Provisioning with Secure Elements Feature](source/secure-element/README.md)
   * [Logging](source/logging/README.md)
   * [Samples](source/samples/):
     - [MQTT Pub/Sub Sample Feature](source/samples/pubsub/README.md)
@@ -122,7 +122,7 @@ cmake --build . --target test-aws-iot-device-client
 * [Secure Tunneling Feature Readme](source/tunneling/README.md)
 * [Named Shadow Feature Readme](source/shadow/README.md)
 * [Sensor Publish Feature](source/sensor-publish/README.md)
-* [Secure Element Feature](source/secure-element/README.md)
+* [Provisioning with Secure Elements Feature](source/secure-element/README.md)
 
 ## AWS IoT Device Client Samples
 [MQTT Pub/Sub Sample Feature](source/samples/pubsub/README.md)

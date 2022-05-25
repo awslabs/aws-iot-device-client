@@ -538,7 +538,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
         {
             LOGM_ERROR(
                 TAG,
-                "*** %s: With Secure Element feature is enabled, Device Client only provide support for Fleet "
+                "*** %s: When Secure Tunneling feature is enabled, Device Client only provide support for Fleet "
                 "Provisioning using certificate signing request. Please provide valid CSR file path ***",
                 DeviceClient::DC_FATAL_ERROR);
             return false;
