@@ -1,4 +1,5 @@
 # this one is important
+SET(S2N_NO_PQ 1)
 SET(CMAKE_SYSTEM_NAME Linux)
 #this one not so much
 SET(CMAKE_SYSTEM_VERSION 1)
@@ -23,7 +24,7 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
 
 SET(CMAKE_CROSSCOMPILING 1)
 
-SET(S2N_NO_PQ ON)
+SET(S2N_NO_PQ 1)
 set(CMAKE_FIND_DEBUG_MODE TRUE)
 
 #Fix some wonkiness in the S2N build
