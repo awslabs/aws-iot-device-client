@@ -44,5 +44,13 @@
 		"shadow-name": "<replace_with_shadow_name>",
 		"shadow-input-file": "<replace_with_shadow_input_file_path>",
 		"shadow-output-file": "<replace_with_shadow_output_file_path>"
+	},
+	"secure-element": {
+		"enabled": false,
+		"pkcs11-lib": "<replace_with_pkcs11_lib_path>",
+		"secure-element-pin": "<replace_with_secure_element_pin>",
+		"secure-element-key-label": "<replace_with_secure_element_key_label>",
+		"secure-element-slot-id": replace_with_secure_element_slot_id_integer,
+		"secure-element-token-label": "<replace_with_secure_element_token_label>"
 	}
 }

@@ -510,8 +510,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
         return false;
     }
 
-    if (config.fleetProvisioning.csrFile.has_value() && !config.fleetProvisioning.csrFile->empty() &&
-        config.fleetProvisioning.deviceKey.has_value() && !config.fleetProvisioning.deviceKey->empty())
+    if (config.fleetProvisioning.csrFile.has_value() && !config.fleetProvisioning.csrFile->empty())
     {
         if (!GetCsrFileContent(config.fleetProvisioning.csrFile->c_str()) ||
             !LocateDeviceKey(config.fleetProvisioning.deviceKey->c_str()) || !CreateCertificateUsingCSR(identityClient))
@@ -523,17 +522,37 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
                 DeviceClient::DC_FATAL_ERROR);
             return false;
         }
-        keyPath = config.fleetProvisioning.deviceKey->c_str();
+        if (!config.secureElement.enabled && config.fleetProvisioning.deviceKey.has_value() &&
+            !config.fleetProvisioning.deviceKey->empty())
+        {
+            keyPath = config.fleetProvisioning.deviceKey->c_str();
+        }
+        else
+        {
+            keyPath = "";
+        }
     }
     else
     {
-        if (!CreateCertificateAndKey(identityClient))
+        if (config.secureElement.enabled)
         {
             LOGM_ERROR(
                 TAG,
-                "*** %s: Fleet Provisioning Feature failed to create a new certificate and private key ***",
+                "*** %s: When Secure Tunneling feature is enabled, Device Client only provide support for Fleet "
+                "Provisioning using certificate signing request. Please provide valid CSR file path ***",
                 DeviceClient::DC_FATAL_ERROR);
             return false;
+        }
+        else
+        {
+            if (!CreateCertificateAndKey(identityClient))
+            {
+                LOGM_ERROR(
+                    TAG,
+                    "*** %s: Fleet Provisioning Feature failed to create a new certificate and private key ***",
+                    DeviceClient::DC_FATAL_ERROR);
+                return false;
+            }
         }
     }
     if (RegisterThing(identityClient))

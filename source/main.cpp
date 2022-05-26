@@ -398,6 +398,22 @@ int main(int argc, char *argv[])
     attemptConnection();
 #endif
 
+#if defined(EXCLUDE_SECURE_ELEMENT)
+    if (config.config.secureElement.enabled)
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Secure Element configuration is enabled but feature is not compiled into binary.",
+            DC_FATAL_ERROR);
+        LoggerFactory::getLoggerInstance()->shutdown();
+        deviceClientAbort("Invalid configuration");
+    }
+    else
+    {
+        LOG_INFO(TAG, "Provisioning with Secure Elements is disabled");
+    }
+#endif
+
 #if !defined(EXCLUDE_SHADOW)
 #    if !defined(EXCLUDE_CONFIG_SHADOW)
     if (config.config.configShadow.enabled)
@@ -407,6 +423,10 @@ int main(int argc, char *argv[])
         configShadow.reconfigureWithConfigShadow(resourceManager, config.config);
         resourceManager->disconnect();
         attemptConnection();
+    }
+    else
+    {
+        LOG_INFO(TAG, "Config shadow is disabled");
     }
 #    endif
 #endif

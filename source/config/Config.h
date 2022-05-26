@@ -44,6 +44,7 @@ namespace Aws
                 static constexpr int CONFIG_DIR = 745;
                 static constexpr int LOG_DIR = 745;
                 static constexpr int PUBSUB_DIR = 745;
+                static constexpr int PKCS11_LIB_DIR = 700;
 
                 /** Files **/
                 static constexpr int PRIVATE_KEY = 600;
@@ -57,6 +58,7 @@ namespace Aws
                 static constexpr int PUB_SUB_FILES = 600;
                 static constexpr int SAMPLE_SHADOW_FILES = 600;
                 static constexpr int SENSOR_PUBLISH_ADDR_FILE = 660;
+                static constexpr int PKCS11_LIB_FILE = 640;
             };
 
             struct PlainConfig : public LoadableFromJsonAndCliAndEnvironment
@@ -92,6 +94,8 @@ namespace Aws
                 static constexpr char JSON_KEY_SENSOR_PUBLISH[] = "sensor-publish";
 
                 static constexpr char DEFAULT_LOCK_FILE_PATH[] = "/run/lock/";
+
+                static constexpr char JSON_KEY_SECURE_ELEMENT[] = "secure-element";
 
                 Aws::Crt::Optional<std::string> endpoint;
                 Aws::Crt::Optional<std::string> cert;
@@ -325,6 +329,38 @@ namespace Aws
                 };
                 ConfigShadow configShadow;
 
+                struct SecureElement : public LoadableFromJsonAndCliAndEnvironment
+                {
+                    bool LoadFromJson(const Crt::JsonView &json) override;
+                    bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override { return true; }
+                    bool Validate() const override;
+                    /** Serialize Secure Element configurations To Json Object **/
+                    void SerializeToObject(Crt::JsonObject &object) const;
+
+                    static constexpr char CLI_ENABLE_SECURE_ELEMENT[] = "--enable-secure-element";
+                    static constexpr char CLI_PKCS11_LIB[] = "--pkcs11-lib";
+                    static constexpr char CLI_SECURE_ELEMENT_PIN[] = "--secure-element-pin";
+                    static constexpr char CLI_SECURE_ELEMENT_KEY_LABEL[] = "--secure-element-key-label";
+                    static constexpr char CLI_SECURE_ELEMENT_SLOT_ID[] = "--secure-element-slot-id";
+                    static constexpr char CLI_SECURE_ELEMENT_TOKEN_LABEL[] = "--secure-element-token-label";
+
+                    static constexpr char JSON_ENABLE_SECURE_ELEMENT[] = "enabled";
+                    static constexpr char JSON_PKCS11_LIB[] = "pkcs11-lib";
+                    static constexpr char JSON_SECURE_ELEMENT_PIN[] = "secure-element-pin";
+                    static constexpr char JSON_SECURE_ELEMENT_KEY_LABEL[] = "secure-element-key-label";
+                    static constexpr char JSON_SECURE_ELEMENT_SLOT_ID[] = "secure-element-slot-id";
+                    static constexpr char JSON_SECURE_ELEMENT_TOKEN_LABEL[] = "secure-element-token-label";
+
+                    bool enabled{false};
+                    Aws::Crt::Optional<std::string> pkcs11Lib;
+                    Aws::Crt::Optional<std::string> secureElementPin;
+                    Aws::Crt::Optional<std::string> secureElementKeyLabel;
+                    Aws::Crt::Optional<uint64_t> secureElementSlotId;
+                    Aws::Crt::Optional<std::string> secureElementTokenLabel;
+                };
+                SecureElement secureElement;
+
                 struct SensorPublish : public LoadableFromJsonAndCliAndEnvironment
                 {
                     bool LoadFromJson(const Crt::JsonView &json) override;
@@ -405,7 +441,6 @@ namespace Aws
                 static constexpr char DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[] = "~/.aws-iot-device-client/sample-shadow/";
 
                 static constexpr char CLI_HELP[] = "--help";
-                static constexpr char CLI_VERSION[] = "--version";
                 static constexpr char CLI_EXPORT_DEFAULT_SETTINGS[] = "--export-default-settings";
                 static constexpr char CLI_CONFIG_FILE[] = "--config-file";
 
@@ -434,7 +469,6 @@ namespace Aws
 
               private:
                 static void PrintHelpMessage();
-                static void PrintVersion();
                 static bool ExportDefaultSetting(const std::string &file);
             };
         } // namespace DeviceClient

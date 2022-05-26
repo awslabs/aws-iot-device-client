@@ -20,7 +20,6 @@
 #include "../util/FileUtils.h"
 #include "../util/MqttUtils.h"
 #include "../util/StringUtils.h"
-#include "Version.h"
 
 #include <algorithm>
 #include <aws/crt/JsonObject.h>
@@ -62,6 +61,7 @@ constexpr char PlainConfig::JSON_KEY_SAMPLES[];
 constexpr char PlainConfig::JSON_KEY_PUB_SUB[];
 constexpr char PlainConfig::JSON_KEY_SAMPLE_SHADOW[];
 constexpr char PlainConfig::JSON_KEY_CONFIG_SHADOW[];
+constexpr char PlainConfig::JSON_KEY_SECURE_ELEMENT[];
 constexpr char PlainConfig::JSON_KEY_SENSOR_PUBLISH[];
 constexpr char PlainConfig::DEFAULT_LOCK_FILE_PATH[];
 
@@ -70,6 +70,7 @@ constexpr int Permissions::ROOT_CA_DIR;
 constexpr int Permissions::CERT_DIR;
 constexpr int Permissions::CONFIG_DIR;
 constexpr int Permissions::LOG_DIR;
+constexpr int Permissions::PKCS11_LIB_DIR;
 constexpr int Permissions::PRIVATE_KEY;
 constexpr int Permissions::PUBLIC_CERT;
 constexpr int Permissions::LOG_FILE;
@@ -78,6 +79,7 @@ constexpr int Permissions::RUNTIME_CONFIG_FILE;
 constexpr int Permissions::JOB_HANDLER;
 constexpr int Permissions::PUB_SUB_FILES;
 constexpr int Permissions::SAMPLE_SHADOW_FILES;
+constexpr int Permissions::PKCS11_LIB_FILE;
 
 bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
 {
@@ -219,6 +221,14 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
         configShadow = temp;
     }
 
+    jsonKey = JSON_KEY_SECURE_ELEMENT;
+    if (json.ValueExists(jsonKey))
+    {
+        SecureElement temp;
+        temp.LoadFromJson(json.GetJsonObject(jsonKey));
+        secureElement = temp;
+    }
+
     jsonKey = JSON_KEY_SENSOR_PUBLISH;
     if (json.ValueExists(jsonKey))
     {
@@ -267,7 +277,7 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     return logConfig.LoadFromCliArgs(cliArgs) && jobs.LoadFromCliArgs(cliArgs) && tunneling.LoadFromCliArgs(cliArgs) &&
            deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs) &&
            pubSub.LoadFromCliArgs(cliArgs) && sampleShadow.LoadFromCliArgs(cliArgs) &&
-           configShadow.LoadFromCliArgs(cliArgs);
+           configShadow.LoadFromCliArgs(cliArgs) && secureElement.LoadFromCliArgs(cliArgs);
 }
 
 bool PlainConfig::LoadFromEnvironment()
@@ -347,15 +357,20 @@ bool PlainConfig::Validate() const
     {
         return false;
     }
-    if (!key.has_value() || key->empty())
+
+    if (!secureElement.enabled)
     {
-        LOGM_ERROR(Config::TAG, "*** %s: Private Key is missing ***", DeviceClient::DC_FATAL_ERROR);
-        return false;
+        if (!key.has_value() || key->empty())
+        {
+            LOGM_ERROR(Config::TAG, "*** %s: Private Key is missing ***", DeviceClient::DC_FATAL_ERROR);
+            return false;
+        }
+        else if (!FileUtils::IsValidFilePath(key->c_str()))
+        {
+            return false;
+        }
     }
-    else if (!FileUtils::IsValidFilePath(key->c_str()))
-    {
-        return false;
-    }
+
     if (!thingName.has_value() || thingName->empty())
     {
         LOGM_ERROR(Config::TAG, "*** %s: Thing name is missing ***", DeviceClient::DC_FATAL_ERROR);
@@ -398,6 +413,13 @@ bool PlainConfig::Validate() const
         return false;
     }
 #endif
+    if (secureElement.enabled)
+    {
+        if (!secureElement.Validate())
+        {
+            return false;
+        }
+    }
 #if !defined(EXCLUDE_SENSOR_PUBLISH)
     if (!sensorPublish.Validate())
     {
@@ -1452,6 +1474,183 @@ bool PlainConfig::ConfigShadow::Validate() const
     return true;
 }
 
+constexpr char PlainConfig::SecureElement::CLI_ENABLE_SECURE_ELEMENT[];
+constexpr char PlainConfig::SecureElement::CLI_PKCS11_LIB[];
+constexpr char PlainConfig::SecureElement::CLI_SECURE_ELEMENT_PIN[];
+constexpr char PlainConfig::SecureElement::CLI_SECURE_ELEMENT_KEY_LABEL[];
+constexpr char PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID[];
+constexpr char PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL[];
+
+constexpr char PlainConfig::SecureElement::JSON_ENABLE_SECURE_ELEMENT[];
+constexpr char PlainConfig::SecureElement::JSON_PKCS11_LIB[];
+constexpr char PlainConfig::SecureElement::JSON_SECURE_ELEMENT_PIN[];
+constexpr char PlainConfig::SecureElement::JSON_SECURE_ELEMENT_KEY_LABEL[];
+constexpr char PlainConfig::SecureElement::JSON_SECURE_ELEMENT_SLOT_ID[];
+constexpr char PlainConfig::SecureElement::JSON_SECURE_ELEMENT_TOKEN_LABEL[];
+
+bool PlainConfig::SecureElement::LoadFromJson(const Crt::JsonView &json)
+{
+    const char *jsonKey = JSON_ENABLE_SECURE_ELEMENT;
+    if (json.ValueExists(jsonKey))
+    {
+        enabled = json.GetBool(jsonKey);
+    }
+
+    jsonKey = JSON_PKCS11_LIB;
+    if (json.ValueExists(jsonKey))
+    {
+        if (!json.GetString(jsonKey).empty())
+        {
+            pkcs11Lib = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
+    }
+
+    jsonKey = JSON_SECURE_ELEMENT_PIN;
+    if (json.ValueExists(jsonKey))
+    {
+        if (!json.GetString(jsonKey).empty())
+        {
+            secureElementPin = json.GetString(jsonKey).c_str();
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
+    }
+
+    jsonKey = JSON_SECURE_ELEMENT_KEY_LABEL;
+    if (json.ValueExists(jsonKey))
+    {
+        if (!json.GetString(jsonKey).empty())
+        {
+            secureElementKeyLabel = json.GetString(jsonKey).c_str();
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
+    }
+
+    jsonKey = JSON_SECURE_ELEMENT_SLOT_ID;
+    if (json.ValueExists(jsonKey))
+    {
+        if (json.GetInt64(jsonKey))
+        {
+            secureElementSlotId = json.GetInt64(jsonKey);
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
+    }
+
+    jsonKey = JSON_SECURE_ELEMENT_TOKEN_LABEL;
+    if (json.ValueExists(jsonKey))
+    {
+        if (!json.GetString(jsonKey).empty())
+        {
+            secureElementTokenLabel = json.GetString(jsonKey).c_str();
+        }
+        else
+        {
+            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+        }
+    }
+
+    return true;
+}
+
+bool PlainConfig::SecureElement::LoadFromCliArgs(const CliArgs &cliArgs)
+{
+    if (cliArgs.count(PlainConfig::SecureElement::CLI_ENABLE_SECURE_ELEMENT))
+    {
+        enabled = cliArgs.at(PlainConfig::SecureElement::CLI_ENABLE_SECURE_ELEMENT).compare("true") == 0;
+    }
+    if (cliArgs.count(PlainConfig::SecureElement::CLI_PKCS11_LIB))
+    {
+        pkcs11Lib = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::SecureElement::CLI_PKCS11_LIB));
+    }
+    if (cliArgs.count(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_PIN))
+    {
+        secureElementPin = cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_PIN);
+    }
+    if (cliArgs.count(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_KEY_LABEL))
+    {
+        secureElementKeyLabel = cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_KEY_LABEL);
+    }
+    if (cliArgs.count(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID))
+    {
+        secureElementSlotId = stoul(cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID));
+    }
+    if (cliArgs.count(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL))
+    {
+        secureElementTokenLabel = cliArgs.at(PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL);
+    }
+    return true;
+}
+
+bool PlainConfig::SecureElement::Validate() const
+{
+    if (!enabled)
+    {
+        return true;
+    }
+    if (!pkcs11Lib.has_value() || pkcs11Lib->empty())
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: PKCS11 Library path field must be specified if Secure Element Configuration is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+
+    if (!secureElementPin.has_value() || secureElementPin->empty())
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Secure Element Pin field must be specified if Secure Element Configuration is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+
+    return true;
+}
+
+void PlainConfig::SecureElement::SerializeToObject(Crt::JsonObject &object) const
+{
+    (void)object;
+    object.WithBool(JSON_ENABLE_SECURE_ELEMENT, enabled);
+
+    if (pkcs11Lib.has_value() && pkcs11Lib->c_str())
+    {
+        object.WithString(JSON_PKCS11_LIB, pkcs11Lib->c_str());
+    }
+
+    if (secureElementPin.has_value() && secureElementPin->c_str())
+    {
+        object.WithString(JSON_SECURE_ELEMENT_PIN, secureElementPin->c_str());
+    }
+
+    if (secureElementKeyLabel.has_value() && secureElementKeyLabel->c_str())
+    {
+        object.WithString(JSON_SECURE_ELEMENT_KEY_LABEL, secureElementKeyLabel->c_str());
+    }
+
+    if (secureElementSlotId.has_value())
+    {
+        object.WithInt64(JSON_SECURE_ELEMENT_SLOT_ID, secureElementSlotId.value());
+    }
+
+    if (secureElementTokenLabel.has_value() && secureElementTokenLabel->c_str())
+    {
+        object.WithString(JSON_SECURE_ELEMENT_TOKEN_LABEL, secureElementTokenLabel->c_str());
+    }
+}
+
 constexpr char PlainConfig::SensorPublish::JSON_SENSORS[];
 constexpr char PlainConfig::SensorPublish::JSON_ENABLED[];
 constexpr char PlainConfig::SensorPublish::JSON_NAME[];
@@ -1779,7 +1978,6 @@ constexpr char Config::DEFAULT_CONFIG_DIR[];
 constexpr char Config::DEFAULT_KEY_DIR[];
 constexpr char Config::DEFAULT_CONFIG_FILE[];
 constexpr char Config::CLI_HELP[];
-constexpr char Config::CLI_VERSION[];
 constexpr char Config::CLI_EXPORT_DEFAULT_SETTINGS[];
 constexpr char Config::CLI_CONFIG_FILE[];
 constexpr char Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[];
@@ -1797,7 +1995,6 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
     };
     ArgumentDefinition argumentDefinitions[] = {
         {CLI_HELP, false, true, [](const string &additionalArg) { PrintHelpMessage(); }},
-        {CLI_VERSION, false, true, [](const string &additionalArg) { PrintVersion(); }},
         {CLI_EXPORT_DEFAULT_SETTINGS,
          true,
          true,
@@ -1845,7 +2042,14 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE, true, false, nullptr},
         {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE, true, false, nullptr},
 
-        {PlainConfig::ConfigShadow::CLI_ENABLE_CONFIG_SHADOW, true, false, nullptr}};
+        {PlainConfig::ConfigShadow::CLI_ENABLE_CONFIG_SHADOW, true, false, nullptr},
+
+        {PlainConfig::SecureElement::CLI_ENABLE_SECURE_ELEMENT, true, false, nullptr},
+        {PlainConfig::SecureElement::CLI_PKCS11_LIB, true, false, nullptr},
+        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_PIN, true, false, nullptr},
+        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_KEY_LABEL, true, false, nullptr},
+        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID, true, false, nullptr},
+        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL, true, false, nullptr}};
 
     map<string, ArgumentDefinition> argumentDefinitionMap;
     for (auto &i : argumentDefinitions)
@@ -2029,6 +2233,7 @@ bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
         return false;
     }
     Aws::Crt::JsonView jsonView = Aws::Crt::JsonView(jsonObj);
+    // Parse, validate and store config file content
     config.LoadFromJson(jsonView);
 
     LOGM_INFO(TAG, "Successfully fetched JSON config file: %s", Sanitize(contents).c_str());
@@ -2047,7 +2252,6 @@ void Config::PrintHelpMessage()
         "Available sub-commands:\n"
         "\n"
         "%s:\t\t\t\t\t\t\t\t\tGet more help on commands\n"
-        "%s:\t\t\t\t\t\t\t\tOutput current version\n"
         "%s <JSON-File-Location>:\t\t\t\tExport default settings for the AWS IoT Device Client binary to the specified "
         "file "
         "and exit "
@@ -2064,13 +2268,14 @@ void Config::PrintHelpMessage()
         "%s [true|false]:\t\t\t\t\tEnables/Disables Device Defender feature\n"
         "%s [true|false]:\t\t\t\tEnables/Disables Fleet Provisioning feature\n"
         "%s [true|false]:\t\t\t\t\t\tEnables/Disables Pub/Sub Sample feature\n"
-        "%s [true|false]:\t\t\t\t\tEnables/Disables Sample Shadow feature\n"
-        "%s [true|false]:\t\t\t\t\tEnables/Disables Config Shadow feature\n"
+        "%s [true|false]:\t\t\t\t\t\tEnables/Disables Sample Shadow feature\n"
+        "%s [true|false]:\t\t\t\t\t\tEnables/Disables Config Shadow feature\n"
+        "%s [true|false]:\t\t\t\t\t\tEnables/Disables Secure Element Configuration\n"
         "%s <endpoint-value>:\t\t\t\t\t\tUse Specified Endpoint\n"
         "%s <Cert-Location>:\t\t\t\t\t\t\tUse Specified Cert file\n"
         "%s <Key-Location>:\t\t\t\t\t\t\tUse Specified Key file\n"
         "%s <Root-CA-Location>:\t\t\t\t\t\tUse Specified Root-CA file\n"
-        "%s <thing-name-value/client-id-value>:\t\t\tUse Specified Thing Name (Also used as Client ID)\n"
+        "%s <thing-name-value/client-id-value>:\t\t\t\t\tUse Specified Thing Name (Also used as Client ID)\n"
         "%s <Jobs-handler-directory>:\t\t\t\tUse specified directory to find job handlers\n"
         "%s <region>:\t\t\t\t\t\tUse Specified AWS Region for Secure Tunneling\n"
         "%s <service>:\t\t\t\t\t\tConnect secure tunnel to specific service\n"
@@ -2090,15 +2295,19 @@ void Config::PrintHelpMessage()
         "%s <path/to/publish/file>:\t\t\t\t\tThe file the Pub/Sub sample feature will read from when publishing\n"
         "%s <subscribe-topic>:\t\t\t\t\tThe topic the Pub/Sub sample feature will receive messages on\n"
         "%s <path/to/sub/file>:\t\t\t\t\tThe file the Pub/Sub sample feature will write received messaged to\n"
-        "%s <shadow-name>:\t\t\t\t\t\tThe name of shadow SampleShadow feature will create or update\n"
-        "%s <shadow-input-file>:\t\t\t\tThe file the Sample Shadow feature will read from when updating shadow data\n"
-        "%s <shadow-output-file>:\t\t\t\tThe file the Sample Shadow feature will write the latest shadow document "
-        "to\n";
+        "%s <shadow-name>:\t\t\t\t\tThe name of shadow SampleShadow feature will create or update\n"
+        "%s <shadow-input-file>:\t\t\t\t\tThe file the Sample Shadow feature will read from when updating shadow data\n"
+        "%s <shadow-output-file>:\t\t\t\t\tThe file the Sample Shadow feature will write the latest shadow document "
+        "to\n"
+        "%s <pkcs11-lib-path>:\t\t\t\t\tThe file path to PKCS#11 library\n"
+        "%s <secure-element-pin>:\t\t\t\t\tThe user PIN for logging into PKCS#11 token.\n"
+        "%s <secure-element-key-label>:\t\t\t\t\tThe Label of private key on the PKCS#11 token (optional). \n"
+        "%s <secure-element-slot-id>:\t\t\t\t\tThe Slot ID containing PKCS#11 token to use (optional).\n"
+        "%s <secure-element-token-label>:\t\t\t\t\tThe Label of the PKCS#11 token to use (optional).\n";
 
     cout << FormatMessage(
         helpMessageTemplate,
         CLI_HELP,
-        CLI_VERSION,
         CLI_EXPORT_DEFAULT_SETTINGS,
         CLI_CONFIG_FILE,
         PlainConfig::LogConfig::CLI_LOG_LEVEL,
@@ -2114,6 +2323,7 @@ void Config::PrintHelpMessage()
         PlainConfig::PubSub::CLI_ENABLE_PUB_SUB,
         PlainConfig::SampleShadow::CLI_ENABLE_SAMPLE_SHADOW,
         PlainConfig::ConfigShadow::CLI_ENABLE_CONFIG_SHADOW,
+        PlainConfig::SecureElement::CLI_ENABLE_SECURE_ELEMENT,
         PlainConfig::CLI_ENDPOINT,
         PlainConfig::CLI_CERT,
         PlainConfig::CLI_KEY,
@@ -2134,12 +2344,12 @@ void Config::PrintHelpMessage()
         PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE,
         PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME,
         PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE,
-        PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE);
-}
-
-void Config::PrintVersion()
-{
-    cout << DEVICE_CLIENT_VERSION_FULL << endl;
+        PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE,
+        PlainConfig::SecureElement::CLI_PKCS11_LIB,
+        PlainConfig::SecureElement::CLI_SECURE_ELEMENT_PIN,
+        PlainConfig::SecureElement::CLI_SECURE_ELEMENT_KEY_LABEL,
+        PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID,
+        PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL);
 }
 
 bool Config::ExportDefaultSetting(const string &file)
@@ -2195,6 +2405,13 @@ bool Config::ExportDefaultSetting(const string &file)
         "%s": false
     },
     "%s": {
+		"%s": false,
+		"%s": "<replace_with_pkcs11_lib_path>",
+		"%s": "<replace_with_secure_element_pin>",
+		"%s": "<replace_with_secure_element_key_label>",
+		"%s": replace_with_secure_element_slot_id_integer,
+		"%s": "<replace_with_secure_element_token_label>"
+	},
         "%s": [
             "%s": false,
             "%s": "<replace>",
@@ -2263,6 +2480,13 @@ bool Config::ExportDefaultSetting(const string &file)
         PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_OUTPUT_FILE,
         PlainConfig::JSON_KEY_CONFIG_SHADOW,
         PlainConfig::ConfigShadow::JSON_ENABLE_CONFIG_SHADOW,
+        PlainConfig::JSON_KEY_SECURE_ELEMENT,
+        PlainConfig::SecureElement::JSON_ENABLE_SECURE_ELEMENT,
+        PlainConfig::SecureElement::JSON_PKCS11_LIB,
+        PlainConfig::SecureElement::JSON_SECURE_ELEMENT_PIN,
+        PlainConfig::SecureElement::JSON_SECURE_ELEMENT_KEY_LABEL,
+        PlainConfig::SecureElement::JSON_SECURE_ELEMENT_SLOT_ID,
+        PlainConfig::SecureElement::JSON_SECURE_ELEMENT_TOKEN_LABEL,
         PlainConfig::PlainConfig::JSON_KEY_SENSOR_PUBLISH,
         PlainConfig::SensorPublish::JSON_SENSORS,
         PlainConfig::SensorPublish::JSON_ENABLED,
