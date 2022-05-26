@@ -8,6 +8,7 @@
 #include "../Feature.h"
 #include "../SharedCrtResourceManager.h"
 #include "IotSecureTunnelingClientWrapper.h"
+#include "SecureTunnelingContext.h"
 #include <aws/iotdevicecommon/IotDevice.h>
 #include <aws/iotsecuretunneling/SecureTunnelingNotifyResponse.h>
 
@@ -19,8 +20,6 @@ namespace Aws
         {
             namespace SecureTunneling
             {
-                class SecureTunnelingContext;
-
                 /**
                  * \brief Provides IoT Secure Tunneling related functionality within the Device Client
                  */
@@ -118,7 +117,7 @@ namespace Aws
                     /**
                      * \brief Get the IotSecureTunneling client
                      */
-                    virtual std::shared_ptr<AbstractIotSecureTunnelingClient> getClient();
+                    virtual std::shared_ptr<AbstractIotSecureTunnelingClient> createClient();
 
                     /**
                      * \brief a helper function to get SecureTunnelingContext in order to facilitate testing

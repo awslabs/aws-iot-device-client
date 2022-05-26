@@ -47,6 +47,11 @@ namespace Aws
                         const OnConnectionShutdownFn &onConnectionShutdown);
 
                     /**
+                     * \brief Constructor
+                     */
+                    SecureTunnelingContext() = default;
+
+                    /**
                      * \brief Destructor
                      */
                     virtual ~SecureTunnelingContext();
@@ -66,12 +71,6 @@ namespace Aws
                      * @return True if successfully connected to the tunnel. False otherwise.
                      */
                     virtual bool ConnectToSecureTunnel();
-
-                  protected:
-                    /**
-                     * Protected constructor to facilitate mocking
-                     */
-                    SecureTunnelingContext();
 
                     /**
                      * \brief Stop and close secure tunnel
