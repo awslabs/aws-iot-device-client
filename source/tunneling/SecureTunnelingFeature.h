@@ -30,7 +30,7 @@ namespace Aws
                     /**
                      * \brief Constructor
                      */
-                    SecureTunnelingFeature();
+                    SecureTunnelingFeature() = default;
 
                     /**
                      * \brief Destructor
@@ -118,7 +118,7 @@ namespace Aws
                     /**
                      * \brief Get the IotSecureTunneling client
                      */
-                    virtual std::shared_ptr<AbstractIotSecureTunnelingClient> getClient();
+                    virtual std::shared_ptr<AbstractIotSecureTunnelingClient> createClient();
 
                     /**
                      * \brief a helper function to get SecureTunnelingContext in order to facilitate testing

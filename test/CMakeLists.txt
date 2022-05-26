@@ -35,11 +35,6 @@ endif ()
 
 if (NOT EXCLUDE_ST)
     file(GLOB ST_SRC "../source/tunneling/*.cpp")
-    list(APPEND ST_SRC ${ST_SRC})
-endif ()
-
-if (NOT EXCLUDE_ST)
-    file(GLOB ST_SRC "../source/tunneling/*.cpp")
     list(APPEND DC_SRC ${ST_SRC})
 endif ()
 
