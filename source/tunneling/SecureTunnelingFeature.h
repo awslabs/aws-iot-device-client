@@ -28,11 +28,6 @@ namespace Aws
                 {
                   public:
                     /**
-                     * \brief Constructor
-                     */
-                    SecureTunnelingFeature() = default;
-
-                    /**
                      * \brief Destructor
                      */
                     virtual ~SecureTunnelingFeature() override;
