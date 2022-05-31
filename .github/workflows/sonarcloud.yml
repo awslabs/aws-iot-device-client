@@ -12,7 +12,7 @@ jobs:
     env:
       SONAR_SCANNER_VERSION: 4.7.0.2747
       SONAR_SERVER_URL: "https://sonarcloud.io"
-      BUILD_WRAPPER_OUT_DIR: /var/bw_output # Directory where build-wrapper output will be placed
+      BUILD_WRAPPER_OUT_DIR: bw_output # Directory where build-wrapper output will be placed
     steps:
       - uses: actions/checkout@v2
         with:
@@ -38,6 +38,10 @@ jobs:
           echo "$HOME/.sonar/build-wrapper-linux-x86" >> $GITHUB_PATH
       - name: Run build-wrapper
         run: |
+          rm -rf build
+          mkdir build
+          cd build
+          cmake ..
           build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build . --target aws-iot-device-client
       - name: Run sonar-scanner
         env:
