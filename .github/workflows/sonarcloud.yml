@@ -12,7 +12,7 @@ jobs:
     env:
       SONAR_SCANNER_VERSION: 4.7.0.2747
       SONAR_SERVER_URL: "https://sonarcloud.io"
-      BUILD_WRAPPER_OUT_DIR: /root/bw_output # Directory where build-wrapper output will be placed
+      BUILD_WRAPPER_OUT_DIR: /var/bw_output # Directory where build-wrapper output will be placed
     steps:
       - uses: actions/checkout@v2
         with:
