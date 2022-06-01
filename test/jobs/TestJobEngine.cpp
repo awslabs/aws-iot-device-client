@@ -156,6 +156,6 @@ TEST_F(TestJobEngine, ExecuteNoSteps)
 
     int executionStatus = jobEngine.exec_steps(jobDocument, testHandlerDirectoryPath);
     ASSERT_EQ(executionStatus, 0);
-    ASSERT_TRUE(jobEngine.getStdOut().length() == 0);
-    ASSERT_TRUE(jobEngine.getStdErr().length() == 0);
+    ASSERT_EQ(jobEngine.getStdOut().length(), 0);
+    ASSERT_EQ(jobEngine.getStdErr().length(), 0);
 }

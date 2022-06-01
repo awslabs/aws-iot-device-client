@@ -76,7 +76,7 @@ namespace Aws
                      * \brief The default directory that the Jobs feature will use to find executables matching
                      * an incoming job document's operation attribute
                      */
-                    const std::string DEFAULT_JOBS_HANDLER_DIR = "~/.aws-iot-device-client/jobs/";
+                    static const std::string DEFAULT_JOBS_HANDLER_DIR;
 
                     /**
                      * \brief A limit enforced by the AWS IoT Jobs API on the maximum number of characters allowed
