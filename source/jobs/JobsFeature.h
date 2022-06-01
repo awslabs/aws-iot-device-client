@@ -47,21 +47,23 @@ namespace Aws
                     /**
                      * \brief Wrapper struct to aggregate JobEngine output for updating a job execution status
                      */
+
                     struct JobExecutionStatusInfo
                     {
-                        Iotjobs::JobStatus status;
+                        Aws::Iotjobs::JobStatus status;
                         std::string reason;
-                        std::string output;
+                        std::string stdoutput;
+                        std::string stderror;
 
+                        explicit JobExecutionStatusInfo(Aws::Iotjobs::JobStatus status) : status(status) {}
                         JobExecutionStatusInfo(
-                            Iotjobs::JobStatus status,
+                            Aws::Iotjobs::JobStatus status,
                             const std::string &reason,
-                            const std::string &output)
-                            : status(status), reason(reason), output(output)
+                            const std::string &stdoutput,
+                            const std::string &stderror)
+                            : status(status), reason(reason), stdoutput(stdoutput), stderror(stderror)
                         {
                         }
-
-                        explicit JobExecutionStatusInfo(Iotjobs::JobStatus status) : status(status) {}
                     };
 
                   private:
@@ -74,12 +76,13 @@ namespace Aws
                      * \brief The default directory that the Jobs feature will use to find executables matching
                      * an incoming job document's operation attribute
                      */
+                    const std::string DEFAULT_JOBS_HANDLER_DIR = "~/.aws-iot-device-client/jobs/";
+
                     /**
                      * \brief A limit enforced by the AWS IoT Jobs API on the maximum number of characters allowed
                      * to be provided in a StatusDetail entry when calling the UpdateJobExecution API
                      */
                     const size_t MAX_STATUS_DETAIL_LENGTH = 1024;
-                    const std::string DEFAULT_JOBS_HANDLER_DIR = "~/.aws-iot-device-client/jobs/";
 
                     /**
                      * \brief Whether the DeviceClient base has requested this feature to stop
