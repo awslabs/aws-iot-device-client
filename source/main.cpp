@@ -280,6 +280,7 @@ namespace Aws
 
 int main(int argc, char *argv[])
 {
+    cout << "Hello World!" << endl;
     CliArgs cliArgs;
     if (Config::CheckTerminalArgs(argc, argv))
     {
