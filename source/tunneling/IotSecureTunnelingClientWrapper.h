@@ -14,6 +14,9 @@ namespace Aws
         {
             namespace SecureTunneling
             {
+                /**
+                 * An interface to facilitate testing of IotSecureTunnelingClient using the IotSecureTunnelingClientWrapper
+                 */
                 class AbstractIotSecureTunnelingClient
                 {
                   public:
@@ -24,7 +27,10 @@ namespace Aws
                         const Iotsecuretunneling::OnSubscribeToTunnelsNotifyResponse &handler,
                         const Iotsecuretunneling::OnSubscribeComplete &onSubAck) = 0;
                 };
-
+                /**
+                 * A wrapper class for IotSecureTunnelingClient. This class can be mocked, unlike IotSecureTunnelingClient.
+                 * This allows for testing the SecureTunnelingFeature.
+                 */
                 class IotSecureTunnelingClientWrapper : public AbstractIotSecureTunnelingClient
                 {
                   public:

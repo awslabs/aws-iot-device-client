@@ -14,6 +14,10 @@ namespace Aws
         {
             namespace SecureTunneling
             {
+                /**
+                 * \brief Constructor
+                 * @param connection An MqttConnection
+                 */
                 IotSecureTunnelingClientWrapper::IotSecureTunnelingClientWrapper(
                     std::shared_ptr<Aws::Crt::Mqtt::MqttConnection> connection)
                     : iotSecureTunnelingClient(
@@ -21,6 +25,13 @@ namespace Aws
                 {
                 }
 
+                /**
+                 * \brief Subscribe to Mqtt Tunnel Notification Topic
+                 * @param request The request object
+                 * @param qos Mqtt Quality of Service
+                 * @param handler Response handler callback
+                 * @param onSubAck SubAck handler
+                 */
                 void IotSecureTunnelingClientWrapper::SubscribeToTunnelsNotify(
                     const Aws::Iotsecuretunneling::SubscribeToTunnelsNotifyRequest &request,
                     Aws::Crt::Mqtt::QOS qos,
