@@ -40,9 +40,8 @@ jobs:
         run: |
           rm -rf build
           mkdir build
-          cd build
-          cmake ..
-          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build . --target aws-iot-device-client
+          cmake . -B build
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build build/ --target aws-iot-device-client
       - name: Run sonar-scanner
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
