@@ -304,6 +304,7 @@ namespace Aws
 
 int main(int argc, char *argv[])
 {
+    cout << "Hello World!" << endl;
     CliArgs cliArgs;
     if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
     {
