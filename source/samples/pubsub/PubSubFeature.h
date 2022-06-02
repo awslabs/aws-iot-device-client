@@ -89,7 +89,7 @@ namespace Aws
                     /**
                      * \brief Default payload if no publish file was provided
                      */
-                    const std::string DEFAULT_PUBLISH_PAYLOAD = "{\"Hello\": \"World!\"}";
+                    const std::string DEFAULT_PUBLISH_PAYLOAD = R"({"Hello": "World!"})";
                     /**
                      * \brief Subscription payload used to retrigger the publish actions
                      */
