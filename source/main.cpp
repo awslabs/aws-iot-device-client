@@ -280,8 +280,6 @@ namespace Aws
 
 int main(int argc, char *argv[])
 {
-    int8_t num = static_cast<int8_t>(1234123);
-
     CliArgs cliArgs;
     if (Config::CheckTerminalArgs(argc, argv))
     {
