@@ -91,11 +91,11 @@ namespace Aws
                     /**
                      * \brief Default payload if no publish file was provided
                      */
-                    const std::string DEFAULT_PUBLISH_PAYLOAD = R"({"Hello": "World!"})";
+                    static const std::string DEFAULT_PUBLISH_PAYLOAD;
                     /**
                      * \brief Subscription payload used to retrigger the publish actions
                      */
-                    const std::string PUBLISH_TRIGGER_PAYLOAD = "DC-Publish";
+                    static const std::string PUBLISH_TRIGGER_PAYLOAD;
 
                     /**
                      * \brief Workflow function for publishing data to the configured topic

@@ -30,6 +30,9 @@ constexpr char PubSubFeature::DEFAULT_SUBSCRIBE_FILE[];
 
 #define MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES 128000
 
+const std::string DEFAULT_PUBLISH_PAYLOAD = R"({"Hello": "World!"})";
+const std::string PUBLISH_TRIGGER_PAYLOAD = "DC-Publish";
+
 string PubSubFeature::getName()
 {
     return NAME;
