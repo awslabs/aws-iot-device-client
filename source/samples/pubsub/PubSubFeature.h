@@ -60,6 +60,16 @@ namespace Aws
                      */
                     std::string thingName;
                     static constexpr char TAG[] = "samples/PubSubFeature.cpp";
+
+                    /**
+                     * \brief Default payload if no publish file was provided
+                     */
+                    static const std::string DEFAULT_PUBLISH_PAYLOAD;
+                    /**
+                     * \brief Subscription payload used to retrigger the publish actions
+                     */
+                    static const std::string PUBLISH_TRIGGER_PAYLOAD;
+
                     /**
                      * \brief The resource manager used to manage CRT resources
                      */
@@ -86,14 +96,6 @@ namespace Aws
                      * \brief Topic to write subscription payloads to
                      */
                     std::string subFile = DEFAULT_SUBSCRIBE_FILE;
-                    /**
-                     * \brief Default payload if no publish file was provided
-                     */
-                    const std::string DEFAULT_PUBLISH_PAYLOAD = R"({"Hello": "World!"})";
-                    /**
-                     * \brief Subscription payload used to retrigger the publish actions
-                     */
-                    const std::string PUBLISH_TRIGGER_PAYLOAD = "DC-Publish";
 
                     /**
                      * \brief Workflow function for publishing data to the configured topic
