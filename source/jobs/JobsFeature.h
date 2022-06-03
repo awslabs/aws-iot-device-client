@@ -14,6 +14,7 @@
 #include "EphemeralPromise.h"
 #include "IotJobsClientWrapper.h"
 #include "JobDocument.h"
+#include "JobEngine.h"
 
 namespace Aws
 {
@@ -29,20 +30,8 @@ namespace Aws
                  */
                 class JobsFeature : public Feature
                 {
-                  protected:
-                    /**
-                     * \brief Begins running the Jobs feature
-                     */
-                    void runJobs();
-                    /**
-                     * \brief An enum used for UpdateJobExecution responses
-                     */
-                    enum UpdateJobExecutionResponseType
-                    {
-                        ACCEPTED,
-                        RETRYABLE_ERROR,
-                        NON_RETRYABLE_ERROR
-                    };
+                  public:
+                    virtual std::string getName() override;
 
                     /**
                      * \brief Wrapper struct to aggregate JobEngine output for updating a job execution status
@@ -64,6 +53,40 @@ namespace Aws
                             : status(status), reason(reason), stdoutput(stdoutput), stderror(stderror)
                         {
                         }
+                    };
+
+                    /**
+                     * \brief Initializes the Jobs feature with all the required setup information, event handlers, and
+                     * the shared MqttConnection
+                     *
+                     * @param manager the shared MqttConnectionManager
+                     * @param notifier an ClientBaseNotifier used for notifying the client base of events or errors
+                     * @param config configuration information passed in by the user via either the command line or
+                     * configuration file
+                     * @return a non-zero return code indicates a problem. The logs can be checked for more info
+                     */
+                    virtual int init(
+                        std::shared_ptr<Crt::Mqtt::MqttConnection> connection,
+                        std::shared_ptr<ClientBaseNotifier> notifier,
+                        const PlainConfig &config);
+
+                    // Interface methods defined in Feature.h
+                    virtual int start() override;
+                    virtual int stop() override;
+
+                  protected:
+                    /**
+                     * \brief Begins running the Jobs feature
+                     */
+                    void runJobs();
+                    /**
+                     * \brief An enum used for UpdateJobExecution responses
+                     */
+                    enum UpdateJobExecutionResponseType
+                    {
+                        ACCEPTED,
+                        RETRYABLE_ERROR,
+                        NON_RETRYABLE_ERROR
                     };
 
                   private:
@@ -296,30 +319,11 @@ namespace Aws
                     void copyJobsNotification(Iotjobs::JobExecutionData job);
 
                     /**
-                     * \brief Made virtual to facilitate injecting mock for testing
+                     * \brief virtual functions to facilitate injecting mocks for testing
                      */
                     virtual std::shared_ptr<AbstractIotJobsClient> createJobsClient();
 
-                  public:
-                    virtual std::string getName() override;
-                    /**
-                     * \brief Initializes the Jobs feature with all the required setup information, event handlers, and
-                     * the shared MqttConnection
-                     *
-                     * @param manager the shared MqttConnectionManager
-                     * @param notifier an ClientBaseNotifier used for notifying the client base of events or errors
-                     * @param config configuration information passed in by the user via either the command line or
-                     * configuration file
-                     * @return a non-zero return code indicates a problem. The logs can be checked for more info
-                     */
-                    virtual int init(
-                        std::shared_ptr<Crt::Mqtt::MqttConnection> connection,
-                        std::shared_ptr<ClientBaseNotifier> notifier,
-                        const PlainConfig &config);
-
-                    // Interface methods defined in Feature.h
-                    virtual int start() override;
-                    virtual int stop() override;
+                    virtual std::shared_ptr<JobEngine> createJobEngine();
                 };
             } // namespace Jobs
         }     // namespace DeviceClient

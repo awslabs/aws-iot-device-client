@@ -607,14 +607,14 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
     };
     // TODO: Add support for checking condition
     auto runJob = [this, job, jobDocument, shutdownHandler]() {
-        JobEngine engine;
+        auto engine = createJobEngine();
         // execute all action steps in sequence as provided in job document
-        int executionStatus = engine.exec_steps(jobDocument, jobHandlerDir);
-        string reason = engine.getReason(executionStatus);
+        int executionStatus = engine->exec_steps(jobDocument, jobHandlerDir);
+        string reason = engine->getReason(executionStatus);
 
         LOG_INFO(TAG, Sanitize(reason).c_str());
 
-        if (engine.hasErrors())
+        if (engine->hasErrors())
         {
             LOG_WARN(TAG, "JobEngine reported receiving errors from STDERR");
         }
@@ -622,7 +622,7 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
         string standardOut;
         if (jobDocument.includeStdOut)
         {
-            standardOut = engine.getStdOut();
+            standardOut = engine->getStdOut();
         }
         else
         {
@@ -640,7 +640,7 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
             status = JobStatus::FAILED;
         }
         publishUpdateJobExecutionStatus(
-            job, JobExecutionStatusInfo(status, reason, standardOut, engine.getStdErr()), shutdownHandler);
+            job, JobExecutionStatusInfo(status, reason, standardOut, engine->getStdErr()), shutdownHandler);
     };
     thread jobEngineThread(runJob);
     jobEngineThread.detach();
@@ -711,4 +711,9 @@ int JobsFeature::stop()
 std::shared_ptr<AbstractIotJobsClient> JobsFeature::createJobsClient()
 {
     return std::shared_ptr<AbstractIotJobsClient>(new IotJobsClientWrapper(mqttConnection));
+}
+
+std::shared_ptr<JobEngine> JobsFeature::createJobEngine()
+{
+    return std::shared_ptr<JobEngine>(new JobEngine());
 }
