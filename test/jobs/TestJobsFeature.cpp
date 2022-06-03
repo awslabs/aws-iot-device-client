@@ -251,7 +251,6 @@ class MockJobsFeature : public JobsFeature
          (Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> statusDetails),
          std::function<void(void)> onCompleteCallback),
         (override));
-    //    MOCK_METHOD(void, executeJob, (const JobExecutionData &job, const PlainJobDocument &jobDocument), (override));
 };
 
 class TestJobsFeature : public ::testing::Test
@@ -578,7 +577,7 @@ TEST_F(TestJobsFeature, ExecuteJobStdOutAndStderror)
     EXPECT_EQ(std::future_status::ready, promise.get_future().wait_for(std::chrono::seconds(3)));
 }
 
-TEST_F(TestJobsFeature, DuplicateJobNotification)
+TEST_F(TestJobsFeature, ExecuteJobDuplicateNotificaton)
 {
     /**
      * Sends duplicate StartNextJobExecutionResponse to handler callback. Expect to only update and execute 1
@@ -591,17 +590,17 @@ TEST_F(TestJobsFeature, DuplicateJobNotification)
     std::promise<void> promise;
     auto setPromise = [&promise]() -> void { promise.set_value(); };
 
-    EXPECT_CALL(*jobsMock, createJobEngine()).Times(1).WillOnce(Return(mockEngine));
+    string stdoutput = "test output";
 
+    EXPECT_CALL(*jobsMock, createJobEngine()).Times(1).WillOnce(Return(mockEngine));
     EXPECT_CALL(*mockEngine, exec_steps(_, _)).WillOnce(Return(0));
     EXPECT_CALL(*mockEngine, hasErrors()).WillOnce(Return(1));
     EXPECT_CALL(*mockEngine, getReason(_)).WillOnce(Return(""));
-    EXPECT_CALL(*mockEngine, getStdOut()).WillOnce(Return(""));
+    EXPECT_CALL(*mockEngine, getStdOut()).WillOnce(Return(stdoutput));
     EXPECT_CALL(*mockEngine, getStdErr()).WillOnce(Return(""));
 
     EXPECT_CALL(*jobsMock, createJobsClient()).Times(1).WillOnce(Return(mockClient));
 
-    // Invokes handler twice with same Job
     EXPECT_CALL(
         *mockClient,
         SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
@@ -632,7 +631,6 @@ TEST_F(TestJobsFeature, DuplicateJobNotification)
         .Times(1)
         .WillOnce(InvokeArgument<2>(0));
 
-    // Expects single update and execution
     EXPECT_CALL(
         *jobsMock,
         publishUpdateJobExecutionStatusWithRetry(
@@ -645,13 +643,15 @@ TEST_F(TestJobsFeature, DuplicateJobNotification)
         *jobsMock,
         publishUpdateJobExecutionStatusWithRetry(
             JobExecutionEq(job),
-            StatusInfoEq(JobsFeature::JobExecutionStatusInfo(Iotjobs::JobStatus::SUCCEEDED, "", "", "")),
+            StatusInfoEq(JobsFeature::JobExecutionStatusInfo(Iotjobs::JobStatus::SUCCEEDED, "", stdoutput, "")),
             _,
             _))
         .WillOnce(InvokeWithoutArgs(setPromise));
 
     jobsMock->init(std::shared_ptr<Mqtt::MqttConnection>(), notifier, config);
     jobsMock->invokeRunJobs();
+
+    EXPECT_EQ(std::future_status::ready, promise.get_future().wait_for(std::chrono::seconds(3)));
 }
 
 TEST_F(TestJobsFeature, InvalidJobDocument)
