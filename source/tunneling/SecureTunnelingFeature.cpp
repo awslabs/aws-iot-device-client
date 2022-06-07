@@ -62,9 +62,10 @@ namespace Aws
 
                 int SecureTunnelingFeature::stop()
                 {
+                    LOG_DEBUG(TAG, "SecureTunnelingFeature::stop");
                     for (auto &c : mContexts)
                     {
-                        c.reset();
+                        c->StopSecureTunnel();
                     }
 
                     auto self = static_cast<Feature *>(this);
@@ -265,13 +266,6 @@ namespace Aws
                         return c.get() == contextToRemove;
                     });
                     mContexts.erase(std::remove(mContexts.begin(), mContexts.end(), *it));
-
-#if defined(DISABLE_MQTT)
-                    if (mContexts.empty())
-                    {
-                        stop();
-                    }
-#endif
                 }
 
             } // namespace SecureTunneling

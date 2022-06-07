@@ -33,7 +33,16 @@ namespace Aws
                 {
                 }
 
-                SecureTunnelingContext::~SecureTunnelingContext() { mSecureTunnel->Close(); }
+                SecureTunnelingContext::~SecureTunnelingContext() {
+                    LOG_DEBUG(TAG, "SecureTunnelingContext::~SecureTunnelingContext");
+//                    mSecureTunnel->Close();
+                }
+
+                void SecureTunnelingContext::StopSecureTunnel()
+                {
+                    LOG_DEBUG(TAG, "SecureTunnelingContext::StopSecureTunnel");
+                    mSecureTunnel->Stop();
+                }
 
                 template <typename T>
                 static bool operator==(const Aws::Crt::Optional<T> &lhs, const Aws::Crt::Optional<T> &rhs)
