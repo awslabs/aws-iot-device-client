@@ -240,7 +240,7 @@ TEST(JobDocument, SampleJobDocument)
     ASSERT_TRUE(jobDocument.finalStep->ignoreStepFailure);
 }
 
-TEST(JobDocuemnt, MissingRequiredFields)
+TEST(JobDocument, MissingRequiredFields)
 {
     constexpr char jsonString[] = R"(
 {
@@ -333,7 +333,7 @@ TEST(JobDocuemnt, MissingRequiredFields)
     ASSERT_FALSE(jobDocument.Validate());
 }
 
-TEST(JobDocuemnt, MinimumJobDocument)
+TEST(JobDocument, MinimumJobDocument)
 {
     constexpr char jsonString[] = R"(
 {
@@ -377,7 +377,7 @@ TEST(JobDocuemnt, MinimumJobDocument)
     ASSERT_TRUE(jobDocument.Validate());
 }
 
-TEST(JobDocuemnt, MissingRequiredFieldsValue)
+TEST(JobDocument, MissingRequiredFieldsValue)
 {
     constexpr char jsonString[] = R"(
 {

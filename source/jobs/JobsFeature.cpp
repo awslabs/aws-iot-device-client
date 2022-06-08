@@ -33,6 +33,8 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Jobs;
 using namespace Aws::Iotjobs;
 
+const std::string JobsFeature::DEFAULT_JOBS_HANDLER_DIR = "~/.aws-iot-device-client/jobs/";
+
 string JobsFeature::getName()
 {
     return string("Jobs");
@@ -376,11 +378,11 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         statusDetails["reason"] = statusInfo.reason.substr(0, MAX_STATUS_DETAIL_LENGTH).c_str();
     }
 
-    if (statusInfo.status == Iotjobs::JobStatus::SUCCEEDED && !statusInfo.output.empty())
+    if (!statusInfo.stdoutput.empty())
     {
         // We want the most recent output since we can only include 1024 characters in the job execution update
-        int startPos = statusInfo.output.size() > MAX_STATUS_DETAIL_LENGTH
-                           ? statusInfo.output.size() - MAX_STATUS_DETAIL_LENGTH
+        int startPos = statusInfo.stdoutput.size() > MAX_STATUS_DETAIL_LENGTH
+                           ? statusInfo.stdoutput.size() - MAX_STATUS_DETAIL_LENGTH
                            : 0;
         // TODO We need to add filtering of invalid characters for the status details that may come from weird
         // process output. The valid values for a statusDetail value are '[^\p{C}]+ which translates into
@@ -389,16 +391,17 @@ void JobsFeature::publishUpdateJobExecutionStatus(
 
         // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
         // cppcheck-suppress danglingTemporaryLifetime
-        statusDetails["stdout"] = statusInfo.output.substr(startPos, statusInfo.output.size()).c_str();
+        statusDetails["stdout"] = statusInfo.stdoutput.substr(startPos, statusInfo.stdoutput.size()).c_str();
     }
-    else if (!statusInfo.output.empty())
+
+    if (!statusInfo.stderror.empty())
     {
-        int startPos = statusInfo.output.size() > MAX_STATUS_DETAIL_LENGTH
-                           ? statusInfo.output.size() - MAX_STATUS_DETAIL_LENGTH
+        int startPos = statusInfo.stderror.size() > MAX_STATUS_DETAIL_LENGTH
+                           ? statusInfo.stderror.size() - MAX_STATUS_DETAIL_LENGTH
                            : 0;
         // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
         // cppcheck-suppress danglingTemporaryLifetime
-        statusDetails["stderr"] = statusInfo.output.substr(startPos, statusInfo.output.size()).c_str();
+        statusDetails["stderr"] = statusInfo.stderror.substr(startPos, statusInfo.stderror.size()).c_str();
     }
 
     // NOTE(marcoaz): statusDetails is captured by value
@@ -582,7 +585,7 @@ void JobsFeature::initJob(const JobExecutionData &job)
         publishUpdateJobExecutionStatus(
             job,
             JobExecutionStatusInfo(
-                Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!", ""),
+                Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!", "", ""),
             shutdownHandler);
         return;
     }
@@ -604,39 +607,40 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
     };
     // TODO: Add support for checking condition
     auto runJob = [this, job, jobDocument, shutdownHandler]() {
-        JobEngine engine;
+        auto engine = createJobEngine();
         // execute all action steps in sequence as provided in job document
-        int executionStatus = engine.exec_steps(jobDocument, jobHandlerDir);
-        string reason = engine.getReason(executionStatus);
+        int executionStatus = engine->exec_steps(jobDocument, jobHandlerDir);
+        string reason = engine->getReason(executionStatus);
 
         LOG_INFO(TAG, Sanitize(reason).c_str());
 
-        if (engine.hasErrors())
+        if (engine->hasErrors())
         {
             LOG_WARN(TAG, "JobEngine reported receiving errors from STDERR");
         }
 
+        string standardOut;
+        if (jobDocument.includeStdOut)
+        {
+            standardOut = engine->getStdOut();
+        }
+        else
+        {
+            LOG_DEBUG(TAG, "Not including stdout with the status details");
+        }
+        JobStatus status;
         if (!executionStatus)
         {
             LOG_INFO(TAG, "Job executed successfully!");
-            string standardOut;
-            if (jobDocument.includeStdOut)
-            {
-                standardOut = engine.getStdOut();
-            }
-            else
-            {
-                LOG_DEBUG(TAG, "Not including stdout with the status details");
-            }
-            publishUpdateJobExecutionStatus(
-                job, JobExecutionStatusInfo(JobStatus::SUCCEEDED, "", standardOut), shutdownHandler);
+            status = JobStatus::SUCCEEDED;
         }
         else
         {
             LOG_WARN(TAG, "Job execution failed!");
-            publishUpdateJobExecutionStatus(
-                job, JobExecutionStatusInfo(JobStatus::FAILED, reason, engine.getStdErr()), shutdownHandler);
+            status = JobStatus::FAILED;
         }
+        publishUpdateJobExecutionStatus(
+            job, JobExecutionStatusInfo(status, reason, standardOut, engine->getStdErr()), shutdownHandler);
     };
     thread jobEngineThread(runJob);
     jobEngineThread.detach();
@@ -707,4 +711,9 @@ int JobsFeature::stop()
 std::shared_ptr<AbstractIotJobsClient> JobsFeature::createJobsClient()
 {
     return std::shared_ptr<AbstractIotJobsClient>(new IotJobsClientWrapper(mqttConnection));
+}
+
+std::shared_ptr<JobEngine> JobsFeature::createJobEngine()
+{
+    return std::shared_ptr<JobEngine>(new JobEngine());
 }
