@@ -105,6 +105,7 @@ namespace Aws
                         int &executionStatus);
 
                   public:
+                    virtual ~JobEngine() = default;
                     /**
                      * \brief Used by output processing threads to assess output from the child process
                      *
@@ -112,7 +113,7 @@ namespace Aws
                      * @param isStdErr whether the output being processed is from STDERR
                      * @param childPID the process ID of the child process
                      */
-                    void processCmdOutput(int fd, bool isStdErr, int childPID);
+                    virtual void processCmdOutput(int fd, bool isStdErr, int childPID);
 
                     /**
                      * \brief Executes the given set of steps (actions) in sequence as provided in the job document
@@ -120,7 +121,7 @@ namespace Aws
                      * @param jobHandlerDir the default job handler directory path
                      * @return an integer representing the return code of the executed action
                      */
-                    int exec_steps(PlainJobDocument jobDocument, const std::string &jobHandlerDir);
+                    virtual int exec_steps(PlainJobDocument jobDocument, const std::string &jobHandlerDir);
                     /**
                      * \brief Begin the execution of a command with the specified arguments
                      *
@@ -133,28 +134,28 @@ namespace Aws
                      *
                      * @return an integer representing the number of lines received on STDERR
                      */
-                    int hasErrors() { return errors; }
+                    virtual int hasErrors() { return errors; }
 
                     /**
                      * \brief Evaluates the return code of the JobEngine's command execution
                      * @param statusCode the status code returned by the job execution
                      * @return the output of the status code evaluation
                      */
-                    std::string getReason(int statusCode);
+                    virtual std::string getReason(int statusCode);
 
                     /**
                      * \brief Take the STDOUT received from the child process
                      *
                      * @return a LimitedStreamBuffer taken from the JobEngine
                      */
-                    std::string getStdOut() { return stdoutstream.toString(); };
+                    virtual std::string getStdOut() { return stdoutstream.toString(); };
 
                     /**
                      * \brief Take the STDERR received from the child process
                      *
                      * @return a LimitedStreamBuffer taken from the JobEngine
                      */
-                    std::string getStdErr() { return stderrstream.toString(); };
+                    virtual std::string getStdErr() { return stderrstream.toString(); };
                 };
             } // namespace Jobs
         }     // namespace DeviceClient
