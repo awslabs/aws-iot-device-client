@@ -265,13 +265,6 @@ namespace Aws
                         return c.get() == contextToRemove;
                     });
                     mContexts.erase(std::remove(mContexts.begin(), mContexts.end(), *it));
-
-#if defined(DISABLE_MQTT)
-                    if (mContexts.empty())
-                    {
-                        stop();
-                    }
-#endif
                 }
 
             } // namespace SecureTunneling
