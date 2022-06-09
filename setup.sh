@@ -343,7 +343,9 @@ if [ "$INSTALL_SERVICE" = "y" ]; then
   done
 
   ### Get DeviceClient Service File Location ###
-  FOUND_SERVICE_FILE=false
+  
+  
+  =false
   SERVICE_FILE_DEFAULT="./setup/aws-iot-device-client.service"
   while [ "$FOUND_SERVICE_FILE" != true ]; do
     printf ${PMPT} "Enter the complete directory path for the aws-iot-device-client service file. (Empty for default: ${SERVICE_FILE_DEFAULT})"
@@ -374,6 +376,7 @@ if [ "$INSTALL_SERVICE" = "y" ]; then
   printf ${PMPT} "Installing AWS IoT Device Client..."
   if command -v "systemctl" &>/dev/null; then
     systemctl stop aws-iot-device-client.service || true
+    sed -i "s#/etc/.aws-iot-device-client/aws-iot-device-client.conf#$CONF_OUTPUT_PATH#g" $SERVICE_FILE
     cp "$SERVICE_FILE" /etc/systemd/system/aws-iot-device-client.service
     if [ "$SERVICE_DEBUG" = "y" ]; then
       echo "$DEBUG_SCRIPT" | tee /sbin/aws-iot-device-client >/dev/null
