@@ -343,9 +343,7 @@ if [ "$INSTALL_SERVICE" = "y" ]; then
   done
 
   ### Get DeviceClient Service File Location ###
-  
-  
-  =false
+  FOUND_SERVICE_FILE=false
   SERVICE_FILE_DEFAULT="./setup/aws-iot-device-client.service"
   while [ "$FOUND_SERVICE_FILE" != true ]; do
     printf ${PMPT} "Enter the complete directory path for the aws-iot-device-client service file. (Empty for default: ${SERVICE_FILE_DEFAULT})"
