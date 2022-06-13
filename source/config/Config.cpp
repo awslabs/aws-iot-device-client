@@ -1829,7 +1829,7 @@ bool PlainConfig::SensorPublish::Validate() const
             // If the path does not point to an existing file,
             // then check the parent directory exists and has required permissions.
             auto addrParentDir = FileUtils::ExtractParentDirectory(setting.addr.value());
-            if (!FileUtils::ValidateFilePermissions(addrParentDir, Permissions::SENSOR_PUBLISH_ADDR_FILE))
+            if (!FileUtils::ValidateFilePermissions(addrParentDir, Permissions::SENSOR_PUBLISH_ADDR_DIR))
             {
                 setting.enabled = false;
             }
