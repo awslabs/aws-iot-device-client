@@ -58,6 +58,7 @@ namespace Aws
                 static constexpr int PUB_SUB_FILES = 600;
                 static constexpr int SAMPLE_SHADOW_FILES = 600;
                 static constexpr int SENSOR_PUBLISH_ADDR_FILE = 660;
+                static constexpr int SENSOR_PUBLISH_ADDR_DIR = 700;
                 static constexpr int PKCS11_LIB_FILE = 640;
             };
 
@@ -441,6 +442,7 @@ namespace Aws
                 static constexpr char DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[] = "~/.aws-iot-device-client/sample-shadow/";
 
                 static constexpr char CLI_HELP[] = "--help";
+                static constexpr char CLI_VERSION[] = "--version";
                 static constexpr char CLI_EXPORT_DEFAULT_SETTINGS[] = "--export-default-settings";
                 static constexpr char CLI_CONFIG_FILE[] = "--config-file";
 
@@ -469,6 +471,7 @@ namespace Aws
 
               private:
                 static void PrintHelpMessage();
+                static void PrintVersion();
                 static bool ExportDefaultSetting(const std::string &file);
             };
         } // namespace DeviceClient

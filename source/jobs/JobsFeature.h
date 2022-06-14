@@ -14,6 +14,7 @@
 #include "EphemeralPromise.h"
 #include "IotJobsClientWrapper.h"
 #include "JobDocument.h"
+#include "JobEngine.h"
 
 namespace Aws
 {
@@ -29,6 +30,50 @@ namespace Aws
                  */
                 class JobsFeature : public Feature
                 {
+                  public:
+                    virtual std::string getName() override;
+
+                    /**
+                     * \brief Wrapper struct to aggregate JobEngine output for updating a job execution status
+                     */
+
+                    struct JobExecutionStatusInfo
+                    {
+                        Aws::Iotjobs::JobStatus status;
+                        std::string reason;
+                        std::string stdoutput;
+                        std::string stderror;
+
+                        explicit JobExecutionStatusInfo(Aws::Iotjobs::JobStatus status) : status(status) {}
+                        JobExecutionStatusInfo(
+                            Aws::Iotjobs::JobStatus status,
+                            const std::string &reason,
+                            const std::string &stdoutput,
+                            const std::string &stderror)
+                            : status(status), reason(reason), stdoutput(stdoutput), stderror(stderror)
+                        {
+                        }
+                    };
+
+                    /**
+                     * \brief Initializes the Jobs feature with all the required setup information, event handlers, and
+                     * the shared MqttConnection
+                     *
+                     * @param manager the shared MqttConnectionManager
+                     * @param notifier an ClientBaseNotifier used for notifying the client base of events or errors
+                     * @param config configuration information passed in by the user via either the command line or
+                     * configuration file
+                     * @return a non-zero return code indicates a problem. The logs can be checked for more info
+                     */
+                    virtual int init(
+                        std::shared_ptr<Crt::Mqtt::MqttConnection> connection,
+                        std::shared_ptr<ClientBaseNotifier> notifier,
+                        const PlainConfig &config);
+
+                    // Interface methods defined in Feature.h
+                    virtual int start() override;
+                    virtual int stop() override;
+
                   protected:
                     /**
                      * \brief Begins running the Jobs feature
@@ -44,26 +89,6 @@ namespace Aws
                         NON_RETRYABLE_ERROR
                     };
 
-                    /**
-                     * \brief Wrapper struct to aggregate JobEngine output for updating a job execution status
-                     */
-                    struct JobExecutionStatusInfo
-                    {
-                        Iotjobs::JobStatus status;
-                        std::string reason;
-                        std::string output;
-
-                        JobExecutionStatusInfo(
-                            Iotjobs::JobStatus status,
-                            const std::string &reason,
-                            const std::string &output)
-                            : status(status), reason(reason), output(output)
-                        {
-                        }
-
-                        explicit JobExecutionStatusInfo(Iotjobs::JobStatus status) : status(status) {}
-                    };
-
                   private:
                     /**
                      * \brief Used by the logger to specify that log messages are coming from the Jobs feature
@@ -74,12 +99,13 @@ namespace Aws
                      * \brief The default directory that the Jobs feature will use to find executables matching
                      * an incoming job document's operation attribute
                      */
+                    static const std::string DEFAULT_JOBS_HANDLER_DIR;
+
                     /**
                      * \brief A limit enforced by the AWS IoT Jobs API on the maximum number of characters allowed
                      * to be provided in a StatusDetail entry when calling the UpdateJobExecution API
                      */
                     const size_t MAX_STATUS_DETAIL_LENGTH = 1024;
-                    const std::string DEFAULT_JOBS_HANDLER_DIR = "~/.aws-iot-device-client/jobs/";
 
                     /**
                      * \brief Whether the DeviceClient base has requested this feature to stop
@@ -293,30 +319,11 @@ namespace Aws
                     void copyJobsNotification(Iotjobs::JobExecutionData job);
 
                     /**
-                     * \brief Made virtual to facilitate injecting mock for testing
+                     * \brief virtual functions to facilitate injecting mocks for testing
                      */
                     virtual std::shared_ptr<AbstractIotJobsClient> createJobsClient();
 
-                  public:
-                    virtual std::string getName() override;
-                    /**
-                     * \brief Initializes the Jobs feature with all the required setup information, event handlers, and
-                     * the shared MqttConnection
-                     *
-                     * @param manager the shared MqttConnectionManager
-                     * @param notifier an ClientBaseNotifier used for notifying the client base of events or errors
-                     * @param config configuration information passed in by the user via either the command line or
-                     * configuration file
-                     * @return a non-zero return code indicates a problem. The logs can be checked for more info
-                     */
-                    virtual int init(
-                        std::shared_ptr<Crt::Mqtt::MqttConnection> connection,
-                        std::shared_ptr<ClientBaseNotifier> notifier,
-                        const PlainConfig &config);
-
-                    // Interface methods defined in Feature.h
-                    virtual int start() override;
-                    virtual int stop() override;
+                    virtual std::shared_ptr<JobEngine> createJobEngine();
                 };
             } // namespace Jobs
         }     // namespace DeviceClient

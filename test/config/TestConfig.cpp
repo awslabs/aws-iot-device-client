@@ -50,7 +50,7 @@ class ConfigTestFixture : public ::testing::Test
 
         // Ensure invalid-file does not exist
         std::remove(invalidFilePath.c_str());
-        mode_t validPerms = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
+        mode_t validPerms = S_IRUSR | S_IWUSR | S_IXUSR;
         FileUtils::CreateDirectoryWithPermissions(addrPathValid.c_str(), validPerms);
 
         mode_t invalidPerms = validPerms | S_IRWXO;
