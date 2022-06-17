@@ -224,6 +224,72 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     ASSERT_STREQ(
         "token-label", secureElement.View().GetString(config.secureElement.JSON_SECURE_ELEMENT_TOKEN_LABEL).c_str());
 }
+/**
+ * tests if fields requiring ExtractExpandedPath() are passed in with bad characters
+ */
+TEST_F(ConfigTestFixture, PlaceholderInput)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "<replace_with_endpoint_value>",
+    "cert": "<replace_with_certificate_file_path>",
+    "key": "<replace_with_private_key_file_path>",
+    "thing-name": "<replace_with_thing_name/replace_with_client_id>",
+    "logging": {
+        "level": "debug",
+        "type": "file",
+        "file": "./aws-iot-device-client.log"
+    },
+    "jobs": {
+        "enabled": true
+    },
+    "tunneling": {
+        "enabled": true
+    },
+    "device-defender": {
+        "enabled": true,
+        "interval": 300
+    },
+    "fleet-provisioning": {
+        "enabled": true,
+        "template-name": "template-name",
+        "csr-file": "<replace_with_csr_file_path>",
+        "device-key": "<replace_with_device_private_key_file_path>",
+        "template-parameters": "{\"SerialNumber\": \"Device-SN\"}"
+    },
+    "samples": {
+		"pub-sub": {
+			"enabled": true,
+			"publish-topic": "publish_topic",
+			"subscribe-topic": "subscribe_topic"
+		}
+	},
+    "config-shadow": {
+        "enabled": true
+      },
+    "sample-shadow": {
+        "enabled": true,
+        "shadow-name": "shadow-name",
+        "shadow-input-file": "<replace_with_shadow_input_file_path>",
+        "shadow-output-file": "<replace_with_shadow_output_file_path>"
+      },
+    "secure-element": {
+        "enabled": true,
+        "pkcs11-lib": "/tmp/aws-iot-device-client-test-file",
+        "secure-element-pin": "0000",
+        "secure-element-key-label": "key-label",
+        "secure-element-slot-id": 1111,
+        "secure-element-token-label": "token-label"
+      }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate());
+}
 
 TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
 {
