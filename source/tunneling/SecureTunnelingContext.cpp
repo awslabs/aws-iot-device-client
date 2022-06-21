@@ -45,7 +45,7 @@ namespace Aws
                 void SecureTunnelingContext::StopSecureTunnel()
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingContext::StopSecureTunnel");
-                    mSecureTunnel->Stop();
+                    mSecureTunnel->Shutdown();
                 }
 
                 template <typename T>
