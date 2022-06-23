@@ -576,7 +576,7 @@ bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_LOG_FILE;
     if (json.ValueExists(jsonKey))
     {
-        if (!json.GetString(jsonKey).empty())
+        if (!json.GetString(jsonKey).empty() && FileUtils::IsValidFilePath(json.GetString(jsonKey).c_str()))
         {
             deviceClientLogFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
@@ -616,7 +616,7 @@ bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_SDK_LOG_FILE;
     if (json.ValueExists(jsonKey))
     {
-        if (!json.GetString(jsonKey).empty())
+        if (!json.GetString(jsonKey).empty() && FileUtils::IsValidFilePath(json.GetString(jsonKey).c_str()))
         {
             sdkLogFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }

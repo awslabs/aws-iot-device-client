@@ -104,7 +104,7 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     "logging": {
         "level": "debug",
         "type": "file",
-        "file": "./aws-iot-device-client.log"
+        "file": "/tmp/aws-iot-device-client-test-file"
     },
     "jobs": {
         "enabled": true
@@ -161,7 +161,7 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_STREQ("file", config.logConfig.deviceClientLogtype.c_str());
-    ASSERT_STREQ("./aws-iot-device-client.log", config.logConfig.deviceClientLogFile.c_str());
+    ASSERT_STREQ(filePath.c_str(), config.logConfig.deviceClientLogFile.c_str());
     ASSERT_EQ(3, config.logConfig.deviceClientlogLevel); // Expect DEBUG log level, which is 3
     ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
@@ -226,7 +226,9 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
 }
 /**
  * tests if fields requiring ExtractExpandedPath() are passed in with bad characters
+ * Adding disable_mqtt tag to pass ST_component_mode build test
  */
+#if !defined(DISABLE_MQTT)
 TEST_F(ConfigTestFixture, PlaceholderInput)
 {
     constexpr char jsonString[] = R"(
@@ -238,7 +240,7 @@ TEST_F(ConfigTestFixture, PlaceholderInput)
     "logging": {
         "level": "debug",
         "type": "file",
-        "file": "./aws-iot-device-client.log"
+        "file": "/tmp/aws-iot-device-client-test-file"
     },
     "jobs": {
         "enabled": true
@@ -290,6 +292,49 @@ TEST_F(ConfigTestFixture, PlaceholderInput)
 
     ASSERT_FALSE(config.Validate());
 }
+#endif
+
+#if defined(DISABLE_MQTT)
+TEST_F(ConfigTestFixture, PlaceholderForST)
+{
+    constexpr char jsonString[] = R"(
+{
+  "endpoint": "replace_with_endpoint_value",
+  "cert": "replace_with_certificate_file_location",
+  "key": "replace_with_private_key_file_location",
+  "root-ca": "replace_with_root_ca_file_location",
+  "thing-name": "replace_with_thing_name",
+  "logging": {
+    "level": "ERROR",
+    "type": "STDOUT",
+    "file": "/var/log/aws-iot-device-client/aws-iot-device-client.log"
+  },
+  "jobs": {
+    "enabled": false,
+    "handler-directory": "replace_with_path_to_handler_dir"
+  },
+  "tunneling": {
+    "enabled": true
+  },
+  "device-defender":	{
+    "enabled":	false,
+    "interval": 300
+  },
+  "fleet-provisioning": {
+    "enabled": false,
+    "template-name": "replace_with_template_name",
+    "csr-file": "replace_with_csr-file-path"
+  }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+}
+#endif
 
 TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
 {
@@ -494,7 +539,7 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabledInvalidRootCa)
     "logging": {
         "level": "debug",
         "type": "file",
-        "file": "./aws-iot-device-client.log"
+        "file": "/tmp/aws-iot-device-client-test-file"
     },
     "jobs": {
         "enabled": true
@@ -543,7 +588,7 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabledInvalidRootCa)
     ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_STREQ("file", config.logConfig.deviceClientLogtype.c_str());
-    ASSERT_STREQ("./aws-iot-device-client.log", config.logConfig.deviceClientLogFile.c_str());
+    ASSERT_STREQ(filePath.c_str(), config.logConfig.deviceClientLogFile.c_str());
     ASSERT_EQ(3, config.logConfig.deviceClientlogLevel); // Expect DEBUG log level, which is 3
     ASSERT_TRUE(config.jobs.enabled);
     ASSERT_TRUE(config.tunneling.enabled);
@@ -889,10 +934,10 @@ TEST_F(ConfigTestFixture, SDKLoggingConfigurationJson)
     "logging": {
         "level": "DEBUG",
         "type": "STDOUT",
-        "file": "device-client.log",
+        "file": "/tmp/aws-iot-device-client-test-file",
         "enable-sdk-logging": true,
         "sdk-log-level": "warn",
-        "sdk-log-file": "sdk-log.log"
+        "sdk-log-file": "/tmp/aws-iot-device-client-test-file"
     }
 })";
     JsonObject jsonObject(jsonString);
@@ -903,12 +948,12 @@ TEST_F(ConfigTestFixture, SDKLoggingConfigurationJson)
 
     ASSERT_TRUE(config.logConfig.sdkLoggingEnabled);
     ASSERT_EQ(Aws::Crt::LogLevel::Warn, config.logConfig.sdkLogLevel);
-    ASSERT_STREQ("sdk-log.log", config.logConfig.sdkLogFile.c_str());
+    ASSERT_STREQ(filePath.c_str(), config.logConfig.sdkLogFile.c_str());
 
     // Also make sure none of the device client log API settings have been modified
     ASSERT_EQ(3, config.logConfig.deviceClientlogLevel);
     ASSERT_STREQ("stdout", config.logConfig.deviceClientLogtype.c_str());
-    ASSERT_STREQ("device-client.log", config.logConfig.deviceClientLogFile.c_str());
+    ASSERT_STREQ(filePath.c_str(), config.logConfig.deviceClientLogFile.c_str());
 }
 
 TEST_F(ConfigTestFixture, FleetProvisioningMinimumConfig)

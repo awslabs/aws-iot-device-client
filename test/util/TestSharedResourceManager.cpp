@@ -33,7 +33,7 @@ static PlainConfig getConfig(string certPath, string keyPath)
 
     std::string jsonString = "{\"endpoint\": \"endpoint value\",\n"
                              "\"cert\": \"" +
-                             certPath + "\",\n\"key\": \"" + keyPath + "\"}";
+                             certPath + "\",\n\"key\": \"" + keyPath + "\",\n\"thing-name\": \"thing-name value\"}";
 
     JsonObject jsonObject(jsonString.c_str());
     JsonView jsonView = jsonObject.View();
@@ -103,6 +103,7 @@ TEST_F(SharedResourceManagerTest, locateCredentialsHappy)
     PlainConfig config;
     config = getConfig(certFilePath, keyFilePath);
 
+    ASSERT_TRUE(config.Validate());
     ASSERT_TRUE(manager.locateCredentialsWrapper(config));
 }
 
@@ -112,6 +113,7 @@ TEST_F(SharedResourceManagerTest, badPermissionsCert)
     PlainConfig config;
     config = getConfig(badPermissionsCertFilePath, keyFilePath);
 
+    ASSERT_TRUE(config.Validate());
     ASSERT_FALSE(manager.locateCredentialsWrapper(config));
 }
 
@@ -121,6 +123,7 @@ TEST_F(SharedResourceManagerTest, badPermissionsKey)
     PlainConfig config;
     config = getConfig(certFilePath, badPermissionsKeyFilePath);
 
+    ASSERT_TRUE(config.Validate());
     ASSERT_FALSE(manager.locateCredentialsWrapper(config));
 }
 
@@ -130,7 +133,7 @@ TEST_F(SharedResourceManagerTest, invalidCert)
     PlainConfig config;
     config = getConfig(invalidCertFilePath, keyFilePath);
 
-    ASSERT_FALSE(manager.locateCredentialsWrapper(config));
+    ASSERT_FALSE(config.Validate());
 }
 
 TEST_F(SharedResourceManagerTest, invalidKey)
@@ -139,7 +142,7 @@ TEST_F(SharedResourceManagerTest, invalidKey)
     PlainConfig config;
     config = getConfig(invalidCertFilePath, keyFilePath);
 
-    ASSERT_FALSE(manager.locateCredentialsWrapper(config));
+    ASSERT_FALSE(config.Validate());
 }
 
 TEST_F(SharedResourceManagerTest, badPermissionsDirectory)
@@ -149,5 +152,6 @@ TEST_F(SharedResourceManagerTest, badPermissionsDirectory)
     config = getConfig(certFilePath, keyFilePath);
     chmod(certDir.c_str(), 0777);
 
+    ASSERT_TRUE(config.Validate());
     ASSERT_FALSE(manager.locateCredentialsWrapper(config));
 }
