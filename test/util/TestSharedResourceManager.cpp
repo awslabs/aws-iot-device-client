@@ -127,6 +127,7 @@ TEST_F(SharedResourceManagerTest, badPermissionsKey)
     ASSERT_FALSE(manager.locateCredentialsWrapper(config));
 }
 
+#if !defined(DISABLE_MQTT)
 TEST_F(SharedResourceManagerTest, invalidCert)
 {
 
@@ -144,6 +145,27 @@ TEST_F(SharedResourceManagerTest, invalidKey)
 
     ASSERT_FALSE(config.Validate());
 }
+#endif
+
+#if defined(DISABLE_MQTT)
+TEST_F(SharedResourceManagerTest, invalidCertForST)
+{
+
+    PlainConfig config;
+    config = getConfig(invalidCertFilePath, keyFilePath);
+
+    ASSERT_TRUE(config.Validate());
+}
+
+TEST_F(SharedResourceManagerTest, invalidKeyForST)
+{
+
+    PlainConfig config;
+    config = getConfig(invalidCertFilePath, keyFilePath);
+
+    ASSERT_TRUE(config.Validate());
+}
+#endif
 
 TEST_F(SharedResourceManagerTest, badPermissionsDirectory)
 {
