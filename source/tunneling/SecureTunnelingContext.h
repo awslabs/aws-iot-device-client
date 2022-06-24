@@ -67,6 +67,11 @@ namespace Aws
                      */
                     bool ConnectToSecureTunnel();
 
+                    /**
+                     * \brief Stop and close secure tunnel
+                     */
+                    void StopSecureTunnel();
+
                   private:
                     /**
                      * \brief Connect to local TCP forward
