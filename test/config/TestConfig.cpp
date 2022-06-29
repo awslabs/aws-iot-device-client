@@ -32,6 +32,7 @@ class ConfigTestFixture : public ::testing::Test
 {
   public:
     ConfigTestFixture() = default;
+    string outputPath;
 
     void SetUp() override
     {
@@ -55,6 +56,11 @@ class ConfigTestFixture : public ::testing::Test
 
         mode_t invalidPerms = validPerms | S_IRWXO;
         FileUtils::CreateDirectoryWithPermissions(addrPathInvalid.c_str(), invalidPerms);
+
+        ostringstream outputPathStream;
+        outputPathStream << Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR << Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
+
+        outputPath = FileUtils::ExtractExpandedPath(outputPathStream.str().c_str());
     }
 
     void TearDown() override
@@ -176,7 +182,7 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     ASSERT_TRUE(config.sampleShadow.enabled);
     ASSERT_STREQ("shadow-name", config.sampleShadow.shadowName->c_str());
     ASSERT_FALSE(config.sampleShadow.shadowInputFile.has_value());
-    ASSERT_FALSE(config.sampleShadow.shadowOutputFile.has_value());
+    ASSERT_TRUE(config.sampleShadow.shadowOutputFile.has_value());
     ASSERT_TRUE(config.pubSub.enabled);
     ASSERT_STREQ("publish_topic", config.pubSub.publishTopic->c_str());
     ASSERT_STREQ("subscribe_topic", config.pubSub.subscribeTopic->c_str());
@@ -211,7 +217,8 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     config.sampleShadow.SerializeToObject(sampleShadow);
     ASSERT_STREQ("shadow-name", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_NAME).c_str());
     ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_INPUT_FILE).c_str());
-    ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
+    ASSERT_STREQ(
+        outputPath.c_str(), sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
 
     JsonObject secureElement;
     config.secureElement.SerializeToObject(secureElement);
@@ -249,6 +256,34 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
     AssertDefaultFeaturesEnabled(config);
 }
 
+TEST_F(ConfigTestFixture, ExtractExpandedPathFailureConfig)
+{
+    constexpr char badCertCharacter[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file|",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value"
+})";
+    constexpr char badKeyCharacter[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file|",
+    "thing-name": "thing-name value"
+})";
+    PlainConfig config;
+
+    JsonObject jsonObjectBadCert(badCertCharacter);
+    JsonView jsonViewBadCert = jsonObjectBadCert.View();
+
+    JsonObject jsonObjectBadKey(badKeyCharacter);
+    JsonView jsonViewBadKey = jsonObjectBadKey.View();
+
+    ASSERT_THROW(config.LoadFromJson(jsonViewBadCert), wordexp_fail_error);
+    ASSERT_THROW(config.LoadFromJson(jsonViewBadKey), wordexp_fail_error);
+}
+
 TEST_F(ConfigTestFixture, HappyCaseMinimumCli)
 {
     CliArgs cliArgs = makeMinimumCliArgs();
@@ -262,6 +297,28 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumCli)
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     AssertDefaultFeaturesEnabled(config);
+}
+
+TEST_F(ConfigTestFixture, ExtractExpandedPathFailureCLI)
+{
+    CliArgs badCertCharacter = CliArgs{
+        {PlainConfig::CLI_ENDPOINT, "endpoint value"},
+        {PlainConfig::CLI_CERT, filePath + "|"},
+        {PlainConfig::CLI_KEY, filePath},
+        {PlainConfig::CLI_THING_NAME, "thing-name value"},
+    };
+
+    CliArgs badKeyCharacter = CliArgs{
+        {PlainConfig::CLI_ENDPOINT, "endpoint value"},
+        {PlainConfig::CLI_CERT, filePath},
+        {PlainConfig::CLI_KEY, filePath + "|"},
+        {PlainConfig::CLI_THING_NAME, "thing-name value"},
+    };
+
+    PlainConfig config;
+
+    ASSERT_THROW(config.LoadFromCliArgs(badCertCharacter), wordexp_fail_error);
+    ASSERT_THROW(config.LoadFromCliArgs(badKeyCharacter), wordexp_fail_error);
 }
 
 /**
@@ -492,7 +549,7 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabledInvalidRootCa)
     ASSERT_TRUE(config.sampleShadow.enabled);
     ASSERT_STREQ("shadow-name", config.sampleShadow.shadowName->c_str());
     ASSERT_FALSE(config.sampleShadow.shadowInputFile.has_value());
-    ASSERT_FALSE(config.sampleShadow.shadowOutputFile.has_value());
+    ASSERT_TRUE(config.sampleShadow.shadowOutputFile.has_value());
     ASSERT_TRUE(config.pubSub.enabled);
     ASSERT_STREQ("publish_topic", config.pubSub.publishTopic->c_str());
     ASSERT_STREQ("subscribe_topic", config.pubSub.subscribeTopic->c_str());
@@ -520,7 +577,8 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabledInvalidRootCa)
     config.sampleShadow.SerializeToObject(sampleShadow);
     ASSERT_STREQ("shadow-name", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_NAME).c_str());
     ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_INPUT_FILE).c_str());
-    ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
+    ASSERT_STREQ(
+        outputPath.c_str(), sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
 }
 
 /**

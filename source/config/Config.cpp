@@ -1296,6 +1296,51 @@ constexpr char PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_NAME[];
 constexpr char PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_INPUT_FILE[];
 constexpr char PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_OUTPUT_FILE[];
 
+bool PlainConfig::SampleShadow::createShadowOutputFile()
+{
+    if (!FileUtils::CreateDirectoryWithPermissions(Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR, S_IRWXU))
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "Failed to access/create default directories: %s required for storage of shadow document",
+            Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR);
+
+        return false;
+    }
+    else
+    {
+        ostringstream outputPathStream;
+        outputPathStream << Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR << Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
+        LOG_INFO(Config::TAG, outputPathStream.str().c_str());
+
+        string outputPath = FileUtils::ExtractExpandedPath(outputPathStream.str().c_str());
+
+        if (FileUtils::StoreValueInFile("", outputPath))
+        {
+            chmod(outputPath.c_str(), S_IRUSR | S_IWUSR);
+            if (FileUtils::ValidateFilePermissions(outputPath.c_str(), Permissions::SAMPLE_SHADOW_FILES))
+            {
+                shadowOutputFile = outputPath;
+                LOGM_INFO(
+                    Config::TAG,
+                    "Succesfully create default file: %s required for storage of shadow document",
+                    outputPath.c_str());
+            }
+        }
+        else
+        {
+            LOGM_ERROR(
+                Config::TAG,
+                "Failed to access/create default file: %s required for storage of shadow document",
+                outputPath.c_str());
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool PlainConfig::SampleShadow::LoadFromJson(const Crt::JsonView &json)
 {
     const char *jsonKey = JSON_ENABLE_SAMPLE_SHADOW;
@@ -1340,10 +1385,10 @@ bool PlainConfig::SampleShadow::LoadFromJson(const Crt::JsonView &json)
         }
         else
         {
-            LOGM_WARN(
-                Config::TAG,
-                "Output file {%s} was provided in the JSON configuration file with an empty value",
-                jsonKey);
+            if (!createShadowOutputFile())
+            {
+                return false;
+            }
         }
     }
 
@@ -1370,6 +1415,13 @@ bool PlainConfig::SampleShadow::LoadFromCliArgs(const CliArgs &cliArgs)
         shadowOutputFile =
             FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE))
                 .c_str();
+    }
+    else
+    {
+        if (!createShadowOutputFile())
+        {
+            return false;
+        }
     }
 
     return true;
@@ -1402,6 +1454,18 @@ bool PlainConfig::SampleShadow::Validate() const
         }
         else
         {
+            return false;
+        }
+
+        size_t incomingFileSize = FileUtils::GetFileSize(shadowInputFile->c_str());
+        if (MAXIMUM_SHADOW_INPUT_FILE_SIZE < incomingFileSize)
+        {
+            LOGM_ERROR(
+                Config::TAG,
+                "Refusing to open input file %s, file size %zu bytes is greater than allowable limit of %zu bytes",
+                Sanitize(shadowInputFile->c_str()).c_str(),
+                incomingFileSize,
+                MAXIMUM_SHADOW_INPUT_FILE_SIZE);
             return false;
         }
     }
@@ -1984,6 +2048,7 @@ constexpr char Config::CLI_EXPORT_DEFAULT_SETTINGS[];
 constexpr char Config::CLI_CONFIG_FILE[];
 constexpr char Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[];
 constexpr char Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[];
+constexpr char Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[];
 
 bool Config::CheckTerminalArgs(int argc, char **argv)
 {
@@ -2124,55 +2189,64 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 
 bool Config::init(const CliArgs &cliArgs)
 {
-    string filename = Config::DEFAULT_CONFIG_FILE;
-    bool bReadConfigFile = FileUtils::FileExists(filename);
-
-    if (cliArgs.count(Config::CLI_CONFIG_FILE))
+    try
     {
-        filename = cliArgs.at(Config::CLI_CONFIG_FILE);
-        if (!FileUtils::FileExists(filename))
+        string filename = Config::DEFAULT_CONFIG_FILE;
+        bool bReadConfigFile = FileUtils::FileExists(filename);
+
+        if (cliArgs.count(Config::CLI_CONFIG_FILE))
+        {
+            filename = cliArgs.at(Config::CLI_CONFIG_FILE);
+            if (!FileUtils::FileExists(filename))
+            {
+                LOGM_ERROR(
+                    TAG,
+                    "*** %s: Config file specified in the CLI doesn't exist: '%s' ***",
+                    DeviceClient::DC_FATAL_ERROR,
+                    Sanitize(filename).c_str());
+                return false;
+            }
+
+            bReadConfigFile = true;
+        }
+
+        if (bReadConfigFile && !ParseConfigFile(filename, false))
         {
             LOGM_ERROR(
                 TAG,
-                "*** %s: Config file specified in the CLI doesn't exist: '%s' ***",
+                "*** %s: Unable to Parse Config file: '%s' ***",
                 DeviceClient::DC_FATAL_ERROR,
                 Sanitize(filename).c_str());
             return false;
         }
 
-        bReadConfigFile = true;
-    }
+        if (!config.LoadFromCliArgs(cliArgs))
+        {
+            return false;
+        }
 
-    if (bReadConfigFile && !ParseConfigFile(filename, false))
+        if (!config.LoadFromEnvironment())
+        {
+            return false;
+        }
+
+        if (ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, true) &&
+            ValidateAndStoreRuntimeConfig())
+        {
+            LOGM_INFO(
+                TAG,
+                "Successfully fetched Runtime config file '%s' and validated its content.",
+                Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
+        }
+
+        return config.Validate();
+    }
+    catch (const std::exception &e)
     {
-        LOGM_ERROR(
-            TAG,
-            "*** %s: Unable to Parse Config file: '%s' ***",
-            DeviceClient::DC_FATAL_ERROR,
-            Sanitize(filename).c_str());
+        LOGM_ERROR(TAG, "Error while initializing configuration: %s", e.what());
+
         return false;
     }
-
-    if (!config.LoadFromCliArgs(cliArgs))
-    {
-        return false;
-    }
-
-    if (!config.LoadFromEnvironment())
-    {
-        return false;
-    }
-
-    if (ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, true) &&
-        ValidateAndStoreRuntimeConfig())
-    {
-        LOGM_INFO(
-            TAG,
-            "Successfully fetched Runtime config file '%s' and validated its content.",
-            Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
-    }
-
-    return config.Validate();
 }
 
 bool Config::ValidateAndStoreRuntimeConfig()
