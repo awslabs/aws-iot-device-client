@@ -187,7 +187,7 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       read -r PUB_TOPIC
       printf ${PMPT} "Specify the path of a file for the feature to publish (if no path is provided, will default to ${PUB_FILE}):"
       read -r PUB_FILE_TMP
-      if [ "$PUB_FILE_TMP"]; then
+      if [ "$PUB_FILE_TMP" ]; then
         PUB_FILE=$PUB_FILE_TMP
         PUB_FILE_PROVIDED="y"
       fi
@@ -195,7 +195,7 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       read -r SUB_TOPIC
       printf ${PMPT} "Specify the path of a file for the feature to write to (if no path is provided, will default to ${SUB_FILE}):"
       read -r SUB_FILE_TMP
-      if [ "$SUB_FILE_TMP"]; then
+      if [ "$SUB_FILE_TMP" ]; then
         SUB_FILE=$SUB_FILE_TMP
         SUB_FILE_PROVIDED="y"
       fi
