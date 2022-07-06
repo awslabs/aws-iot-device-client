@@ -75,7 +75,7 @@ namespace Aws
                     /**
                      * \brief Stop and close secure tunnel
                      */
-                    void StopSecureTunnel();
+                    virtual void StopSecureTunnel();
 
                   private:
                     /**

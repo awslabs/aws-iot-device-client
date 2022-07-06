@@ -59,10 +59,16 @@ class MockNotifier : public Aws::Iot::DeviceClient::ClientBaseNotifier
 
 class FakeSecureTunnelContext : public SecureTunnelingContext
 {
+    /**
+     * Fake Context only needed to perform a few basic actions which could be hard coded here.
+     * If more elaborate testing is required/desired in the future this can be changed to a mock to
+     * give dynamic responses.
+     */
   public:
     FakeSecureTunnelContext() : SecureTunnelingContext() {}
     ~FakeSecureTunnelContext() = default;
     bool ConnectToSecureTunnel() override { return true; }
+    void StopSecureTunnel() override { return; }
     bool IsDuplicateNotification(const SecureTunnelingNotifyResponse &response) override { return true; }
 };
 
