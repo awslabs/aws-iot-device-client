@@ -305,10 +305,15 @@ namespace Aws
 int main(int argc, char *argv[])
 {
     CliArgs cliArgs;
-    if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
+    if (Config::CheckTerminalArgs(argc, argv))
     {
         LoggerFactory::getLoggerInstance()->shutdown();
         return 0;
+    }
+    if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
+    {
+        LoggerFactory::getLoggerInstance()->shutdown();
+        return 1;
     }
 
     if (!LoggerFactory::reconfigure(config.config) &&
