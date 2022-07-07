@@ -1987,15 +1987,15 @@ constexpr char Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[];
 
 bool Config::CheckTerminalArgs(int argc, char **argv)
 {
-    for(int i = 1; i < argc; i++)
+    for (int i = 1; i < argc; i++)
     {
         std::string currentArg = argv[i];
-        if(currentArg == CLI_HELP)
+        if (currentArg == CLI_HELP)
         {
             PrintHelpMessage();
             return true;
         }
-        if(currentArg == CLI_VERSION)
+        if (currentArg == CLI_VERSION)
         {
             PrintVersion();
             return true;
@@ -2008,16 +2008,14 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 {
     struct ArgumentDefinition
     {
-        std::string cliFlag;     // Cli flag to look for
-        bool additionalArg; // Does this take an addition argument?
+        std::string cliFlag; // Cli flag to look for
+        bool additionalArg;  // Does this take an addition argument?
         // cppcheck-suppress unusedStructMember
         std::function<void(const std::string &additionalArg)> extraSteps; // Function to call if this is found
     };
 
     ArgumentDefinition argumentDefinitions[] = {
-        {CLI_EXPORT_DEFAULT_SETTINGS,
-         true,
-         [](const string &additionalArg) { ExportDefaultSetting(additionalArg); }},
+        {CLI_EXPORT_DEFAULT_SETTINGS, true, [](const string &additionalArg) { ExportDefaultSetting(additionalArg); }},
         {CLI_CONFIG_FILE, true, nullptr},
 
         {PlainConfig::CLI_ENDPOINT, true, nullptr},
