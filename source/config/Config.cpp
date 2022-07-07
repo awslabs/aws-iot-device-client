@@ -2008,9 +2008,8 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 {
     struct ArgumentDefinition
     {
-        std::string cliFlag; // Cli flag to look for
-        bool additionalArg;  // Does this take an addition argument?
-        // cppcheck-suppress unusedStructMember
+        std::string cliFlag;                                              // Cli flag to look for
+        bool additionalArg;                                               // Does this take an addition argument?
         std::function<void(const std::string &additionalArg)> extraSteps; // Function to call if this is found
     };
 
