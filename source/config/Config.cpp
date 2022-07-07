@@ -1985,74 +1985,90 @@ constexpr char Config::CLI_CONFIG_FILE[];
 constexpr char Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[];
 constexpr char Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[];
 
+bool Config::CheckTerminalArgs(int argc, char **argv)
+{
+    for(int i = 1; i < argc; i++)
+    {
+        std::string currentArg = argv[i];
+        if(currentArg == CLI_HELP)
+        {
+            PrintHelpMessage();
+            return true;
+        }
+        if(currentArg == CLI_VERSION)
+        {
+            PrintVersion();
+            return true;
+        }
+    }
+    return false;
+}
+
 bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 {
     struct ArgumentDefinition
     {
-        string cliFlag;     // Cli flag to look for
+        std::string cliFlag;     // Cli flag to look for
         bool additionalArg; // Does this take an addition argument?
         // cppcheck-suppress unusedStructMember
-        bool stopIfFound; // Should we stop processing more arguments if this is found?
-        std::function<void(const string &additionalArg)> extraSteps; // Function to call if this is found
+        std::function<void(const std::string &additionalArg)> extraSteps; // Function to call if this is found
     };
+
     ArgumentDefinition argumentDefinitions[] = {
-        {CLI_HELP, false, true, [](const string &additionalArg) { PrintHelpMessage(); }},
-        {CLI_VERSION, false, true, [](const string &additionalArg) { PrintVersion(); }},
         {CLI_EXPORT_DEFAULT_SETTINGS,
          true,
-         true,
          [](const string &additionalArg) { ExportDefaultSetting(additionalArg); }},
-        {CLI_CONFIG_FILE, true, false, nullptr},
+        {CLI_CONFIG_FILE, true, nullptr},
 
-        {PlainConfig::CLI_ENDPOINT, true, false, nullptr},
-        {PlainConfig::CLI_CERT, true, false, nullptr},
-        {PlainConfig::CLI_KEY, true, false, nullptr},
-        {PlainConfig::CLI_ROOT_CA, true, false, nullptr},
-        {PlainConfig::CLI_THING_NAME, true, false, nullptr},
+        {PlainConfig::CLI_ENDPOINT, true, nullptr},
+        {PlainConfig::CLI_CERT, true, nullptr},
+        {PlainConfig::CLI_KEY, true, nullptr},
+        {PlainConfig::CLI_ROOT_CA, true, nullptr},
+        {PlainConfig::CLI_THING_NAME, true, nullptr},
 
-        {PlainConfig::LogConfig::CLI_LOG_LEVEL, true, false, nullptr},
-        {PlainConfig::LogConfig::CLI_LOG_TYPE, true, false, nullptr},
-        {PlainConfig::LogConfig::CLI_LOG_FILE, true, false, nullptr},
-        {PlainConfig::LogConfig::CLI_ENABLE_SDK_LOGGING, false, false, nullptr},
-        {PlainConfig::LogConfig::CLI_SDK_LOG_LEVEL, true, false, nullptr},
-        {PlainConfig::LogConfig::CLI_SDK_LOG_FILE, true, false, nullptr},
+        {PlainConfig::LogConfig::CLI_LOG_LEVEL, true, nullptr},
+        {PlainConfig::LogConfig::CLI_LOG_TYPE, true, nullptr},
+        {PlainConfig::LogConfig::CLI_LOG_FILE, true, nullptr},
+        {PlainConfig::LogConfig::CLI_ENABLE_SDK_LOGGING, false, nullptr},
+        {PlainConfig::LogConfig::CLI_SDK_LOG_LEVEL, true, nullptr},
+        {PlainConfig::LogConfig::CLI_SDK_LOG_FILE, true, nullptr},
 
-        {PlainConfig::Jobs::CLI_ENABLE_JOBS, true, false, nullptr},
-        {PlainConfig::Jobs::CLI_HANDLER_DIR, true, false, nullptr},
+        {PlainConfig::Jobs::CLI_ENABLE_JOBS, true, nullptr},
+        {PlainConfig::Jobs::CLI_HANDLER_DIR, true, nullptr},
 
-        {PlainConfig::Tunneling::CLI_ENABLE_TUNNELING, true, false, nullptr},
-        {PlainConfig::Tunneling::CLI_TUNNELING_REGION, true, false, nullptr},
-        {PlainConfig::Tunneling::CLI_TUNNELING_SERVICE, true, false, nullptr},
-        {PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION, false, false, nullptr},
+        {PlainConfig::Tunneling::CLI_ENABLE_TUNNELING, true, nullptr},
+        {PlainConfig::Tunneling::CLI_TUNNELING_REGION, true, nullptr},
+        {PlainConfig::Tunneling::CLI_TUNNELING_SERVICE, true, nullptr},
+        {PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION, false, nullptr},
 
-        {PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER, true, false, nullptr},
-        {PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL, true, false, nullptr},
+        {PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER, true, nullptr},
+        {PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL, true, nullptr},
 
-        {PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING, true, false, nullptr},
-        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME, true, false, nullptr},
-        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS, true, false, nullptr},
-        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE, true, false, nullptr},
-        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY, true, false, nullptr},
+        {PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING, true, nullptr},
+        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME, true, nullptr},
+        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS, true, nullptr},
+        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE, true, nullptr},
+        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY, true, nullptr},
 
-        {PlainConfig::PubSub::CLI_ENABLE_PUB_SUB, true, false, nullptr},
-        {PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_TOPIC, true, false, nullptr},
-        {PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE, true, false, nullptr},
-        {PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC, true, false, nullptr},
-        {PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE, true, false, nullptr},
+        {PlainConfig::PubSub::CLI_ENABLE_PUB_SUB, true, nullptr},
+        {PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_TOPIC, true, nullptr},
+        {PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE, true, nullptr},
+        {PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC, true, nullptr},
+        {PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE, true, nullptr},
 
-        {PlainConfig::SampleShadow::CLI_ENABLE_SAMPLE_SHADOW, true, false, nullptr},
-        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME, true, false, nullptr},
-        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE, true, false, nullptr},
-        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE, true, false, nullptr},
+        {PlainConfig::SampleShadow::CLI_ENABLE_SAMPLE_SHADOW, true, nullptr},
+        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME, true, nullptr},
+        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE, true, nullptr},
+        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE, true, nullptr},
 
-        {PlainConfig::ConfigShadow::CLI_ENABLE_CONFIG_SHADOW, true, false, nullptr},
+        {PlainConfig::ConfigShadow::CLI_ENABLE_CONFIG_SHADOW, true, nullptr},
 
-        {PlainConfig::SecureElement::CLI_ENABLE_SECURE_ELEMENT, true, false, nullptr},
-        {PlainConfig::SecureElement::CLI_PKCS11_LIB, true, false, nullptr},
-        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_PIN, true, false, nullptr},
-        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_KEY_LABEL, true, false, nullptr},
-        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID, true, false, nullptr},
-        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL, true, false, nullptr}};
+        {PlainConfig::SecureElement::CLI_ENABLE_SECURE_ELEMENT, true, nullptr},
+        {PlainConfig::SecureElement::CLI_PKCS11_LIB, true, nullptr},
+        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_PIN, true, nullptr},
+        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_KEY_LABEL, true, nullptr},
+        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID, true, nullptr},
+        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL, true, nullptr}};
 
     map<string, ArgumentDefinition> argumentDefinitionMap;
     for (auto &i : argumentDefinitions)
@@ -2104,11 +2120,6 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         if (search->second.extraSteps)
         {
             search->second.extraSteps(additionalArg);
-        }
-
-        if (search->second.stopIfFound)
-        {
-            return false;
         }
     }
     return true;
