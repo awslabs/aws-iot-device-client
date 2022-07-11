@@ -25,6 +25,7 @@ Config File | 640               | **Yes**
 Pub/Sub Files | 600               | **Yes**
 Sensor Pubilsh Pathname Socket | 660               | **Yes**
 PKCS11 Library File | 640               | **Yes**
+HTTP Proxy Config File | 600           | **Yes**
 
 #### Recommended and Required permissions on directories storing respective files
 Directory     | Chmod Permissions | Required |
