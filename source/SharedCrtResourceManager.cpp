@@ -3,8 +3,10 @@
 
 #include "SharedCrtResourceManager.h"
 #include "Version.h"
+#include "aws/crt/http/HttpProxyStrategy.h"
 #include "logging/LoggerFactory.h"
 #include "util/FileUtils.h"
+#include "util/ProxyUtils.h"
 #include "util/Retry.h"
 #include "util/StringUtils.h"
 
@@ -306,6 +308,40 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     }
     clientConfigBuilder.WithSdkName(SharedCrtResourceManager::BINARY_NAME);
     clientConfigBuilder.WithSdkVersion(DEVICE_CLIENT_VERSION);
+
+    PlainConfig::HttpProxyConfig proxyConfig = config.httpProxyConfig;
+    Aws::Crt::Http::HttpClientConnectionProxyOptions proxyOptions;
+
+    if (proxyConfig.httpProxyEnabled)
+    {
+        proxyOptions.HostName = proxyConfig.proxyHost->c_str();
+        proxyOptions.Port = proxyConfig.proxyPort.value();
+
+        LOGM_INFO(
+            TAG,
+            "Attempting to establish MQTT connection with proxy: %s:%u",
+            proxyConfig.proxyHost->c_str(),
+            proxyConfig.proxyPort.value());
+
+        if (proxyConfig.httpProxyAuthEnabled)
+        {
+            LOG_INFO(TAG, "Proxy Authentication is enabled");
+            Aws::Crt::Http::HttpProxyStrategyBasicAuthConfig basicAuthConfig;
+            basicAuthConfig.ConnectionType = Aws::Crt::Http::AwsHttpProxyConnectionType::Tunneling;
+            proxyOptions.AuthType = Aws::Crt::Http::AwsHttpProxyAuthenticationType::Basic;
+            basicAuthConfig.Username = proxyConfig.proxyUsername->c_str();
+            basicAuthConfig.Password = proxyConfig.proxyPassword->c_str();
+            proxyOptions.ProxyStrategy =
+                Aws::Crt::Http::HttpProxyStrategy::CreateBasicHttpProxyStrategy(basicAuthConfig, Aws::Crt::g_allocator);
+        }
+        else
+        {
+            LOG_INFO(TAG, "Proxy Authentication is disabled");
+            proxyOptions.AuthType = Aws::Crt::Http::AwsHttpProxyAuthenticationType::None;
+        }
+
+        clientConfigBuilder.WithHttpProxyOptions(proxyOptions);
+    }
 
     auto clientConfig = clientConfigBuilder.Build();
 

@@ -60,6 +60,7 @@ namespace Aws
                 static constexpr int SENSOR_PUBLISH_ADDR_FILE = 660;
                 static constexpr int SENSOR_PUBLISH_ADDR_DIR = 700;
                 static constexpr int PKCS11_LIB_FILE = 640;
+                static constexpr int HTTP_PROXY_CONFIG_FILE = 600;
             };
 
             struct PlainConfig : public LoadableFromJsonAndCliAndEnvironment
@@ -261,6 +262,33 @@ namespace Aws
                 };
                 FleetProvisioningRuntimeConfig fleetProvisioningRuntimeConfig;
 
+                struct HttpProxyConfig : public LoadableFromJsonAndCliAndEnvironment
+                {
+                    bool LoadFromJson(const Crt::JsonView &json) override;
+                    bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override { return true; }
+                    bool Validate() const override;
+
+                    static constexpr char CLI_HTTP_PROXY_CONFIG_PATH[] = "--http-proxy-config";
+
+                    static constexpr char JSON_KEY_HTTP_PROXY_ENABLED[] = "http-proxy-enabled";
+                    static constexpr char JSON_KEY_HTTP_PROXY_HOST[] = "http-proxy-host";
+                    static constexpr char JSON_KEY_HTTP_PROXY_PORT[] = "http-proxy-port";
+                    static constexpr char JSON_KEY_HTTP_PROXY_AUTH_METHOD[] = "http-proxy-auth-method";
+                    static constexpr char JSON_KEY_HTTP_PROXY_USERNAME[] = "http-proxy-username";
+                    static constexpr char JSON_KEY_HTTP_PROXY_PASSWORD[] = "http-proxy-password";
+
+                    bool httpProxyEnabled{false};
+                    bool httpProxyAuthEnabled{false};
+                    Aws::Crt::Optional<std::string> proxyConfigPath;
+                    Aws::Crt::Optional<std::string> proxyHost;
+                    Aws::Crt::Optional<int> proxyPort;
+                    Aws::Crt::Optional<std::string> proxyAuthMethod;
+                    Aws::Crt::Optional<std::string> proxyUsername;
+                    Aws::Crt::Optional<std::string> proxyPassword;
+                };
+                HttpProxyConfig httpProxyConfig;
+
                 struct PubSub : public LoadableFromJsonAndCliAndEnvironment
                 {
                     bool LoadFromJson(const Crt::JsonView &json) override;
@@ -439,6 +467,7 @@ namespace Aws
                 static constexpr char DEFAULT_CONFIG_FILE[] = "~/.aws-iot-device-client/aws-iot-device-client.conf";
                 static constexpr char DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] =
                     "~/.aws-iot-device-client/aws-iot-device-client-runtime.conf";
+                static constexpr char DEFAULT_HTTP_PROXY_CONFIG_FILE[] = "~/.aws-iot-device-client/http-proxy.conf";
                 static constexpr char DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[] = "~/.aws-iot-device-client/sample-shadow/";
 
                 static constexpr char CLI_HELP[] = "--help";
@@ -446,10 +475,21 @@ namespace Aws
                 static constexpr char CLI_EXPORT_DEFAULT_SETTINGS[] = "--export-default-settings";
                 static constexpr char CLI_CONFIG_FILE[] = "--config-file";
 
+                /**
+                 * \brief Enum defining several config file types
+                 */
+                enum ConfigFileType
+                {
+                    DEVICE_CLIENT_ESSENTIAL_CONFIG,
+                    FLEET_PROVISIONING_RUNTIME_CONFIG,
+                    HTTP_PROXY_CONFIG
+                };
+
                 static bool CheckTerminalArgs(int argc, char *argv[]);
                 static bool ParseCliArgs(int argc, char *argv[], CliArgs &cliArgs);
                 bool ValidateAndStoreRuntimeConfig();
-                bool ParseConfigFile(const std::string &file, bool isRuntimeConfig);
+                bool ValidateAndStoreHttpProxyConfig();
+                bool ParseConfigFile(const std::string &file, ConfigFileType configFileType);
                 bool init(const CliArgs &cliArgs);
 
                 /**

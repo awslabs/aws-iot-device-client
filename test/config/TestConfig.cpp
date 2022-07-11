@@ -1560,6 +1560,74 @@ TEST_F(ConfigTestFixture, SecureElementCli)
 }
 #endif
 
+TEST_F(ConfigTestFixture, HTTPProxyConfigHappy)
+{
+    constexpr char jsonString[] = R"(
+{
+  "http-proxy-enabled": true,
+  "http-proxy-host": "10.0.0.1",
+  "http-proxy-port": "8888",
+  "http-proxy-auth-method": "UserNameAndPassword",
+  "http-proxy-username": "testUserName",
+  "http-proxy-password": "12345"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig::HttpProxyConfig httpProxyConfig;
+    httpProxyConfig.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(httpProxyConfig.httpProxyEnabled);
+    ASSERT_STREQ("10.0.0.1", httpProxyConfig.proxyHost->c_str());
+    ASSERT_EQ(8888, httpProxyConfig.proxyPort.value());
+    ASSERT_TRUE(httpProxyConfig.httpProxyAuthEnabled);
+    ASSERT_STREQ("UserNameAndPassword", httpProxyConfig.proxyAuthMethod->c_str());
+    ASSERT_STREQ("testUserName", httpProxyConfig.proxyUsername->c_str());
+    ASSERT_STREQ("12345", httpProxyConfig.proxyPassword->c_str());
+}
+
+TEST_F(ConfigTestFixture, HTTPProxyConfigDisabled)
+{
+    constexpr char jsonString[] = R"(
+{
+  "http-proxy-enabled": false,
+  "http-proxy-host": "10.0.0.1",
+  "http-proxy-port": "8888",
+  "http-proxy-auth-method": "UserNameAndPassword",
+  "http-proxy-username": "testUserName",
+  "http-proxy-password": "12345"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig::HttpProxyConfig httpProxyConfig;
+    httpProxyConfig.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(httpProxyConfig.httpProxyEnabled);
+}
+
+TEST_F(ConfigTestFixture, HTTPProxyConfigNoAuth)
+{
+    constexpr char jsonString[] = R"(
+{
+  "http-proxy-enabled": true,
+  "http-proxy-host": "10.0.0.1",
+  "http-proxy-port": "8888",
+  "http-proxy-auth-method": "None"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig::HttpProxyConfig httpProxyConfig;
+    httpProxyConfig.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(httpProxyConfig.httpProxyEnabled);
+    ASSERT_STREQ("10.0.0.1", httpProxyConfig.proxyHost->c_str());
+    ASSERT_EQ(8888, httpProxyConfig.proxyPort.value());
+    ASSERT_FALSE(httpProxyConfig.httpProxyAuthEnabled);
+    ASSERT_STREQ("None", httpProxyConfig.proxyAuthMethod->c_str());
+}
+
 TEST(Config, MemoryTrace)
 {
     PlainConfig config;

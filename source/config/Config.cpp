@@ -19,6 +19,7 @@
 
 #include "../util/FileUtils.h"
 #include "../util/MqttUtils.h"
+#include "../util/ProxyUtils.h"
 #include "../util/StringUtils.h"
 #include "Version.h"
 
@@ -278,7 +279,8 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     return logConfig.LoadFromCliArgs(cliArgs) && jobs.LoadFromCliArgs(cliArgs) && tunneling.LoadFromCliArgs(cliArgs) &&
            deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs) &&
            pubSub.LoadFromCliArgs(cliArgs) && sampleShadow.LoadFromCliArgs(cliArgs) &&
-           configShadow.LoadFromCliArgs(cliArgs) && secureElement.LoadFromCliArgs(cliArgs);
+           configShadow.LoadFromCliArgs(cliArgs) && secureElement.LoadFromCliArgs(cliArgs) &&
+           httpProxyConfig.LoadFromCliArgs(cliArgs);
 }
 
 bool PlainConfig::LoadFromEnvironment()
@@ -1133,6 +1135,207 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::Validate() const
            !thingName->empty();
 }
 
+constexpr char PlainConfig::HttpProxyConfig::CLI_HTTP_PROXY_CONFIG_PATH[];
+constexpr char PlainConfig::HttpProxyConfig::JSON_KEY_HTTP_PROXY_ENABLED[];
+constexpr char PlainConfig::HttpProxyConfig::JSON_KEY_HTTP_PROXY_HOST[];
+constexpr char PlainConfig::HttpProxyConfig::JSON_KEY_HTTP_PROXY_PORT[];
+constexpr char PlainConfig::HttpProxyConfig::JSON_KEY_HTTP_PROXY_AUTH_METHOD[];
+constexpr char PlainConfig::HttpProxyConfig::JSON_KEY_HTTP_PROXY_USERNAME[];
+constexpr char PlainConfig::HttpProxyConfig::JSON_KEY_HTTP_PROXY_PASSWORD[];
+
+bool PlainConfig::HttpProxyConfig::LoadFromJson(const Crt::JsonView &json)
+{
+    const char *jsonKey = JSON_KEY_HTTP_PROXY_ENABLED;
+    if (json.ValueExists(jsonKey))
+    {
+        httpProxyEnabled = json.GetBool(jsonKey);
+    }
+
+    if (httpProxyEnabled)
+    {
+        jsonKey = JSON_KEY_HTTP_PROXY_HOST;
+        if (json.ValueExists(jsonKey))
+        {
+            if (!json.GetString(jsonKey).empty())
+            {
+                proxyHost = json.GetString(jsonKey).c_str();
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
+        }
+
+        jsonKey = JSON_KEY_HTTP_PROXY_PORT;
+        if (json.ValueExists(jsonKey))
+        {
+            if (!json.GetString(jsonKey).empty())
+            {
+                try
+                {
+                    proxyPort = stoi(json.GetString(jsonKey).c_str());
+                }
+                catch (...)
+                {
+                    LOGM_ERROR(
+                        Config::TAG,
+                        "*** %s: Failed to convert JSON key {%s} to integer, please use a "
+                        "valid value for port number",
+                        DeviceClient::DC_FATAL_ERROR,
+                        jsonKey);
+                    return false;
+                }
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
+        }
+
+        jsonKey = JSON_KEY_HTTP_PROXY_AUTH_METHOD;
+        if (json.ValueExists(jsonKey))
+        {
+            if (!json.GetString(jsonKey).empty())
+            {
+                proxyAuthMethod = json.GetString(jsonKey).c_str();
+                if (strcmp(proxyAuthMethod->c_str(), "UserNameAndPassword") == 0)
+                {
+                    httpProxyAuthEnabled = true;
+                }
+                else if (strcmp(proxyAuthMethod->c_str(), "None") != 0)
+                {
+                    LOGM_WARN(
+                        Config::TAG,
+                        "Unrecognized HTTP Proxy Authentication Method value: {%s}. Supported values are "
+                        "UserNameAndPassword or None",
+                        proxyAuthMethod->c_str());
+                }
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
+        }
+
+        jsonKey = JSON_KEY_HTTP_PROXY_USERNAME;
+        if (json.ValueExists(jsonKey))
+        {
+            if (!json.GetString(jsonKey).empty())
+            {
+                proxyUsername = json.GetString(jsonKey).c_str();
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
+        }
+
+        jsonKey = JSON_KEY_HTTP_PROXY_PASSWORD;
+        if (json.ValueExists(jsonKey))
+        {
+            if (!json.GetString(jsonKey).empty())
+            {
+                proxyPassword = json.GetString(jsonKey).c_str();
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
+        }
+    }
+    else
+    {
+        LOG_INFO(Config::TAG, "HTTP Proxy is disabled as configured.");
+    }
+
+    return true;
+}
+
+bool PlainConfig::HttpProxyConfig::LoadFromCliArgs(const CliArgs &cliArgs)
+{
+    if (cliArgs.count(PlainConfig::HttpProxyConfig::CLI_HTTP_PROXY_CONFIG_PATH))
+    {
+        proxyConfigPath =
+            FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::HttpProxyConfig::CLI_HTTP_PROXY_CONFIG_PATH))
+                .c_str();
+    }
+    else
+    {
+        // If http proxy config file path is not provided,
+        proxyConfigPath = Config::DEFAULT_HTTP_PROXY_CONFIG_FILE;
+    }
+    return true;
+}
+
+bool PlainConfig::HttpProxyConfig::Validate() const
+{
+    if (!httpProxyEnabled)
+    {
+        return true;
+    }
+
+    if (!proxyHost.has_value() || proxyHost->empty())
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Proxy host name field must be specified if HTTP proxy is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+
+    if (!ProxyUtils::ValidateHostIpAddress(proxyHost->c_str()))
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Proxy host IP address must be a private IP address ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+
+    if (!proxyPort.has_value() || !ProxyUtils::ValidatePortNumber(proxyPort.value()))
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Valid value of proxy port field must be specified if HTTP proxy is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+
+    if (!proxyAuthMethod.has_value() || proxyAuthMethod->empty())
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Proxy auth method field must be specified if HTTP proxy is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return true;
+    }
+
+    if (httpProxyAuthEnabled && (!proxyUsername.has_value() || proxyUsername->empty()))
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Proxy username field must be specified if HTTP proxy authentication is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+
+    if (httpProxyAuthEnabled && (!proxyPassword.has_value() || proxyPassword->empty()))
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Proxy password field must be specified if HTTP proxy authentication is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+
+    return true;
+}
+
 constexpr char PlainConfig::PubSub::CLI_ENABLE_PUB_SUB[];
 constexpr char PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_TOPIC[];
 constexpr char PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE[];
@@ -1984,6 +2187,7 @@ constexpr char Config::CLI_EXPORT_DEFAULT_SETTINGS[];
 constexpr char Config::CLI_CONFIG_FILE[];
 constexpr char Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[];
 constexpr char Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[];
+constexpr char Config::DEFAULT_HTTP_PROXY_CONFIG_FILE[];
 
 bool Config::CheckTerminalArgs(int argc, char **argv)
 {
@@ -2065,7 +2269,8 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_PIN, true, nullptr},
         {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_KEY_LABEL, true, nullptr},
         {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID, true, nullptr},
-        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL, true, nullptr}};
+        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL, true, nullptr},
+        {PlainConfig::HttpProxyConfig::CLI_HTTP_PROXY_CONFIG_PATH, true, nullptr}};
 
     map<string, ArgumentDefinition> argumentDefinitionMap;
     for (auto &i : argumentDefinitions)
@@ -2143,7 +2348,7 @@ bool Config::init(const CliArgs &cliArgs)
         bReadConfigFile = true;
     }
 
-    if (bReadConfigFile && !ParseConfigFile(filename, false))
+    if (bReadConfigFile && !ParseConfigFile(filename, DEVICE_CLIENT_ESSENTIAL_CONFIG))
     {
         LOGM_ERROR(
             TAG,
@@ -2163,13 +2368,32 @@ bool Config::init(const CliArgs &cliArgs)
         return false;
     }
 
-    if (ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, true) &&
+    if (ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, FLEET_PROVISIONING_RUNTIME_CONFIG) &&
         ValidateAndStoreRuntimeConfig())
     {
         LOGM_INFO(
             TAG,
             "Successfully fetched Runtime config file '%s' and validated its content.",
             Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
+    }
+
+    if (ParseConfigFile(config.httpProxyConfig.proxyConfigPath->c_str(), HTTP_PROXY_CONFIG) &&
+        config.httpProxyConfig.httpProxyEnabled)
+    {
+        if (!ValidateAndStoreHttpProxyConfig())
+        {
+            LOGM_ERROR(
+                TAG,
+                "*** %s: Unable to Parse HTTP proxy Config file: '%s' ***",
+                DeviceClient::DC_FATAL_ERROR,
+                Sanitize(config.httpProxyConfig.proxyConfigPath->c_str()).c_str());
+            return false;
+        }
+        LOGM_INFO(
+            TAG,
+            "Successfully fetched http proxy config file '%s' and validated its content.",
+            config.httpProxyConfig.proxyConfigPath->c_str());
+        return true;
     }
 
     return config.Validate();
@@ -2193,21 +2417,54 @@ bool Config::ValidateAndStoreRuntimeConfig()
     return true;
 }
 
-bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
+bool Config::ValidateAndStoreHttpProxyConfig()
+{
+    // check if all values are present and also check if the files are present then only overwrite values
+    if (!config.httpProxyConfig.Validate())
+    {
+        LOGM_ERROR(
+            TAG,
+            "Failed to Validate http proxy configurations. Please check '%s' file",
+            Config::DEFAULT_HTTP_PROXY_CONFIG_FILE);
+        return false;
+    }
+
+    return true;
+}
+
+bool Config::ParseConfigFile(const string &file, ConfigFileType configFileType)
 {
     string expandedPath = FileUtils::ExtractExpandedPath(file.c_str());
     if (!FileUtils::FileExists(expandedPath))
     {
-        if (!isRuntimeConfig)
+        switch (configFileType)
         {
-            LOGM_DEBUG(TAG, "Unable to open config file %s, file does not exist", Sanitize(expandedPath).c_str());
-        }
-        else
-        {
-            LOG_DEBUG(
-                TAG,
-                "Did not find a runtime configuration file, assuming Fleet Provisioning has not run for this device");
-        }
+            case DEVICE_CLIENT_ESSENTIAL_CONFIG:
+            {
+                LOGM_DEBUG(TAG, "Unable to open config file %s, file does not exist", Sanitize(expandedPath).c_str());
+                break;
+            }
+            case FLEET_PROVISIONING_RUNTIME_CONFIG:
+            {
+                LOG_DEBUG(
+                    TAG,
+                    "Did not find a runtime configuration file, assuming Fleet Provisioning has not run for this "
+                    "device");
+                break;
+            }
+            case HTTP_PROXY_CONFIG:
+            {
+                LOGM_DEBUG(
+                    TAG,
+                    "Did not find a http proxy config file %s, assuming HTTP proxy is disabled on this device",
+                    Sanitize(expandedPath).c_str());
+                break;
+            }
+            default:
+            {
+                LOG_ERROR(TAG, "Unhandled config file type when trying to load from disk: file does not exist");
+            }
+        };
 
         return false;
     }
@@ -2225,8 +2482,32 @@ bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
     }
 
     string configFileParentDir = FileUtils::ExtractParentDirectory(expandedPath.c_str());
-    FileUtils::ValidateFilePermissions(configFileParentDir, Permissions::CONFIG_DIR, false);
-    FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::CONFIG_FILE, false);
+    FileUtils::ValidateFilePermissions(configFileParentDir, Permissions::CONFIG_DIR, true);
+    switch (configFileType)
+    {
+        case DEVICE_CLIENT_ESSENTIAL_CONFIG:
+        {
+            FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::CONFIG_FILE, true);
+            break;
+        }
+        case FLEET_PROVISIONING_RUNTIME_CONFIG:
+        {
+            FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::RUNTIME_CONFIG_FILE, true);
+            break;
+        }
+        case HTTP_PROXY_CONFIG:
+        {
+            FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::HTTP_PROXY_CONFIG_FILE, true);
+            break;
+        }
+        default:
+        {
+            LOGM_ERROR(
+                TAG,
+                "Undefined config type of file %s, file permission was not able to be verified",
+                expandedPath.c_str());
+        }
+    }
 
     ifstream setting(expandedPath.c_str());
     if (!setting.is_open())
@@ -2244,8 +2525,30 @@ bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
         return false;
     }
     Aws::Crt::JsonView jsonView = Aws::Crt::JsonView(jsonObj);
-    // Parse, validate and store config file content
-    config.LoadFromJson(jsonView);
+    switch (configFileType)
+    {
+        case DEVICE_CLIENT_ESSENTIAL_CONFIG:
+        {
+            config.LoadFromJson(jsonView);
+            break;
+        }
+        case FLEET_PROVISIONING_RUNTIME_CONFIG:
+        {
+            break;
+        }
+        case HTTP_PROXY_CONFIG:
+        {
+            config.httpProxyConfig.LoadFromJson(jsonView);
+            break;
+        }
+        default:
+        {
+            LOGM_ERROR(
+                TAG,
+                "Undefined config type of file %s, was not able to parse config into json object",
+                expandedPath.c_str());
+        }
+    }
 
     LOGM_INFO(TAG, "Successfully fetched JSON config file: %s", Sanitize(contents).c_str());
     setting.close();
@@ -2315,7 +2618,8 @@ void Config::PrintHelpMessage()
         "%s <secure-element-pin>:\t\t\t\t\tThe user PIN for logging into PKCS#11 token.\n"
         "%s <secure-element-key-label>:\t\t\t\t\tThe Label of private key on the PKCS#11 token (optional). \n"
         "%s <secure-element-slot-id>:\t\t\t\t\tThe Slot ID containing PKCS#11 token to use (optional).\n"
-        "%s <secure-element-token-label>:\t\t\t\t\tThe Label of the PKCS#11 token to use (optional).\n";
+        "%s <secure-element-token-label>:\t\t\t\t\tThe Label of the PKCS#11 token to use (optional).\n"
+        "%s <http-proxy-config-file>:\t\t\t\tUse specified file path to load HTTP proxy configs\n";
 
     cout << FormatMessage(
         helpMessageTemplate,
@@ -2362,7 +2666,8 @@ void Config::PrintHelpMessage()
         PlainConfig::SecureElement::CLI_SECURE_ELEMENT_PIN,
         PlainConfig::SecureElement::CLI_SECURE_ELEMENT_KEY_LABEL,
         PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID,
-        PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL);
+        PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL,
+        PlainConfig::HttpProxyConfig::CLI_HTTP_PROXY_CONFIG_PATH);
 }
 
 void Config::PrintVersion()
