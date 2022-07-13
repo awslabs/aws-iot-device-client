@@ -10,6 +10,7 @@ ARG OPENSSL_VERSION=1.1.1n
 RUN apt-get update -qq \
     && apt-get -y install \
     git \
+    clang-format \
     curl \
     build-essential \
     wget \
