@@ -15,12 +15,12 @@ jobs:
     steps:
     - name: Checkout Sources
       uses: actions/checkout@v1
-
-    - name: clang-format lint
-      uses: DoozyX/clang-format-lint-action@v0.3.1
-      with:
-        # List of extensions to check
-        extensions: cpp,h
+    - name: clang-format script
+      run: |
+        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
+        export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
+        docker pull $DOCKER_IMAGE
+        docker run --mount type=bind,source=$(pwd),target=/src --workdir /src --entrypoint /src/format-check.sh $DOCKER_IMAGE
 
   cppcheck:
     runs-on: ubuntu-latest
