@@ -66,7 +66,13 @@ string FileUtils::ExtractExpandedPath(const string &filePath)
         return "";
     }
     wordexp_t word;
-    wordexp(filePath.c_str(), &word, 0); // TODO: How to handle error?
+    int status = wordexp(filePath.c_str(), &word, 0);
+    if (status)
+    {
+        throw wordexp_fail_error(
+            "Received status from wordexp: " + std::to_string(status) +
+            " Pertaining to following filepath: " + filePath);
+    }
     string expandedPath = word.we_wordv[0];
     wordfree(&word);
     return expandedPath;
