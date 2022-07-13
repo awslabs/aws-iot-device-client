@@ -15,7 +15,7 @@ jobs:
     steps:
     - name: Checkout Sources
       uses: actions/checkout@v1
-    - name: cppcheck script
+    - name: clang-format script
       run: |
         echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
         export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
