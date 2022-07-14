@@ -260,13 +260,27 @@ int JobEngine::exec_cmd(const string &operation, PlainJobDocument::JobAction act
     {
         argSize = action.input.args->size();
     }
-    std::unique_ptr<const char *[]> argv(new const char *[argSize + 3]);
-    argv[0] = operation.c_str();
-    argv[1] = action.runAsUser->c_str();
-    argv[argSize + 2] = nullptr;
-    for (size_t i = 0; i < argSize; i++)
+    std::unique_ptr<const char *[]> argv;
+    if (action.runAsUser.has_value() && !action.runAsUser->empty())
     {
-        argv[i + 2] = action.input.args->at(i).c_str();
+        argv.reset(new const char *[argSize + 3]);
+        argv[0] = operation.c_str();
+        argv[1] = action.runAsUser->c_str();
+        argv[argSize + 2] = nullptr;
+        for (size_t i = 0; i < argSize; i++)
+        {
+            argv[i + 2] = action.input.args->at(i).c_str();
+        }
+    }
+    else
+    {
+        argv.reset(new const char *[argSize + 2]);
+        argv[0] = operation.c_str();
+        argv[argSize + 1] = nullptr;
+        for (size_t i = 0; i < argSize; i++)
+        {
+            argv[i + 1] = action.input.args->at(i).c_str();
+        }
     }
 
     int execResult;

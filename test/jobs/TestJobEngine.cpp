@@ -102,6 +102,21 @@ TEST_F(TestJobEngine, ExecuteStepsHappy)
     ASSERT_STREQ(jobEngine.getStdOut().c_str(), std::string(testStdout + "\n").c_str());
 }
 
+TEST_F(TestJobEngine, ExecuteWithoutRunAsUser)
+{
+    vector<PlainJobDocument::JobAction> steps;
+    vector<std::string> args;
+    args.push_back("-c");
+    args.push_back("echo " + testStdout);
+    steps.push_back(createJobAction("testAction", "runHandler", "sh", args, "/bin", false));
+    PlainJobDocument jobDocument = createTestJobDocument(steps, true);
+    JobEngine jobEngine;
+
+    int executionStatus = jobEngine.exec_steps(jobDocument, testHandlerDirectoryPath);
+    ASSERT_EQ(executionStatus, 0);
+    ASSERT_STREQ(jobEngine.getStdOut().c_str(), std::string(testStdout + "\n").c_str());
+}
+
 TEST_F(TestJobEngine, ExecuteSucceedThenFail)
 {
     vector<PlainJobDocument::JobAction> steps;
