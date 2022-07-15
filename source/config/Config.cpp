@@ -2435,7 +2435,8 @@ bool Config::init(const CliArgs &cliArgs)
             return false;
         }
 
-        if (ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, FLEET_PROVISIONING_RUNTIME_CONFIG) &&
+        if (ParseConfigFile(
+                Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, FLEET_PROVISIONING_RUNTIME_CONFIG) &&
             ValidateAndStoreRuntimeConfig())
         {
             LOGM_INFO(
