@@ -326,6 +326,7 @@ namespace Aws
                     bool Validate() const override;
                     /** Serialize SampleShadow feature To Json Object **/
                     void SerializeToObject(Crt::JsonObject &object) const;
+                    bool createShadowOutputFile();
 
                     static constexpr char CLI_ENABLE_SAMPLE_SHADOW[] = "--enable-sample-shadow";
                     static constexpr char CLI_SAMPLE_SHADOW_NAME[] = "--shadow-name";
@@ -336,6 +337,8 @@ namespace Aws
                     static constexpr char JSON_SAMPLE_SHADOW_NAME[] = "shadow-name";
                     static constexpr char JSON_SAMPLE_SHADOW_INPUT_FILE[] = "shadow-input-file";
                     static constexpr char JSON_SAMPLE_SHADOW_OUTPUT_FILE[] = "shadow-output-file";
+
+                    static constexpr int MAXIMUM_SHADOW_INPUT_FILE_SIZE = 8 * 1024;
 
                     bool enabled{false};
                     Aws::Crt::Optional<std::string> shadowName;
@@ -469,6 +472,7 @@ namespace Aws
                     "~/.aws-iot-device-client/aws-iot-device-client-runtime.conf";
                 static constexpr char DEFAULT_HTTP_PROXY_CONFIG_FILE[] = "~/.aws-iot-device-client/http-proxy.conf";
                 static constexpr char DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[] = "~/.aws-iot-device-client/sample-shadow/";
+                static constexpr char DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[] = "default-sample-shadow-document";
 
                 static constexpr char CLI_HELP[] = "--help";
                 static constexpr char CLI_VERSION[] = "--version";

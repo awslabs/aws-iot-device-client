@@ -197,33 +197,42 @@ void handle_feature_stopped(const Feature *feature)
 
 void attemptConnection()
 {
-    Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 900 * 1000, -1, nullptr};
-    auto publishLambda = []() -> bool {
-        int connectionStatus = resourceManager.get()->establishConnection(config.config);
-        if (SharedCrtResourceManager::ABORT == connectionStatus)
-        {
-            LOGM_ERROR(
-                TAG,
-                "*** %s: Failed to establish the MQTT Client. Please verify your AWS "
-                "IoT credentials, "
-                "configuration and/or certificate policy. ***",
-                DC_FATAL_ERROR);
-            LoggerFactory::getLoggerInstance()->shutdown();
-            deviceClientAbort("Failed to establish MQTT connection due to credential/configuration error");
-            return true;
-        }
-        else if (SharedCrtResourceManager::SUCCESS == connectionStatus)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    };
-    std::thread attemptConnectionThread(
-        [retryConfig, publishLambda] { Retry::exponentialBackoff(retryConfig, publishLambda); });
-    attemptConnectionThread.join();
+    try
+    {
+        Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 900 * 1000, -1, nullptr};
+        auto publishLambda = []() -> bool {
+            int connectionStatus = resourceManager.get()->establishConnection(config.config);
+            if (SharedCrtResourceManager::ABORT == connectionStatus)
+            {
+                LOGM_ERROR(
+                    TAG,
+                    "*** %s: Failed to establish the MQTT Client. Please verify your AWS "
+                    "IoT credentials, "
+                    "configuration and/or certificate policy. ***",
+                    DC_FATAL_ERROR);
+                LoggerFactory::getLoggerInstance()->shutdown();
+                deviceClientAbort("Failed to establish MQTT connection due to credential/configuration error");
+                return true;
+            }
+            else if (SharedCrtResourceManager::SUCCESS == connectionStatus)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        };
+        std::thread attemptConnectionThread(
+            [retryConfig, publishLambda] { Retry::exponentialBackoff(retryConfig, publishLambda); });
+        attemptConnectionThread.join();
+    }
+    catch (const std::exception &e)
+    {
+        LOGM_ERROR(TAG, "Error attempting to connect: %s", e.what());
+        LoggerFactory::getLoggerInstance()->shutdown();
+        deviceClientAbort("Failure from attemptConnection");
+    }
 }
 
 namespace Aws

@@ -5,6 +5,7 @@
 #define AWS_IOT_DEVICE_CLIENT_FILEUTILS_H
 
 #include <aws/common/byte_buf.h>
+#include <stdexcept>
 #include <string>
 #include <sys/stat.h>
 
@@ -40,9 +41,10 @@ namespace Aws
                     static std::string ExtractParentDirectory(const std::string &filePath);
 
                     /**
-                     * \brief Given a path to a file, attempts to extract the absolute path
+                     * \brief Given a path to a file, attempts to extract the absolute path.
                      * @param filePath a path to a file
-                     * @return the expanded path of the file
+                     * @return the expanded path of the file.
+                     * @throws wordexp_fail_error upon wordexp failure
                      */
                     static std::string ExtractExpandedPath(const std::string &filePath);
 
@@ -164,6 +166,11 @@ namespace Aws
                      * @return True if the filepath is valid. False otherwise.
                      */
                     static bool IsValidFilePath(const std::string &filePath);
+                };
+
+                struct wordexp_fail_error : std::runtime_error
+                {
+                    using std::runtime_error::runtime_error;
                 };
             } // namespace Util
         }     // namespace DeviceClient
