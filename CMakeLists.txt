@@ -185,7 +185,7 @@ endif ()
 ###############################################
 ## Build the AWS IoT Device Client Executable #
 ###############################################
-add_executable(${DC_PROJECT_NAME} ${DC_SRC} source/util/ProxyUtils.cpp source/util/ProxyUtils.h)
+add_executable(${DC_PROJECT_NAME} ${DC_SRC})
 set_target_properties(${DC_PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_definitions(${DC_PROJECT_NAME} PRIVATE "-DDEBUG_BUILD")
 ## We need to add the project binary directory to the list of include directories
