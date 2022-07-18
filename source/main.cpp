@@ -389,7 +389,9 @@ int main(int argc, char *argv[])
          */
         FleetProvisioning fleetProvisioning;
         if (!fleetProvisioning.ProvisionDevice(resourceManager, config.config) ||
-            !config.ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, true) ||
+            !config.ParseConfigFile(
+                Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
+                Aws::Iot::DeviceClient::Config::FLEET_PROVISIONING_RUNTIME_CONFIG) ||
             !config.ValidateAndStoreRuntimeConfig())
         {
             LOGM_ERROR(
