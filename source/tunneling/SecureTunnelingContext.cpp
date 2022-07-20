@@ -36,7 +36,7 @@ namespace Aws
                 SecureTunnelingContext::~SecureTunnelingContext()
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingContext::~SecureTunnelingContext");
-                    if (mSecureTunnel)
+                    if (mSecureTunnel && mSecureTunnel->IsValid())
                     {
                         mSecureTunnel->Close();
                     }

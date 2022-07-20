@@ -47,8 +47,8 @@ namespace Aws
                      * @return a non-zero return code indicates a problem. The logs can be checked for more info
                      */
                     int init(
-                        const std::shared_ptr<SharedCrtResourceManager> manager,
-                        const std::shared_ptr<ClientBaseNotifier> notifier,
+                        std::shared_ptr<SharedCrtResourceManager> manager,
+                        std::shared_ptr<ClientBaseNotifier> notifier,
                         const PlainConfig &config);
 
                     // Interface methods defined in Feature.h

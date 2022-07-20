@@ -33,8 +33,8 @@ namespace Aws
                 SecureTunnelingFeature::~SecureTunnelingFeature() { aws_http_library_clean_up(); }
 
                 int SecureTunnelingFeature::init(
-                    const shared_ptr<SharedCrtResourceManager> sharedCrtResourceManager,
-                    const shared_ptr<ClientBaseNotifier> notifier,
+                    shared_ptr<SharedCrtResourceManager> sharedCrtResourceManager,
+                    shared_ptr<ClientBaseNotifier> notifier,
                     const PlainConfig &config)
                 {
                     sharedCrtResourceManager->initializeAWSHttpLib();
