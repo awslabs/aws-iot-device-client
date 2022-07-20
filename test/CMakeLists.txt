@@ -108,7 +108,7 @@ list(APPEND DC_SRC ${DC_TST})
 list(FILTER DC_SRC EXCLUDE REGEX ".*main.cpp$")
 
 set(HEADERS)
-add_executable(${GTEST_PROJECT} ${DC_SRC} util/TestProxyUtils.cpp)
+add_executable(${GTEST_PROJECT} ${DC_SRC})
 
 if (NOT EXCLUDE_JOBS)
     target_link_libraries(${GTEST_PROJECT} IotJobs-cpp)
