@@ -17,57 +17,7 @@ execute_process(COMMAND git log --pretty=format:'%h' -n 1
                 OUTPUT_VARIABLE GIT_INFO
                 ERROR_QUIET)
 
-if (GIT_VERSION AND NOT ${GIT_INFO} STREQUAL "")
-    message("-- Using Git to calculate AWS IoT Device Client version information...")
-
-    # Get last tag from git - this only matches tags starting with v, so we ignore non-versioning tags
-    execute_process(COMMAND ${GIT_EXECUTABLE} describe --abbrev=0 --tags --match "v[0-9]*"
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE ${PROJECT_NAME}_VERSION_STRING
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    # Determine how many commits since last tag
-    execute_process(COMMAND ${GIT_EXECUTABLE} rev-list ${${PROJECT_NAME}_VERSION_STRING}..HEAD --count
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE ${PROJECT_NAME}_VERSION_AHEAD
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    # Get current commit SHA from git
-    execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE ${PROJECT_NAME}_VERSION_GIT_SHA
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-    # Collect the partial versions into a list
-    string(REGEX MATCHALL "[0-9]+" ${PROJECT_NAME}_PARTIAL_VERSION_LIST
-        ${${PROJECT_NAME}_VERSION_STRING})
-
-    # Set the version numbers
-    list(GET ${PROJECT_NAME}_PARTIAL_VERSION_LIST
-        0 ${PROJECT_NAME}_VERSION_MAJOR)
-    list(GET ${PROJECT_NAME}_PARTIAL_VERSION_LIST
-        1 ${PROJECT_NAME}_VERSION_MINOR)
-    set(${PROJECT_NAME}_VERSION_PATCH ${${PROJECT_NAME}_VERSION_AHEAD})
-
-    # Unset the list
-    unset(${PROJECT_NAME}_PARTIAL_VERSION_LIST)
-
-    # Set full project version string
-    set(${PROJECT_NAME}_VERSION_STRING_FULL
-            v${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}-${${PROJECT_NAME}_VERSION_GIT_SHA})
-
-
-    message("-- Generated AWS IoT Device Client version: ${${PROJECT_NAME}_VERSION_STRING_FULL}")
-    # Save version to file (which will be used when Git is not available
-    # or VERSION_UPDATE_FROM_GIT is disabled)
-    file(WRITE ${CMAKE_SOURCE_DIR}/.version ${${PROJECT_NAME}_VERSION_STRING_FULL}
-        "*" ${${PROJECT_NAME}_VERSION_STRING}
-        "*" ${${PROJECT_NAME}_VERSION_MAJOR}
-        "*" ${${PROJECT_NAME}_VERSION_MINOR}
-        "*" ${${PROJECT_NAME}_VERSION_PATCH}
-        "*" ${${PROJECT_NAME}_VERSION_AHEAD}
-        "*" ${${PROJECT_NAME}_VERSION_GIT_SHA})
-else()
+function (load_version_from_file)
     # Git is not available (this is the case if the source is packaged as an archive), get version from file
     file(STRINGS ${CMAKE_SOURCE_DIR}/.version ${PROJECT_NAME}_VERSION_LIST)
     string(REPLACE "*" ";" ${PROJECT_NAME}_VERSION_LIST ${${PROJECT_NAME}_VERSION_LIST})
@@ -81,5 +31,65 @@ else()
     list(GET ${PROJECT_NAME}_VERSION_LIST 6 ${PROJECT_NAME}_VERSION_GIT_SHA)
     unset(${PROJECT_NAME}_VERSION_LIST)
 
-    message("-- Loaded AWS IoT Device Client version: ${${PROJECT_NAME}_VERSION_STRING_FULL}")
+    message("-- Failed to infer patch version from git, loaded AWS IoT Device Client version from file: ${${PROJECT_NAME}_VERSION_STRING_FULL}")
+endfunction()
+
+if (GIT_VERSION AND NOT ${GIT_INFO} STREQUAL "")
+    message("-- Using Git to calculate AWS IoT Device Client version information...")
+
+    # Get last tag from git - this only matches tags starting with v, so we ignore non-versioning tags
+    execute_process(COMMAND ${GIT_EXECUTABLE} describe --abbrev=0 --tags --match "v[0-9]*"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE ${PROJECT_NAME}_VERSION_STRING
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE exit)
+
+    if (exit EQUAL 0)
+        # Determine how many commits since last tag
+        execute_process(COMMAND ${GIT_EXECUTABLE} rev-list ${${PROJECT_NAME}_VERSION_STRING}..HEAD --count
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE ${PROJECT_NAME}_VERSION_AHEAD
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+        # Get current commit SHA from git
+        execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE ${PROJECT_NAME}_VERSION_GIT_SHA
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+        # Collect the partial versions into a list
+        string(REGEX MATCHALL "[0-9]+" ${PROJECT_NAME}_PARTIAL_VERSION_LIST
+            ${${PROJECT_NAME}_VERSION_STRING})
+
+        # Set the version numbers
+        list(GET ${PROJECT_NAME}_PARTIAL_VERSION_LIST
+            0 ${PROJECT_NAME}_VERSION_MAJOR)
+        list(GET ${PROJECT_NAME}_PARTIAL_VERSION_LIST
+            1 ${PROJECT_NAME}_VERSION_MINOR)
+        set(${PROJECT_NAME}_VERSION_PATCH ${${PROJECT_NAME}_VERSION_AHEAD})
+
+        # Unset the list
+        unset(${PROJECT_NAME}_PARTIAL_VERSION_LIST)
+
+        # Set full project version string
+        set(${PROJECT_NAME}_VERSION_STRING_FULL
+                v${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}-${${PROJECT_NAME}_VERSION_GIT_SHA})
+
+
+        message("-- Generated AWS IoT Device Client version: ${${PROJECT_NAME}_VERSION_STRING_FULL}")
+        # Save version to file (which will be used when Git is not available
+        # or VERSION_UPDATE_FROM_GIT is disabled)
+        file(WRITE ${CMAKE_SOURCE_DIR}/.version ${${PROJECT_NAME}_VERSION_STRING_FULL}
+            "*" ${${PROJECT_NAME}_VERSION_STRING}
+            "*" ${${PROJECT_NAME}_VERSION_MAJOR}
+            "*" ${${PROJECT_NAME}_VERSION_MINOR}
+            "*" ${${PROJECT_NAME}_VERSION_PATCH}
+            "*" ${${PROJECT_NAME}_VERSION_AHEAD}
+            "*" ${${PROJECT_NAME}_VERSION_GIT_SHA})
+
+        # exit from cmake processing
+        return()
+    endif()
 endif()
+
+load_version_from_file()
