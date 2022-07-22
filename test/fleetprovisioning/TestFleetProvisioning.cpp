@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "../../source/fleetprovisioning/FleetProvisioning.h"
+#include "../../source/fleet-provisioning/FleetProvisioning.h"
 #include "gtest/gtest.h"
 #include <aws/crt/JsonObject.h>
 #include <stdlib.h>
