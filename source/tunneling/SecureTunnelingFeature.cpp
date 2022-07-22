@@ -6,7 +6,6 @@
 #include "SecureTunnelingContext.h"
 #include "TcpForward.h"
 #include <aws/crt/mqtt/MqttClient.h>
-#include <aws/iotsecuretunneling/IotSecureTunnelingClient.h>
 #include <aws/iotsecuretunneling/SubscribeToTunnelsNotifyRequest.h>
 #include <map>
 #include <memory>
@@ -41,8 +40,6 @@ namespace Aws
                     sharedCrtResourceManager->initializeAWSHttpLib();
 
                     this->mSharedCrtResourceManager = sharedCrtResourceManager;
-                    mDeviceApiHandle = unique_ptr<Aws::Iotdevicecommon::DeviceApiHandle>(
-                        new Aws::Iotdevicecommon::DeviceApiHandle(sharedCrtResourceManager->getAllocator()));
                     mClientBaseNotifier = notifier;
 
                     LoadFromConfig(config);
@@ -123,8 +120,9 @@ namespace Aws
                         SubscribeToTunnelsNotifyRequest request;
                         request.ThingName = mThingName.c_str();
 
-                        IotSecureTunnelingClient client(mSharedCrtResourceManager->getConnection());
-                        client.SubscribeToTunnelsNotify(
+                        iotSecureTunnelingClient = createClient();
+
+                        iotSecureTunnelingClient->SubscribeToTunnelsNotify(
                             request,
                             AWS_MQTT_QOS_AT_LEAST_ONCE,
                             bind(
@@ -172,13 +170,12 @@ namespace Aws
                         return;
                     }
 
-                    size_t nServices = response->Services->size();
-                    if (nServices == 0)
+                    if (!response->Services.has_value() || response->Services->empty())
                     {
                         LOG_ERROR(TAG, "no service requested");
                         return;
                     }
-                    if (nServices > 1)
+                    if (response->Services->size() > 1)
                     {
                         LOG_ERROR(
                             TAG,
@@ -187,19 +184,19 @@ namespace Aws
                         return;
                     }
 
-                    string accessToken = response->ClientAccessToken->c_str();
-                    if (accessToken.empty())
+                    if (!response->ClientAccessToken.has_value() || response->ClientAccessToken->empty())
                     {
                         LOG_ERROR(TAG, "access token cannot be empty");
                         return;
                     }
+                    string accessToken = response->ClientAccessToken->c_str();
 
-                    string region = response->Region->c_str();
-                    if (region.empty())
+                    if (!response->Region.has_value() || response->Region->empty())
                     {
                         LOG_ERROR(TAG, "region cannot be empty");
                         return;
                     }
+                    string region = response->Region->c_str();
 
                     string service = response->Services->at(0).c_str();
                     uint16_t port = GetPortFromService(service);
@@ -211,14 +208,8 @@ namespace Aws
 
                     LOGM_DEBUG(TAG, "Region=%s, Service=%s", region.c_str(), service.c_str());
 
-                    std::unique_ptr<SecureTunnelingContext> context =
-                        unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
-                            mSharedCrtResourceManager,
-                            mRootCa,
-                            accessToken,
-                            GetEndpoint(region),
-                            port,
-                            bind(&SecureTunnelingFeature::OnConnectionShutdown, this, placeholders::_1)));
+                    auto context = createContext(accessToken, region, port);
+
                     if (context->ConnectToSecureTunnel())
                     {
                         mContexts.push_back(std::move(context));
@@ -256,6 +247,26 @@ namespace Aws
                     }
 
                     return endpoint;
+                }
+
+                std::unique_ptr<SecureTunnelingContext> SecureTunnelingFeature::createContext(
+                    const std::string &accessToken,
+                    const std::string &region,
+                    const uint16_t &port)
+                {
+                    return std::unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
+                        mSharedCrtResourceManager,
+                        mRootCa,
+                        accessToken,
+                        GetEndpoint(region),
+                        port,
+                        bind(&SecureTunnelingFeature::OnConnectionShutdown, this, placeholders::_1)));
+                }
+
+                std::shared_ptr<AbstractIotSecureTunnelingClient> SecureTunnelingFeature::createClient()
+                {
+                    return std::shared_ptr<AbstractIotSecureTunnelingClient>(
+                        new IotSecureTunnelingClientWrapper(mSharedCrtResourceManager->getConnection()));
                 }
 
                 void SecureTunnelingFeature::OnConnectionShutdown(SecureTunnelingContext *contextToRemove)
