@@ -29,7 +29,7 @@ The AWS IoT Device Client offers the ability to automatically provision your IoT
 
 When you use Fleet Provisioning with Secure Elements, the AWS IoT Device Client currently only supports the use of Certificate Signing Requests (CSRs). The AWS IoT Device Client does not support writing a new private key to your Secure Element since this is against security best practices.
 
-More details about the Fleet Provisioning feature can be found here: [Fleet Provisioning Feature README](../fleetprovisioning/README.md)
+More details about the Fleet Provisioning feature can be found here: [Fleet Provisioning Feature README](../fleet-provisioning/README.md)
 
 **Note:** In the above-mentioned scenario, the runtime config file will store empty file path for **key** if no file path is provided.
 

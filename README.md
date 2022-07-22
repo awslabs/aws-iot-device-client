@@ -8,8 +8,8 @@
   * [Installation](#installation)
   * [Setup & Configuration](#setup-and-configuration)
   * [Jobs Feature](source/jobs/README.md)
-  * [Fleet Provisioning Feature](source/fleetprovisioning/README.md)
-  * [Device Defender Feature](source/devicedefender/README.md)
+  * [Fleet Provisioning Feature](source/fleet-provisioning/README.md)
+  * [Device Defender Feature](source/device-defender/README.md)
   * [Secure Tunneling Feature](source/tunneling/README.md)
   * [Named Shadow Feature](source/shadow/README.md)
     - [Sample Shadow Feature](source/shadow#sample-shadow)
@@ -119,8 +119,8 @@ cmake --build . --target test-aws-iot-device-client
 
 ## AWS IoT Features
 * [Jobs Feature Readme](source/jobs/README.md)
-* [Fleet Provisioning Feature Readme](source/fleetprovisioning/README.md)
-* [Device Defender Feature Readme](source/devicedefender/README.md)
+* [Fleet Provisioning Feature Readme](source/fleet-provisioning/README.md)
+* [Device Defender Feature Readme](source/device-defender/README.md)
 * [Secure Tunneling Feature Readme](source/tunneling/README.md)
 * [Named Shadow Feature Readme](source/shadow/README.md)
 * [Sensor Publish Feature](source/sensor-publish/README.md)

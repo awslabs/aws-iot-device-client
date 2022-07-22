@@ -85,7 +85,7 @@ file(GLOB DC_SRC "source/*.cpp" /
         ${SAMP_SRC})
 
 if (NOT EXCLUDE_DD)
-    file(GLOB DD_SRC "source/devicedefender/*.cpp")
+    file(GLOB DD_SRC "source/device-defender/*.cpp")
     list(APPEND DC_SRC ${DD_SRC})
 endif ()
 
@@ -100,7 +100,7 @@ if (NOT EXCLUDE_ST)
 endif ()
 
 if (NOT EXCLUDE_FP)
-    file(GLOB FP_SRC "source/fleetprovisioning/*.cpp")
+    file(GLOB FP_SRC "source/fleet-provisioning/*.cpp")
     list(APPEND DC_SRC ${FP_SRC})
 endif ()
 
