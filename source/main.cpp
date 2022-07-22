@@ -12,7 +12,7 @@
 
 #if !defined(EXCLUDE_DD)
 
-#    include "devicedefender/DeviceDefenderFeature.h"
+#    include "device-defender/DeviceDefenderFeature.h"
 
 #endif
 #if !defined(EXCLUDE_JOBS)
@@ -22,7 +22,7 @@
 #endif
 #if !defined(EXCLUDE_FP)
 
-#    include "fleetprovisioning/FleetProvisioning.h"
+#    include "fleet-provisioning/FleetProvisioning.h"
 
 #endif
 
