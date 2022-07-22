@@ -1258,7 +1258,7 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigAddr)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
-#if !defined(EXCLUDE_SENSOR_PUBLISH)
+#if defined(EXCLUDE_SENSOR_PUBLISH)
     GTEST_SKIP();
 #endif
     ASSERT_FALSE(config.Validate()); // Invalid permissions on addr.
@@ -1293,7 +1293,7 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopicEmpty)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
-#if !defined(EXCLUDE_SENSOR_PUBLISH)
+#if defined(EXCLUDE_SENSOR_PUBLISH)
     GTEST_SKIP();
 #endif
     ASSERT_FALSE(config.Validate()); // Empty mqtt_topic.
@@ -1328,7 +1328,7 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopic)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
-#if !defined(EXCLUDE_SENSOR_PUBLISH)
+#if defined(EXCLUDE_SENSOR_PUBLISH)
     GTEST_SKIP();
 #endif
     ASSERT_FALSE(config.Validate()); // Invalid mqtt_topic.
@@ -1363,7 +1363,7 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigEomDelimiter)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
-#if !defined(EXCLUDE_SENSOR_PUBLISH)
+#if defined(EXCLUDE_SENSOR_PUBLISH)
     GTEST_SKIP();
 #endif
     ASSERT_FALSE(config.Validate()); // Invalid eom_delimiter.
@@ -1402,7 +1402,7 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigNegativeIntegers)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
-#if !defined(EXCLUDE_SENSOR_PUBLISH)
+#if defined(EXCLUDE_SENSOR_PUBLISH)
     GTEST_SKIP();
 #endif
     ASSERT_FALSE(config.Validate()); // Invalid integer values.
@@ -1438,7 +1438,7 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigBufferCapacityTooSmall)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
-#if !defined(EXCLUDE_SENSOR_PUBLISH)
+#if defined(EXCLUDE_SENSOR_PUBLISH)
     GTEST_SKIP();
 #endif
     ASSERT_FALSE(config.Validate()); // Buffer capacity too small.
@@ -1474,7 +1474,7 @@ TEST_F(ConfigTestFixture, SensorPublishDisableFeature)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
-#if !defined(EXCLUDE_SENSOR_PUBLISH)
+#if defined(EXCLUDE_SENSOR_PUBLISH)
     GTEST_SKIP();
 #endif
     ASSERT_FALSE(config.Validate()); // All sensors disabled, then disable feature.
