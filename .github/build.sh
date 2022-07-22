@@ -103,7 +103,7 @@ cd ./build/
 case $compileMode in
     st_component_mode)
     echo "Building in ST component mode"
-    cmake ../ -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_SDK=ON -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON
+    cmake ../ -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_SDK=ON -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON -DEXCLUDE_SENSOR_PUBLISH=ON
     ;;
     armhf_cross_mode)
     apt-get update
@@ -125,7 +125,7 @@ case $compileMode in
     cd ..
     if [ "$stMode" = true ]; then
       # Set CMake flags for ST mode
-      cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../
+      cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON -DEXCLUDE_SENSOR_PUBLISH=ON ../
     elif [ "$sharedLibs" = true ]; then
       cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON ../
       make install DESTDIR=./shared_install_dir
@@ -188,7 +188,7 @@ case $compileMode in
     cd ..
     if [ "$stMode" = true ]; then
       # Set CMake flags for ST mode
-      cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../
+      cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON -DEXCLUDE_SENSOR_PUBLISH=ON ../
     elif [ "$sharedLibs" = true ]; then
       cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON ../
       make install DESTDIR=./shared_install_dir
