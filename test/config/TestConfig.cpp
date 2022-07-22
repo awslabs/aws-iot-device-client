@@ -1259,9 +1259,10 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigAddr)
     config.LoadFromJson(jsonView);
 
 #if !defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Invalid permissions on addr.
     ASSERT_TRUE(config.sensorPublish.enabled);
-#endif
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
     const auto &settings = config.sensorPublish.settings[0];
     ASSERT_FALSE(settings.enabled);
@@ -1293,9 +1294,10 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopicEmpty)
     config.LoadFromJson(jsonView);
 
 #if !defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Empty mqtt_topic.
     ASSERT_TRUE(config.sensorPublish.enabled);
-#endif
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
     const auto &settings = config.sensorPublish.settings[0];
     ASSERT_FALSE(settings.enabled);
@@ -1325,10 +1327,12 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopic)
 
     PlainConfig config;
     config.LoadFromJson(jsonView);
+
 #if !defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Invalid mqtt_topic.
     ASSERT_TRUE(config.sensorPublish.enabled);
-#endif
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
     const auto &settings = config.sensorPublish.settings[0];
     ASSERT_FALSE(settings.enabled);
@@ -1360,9 +1364,10 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigEomDelimiter)
     config.LoadFromJson(jsonView);
 
 #if !defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Invalid eom_delimiter.
     ASSERT_TRUE(config.sensorPublish.enabled);
-#endif
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
     const auto &settings = config.sensorPublish.settings[0];
     ASSERT_FALSE(settings.enabled);
@@ -1398,9 +1403,10 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigNegativeIntegers)
     config.LoadFromJson(jsonView);
 
 #if !defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Invalid integer values.
     ASSERT_TRUE(config.sensorPublish.enabled);
-#endif
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
     const auto &settings = config.sensorPublish.settings[0];
     ASSERT_FALSE(settings.enabled);
@@ -1433,9 +1439,10 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigBufferCapacityTooSmall)
     config.LoadFromJson(jsonView);
 
 #if !defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Buffer capacity too small.
     ASSERT_TRUE(config.sensorPublish.enabled);
-#endif
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
     const auto &settings = config.sensorPublish.settings[0];
     ASSERT_FALSE(settings.enabled);
@@ -1468,9 +1475,10 @@ TEST_F(ConfigTestFixture, SensorPublishDisableFeature)
     config.LoadFromJson(jsonView);
 
 #if !defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // All sensors disabled, then disable feature.
     ASSERT_FALSE(config.sensorPublish.enabled);
-#endif
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
     const auto &settings = config.sensorPublish.settings[0];
     ASSERT_FALSE(settings.enabled);
