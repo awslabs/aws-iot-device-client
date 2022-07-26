@@ -34,8 +34,10 @@ namespace Aws
 
                 TcpForward::~TcpForward()
                 {
-                    Close();
-
+                    if (mConnected)
+                    {
+                        aws_socket_close(&mSocket);
+                    }
                     aws_socket_clean_up(&mSocket);
                     aws_byte_buf_clean_up(&mSendBuffer);
                 }
@@ -52,14 +54,6 @@ namespace Aws
 
                     aws_socket_connect(&mSocket, &endpoint, eventLoop, sOnConnectionResult, this);
 
-                    return 0;
-                }
-
-                int TcpForward::Close()
-                {
-                    FlushSendBuffer();
-                    mConnected = false;
-                    aws_socket_close(&mSocket);
                     return 0;
                 }
 
