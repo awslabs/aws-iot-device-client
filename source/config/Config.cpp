@@ -2556,22 +2556,22 @@ bool Config::ParseConfigFile(const string &file, ConfigFileType configFileType)
     }
 
     string configFileParentDir = FileUtils::ExtractParentDirectory(expandedPath.c_str());
-    FileUtils::ValidateFilePermissions(configFileParentDir, Permissions::CONFIG_DIR, true);
+    FileUtils::ValidateFilePermissions(configFileParentDir, Permissions::CONFIG_DIR, false);
     switch (configFileType)
     {
         case DEVICE_CLIENT_ESSENTIAL_CONFIG:
         {
-            FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::CONFIG_FILE, true);
+            FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::CONFIG_FILE, false);
             break;
         }
         case FLEET_PROVISIONING_RUNTIME_CONFIG:
         {
-            FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::RUNTIME_CONFIG_FILE, true);
+            FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::RUNTIME_CONFIG_FILE, false);
             break;
         }
         case HTTP_PROXY_CONFIG:
         {
-            FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::HTTP_PROXY_CONFIG_FILE, true);
+            FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::HTTP_PROXY_CONFIG_FILE, false);
             break;
         }
         default:
@@ -2608,6 +2608,7 @@ bool Config::ParseConfigFile(const string &file, ConfigFileType configFileType)
         }
         case FLEET_PROVISIONING_RUNTIME_CONFIG:
         {
+            config.LoadFromJson(jsonView);
             break;
         }
         case HTTP_PROXY_CONFIG:
