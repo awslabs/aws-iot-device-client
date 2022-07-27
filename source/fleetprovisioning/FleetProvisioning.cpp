@@ -374,8 +374,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         registerAcceptedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
-    auto onRegisterRejectedSubAck = [&](int ioErr)
-    {
+    auto onRegisterRejectedSubAck = [&](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
             LOGM_ERROR(
