@@ -1586,13 +1586,6 @@ bool PlainConfig::SampleShadow::LoadFromJson(const Crt::JsonView &json)
         {
             shadowOutputFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
-        else
-        {
-            if (!createShadowOutputFile())
-            {
-                return false;
-            }
-        }
     }
 
     return true;
@@ -1619,7 +1612,9 @@ bool PlainConfig::SampleShadow::LoadFromCliArgs(const CliArgs &cliArgs)
             FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE))
                 .c_str();
     }
-    else
+
+    // setting `shadowOutputFile` value to default if no value was passed by user via CLI or JSON config.
+    if (!shadowOutputFile.has_value() || shadowOutputFile->empty())
     {
         if (!createShadowOutputFile())
         {
@@ -1657,6 +1652,11 @@ bool PlainConfig::SampleShadow::Validate() const
         }
         else
         {
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: Invalid file path passed for argument: %s ***",
+                DeviceClient::DC_FATAL_ERROR,
+                JSON_SAMPLE_SHADOW_INPUT_FILE);
             return false;
         }
 
@@ -1684,6 +1684,11 @@ bool PlainConfig::SampleShadow::Validate() const
         }
         else
         {
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: Invalid file path passed for argument: %s ***",
+                DeviceClient::DC_FATAL_ERROR,
+                JSON_SAMPLE_SHADOW_OUTPUT_FILE);
             return false;
         }
     }
