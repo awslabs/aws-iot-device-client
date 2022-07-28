@@ -135,3 +135,11 @@ if (VALGRIND_PATH)
         COMMAND ${VALGRIND_PATH} --leak-check=yes --error-exitcode=1 ./${GTEST_PROJECT}
         DEPENDS ${GTEST_PROJECT})
 endif()
+
+# Add custom target for copying sample-job-handlers to build directory for use with unit tests.
+add_custom_target(
+    copy-sample-job-handlers
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/sample-job-handlers ${CMAKE_BINARY_DIR}/sample-job-handlers
+    COMMENT "copying sample-job-handlers to build directory")
+# Make unit test binary depend on this target.
+add_dependencies(${GTEST_PROJECT} copy-sample-job-handlers)
