@@ -358,6 +358,41 @@ We recommend avoiding execution of any jobs that may reveal or leak sensitive in
 , private keys, or sensitive files as well as assignment of appropriately restrictive permissions for your credentials
 /sensitive files. 
 
+### Running Shell-command jobs
+
+When running a shell-command job, for instance: creating a new file under `tmp` directory using `touch /temp/new-file`. You can follow
+similar steps in `Creating Your Own Job Handler`. The difference are:
+
+1. `shell-command-handler` is already created under `sample-job-handler` directory if you have copied entire directory during setup. All you need to do is to create a job document for the shell-command.
+2. `action.name` needs to be `shell-command` in order to invoke `shell-command-handler.sh` from `sample-job-handler` directory.
+3. `handler`'s value needs to be `shell-command-handler.sh`
+
+**Sample shell-command job document**
+```
+{
+    "version": "1.0",
+    "steps": [
+      {
+        "action": {
+          "name": "shell-command",
+          "type": "runHandler",
+          "input": {
+            "handler": "shell-command-handler.sh",
+            "args": [
+              "touch",
+              "/tmp/new-file"
+            ],
+            "path": ""
+          },
+          runAsUser: "root" 
+        }
+      }
+    ]
+  }
+``` 
+
+**Note: In the shell-command job document, `path` is not required since it will always invoke `shell-command-handler.sh` under `sample-job-handler` directory. `runAsUser` is an optional field.**
+
 ### Debugging your Job
 
 Once you've set up your job handlers and started targeting your thing or thing group with jobs, you may need to perform
