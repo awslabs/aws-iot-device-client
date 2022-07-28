@@ -139,21 +139,20 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, const std::strin
     string command;
     if (action.type == PlainJobDocument::ACTION_TYPE_RUN_HANDLER)
     {
-        try{
+        try
+        {
             // build command for shell command
             if (action.name == "shell-command")
             {
                 command = buildCommand(jobHandlerDir, "shell-command-handler.sh", jobHandlerDir);
-
             }
             else
             {
                 // build command for standard jobHandler
                 command = buildCommand(action.input.path, action.input.handler, jobHandlerDir);
-
             }
-
-        }catch (exception &e)
+        }
+        catch (exception &e)
         {
             if (!action.ignoreStepFailure.value())
             {
