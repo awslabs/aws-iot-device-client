@@ -1654,8 +1654,9 @@ bool PlainConfig::SampleShadow::Validate() const
         {
             LOGM_ERROR(
                 Config::TAG,
-                "*** %s: Invalid file path passed for argument: %s ***",
+                "*** %s: Invalid file path {%s} passed for argument: %s ***",
                 DeviceClient::DC_FATAL_ERROR,
+                shadowInputFile.value().c_str(),
                 JSON_SAMPLE_SHADOW_INPUT_FILE);
             return false;
         }
@@ -1686,8 +1687,9 @@ bool PlainConfig::SampleShadow::Validate() const
         {
             LOGM_ERROR(
                 Config::TAG,
-                "*** %s: Invalid file path passed for argument: %s ***",
+                "*** %s: Invalid file path {%s} passed for argument: %s ***",
                 DeviceClient::DC_FATAL_ERROR,
+                shadowOutputFile.value().c_str(),
                 JSON_SAMPLE_SHADOW_OUTPUT_FILE);
             return false;
         }
