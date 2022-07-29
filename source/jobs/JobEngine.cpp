@@ -141,16 +141,24 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, const std::strin
     {
         try
         {
+            // build command for standard jobHandler
+            command = buildCommand(action.input.path, action.input.handler, jobHandlerDir);
+        }
+        catch (exception &e)
+        {
+            if (!action.ignoreStepFailure.value())
+            {
+                executionStatus = 1;
+            }
+            return;
+        }
+    }
+    else if (action.type == "runShellCommand")
+    {
+        try
+        {
             // build command for shell command
-            if (action.name == "shell-command")
-            {
-                command = buildCommand(jobHandlerDir, "shell-command-handler.sh", jobHandlerDir);
-            }
-            else
-            {
-                // build command for standard jobHandler
-                command = buildCommand(action.input.path, action.input.handler, jobHandlerDir);
-            }
+            command = buildCommand(jobHandlerDir, "shell-command-handler.sh", jobHandlerDir);
         }
         catch (exception &e)
         {

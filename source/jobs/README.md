@@ -363,8 +363,8 @@ We recommend avoiding execution of any jobs that may reveal or leak sensitive in
 When running a shell-command job, for instance: creating a new file under `tmp` directory using `touch /temp/new-file`. You can follow
 similar steps in `Creating Your Own Job Handler`. The difference are:
 
-1. `shell-command-handler` is already created under `sample-job-handler` directory if you have copied entire directory during setup. All you need to do is to create a job document for the shell-command.
-2. `action.name` needs to be `shell-command` in order to invoke `shell-command-handler.sh` from `sample-job-handler` directory.
+1. `shell-command-handler.sh` is already created under `sample-job-handler` directory if you have copied entire directory during setup. All you need to do is to create a job document for the shell-command.
+2. `action.type` needs to be `runShellCommand` in order to invoke `shell-command-handler.sh` from `sample-job-handler` directory.
 3. `handler`'s value needs to be `shell-command-handler.sh`
 
 **Sample shell-command job document**
@@ -374,8 +374,8 @@ similar steps in `Creating Your Own Job Handler`. The difference are:
     "steps": [
       {
         "action": {
-          "name": "shell-command",
-          "type": "runHandler",
+          "name": "create-file",
+          "type": "runShellCommand",
           "input": {
             "handler": "shell-command-handler.sh",
             "args": [

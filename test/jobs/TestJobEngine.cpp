@@ -173,7 +173,8 @@ TEST_F(TestJobEngine, ExecuteShellCommandHandlerWithoutUser)
     vector<std::string> args;
     args.push_back("touch");
     args.push_back(testHandlerDirectoryPath + "/test-success");
-    steps.push_back(createJobAction("shell-command", "runHandler", "shell-command-handler.sh", args, "", NULL, false));
+    steps.push_back(
+        createJobAction("create-file", "runShellCommand", "shell-command-handler.sh", args, "", NULL, false));
     PlainJobDocument jobDocument = createTestJobDocument(steps, true);
     JobEngine jobEngine;
 
@@ -188,7 +189,7 @@ TEST_F(TestJobEngine, ExecuteShellCommandHandlerWithEmptyUser)
     vector<std::string> args;
     args.push_back("touch");
     args.push_back(testHandlerDirectoryPath + "/test-success");
-    steps.push_back(createJobAction("shell-command", "runHandler", "shell-command-handler.sh", args, "", "", false));
+    steps.push_back(createJobAction("create-file", "runShellCommand", "shell-command-handler.sh", args, "", "", false));
     PlainJobDocument jobDocument = createTestJobDocument(steps, true);
     JobEngine jobEngine;
 
@@ -204,7 +205,7 @@ TEST_F(TestJobEngine, ExecuteShellCommandHandlerWithUser)
     args.push_back("touch");
     args.push_back(testHandlerDirectoryPath + "/test-success");
     steps.push_back(
-        createJobAction("shell-command", "runHandler", "shell-command-handler.sh", args, "", "root", false));
+        createJobAction("create-file", "runShellCommand", "shell-command-handler.sh", args, "", "root", false));
     PlainJobDocument jobDocument = createTestJobDocument(steps, true);
     JobEngine jobEngine;
 
