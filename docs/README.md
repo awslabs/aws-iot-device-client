@@ -22,7 +22,7 @@ sudo apt-get install doxygen
 Once Doxygen is installed on your machine, you can generate the documentation as follows:
 
 ```
-cd doc # Navigate into the documentation folder
+cd docs # Navigate into the documentation folder
 doxygen # Doxygen bin generates HTML and Latex output
 ```
 
