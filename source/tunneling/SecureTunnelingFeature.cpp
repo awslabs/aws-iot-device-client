@@ -25,6 +25,7 @@ namespace Aws
             namespace SecureTunneling
             {
                 constexpr char SecureTunnelingFeature::TAG[];
+                constexpr char SecureTunnelingFeature::NAME[];
                 constexpr char SecureTunnelingFeature::DEFAULT_PROXY_ENDPOINT_HOST_FORMAT[];
                 std::map<std::string, uint16_t> SecureTunnelingFeature::mServiceToPortMap;
 
@@ -47,7 +48,7 @@ namespace Aws
                     return 0;
                 }
 
-                string SecureTunnelingFeature::getName() { return "Secure Tunneling"; }
+                string SecureTunnelingFeature::getName() { return NAME; }
 
                 int SecureTunnelingFeature::start()
                 {

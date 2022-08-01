@@ -29,6 +29,7 @@ namespace Aws
                 class PubSubFeature : public Feature
                 {
                   public:
+                    static constexpr char NAME[] = "Pub Sub Sample";
                     static constexpr char DEFAULT_PUBLISH_FILE[] = "~/.aws-iot-device-client/pubsub/publish-file.txt";
                     static constexpr char DEFAULT_SUBSCRIBE_FILE[] =
                         "~/.aws-iot-device-client/pubsub/subscribe-file.txt";
@@ -60,6 +61,7 @@ namespace Aws
                      */
                     std::string thingName;
                     static constexpr char TAG[] = "samples/PubSubFeature.cpp";
+
                     /**
                      * \brief The resource manager used to manage CRT resources
                      */
