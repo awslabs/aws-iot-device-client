@@ -1,13 +1,12 @@
-FROM registry.redhat.io/ubi8/ubi
+FROM amazonlinux:latest
 
 ARG OPENSSL_VERSION=1.1.1n
 
 ###############################################################################
 # Install prereqs
 ###############################################################################
-RUN subscription-manager config --rhsm.manage_repos=0
-RUN yum --disableplugin=subscription-manager -y update \
-    && yum --disableplugin=subscription-manager -y install \
+RUN yum -y update \
+    && yum -y install \
     tar \
     bzip2 \
     git \
@@ -17,12 +16,13 @@ RUN yum --disableplugin=subscription-manager -y update \
     make \
     gcc \
     gcc-c++ \
+    softhsm \
     && yum clean all \
     && rm -rf /var/cache/yum
 
 ###############################################################################
 # Install cppcheck
-# cppcheck package is not available from Redhat Linux default repositories
+# cppcheck package is not available from amazonlinux default repositories
 # Install and enable epel repository.
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/add-repositories.html
 ###############################################################################
@@ -37,7 +37,7 @@ RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3
     && tar -zxvf cmake-3.10.0.tar.gz \
     && cd cmake-3.10.0 \
     && ./bootstrap \
-    && make \
+    && make -j 4 \
     && make install
 
 ###############################################################################
@@ -49,19 +49,7 @@ RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
     && cd openssl-${OPENSSL_VERSION} \
     && ./config \
     && make \
-    && make install
-
-###############################################################################
-# Install softhsm v2.3.0 from source
-###############################################################################
-
-WORKDIR /tmp
-RUN wget https://dist.opendnssec.org/source/softhsm-2.3.0.tar.gz \
-    && tar -xzf softhsm-2.3.0.tar.gz \
-    && cd softhsm-2.3.0 \
-    && ./configure --disable-gost \
-    && make \
-    && make install
+    && sudo make install
 
 ###############################################################################
 # Clone and build Google Test
@@ -88,9 +76,9 @@ RUN wget https://sourceware.org/pub/valgrind/valgrind-3.19.0.tar.bz2 \
     && make \
     && make install
 
-################################################################################
-# Install Aws Iot Device Sdk Cpp v2
-################################################################################
+# ###############################################################################
+# # Install Aws Iot Device Sdk Cpp v2
+# ###############################################################################
 WORKDIR /home/aws-iot-device-client
 RUN mkdir sdk-cpp-workspace \
     && cd sdk-cpp-workspace \

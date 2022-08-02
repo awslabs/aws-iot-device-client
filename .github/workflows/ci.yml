@@ -238,7 +238,7 @@ jobs:
           path: |
             ./setup/
 
-  build-shared-libs-ubuntu-18-x64:
+  build-ppc64:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
@@ -250,219 +250,53 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
           export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
           docker pull $DOCKER_IMAGE
-          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=shared_lib_mode
-      - name: Archive ubuntu-18-x64 Build Artifact
-        uses: actions/upload-artifact@v2
-        # Run for main branch only
-        if: github.ref == 'refs/heads/main'
-        with:
-          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.shared"
-          path: |
-            ./build/${{ env.PACKAGE_NAME }}
-      - name: Archive SDK shared libraries
-        uses: actions/upload-artifact@v2
-        # Run for main branch only
-        if: github.ref == 'refs/heads/main'
-        with:
-          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.shared"
-          path: |
-            ./build/shared_install_dir
-      - name: Archive setup files
-        uses: actions/upload-artifact@v2
-        # Run for main branch only
-        if: github.ref == 'refs/heads/main'
-        with:
-          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.shared"
-          path: |
-            ./setup/
-
-  build-shared-libs-amazonlinux:
-    runs-on: ubuntu-latest
-    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Build ${{ env.PACKAGE_NAME }}
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/amazonlinux:latest
-          docker pull $DOCKER_IMAGE
-          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=shared_lib_mode
-
-  build-shared-libs-rhel-ubi8:
-    runs-on: ubuntu-latest
-    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Build ${{ env.PACKAGE_NAME }}
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubi8:latest
-          docker pull $DOCKER_IMAGE
-          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=shared_lib_mode
-      - name: Archive rhel-ubi8 Build Artifact
-        uses: actions/upload-artifact@v2
-        # Run for main branch only
-        if: github.ref == 'refs/heads/main'
-        with:
-          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.shared"
-          path: |
-            ./build/${{ env.PACKAGE_NAME }}
-      - name: Archive SDK shared libraries
-        uses: actions/upload-artifact@v2
-        # Run for main branch only
-        if: github.ref == 'refs/heads/main'
-        with:
-          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.shared"
-          path: |
-            ./build/shared_install_dir
-      - name: Archive setup files
-        uses: actions/upload-artifact@v2
-        # Run for main branch only
-        if: github.ref == 'refs/heads/main'
-        with:
-          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.shared"
-          path: |
-            ./setup/
-
-  build-shared-libs-armhf32:
-      runs-on: ubuntu-latest
-      if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
-      steps:
-        - uses: actions/checkout@v2
-          with:
-            fetch-depth: 0
-        - name: Build ${{ env.PACKAGE_NAME }}
-          run: |
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-            export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
-            docker pull $DOCKER_IMAGE
-            docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=armhf_cross_mode_shared_libs
-        - name: Archive armhf32 Build Artifact
-          uses: actions/upload-artifact@v2
-          # Run for main branch only
-          if: github.ref == 'refs/heads/main'
-          with:
-            name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.shared"
-            path: |
-              ./build/${{ env.PACKAGE_NAME }}
-        - name: Archive SDK shared libraries
-          uses: actions/upload-artifact@v2
-          # Run for main branch only
-          if: github.ref == 'refs/heads/main'
-          with:
-            name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.shared"
-            path: |
-              ./build/shared_install_dir
-        - name: Archive setup files
-          uses: actions/upload-artifact@v2
-          # Run for main branch only
-          if: github.ref == 'refs/heads/main'
-          with:
-            name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.shared"
-            path: |
-              ./setup/
-
-  build-shared-libs-mips32:
-    runs-on: ubuntu-latest
-    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Build ${{ env.PACKAGE_NAME }}
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
-          docker pull $DOCKER_IMAGE
-          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=mips_cross_mode_shared_libs
-      - name: Archive mips32 Build Artifact
-        uses: actions/upload-artifact@v2
-        # Run for main branch only
-        if: github.ref == 'refs/heads/main'
-        with:
-          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.shared"
-          path: |
-            ./build/${{ env.PACKAGE_NAME }}
-      - name: Archive SDK shared libraries
-        uses: actions/upload-artifact@v2
-        # Run for main branch only
-        if: github.ref == 'refs/heads/main'
-        with:
-          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.shared"
-          path: |
-            ./build/shared_install_dir
-      - name: Archive setup files
-        uses: actions/upload-artifact@v2
-        # Run for main branch only
-        if: github.ref == 'refs/heads/main'
-        with:
-          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.shared"
-          path: |
-            ./setup/
-
-  build-shared-libs-aarch64:
-    runs-on: ubuntu-latest
-    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Build ${{ env.PACKAGE_NAME }}
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-          export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
-          docker pull $DOCKER_IMAGE
-          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=aarch64_cross_mode_shared_libs
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=ppc64_cross_mode
       - name: Archive aarch64 Build Artifact
         uses: actions/upload-artifact@v2
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.shared"
+          name: "DC.linux.ppc64.${{ env.PACKAGE_NAME }}.static"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
-      - name: Archive SDK shared libraries
-        uses: actions/upload-artifact@v2
-        # Run for main branch only
-        if: github.ref == 'refs/heads/main'
-        with:
-          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.shared"
-          path: |
-            ./build/shared_install_dir
       - name: Archive setup files
         uses: actions/upload-artifact@v2
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.shared"
+          name: "DC.linux.ppc64.${{ env.PACKAGE_NAME }}.static"
           path: |
             ./setup/
 
-  build-st-ubuntu-18-x64:
+  build-ppc64le:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Build ${{ env.PACKAGE_NAME }} ST Component Mode
+      - name: Build ${{ env.PACKAGE_NAME }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
           export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
           docker pull $DOCKER_IMAGE
-          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_component_mode
-      - name: Archive ST Component Mode Build Artifact
+          docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=ppc64le_cross_mode
+      - name: Archive aarch64 Build Artifact
         uses: actions/upload-artifact@v2
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "ST.ubuntu.x64.${{ env.PACKAGE_NAME }}"
+          name: "DC.linux.ppc64le.${{ env.PACKAGE_NAME }}.static"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
+      - name: Archive setup files
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.linux.ppc64le.${{ env.PACKAGE_NAME }}.static"
+          path: |
+            ./setup/
 
   build-st-ubuntu-18-aarch64:
     runs-on: ubuntu-latest
@@ -507,3 +341,87 @@ jobs:
           name: "ST.linux.armhf.${{ env.PACKAGE_NAME }}"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
+
+  build-docker-images-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build first
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: false
+          file: .github/docker-images/multi-stage-builds/ubuntu/Dockerfile
+          target: builder
+          platform: linux/amd64,linux/arm64,linux/arm/v7
+      - name: Build second
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: false
+          file: .github/docker-images/multi-stage-builds/ubuntu/Dockerfile
+          target: deploy
+          platform: linux/amd64,linux/arm64,linux/arm/v7
+
+  build-docker-images-amazonlinux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build first
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: false
+          file: .github/docker-images/multi-stage-builds/amazonlinux/Dockerfile
+          target: builder
+          platform: linux/amd64,linux/arm64,linux/arm/v7
+      - name: Build second
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: false
+          file: .github/docker-images/multi-stage-builds/amazonlinux/Dockerfile
+          target: deploy
+          platform: linux/amd64,linux/arm64,linux/arm/v7
+
+  build-docker-images-ubi8:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build first
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: false
+          file: .github/docker-images/multi-stage-builds/ubi8/Dockerfile
+          target: builder
+          platform: linux/amd64,linux/arm64,linux/arm/v7
+      - name: Build second
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: false
+          file: .github/docker-images/multi-stage-builds/ubi8/Dockerfile
+          target: deploy
+          platform: linux/amd64,linux/arm64,linux/arm/v7

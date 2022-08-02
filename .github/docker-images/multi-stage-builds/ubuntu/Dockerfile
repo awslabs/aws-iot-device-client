@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:18.04 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -82,6 +82,16 @@ RUN mkdir sdk-cpp-workspace \
     && cmake -DCMAKE_INSTALL_PREFIX="/usr" -DUSE_OPENSSL=ON -DBUILD_DEPS=ON ../aws-iot-device-sdk-cpp-v2 \
     && cmake --build . --target install
 
-ADD entry-script.sh /home/entry-script
-RUN chmod a+x /home/entry-script
-ENTRYPOINT ["/home/entry-script"]
+###############################################################################
+# Copy and build device client
+###############################################################################
+COPY . /src/aws-iot-device-client
+RUN mkdir -p /src/aws-iot-device-client/build \
+    && cd /src/aws-iot-device-client/build \
+    && cmake .. \
+    && cmake --build . --target aws-iot-device-client
+
+FROM ubuntu:18.04 AS deploy
+
+COPY --from=builder /src/aws-iot-device-client/build/aws-iot-device-client ./aws-iot-device-client
+CMD ["./aws-iot-device-client"]
