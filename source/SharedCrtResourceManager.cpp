@@ -363,6 +363,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     }
 
     promise<int> connectionCompletedPromise;
+    connectionClosedPromise = std::promise<void>();
 
     /*
      * This will execute when an mqtt connect has completed or failed.
