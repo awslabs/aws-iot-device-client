@@ -56,11 +56,6 @@ namespace Aws
                     virtual int Connect();
 
                     /**
-                     * \brief Close the local TCP socket
-                     */
-                    virtual int Close();
-
-                    /**
                      * \brief Send the given payload to the TCP socket
                      *
                      * @param data the payload to send

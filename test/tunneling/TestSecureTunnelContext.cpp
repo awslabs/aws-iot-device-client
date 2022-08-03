@@ -60,7 +60,6 @@ class MockTcpForward : public TcpForward
   public:
     MockTcpForward() : TcpForward() {}
     MOCK_METHOD(int, Connect, (), (override));
-    MOCK_METHOD(int, Close, (), (override));
     MOCK_METHOD(int, SendData, (const Crt::ByteCursor &data), (override));
 };
 
