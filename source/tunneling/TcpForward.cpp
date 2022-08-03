@@ -37,9 +37,9 @@ namespace Aws
                     if (mConnected)
                     {
                         aws_socket_close(&mSocket);
+                        aws_socket_clean_up(&mSocket);
+                        aws_byte_buf_clean_up(&mSendBuffer);
                     }
-                    aws_socket_clean_up(&mSocket);
-                    aws_byte_buf_clean_up(&mSendBuffer);
                 }
 
                 int TcpForward::Connect()
