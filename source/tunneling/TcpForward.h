@@ -48,7 +48,7 @@ namespace Aws
                     /**
                      * \brief Destructor
                      */
-                    ~TcpForward();
+                    virtual ~TcpForward();
 
                     /**
                      * \brief Connect to the local TCP socket
