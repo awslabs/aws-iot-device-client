@@ -4,6 +4,7 @@
 #ifndef DEVICE_CLIENT_SECURETUNNELINGCONTEXT_H
 #define DEVICE_CLIENT_SECURETUNNELINGCONTEXT_H
 
+#include "SecureTunnelWrapper.h"
 #include "TcpForward.h"
 #include <aws/crt/Types.h>
 #include <aws/iotsecuretunneling/SecureTunnel.h>
@@ -43,7 +44,7 @@ namespace Aws
                         const Aws::Crt::Optional<std::string> &rootCa,
                         const std::string &accessToken,
                         const std::string &endpoint,
-                        uint16_t port,
+                        const int port,
                         const OnConnectionShutdownFn &onConnectionShutdown);
 
                     /**
@@ -77,7 +78,36 @@ namespace Aws
                      */
                     virtual void StopSecureTunnel();
 
+                  protected:
+                    /**
+                     * Visible for testing
+                     */
+
+                    /**
+                     * \brief Callback when data is received from the local TCP port
+                     *
+                     * @param data data received from the local TCP port
+                     */
+                    void OnTcpForwardDataReceive(const Crt::ByteBuf &data);
+
                   private:
+                    /**
+                     * \brief Create a Secure Tunnel instance
+                     */
+                    virtual std::shared_ptr<SecureTunnelWrapper> CreateSecureTunnel(
+                        Aws::Iotsecuretunneling::OnConnectionComplete onConnectionComplete,
+                        Aws::Iotsecuretunneling::OnConnectionShutdown onConnectionShutdown,
+                        Aws::Iotsecuretunneling::OnSendDataComplete onSendDataComplete,
+                        Aws::Iotsecuretunneling::OnDataReceive onDataReceive,
+                        Aws::Iotsecuretunneling::OnStreamStart onStreamStart,
+                        Aws::Iotsecuretunneling::OnStreamReset onStreamReset,
+                        Aws::Iotsecuretunneling::OnSessionReset onSessionReset);
+
+                    /**
+                     * \brief Create a Tcp Forward instance
+                     */
+                    virtual std::shared_ptr<TcpForward> CreateTcpForward();
+
                     /**
                      * \brief Connect to local TCP forward
                      */
@@ -86,7 +116,7 @@ namespace Aws
                     /**
                      * \brief Disconnect from local TCP forward
                      */
-                    void DisconnectFromTcpForward();
+                    virtual void DisconnectFromTcpForward();
 
                     //
                     // Secure tunneling protocol client callbacks
@@ -130,18 +160,6 @@ namespace Aws
                      * \brief Callback when secure tunnel session_reset is received
                      */
                     void OnSessionReset();
-
-                    //
-                    // Tcp forward client callback
-                    //
-
-                    /**
-                     * \brief Callback when data is received from the local TCP port
-                     *
-                     * @param data data received from the local TCP port
-                     */
-                    void OnTcpForwardDataReceive(const Crt::ByteBuf &data);
-
                     //
                     // Member variables
                     //
@@ -182,14 +200,14 @@ namespace Aws
                     OnConnectionShutdownFn mOnConnectionShutdown;
 
                     /**
-                     * \brief An AWS IoT SDK Secure Tunnel object. It manages the secure tunnel.
+                     * \brief Wrapper around an AWS IoT SDK Secure Tunnel object. It manages the secure tunnel.
                      */
-                    std::unique_ptr<Aws::Iotsecuretunneling::SecureTunnel> mSecureTunnel;
+                    std::shared_ptr<SecureTunnelWrapper> mSecureTunnel;
 
                     /**
                      * \brief Manages local TCP port forward
                      */
-                    std::unique_ptr<TcpForward> mTcpForward;
+                    std::shared_ptr<TcpForward> mTcpForward;
 
                     /**
                      * \brief Save the MQTT new tunnel notification that results in the creation of this tunnel context.

@@ -89,7 +89,7 @@ namespace Aws
 
                 virtual aws_allocator *getAllocator();
 
-                Aws::Crt::Io::ClientBootstrap *getClientBootstrap();
+                virtual Aws::Crt::Io::ClientBootstrap *getClientBootstrap();
 
                 void disconnect();
 

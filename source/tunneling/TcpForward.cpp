@@ -34,10 +34,13 @@ namespace Aws
 
                 TcpForward::~TcpForward()
                 {
-                    Close();
+                    if (mConnected)
+                    {
+                        Close();
 
-                    aws_socket_clean_up(&mSocket);
-                    aws_byte_buf_clean_up(&mSendBuffer);
+                        aws_socket_clean_up(&mSocket);
+                        aws_byte_buf_clean_up(&mSendBuffer);
+                    }
                 }
 
                 int TcpForward::Connect()
