@@ -18,7 +18,7 @@ namespace Aws
                 {
                   public:
                     SecureTunnelWrapper() = default;
-                    ~SecureTunnelWrapper() = default;
+                    virtual ~SecureTunnelWrapper() = default;
                     SecureTunnelWrapper(
                         Aws::Crt::Allocator *allocator,
                         Aws::Crt::Io::ClientBootstrap *clientBootstrap,
