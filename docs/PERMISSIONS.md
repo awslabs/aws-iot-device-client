@@ -14,27 +14,31 @@ The AWS IoT Device Client requires specific permissions on files and directory s
 
 #### Recommended and Required permissions on files
 File          | Chmod Permissions | Required |
-------------- | ------------- | -------------
-Private Keys  | 600 | **Yes**
-Public Certificates | 644 | **Yes**
-Root Certificate Authority | 644 | **Yes**
-CSR File  | 600 | **Yes**
-Log File  | 600 | **Yes**
-Job Handler | 700 | **Yes**
-Config File | 644 | **Recommended**
-Pub/Sub Files | 600 | **yes**
-Sensor Pubilsh Pathname Socket | 660 | **Yes**
+------------- |-------------------| -------------
+Private Keys  | 600               | **Yes**
+Public Certificates | 644               | **Yes**
+Root Certificate Authority | 644               | **Yes**
+CSR File  | 600               | **Yes**
+Log File  | 600               | **Yes**
+Job Handler | 700               | **Yes**
+Config File | 640               | **Recommended**
+HTTP Proxy Config File | 600           | **Recommended**
+Pub/Sub Files | 600               | **Yes**
+Sensor Pubilsh Pathname Socket | 660               | **Yes**
+PKCS11 Library File | 640               | **Yes**
 
 #### Recommended and Required permissions on directories storing respective files
 Directory     | Chmod Permissions | Required |
-------------- | ------------- | -------------
-Directory Storing Private Key | 700 | **Yes**
-Directory Storing Public Certificates   | 700 | **Yes**
-Directory Storing Root Certificate Authority | 700 | **Yes**
-Directory Storing CSR File  | 700 | **Yes**
-Directory Storing Log File  | 745 | **Yes**
-Directory Storing Config Files | 745 | **Recommended**
-Directory Storing PubSub File  | 745 | **Yes**
+------------- |-------------------| -------------
+Directory Storing Private Key | 700               | **Yes**
+Directory Storing Public Certificates   | 700               | **Yes**
+Directory Storing Root Certificate Authority | 700               | **Yes**
+Directory Storing CSR File  | 700               | **Yes**
+Directory Storing Log File  | 745               | **Yes**
+Directory Storing Config Files | 745               | **Recommended**
+Directory Storing PubSub File  | 745               | **Yes**
+Directory Storing Sensor Publish Pathname Socket | 700               | **Yes**
+Directory Storing PKCS11 Library File  | 700               | **Yes**
 
 *Note: It is worth noting here that files are directories storing these files created by AWS IoT Device Client will have the above mentioned permissions set by default*
 

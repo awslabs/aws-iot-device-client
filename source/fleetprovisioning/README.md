@@ -2,6 +2,7 @@
  **Notice:** Running the AWS IoT Device Client will incur usage of AWS IoT services, and is likely to incur charges on your AWS account. Please refer the pricing pages for [AWS IoT Core](https://aws.amazon.com/iot-core/pricing/), [AWS IoT Device Management](https://aws.amazon.com/iot-device-management/pricing/), and [AWS IoT Device Defender](https://aws.amazon.com/iot-device-defender/pricing/) for more details.
 
   * [Fleet Provisioning Feature](#fleet-provisioning-feature)
+    + [Fleet Provisioning with Secured Element feature](#fleet-provisioning-with-secured-element-feature)
     + [Resources required for Fleet Provisioning feature](#resources-required-for-fleet-provisioning-feature)
     + [Sample Claim Certificate Policy](#sample-claim-certificate-policy)
         * [Sample Policy](#sample-policy)
@@ -32,6 +33,16 @@ More details about AWS IoT Fleet Provisioning by claim can be found [here](https
 *Note: Please make sure that the Claim certificate, private key, CSR file and/or device private key stored on device side have respective permissions applied to it as mentioned above in the "File and Directory Permissions" section of the readme.*
 
 Refer to the [CreateKeysAndCertificate](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-keys-cert) and [CreateCertificateFromCsr](https://docs.aws.amazon.com/iot/latest/developerguide/fleet-provision-api.html#create-cert-csr) APIs for more details.
+
+### Fleet Provisioning with Secured Element feature 
+
+The Device Client uses combination of certificate and private key registered with AWS IoT for MQTT connectivity with AWS IoT core. It provides support for private key stored in secure element. 
+
+With Secure Element feature enabled, Fleet Provisioning can only be done using certificate signing request (CSR). This is because the client **does not** provide support for importing private key into security module since it is not considered a security best practice.
+
+More details about the Secure Element feature can be found here: [Secure Element Feature README](../secure-element/README.md)
+
+*Note: In the above-mentioned scenario, the runtime config file will store empty file path for **key** if no file path is provided.*
 
 ### Resources required for Fleet Provisioning feature
 

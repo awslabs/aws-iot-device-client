@@ -17,7 +17,7 @@ printf ${PMPT} "Do you want to interactively generate a configuration file for t
 read -r BUILD_CONFIG
 
 if [ $(id -u) = 0 ]; then
-  OUTPUT_DIR=/root/.aws-iot-device-client/
+  OUTPUT_DIR=/etc/.aws-iot-device-client/
 else
   OUTPUT_DIR=/home/$(whoami)/.aws-iot-device-client/
 fi
@@ -187,7 +187,7 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       read -r PUB_TOPIC
       printf ${PMPT} "Specify the path of a file for the feature to publish (if no path is provided, will default to ${PUB_FILE}):"
       read -r PUB_FILE_TMP
-      if [ "$PUB_FILE_TMP"]; then
+      if [ "$PUB_FILE_TMP" ]; then
         PUB_FILE=$PUB_FILE_TMP
         PUB_FILE_PROVIDED="y"
       fi
@@ -195,7 +195,7 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       read -r SUB_TOPIC
       printf ${PMPT} "Specify the path of a file for the feature to write to (if no path is provided, will default to ${SUB_FILE}):"
       read -r SUB_FILE_TMP
-      if [ "$SUB_FILE_TMP"]; then
+      if [ "$SUB_FILE_TMP" ]; then
         SUB_FILE=$SUB_FILE_TMP
         SUB_FILE_PROVIDED="y"
       fi
@@ -282,17 +282,22 @@ if [ "$BUILD_CONFIG" = "y" ]; then
       }
     }"
 
-    printf ${PMPT} "Does the following configuration appear correct? If yes, configuration will be written to ${CONF_OUTPUT_PATH}: y/n"
-    printf ${GREEN} "${CONFIG_OUTPUT}"
-    read -r GOOD_TO_GO
-    if [ "$GOOD_TO_GO" = "y" ]; then
-      CONFIGURED=1
-      mkdir -p "$OUTPUT_DIR"
-      echo "$CONFIG_OUTPUT" | tee "$CONF_OUTPUT_PATH" >/dev/null
-      chmod 745 "$OUTPUT_DIR"
-      chmod 644 "$CONF_OUTPUT_PATH"
-      printf ${GREEN} "Configuration has been successfully written to ${CONF_OUTPUT_PATH}"
-    fi
+    while [ "$CONFIRMED" != 1 ]; do
+      printf ${GREEN} "${CONFIG_OUTPUT}"
+      printf ${PMPT} "Does the following configuration appear correct? If yes, configuration will be written to ${CONF_OUTPUT_PATH}: y/n"
+      read -r GOOD_TO_GO
+      if [ "$GOOD_TO_GO" = "y" ] || [ "$GOOD_TO_GO" = "n" ]; then
+        CONFIRMED=1
+      fi
+      if [ "$GOOD_TO_GO" = "y" ]; then
+        CONFIGURED=1
+        mkdir -p "$OUTPUT_DIR"
+        echo "$CONFIG_OUTPUT" | tee "$CONF_OUTPUT_PATH" >/dev/null
+        chmod 745 "$OUTPUT_DIR"
+        chmod 640 "$CONF_OUTPUT_PATH"
+        printf ${GREEN} "Configuration has been successfully written to ${CONF_OUTPUT_PATH}"
+      fi
+    done
     tput sgr0
   done
 fi
@@ -369,6 +374,7 @@ if [ "$INSTALL_SERVICE" = "y" ]; then
   printf ${PMPT} "Installing AWS IoT Device Client..."
   if command -v "systemctl" &>/dev/null; then
     systemctl stop aws-iot-device-client.service || true
+    sed -i "s#/etc/.aws-iot-device-client/aws-iot-device-client.conf#$CONF_OUTPUT_PATH#g" $SERVICE_FILE
     cp "$SERVICE_FILE" /etc/systemd/system/aws-iot-device-client.service
     if [ "$SERVICE_DEBUG" = "y" ]; then
       echo "$DEBUG_SCRIPT" | tee /sbin/aws-iot-device-client >/dev/null

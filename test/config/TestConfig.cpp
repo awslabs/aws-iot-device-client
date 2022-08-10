@@ -21,6 +21,9 @@ using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Util;
 
 const string filePath = "/tmp/aws-iot-device-client-test-file";
+const string filePathOpenPerms = "/tmp/aws-iot-device-client-perm-test-file";
+const string nonStandardDir = "/tmp/aws-iot-device-client-test/";
+const string rootCaPath = nonStandardDir + "AmazonRootCA1.pem";
 const string invalidFilePath = "/tmp/invalid-file-path";
 const string addrPathValid = "/tmp/sensors";
 const string addrPathInvalid = "/tmp/sensors-invalid-perms";
@@ -29,6 +32,7 @@ class ConfigTestFixture : public ::testing::Test
 {
   public:
     ConfigTestFixture() = default;
+    string outputPath;
 
     void SetUp() override
     {
@@ -37,20 +41,47 @@ class ConfigTestFixture : public ::testing::Test
         ofstream file(filePath, std::fstream::app);
         file << "test message" << endl;
 
+        ofstream openPermFile(filePathOpenPerms, std::fstream::app);
+        openPermFile << "test message" << endl;
+        chmod(filePathOpenPerms.c_str(), 0777);
+
+        FileUtils::CreateDirectoryWithPermissions(nonStandardDir.c_str(), 0700);
+        ofstream rootCa(rootCaPath, std::fstream::app);
+        chmod(rootCaPath.c_str(), 0644);
+
         // Ensure invalid-file does not exist
         std::remove(invalidFilePath.c_str());
-        mode_t validPerms = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
+        mode_t validPerms = S_IRUSR | S_IWUSR | S_IXUSR;
         FileUtils::CreateDirectoryWithPermissions(addrPathValid.c_str(), validPerms);
 
         mode_t invalidPerms = validPerms | S_IRWXO;
         FileUtils::CreateDirectoryWithPermissions(addrPathInvalid.c_str(), invalidPerms);
+
+        ostringstream outputPathStream;
+        outputPathStream << Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR << Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
+
+        outputPath = FileUtils::ExtractExpandedPath(outputPathStream.str().c_str());
     }
 
     void TearDown() override
     {
+        std::remove(rootCaPath.c_str());
+        std::remove(nonStandardDir.c_str());
+        std::remove(filePathOpenPerms.c_str());
         std::remove(filePath.c_str());
         std::remove(addrPathValid.c_str());
         std::remove(addrPathInvalid.c_str());
+    }
+
+    static void AssertDefaultFeaturesEnabled(const PlainConfig &config)
+    {
+        ASSERT_TRUE(config.jobs.enabled);
+        ASSERT_TRUE(config.tunneling.enabled);
+        ASSERT_FALSE(config.fleetProvisioning.enabled);
+        ASSERT_FALSE(config.deviceDefender.enabled);
+        ASSERT_FALSE(config.sampleShadow.enabled);
+        ASSERT_FALSE(config.sensorPublish.enabled);
+        ASSERT_FALSE(config.pubSub.enabled);
     }
 };
 
@@ -75,7 +106,380 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "logging": {
+        "level": "debug",
+        "type": "file",
+        "file": "./aws-iot-device-client.log"
+    },
+    "jobs": {
+        "enabled": true
+    },
+    "tunneling": {
+        "enabled": true
+    },
+    "device-defender": {
+        "enabled": true,
+        "interval": 300
+    },
+    "fleet-provisioning": {
+        "enabled": true,
+        "template-name": "template-name",
+        "csr-file": "/tmp/aws-iot-device-client-test-file",
+        "device-key": "/tmp/aws-iot-device-client-test-file",
+        "template-parameters": "{\"SerialNumber\": \"Device-SN\"}"
+    },
+    "samples": {
+		"pub-sub": {
+			"enabled": true,
+			"publish-topic": "publish_topic",
+			"subscribe-topic": "subscribe_topic"
+		}
+	},
+    "config-shadow": {
+        "enabled": true
+      },
+    "sample-shadow": {
+        "enabled": true,
+        "shadow-name": "shadow-name",
+        "shadow-input-file": "",
+        "shadow-output-file": ""
+      },
+    "secure-element": {
+        "enabled": true,
+        "pkcs11-lib": "/tmp/aws-iot-device-client-test-file",
+        "secure-element-pin": "0000",
+        "secure-element-key-label": "key-label",
+        "secure-element-slot-id": 1111,
+        "secure-element-token-label": "token-label"
+      }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_FALSE(config.rootCa.has_value());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    ASSERT_STREQ("file", config.logConfig.deviceClientLogtype.c_str());
+    ASSERT_STREQ("./aws-iot-device-client.log", config.logConfig.deviceClientLogFile.c_str());
+    ASSERT_EQ(3, config.logConfig.deviceClientlogLevel); // Expect DEBUG log level, which is 3
+    ASSERT_TRUE(config.jobs.enabled);
+    ASSERT_TRUE(config.tunneling.enabled);
+    ASSERT_TRUE(config.deviceDefender.enabled);
+    ASSERT_TRUE(config.fleetProvisioning.enabled);
+    ASSERT_EQ(300, config.deviceDefender.interval);
+    ASSERT_STREQ("template-name", config.fleetProvisioning.templateName->c_str());
+    ASSERT_STREQ("{\"SerialNumber\": \"Device-SN\"}", config.fleetProvisioning.templateParameters->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.fleetProvisioning.csrFile->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.fleetProvisioning.deviceKey->c_str());
+    ASSERT_TRUE(config.configShadow.enabled);
+    ASSERT_TRUE(config.sampleShadow.enabled);
+    ASSERT_STREQ("shadow-name", config.sampleShadow.shadowName->c_str());
+    ASSERT_FALSE(config.sampleShadow.shadowInputFile.has_value());
+    ASSERT_FALSE(config.sampleShadow.shadowOutputFile.has_value());
+    ASSERT_TRUE(config.pubSub.enabled);
+    ASSERT_STREQ("publish_topic", config.pubSub.publishTopic->c_str());
+    ASSERT_STREQ("subscribe_topic", config.pubSub.subscribeTopic->c_str());
+    ASSERT_TRUE(config.secureElement.enabled);
+    ASSERT_STREQ(filePath.c_str(), config.secureElement.pkcs11Lib->c_str());
+    ASSERT_STREQ("0000", config.secureElement.secureElementPin->c_str());
+    ASSERT_STREQ("key-label", config.secureElement.secureElementKeyLabel->c_str());
+    ASSERT_TRUE(config.secureElement.secureElementSlotId.has_value());
+    ASSERT_EQ(1111, config.secureElement.secureElementSlotId.value());
+    ASSERT_STREQ("token-label", config.secureElement.secureElementTokenLabel->c_str());
+
+    JsonObject tunneling;
+    config.tunneling.SerializeToObject(tunneling);
+    ASSERT_TRUE(tunneling.View().GetBool(config.tunneling.JSON_KEY_ENABLED));
+
+    JsonObject jobs;
+    config.jobs.SerializeToObject(jobs);
+    ASSERT_TRUE(jobs.View().GetBool(config.jobs.JSON_KEY_ENABLED));
+
+    JsonObject deviceDefender;
+    config.deviceDefender.SerializeToObject(deviceDefender);
+    ASSERT_TRUE(deviceDefender.View().GetBool(config.deviceDefender.JSON_KEY_ENABLED));
+    ASSERT_EQ(300, deviceDefender.View().GetInteger(config.deviceDefender.JSON_KEY_INTERVAL));
+
+    JsonObject pubsub;
+    config.pubSub.SerializeToObject(pubsub);
+    ASSERT_TRUE(pubsub.View().GetBool(config.deviceDefender.JSON_KEY_ENABLED));
+    ASSERT_STREQ("publish_topic", pubsub.View().GetString(config.pubSub.JSON_PUB_SUB_PUBLISH_TOPIC).c_str());
+    ASSERT_STREQ("subscribe_topic", pubsub.View().GetString(config.pubSub.JSON_PUB_SUB_SUBSCRIBE_TOPIC).c_str());
+
+    JsonObject sampleShadow;
+    config.sampleShadow.SerializeToObject(sampleShadow);
+    ASSERT_STREQ("shadow-name", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_NAME).c_str());
+    ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_INPUT_FILE).c_str());
+    ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
+
+    JsonObject secureElement;
+    config.secureElement.SerializeToObject(secureElement);
+    ASSERT_TRUE(secureElement.View().GetBool(config.secureElement.JSON_ENABLE_SECURE_ELEMENT));
+    ASSERT_STREQ(filePath.c_str(), secureElement.View().GetString(config.secureElement.JSON_PKCS11_LIB).c_str());
+    ASSERT_STREQ("0000", secureElement.View().GetString(config.secureElement.JSON_SECURE_ELEMENT_PIN).c_str());
+    ASSERT_STREQ(
+        "key-label", secureElement.View().GetString(config.secureElement.JSON_SECURE_ELEMENT_KEY_LABEL).c_str());
+    ASSERT_EQ(1111, secureElement.View().GetInteger(config.secureElement.JSON_SECURE_ELEMENT_SLOT_ID));
+    ASSERT_STREQ(
+        "token-label", secureElement.View().GetString(config.secureElement.JSON_SECURE_ELEMENT_TOKEN_LABEL).c_str());
+}
+
+TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_FALSE(config.rootCa.has_value());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    AssertDefaultFeaturesEnabled(config);
+}
+
+TEST_F(ConfigTestFixture, ExtractExpandedPathFailureConfig)
+{
+    constexpr char badCertCharacter[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file|",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value"
+})";
+    constexpr char badKeyCharacter[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file|",
+    "thing-name": "thing-name value"
+})";
+    PlainConfig config;
+
+    JsonObject jsonObjectBadCert(badCertCharacter);
+    JsonView jsonViewBadCert = jsonObjectBadCert.View();
+
+    JsonObject jsonObjectBadKey(badKeyCharacter);
+    JsonView jsonViewBadKey = jsonObjectBadKey.View();
+
+    ASSERT_THROW(config.LoadFromJson(jsonViewBadCert), wordexp_fail_error);
+    ASSERT_THROW(config.LoadFromJson(jsonViewBadKey), wordexp_fail_error);
+}
+
+TEST_F(ConfigTestFixture, HappyCaseMinimumCli)
+{
+    CliArgs cliArgs = makeMinimumCliArgs();
+
+    PlainConfig config;
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    AssertDefaultFeaturesEnabled(config);
+}
+
+TEST_F(ConfigTestFixture, ExtractExpandedPathFailureCLI)
+{
+    CliArgs badCertCharacter = CliArgs{
+        {PlainConfig::CLI_ENDPOINT, "endpoint value"},
+        {PlainConfig::CLI_CERT, filePath + "|"},
+        {PlainConfig::CLI_KEY, filePath},
+        {PlainConfig::CLI_THING_NAME, "thing-name value"},
+    };
+
+    CliArgs badKeyCharacter = CliArgs{
+        {PlainConfig::CLI_ENDPOINT, "endpoint value"},
+        {PlainConfig::CLI_CERT, filePath},
+        {PlainConfig::CLI_KEY, filePath + "|"},
+        {PlainConfig::CLI_THING_NAME, "thing-name value"},
+    };
+
+    PlainConfig config;
+
+    ASSERT_THROW(config.LoadFromCliArgs(badCertCharacter), wordexp_fail_error);
+    ASSERT_THROW(config.LoadFromCliArgs(badKeyCharacter), wordexp_fail_error);
+}
+
+/**
+ * Explicitly pass a valid root-ca path via JSON
+ * Expect Config.rootCa to equal root-ca path
+ */
+TEST_F(ConfigTestFixture, HappyCaseExplicitRootCaConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_STREQ(rootCaPath.c_str(), config.rootCa->c_str());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    AssertDefaultFeaturesEnabled(config);
+}
+
+/**
+ * Explicitly pass a valid root-ca path via CLI
+ * Expect Config.rootCa to equal root-ca path
+ */
+TEST_F(ConfigTestFixture, HappyCaseExplicitRootCaCli)
+{
+    CliArgs cliArgs = CliArgs{
+        {PlainConfig::CLI_ENDPOINT, "endpoint value"},
+        {PlainConfig::CLI_ROOT_CA, rootCaPath},
+        {PlainConfig::CLI_CERT, filePath},
+        {PlainConfig::CLI_KEY, filePath},
+        {PlainConfig::CLI_THING_NAME, "thing-name value"},
+    };
+
+    PlainConfig config;
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_STREQ(rootCaPath.c_str(), config.rootCa->c_str());
+    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    AssertDefaultFeaturesEnabled(config);
+}
+
+/**
+ * Explicitly pass root-ca path via JSON with invalid permissions on parent directory
+ * Expect validation to fail
+ */
+TEST_F(ConfigTestFixture, ExplicitRootCaBadParentPermissionsConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    chmod(nonStandardDir.c_str(), 0777);
+    ASSERT_FALSE(config.Validate());
+}
+
+/**
+ * Explicitly pass root-ca path via CLI with invalid permissions on parent directory
+ * Expect validation to fail
+ */
+TEST_F(ConfigTestFixture, ExplicitRootCaBadParentPermissionsCli)
+{
+    CliArgs cliArgs = CliArgs{
+        {PlainConfig::CLI_ENDPOINT, "endpoint value"},
+        {PlainConfig::CLI_ROOT_CA, rootCaPath},
+        {PlainConfig::CLI_CERT, filePath},
+        {PlainConfig::CLI_KEY, filePath},
+        {PlainConfig::CLI_THING_NAME, "thing-name value"},
+    };
+
+    PlainConfig config;
+    config.LoadFromCliArgs(cliArgs);
+
+    chmod(nonStandardDir.c_str(), 0777);
+
+    ASSERT_FALSE(config.Validate());
+}
+
+/**
+ * Explicitly pass root-ca path via JSON with invalid permissions on root-ca file
+ * Expect validation to fail
+ */
+TEST_F(ConfigTestFixture, ExplicitRootCaBadPermissionsConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    chmod(rootCaPath.c_str(), 0777);
+
+    ASSERT_FALSE(config.Validate());
+}
+
+/**
+ * Explicitly pass root-ca path via CLI with invalid permissions on root-ca file
+ * Expect validation to fail
+ */
+TEST_F(ConfigTestFixture, ExplicitRootCaBadPermissionsCli)
+{
+    CliArgs cliArgs = CliArgs{
+        {PlainConfig::CLI_ENDPOINT, "endpoint value"},
+        {PlainConfig::CLI_ROOT_CA, rootCaPath},
+        {PlainConfig::CLI_CERT, filePath},
+        {PlainConfig::CLI_KEY, filePath},
+        {PlainConfig::CLI_THING_NAME, "thing-name value"},
+    };
+
+    PlainConfig config;
+    config.LoadFromCliArgs(cliArgs);
+
+    chmod(rootCaPath.c_str(), 0777);
+
+    ASSERT_FALSE(config.Validate());
+}
+
+/**
+ * Explicitly pass root-ca path to non-existent file via JSON
+ * Expect Config to ignore and not set value
+ */
+TEST_F(ConfigTestFixture, AllFeaturesEnabledInvalidRootCa)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/invalid-file-path",
     "thing-name": "thing-name value",
     "logging": {
         "level": "debug",
@@ -126,7 +530,7 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
-    ASSERT_STREQ(filePath.c_str(), config.rootCa->c_str());
+    ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     ASSERT_STREQ("file", config.logConfig.deviceClientLogtype.c_str());
     ASSERT_STREQ("./aws-iot-device-client.log", config.logConfig.deviceClientLogFile.c_str());
@@ -175,13 +579,18 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
 }
 
-TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
+/**
+ * Explicitly pass empty root-ca path via JSON
+ * Expect Config to ignore and not set value
+ */
+TEST_F(ConfigTestFixture, emptyRootCaPathConfig)
 {
     constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "",
     "thing-name": "thing-name value"
 })";
     JsonObject jsonObject(jsonString);
@@ -194,16 +603,23 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_TRUE(config.jobs.enabled);
-    ASSERT_TRUE(config.tunneling.enabled);
-    ASSERT_TRUE(config.deviceDefender.enabled);
-    ASSERT_FALSE(config.fleetProvisioning.enabled);
+    AssertDefaultFeaturesEnabled(config);
 }
 
-TEST_F(ConfigTestFixture, HappyCaseMinimumCli)
+/**
+ * Explicitly pass invalid root-ca path via CLI
+ * Expect Config to ignore and not set value
+ */
+TEST_F(ConfigTestFixture, InvalidRootCaPathConfigCli)
 {
-    CliArgs cliArgs = makeMinimumCliArgs();
+    CliArgs cliArgs;
+    cliArgs[PlainConfig::CLI_ENDPOINT] = "endpoint value";
+    cliArgs[PlainConfig::CLI_CERT] = filePath;
+    cliArgs[PlainConfig::CLI_KEY] = filePath;
+    cliArgs[PlainConfig::CLI_THING_NAME] = "thing-name value";
+    cliArgs[PlainConfig::CLI_ROOT_CA] = invalidFilePath;
 
     PlainConfig config;
     config.LoadFromCliArgs(cliArgs);
@@ -212,13 +628,15 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumCli)
     ASSERT_STREQ("endpoint value", config.endpoint->c_str());
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
+    ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_TRUE(config.jobs.enabled);
-    ASSERT_TRUE(config.tunneling.enabled);
-    ASSERT_TRUE(config.deviceDefender.enabled);
-    ASSERT_FALSE(config.fleetProvisioning.enabled);
+    AssertDefaultFeaturesEnabled(config);
 }
 
+/**
+ * Explicitly pass invalid root-ca path via JSON
+ * Expect Config to ignore and not set value
+ */
 TEST_F(ConfigTestFixture, InvalidRootCaPathConfig)
 {
     constexpr char jsonString[] = R"(
@@ -241,34 +659,7 @@ TEST_F(ConfigTestFixture, InvalidRootCaPathConfig)
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_FALSE(config.rootCa.has_value());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_TRUE(config.jobs.enabled);
-    ASSERT_TRUE(config.tunneling.enabled);
-    ASSERT_TRUE(config.deviceDefender.enabled);
-    ASSERT_FALSE(config.fleetProvisioning.enabled);
-}
-
-TEST_F(ConfigTestFixture, InvalidRootCaPathConfigCli)
-{
-    CliArgs cliArgs;
-    cliArgs[PlainConfig::CLI_ENDPOINT] = "endpoint value";
-    cliArgs[PlainConfig::CLI_CERT] = filePath;
-    cliArgs[PlainConfig::CLI_KEY] = filePath;
-    cliArgs[PlainConfig::CLI_THING_NAME] = "thing-name value";
-    cliArgs[PlainConfig::CLI_ROOT_CA] = invalidFilePath;
-
-    PlainConfig config;
-    config.LoadFromCliArgs(cliArgs);
-
-    ASSERT_TRUE(config.Validate());
-    ASSERT_STREQ("endpoint value", config.endpoint->c_str());
-    ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
-    ASSERT_STREQ(filePath.c_str(), config.key->c_str());
-    ASSERT_FALSE(config.rootCa.has_value());
-    ASSERT_STREQ("thing-name value", config.thingName->c_str());
-    ASSERT_TRUE(config.jobs.enabled);
-    ASSERT_TRUE(config.tunneling.enabled);
-    ASSERT_TRUE(config.deviceDefender.enabled);
-    ASSERT_FALSE(config.fleetProvisioning.enabled);
+    AssertDefaultFeaturesEnabled(config);
 }
 
 TEST_F(ConfigTestFixture, MissingSomeSettings)
@@ -301,8 +692,8 @@ TEST_F(ConfigTestFixture, SecureTunnelingMinimumConfig)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
@@ -325,8 +716,8 @@ TEST_F(ConfigTestFixture, SecureTunnelingCli)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
@@ -364,8 +755,8 @@ TEST_F(ConfigTestFixture, SecureTunnelingDisableSubscription)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "tunneling": {
         "enabled": true
@@ -516,8 +907,8 @@ TEST_F(ConfigTestFixture, FleetProvisioningMinimumConfig)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "fleet-provisioning": {
         "enabled": true,
@@ -541,8 +932,8 @@ TEST_F(ConfigTestFixture, MissingFleetProvisioningConfig)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value"
 })";
     JsonObject jsonObject(jsonString);
@@ -573,8 +964,8 @@ TEST_F(ConfigTestFixture, FleetProvisioningCli)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "fleet-provisioning": {
         "enabled": true,
@@ -612,8 +1003,8 @@ TEST_F(ConfigTestFixture, DeviceDefenderCli)
 {
 	"endpoint": "endpoint value",
 	"cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
 	"key": "/tmp/aws-iot-device-client-test-file",
-	"root-ca": "/tmp/aws-iot-device-client-test-file",
 	"thing-name": "thing-name value",
     "device-defender": {
         "enabled": true,
@@ -644,8 +1035,8 @@ TEST_F(ConfigTestFixture, PubSubSampleConfig)
 {
 	"endpoint": "endpoint value",
 	"cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
 	"key": "/tmp/aws-iot-device-client-test-file",
-	"root-ca": "/tmp/aws-iot-device-client-test-file",
 	"thing-name": "thing-name value",
 	"samples": {
 		"pub-sub": {
@@ -713,8 +1104,8 @@ TEST_F(ConfigTestFixture, SampleShadowCli)
 {
 	"endpoint": "endpoint value",
 	"cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
 	"key": "/tmp/aws-iot-device-client-test-file",
-	"root-ca": "/tmp/aws-iot-device-client-test-file",
 	"thing-name": "thing-name value",
     "sample-shadow": {
         "enabled": true,
@@ -750,8 +1141,8 @@ TEST_F(ConfigTestFixture, SensorPublishMinimumConfig)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -785,8 +1176,8 @@ TEST_F(ConfigTestFixture, SensorPublishMinimumConfigMultipleSensors)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -846,8 +1237,8 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigAddr)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -865,6 +1256,9 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigAddr)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Invalid permissions on addr.
     ASSERT_TRUE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
@@ -878,8 +1272,8 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopicEmpty)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -897,6 +1291,9 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopicEmpty)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Empty mqtt_topic.
     ASSERT_TRUE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
@@ -910,8 +1307,8 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopic)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -929,6 +1326,9 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopic)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Invalid mqtt_topic.
     ASSERT_TRUE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
@@ -942,8 +1342,8 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigEomDelimiter)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -961,6 +1361,9 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigEomDelimiter)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Invalid eom_delimiter.
     ASSERT_TRUE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
@@ -974,8 +1377,8 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigNegativeIntegers)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -997,6 +1400,9 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigNegativeIntegers)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Invalid integer values.
     ASSERT_TRUE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
@@ -1010,8 +1416,8 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigBufferCapacityTooSmall)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -1030,6 +1436,9 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigBufferCapacityTooSmall)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Buffer capacity too small.
     ASSERT_TRUE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
@@ -1043,8 +1452,8 @@ TEST_F(ConfigTestFixture, SensorPublishDisableFeature)
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
     "key": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "sensor-publish": {
         "sensors": [
@@ -1063,11 +1472,237 @@ TEST_F(ConfigTestFixture, SensorPublishDisableFeature)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // All sensors disabled, then disable feature.
     ASSERT_FALSE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
     const auto &settings = config.sensorPublish.settings[0];
     ASSERT_FALSE(settings.enabled);
+}
+
+TEST_F(ConfigTestFixture, SecureElementMinimumConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "secure-element": {
+        "enabled": true,
+        "pkcs11-lib": "/tmp/aws-iot-device-client-test-file",
+        "secure-element-pin": "0000"
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_TRUE(config.secureElement.enabled);
+    ASSERT_STREQ(filePath.c_str(), config.secureElement.pkcs11Lib->c_str());
+    ASSERT_STREQ("0000", config.secureElement.secureElementPin->c_str());
+}
+
+TEST_F(ConfigTestFixture, SecureElementWithFleetProvisioningEnabled)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "secure-element": {
+        "enabled": true,
+        "pkcs11-lib": "/tmp/aws-iot-device-client-test-file",
+        "secure-element-pin": "0000"
+    },
+    "fleet-provisioning": {
+        "enabled": true,
+        "template-name": "template-name",
+        "csr-file": "/tmp/aws-iot-device-client-test-file"
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_TRUE(config.secureElement.enabled);
+    ASSERT_FALSE(config.key.has_value());
+    ASSERT_STREQ(filePath.c_str(), config.secureElement.pkcs11Lib->c_str());
+    ASSERT_STREQ("0000", config.secureElement.secureElementPin->c_str());
+
+    ASSERT_TRUE(config.fleetProvisioning.enabled);
+    ASSERT_STREQ("template-name", config.fleetProvisioning.templateName->c_str());
+    ASSERT_STREQ(filePath.c_str(), config.fleetProvisioning.csrFile->c_str());
+    ASSERT_FALSE(config.fleetProvisioning.deviceKey.has_value());
+}
+
+TEST_F(ConfigTestFixture, SecureElementInvalidConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "secure-element": {
+        "enabled": true,
+        "pkcs11-lib": "/tmp/aws-iot-device-client-test-file"
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate()); // secure element pin missing
+    ASSERT_TRUE(config.secureElement.enabled);
+    ASSERT_STREQ(filePath.c_str(), config.secureElement.pkcs11Lib->c_str());
+    ASSERT_FALSE(config.secureElement.secureElementPin.has_value());
+}
+
+#if !defined(DISABLE_MQTT)
+// These tests are not applicable if MQTT is disabled.
+TEST_F(ConfigTestFixture, SecureElementDisableFeature)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
+    "thing-name": "thing-name value",
+    "secure-element": {
+        "enabled": false
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate()); // key value is required if secure element is disabled
+    ASSERT_FALSE(config.secureElement.enabled);
+    ASSERT_FALSE(config.key.has_value());
+
+    CliArgs cliArgs;
+    cliArgs[PlainConfig::CLI_KEY] = "/tmp/aws-iot-device-client-test-file";
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_FALSE(config.secureElement.enabled);
+    ASSERT_TRUE(config.key.has_value());
+}
+
+TEST_F(ConfigTestFixture, SecureElementCli)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
+    "thing-name": "thing-name value",
+    "secure-element": {
+        "enabled": false
+    }
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(config.Validate()); // key value is required if secure element is disabled
+    ASSERT_FALSE(config.secureElement.enabled);
+    ASSERT_FALSE(config.key.has_value());
+
+    CliArgs cliArgs;
+    cliArgs[PlainConfig::SecureElement::CLI_ENABLE_SECURE_ELEMENT] = "true";
+    cliArgs[PlainConfig::SecureElement::CLI_PKCS11_LIB] = filePath.c_str();
+    cliArgs[PlainConfig::SecureElement::CLI_SECURE_ELEMENT_PIN] = "0000";
+    config.LoadFromCliArgs(cliArgs);
+
+    ASSERT_TRUE(config.secureElement.enabled);
+    ASSERT_FALSE(config.key.has_value());
+    ASSERT_STREQ(filePath.c_str(), config.secureElement.pkcs11Lib->c_str());
+    ASSERT_EQ("0000", config.secureElement.secureElementPin.value());
+    ASSERT_TRUE(config.Validate());
+}
+#endif
+
+TEST_F(ConfigTestFixture, HTTPProxyConfigHappy)
+{
+    constexpr char jsonString[] = R"(
+{
+  "http-proxy-enabled": true,
+  "http-proxy-host": "10.0.0.1",
+  "http-proxy-port": "8888",
+  "http-proxy-auth-method": "UserNameAndPassword",
+  "http-proxy-username": "testUserName",
+  "http-proxy-password": "12345"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig::HttpProxyConfig httpProxyConfig;
+    httpProxyConfig.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(httpProxyConfig.httpProxyEnabled);
+    ASSERT_STREQ("10.0.0.1", httpProxyConfig.proxyHost->c_str());
+    ASSERT_EQ(8888, httpProxyConfig.proxyPort.value());
+    ASSERT_TRUE(httpProxyConfig.httpProxyAuthEnabled);
+    ASSERT_STREQ("UserNameAndPassword", httpProxyConfig.proxyAuthMethod->c_str());
+    ASSERT_STREQ("testUserName", httpProxyConfig.proxyUsername->c_str());
+    ASSERT_STREQ("12345", httpProxyConfig.proxyPassword->c_str());
+}
+
+TEST_F(ConfigTestFixture, HTTPProxyConfigDisabled)
+{
+    constexpr char jsonString[] = R"(
+{
+  "http-proxy-enabled": false,
+  "http-proxy-host": "10.0.0.1",
+  "http-proxy-port": "8888",
+  "http-proxy-auth-method": "UserNameAndPassword",
+  "http-proxy-username": "testUserName",
+  "http-proxy-password": "12345"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig::HttpProxyConfig httpProxyConfig;
+    httpProxyConfig.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(httpProxyConfig.httpProxyEnabled);
+}
+
+TEST_F(ConfigTestFixture, HTTPProxyConfigNoAuth)
+{
+    constexpr char jsonString[] = R"(
+{
+  "http-proxy-enabled": true,
+  "http-proxy-host": "10.0.0.1",
+  "http-proxy-port": "8888",
+  "http-proxy-auth-method": "None"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig::HttpProxyConfig httpProxyConfig;
+    httpProxyConfig.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(httpProxyConfig.httpProxyEnabled);
+    ASSERT_STREQ("10.0.0.1", httpProxyConfig.proxyHost->c_str());
+    ASSERT_EQ(8888, httpProxyConfig.proxyPort.value());
+    ASSERT_FALSE(httpProxyConfig.httpProxyAuthEnabled);
+    ASSERT_STREQ("None", httpProxyConfig.proxyAuthMethod->c_str());
 }
 
 TEST(Config, MemoryTrace)

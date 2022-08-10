@@ -84,7 +84,7 @@ else
           echo "ver"
           echo $ver
           apt-get --assume-yes install apt-transport-https
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add
+          wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add
           apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-$ver main" -y
           apt-get update
           apt-get --assume-yes install clang-$ver
@@ -103,7 +103,7 @@ cd ./build/
 case $compileMode in
     st_component_mode)
     echo "Building in ST component mode"
-    cmake ../ -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_SDK=ON -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON
+    cmake ../ -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_SDK=ON -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON -DEXCLUDE_SENSOR_PUBLISH=ON
     ;;
     armhf_cross_mode)
     apt-get update
@@ -112,7 +112,7 @@ case $compileMode in
     apt-get install --assume-yes g++-arm-linux-gnueabihf
     apt-get install --assume-yes gcc-arm-linux-gnueabihf
     apt-get install --assume-yes gdb-multiarch
-    wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
+    wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
     tar -xvzf openssl-${OPENSSL_VERSION}.tar.gz
     export INSTALL_DIR=/usr/lib/arm-linux-gnueabihf
     cd openssl-${OPENSSL_VERSION}
@@ -125,17 +125,12 @@ case $compileMode in
     cd ..
     if [ "$stMode" = true ]; then
       # Set CMake flags for ST mode
-      # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
-      cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../ || true
-      cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../
+      cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON -DEXCLUDE_SENSOR_PUBLISH=ON ../
     elif [ "$sharedLibs" = true ]; then
-      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON ../ || true
       cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON ../
       make install DESTDIR=./shared_install_dir
       chmod 0777 ./shared_install_dir
     else
-      # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
-      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../ || true
       cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../
     fi
     cmake --build . --target aws-iot-device-client
@@ -150,7 +145,7 @@ case $compileMode in
     apt-get install --assume-yes g++-mips-linux-gnu
     apt-get install --assume-yes gcc-mips-linux-gnu
     apt-get install --assume-yes gdb-multiarch
-    wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
+    wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
     tar -xvzf openssl-${OPENSSL_VERSION}.tar.gz
     export INSTALL_DIR=/usr/lib/mips-linux-gnu
     cd openssl-${OPENSSL_VERSION}
@@ -161,15 +156,12 @@ case $compileMode in
     make -j 4
     make install
     cd ..
-    # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
     if [ "$sharedLibs" = true ]; then
-      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
-      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../
+      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake -DS2N_NO_PQ=ON ../
       make install DESTDIR=./shared_install_dir
       chmod 0777 ./shared_install_dir
     else
-      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../ || true
-      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake ../
+      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake -DS2N_NO_PQ=ON ../
     fi
     cmake --build . --target aws-iot-device-client
     cmake --build . --target test-aws-iot-device-client
@@ -183,7 +175,7 @@ case $compileMode in
     apt-get install --assume-yes g++-aarch64-linux-gnu
     apt-get install --assume-yes gcc-aarch64-linux-gnu
     apt-get install --assume-yes gdb-multiarch
-    wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
+    wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
     tar -xvzf openssl-${OPENSSL_VERSION}.tar.gz
     export INSTALL_DIR=/usr/lib/aarch64-linux-gnu
     cd openssl-${OPENSSL_VERSION}
@@ -196,17 +188,12 @@ case $compileMode in
     cd ..
     if [ "$stMode" = true ]; then
       # Set CMake flags for ST mode
-      # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
-      cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../ || true
-      cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON ../
+      cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON -DEXCLUDE_SENSOR_PUBLISH=ON ../
     elif [ "$sharedLibs" = true ]; then
-      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON ../ || true
       cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON ../
       make install DESTDIR=./shared_install_dir
       chmod 0777 ./shared_install_dir
     else
-      # Fix for the Cmake executing build of the sdk which errors out linking incorrectly to openssl
-      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake ../ || true
       cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake ../
     fi
     cmake --build . --target aws-iot-device-client

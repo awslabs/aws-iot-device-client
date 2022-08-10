@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -10,11 +10,13 @@ ARG OPENSSL_VERSION=1.1.1n
 RUN apt-get update -qq \
     && apt-get -y install \
     git \
+    clang-format \
     curl \
     build-essential \
     wget \
     cppcheck \
     libc6-dbg \
+    softhsm \
     && apt-get clean
 
 ###############################################################################
@@ -44,7 +46,7 @@ RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3
 # Clone and build Google Test
 ###############################################################################
 WORKDIR /tmp
-RUN wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz \
+RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://github.com/google/googletest/archive/release-1.10.0.tar.gz \
     && tar xf release-1.10.0.tar.gz \
     && cd googletest-release-1.10.0 \
     && cmake -DBUILD_SHARED_LIBS=ON . \
@@ -57,7 +59,7 @@ RUN wget https://github.com/google/googletest/archive/release-1.10.0.tar.gz \
 # Clone and build valgrind
 ###############################################################################
 WORKDIR /tmp
-RUN wget https://sourceware.org/pub/valgrind/valgrind-3.19.0.tar.bz2 \
+RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://sourceware.org/pub/valgrind/valgrind-3.19.0.tar.bz2 \
     && tar jxvf valgrind-3.19.0.tar.bz2 \
     && cd valgrind-3.19.0 \
     && ./configure \
@@ -72,7 +74,7 @@ RUN mkdir sdk-cpp-workspace \
     && cd sdk-cpp-workspace \
     && git clone https://github.com/aws/aws-iot-device-sdk-cpp-v2.git \
     && cd aws-iot-device-sdk-cpp-v2 \
-    && git checkout 3223ce81919bff882014bcc57fd5348f758397bc \
+    && git checkout ac3ba3774b031dde1b988e698880d6064d53b9d9 \
     && git submodule update --init --recursive \
     && cd .. \
     && mkdir aws-iot-device-sdk-cpp-v2-build \

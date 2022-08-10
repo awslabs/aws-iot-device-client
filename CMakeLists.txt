@@ -14,6 +14,7 @@ option(EXCLUDE_PUBSUB "Builds the device client without the IoT Pub Sub Sample F
 option(EXCLUDE_SHADOW "Builds the device client without any of the IoT Shadow Features (Config Shadow Feature and Sample Shadow feature)." OFF)
 option(EXCLUDE_CONFIG_SHADOW "Builds the device client without the IoT Config Shadow Feature." OFF)
 option(EXCLUDE_SAMPLE_SHADOW "Builds the device client without the IoT Sample Shadow Feature." OFF)
+option(EXCLUDE_SECURE_ELEMENT "Builds the device client without the support for storing/accessing keys stored in a secure module using PKCS#11." ON)
 option(EXCLUDE_SENSOR_PUBLISH "Builds the device client without the Sensor Publish over MQTT Feature." OFF)
 option(EXCLUDE_SENSOR_PUBLISH_SAMPLES "Builds the device client without the Sensor Publish sample servers." OFF)
 option(GIT_VERSION "Updates the version number using the Git commit history" ON)
@@ -48,15 +49,19 @@ endif ()
 
 if (EXCLUDE_SHADOW)
     add_definitions(-DEXCLUDE_SHADOW)
-endif()
+endif ()
 
 if (EXCLUDE_CONFIG_SHADOW)
     add_definitions(-DEXCLUDE_CONFIG_SHADOW)
-endif()
+endif ()
 
 if (EXCLUDE_SAMPLE_SHADOW)
     add_definitions(-DEXCLUDE_SAMPLE_SHADOW)
-endif()
+endif ()
+
+if (EXCLUDE_SECURE_ELEMENT)
+    add_definitions(-DEXCLUDE_SECURE_ELEMENT)
+endif ()
 
 if (EXCLUDE_SENSOR_PUBLISH)
     add_definitions(-DEXCLUDE_SENSOR_PUBLISH)
@@ -138,7 +143,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ldl")
-endif()
+endif ()
 
 #########################################
 # Generate Version Information from Git #
@@ -196,8 +201,8 @@ endif ()
 set(DEP_DC_LIBS ${DEP_DC_LIBS} aws-crt-cpp aws-c-mqtt aws-c-auth aws-c-io aws-c-cal aws-c-http aws-c-compression aws-c-common aws-c-s3 aws-c-event-stream aws-checksums aws-c-sdkutils)
 
 if (UNIX AND NOT APPLE)
-    set (DEP_DC_LIBS ${DEP_DC_LIBS} s2n)
-endif()
+    set(DEP_DC_LIBS ${DEP_DC_LIBS} s2n)
+endif ()
 
 # Set SDK dependency libraries as needed
 
@@ -218,7 +223,7 @@ if (NOT EXCLUDE_FP)
     set(DEP_DC_LIBS ${DEP_DC_LIBS} IotIdentity-cpp)
 endif ()
 
-if(NOT EXCLUDE_SHADOW)
+if (NOT EXCLUDE_SHADOW)
     set(DEP_DC_LIBS ${DEP_DC_LIBS} IotShadow-cpp)
 endif ()
 

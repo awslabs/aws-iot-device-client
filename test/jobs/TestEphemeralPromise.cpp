@@ -3,6 +3,7 @@
 
 #include "../../source/jobs/EphemeralPromise.h"
 #include "gtest/gtest.h"
+#include <thread>
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Jobs;

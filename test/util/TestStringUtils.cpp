@@ -1,11 +1,15 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+#include "../../source/config/Config.h"
 #include "../../source/util/StringUtils.h"
 #include "gtest/gtest.h"
 
 using namespace std;
+using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Util;
+
+constexpr size_t Config::MAX_CONFIG_SIZE;
 
 TEST(StringUtils, FormatStringNoArg)
 {
@@ -19,6 +23,13 @@ TEST(StringUtils, FormatStringWithArg)
     constexpr char format[] = "I want to eat %d fresh %s.";
     string actual = FormatMessage(format, 1, "apple");
     ASSERT_STREQ("I want to eat 1 fresh apple.", actual.c_str());
+}
+
+TEST(StringUtils, FormatStringTruncate)
+{
+    string s(Config::MAX_CONFIG_SIZE + 1234, '*');
+    string actual = FormatMessage(s.c_str());
+    ASSERT_EQ(actual.size(), Config::MAX_CONFIG_SIZE);
 }
 
 TEST(StringUtils, sanitizeRemovesFormatSpecifier)

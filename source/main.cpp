@@ -197,33 +197,42 @@ void handle_feature_stopped(const Feature *feature)
 
 void attemptConnection()
 {
-    Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 900 * 1000, -1, nullptr};
-    auto publishLambda = []() -> bool {
-        int connectionStatus = resourceManager.get()->establishConnection(config.config);
-        if (SharedCrtResourceManager::ABORT == connectionStatus)
-        {
-            LOGM_ERROR(
-                TAG,
-                "*** %s: Failed to establish the MQTT Client. Please verify your AWS "
-                "IoT credentials, "
-                "configuration and/or certificate policy. ***",
-                DC_FATAL_ERROR);
-            LoggerFactory::getLoggerInstance()->shutdown();
-            deviceClientAbort("Failed to establish MQTT connection due to credential/configuration error");
-            return true;
-        }
-        else if (SharedCrtResourceManager::SUCCESS == connectionStatus)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    };
-    std::thread attemptConnectionThread(
-        [retryConfig, publishLambda] { Retry::exponentialBackoff(retryConfig, publishLambda); });
-    attemptConnectionThread.join();
+    try
+    {
+        Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 900 * 1000, -1, nullptr};
+        auto publishLambda = []() -> bool {
+            int connectionStatus = resourceManager.get()->establishConnection(config.config);
+            if (SharedCrtResourceManager::ABORT == connectionStatus)
+            {
+                LOGM_ERROR(
+                    TAG,
+                    "*** %s: Failed to establish the MQTT Client. Please verify your AWS "
+                    "IoT credentials, "
+                    "configuration and/or certificate policy. ***",
+                    DC_FATAL_ERROR);
+                LoggerFactory::getLoggerInstance()->shutdown();
+                deviceClientAbort("Failed to establish MQTT connection due to credential/configuration error");
+                return true;
+            }
+            else if (SharedCrtResourceManager::SUCCESS == connectionStatus)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        };
+        std::thread attemptConnectionThread(
+            [retryConfig, publishLambda] { Retry::exponentialBackoff(retryConfig, publishLambda); });
+        attemptConnectionThread.join();
+    }
+    catch (const std::exception &e)
+    {
+        LOGM_ERROR(TAG, "Error attempting to connect: %s", e.what());
+        LoggerFactory::getLoggerInstance()->shutdown();
+        deviceClientAbort("Failure from attemptConnection");
+    }
 }
 
 namespace Aws
@@ -305,10 +314,15 @@ namespace Aws
 int main(int argc, char *argv[])
 {
     CliArgs cliArgs;
-    if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
+    if (Config::CheckTerminalArgs(argc, argv))
     {
         LoggerFactory::getLoggerInstance()->shutdown();
         return 0;
+    }
+    if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
+    {
+        LoggerFactory::getLoggerInstance()->shutdown();
+        return 1;
     }
 
     if (!LoggerFactory::reconfigure(config.config) &&
@@ -375,7 +389,9 @@ int main(int argc, char *argv[])
          */
         FleetProvisioning fleetProvisioning;
         if (!fleetProvisioning.ProvisionDevice(resourceManager, config.config) ||
-            !config.ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, true) ||
+            !config.ParseConfigFile(
+                Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
+                Aws::Iot::DeviceClient::Config::FLEET_PROVISIONING_RUNTIME_CONFIG) ||
             !config.ValidateAndStoreRuntimeConfig())
         {
             LOGM_ERROR(
@@ -398,6 +414,22 @@ int main(int argc, char *argv[])
     attemptConnection();
 #endif
 
+#if defined(EXCLUDE_SECURE_ELEMENT)
+    if (config.config.secureElement.enabled)
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Secure Element configuration is enabled but feature is not compiled into binary.",
+            DC_FATAL_ERROR);
+        LoggerFactory::getLoggerInstance()->shutdown();
+        deviceClientAbort("Invalid configuration");
+    }
+    else
+    {
+        LOG_INFO(TAG, "Provisioning with Secure Elements is disabled");
+    }
+#endif
+
 #if !defined(EXCLUDE_SHADOW)
 #    if !defined(EXCLUDE_CONFIG_SHADOW)
     if (config.config.configShadow.enabled)
@@ -407,6 +439,10 @@ int main(int argc, char *argv[])
         configShadow.reconfigureWithConfigShadow(resourceManager, config.config);
         resourceManager->disconnect();
         attemptConnection();
+    }
+    else
+    {
+        LOG_INFO(TAG, "Config shadow is disabled");
     }
 #    endif
 #endif
@@ -419,7 +455,7 @@ int main(int argc, char *argv[])
     {
         LOG_INFO(TAG, "Jobs is enabled");
         jobs = unique_ptr<JobsFeature>(new JobsFeature());
-        jobs->init(resourceManager, listener, config.config);
+        jobs->init(resourceManager->getConnection(), listener, config.config);
         features.push_back(jobs.get());
     }
     else

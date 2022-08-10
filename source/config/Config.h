@@ -44,6 +44,8 @@ namespace Aws
                 static constexpr int CONFIG_DIR = 745;
                 static constexpr int LOG_DIR = 745;
                 static constexpr int PUBSUB_DIR = 745;
+                static constexpr int PKCS11_LIB_DIR = 700;
+                static constexpr int SENSOR_PUBLISH_ADDR_DIR = 700;
 
                 /** Files **/
                 static constexpr int PRIVATE_KEY = 600;
@@ -51,12 +53,14 @@ namespace Aws
                 static constexpr int ROOT_CA = 644;
                 static constexpr int CSR_FILE = 600;
                 static constexpr int LOG_FILE = 600;
-                static constexpr int CONFIG_FILE = 644;
-                static constexpr int RUNTIME_CONFIG_FILE = 644;
+                static constexpr int CONFIG_FILE = 640;
+                static constexpr int RUNTIME_CONFIG_FILE = 640;
                 static constexpr int JOB_HANDLER = 700;
                 static constexpr int PUB_SUB_FILES = 600;
                 static constexpr int SAMPLE_SHADOW_FILES = 600;
                 static constexpr int SENSOR_PUBLISH_ADDR_FILE = 660;
+                static constexpr int PKCS11_LIB_FILE = 640;
+                static constexpr int HTTP_PROXY_CONFIG_FILE = 600;
             };
 
             struct PlainConfig : public LoadableFromJsonAndCliAndEnvironment
@@ -92,6 +96,8 @@ namespace Aws
                 static constexpr char JSON_KEY_SENSOR_PUBLISH[] = "sensor-publish";
 
                 static constexpr char DEFAULT_LOCK_FILE_PATH[] = "/run/lock/";
+
+                static constexpr char JSON_KEY_SECURE_ELEMENT[] = "secure-element";
 
                 Aws::Crt::Optional<std::string> endpoint;
                 Aws::Crt::Optional<std::string> cert;
@@ -203,7 +209,7 @@ namespace Aws
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
                     static constexpr char JSON_KEY_INTERVAL[] = "interval";
 
-                    bool enabled{true};
+                    bool enabled{false};
                     int interval{300};
                 };
                 DeviceDefender deviceDefender;
@@ -256,6 +262,33 @@ namespace Aws
                 };
                 FleetProvisioningRuntimeConfig fleetProvisioningRuntimeConfig;
 
+                struct HttpProxyConfig : public LoadableFromJsonAndCliAndEnvironment
+                {
+                    bool LoadFromJson(const Crt::JsonView &json) override;
+                    bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override { return true; }
+                    bool Validate() const override;
+
+                    static constexpr char CLI_HTTP_PROXY_CONFIG_PATH[] = "--http-proxy-config";
+
+                    static constexpr char JSON_KEY_HTTP_PROXY_ENABLED[] = "http-proxy-enabled";
+                    static constexpr char JSON_KEY_HTTP_PROXY_HOST[] = "http-proxy-host";
+                    static constexpr char JSON_KEY_HTTP_PROXY_PORT[] = "http-proxy-port";
+                    static constexpr char JSON_KEY_HTTP_PROXY_AUTH_METHOD[] = "http-proxy-auth-method";
+                    static constexpr char JSON_KEY_HTTP_PROXY_USERNAME[] = "http-proxy-username";
+                    static constexpr char JSON_KEY_HTTP_PROXY_PASSWORD[] = "http-proxy-password";
+
+                    bool httpProxyEnabled{false};
+                    bool httpProxyAuthEnabled{false};
+                    Aws::Crt::Optional<std::string> proxyConfigPath;
+                    Aws::Crt::Optional<std::string> proxyHost;
+                    Aws::Crt::Optional<int> proxyPort;
+                    Aws::Crt::Optional<std::string> proxyAuthMethod;
+                    Aws::Crt::Optional<std::string> proxyUsername;
+                    Aws::Crt::Optional<std::string> proxyPassword;
+                };
+                HttpProxyConfig httpProxyConfig;
+
                 struct PubSub : public LoadableFromJsonAndCliAndEnvironment
                 {
                     bool LoadFromJson(const Crt::JsonView &json) override;
@@ -293,6 +326,7 @@ namespace Aws
                     bool Validate() const override;
                     /** Serialize SampleShadow feature To Json Object **/
                     void SerializeToObject(Crt::JsonObject &object) const;
+                    bool createShadowOutputFile();
 
                     static constexpr char CLI_ENABLE_SAMPLE_SHADOW[] = "--enable-sample-shadow";
                     static constexpr char CLI_SAMPLE_SHADOW_NAME[] = "--shadow-name";
@@ -303,6 +337,8 @@ namespace Aws
                     static constexpr char JSON_SAMPLE_SHADOW_NAME[] = "shadow-name";
                     static constexpr char JSON_SAMPLE_SHADOW_INPUT_FILE[] = "shadow-input-file";
                     static constexpr char JSON_SAMPLE_SHADOW_OUTPUT_FILE[] = "shadow-output-file";
+
+                    static constexpr int MAXIMUM_SHADOW_INPUT_FILE_SIZE = 8 * 1024;
 
                     bool enabled{false};
                     Aws::Crt::Optional<std::string> shadowName;
@@ -324,6 +360,38 @@ namespace Aws
                     bool enabled{false};
                 };
                 ConfigShadow configShadow;
+
+                struct SecureElement : public LoadableFromJsonAndCliAndEnvironment
+                {
+                    bool LoadFromJson(const Crt::JsonView &json) override;
+                    bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override { return true; }
+                    bool Validate() const override;
+                    /** Serialize Secure Element configurations To Json Object **/
+                    void SerializeToObject(Crt::JsonObject &object) const;
+
+                    static constexpr char CLI_ENABLE_SECURE_ELEMENT[] = "--enable-secure-element";
+                    static constexpr char CLI_PKCS11_LIB[] = "--pkcs11-lib";
+                    static constexpr char CLI_SECURE_ELEMENT_PIN[] = "--secure-element-pin";
+                    static constexpr char CLI_SECURE_ELEMENT_KEY_LABEL[] = "--secure-element-key-label";
+                    static constexpr char CLI_SECURE_ELEMENT_SLOT_ID[] = "--secure-element-slot-id";
+                    static constexpr char CLI_SECURE_ELEMENT_TOKEN_LABEL[] = "--secure-element-token-label";
+
+                    static constexpr char JSON_ENABLE_SECURE_ELEMENT[] = "enabled";
+                    static constexpr char JSON_PKCS11_LIB[] = "pkcs11-lib";
+                    static constexpr char JSON_SECURE_ELEMENT_PIN[] = "secure-element-pin";
+                    static constexpr char JSON_SECURE_ELEMENT_KEY_LABEL[] = "secure-element-key-label";
+                    static constexpr char JSON_SECURE_ELEMENT_SLOT_ID[] = "secure-element-slot-id";
+                    static constexpr char JSON_SECURE_ELEMENT_TOKEN_LABEL[] = "secure-element-token-label";
+
+                    bool enabled{false};
+                    Aws::Crt::Optional<std::string> pkcs11Lib;
+                    Aws::Crt::Optional<std::string> secureElementPin;
+                    Aws::Crt::Optional<std::string> secureElementKeyLabel;
+                    Aws::Crt::Optional<uint64_t> secureElementSlotId;
+                    Aws::Crt::Optional<std::string> secureElementTokenLabel;
+                };
+                SecureElement secureElement;
 
                 struct SensorPublish : public LoadableFromJsonAndCliAndEnvironment
                 {
@@ -402,17 +470,36 @@ namespace Aws
                 static constexpr char DEFAULT_CONFIG_FILE[] = "~/.aws-iot-device-client/aws-iot-device-client.conf";
                 static constexpr char DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] =
                     "~/.aws-iot-device-client/aws-iot-device-client-runtime.conf";
+                static constexpr char DEFAULT_HTTP_PROXY_CONFIG_FILE[] = "~/.aws-iot-device-client/http-proxy.conf";
                 static constexpr char DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[] = "~/.aws-iot-device-client/sample-shadow/";
+                static constexpr char DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[] = "default-sample-shadow-document";
 
                 static constexpr char CLI_HELP[] = "--help";
                 static constexpr char CLI_VERSION[] = "--version";
                 static constexpr char CLI_EXPORT_DEFAULT_SETTINGS[] = "--export-default-settings";
                 static constexpr char CLI_CONFIG_FILE[] = "--config-file";
 
+                /**
+                 * \brief Enum defining several config file types
+                 */
+                enum ConfigFileType
+                {
+                    DEVICE_CLIENT_ESSENTIAL_CONFIG,
+                    FLEET_PROVISIONING_RUNTIME_CONFIG,
+                    HTTP_PROXY_CONFIG
+                };
+
+                static bool CheckTerminalArgs(int argc, char *argv[]);
                 static bool ParseCliArgs(int argc, char *argv[], CliArgs &cliArgs);
                 bool ValidateAndStoreRuntimeConfig();
-                bool ParseConfigFile(const std::string &file, bool isRuntimeConfig);
+                bool ValidateAndStoreHttpProxyConfig();
+                bool ParseConfigFile(const std::string &file, ConfigFileType configFileType);
                 bool init(const CliArgs &cliArgs);
+
+                /**
+                 * \brief Maximum accepted size for the config file.
+                 */
+                static constexpr size_t MAX_CONFIG_SIZE = 5000;
 
                 /**
                  * \brief Separator between directories in path.

@@ -489,73 +489,104 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
 
 bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpConnection, PlainConfig &config)
 {
-    LOG_INFO(TAG, "Fleet Provisioning Feature has been started.");
-
-    bool didSetup = FileUtils::CreateDirectoryWithPermissions(keyDir.c_str(), S_IRWXU) &&
-                    FileUtils::CreateDirectoryWithPermissions(Config::DEFAULT_CONFIG_DIR, S_IRWXU);
-    if (!didSetup)
+    try
     {
+        LOG_INFO(TAG, "Fleet Provisioning Feature has been started.");
+
+        bool didSetup = FileUtils::CreateDirectoryWithPermissions(keyDir.c_str(), S_IRWXU) &&
+                        FileUtils::CreateDirectoryWithPermissions(
+                            Config::DEFAULT_CONFIG_DIR, S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH | S_IXOTH);
+        if (!didSetup)
+        {
+            LOGM_ERROR(
+                TAG,
+                "*** %s: Failed to access/create directories required for storage of provisioned certificates, cannot "
+                "continue ***",
+                DeviceClient::DC_FATAL_ERROR);
+            return false;
+        }
+
+        IotIdentityClient identityClient(fpConnection.get()->getConnection());
+        templateName = config.fleetProvisioning.templateName.value().c_str();
+        if (!MapParameters(config.fleetProvisioning.templateParameters))
+        {
+            return false;
+        }
+
+        if (config.fleetProvisioning.csrFile.has_value() && !config.fleetProvisioning.csrFile->empty())
+        {
+            if (!GetCsrFileContent(config.fleetProvisioning.csrFile->c_str()) ||
+                !LocateDeviceKey(config.fleetProvisioning.deviceKey->c_str()) ||
+                !CreateCertificateUsingCSR(identityClient))
+            {
+                LOGM_ERROR(
+                    TAG,
+                    "*** %s: Fleet Provisioning Feature failed to generate a certificate from a certificate signing "
+                    "request (CSR) ***",
+                    DeviceClient::DC_FATAL_ERROR);
+                return false;
+            }
+            if (!config.secureElement.enabled && config.fleetProvisioning.deviceKey.has_value() &&
+                !config.fleetProvisioning.deviceKey->empty())
+            {
+                keyPath = config.fleetProvisioning.deviceKey->c_str();
+            }
+            else
+            {
+                keyPath = "";
+            }
+        }
+        else
+        {
+            if (config.secureElement.enabled)
+            {
+                LOGM_ERROR(
+                    TAG,
+                    "*** %s: When Secure Tunneling feature is enabled, Device Client only provide support for Fleet "
+                    "Provisioning using certificate signing request. Please provide valid CSR file path ***",
+                    DeviceClient::DC_FATAL_ERROR);
+                return false;
+            }
+            else
+            {
+                if (!CreateCertificateAndKey(identityClient))
+                {
+                    LOGM_ERROR(
+                        TAG,
+                        "*** %s: Fleet Provisioning Feature failed to create a new certificate and private key ***",
+                        DeviceClient::DC_FATAL_ERROR);
+                    return false;
+                }
+            }
+        }
+        if (RegisterThing(identityClient))
+        {
+            /*
+             * Store data in runtime conf file and update @config object.
+             */
+            if (!ExportRuntimeConfig(
+                    Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
+                    certPath.c_str(),
+                    keyPath.c_str(),
+                    thingName.c_str(),
+                    deviceConfig.c_str()))
+            {
+                return false;
+            }
+
+            LOGM_INFO(TAG, "Successfully provisioned thing: %s", thingName.c_str());
+            return true;
+        }
         LOGM_ERROR(
-            TAG,
-            "*** %s: Failed to access/create directories required for storage of provisioned certificates, cannot "
-            "continue ***",
-            DeviceClient::DC_FATAL_ERROR);
+            TAG, "*** %s: Fleet Provisioning Feature failed to provision device. ***", DeviceClient::DC_FATAL_ERROR);
         return false;
     }
-
-    IotIdentityClient identityClient(fpConnection.get()->getConnection());
-    templateName = config.fleetProvisioning.templateName.value().c_str();
-    if (!MapParameters(config.fleetProvisioning.templateParameters))
+    catch (const std::exception &e)
     {
+        LOGM_ERROR(TAG, "Error while provisioning device using fleet indexing: %s", e.what());
+
         return false;
     }
-
-    if (config.fleetProvisioning.csrFile.has_value() && !config.fleetProvisioning.csrFile->empty() &&
-        config.fleetProvisioning.deviceKey.has_value() && !config.fleetProvisioning.deviceKey->empty())
-    {
-        if (!GetCsrFileContent(config.fleetProvisioning.csrFile->c_str()) ||
-            !LocateDeviceKey(config.fleetProvisioning.deviceKey->c_str()) || !CreateCertificateUsingCSR(identityClient))
-        {
-            LOGM_ERROR(
-                TAG,
-                "*** %s: Fleet Provisioning Feature failed to generate a certificate from a certificate signing "
-                "request (CSR) ***",
-                DeviceClient::DC_FATAL_ERROR);
-            return false;
-        }
-        keyPath = config.fleetProvisioning.deviceKey->c_str();
-    }
-    else
-    {
-        if (!CreateCertificateAndKey(identityClient))
-        {
-            LOGM_ERROR(
-                TAG,
-                "*** %s: Fleet Provisioning Feature failed to create a new certificate and private key ***",
-                DeviceClient::DC_FATAL_ERROR);
-            return false;
-        }
-    }
-    if (RegisterThing(identityClient))
-    {
-        /*
-         * Store data in runtime conf file and update @config object.
-         */
-        if (!ExportRuntimeConfig(
-                Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
-                certPath.c_str(),
-                keyPath.c_str(),
-                thingName.c_str(),
-                deviceConfig.c_str()))
-        {
-            return false;
-        }
-
-        LOGM_INFO(TAG, "Successfully provisioned thing: %s", thingName.c_str());
-        return true;
-    }
-    LOGM_ERROR(TAG, "*** %s: Fleet Provisioning Feature failed to provision device. ***", DeviceClient::DC_FATAL_ERROR);
-    return false;
 }
 
 /*
@@ -683,8 +714,8 @@ bool FleetProvisioning::ExportRuntimeConfig(
         runtimeDeviceConfig.c_str());
     LOGM_INFO(TAG, "Exported runtime configurations to: %s", file.c_str());
 
-    chmod(file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    FileUtils::ValidateFilePermissions(file.c_str(), Permissions::RUNTIME_CONFIG_FILE, false);
+    chmod(expandedPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::RUNTIME_CONFIG_FILE, false);
     return true;
 }
 

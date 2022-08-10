@@ -47,9 +47,14 @@ namespace Aws
                         const OnConnectionShutdownFn &onConnectionShutdown);
 
                     /**
+                     * \brief Constructor
+                     */
+                    SecureTunnelingContext() = default;
+
+                    /**
                      * \brief Destructor
                      */
-                    ~SecureTunnelingContext();
+                    virtual ~SecureTunnelingContext();
 
                     /**
                      * \brief Check to see if we have seen and processed the given MQTT notification
@@ -57,7 +62,7 @@ namespace Aws
                      * @param response MQTT notification
                      * @return True if the given MQTT notification is a duplication. False otherwise.
                      */
-                    bool IsDuplicateNotification(
+                    virtual bool IsDuplicateNotification(
                         const Aws::Iotsecuretunneling::SecureTunnelingNotifyResponse &response);
 
                     /**
@@ -65,7 +70,12 @@ namespace Aws
                      *
                      * @return True if successfully connected to the tunnel. False otherwise.
                      */
-                    bool ConnectToSecureTunnel();
+                    virtual bool ConnectToSecureTunnel();
+
+                    /**
+                     * \brief Stop and close secure tunnel
+                     */
+                    virtual void StopSecureTunnel();
 
                   private:
                     /**

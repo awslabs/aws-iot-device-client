@@ -5,8 +5,8 @@ out/
 build/
 
 # Ignore compiled documentation folders
-doc/html/
-doc/latex/
+docs/html/
+docs/latex/
 
 # Intellij
 .idea/
