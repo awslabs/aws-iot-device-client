@@ -7,6 +7,7 @@
 #include <atomic>
 #include <functional>
 #include <future>
+#include <thread>
 
 namespace Aws
 {
