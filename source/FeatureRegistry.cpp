@@ -22,7 +22,7 @@ std::shared_ptr<Feature> FeatureRegistry::get(const std::string &name) const
     return nullptr;
 }
 
-void FeatureRegistry::add(std::string name, std::shared_ptr<Feature> featureToAdd)
+void FeatureRegistry::add(const std::string &name, std::shared_ptr<Feature> featureToAdd)
 {
     std::lock_guard<std::mutex> lock(featuresLock);
     if (!features.count(name))

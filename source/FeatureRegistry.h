@@ -42,7 +42,7 @@ namespace Aws
                      *
                      * @param feature A shared pointer to the feature to be added
                      */
-                    void add(std::string name, std::shared_ptr<Feature> feature);
+                    void add(const std::string &name, std::shared_ptr<Feature> feature);
 
                     /**
                      * @brief Disables a feature in the registry
