@@ -415,9 +415,9 @@ int main(int argc, char *argv[])
 #endif
 
 #if !defined(EXCLUDE_JOBS)
-    shared_ptr<JobsFeature> jobs;
     if (config.config.jobs.enabled)
     {
+        shared_ptr<JobsFeature> jobs;
         LOG_INFO(TAG, "Jobs is enabled");
         jobs = make_shared<JobsFeature>();
         jobs->init(resourceManager->getConnection(), listener, config.config);
@@ -431,9 +431,9 @@ int main(int argc, char *argv[])
 #endif
 
 #if !defined(EXCLUDE_ST)
-    shared_ptr<SecureTunnelingFeature> tunneling;
     if (config.config.tunneling.enabled)
     {
+        shared_ptr<SecureTunnelingFeature> tunneling;
         LOG_INFO(TAG, "Secure Tunneling is enabled");
         tunneling = make_shared<SecureTunnelingFeature>();
         tunneling->init(resourceManager, listener, config.config);
@@ -447,9 +447,9 @@ int main(int argc, char *argv[])
 #endif
 
 #if !defined(EXCLUDE_DD)
-    shared_ptr<DeviceDefenderFeature> deviceDefender;
     if (config.config.deviceDefender.enabled)
     {
+        shared_ptr<DeviceDefenderFeature> deviceDefender;
         LOG_INFO(TAG, "Device Defender is enabled");
         deviceDefender = make_shared<DeviceDefenderFeature>();
         deviceDefender->init(resourceManager, listener, config.config);
@@ -464,9 +464,9 @@ int main(int argc, char *argv[])
 
 #if !defined(EXCLUDE_SHADOW)
 #    if !defined(EXCLUDE_SAMPLE_SHADOW)
-    shared_ptr<SampleShadowFeature> sampleShadow;
     if (config.config.sampleShadow.enabled)
     {
+        shared_ptr<SampleShadowFeature> sampleShadow;
         LOG_INFO(TAG, "Sample shadow is enabled");
         sampleShadow = make_shared<SampleShadowFeature>();
         sampleShadow->init(resourceManager, listener, config.config);
@@ -482,9 +482,9 @@ int main(int argc, char *argv[])
 
 #if !defined(EXCLUDE_SAMPLES)
 #    if !defined(EXCLUDE_PUBSUB)
-    shared_ptr<PubSubFeature> pubSub;
     if (config.config.pubSub.enabled)
     {
+        shared_ptr<PubSubFeature> pubSub;
         LOG_INFO(TAG, "PubSub is enabled");
         pubSub = make_shared<PubSubFeature>();
         pubSub->init(resourceManager, listener, config.config);
@@ -499,9 +499,9 @@ int main(int argc, char *argv[])
 #endif
 
 #if !defined(EXCLUDE_SENSOR_PUBLISH)
-    shared_ptr<SensorPublishFeature> sensorPublish;
     if (config.config.sensorPublish.enabled)
     {
+        shared_ptr<SensorPublishFeature> sensorPublish;
         LOG_INFO(TAG, "Sensor Publish is enabled");
         sensorPublish = make_shared<SensorPublishFeature>();
         sensorPublish->init(resourceManager, listener, config.config);
