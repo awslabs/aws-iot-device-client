@@ -89,4 +89,3 @@ TEST_F(TestDeviceDefender, Init)
      */
     ASSERT_EQ(deviceDefender->init(manager, notifier, config), 0);
 }
-
