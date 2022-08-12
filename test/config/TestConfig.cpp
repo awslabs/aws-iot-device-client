@@ -293,7 +293,39 @@ TEST_F(ConfigTestFixture, SerializeAllFeaturesEnabled)
         "secure-element-key-label": "key-label",
         "secure-element-slot-id": 1111,
         "secure-element-token-label": "token-label"
-      }
+      },
+      "sensor-publish": {
+        "sensors": [
+            {
+                "name": "sensor_1",
+                "enabled": true,
+                "addr": "address_1",
+                "addr_poll_sec": 10,
+                "buffer_time_ms": 0,
+                "buffer_size": 0,
+                "buffer_capacity": 128000,
+                "eom_delimiter": "delim_1",
+                "mqtt_topic": "topic_1",
+                "mqtt_dead_letter_topic": "dead_letter_topic_1",
+                "mqtt_heartbeat_topic": "heart_beat_topic_1",
+                "heartbeat_time_sec": 300
+            },
+            {
+                "name": "sensor_2",
+                "enabled": true,
+                "addr": "address_2",
+                "addr_poll_sec": 1,
+                "buffer_time_ms": 1,
+                "buffer_size": 1,
+                "buffer_capacity": 1,
+                "eom_delimiter": "delim_2",
+                "mqtt_topic": "topic_2",
+                "mqtt_dead_letter_topic": "dead_letter_topic_2",
+                "mqtt_heartbeat_topic": "heart_beat_topic_2",
+                "heartbeat_time_sec": 10
+            }
+        ]
+    }
 })";
 
     PlainConfig config;

@@ -2417,6 +2417,8 @@ void PlainConfig::SensorPublish::SerializeToObject(Crt::JsonObject &object) cons
             sensor.WithString(JSON_NAME, entry.name->c_str());
         }
 
+        sensor.WithBool(JSON_ENABLED, entry.enabled);
+
         if (entry.addr.has_value() && entry.addr->c_str())
         {
             sensor.WithString(JSON_ADDR, entry.addr->c_str());
