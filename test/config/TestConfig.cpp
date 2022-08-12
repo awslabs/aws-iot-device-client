@@ -242,10 +242,14 @@ TEST_F(ConfigTestFixture, SerializeAllFeaturesEnabled)
     "logging": {
         "level": "debug",
         "type": "file",
-        "file": "./aws-iot-device-client.log"
+        "file": "./aws-iot-device-client.log",
+        "enable-sdk-logging": false,
+        "sdk-log-level": "TRACE",
+        "sdk-log-file": "/var/log/aws-iot-device-client/sdk.log"
     },
     "jobs": {
-        "enabled": true
+        "enabled": true,
+        "handler-directory": "" 
     },
     "tunneling": {
         "enabled": true
@@ -257,15 +261,20 @@ TEST_F(ConfigTestFixture, SerializeAllFeaturesEnabled)
     "fleet-provisioning": {
         "enabled": true,
         "template-name": "template-name",
+        "template-parameters": "{\"SerialNumber\": \"Device-SN\"}",
         "csr-file": "/tmp/aws-iot-device-client-test-file",
-        "device-key": "/tmp/aws-iot-device-client-test-file",
-        "template-parameters": "{\"SerialNumber\": \"Device-SN\"}"
+        "device-key": "/tmp/aws-iot-device-client-test-file"
     },
+    "runtime-config": {
+        "completed-fp": false
+     },
     "samples": {
 		"pub-sub": {
 			"enabled": true,
 			"publish-topic": "publish_topic",
-			"subscribe-topic": "subscribe_topic"
+			"publish-file": "publish_file",
+			"subscribe-topic": "subscribe_topic",
+			"subscribe-file": "subscribe_file"
 		}
 	},
     "config-shadow": {
@@ -274,8 +283,8 @@ TEST_F(ConfigTestFixture, SerializeAllFeaturesEnabled)
     "sample-shadow": {
         "enabled": true,
         "shadow-name": "shadow-name",
-        "shadow-input-file": "",
-        "shadow-output-file": ""
+        "shadow-input-file": "shadow_input_file",
+        "shadow-output-file": "shadow_output_file"
       },
     "secure-element": {
         "enabled": true,
@@ -287,21 +296,16 @@ TEST_F(ConfigTestFixture, SerializeAllFeaturesEnabled)
       }
 })";
 
-    JsonObject jsonObject(jsonString);
-    JsonView jsonView = jsonObject.View();
-
     PlainConfig config;
-    config.LoadFromJson(jsonView);
+    JsonObject jsonObject(jsonString);
+    config.LoadFromJson(jsonObject.View());
+    auto inputJsonString = jsonObject.View().WriteCompact();
 
     JsonObject serializedConfig;
     config.SerializeToObject(serializedConfig);
+    auto serializedJsonString = serializedConfig.View().WriteCompact();
 
-    jsonView = serializedConfig.View();
-
-    PlainConfig postSerializedConfig;
-    postSerializedConfig.LoadFromJson(jsonView);
-
-    ASSERT_EQ(config.endpoint.value(), postSerializedConfig.endpoint.value());
+    ASSERT_STREQ(inputJsonString.c_str(), serializedJsonString.c_str());
 }
 
 TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
@@ -1097,86 +1101,6 @@ TEST_F(ConfigTestFixture, DeviceDefenderCli)
     ASSERT_TRUE(config.Validate());
     ASSERT_TRUE(config.deviceDefender.enabled);
     ASSERT_EQ(6, config.deviceDefender.interval);
-}
-
-TEST_F(ConfigTestFixture, DeviceDefenderComparison)
-{
-    constexpr char jsonString1[] = R"(
-{
-	"endpoint": "endpoint value",
-	"cert": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
-	"key": "/tmp/aws-iot-device-client-test-file",
-	"thing-name": "thing-name value",
-    "device-defender": {
-        "enabled": true,
-		"interval": 6
-    }
-})";
-    constexpr char jsonString2[] = R"(
-{
-	"endpoint": "endpoint value",
-	"cert": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
-	"key": "/tmp/aws-iot-device-client-test-file",
-	"thing-name": "thing-name value",
-    "device-defender": {
-        "enabled": true,
-		"interval": 6
-    }
-})";
-    constexpr char jsonString3[] = R"(
-{
-	"endpoint": "endpoint value",
-	"cert": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
-	"key": "/tmp/aws-iot-device-client-test-file",
-	"thing-name": "thing-name value",
-    "device-defender": {
-        "enabled": false,
-		"interval": 6
-    }
-})";
-    constexpr char jsonString4[] = R"(
-{
-	"endpoint": "endpoint value",
-	"cert": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
-	"key": "/tmp/aws-iot-device-client-test-file",
-	"thing-name": "thing-name value",
-    "device-defender": {
-        "enabled": true,
-		"interval": 8
-    }
-})";
-
-    JsonObject jsonObject1(jsonString1);
-    JsonView jsonView1 = jsonObject1.View();
-
-    JsonObject jsonObject2(jsonString2);
-    JsonView jsonView2 = jsonObject2.View();
-
-    JsonObject jsonObject3(jsonString3);
-    JsonView jsonView3 = jsonObject3.View();
-
-    JsonObject jsonObject4(jsonString4);
-    JsonView jsonView4 = jsonObject4.View();
-
-    PlainConfig config1;
-    PlainConfig config2;
-    PlainConfig config3;
-    PlainConfig config4;
-    config1.LoadFromJson(jsonView1);
-    config2.LoadFromJson(jsonView2);
-    config3.LoadFromJson(jsonView3);
-    config4.LoadFromJson(jsonView4);
-
-    ASSERT_TRUE(config1.deviceDefender == config2.deviceDefender);
-    ASSERT_TRUE(config1.deviceDefender != config3.deviceDefender);
-    ASSERT_TRUE(config1.deviceDefender != config4.deviceDefender);
-    ASSERT_FALSE(config1.deviceDefender != config2.deviceDefender);
-    ASSERT_FALSE(config1.deviceDefender == config3.deviceDefender);
-    ASSERT_FALSE(config1.deviceDefender == config4.deviceDefender);
 }
 
 TEST_F(ConfigTestFixture, PubSubSampleConfig)

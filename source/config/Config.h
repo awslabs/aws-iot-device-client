@@ -119,6 +119,7 @@ namespace Aws
                     int ParseDeviceClientLogLevel(std::string value);
                     Aws::Crt::LogLevel ParseSDKLogLevel(std::string value);
                     std::string ParseDeviceClientLogType(std::string value);
+                    std::string StringifyDeviceClientLogLevel(int level) const;
                     std::string StringifySDKLogLevel(Aws::Crt::LogLevel level) const;
                     /** Serialize logging configurations To Json Object **/
                     void SerializeToObject(Crt::JsonObject &object) const;
@@ -204,8 +205,6 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
-                    bool operator==(const PlainConfig::DeviceDefender &other) const;
-                    bool operator!=(const PlainConfig::DeviceDefender &other) const;
                     /** Serialize Device Defender feature To Json Object **/
                     void SerializeToObject(Crt::JsonObject &object) const;
 

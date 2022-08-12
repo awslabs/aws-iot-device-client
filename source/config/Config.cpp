@@ -615,6 +615,25 @@ string PlainConfig::LogConfig::ParseDeviceClientLogType(string value)
     }
 }
 
+string PlainConfig::LogConfig::StringifyDeviceClientLogLevel(int level) const
+{
+
+    switch (level)
+    {
+        case 0:
+            return "error";
+            break;
+        case 1:
+            return "warn";
+            break;
+        case 2:
+            return "info";
+            break;
+    }
+    // this is the defualt case for log level
+    return "debug";
+}
+
 string PlainConfig::LogConfig::StringifySDKLogLevel(Aws::Crt::LogLevel level) const
 {
     const char *levelString;
@@ -789,8 +808,7 @@ bool PlainConfig::LogConfig::Validate() const
 
 void PlainConfig::LogConfig::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
-    object.WithInteger(JSON_KEY_LOG_LEVEL, deviceClientlogLevel);
+    object.WithString(JSON_KEY_LOG_LEVEL, StringifyDeviceClientLogLevel(deviceClientlogLevel).c_str());
     object.WithString(JSON_KEY_LOG_TYPE, deviceClientLogtype.c_str());
     object.WithString(JSON_KEY_LOG_FILE, deviceClientLogFile.c_str());
     object.WithBool(JSON_KEY_ENABLE_SDK_LOGGING, sdkLoggingEnabled);
@@ -842,7 +860,6 @@ bool PlainConfig::Jobs::Validate() const
 
 void PlainConfig::Jobs::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
 
     object.WithBool(JSON_KEY_ENABLED, enabled);
 
@@ -951,8 +968,6 @@ bool PlainConfig::Tunneling::Validate() const
 
 void PlainConfig::Tunneling::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
-
     object.WithBool(JSON_KEY_ENABLED, enabled);
 }
 
@@ -1022,19 +1037,8 @@ bool PlainConfig::DeviceDefender::Validate() const
     return true;
 }
 
-bool PlainConfig::DeviceDefender::operator==(const PlainConfig::DeviceDefender &other) const
-{
-    return this->enabled == other.enabled && this->interval == other.interval;
-}
-
-bool PlainConfig::DeviceDefender::operator!=(const PlainConfig::DeviceDefender &other) const
-{
-    return !(*this == other);
-}
-
 void PlainConfig::DeviceDefender::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
     object.WithBool(JSON_KEY_ENABLED, enabled);
     object.WithInteger(JSON_KEY_INTERVAL, interval);
 }
@@ -1176,7 +1180,6 @@ bool PlainConfig::FleetProvisioning::Validate() const
 
 void PlainConfig::FleetProvisioning::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
     object.WithBool(JSON_KEY_ENABLED, enabled);
 
     if (templateName.has_value() && templateName->c_str())
@@ -1269,8 +1272,7 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::Validate() const
 
 void PlainConfig::FleetProvisioningRuntimeConfig::SerializeToObject(Aws::Crt::JsonObject &object) const
 {
-    (void)object;
-    object.WithBool(JSON_KEY_COMPLETED_FLEET_PROVISIONING, true);
+    object.WithBool(JSON_KEY_COMPLETED_FLEET_PROVISIONING, completedFleetProvisioning);
 
     if (cert.has_value() && cert->c_str())
     {
@@ -1618,7 +1620,6 @@ bool PlainConfig::PubSub::Validate() const
 
 void PlainConfig::PubSub::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
     object.WithBool(JSON_ENABLE_PUB_SUB, enabled);
 
     if (publishTopic.has_value() && publishTopic->c_str())
@@ -1853,7 +1854,6 @@ bool PlainConfig::SampleShadow::Validate() const
 
 void PlainConfig::SampleShadow::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
 
     object.WithBool(JSON_ENABLE_SAMPLE_SHADOW, enabled);
 
@@ -1904,7 +1904,6 @@ bool PlainConfig::ConfigShadow::Validate() const
 
 void PlainConfig::ConfigShadow::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
     object.WithBool(JSON_ENABLE_CONFIG_SHADOW, enabled);
 }
 
@@ -2056,7 +2055,6 @@ bool PlainConfig::SecureElement::Validate() const
 
 void PlainConfig::SecureElement::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
     object.WithBool(JSON_ENABLE_SECURE_ELEMENT, enabled);
 
     if (pkcs11Lib.has_value() && pkcs11Lib->c_str())
@@ -2409,7 +2407,6 @@ bool PlainConfig::SensorPublish::Validate() const
 
 void PlainConfig::SensorPublish::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
     Aws::Crt::Vector<Aws::Crt::JsonObject> sensors;
     for (const auto &entry : settings)
     {
