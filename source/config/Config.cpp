@@ -1857,7 +1857,7 @@ void PlainConfig::SampleShadow::SerializeToObject(Crt::JsonObject &object) const
 
     object.WithBool(JSON_ENABLE_SAMPLE_SHADOW, enabled);
 
-    if (shadowName->c_str())
+    if (shadowName.has_value() && shadowName->c_str())
     {
         object.WithString(JSON_SAMPLE_SHADOW_NAME, shadowName->c_str());
     }
