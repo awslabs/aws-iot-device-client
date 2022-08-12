@@ -456,54 +456,54 @@ void PlainConfig::SerializeToObject(Crt::JsonObject &object) const
         object.WithString(JSON_KEY_THING_NAME, thingName->c_str());
     }
 
-    JsonObject loggingObject;
+    Crt::JsonObject loggingObject;
     logConfig.SerializeToObject(loggingObject);
     object.WithObject(JSON_KEY_LOGGING, loggingObject);
 
-    JsonObject jobsObject;
+    Crt::JsonObject jobsObject;
     jobs.SerializeToObject(jobsObject);
     object.WithObject(JSON_KEY_JOBS, jobsObject);
 
-    JsonObject tunnelingObject;
+    Crt::JsonObject tunnelingObject;
     tunneling.SerializeToObject(tunnelingObject);
     object.WithObject(JSON_KEY_TUNNELING, tunnelingObject);
 
-    JsonObject deviceDefenderObject;
+    Crt::JsonObject deviceDefenderObject;
     deviceDefender.SerializeToObject(deviceDefenderObject);
     object.WithObject(JSON_KEY_DEVICE_DEFENDER, deviceDefenderObject);
 
-    JsonObject fleetProvisioningObject;
+    Crt::JsonObject fleetProvisioningObject;
     fleetProvisioning.SerializeToObject(fleetProvisioningObject);
     object.WithObject(JSON_KEY_FLEET_PROVISIONING, fleetProvisioningObject);
 
     if (fleetProvisioning.enabled)
     {
-        JsonObject fleetProvisioningRuntimeObject;
+        Crt::JsonObject fleetProvisioningRuntimeObject;
         fleetProvisioningRuntimeConfig.SerializeToObject(fleetProvisioningRuntimeObject);
         object.WithObject(JSON_KEY_RUNTIME_CONFIG, fleetProvisioningRuntimeObject);
     }
 
-    JsonObject samplesObject;
-    JsonObject pubSubObject;
+    Crt::JsonObject samplesObject;
+    Crt::JsonObject pubSubObject;
     pubSub.SerializeToObject(pubSubObject);
     samplesObject.WithObject(JSON_KEY_PUB_SUB, pubSubObject);
     object.WithObject(JSON_KEY_SAMPLES, samplesObject);
 
-    JsonObject configShadowObject;
+    Crt::JsonObject configShadowObject;
     configShadow.SerializeToObject(configShadowObject);
     object.WithObject(JSON_KEY_CONFIG_SHADOW, configShadowObject);
 
-    JsonObject sampleShadowObject;
+    Crt::JsonObject sampleShadowObject;
     sampleShadow.SampleShadow::SerializeToObject(sampleShadowObject);
     object.WithObject(JSON_KEY_SAMPLE_SHADOW, sampleShadowObject);
 
-    JsonObject secureElementObject;
+    Crt::JsonObject secureElementObject;
     secureElement.SerializeToObject(secureElementObject);
     object.WithObject(JSON_KEY_SECURE_ELEMENT, secureElementObject);
 
     if (sensorPublish.enabled)
     {
-        JsonObject sensorPublishObject;
+        Crt::JsonObject sensorPublishObject;
         sensorPublish.SerializeToObject(sensorPublishObject);
         object.WithObject(JSON_KEY_SENSOR_PUBLISH, sensorPublishObject);
     }
@@ -2410,7 +2410,7 @@ void PlainConfig::SensorPublish::SerializeToObject(Crt::JsonObject &object) cons
     Aws::Crt::Vector<Aws::Crt::JsonObject> sensors;
     for (const auto &entry : settings)
     {
-        JsonObject sensor;
+        Aws::Crt::JsonObject sensor;
 
         if (entry.name.has_value() && entry.name->c_str())
         {
