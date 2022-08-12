@@ -61,7 +61,7 @@ INSTANTIATE_TEST_CASE_P(
     },
     "jobs": {
         "enabled": true,
-        "handler-directory": "" 
+        "handler-directory": "directory" 
     },
     "tunneling": {
         "enabled": true
