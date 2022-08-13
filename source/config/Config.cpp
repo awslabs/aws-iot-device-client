@@ -618,20 +618,21 @@ string PlainConfig::LogConfig::ParseDeviceClientLogType(string value)
 string PlainConfig::LogConfig::StringifyDeviceClientLogLevel(int level) const
 {
 
-    switch (level)
+    switch (static_cast<DeviceClient::Logging::LogLevel>(level))
     {
-        case 0:
-            return "error";
+        case DeviceClient::Logging::LogLevel::ERROR:
+            return "ERROR";
             break;
-        case 1:
-            return "warn";
+        case DeviceClient::Logging::LogLevel::WARN:
+            return "WARN";
             break;
-        case 2:
-            return "info";
+        case DeviceClient::Logging::LogLevel::INFO:
+            return "INFO";
             break;
+        case DeviceClient::Logging::LogLevel::DEBUG:
+            return "DEBUG";
     }
-    // this is the defualt case for log level
-    return "debug";
+    throw std::invalid_argument(FormatMessage("Provided log level, %d is not known", level));
 }
 
 string PlainConfig::LogConfig::StringifySDKLogLevel(Aws::Crt::LogLevel level) const
@@ -990,8 +991,6 @@ bool PlainConfig::DeviceDefender::LoadFromJson(const Crt::JsonView &json)
     {
         interval = json.GetInteger(jsonKey);
     }
-
-    userDefined = true;
 
     return true;
 }

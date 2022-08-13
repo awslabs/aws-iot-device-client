@@ -52,7 +52,7 @@ INSTANTIATE_TEST_CASE_P(
     "key": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
     "logging": {
-        "level": "debug",
+        "level": "INFO",
         "type": "file",
         "file": "./aws-iot-device-client.log",
         "enable-sdk-logging": false,
@@ -141,7 +141,7 @@ INSTANTIATE_TEST_CASE_P(
 })",
         R"({
     "logging": {
-        "level": "debug",
+        "level": "DEBUG",
         "type": "file",
         "file": "./aws-iot-device-client.log",
         "enable-sdk-logging": false,

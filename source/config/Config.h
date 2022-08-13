@@ -215,9 +215,6 @@ namespace Aws
                     static constexpr char JSON_KEY_INTERVAL[] = "interval";
 
                     bool enabled{false};
-                    // userDefined keeps track of whether or not the feature was defined by a user when loaded from a
-                    // json. This is only to be used by dynamic reload.
-                    bool userDefined{false};
                     int interval{300};
                 };
                 DeviceDefender deviceDefender;
