@@ -45,6 +45,8 @@ namespace Aws
 
                     virtual void Shutdown();
 
+                    virtual bool IsValid();
+
                     std::unique_ptr<Aws::Iotsecuretunneling::SecureTunnel> secureTunnel;
 
                   private:

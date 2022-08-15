@@ -67,3 +67,6 @@ void SecureTunnelWrapper::Shutdown()
 {
     secureTunnel->Shutdown();
 }
+bool SecureTunnelWrapper::IsValid() {
+    secureTunnel->IsValid();
+}
