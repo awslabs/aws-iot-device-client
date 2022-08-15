@@ -83,7 +83,7 @@ class TestSecureTunnelContext : public testing::Test
     Aws::Crt::Optional<std::string> rootCa;
     string accessToken;
     string endpoint;
-    uint16_t port;
+    int port;
     OnConnectionShutdownFn onConnectionShutdown;
 };
 

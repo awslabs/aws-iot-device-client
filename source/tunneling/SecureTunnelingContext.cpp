@@ -35,7 +35,7 @@ namespace Aws
 
                 SecureTunnelingContext::~SecureTunnelingContext()
                 {
-                    if (mSecureTunnel)
+                    if (mSecureTunnel && mSecureTunnel->IsValid())
                     {
                         mSecureTunnel->Close();
                     }
