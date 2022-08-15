@@ -53,7 +53,7 @@ class MockSecureTunnel : public SecureTunnelWrapper
     MOCK_METHOD(int, Connect, (), (override));
     MOCK_METHOD(int, Close, (), (override));
     MOCK_METHOD(int, SendData, (const Aws::Crt::ByteCursor &data), (override));
-    bool IsValid() override { return true;}
+    bool IsValid() override { return true; }
 };
 
 class MockTcpForward : public TcpForward
