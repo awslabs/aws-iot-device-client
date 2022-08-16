@@ -283,8 +283,8 @@ if [ "$BUILD_CONFIG" = "y" ]; then
     }"
 
     while [ "$CONFIRMED" != 1 ]; do
-      printf ${PMPT} "Does the following configuration appear correct? If yes, configuration will be written to ${CONF_OUTPUT_PATH}: y/n"
       printf ${GREEN} "${CONFIG_OUTPUT}"
+      printf ${PMPT} "Does the following configuration appear correct? If yes, configuration will be written to ${CONF_OUTPUT_PATH}: y/n"
       read -r GOOD_TO_GO
       if [ "$GOOD_TO_GO" = "y" ] || [ "$GOOD_TO_GO" = "n" ]; then
         CONFIRMED=1
@@ -294,7 +294,7 @@ if [ "$BUILD_CONFIG" = "y" ]; then
         mkdir -p "$OUTPUT_DIR"
         echo "$CONFIG_OUTPUT" | tee "$CONF_OUTPUT_PATH" >/dev/null
         chmod 745 "$OUTPUT_DIR"
-        chmod 644 "$CONF_OUTPUT_PATH"
+        chmod 640 "$CONF_OUTPUT_PATH"
         printf ${GREEN} "Configuration has been successfully written to ${CONF_OUTPUT_PATH}"
       fi
     done

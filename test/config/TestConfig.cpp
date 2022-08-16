@@ -182,7 +182,7 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     ASSERT_TRUE(config.sampleShadow.enabled);
     ASSERT_STREQ("shadow-name", config.sampleShadow.shadowName->c_str());
     ASSERT_FALSE(config.sampleShadow.shadowInputFile.has_value());
-    ASSERT_TRUE(config.sampleShadow.shadowOutputFile.has_value());
+    ASSERT_FALSE(config.sampleShadow.shadowOutputFile.has_value());
     ASSERT_TRUE(config.pubSub.enabled);
     ASSERT_STREQ("publish_topic", config.pubSub.publishTopic->c_str());
     ASSERT_STREQ("subscribe_topic", config.pubSub.subscribeTopic->c_str());
@@ -217,8 +217,7 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
     config.sampleShadow.SerializeToObject(sampleShadow);
     ASSERT_STREQ("shadow-name", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_NAME).c_str());
     ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_INPUT_FILE).c_str());
-    ASSERT_STREQ(
-        outputPath.c_str(), sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
+    ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
 
     JsonObject secureElement;
     config.secureElement.SerializeToObject(secureElement);
@@ -549,7 +548,7 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabledInvalidRootCa)
     ASSERT_TRUE(config.sampleShadow.enabled);
     ASSERT_STREQ("shadow-name", config.sampleShadow.shadowName->c_str());
     ASSERT_FALSE(config.sampleShadow.shadowInputFile.has_value());
-    ASSERT_TRUE(config.sampleShadow.shadowOutputFile.has_value());
+    ASSERT_FALSE(config.sampleShadow.shadowOutputFile.has_value());
     ASSERT_TRUE(config.pubSub.enabled);
     ASSERT_STREQ("publish_topic", config.pubSub.publishTopic->c_str());
     ASSERT_STREQ("subscribe_topic", config.pubSub.subscribeTopic->c_str());
@@ -577,8 +576,7 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabledInvalidRootCa)
     config.sampleShadow.SerializeToObject(sampleShadow);
     ASSERT_STREQ("shadow-name", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_NAME).c_str());
     ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_INPUT_FILE).c_str());
-    ASSERT_STREQ(
-        outputPath.c_str(), sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
+    ASSERT_STREQ("", sampleShadow.View().GetString(config.sampleShadow.JSON_SAMPLE_SHADOW_OUTPUT_FILE).c_str());
 }
 
 /**

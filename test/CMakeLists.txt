@@ -86,6 +86,11 @@ if (NOT EXCLUDE_ST)
     list(APPEND DC_TST ${ST_TST})
 endif ()
 
+if (NOT EXCLUDE_DD)
+    file(GLOB DD_TST "./devicedefender/*.cpp")
+    list(APPEND DC_TST ${DD_TST})
+endif ()
+
 if (NOT EXCLUDE_FP)
     list(APPEND DC_TST ${FP_TST})
 endif ()
