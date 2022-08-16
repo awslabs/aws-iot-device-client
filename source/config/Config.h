@@ -69,8 +69,6 @@ namespace Aws
                 bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                 bool LoadFromEnvironment() override;
                 bool Validate() const override;
-                /** Serialize configurations To Json Object **/
-                void SerializeToObject(Crt::JsonObject &object) const;
 
                 static constexpr char CLI_ENDPOINT[] = "--endpoint";
                 static constexpr char CLI_CERT[] = "--cert";
@@ -119,10 +117,7 @@ namespace Aws
                     int ParseDeviceClientLogLevel(std::string value);
                     Aws::Crt::LogLevel ParseSDKLogLevel(std::string value);
                     std::string ParseDeviceClientLogType(std::string value);
-                    std::string StringifyDeviceClientLogLevel(int level) const;
-                    std::string StringifySDKLogLevel(Aws::Crt::LogLevel level) const;
-                    /** Serialize logging configurations To Json Object **/
-                    void SerializeToObject(Crt::JsonObject &object) const;
+
                     static constexpr char LOG_TYPE_FILE[] = "file";
                     static constexpr char LOG_TYPE_STDOUT[] = "stdout";
 
@@ -143,12 +138,12 @@ namespace Aws
                     static constexpr char JSON_KEY_SDK_LOG_FILE[] = "sdk-log-file";
 
                     int deviceClientlogLevel{3};
-                    std::string deviceClientLogtype{LOG_TYPE_STDOUT};
-                    std::string deviceClientLogFile{"/var/log/aws-iot-device-client/aws-iot-device-client.log"};
+                    std::string deviceClientLogtype;
+                    std::string deviceClientLogFile;
 
-                    bool sdkLoggingEnabled{false};
-                    Aws::Crt::LogLevel sdkLogLevel{Aws::Crt::LogLevel::Trace};
-                    std::string sdkLogFile{"/var/log/aws-iot-device-client/sdk.log"};
+                    bool sdkLoggingEnabled = false;
+                    Aws::Crt::LogLevel sdkLogLevel = Aws::Crt::LogLevel::Trace;
+                    std::string sdkLogFile;
                 };
                 LogConfig logConfig;
 
@@ -225,8 +220,6 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
-                    /** Serialize fleet provisioning configurations To Json Object **/
-                    void SerializeToObject(Crt::JsonObject &object) const;
 
                     static constexpr char CLI_ENABLE_FLEET_PROVISIONING[] = "--enable-fleet-provisioning";
                     static constexpr char CLI_FLEET_PROVISIONING_TEMPLATE_NAME[] = "--fleet-provisioning-template-name";
@@ -255,8 +248,6 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
-                    /** Serialize fleet provisioning runtime configurations To Json Object **/
-                    void SerializeToObject(Crt::JsonObject &object) const;
 
                     static constexpr char JSON_KEY_COMPLETED_FLEET_PROVISIONING[] = "completed-fp";
                     static constexpr char JSON_KEY_CERT[] = "cert";
@@ -362,8 +353,6 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
-                    /** Serialize config shadow configurations To Json Object **/
-                    void SerializeToObject(Crt::JsonObject &object) const;
 
                     static constexpr char CLI_ENABLE_CONFIG_SHADOW[] = "--enable-config-shadow";
                     static constexpr char JSON_ENABLE_CONFIG_SHADOW[] = "enabled";
@@ -410,8 +399,6 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override;
                     bool Validate() const override;
-                    /** Serialize sensor publish configurations To Json Object **/
-                    void SerializeToObject(Crt::JsonObject &object) const;
 
                     static constexpr char JSON_SENSORS[] = "sensors";
                     static constexpr char JSON_ENABLED[] = "enabled";
