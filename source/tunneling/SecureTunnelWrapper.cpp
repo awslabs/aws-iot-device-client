@@ -42,20 +42,12 @@ SecureTunnelWrapper::SecureTunnelWrapper(
 }
 int SecureTunnelWrapper::Connect()
 {
-    if (secureTunnel)
-    {
-        return secureTunnel->Connect();
-    }
-    return AWS_OP_ERR;
+    return secureTunnel->Connect();
 }
 
 int SecureTunnelWrapper::Close()
 {
-    if (secureTunnel)
-    {
-        return secureTunnel->Close();
-    }
-    return 0;
+    return secureTunnel->Close();
 }
 
 int SecureTunnelWrapper::SendData(const Aws::Crt::ByteCursor &data)

@@ -53,7 +53,7 @@ namespace Aws
                     /**
                      * \brief Used by the logger to specify that log messages are coming from this class
                      */
-                    static constexpr char TAG[] = "SecureTunnelingContext.cpp";
+                    static constexpr char TAG[] = "SecureTunnelWrapper.cpp";
                 };
             } // namespace SecureTunneling
         }     // namespace DeviceClient
