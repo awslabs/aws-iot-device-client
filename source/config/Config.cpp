@@ -433,6 +433,82 @@ bool PlainConfig::Validate() const
     return true;
 }
 
+void PlainConfig::SerializeToObject(Crt::JsonObject &object) const
+{
+    if (endpoint.has_value() && endpoint->c_str())
+    {
+        object.WithString(JSON_KEY_ENDPOINT, endpoint->c_str());
+    }
+    if (cert.has_value() && cert->c_str())
+    {
+        object.WithString(JSON_KEY_CERT, cert->c_str());
+    }
+    if (key.has_value() && key->c_str())
+    {
+        object.WithString(JSON_KEY_KEY, key->c_str());
+    }
+    if (rootCa.has_value() && rootCa->c_str())
+    {
+        object.WithString(JSON_KEY_ROOT_CA, rootCa->c_str());
+    }
+    if (thingName.has_value() && thingName->c_str())
+    {
+        object.WithString(JSON_KEY_THING_NAME, thingName->c_str());
+    }
+
+    Crt::JsonObject loggingObject;
+    logConfig.SerializeToObject(loggingObject);
+    object.WithObject(JSON_KEY_LOGGING, loggingObject);
+
+    Crt::JsonObject jobsObject;
+    jobs.SerializeToObject(jobsObject);
+    object.WithObject(JSON_KEY_JOBS, jobsObject);
+
+    Crt::JsonObject tunnelingObject;
+    tunneling.SerializeToObject(tunnelingObject);
+    object.WithObject(JSON_KEY_TUNNELING, tunnelingObject);
+
+    Crt::JsonObject deviceDefenderObject;
+    deviceDefender.SerializeToObject(deviceDefenderObject);
+    object.WithObject(JSON_KEY_DEVICE_DEFENDER, deviceDefenderObject);
+
+    Crt::JsonObject fleetProvisioningObject;
+    fleetProvisioning.SerializeToObject(fleetProvisioningObject);
+    object.WithObject(JSON_KEY_FLEET_PROVISIONING, fleetProvisioningObject);
+
+    if (fleetProvisioning.enabled)
+    {
+        Crt::JsonObject fleetProvisioningRuntimeObject;
+        fleetProvisioningRuntimeConfig.SerializeToObject(fleetProvisioningRuntimeObject);
+        object.WithObject(JSON_KEY_RUNTIME_CONFIG, fleetProvisioningRuntimeObject);
+    }
+
+    Crt::JsonObject samplesObject;
+    Crt::JsonObject pubSubObject;
+    pubSub.SerializeToObject(pubSubObject);
+    samplesObject.WithObject(JSON_KEY_PUB_SUB, pubSubObject);
+    object.WithObject(JSON_KEY_SAMPLES, samplesObject);
+
+    Crt::JsonObject configShadowObject;
+    configShadow.SerializeToObject(configShadowObject);
+    object.WithObject(JSON_KEY_CONFIG_SHADOW, configShadowObject);
+
+    Crt::JsonObject sampleShadowObject;
+    sampleShadow.SampleShadow::SerializeToObject(sampleShadowObject);
+    object.WithObject(JSON_KEY_SAMPLE_SHADOW, sampleShadowObject);
+
+    Crt::JsonObject secureElementObject;
+    secureElement.SerializeToObject(secureElementObject);
+    object.WithObject(JSON_KEY_SECURE_ELEMENT, secureElementObject);
+
+    if (sensorPublish.enabled)
+    {
+        Crt::JsonObject sensorPublishObject;
+        sensorPublish.SerializeToObject(sensorPublishObject);
+        object.WithObject(JSON_KEY_SENSOR_PUBLISH, sensorPublishObject);
+    }
+}
+
 constexpr char PlainConfig::LogConfig::LOG_TYPE_FILE[];
 constexpr char PlainConfig::LogConfig::LOG_TYPE_STDOUT[];
 
@@ -537,6 +613,33 @@ string PlainConfig::LogConfig::ParseDeviceClientLogType(string value)
             LOG_TYPE_FILE,
             LOG_TYPE_STDOUT));
     }
+}
+
+string PlainConfig::LogConfig::StringifyDeviceClientLogLevel(int level) const
+{
+
+    switch (static_cast<DeviceClient::Logging::LogLevel>(level))
+    {
+        case DeviceClient::Logging::LogLevel::ERROR:
+            return "ERROR";
+            break;
+        case DeviceClient::Logging::LogLevel::WARN:
+            return "WARN";
+            break;
+        case DeviceClient::Logging::LogLevel::INFO:
+            return "INFO";
+            break;
+        case DeviceClient::Logging::LogLevel::DEBUG:
+            return "DEBUG";
+    }
+    throw std::invalid_argument(FormatMessage("Provided log level, %d is not known", level));
+}
+
+string PlainConfig::LogConfig::StringifySDKLogLevel(Aws::Crt::LogLevel level) const
+{
+    const char *levelString;
+    aws_log_level_to_string(static_cast<aws_log_level>(level), &levelString);
+    return levelString;
 }
 
 bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
@@ -704,6 +807,16 @@ bool PlainConfig::LogConfig::Validate() const
     return true;
 }
 
+void PlainConfig::LogConfig::SerializeToObject(Crt::JsonObject &object) const
+{
+    object.WithString(JSON_KEY_LOG_LEVEL, StringifyDeviceClientLogLevel(deviceClientlogLevel).c_str());
+    object.WithString(JSON_KEY_LOG_TYPE, deviceClientLogtype.c_str());
+    object.WithString(JSON_KEY_LOG_FILE, deviceClientLogFile.c_str());
+    object.WithBool(JSON_KEY_ENABLE_SDK_LOGGING, sdkLoggingEnabled);
+    object.WithString(JSON_KEY_SDK_LOG_LEVEL, StringifySDKLogLevel(sdkLogLevel).c_str());
+    object.WithString(JSON_KEY_SDK_LOG_FILE, sdkLogFile.c_str());
+}
+
 constexpr char PlainConfig::Jobs::CLI_ENABLE_JOBS[];
 constexpr char PlainConfig::Jobs::CLI_HANDLER_DIR[];
 constexpr char PlainConfig::Jobs::JSON_KEY_ENABLED[];
@@ -748,7 +861,6 @@ bool PlainConfig::Jobs::Validate() const
 
 void PlainConfig::Jobs::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
 
     object.WithBool(JSON_KEY_ENABLED, enabled);
 
@@ -857,8 +969,6 @@ bool PlainConfig::Tunneling::Validate() const
 
 void PlainConfig::Tunneling::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
-
     object.WithBool(JSON_KEY_ENABLED, enabled);
 }
 
@@ -928,7 +1038,6 @@ bool PlainConfig::DeviceDefender::Validate() const
 
 void PlainConfig::DeviceDefender::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
     object.WithBool(JSON_KEY_ENABLED, enabled);
     object.WithInteger(JSON_KEY_INTERVAL, interval);
 }
@@ -1068,6 +1177,31 @@ bool PlainConfig::FleetProvisioning::Validate() const
     return true;
 }
 
+void PlainConfig::FleetProvisioning::SerializeToObject(Crt::JsonObject &object) const
+{
+    object.WithBool(JSON_KEY_ENABLED, enabled);
+
+    if (templateName.has_value() && templateName->c_str())
+    {
+        object.WithString(JSON_KEY_TEMPLATE_NAME, templateName->c_str());
+    }
+
+    if (templateParameters.has_value() && templateParameters->c_str())
+    {
+        object.WithString(JSON_KEY_TEMPLATE_PARAMETERS, templateParameters->c_str());
+    }
+
+    if (csrFile.has_value() && csrFile->c_str())
+    {
+        object.WithString(JSON_KEY_CSR_FILE, csrFile->c_str());
+    }
+
+    if (deviceKey.has_value() && deviceKey->c_str())
+    {
+        object.WithString(JSON_KEY_DEVICE_KEY, deviceKey->c_str());
+    }
+}
+
 constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_COMPLETED_FLEET_PROVISIONING[];
 constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_CERT[];
 constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_KEY[];
@@ -1133,6 +1267,26 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::Validate() const
     }
     return cert.has_value() && key.has_value() && thingName.has_value() && !cert->empty() && !key->empty() &&
            !thingName->empty();
+}
+
+void PlainConfig::FleetProvisioningRuntimeConfig::SerializeToObject(Aws::Crt::JsonObject &object) const
+{
+    object.WithBool(JSON_KEY_COMPLETED_FLEET_PROVISIONING, completedFleetProvisioning);
+
+    if (cert.has_value() && cert->c_str())
+    {
+        object.WithString(JSON_KEY_CERT, cert->c_str());
+    }
+
+    if (key.has_value() && key->c_str())
+    {
+        object.WithString(JSON_KEY_KEY, key->c_str());
+    }
+
+    if (thingName.has_value() && thingName->c_str())
+    {
+        object.WithString(JSON_KEY_THING_NAME, thingName->c_str());
+    }
 }
 
 constexpr char PlainConfig::HttpProxyConfig::CLI_HTTP_PROXY_CONFIG_PATH[];
@@ -1465,7 +1619,6 @@ bool PlainConfig::PubSub::Validate() const
 
 void PlainConfig::PubSub::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
     object.WithBool(JSON_ENABLE_PUB_SUB, enabled);
 
     if (publishTopic.has_value() && publishTopic->c_str())
@@ -1700,11 +1853,10 @@ bool PlainConfig::SampleShadow::Validate() const
 
 void PlainConfig::SampleShadow::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
 
     object.WithBool(JSON_ENABLE_SAMPLE_SHADOW, enabled);
 
-    if (shadowName->c_str())
+    if (shadowName.has_value() && shadowName->c_str())
     {
         object.WithString(JSON_SAMPLE_SHADOW_NAME, shadowName->c_str());
     }
@@ -1747,6 +1899,11 @@ bool PlainConfig::ConfigShadow::LoadFromCliArgs(const CliArgs &cliArgs)
 bool PlainConfig::ConfigShadow::Validate() const
 {
     return true;
+}
+
+void PlainConfig::ConfigShadow::SerializeToObject(Crt::JsonObject &object) const
+{
+    object.WithBool(JSON_ENABLE_CONFIG_SHADOW, enabled);
 }
 
 constexpr char PlainConfig::SecureElement::CLI_ENABLE_SECURE_ELEMENT[];
@@ -1897,7 +2054,6 @@ bool PlainConfig::SecureElement::Validate() const
 
 void PlainConfig::SecureElement::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
     object.WithBool(JSON_ENABLE_SECURE_ELEMENT, enabled);
 
     if (pkcs11Lib.has_value() && pkcs11Lib->c_str())
@@ -2246,6 +2402,76 @@ bool PlainConfig::SensorPublish::Validate() const
     }
 
     return atLeastOneValidSensor;
+}
+
+void PlainConfig::SensorPublish::SerializeToObject(Crt::JsonObject &object) const
+{
+    Aws::Crt::Vector<Aws::Crt::JsonObject> sensors;
+    for (const auto &entry : settings)
+    {
+        Aws::Crt::JsonObject sensor;
+
+        if (entry.name.has_value() && entry.name->c_str())
+        {
+            sensor.WithString(JSON_NAME, entry.name->c_str());
+        }
+
+        sensor.WithBool(JSON_ENABLED, entry.enabled);
+
+        if (entry.addr.has_value() && entry.addr->c_str())
+        {
+            sensor.WithString(JSON_ADDR, entry.addr->c_str());
+        }
+
+        if (entry.addrPollSec.has_value())
+        {
+            sensor.WithInt64(JSON_ADDR_POLL_SEC, entry.addrPollSec.value());
+        }
+
+        if (entry.bufferTimeMs.has_value())
+        {
+            sensor.WithInt64(JSON_BUFFER_TIME_MS, entry.bufferTimeMs.value());
+        }
+
+        if (entry.bufferSize.has_value())
+        {
+            sensor.WithInt64(JSON_BUFFER_SIZE, entry.bufferSize.value());
+        }
+
+        if (entry.bufferCapacity.has_value())
+        {
+            sensor.WithInt64(JSON_BUFFER_CAPACITY, entry.bufferCapacity.value());
+        }
+
+        if (entry.eomDelimiter.has_value() && entry.eomDelimiter->c_str())
+        {
+            sensor.WithString(JSON_EOM_DELIMITER, entry.eomDelimiter->c_str());
+        }
+
+        if (entry.mqttTopic.has_value() && entry.mqttTopic->c_str())
+        {
+            sensor.WithString(JSON_MQTT_TOPIC, entry.mqttTopic->c_str());
+        }
+
+        if (entry.mqttDeadLetterTopic.has_value() && entry.mqttDeadLetterTopic->c_str())
+        {
+            sensor.WithString(JSON_MQTT_DEAD_LETTER_TOPIC, entry.mqttDeadLetterTopic->c_str());
+        }
+
+        if (entry.mqttHeartbeatTopic.has_value() && entry.mqttHeartbeatTopic->c_str())
+        {
+            sensor.WithString(JSON_MQTT_HEARTBEAT_TOPIC, entry.mqttHeartbeatTopic->c_str());
+        }
+
+        if (entry.heartbeatTimeSec.has_value())
+        {
+            sensor.WithInt64(JSON_HEARTBEAT_TIME_SEC, entry.heartbeatTimeSec.value());
+        }
+
+        sensors.push_back(sensor);
+    }
+
+    object.WithArray(JSON_SENSORS, sensors);
 }
 
 constexpr char Config::TAG[];
