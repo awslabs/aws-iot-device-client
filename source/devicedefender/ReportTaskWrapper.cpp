@@ -6,8 +6,7 @@
 using namespace Aws::Iot;
 using namespace std;
 
-DeviceClient::DeviceDefender::ReportTaskWrapper::ReportTaskWrapper(
-    shared_ptr<Iotdevicedefenderv1::ReportTask> task)
+DeviceClient::DeviceDefender::ReportTaskWrapper::ReportTaskWrapper(shared_ptr<Iotdevicedefenderv1::ReportTask> task)
     : task(task)
 {
 }
