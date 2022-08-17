@@ -26,6 +26,8 @@ namespace Aws
                 class DeviceDefenderFeature : public Feature
                 {
                   public:
+                    static constexpr char NAME[] = "Device Defender";
+
                     DeviceDefenderFeature() = default;
 
                     /**

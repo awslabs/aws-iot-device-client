@@ -31,7 +31,9 @@ namespace Aws
                 class JobsFeature : public Feature
                 {
                   public:
-                    virtual std::string getName() override;
+                    static constexpr char NAME[] = "Jobs";
+
+                    std::string getName() override;
 
                     /**
                      * \brief Wrapper struct to aggregate JobEngine output for updating a job execution status

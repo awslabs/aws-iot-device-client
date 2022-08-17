@@ -5,12 +5,15 @@
 #define DEVICE_CLIENT_SHAREDCRTRESOURCEMANAGER_H
 
 #include "Feature.h"
+#include "FeatureRegistry.h"
 #include "config/Config.h"
 
 #include <atomic>
 #include <aws/crt/Api.h>
 #include <aws/iot/MqttClient.h>
 #include <iostream>
+
+using namespace Aws::Iot::DeviceClient::Util;
 
 namespace Aws
 {
@@ -42,7 +45,7 @@ namespace Aws
                 std::shared_ptr<Crt::Mqtt::MqttConnection> connection;
                 aws_allocator *allocator{nullptr};
                 aws_mem_trace_level memTraceLevel{AWS_MEMTRACE_NONE};
-                std::vector<Feature *> *features;
+                std::shared_ptr<FeatureRegistry> features;
 
                 bool setupLogging(const PlainConfig &config);
 
@@ -73,7 +76,7 @@ namespace Aws
                 static const int RETRY = 1;
                 static const int ABORT = 2;
 
-                bool initialize(const PlainConfig &config, std::vector<Feature *> *features);
+                bool initialize(const PlainConfig &config, std::shared_ptr<Util::FeatureRegistry> featureRegistry);
 
                 void initializeAWSHttpLib();
 

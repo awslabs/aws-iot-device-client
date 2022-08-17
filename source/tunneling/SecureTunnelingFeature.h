@@ -26,6 +26,7 @@ namespace Aws
                 class SecureTunnelingFeature : public Feature
                 {
                   public:
+                    static constexpr char NAME[] = "Secure Tunneling";
                     /**
                      * \brief Constructor
                      */
