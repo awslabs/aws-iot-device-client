@@ -17,7 +17,8 @@ namespace Aws
                 /**
                  * \brief Interface for ReportTaskWrapper
                  *
-                 * This interface is to allow the injection of Mocks for the purposes of testing Device Defender Feature.
+                 * This interface is to allow the injection of Mocks for the purposes of testing Device Defender
+                 * Feature.
                  */
                 class AbstractReportTask
                 {
