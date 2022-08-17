@@ -31,8 +31,8 @@ namespace Aws
                     ReportTaskWrapper() = default;
                     explicit ReportTaskWrapper(shared_ptr<Aws::Iotdevicedefenderv1::ReportTask> task);
                     virtual ~ReportTaskWrapper() = default;
-                    virtual int StartTask();
-                    virtual void StopTask();
+                    virtual int StartTask() override;
+                    virtual void StopTask() override;
 
                   private:
                     std::shared_ptr<Aws::Iotdevicedefenderv1::ReportTask> task;
