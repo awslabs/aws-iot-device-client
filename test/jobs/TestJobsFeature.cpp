@@ -259,6 +259,7 @@ class TestJobsFeature : public ::testing::Test
     void SetUp()
     {
         ThingName = Aws::Crt::String("thing-name value");
+        notifier = shared_ptr<MockNotifier>(new MockNotifier());
         config = getSimpleConfig();
         startNextJobExecutionResponse =
             std::unique_ptr<StartNextJobExecutionResponse>(new StartNextJobExecutionResponse());
