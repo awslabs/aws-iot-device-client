@@ -14,6 +14,11 @@ namespace Aws
         {
             namespace DeviceDefender
             {
+                /**
+                 * \brief Interface for ReportTaskWrapper
+                 *
+                 * This interface is to allow the injection of Mocks for the purposes of testing Device Defender Feature.
+                 */
                 class AbstractReportTask
                 {
                   public:
@@ -21,6 +26,12 @@ namespace Aws
                     virtual int StartTask() = 0;
                     virtual void StopTask() = 0;
                 };
+                /**
+                 * \brief A wrapper class for Aws::Iotdevicedefenderv1::ReportTask
+                 *
+                 * This wrapper class is necessary to facilitate testing for Device Defender Feature
+                 * The ReportClass class in the SDK is final and therefore cannot be mocked.
+                 */
                 class ReportTaskWrapper : public AbstractReportTask
                 {
                   public:
