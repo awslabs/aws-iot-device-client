@@ -24,6 +24,7 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char PubSubFeature::TAG[];
+constexpr char PubSubFeature::NAME[];
 constexpr char PubSubFeature::DEFAULT_PUBLISH_FILE[];
 constexpr char PubSubFeature::DEFAULT_SUBSCRIBE_FILE[];
 
@@ -31,7 +32,7 @@ constexpr char PubSubFeature::DEFAULT_SUBSCRIBE_FILE[];
 
 string PubSubFeature::getName()
 {
-    return "Pub Sub Sample";
+    return NAME;
 }
 
 bool PubSubFeature::createPubSub(const PlainConfig &config, std::string filePath, const aws_byte_buf *payload)
@@ -199,8 +200,8 @@ int PubSubFeature::start()
 
     resourceManager->getConnection()->Subscribe(subTopic.c_str(), AWS_MQTT_QOS_AT_LEAST_ONCE, onRecvData, onSubAck);
 
-    // The feature will always publish when starting up, and then will only republish if `PUBLISH_TRIGGER_PAYLOAD` is
-    // received
+    // The feature will always publish when starting up, and then will only republish if `PUBLISH_TRIGGER_PAYLOAD`
+    // is received
     publishFileData();
 
     baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STARTED);

@@ -25,12 +25,13 @@ namespace Aws
             namespace SecureTunneling
             {
                 constexpr char SecureTunnelingFeature::TAG[];
+                constexpr char SecureTunnelingFeature::NAME[];
                 constexpr char SecureTunnelingFeature::DEFAULT_PROXY_ENDPOINT_HOST_FORMAT[];
                 std::map<std::string, uint16_t> SecureTunnelingFeature::mServiceToPortMap;
 
                 SecureTunnelingFeature::SecureTunnelingFeature() = default;
 
-                SecureTunnelingFeature::~SecureTunnelingFeature() { aws_http_library_clean_up(); }
+                SecureTunnelingFeature::~SecureTunnelingFeature() = default;
 
                 int SecureTunnelingFeature::init(
                     shared_ptr<SharedCrtResourceManager> sharedCrtResourceManager,
@@ -47,7 +48,7 @@ namespace Aws
                     return 0;
                 }
 
-                string SecureTunnelingFeature::getName() { return "Secure Tunneling"; }
+                string SecureTunnelingFeature::getName() { return NAME; }
 
                 int SecureTunnelingFeature::start()
                 {

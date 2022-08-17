@@ -18,6 +18,7 @@ using namespace Aws::Iot::DeviceClient::SensorPublish;
 const int Feature::SUCCESS; // Retain reference from header-only source to avoid linker errors.
 
 constexpr char SensorPublishFeature::TAG[];
+constexpr char SensorPublishFeature::NAME[];
 
 int SensorPublishFeature::init(
     shared_ptr<SharedCrtResourceManager> manager,
@@ -66,7 +67,7 @@ std::unique_ptr<Sensor> SensorPublishFeature::createSensor(
 
 std::string SensorPublishFeature::getName()
 {
-    return std::string{"Sensor Publish"};
+    return NAME;
 }
 
 // cppcheck-suppress unusedFunction

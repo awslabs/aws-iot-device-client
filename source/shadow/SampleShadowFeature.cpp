@@ -37,6 +37,7 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char SampleShadowFeature::TAG[];
+constexpr char SampleShadowFeature::NAME[];
 constexpr char SampleShadowFeature::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[];
 constexpr int SampleShadowFeature::DEFAULT_WAIT_TIME_SECONDS;
 
@@ -47,7 +48,7 @@ constexpr int SampleShadowFeature::DEFAULT_WAIT_TIME_SECONDS;
 
 string SampleShadowFeature::getName()
 {
-    return string("SampleShadow");
+    return NAME;
 }
 
 int SampleShadowFeature::init(

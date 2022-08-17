@@ -65,6 +65,8 @@ namespace Aws
                         aws_event_loop *eventLoop) const;
 
                   public:
+                    static constexpr char NAME[] = "Sensor Publish";
+
                     /**
                      * \brief Constructor
                      */
