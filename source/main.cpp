@@ -147,6 +147,7 @@ void shutdown()
     resourceManager->disconnect();
 #endif
     LoggerFactory::getLoggerInstance().get()->shutdown();
+    resourceManager.reset();
     exit(0);
 }
 

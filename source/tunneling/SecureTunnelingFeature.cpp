@@ -31,7 +31,7 @@ namespace Aws
 
                 SecureTunnelingFeature::SecureTunnelingFeature() = default;
 
-                SecureTunnelingFeature::~SecureTunnelingFeature() { aws_http_library_clean_up(); }
+                SecureTunnelingFeature::~SecureTunnelingFeature() = default;
 
                 int SecureTunnelingFeature::init(
                     shared_ptr<SharedCrtResourceManager> sharedCrtResourceManager,
