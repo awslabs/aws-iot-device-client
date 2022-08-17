@@ -8,10 +8,10 @@
 #include <aws/iotdevicecommon/IotDevice.h>
 #include <aws/iotdevicedefender/DeviceDefender.h>
 
-#include "ReportTaskWrapper.h"
 #include "../ClientBaseNotifier.h"
 #include "../Feature.h"
 #include "../SharedCrtResourceManager.h"
+#include "ReportTaskWrapper.h"
 
 namespace Aws
 {
@@ -59,6 +59,7 @@ namespace Aws
                      * \brief the ThingName to use
                      */
                     std::string thingName;
+
                   private:
                     /**
                      * \brief Used by the logger to specify that log messages are coming from the Device Defender
@@ -101,7 +102,7 @@ namespace Aws
                     /**
                      * \brief The format of the Topic Filter
                      */
-                     static constexpr char TOPIC_FORMAT[] = "%s%s%s%s";
+                    static constexpr char TOPIC_FORMAT[] = "%s%s%s%s";
 
                     /**
                      * \brief Factory method for ReportTask to facilitate mocking
@@ -128,12 +129,12 @@ namespace Aws
                     /**
                      * \brief Subscribes to Topic Filter Accepted/Rejected
                      */
-                     virtual void subscribeToTopicFilter();
+                    virtual void subscribeToTopicFilter();
 
-                     /**
-                      * \Brief Unsubscribes to Topic Filter Accepted/Rejected
-                      */
-                     virtual void unsubscribeToTopicFilter();
+                    /**
+                     * \Brief Unsubscribes to Topic Filter Accepted/Rejected
+                     */
+                    virtual void unsubscribeToTopicFilter();
                 };
             } // namespace DeviceDefender
         }     // namespace DeviceClient

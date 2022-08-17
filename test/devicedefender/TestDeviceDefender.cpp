@@ -71,8 +71,8 @@ class MockDDFeature : public DeviceDefenderFeature
 {
   public:
     MockDDFeature() : DeviceDefenderFeature() {}
-    string getThingName() { return this->thingName;}
-    int getInterval() { return this->interval;}
+    string getThingName() { return this->thingName; }
+    int getInterval() { return this->interval; }
     MOCK_METHOD(shared_ptr<AbstractReportTask>, createReportTask, (), (override));
     MOCK_METHOD(void, subscribeToTopicFilter, (), (override));
     MOCK_METHOD(void, unsubscribeToTopicFilter, (), (override));
@@ -125,7 +125,7 @@ TEST_F(TestDeviceDefender, Start)
     EXPECT_CALL(*task, StartTask()).Times(1).WillOnce(Return(0));
     EXPECT_CALL(*deviceDefender, createReportTask()).Times(1).WillOnce(Return(task));
     EXPECT_CALL(*deviceDefender, subscribeToTopicFilter()).Times(1).WillOnce(Return());
-    EXPECT_CALL(*notifier, onEvent(_,_)).Times(1).WillOnce(Return());
+    EXPECT_CALL(*notifier, onEvent(_, _)).Times(1).WillOnce(Return());
 
     ASSERT_EQ(deviceDefender->init(manager, notifier, config), 0);
     ASSERT_EQ(deviceDefender->start(), 0);
@@ -143,7 +143,7 @@ TEST_F(TestDeviceDefender, StartStop)
     EXPECT_CALL(*task, StartTask()).Times(1).WillOnce(Return(0));
     EXPECT_CALL(*deviceDefender, createReportTask()).Times(1).WillOnce(Return(task));
     EXPECT_CALL(*deviceDefender, subscribeToTopicFilter()).Times(1).WillOnce(Return());
-    EXPECT_CALL(*notifier, onEvent(_,_)).Times(2).WillOnce(Return());
+    EXPECT_CALL(*notifier, onEvent(_, _)).Times(2).WillOnce(Return());
     EXPECT_CALL(*task, StopTask()).Times(1);
     EXPECT_CALL(*deviceDefender, unsubscribeToTopicFilter()).Times(1).WillOnce(Return());
 

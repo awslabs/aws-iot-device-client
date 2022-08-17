@@ -3,8 +3,11 @@
 
 #include "ReportTaskWrapper.h"
 
-Iot::DeviceClient::DeviceDefender::ReportTaskWrapper::ReportTaskWrapper(shared_ptr<Iotdevicedefenderv1::ReportTask> task)
-    : task(task){}
+Iot::DeviceClient::DeviceDefender::ReportTaskWrapper::ReportTaskWrapper(
+    shared_ptr<Iotdevicedefenderv1::ReportTask> task)
+    : task(task)
+{
+}
 
 int Iot::DeviceClient::DeviceDefender::ReportTaskWrapper::StartTask()
 {

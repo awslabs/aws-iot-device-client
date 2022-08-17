@@ -9,10 +9,14 @@
 using namespace std;
 using namespace Aws;
 
-namespace Aws {
-    namespace Iot {
-        namespace DeviceClient {
-            namespace DeviceDefender {
+namespace Aws
+{
+    namespace Iot
+    {
+        namespace DeviceClient
+        {
+            namespace DeviceDefender
+            {
 
                 class AbstractReportTask
                 {
@@ -33,11 +37,9 @@ namespace Aws {
                   private:
                     std::shared_ptr<Aws::Iotdevicedefenderv1::ReportTask> task;
                 };
-            }
-        }
-    }
-}
-
-
+            } // namespace DeviceDefender
+        }     // namespace DeviceClient
+    }         // namespace Iot
+} // namespace Aws
 
 #endif // AWS_IOT_DEVICE_CLIENT_REPORTTASKWRAPPER_H

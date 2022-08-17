@@ -41,10 +41,7 @@ void DeviceDefenderFeature::startDeviceDefender()
     task->StartTask();
     LOGM_DEBUG(TAG, "%s StartTask() async called", getName().c_str());
 
-
-
     subscribeToTopicFilter();
-
 }
 
 void DeviceDefenderFeature::stopDeviceDefender()
