@@ -6,9 +6,6 @@
 
 #include <aws/iotdevicedefender/DeviceDefender.h>
 
-using namespace std;
-using namespace Aws;
-
 namespace Aws
 {
     namespace Iot
@@ -17,7 +14,6 @@ namespace Aws
         {
             namespace DeviceDefender
             {
-
                 class AbstractReportTask
                 {
                   public:
@@ -29,7 +25,7 @@ namespace Aws
                 {
                   public:
                     ReportTaskWrapper() = default;
-                    explicit ReportTaskWrapper(shared_ptr<Aws::Iotdevicedefenderv1::ReportTask> task);
+                    explicit ReportTaskWrapper(std::shared_ptr<Aws::Iotdevicedefenderv1::ReportTask> task);
                     virtual ~ReportTaskWrapper() = default;
                     virtual int StartTask() override;
                     virtual void StopTask() override;
