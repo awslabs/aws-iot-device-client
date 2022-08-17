@@ -40,26 +40,27 @@ namespace Aws
                         OnTcpForwardDataReceive onTcpForwardDataReceive);
 
                     /**
+                     * \brief Default Constructor
+                     */
+
+                    TcpForward() = default;
+
+                    /**
                      * \brief Destructor
                      */
-                    ~TcpForward();
+                    virtual ~TcpForward();
 
                     /**
                      * \brief Connect to the local TCP socket
                      */
-                    int Connect();
-
-                    /**
-                     * \brief Close the local TCP socket
-                     */
-                    int Close();
+                    virtual int Connect();
 
                     /**
                      * \brief Send the given payload to the TCP socket
                      *
                      * @param data the payload to send
                      */
-                    int SendData(const Crt::ByteCursor &data);
+                    virtual int SendData(const Crt::ByteCursor &data);
 
                   private:
                     //

@@ -25,7 +25,7 @@ namespace Aws
                     const Aws::Crt::Optional<std::string> &rootCa,
                     const string &accessToken,
                     const string &endpoint,
-                    uint16_t port,
+                    const int port,
                     const OnConnectionShutdownFn &onConnectionShutdown)
                     : mSharedCrtResourceManager(manager), mRootCa(rootCa.has_value() ? rootCa.value() : ""),
                       mAccessToken(accessToken), mEndpoint(endpoint), mPort(port),
@@ -35,17 +35,10 @@ namespace Aws
 
                 SecureTunnelingContext::~SecureTunnelingContext()
                 {
-                    LOG_DEBUG(TAG, "SecureTunnelingContext::~SecureTunnelingContext");
                     if (mSecureTunnel && mSecureTunnel->IsValid())
                     {
                         mSecureTunnel->Close();
                     }
-                }
-
-                void SecureTunnelingContext::StopSecureTunnel()
-                {
-                    LOG_DEBUG(TAG, "SecureTunnelingContext::StopSecureTunnel");
-                    mSecureTunnel->Shutdown();
                 }
 
                 template <typename T>
@@ -99,30 +92,22 @@ namespace Aws
                         return false;
                     }
 
-                    mSecureTunnel = unique_ptr<SecureTunnel>(new SecureTunnel(
-                        mSharedCrtResourceManager->getAllocator(),
-                        mSharedCrtResourceManager->getClientBootstrap(),
-                        Aws::Crt::Io::SocketOptions(),
-
-                        mAccessToken,
-                        AWS_SECURE_TUNNELING_DESTINATION_MODE,
-                        mEndpoint,
-                        mRootCa,
-
+                    mSecureTunnel = CreateSecureTunnel(
                         bind(&SecureTunnelingContext::OnConnectionComplete, this),
                         bind(&SecureTunnelingContext::OnConnectionShutdown, this),
                         bind(&SecureTunnelingContext::OnSendDataComplete, this, placeholders::_1),
                         bind(&SecureTunnelingContext::OnDataReceive, this, placeholders::_1),
                         bind(&SecureTunnelingContext::OnStreamStart, this),
                         bind(&SecureTunnelingContext::OnStreamReset, this),
-                        bind(&SecureTunnelingContext::OnSessionReset, this)));
+                        bind(&SecureTunnelingContext::OnSessionReset, this));
 
-                    bool connectionSuccess =
-                        mSecureTunnel->GetUnderlyingHandle() != nullptr && mSecureTunnel->Connect() == AWS_OP_SUCCESS;
+                    bool connectionSuccess = mSecureTunnel->Connect() == AWS_OP_SUCCESS;
+
                     if (!connectionSuccess)
                     {
                         LOG_ERROR(TAG, "Cannot connect to secure tunnel. Please see the SDK log for detail.");
                     }
+
                     return connectionSuccess;
                 }
 
@@ -134,10 +119,8 @@ namespace Aws
                         return;
                     }
 
-                    mTcpForward = unique_ptr<TcpForward>(new TcpForward(
-                        mSharedCrtResourceManager,
-                        mPort,
-                        bind(&SecureTunnelingContext::OnTcpForwardDataReceive, this, placeholders::_1)));
+                    mTcpForward = CreateTcpForward();
+
                     mTcpForward->Connect();
                 }
 
@@ -193,6 +176,45 @@ namespace Aws
                     mSecureTunnel->SendData(aws_byte_cursor_from_buf(&data));
                 }
 
+                void SecureTunnelingContext::StopSecureTunnel()
+                {
+                    LOG_DEBUG(TAG, "SecureTunnelingContext::StopSecureTunnel");
+                    mSecureTunnel->Shutdown();
+                }
+
+                std::shared_ptr<SecureTunnelWrapper> SecureTunnelingContext::CreateSecureTunnel(
+                    Aws::Iotsecuretunneling::OnConnectionComplete onConnectionComplete,
+                    Aws::Iotsecuretunneling::OnConnectionShutdown onConnectionShutdown,
+                    Aws::Iotsecuretunneling::OnSendDataComplete onSendDataComplete,
+                    Aws::Iotsecuretunneling::OnDataReceive onDataReceive,
+                    Aws::Iotsecuretunneling::OnStreamStart onStreamStart,
+                    Aws::Iotsecuretunneling::OnStreamReset onStreamReset,
+                    Aws::Iotsecuretunneling::OnSessionReset onSessionReset)
+                {
+                    return std::shared_ptr<SecureTunnelWrapper>(new SecureTunnelWrapper(
+                        mSharedCrtResourceManager->getAllocator(),
+                        mSharedCrtResourceManager->getClientBootstrap(),
+                        Crt::Io::SocketOptions(),
+                        mAccessToken,
+                        AWS_SECURE_TUNNELING_DESTINATION_MODE,
+                        mEndpoint,
+                        mRootCa,
+                        onConnectionComplete,
+                        onConnectionShutdown,
+                        onSendDataComplete,
+                        onDataReceive,
+                        onStreamStart,
+                        onStreamReset,
+                        onSessionReset));
+                }
+
+                std::shared_ptr<TcpForward> SecureTunnelingContext::CreateTcpForward()
+                {
+                    return std::shared_ptr<TcpForward>(new TcpForward(
+                        mSharedCrtResourceManager,
+                        mPort,
+                        bind(&SecureTunnelingContext::OnTcpForwardDataReceive, this, placeholders::_1)));
+                }
             } // namespace SecureTunneling
         }     // namespace DeviceClient
     }         // namespace Iot
