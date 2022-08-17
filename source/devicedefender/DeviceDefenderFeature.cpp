@@ -3,16 +3,13 @@
 
 #include "DeviceDefenderFeature.h"
 #include "../logging/LoggerFactory.h"
+#include "ReportTaskWrapper.h"
+
 #include <aws/iotdevicedefender/DeviceDefender.h>
 
-#include <aws/crt/Api.h>
 #include <aws/iotdevicecommon/IotDevice.h>
 #include <iostream>
 #include <thread>
-
-#include <aws/iotdevicecommon/IotDevice.h>
-#include <aws/iotdevicedefender/DeviceDefender.h>
-#include <utility>
 
 using namespace std;
 using namespace Aws;
@@ -29,6 +26,7 @@ constexpr char DeviceDefenderFeature::TOPIC_PRE[];
 constexpr char DeviceDefenderFeature::TOPIC_POST[];
 constexpr char DeviceDefenderFeature::TOPIC_ACCEPTED[];
 constexpr char DeviceDefenderFeature::TOPIC_REJECTED[];
+constexpr char DeviceDefenderFeature::TOPIC_FORMAT[];
 
 string DeviceDefenderFeature::getName()
 {
@@ -38,60 +36,23 @@ string DeviceDefenderFeature::getName()
 void DeviceDefenderFeature::startDeviceDefender()
 {
     LOGM_INFO(TAG, "Starting %s", getName().c_str());
-
-    auto onCancelled = [&](void *userData) -> void {
-        LOGM_DEBUG(TAG, "task called onCancelled for thing: %s", thingName.c_str());
-        stop();
-    };
-
-    Iotdevicedefenderv1::ReportTaskBuilder taskBuilder(
-        resourceManager->getAllocator(),
-        resourceManager->getConnection(),
-        *resourceManager->getEventLoopGroup(),
-        String(thingName.c_str()));
-    taskBuilder.WithTaskPeriodSeconds((uint32_t)interval);
-    taskBuilder.WithNetworkConnectionSamplePeriodSeconds((uint32_t)interval);
-    taskBuilder.WithTaskCancelledHandler(onCancelled);
-    taskBuilder.WithTaskCancellationUserData(NULL);
-    LOGM_INFO(TAG, "%s task builder interval: %i", getName().c_str(), interval);
-    task = taskBuilder.Build();
+    task = createReportTask();
     LOGM_DEBUG(TAG, "%s task build finished", getName().c_str());
     task->StartTask();
     LOGM_DEBUG(TAG, "%s StartTask() async called", getName().c_str());
 
-    auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void {
-        LOGM_DEBUG(TAG, "Recv: Topic:(%s), Payload:%s", topic.c_str(), (char *)payload.buffer);
-    };
-    auto onSubAck =
-        [&](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void {
-        LOGM_DEBUG(TAG, "SubAck: PacketId:(%s), ErrorCode:%i", getName().c_str(), errorCode);
-    };
-    const char *messageFormat = "%s%s%s%s";
-    resourceManager->getConnection()->Subscribe(
-        FormatMessage(messageFormat, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_ACCEPTED).c_str(),
-        AWS_MQTT_QOS_AT_LEAST_ONCE,
-        onRecvData,
-        onSubAck);
-    resourceManager->getConnection()->Subscribe(
-        FormatMessage(messageFormat, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_REJECTED).c_str(),
-        AWS_MQTT_QOS_AT_LEAST_ONCE,
-        onRecvData,
-        onSubAck);
+
+
+    subscribeToTopicFilter();
+
 }
 
 void DeviceDefenderFeature::stopDeviceDefender()
 {
+
     LOGM_INFO(TAG, "Stopping %s", getName().c_str());
     task->StopTask();
-    auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void {
-        LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%i, ErrorCode:%i", packetId, errorCode);
-    };
-    const char *messageFormat = "%s%s%s%s";
-    resourceManager->getConnection()->Unsubscribe(
-        FormatMessage(messageFormat, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_ACCEPTED).c_str(), onUnsubscribe);
-    resourceManager->getConnection()->Unsubscribe(
-        FormatMessage(messageFormat, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_REJECTED).c_str(), onUnsubscribe);
-    LOGM_DEBUG(TAG, "%s StopTask() async called", getName().c_str());
+    unsubscribeToTopicFilter();
 }
 
 int DeviceDefenderFeature::init(
@@ -118,4 +79,59 @@ int DeviceDefenderFeature::stop()
     stopDeviceDefender();
     baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
     return 0;
+}
+std::shared_ptr<AbstractReportTask> DeviceDefender::DeviceDefenderFeature::createReportTask()
+{
+
+    auto onCancelled = [&](void *userData) -> void {
+        LOGM_DEBUG(TAG, "task called onCancelled for thing: %s", thingName.c_str());
+        stop();
+    };
+
+    Iotdevicedefenderv1::ReportTaskBuilder taskBuilder(
+        resourceManager->getAllocator(),
+        resourceManager->getConnection(),
+        *resourceManager->getEventLoopGroup(),
+        String(thingName.c_str()));
+    taskBuilder.WithTaskPeriodSeconds((uint32_t)interval);
+    taskBuilder.WithNetworkConnectionSamplePeriodSeconds((uint32_t)interval);
+    taskBuilder.WithTaskCancelledHandler(onCancelled);
+    taskBuilder.WithTaskCancellationUserData(NULL);
+
+    LOGM_INFO(TAG, "%s task builder interval: %i", getName().c_str(), interval);
+
+    std::shared_ptr<Aws::Iotdevicedefenderv1::ReportTask> reportTask = taskBuilder.Build();
+
+    return std::shared_ptr<AbstractReportTask>(new ReportTaskWrapper(reportTask));
+}
+void DeviceDefender::DeviceDefenderFeature::subscribeToTopicFilter()
+{
+    auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void {
+        LOGM_DEBUG(TAG, "Recv: Topic:(%s), Payload:%s", topic.c_str(), (char *)payload.buffer);
+    };
+    auto onSubAck =
+        [&](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void {
+        LOGM_DEBUG(TAG, "SubAck: PacketId:(%s), ErrorCode:%i", getName().c_str(), errorCode);
+    };
+    resourceManager->getConnection()->Subscribe(
+        FormatMessage(TOPIC_FORMAT, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_ACCEPTED).c_str(),
+        AWS_MQTT_QOS_AT_LEAST_ONCE,
+        onRecvData,
+        onSubAck);
+    resourceManager->getConnection()->Subscribe(
+        FormatMessage(TOPIC_FORMAT, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_REJECTED).c_str(),
+        AWS_MQTT_QOS_AT_LEAST_ONCE,
+        onRecvData,
+        onSubAck);
+}
+void DeviceDefender::DeviceDefenderFeature::unsubscribeToTopicFilter()
+{
+    auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void {
+        LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%i, ErrorCode:%i", packetId, errorCode);
+    };
+    resourceManager->getConnection()->Unsubscribe(
+        FormatMessage(TOPIC_FORMAT, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_ACCEPTED).c_str(), onUnsubscribe);
+    resourceManager->getConnection()->Unsubscribe(
+        FormatMessage(TOPIC_FORMAT, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_REJECTED).c_str(), onUnsubscribe);
+    LOGM_DEBUG(TAG, "%s StopTask() async called", getName().c_str());
 }
