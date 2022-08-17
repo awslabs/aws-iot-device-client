@@ -22,6 +22,8 @@ namespace Aws
                 class SampleShadowFeature : public Feature
                 {
                   public:
+                    static constexpr char NAME[] = "SampleShadow";
+
                     int init(
                         std::shared_ptr<SharedCrtResourceManager> manager,
                         std::shared_ptr<ClientBaseNotifier> notifier,
@@ -40,6 +42,7 @@ namespace Aws
                      */
                     std::string thingName;
                     static constexpr char TAG[] = "SampleShadowFeature.cpp";
+
                     /**
                      * \brief The resource manager used to manage CRT resources
                      */

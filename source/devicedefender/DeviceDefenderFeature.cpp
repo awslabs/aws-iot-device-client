@@ -25,6 +25,7 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char DeviceDefenderFeature::TAG[];
+constexpr char DeviceDefenderFeature::NAME[];
 constexpr char DeviceDefenderFeature::TOPIC_PRE[];
 constexpr char DeviceDefenderFeature::TOPIC_POST[];
 constexpr char DeviceDefenderFeature::TOPIC_ACCEPTED[];
@@ -32,7 +33,7 @@ constexpr char DeviceDefenderFeature::TOPIC_REJECTED[];
 
 string DeviceDefenderFeature::getName()
 {
-    return "Device Defender";
+    return NAME;
 }
 
 void DeviceDefenderFeature::startDeviceDefender()

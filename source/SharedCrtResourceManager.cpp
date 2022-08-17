@@ -34,9 +34,11 @@ SharedCrtResourceManager::~SharedCrtResourceManager()
     }
 }
 
-bool SharedCrtResourceManager::initialize(const PlainConfig &config, vector<Feature *> *featuresList)
+bool SharedCrtResourceManager::initialize(
+    const PlainConfig &config,
+    std::shared_ptr<Util::FeatureRegistry> featureRegistry)
 {
-    features = featuresList;
+    features = featureRegistry;
     initializeAllocator(config);
     initialized = buildClient(config) == SharedCrtResourceManager::SUCCESS;
     return initialized;
@@ -530,10 +532,7 @@ void SharedCrtResourceManager::disconnect()
 void SharedCrtResourceManager::startDeviceClientFeatures()
 {
     LOG_INFO(TAG, "Starting Device Client features.");
-    for (auto *feature : *features)
-    {
-        feature->start();
-    }
+    features->startAll();
 }
 
 void SharedCrtResourceManager::dumpMemTrace()
