@@ -13,8 +13,6 @@
 #include <aws/iot/MqttClient.h>
 #include <iostream>
 
-using namespace Aws::Iot::DeviceClient::Util;
-
 namespace Aws
 {
     namespace Iot
@@ -45,7 +43,7 @@ namespace Aws
                 std::shared_ptr<Crt::Mqtt::MqttConnection> connection;
                 aws_allocator *allocator{nullptr};
                 aws_mem_trace_level memTraceLevel{AWS_MEMTRACE_NONE};
-                std::shared_ptr<FeatureRegistry> features;
+                std::shared_ptr<Util::FeatureRegistry> features;
 
                 bool setupLogging(const PlainConfig &config);
 
