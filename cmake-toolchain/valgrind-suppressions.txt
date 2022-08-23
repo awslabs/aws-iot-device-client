@@ -787,76 +787,6 @@
    possible_1
    Memcheck:Leak
    match-leak-kinds: possible
-   fun:calloc
-   fun:allocate_dtv
-   fun:_dl_allocate_tls
-   fun:allocate_stack
-   fun:pthread_create@@GLIBC_2.2.5
-   fun:aws_thread_launch
-   fun:s_run
-   fun:aws_event_loop_run
-   fun:s_event_loop_group_new
-   fun:aws_event_loop_group_new
-   fun:aws_event_loop_group_new_default
-   fun:_ZN3Aws3Crt2Io14EventLoopGroupC1EtP13aws_allocator
-   fun:_ZN3Aws3Iot12DeviceClient24SharedCrtResourceManager11buildClientERKNS1_11PlainConfigE
-   fun:_ZN3Aws3Iot12DeviceClient24SharedCrtResourceManager10initializeERKNS1_11PlainConfigEPSt6vectorIPNS1_7FeatureESaIS8_EE
-}
-{
-   possible_2
-   Memcheck:Leak
-   match-leak-kinds: possible
-   fun:calloc
-   fun:allocate_dtv
-   fun:_dl_allocate_tls
-   fun:allocate_stack
-   fun:pthread_create@@GLIBC_2.2.5
-   fun:aws_thread_launch
-   fun:create_and_init_host_entry
-   fun:default_resolve_host
-   fun:aws_host_resolver_resolve_host
-   fun:aws_client_bootstrap_new_socket_channel
-   fun:s_mqtt_client_connect
-   fun:aws_mqtt_client_connection_connect
-   fun:_ZN3Aws3Crt4Mqtt14MqttConnection7ConnectEPKcbtjj
-   fun:_ZN3Aws3Iot12DeviceClient24SharedCrtResourceManager19establishConnectionERKNS1_11PlainConfigE
-}
-{
-   possible_3
-   Memcheck:Leak
-   match-leak-kinds: possible
-   fun:calloc
-   fun:allocate_dtv
-   fun:_dl_allocate_tls
-   fun:allocate_stack
-   fun:pthread_create@@GLIBC_2.2.5
-   fun:_ZNSt6thread15_M_start_threadESt10unique_ptrINS_6_StateESt14default_deleteIS1_EEPFvvE
-   fun:_ZNSt6threadC1IMN3Aws3Iot12DeviceClient7Logging12StdOutLoggerEFvvEJPS5_EvEEOT_DpOT0_
-   fun:_ZN3Aws3Iot12DeviceClient7Logging12StdOutLogger5startERKNS1_11PlainConfigE
-   fun:_ZN3Aws3Iot12DeviceClient7Logging13LoggerFactory11reconfigureERKNS1_11PlainConfigE
-   fun:main
-}
-{
-   possible_4
-   Memcheck:Leak
-   match-leak-kinds: possible
-   fun:memalign
-   fun:posix_memalign
-   fun:s_default_malloc
-   fun:s_default_calloc
-   fun:aws_mem_calloc
-   fun:mqtt_disconnect_impl
-   fun:aws_mqtt_client_connection_disconnect
-   fun:_ZN3Aws3Crt4Mqtt14MqttConnection10DisconnectEv
-   fun:_ZN3Aws3Iot12DeviceClient24SharedCrtResourceManager10disconnectEv
-   fun:_Z8shutdownv
-   fun:_Z22handle_feature_stoppedPKN3Aws3Iot12DeviceClient7FeatureE
-   fun:_ZN3Aws3Iot12DeviceClient25DefaultClientBaseNotifier7onEventEPNS1_7FeatureENS1_27ClientBaseEventNotificationE
-}
-{
-   possible_5
-   Memcheck:Leak
-   match-leak-kinds: possible
    fun:memalign
    fun:posix_memalign
    fun:s_default_malloc
@@ -871,24 +801,7 @@
    fun:s2n_connection_send_stuffer
 }
 {
-   possible_6
-   Memcheck:Leak
-   match-leak-kinds: possible
-   fun:_Znwm
-   fun:_ZNSs4_Rep9_S_createEmmRKSaIcE
-   fun:_ZNSs12_S_constructIPKcEEPcT_S3_RKSaIcESt20forward_iterator_tag
-   fun:_ZNSsC1EPKcmRKSaIcE
-   obj:/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28
-   fun:_ZNSt11logic_errorC1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
-   obj:/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28
-   fun:_ZSt20__throw_future_errori
-   fun:_ZNSt13__future_base13_State_baseV221_M_set_retrieved_flagEv
-   fun:_ZNSt14__basic_futureIvEC1ERKSt10shared_ptrINSt13__future_base13_State_baseV2EE
-   fun:_ZNSt6futureIvEC1ERKSt10shared_ptrINSt13__future_base13_State_baseV2EE
-   fun:_ZNSt7promiseIvE10get_futureEv
-}
-{
-   possible_7
+   possible_2
    Memcheck:Leak
    match-leak-kinds: possible
    fun:memalign
@@ -904,17 +817,4 @@
    fun:s_run_all
    fun:aws_task_scheduler_run_all
 }
-{
-   possible_8
-   Memcheck:Leak
-   match-leak-kinds: possible
-   fun:calloc
-   fun:allocate_dtv
-   fun:_dl_allocate_tls
-   fun:allocate_stack
-   fun:pthread_create@@GLIBC_2.2.5
-   fun:_ZNSt6thread15_M_start_threadESt10unique_ptrINS_6_StateESt14default_deleteIS1_EEPFvvE
-   fun:_ZNSt6threadC1IZ17attemptConnectionvEUlvE0_JEvEEOT_DpOT0_
-   fun:_Z17attemptConnectionv
-   fun:main
-}
+
