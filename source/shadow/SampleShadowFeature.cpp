@@ -37,6 +37,7 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char SampleShadowFeature::TAG[];
+constexpr char SampleShadowFeature::NAME[];
 constexpr char SampleShadowFeature::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[];
 constexpr int SampleShadowFeature::DEFAULT_WAIT_TIME_SECONDS;
 
@@ -47,7 +48,7 @@ constexpr int SampleShadowFeature::DEFAULT_WAIT_TIME_SECONDS;
 
 string SampleShadowFeature::getName()
 {
-    return string("SampleShadow");
+    return NAME;
 }
 
 int SampleShadowFeature::init(
@@ -362,23 +363,7 @@ void SampleShadowFeature::readAndUpdateShadowFromFile()
     }
     else
     {
-        string expandedPath = FileUtils::ExtractExpandedPath(inputFile);
-        if (!FileUtils::FileExists(expandedPath))
-        {
-            LOGM_ERROR(TAG, "Unable to open shadow data file %s, file does not exist", Sanitize(expandedPath).c_str());
-            return;
-        }
-        size_t incomingFileSize = FileUtils::GetFileSize(inputFile);
-        if (4 * 1024 < incomingFileSize)
-        {
-            LOGM_WARN(
-                TAG,
-                "Refusing to open input file %s, file size %zu bytes is greater than allowable limit of %zu bytes",
-                Sanitize(inputFile).c_str(),
-                incomingFileSize,
-                4 * 1024);
-            return;
-        }
+        string expandedPath = inputFile;
 
         ifstream setting(expandedPath.c_str());
         if (!setting.is_open())
@@ -421,45 +406,6 @@ void SampleShadowFeature::readAndUpdateShadowFromFile()
 int SampleShadowFeature::start()
 {
     LOGM_INFO(TAG, "Starting %s", getName().c_str());
-
-    if (outputFile.empty())
-    {
-        if (!FileUtils::CreateDirectoryWithPermissions(Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR, S_IRWXU))
-        {
-            LOGM_ERROR(
-                TAG,
-                "Failed to access/create default directories: %s required for storage of shadow document",
-                Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR);
-        }
-        else
-        {
-            ostringstream outputPathStream;
-            outputPathStream << Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR << DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
-            LOG_INFO(TAG, outputPathStream.str().c_str());
-
-            string outputPath = FileUtils::ExtractExpandedPath(outputPathStream.str().c_str());
-
-            if (FileUtils::StoreValueInFile("", outputPath))
-            {
-                chmod(outputPath.c_str(), S_IRUSR | S_IWUSR);
-                if (FileUtils::ValidateFilePermissions(outputPath.c_str(), Permissions::SAMPLE_SHADOW_FILES))
-                {
-                    outputFile = outputPath;
-                    LOGM_INFO(
-                        TAG,
-                        "Succesfully create default file: %s required for storage of shadow document",
-                        outputPath.c_str());
-                }
-            }
-            else
-            {
-                LOGM_ERROR(
-                    TAG,
-                    "Failed to access/create default file: %s required for storage of shadow document",
-                    outputPath.c_str());
-            }
-        }
-    }
 
     shadowClient = unique_ptr<IotShadowClient>(new IotShadowClient(resourceManager.get()->getConnection()));
 

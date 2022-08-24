@@ -68,6 +68,23 @@ TEST(FileUtils, handlesEmptyPathToExtractExpandedPath)
     ASSERT_STREQ("", extendedPath.c_str());
 }
 
+class HandlesIllegalCharacterTestFixture : public ::testing::TestWithParam<const char *>
+{
+  protected:
+    const char *path;
+};
+
+TEST_P(HandlesIllegalCharacterTestFixture, handlesIllegalCharacterInExtractExpandedPath)
+{
+    const char *path = GetParam();
+    ASSERT_THROW(FileUtils::ExtractExpandedPath(path), wordexp_fail_error);
+}
+
+INSTANTIATE_TEST_CASE_P(
+    FileUtils,
+    HandlesIllegalCharacterTestFixture,
+    ::testing::Values("|", "&", ";", "<", ">", "(", ")", "{", "}"));
+
 TEST(FileUtils, handlesEmptyPathForStoreValueInFile)
 {
     ASSERT_FALSE(FileUtils::StoreValueInFile("", ""));

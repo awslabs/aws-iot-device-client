@@ -19,6 +19,7 @@
 
 #include "../util/FileUtils.h"
 #include "../util/MqttUtils.h"
+#include "../util/ProxyUtils.h"
 #include "../util/StringUtils.h"
 #include "Version.h"
 
@@ -278,7 +279,8 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     return logConfig.LoadFromCliArgs(cliArgs) && jobs.LoadFromCliArgs(cliArgs) && tunneling.LoadFromCliArgs(cliArgs) &&
            deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs) &&
            pubSub.LoadFromCliArgs(cliArgs) && sampleShadow.LoadFromCliArgs(cliArgs) &&
-           configShadow.LoadFromCliArgs(cliArgs) && secureElement.LoadFromCliArgs(cliArgs);
+           configShadow.LoadFromCliArgs(cliArgs) && secureElement.LoadFromCliArgs(cliArgs) &&
+           httpProxyConfig.LoadFromCliArgs(cliArgs);
 }
 
 bool PlainConfig::LoadFromEnvironment()
@@ -431,6 +433,82 @@ bool PlainConfig::Validate() const
     return true;
 }
 
+void PlainConfig::SerializeToObject(Crt::JsonObject &object) const
+{
+    if (endpoint.has_value() && endpoint->c_str())
+    {
+        object.WithString(JSON_KEY_ENDPOINT, endpoint->c_str());
+    }
+    if (cert.has_value() && cert->c_str())
+    {
+        object.WithString(JSON_KEY_CERT, cert->c_str());
+    }
+    if (key.has_value() && key->c_str())
+    {
+        object.WithString(JSON_KEY_KEY, key->c_str());
+    }
+    if (rootCa.has_value() && rootCa->c_str())
+    {
+        object.WithString(JSON_KEY_ROOT_CA, rootCa->c_str());
+    }
+    if (thingName.has_value() && thingName->c_str())
+    {
+        object.WithString(JSON_KEY_THING_NAME, thingName->c_str());
+    }
+
+    Crt::JsonObject loggingObject;
+    logConfig.SerializeToObject(loggingObject);
+    object.WithObject(JSON_KEY_LOGGING, loggingObject);
+
+    Crt::JsonObject jobsObject;
+    jobs.SerializeToObject(jobsObject);
+    object.WithObject(JSON_KEY_JOBS, jobsObject);
+
+    Crt::JsonObject tunnelingObject;
+    tunneling.SerializeToObject(tunnelingObject);
+    object.WithObject(JSON_KEY_TUNNELING, tunnelingObject);
+
+    Crt::JsonObject deviceDefenderObject;
+    deviceDefender.SerializeToObject(deviceDefenderObject);
+    object.WithObject(JSON_KEY_DEVICE_DEFENDER, deviceDefenderObject);
+
+    Crt::JsonObject fleetProvisioningObject;
+    fleetProvisioning.SerializeToObject(fleetProvisioningObject);
+    object.WithObject(JSON_KEY_FLEET_PROVISIONING, fleetProvisioningObject);
+
+    if (fleetProvisioning.enabled)
+    {
+        Crt::JsonObject fleetProvisioningRuntimeObject;
+        fleetProvisioningRuntimeConfig.SerializeToObject(fleetProvisioningRuntimeObject);
+        object.WithObject(JSON_KEY_RUNTIME_CONFIG, fleetProvisioningRuntimeObject);
+    }
+
+    Crt::JsonObject samplesObject;
+    Crt::JsonObject pubSubObject;
+    pubSub.SerializeToObject(pubSubObject);
+    samplesObject.WithObject(JSON_KEY_PUB_SUB, pubSubObject);
+    object.WithObject(JSON_KEY_SAMPLES, samplesObject);
+
+    Crt::JsonObject configShadowObject;
+    configShadow.SerializeToObject(configShadowObject);
+    object.WithObject(JSON_KEY_CONFIG_SHADOW, configShadowObject);
+
+    Crt::JsonObject sampleShadowObject;
+    sampleShadow.SampleShadow::SerializeToObject(sampleShadowObject);
+    object.WithObject(JSON_KEY_SAMPLE_SHADOW, sampleShadowObject);
+
+    Crt::JsonObject secureElementObject;
+    secureElement.SerializeToObject(secureElementObject);
+    object.WithObject(JSON_KEY_SECURE_ELEMENT, secureElementObject);
+
+    if (sensorPublish.enabled)
+    {
+        Crt::JsonObject sensorPublishObject;
+        sensorPublish.SerializeToObject(sensorPublishObject);
+        object.WithObject(JSON_KEY_SENSOR_PUBLISH, sensorPublishObject);
+    }
+}
+
 constexpr char PlainConfig::LogConfig::LOG_TYPE_FILE[];
 constexpr char PlainConfig::LogConfig::LOG_TYPE_STDOUT[];
 
@@ -535,6 +613,33 @@ string PlainConfig::LogConfig::ParseDeviceClientLogType(string value)
             LOG_TYPE_FILE,
             LOG_TYPE_STDOUT));
     }
+}
+
+string PlainConfig::LogConfig::StringifyDeviceClientLogLevel(int level) const
+{
+
+    switch (static_cast<DeviceClient::Logging::LogLevel>(level))
+    {
+        case DeviceClient::Logging::LogLevel::ERROR:
+            return "ERROR";
+            break;
+        case DeviceClient::Logging::LogLevel::WARN:
+            return "WARN";
+            break;
+        case DeviceClient::Logging::LogLevel::INFO:
+            return "INFO";
+            break;
+        case DeviceClient::Logging::LogLevel::DEBUG:
+            return "DEBUG";
+    }
+    throw std::invalid_argument(FormatMessage("Provided log level, %d is not known", level));
+}
+
+string PlainConfig::LogConfig::StringifySDKLogLevel(Aws::Crt::LogLevel level) const
+{
+    const char *levelString;
+    aws_log_level_to_string(static_cast<aws_log_level>(level), &levelString);
+    return levelString;
 }
 
 bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
@@ -702,6 +807,16 @@ bool PlainConfig::LogConfig::Validate() const
     return true;
 }
 
+void PlainConfig::LogConfig::SerializeToObject(Crt::JsonObject &object) const
+{
+    object.WithString(JSON_KEY_LOG_LEVEL, StringifyDeviceClientLogLevel(deviceClientlogLevel).c_str());
+    object.WithString(JSON_KEY_LOG_TYPE, deviceClientLogtype.c_str());
+    object.WithString(JSON_KEY_LOG_FILE, deviceClientLogFile.c_str());
+    object.WithBool(JSON_KEY_ENABLE_SDK_LOGGING, sdkLoggingEnabled);
+    object.WithString(JSON_KEY_SDK_LOG_LEVEL, StringifySDKLogLevel(sdkLogLevel).c_str());
+    object.WithString(JSON_KEY_SDK_LOG_FILE, sdkLogFile.c_str());
+}
+
 constexpr char PlainConfig::Jobs::CLI_ENABLE_JOBS[];
 constexpr char PlainConfig::Jobs::CLI_HANDLER_DIR[];
 constexpr char PlainConfig::Jobs::JSON_KEY_ENABLED[];
@@ -746,7 +861,6 @@ bool PlainConfig::Jobs::Validate() const
 
 void PlainConfig::Jobs::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
 
     object.WithBool(JSON_KEY_ENABLED, enabled);
 
@@ -855,8 +969,6 @@ bool PlainConfig::Tunneling::Validate() const
 
 void PlainConfig::Tunneling::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
-
     object.WithBool(JSON_KEY_ENABLED, enabled);
 }
 
@@ -926,7 +1038,6 @@ bool PlainConfig::DeviceDefender::Validate() const
 
 void PlainConfig::DeviceDefender::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
     object.WithBool(JSON_KEY_ENABLED, enabled);
     object.WithInteger(JSON_KEY_INTERVAL, interval);
 }
@@ -1066,6 +1177,31 @@ bool PlainConfig::FleetProvisioning::Validate() const
     return true;
 }
 
+void PlainConfig::FleetProvisioning::SerializeToObject(Crt::JsonObject &object) const
+{
+    object.WithBool(JSON_KEY_ENABLED, enabled);
+
+    if (templateName.has_value() && templateName->c_str())
+    {
+        object.WithString(JSON_KEY_TEMPLATE_NAME, templateName->c_str());
+    }
+
+    if (templateParameters.has_value() && templateParameters->c_str())
+    {
+        object.WithString(JSON_KEY_TEMPLATE_PARAMETERS, templateParameters->c_str());
+    }
+
+    if (csrFile.has_value() && csrFile->c_str())
+    {
+        object.WithString(JSON_KEY_CSR_FILE, csrFile->c_str());
+    }
+
+    if (deviceKey.has_value() && deviceKey->c_str())
+    {
+        object.WithString(JSON_KEY_DEVICE_KEY, deviceKey->c_str());
+    }
+}
+
 constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_COMPLETED_FLEET_PROVISIONING[];
 constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_CERT[];
 constexpr char PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_KEY[];
@@ -1131,6 +1267,227 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::Validate() const
     }
     return cert.has_value() && key.has_value() && thingName.has_value() && !cert->empty() && !key->empty() &&
            !thingName->empty();
+}
+
+void PlainConfig::FleetProvisioningRuntimeConfig::SerializeToObject(Aws::Crt::JsonObject &object) const
+{
+    object.WithBool(JSON_KEY_COMPLETED_FLEET_PROVISIONING, completedFleetProvisioning);
+
+    if (cert.has_value() && cert->c_str())
+    {
+        object.WithString(JSON_KEY_CERT, cert->c_str());
+    }
+
+    if (key.has_value() && key->c_str())
+    {
+        object.WithString(JSON_KEY_KEY, key->c_str());
+    }
+
+    if (thingName.has_value() && thingName->c_str())
+    {
+        object.WithString(JSON_KEY_THING_NAME, thingName->c_str());
+    }
+}
+
+constexpr char PlainConfig::HttpProxyConfig::CLI_HTTP_PROXY_CONFIG_PATH[];
+constexpr char PlainConfig::HttpProxyConfig::JSON_KEY_HTTP_PROXY_ENABLED[];
+constexpr char PlainConfig::HttpProxyConfig::JSON_KEY_HTTP_PROXY_HOST[];
+constexpr char PlainConfig::HttpProxyConfig::JSON_KEY_HTTP_PROXY_PORT[];
+constexpr char PlainConfig::HttpProxyConfig::JSON_KEY_HTTP_PROXY_AUTH_METHOD[];
+constexpr char PlainConfig::HttpProxyConfig::JSON_KEY_HTTP_PROXY_USERNAME[];
+constexpr char PlainConfig::HttpProxyConfig::JSON_KEY_HTTP_PROXY_PASSWORD[];
+
+bool PlainConfig::HttpProxyConfig::LoadFromJson(const Crt::JsonView &json)
+{
+    const char *jsonKey = JSON_KEY_HTTP_PROXY_ENABLED;
+    if (json.ValueExists(jsonKey))
+    {
+        httpProxyEnabled = json.GetBool(jsonKey);
+    }
+
+    if (httpProxyEnabled)
+    {
+        jsonKey = JSON_KEY_HTTP_PROXY_HOST;
+        if (json.ValueExists(jsonKey))
+        {
+            if (!json.GetString(jsonKey).empty())
+            {
+                proxyHost = json.GetString(jsonKey).c_str();
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
+        }
+
+        jsonKey = JSON_KEY_HTTP_PROXY_PORT;
+        if (json.ValueExists(jsonKey))
+        {
+            if (!json.GetString(jsonKey).empty())
+            {
+                try
+                {
+                    proxyPort = stoi(json.GetString(jsonKey).c_str());
+                }
+                catch (...)
+                {
+                    LOGM_ERROR(
+                        Config::TAG,
+                        "*** %s: Failed to convert JSON key {%s} to integer, please use a "
+                        "valid value for port number",
+                        DeviceClient::DC_FATAL_ERROR,
+                        jsonKey);
+                    return false;
+                }
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
+        }
+
+        jsonKey = JSON_KEY_HTTP_PROXY_AUTH_METHOD;
+        if (json.ValueExists(jsonKey))
+        {
+            if (!json.GetString(jsonKey).empty())
+            {
+                proxyAuthMethod = json.GetString(jsonKey).c_str();
+                if (strcmp(proxyAuthMethod->c_str(), "UserNameAndPassword") == 0)
+                {
+                    httpProxyAuthEnabled = true;
+                }
+                else if (strcmp(proxyAuthMethod->c_str(), "None") != 0)
+                {
+                    LOGM_WARN(
+                        Config::TAG,
+                        "Unrecognized HTTP Proxy Authentication Method value: {%s}. Supported values are "
+                        "UserNameAndPassword or None",
+                        proxyAuthMethod->c_str());
+                }
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
+        }
+
+        jsonKey = JSON_KEY_HTTP_PROXY_USERNAME;
+        if (json.ValueExists(jsonKey))
+        {
+            if (!json.GetString(jsonKey).empty())
+            {
+                proxyUsername = json.GetString(jsonKey).c_str();
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
+        }
+
+        jsonKey = JSON_KEY_HTTP_PROXY_PASSWORD;
+        if (json.ValueExists(jsonKey))
+        {
+            if (!json.GetString(jsonKey).empty())
+            {
+                proxyPassword = json.GetString(jsonKey).c_str();
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
+        }
+    }
+    else
+    {
+        LOG_INFO(Config::TAG, "HTTP Proxy is disabled as configured.");
+    }
+
+    return true;
+}
+
+bool PlainConfig::HttpProxyConfig::LoadFromCliArgs(const CliArgs &cliArgs)
+{
+    if (cliArgs.count(PlainConfig::HttpProxyConfig::CLI_HTTP_PROXY_CONFIG_PATH))
+    {
+        proxyConfigPath =
+            FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::HttpProxyConfig::CLI_HTTP_PROXY_CONFIG_PATH))
+                .c_str();
+    }
+    else
+    {
+        // If http proxy config file path is not provided,
+        proxyConfigPath = Config::DEFAULT_HTTP_PROXY_CONFIG_FILE;
+    }
+    return true;
+}
+
+bool PlainConfig::HttpProxyConfig::Validate() const
+{
+    if (!httpProxyEnabled)
+    {
+        return true;
+    }
+
+    if (!proxyHost.has_value() || proxyHost->empty())
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Proxy host name field must be specified if HTTP proxy is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+
+    if (!ProxyUtils::ValidateHostIpAddress(proxyHost->c_str()))
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Proxy host IP address must be a private IP address ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+
+    if (!proxyPort.has_value() || !ProxyUtils::ValidatePortNumber(proxyPort.value()))
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Valid value of proxy port field must be specified if HTTP proxy is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+
+    if (!proxyAuthMethod.has_value() || proxyAuthMethod->empty())
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Proxy auth method field must be specified if HTTP proxy is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return true;
+    }
+
+    if (httpProxyAuthEnabled && (!proxyUsername.has_value() || proxyUsername->empty()))
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Proxy username field must be specified if HTTP proxy authentication is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+
+    if (httpProxyAuthEnabled && (!proxyPassword.has_value() || proxyPassword->empty()))
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "*** %s: Proxy password field must be specified if HTTP proxy authentication is enabled ***",
+            DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+
+    return true;
 }
 
 constexpr char PlainConfig::PubSub::CLI_ENABLE_PUB_SUB[];
@@ -1262,7 +1619,6 @@ bool PlainConfig::PubSub::Validate() const
 
 void PlainConfig::PubSub::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
     object.WithBool(JSON_ENABLE_PUB_SUB, enabled);
 
     if (publishTopic.has_value() && publishTopic->c_str())
@@ -1295,6 +1651,51 @@ constexpr char PlainConfig::SampleShadow::JSON_ENABLE_SAMPLE_SHADOW[];
 constexpr char PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_NAME[];
 constexpr char PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_INPUT_FILE[];
 constexpr char PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_OUTPUT_FILE[];
+
+bool PlainConfig::SampleShadow::createShadowOutputFile()
+{
+    if (!FileUtils::CreateDirectoryWithPermissions(Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR, S_IRWXU))
+    {
+        LOGM_ERROR(
+            Config::TAG,
+            "Failed to access/create default directories: %s required for storage of shadow document",
+            Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR);
+
+        return false;
+    }
+    else
+    {
+        ostringstream outputPathStream;
+        outputPathStream << Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR << Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
+        LOG_INFO(Config::TAG, outputPathStream.str().c_str());
+
+        string outputPath = FileUtils::ExtractExpandedPath(outputPathStream.str().c_str());
+
+        if (FileUtils::StoreValueInFile("", outputPath))
+        {
+            chmod(outputPath.c_str(), S_IRUSR | S_IWUSR);
+            if (FileUtils::ValidateFilePermissions(outputPath.c_str(), Permissions::SAMPLE_SHADOW_FILES))
+            {
+                shadowOutputFile = outputPath;
+                LOGM_INFO(
+                    Config::TAG,
+                    "Succesfully create default file: %s required for storage of shadow document",
+                    outputPath.c_str());
+            }
+        }
+        else
+        {
+            LOGM_ERROR(
+                Config::TAG,
+                "Failed to access/create default file: %s required for storage of shadow document",
+                outputPath.c_str());
+
+            return false;
+        }
+    }
+
+    return true;
+}
 
 bool PlainConfig::SampleShadow::LoadFromJson(const Crt::JsonView &json)
 {
@@ -1338,13 +1739,6 @@ bool PlainConfig::SampleShadow::LoadFromJson(const Crt::JsonView &json)
         {
             shadowOutputFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
         }
-        else
-        {
-            LOGM_WARN(
-                Config::TAG,
-                "Output file {%s} was provided in the JSON configuration file with an empty value",
-                jsonKey);
-        }
     }
 
     return true;
@@ -1370,6 +1764,15 @@ bool PlainConfig::SampleShadow::LoadFromCliArgs(const CliArgs &cliArgs)
         shadowOutputFile =
             FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE))
                 .c_str();
+    }
+
+    // setting `shadowOutputFile` value to default if no value was passed by user via CLI or JSON config.
+    if (!shadowOutputFile.has_value() || shadowOutputFile->empty())
+    {
+        if (!createShadowOutputFile())
+        {
+            return false;
+        }
     }
 
     return true;
@@ -1402,6 +1805,24 @@ bool PlainConfig::SampleShadow::Validate() const
         }
         else
         {
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: Invalid file path {%s} passed for argument: %s ***",
+                DeviceClient::DC_FATAL_ERROR,
+                shadowInputFile.value().c_str(),
+                JSON_SAMPLE_SHADOW_INPUT_FILE);
+            return false;
+        }
+
+        size_t incomingFileSize = FileUtils::GetFileSize(shadowInputFile->c_str());
+        if (MAXIMUM_SHADOW_INPUT_FILE_SIZE < incomingFileSize)
+        {
+            LOGM_ERROR(
+                Config::TAG,
+                "Refusing to open input file %s, file size %zu bytes is greater than allowable limit of %zu bytes",
+                Sanitize(shadowInputFile->c_str()).c_str(),
+                incomingFileSize,
+                MAXIMUM_SHADOW_INPUT_FILE_SIZE);
             return false;
         }
     }
@@ -1417,6 +1838,12 @@ bool PlainConfig::SampleShadow::Validate() const
         }
         else
         {
+            LOGM_ERROR(
+                Config::TAG,
+                "*** %s: Invalid file path {%s} passed for argument: %s ***",
+                DeviceClient::DC_FATAL_ERROR,
+                shadowOutputFile.value().c_str(),
+                JSON_SAMPLE_SHADOW_OUTPUT_FILE);
             return false;
         }
     }
@@ -1426,11 +1853,10 @@ bool PlainConfig::SampleShadow::Validate() const
 
 void PlainConfig::SampleShadow::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
 
     object.WithBool(JSON_ENABLE_SAMPLE_SHADOW, enabled);
 
-    if (shadowName->c_str())
+    if (shadowName.has_value() && shadowName->c_str())
     {
         object.WithString(JSON_SAMPLE_SHADOW_NAME, shadowName->c_str());
     }
@@ -1473,6 +1899,11 @@ bool PlainConfig::ConfigShadow::LoadFromCliArgs(const CliArgs &cliArgs)
 bool PlainConfig::ConfigShadow::Validate() const
 {
     return true;
+}
+
+void PlainConfig::ConfigShadow::SerializeToObject(Crt::JsonObject &object) const
+{
+    object.WithBool(JSON_ENABLE_CONFIG_SHADOW, enabled);
 }
 
 constexpr char PlainConfig::SecureElement::CLI_ENABLE_SECURE_ELEMENT[];
@@ -1623,7 +2054,6 @@ bool PlainConfig::SecureElement::Validate() const
 
 void PlainConfig::SecureElement::SerializeToObject(Crt::JsonObject &object) const
 {
-    (void)object;
     object.WithBool(JSON_ENABLE_SECURE_ELEMENT, enabled);
 
     if (pkcs11Lib.has_value() && pkcs11Lib->c_str())
@@ -1974,6 +2404,76 @@ bool PlainConfig::SensorPublish::Validate() const
     return atLeastOneValidSensor;
 }
 
+void PlainConfig::SensorPublish::SerializeToObject(Crt::JsonObject &object) const
+{
+    Aws::Crt::Vector<Aws::Crt::JsonObject> sensors;
+    for (const auto &entry : settings)
+    {
+        Aws::Crt::JsonObject sensor;
+
+        if (entry.name.has_value() && entry.name->c_str())
+        {
+            sensor.WithString(JSON_NAME, entry.name->c_str());
+        }
+
+        sensor.WithBool(JSON_ENABLED, entry.enabled);
+
+        if (entry.addr.has_value() && entry.addr->c_str())
+        {
+            sensor.WithString(JSON_ADDR, entry.addr->c_str());
+        }
+
+        if (entry.addrPollSec.has_value())
+        {
+            sensor.WithInt64(JSON_ADDR_POLL_SEC, entry.addrPollSec.value());
+        }
+
+        if (entry.bufferTimeMs.has_value())
+        {
+            sensor.WithInt64(JSON_BUFFER_TIME_MS, entry.bufferTimeMs.value());
+        }
+
+        if (entry.bufferSize.has_value())
+        {
+            sensor.WithInt64(JSON_BUFFER_SIZE, entry.bufferSize.value());
+        }
+
+        if (entry.bufferCapacity.has_value())
+        {
+            sensor.WithInt64(JSON_BUFFER_CAPACITY, entry.bufferCapacity.value());
+        }
+
+        if (entry.eomDelimiter.has_value() && entry.eomDelimiter->c_str())
+        {
+            sensor.WithString(JSON_EOM_DELIMITER, entry.eomDelimiter->c_str());
+        }
+
+        if (entry.mqttTopic.has_value() && entry.mqttTopic->c_str())
+        {
+            sensor.WithString(JSON_MQTT_TOPIC, entry.mqttTopic->c_str());
+        }
+
+        if (entry.mqttDeadLetterTopic.has_value() && entry.mqttDeadLetterTopic->c_str())
+        {
+            sensor.WithString(JSON_MQTT_DEAD_LETTER_TOPIC, entry.mqttDeadLetterTopic->c_str());
+        }
+
+        if (entry.mqttHeartbeatTopic.has_value() && entry.mqttHeartbeatTopic->c_str())
+        {
+            sensor.WithString(JSON_MQTT_HEARTBEAT_TOPIC, entry.mqttHeartbeatTopic->c_str());
+        }
+
+        if (entry.heartbeatTimeSec.has_value())
+        {
+            sensor.WithInt64(JSON_HEARTBEAT_TIME_SEC, entry.heartbeatTimeSec.value());
+        }
+
+        sensors.push_back(sensor);
+    }
+
+    object.WithArray(JSON_SENSORS, sensors);
+}
+
 constexpr char Config::TAG[];
 constexpr char Config::DEFAULT_CONFIG_DIR[];
 constexpr char Config::DEFAULT_KEY_DIR[];
@@ -1984,75 +2484,91 @@ constexpr char Config::CLI_EXPORT_DEFAULT_SETTINGS[];
 constexpr char Config::CLI_CONFIG_FILE[];
 constexpr char Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[];
 constexpr char Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[];
+constexpr char Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[];
+constexpr char Config::DEFAULT_HTTP_PROXY_CONFIG_FILE[];
+
+bool Config::CheckTerminalArgs(int argc, char **argv)
+{
+    for (int i = 1; i < argc; i++)
+    {
+        std::string currentArg = argv[i];
+        if (currentArg == CLI_HELP)
+        {
+            PrintHelpMessage();
+            return true;
+        }
+        if (currentArg == CLI_VERSION)
+        {
+            PrintVersion();
+            return true;
+        }
+    }
+    return false;
+}
 
 bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 {
     struct ArgumentDefinition
     {
-        string cliFlag;     // Cli flag to look for
-        bool additionalArg; // Does this take an addition argument?
-        // cppcheck-suppress unusedStructMember
-        bool stopIfFound; // Should we stop processing more arguments if this is found?
-        std::function<void(const string &additionalArg)> extraSteps; // Function to call if this is found
+        std::string cliFlag;                                              // Cli flag to look for
+        bool additionalArg;                                               // Does this take an addition argument?
+        std::function<void(const std::string &additionalArg)> extraSteps; // Function to call if this is found
     };
+
     ArgumentDefinition argumentDefinitions[] = {
-        {CLI_HELP, false, true, [](const string &additionalArg) { PrintHelpMessage(); }},
-        {CLI_VERSION, false, true, [](const string &additionalArg) { PrintVersion(); }},
-        {CLI_EXPORT_DEFAULT_SETTINGS,
-         true,
-         true,
-         [](const string &additionalArg) { ExportDefaultSetting(additionalArg); }},
-        {CLI_CONFIG_FILE, true, false, nullptr},
+        {CLI_EXPORT_DEFAULT_SETTINGS, true, [](const string &additionalArg) { ExportDefaultSetting(additionalArg); }},
+        {CLI_CONFIG_FILE, true, nullptr},
 
-        {PlainConfig::CLI_ENDPOINT, true, false, nullptr},
-        {PlainConfig::CLI_CERT, true, false, nullptr},
-        {PlainConfig::CLI_KEY, true, false, nullptr},
-        {PlainConfig::CLI_ROOT_CA, true, false, nullptr},
-        {PlainConfig::CLI_THING_NAME, true, false, nullptr},
+        {PlainConfig::CLI_ENDPOINT, true, nullptr},
+        {PlainConfig::CLI_CERT, true, nullptr},
+        {PlainConfig::CLI_KEY, true, nullptr},
+        {PlainConfig::CLI_ROOT_CA, true, nullptr},
+        {PlainConfig::CLI_THING_NAME, true, nullptr},
 
-        {PlainConfig::LogConfig::CLI_LOG_LEVEL, true, false, nullptr},
-        {PlainConfig::LogConfig::CLI_LOG_TYPE, true, false, nullptr},
-        {PlainConfig::LogConfig::CLI_LOG_FILE, true, false, nullptr},
-        {PlainConfig::LogConfig::CLI_ENABLE_SDK_LOGGING, false, false, nullptr},
-        {PlainConfig::LogConfig::CLI_SDK_LOG_LEVEL, true, false, nullptr},
-        {PlainConfig::LogConfig::CLI_SDK_LOG_FILE, true, false, nullptr},
+        {PlainConfig::LogConfig::CLI_LOG_LEVEL, true, nullptr},
+        {PlainConfig::LogConfig::CLI_LOG_TYPE, true, nullptr},
+        {PlainConfig::LogConfig::CLI_LOG_FILE, true, nullptr},
+        {PlainConfig::LogConfig::CLI_ENABLE_SDK_LOGGING, false, nullptr},
+        {PlainConfig::LogConfig::CLI_SDK_LOG_LEVEL, true, nullptr},
+        {PlainConfig::LogConfig::CLI_SDK_LOG_FILE, true, nullptr},
 
-        {PlainConfig::Jobs::CLI_ENABLE_JOBS, true, false, nullptr},
-        {PlainConfig::Jobs::CLI_HANDLER_DIR, true, false, nullptr},
+        {PlainConfig::Jobs::CLI_ENABLE_JOBS, true, nullptr},
+        {PlainConfig::Jobs::CLI_HANDLER_DIR, true, nullptr},
 
-        {PlainConfig::Tunneling::CLI_ENABLE_TUNNELING, true, false, nullptr},
-        {PlainConfig::Tunneling::CLI_TUNNELING_REGION, true, false, nullptr},
-        {PlainConfig::Tunneling::CLI_TUNNELING_SERVICE, true, false, nullptr},
-        {PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION, false, false, nullptr},
+        {PlainConfig::Tunneling::CLI_ENABLE_TUNNELING, true, nullptr},
+        {PlainConfig::Tunneling::CLI_TUNNELING_REGION, true, nullptr},
+        {PlainConfig::Tunneling::CLI_TUNNELING_SERVICE, true, nullptr},
+        {PlainConfig::Tunneling::CLI_TUNNELING_DISABLE_NOTIFICATION, false, nullptr},
 
-        {PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER, true, false, nullptr},
-        {PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL, true, false, nullptr},
+        {PlainConfig::DeviceDefender::CLI_ENABLE_DEVICE_DEFENDER, true, nullptr},
+        {PlainConfig::DeviceDefender::CLI_DEVICE_DEFENDER_INTERVAL, true, nullptr},
 
-        {PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING, true, false, nullptr},
-        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME, true, false, nullptr},
-        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS, true, false, nullptr},
-        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE, true, false, nullptr},
-        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY, true, false, nullptr},
+        {PlainConfig::FleetProvisioning::CLI_ENABLE_FLEET_PROVISIONING, true, nullptr},
+        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_NAME, true, nullptr},
+        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS, true, nullptr},
+        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE, true, nullptr},
+        {PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY, true, nullptr},
 
-        {PlainConfig::PubSub::CLI_ENABLE_PUB_SUB, true, false, nullptr},
-        {PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_TOPIC, true, false, nullptr},
-        {PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE, true, false, nullptr},
-        {PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC, true, false, nullptr},
-        {PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE, true, false, nullptr},
+        {PlainConfig::PubSub::CLI_ENABLE_PUB_SUB, true, nullptr},
+        {PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_TOPIC, true, nullptr},
+        {PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE, true, nullptr},
+        {PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC, true, nullptr},
+        {PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE, true, nullptr},
 
-        {PlainConfig::SampleShadow::CLI_ENABLE_SAMPLE_SHADOW, true, false, nullptr},
-        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME, true, false, nullptr},
-        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE, true, false, nullptr},
-        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE, true, false, nullptr},
+        {PlainConfig::SampleShadow::CLI_ENABLE_SAMPLE_SHADOW, true, nullptr},
+        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME, true, nullptr},
+        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE, true, nullptr},
+        {PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE, true, nullptr},
 
-        {PlainConfig::ConfigShadow::CLI_ENABLE_CONFIG_SHADOW, true, false, nullptr},
+        {PlainConfig::ConfigShadow::CLI_ENABLE_CONFIG_SHADOW, true, nullptr},
 
-        {PlainConfig::SecureElement::CLI_ENABLE_SECURE_ELEMENT, true, false, nullptr},
-        {PlainConfig::SecureElement::CLI_PKCS11_LIB, true, false, nullptr},
-        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_PIN, true, false, nullptr},
-        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_KEY_LABEL, true, false, nullptr},
-        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID, true, false, nullptr},
-        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL, true, false, nullptr}};
+        {PlainConfig::SecureElement::CLI_ENABLE_SECURE_ELEMENT, true, nullptr},
+        {PlainConfig::SecureElement::CLI_PKCS11_LIB, true, nullptr},
+        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_PIN, true, nullptr},
+        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_KEY_LABEL, true, nullptr},
+        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID, true, nullptr},
+        {PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL, true, nullptr},
+        {PlainConfig::HttpProxyConfig::CLI_HTTP_PROXY_CONFIG_PATH, true, nullptr}};
 
     map<string, ArgumentDefinition> argumentDefinitionMap;
     for (auto &i : argumentDefinitions)
@@ -2105,66 +2621,89 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {
             search->second.extraSteps(additionalArg);
         }
-
-        if (search->second.stopIfFound)
-        {
-            return false;
-        }
     }
     return true;
 }
 
 bool Config::init(const CliArgs &cliArgs)
 {
-    string filename = Config::DEFAULT_CONFIG_FILE;
-    bool bReadConfigFile = FileUtils::FileExists(filename);
-
-    if (cliArgs.count(Config::CLI_CONFIG_FILE))
+    try
     {
-        filename = cliArgs.at(Config::CLI_CONFIG_FILE);
-        if (!FileUtils::FileExists(filename))
+        string filename = Config::DEFAULT_CONFIG_FILE;
+        bool bReadConfigFile = FileUtils::FileExists(filename);
+
+        if (cliArgs.count(Config::CLI_CONFIG_FILE))
+        {
+            filename = cliArgs.at(Config::CLI_CONFIG_FILE);
+            if (!FileUtils::FileExists(filename))
+            {
+                LOGM_ERROR(
+                    TAG,
+                    "*** %s: Config file specified in the CLI doesn't exist: '%s' ***",
+                    DeviceClient::DC_FATAL_ERROR,
+                    Sanitize(filename).c_str());
+                return false;
+            }
+
+            bReadConfigFile = true;
+        }
+
+        if (bReadConfigFile && !ParseConfigFile(filename, DEVICE_CLIENT_ESSENTIAL_CONFIG))
         {
             LOGM_ERROR(
                 TAG,
-                "*** %s: Config file specified in the CLI doesn't exist: '%s' ***",
+                "*** %s: Unable to Parse Config file: '%s' ***",
                 DeviceClient::DC_FATAL_ERROR,
                 Sanitize(filename).c_str());
             return false;
         }
 
-        bReadConfigFile = true;
-    }
+        if (!config.LoadFromCliArgs(cliArgs))
+        {
+            return false;
+        }
 
-    if (bReadConfigFile && !ParseConfigFile(filename, false))
+        if (!config.LoadFromEnvironment())
+        {
+            return false;
+        }
+
+        if (ParseConfigFile(
+                Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, FLEET_PROVISIONING_RUNTIME_CONFIG) &&
+            ValidateAndStoreRuntimeConfig())
+        {
+            LOGM_INFO(
+                TAG,
+                "Successfully fetched Runtime config file '%s' and validated its content.",
+                Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
+        }
+
+        if (ParseConfigFile(config.httpProxyConfig.proxyConfigPath->c_str(), HTTP_PROXY_CONFIG) &&
+            config.httpProxyConfig.httpProxyEnabled)
+        {
+            if (!ValidateAndStoreHttpProxyConfig())
+            {
+                LOGM_ERROR(
+                    TAG,
+                    "*** %s: Unable to Parse HTTP proxy Config file: '%s' ***",
+                    DeviceClient::DC_FATAL_ERROR,
+                    Sanitize(config.httpProxyConfig.proxyConfigPath->c_str()).c_str());
+                return false;
+            }
+            LOGM_INFO(
+                TAG,
+                "Successfully fetched http proxy config file '%s' and validated its content.",
+                config.httpProxyConfig.proxyConfigPath->c_str());
+            return true;
+        }
+
+        return config.Validate();
+    }
+    catch (const std::exception &e)
     {
-        LOGM_ERROR(
-            TAG,
-            "*** %s: Unable to Parse Config file: '%s' ***",
-            DeviceClient::DC_FATAL_ERROR,
-            Sanitize(filename).c_str());
+        LOGM_ERROR(TAG, "Error while initializing configuration: %s", e.what());
         return false;
     }
-
-    if (!config.LoadFromCliArgs(cliArgs))
-    {
-        return false;
-    }
-
-    if (!config.LoadFromEnvironment())
-    {
-        return false;
-    }
-
-    if (ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, true) &&
-        ValidateAndStoreRuntimeConfig())
-    {
-        LOGM_INFO(
-            TAG,
-            "Successfully fetched Runtime config file '%s' and validated its content.",
-            Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
-    }
-
-    return config.Validate();
 }
 
 bool Config::ValidateAndStoreRuntimeConfig()
@@ -2185,21 +2724,54 @@ bool Config::ValidateAndStoreRuntimeConfig()
     return true;
 }
 
-bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
+bool Config::ValidateAndStoreHttpProxyConfig()
+{
+    // check if all values are present and also check if the files are present then only overwrite values
+    if (!config.httpProxyConfig.Validate())
+    {
+        LOGM_ERROR(
+            TAG,
+            "Failed to Validate http proxy configurations. Please check '%s' file",
+            Config::DEFAULT_HTTP_PROXY_CONFIG_FILE);
+        return false;
+    }
+
+    return true;
+}
+
+bool Config::ParseConfigFile(const string &file, ConfigFileType configFileType)
 {
     string expandedPath = FileUtils::ExtractExpandedPath(file.c_str());
     if (!FileUtils::FileExists(expandedPath))
     {
-        if (!isRuntimeConfig)
+        switch (configFileType)
         {
-            LOGM_DEBUG(TAG, "Unable to open config file %s, file does not exist", Sanitize(expandedPath).c_str());
-        }
-        else
-        {
-            LOG_DEBUG(
-                TAG,
-                "Did not find a runtime configuration file, assuming Fleet Provisioning has not run for this device");
-        }
+            case DEVICE_CLIENT_ESSENTIAL_CONFIG:
+            {
+                LOGM_DEBUG(TAG, "Unable to open config file %s, file does not exist", Sanitize(expandedPath).c_str());
+                break;
+            }
+            case FLEET_PROVISIONING_RUNTIME_CONFIG:
+            {
+                LOG_DEBUG(
+                    TAG,
+                    "Did not find a runtime configuration file, assuming Fleet Provisioning has not run for this "
+                    "device");
+                break;
+            }
+            case HTTP_PROXY_CONFIG:
+            {
+                LOGM_DEBUG(
+                    TAG,
+                    "Did not find a http proxy config file %s, assuming HTTP proxy is disabled on this device",
+                    Sanitize(expandedPath).c_str());
+                break;
+            }
+            default:
+            {
+                LOG_ERROR(TAG, "Unhandled config file type when trying to load from disk: file does not exist");
+            }
+        };
 
         return false;
     }
@@ -2218,7 +2790,31 @@ bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
 
     string configFileParentDir = FileUtils::ExtractParentDirectory(expandedPath.c_str());
     FileUtils::ValidateFilePermissions(configFileParentDir, Permissions::CONFIG_DIR, false);
-    FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::CONFIG_FILE, false);
+    switch (configFileType)
+    {
+        case DEVICE_CLIENT_ESSENTIAL_CONFIG:
+        {
+            FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::CONFIG_FILE, false);
+            break;
+        }
+        case FLEET_PROVISIONING_RUNTIME_CONFIG:
+        {
+            FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::RUNTIME_CONFIG_FILE, false);
+            break;
+        }
+        case HTTP_PROXY_CONFIG:
+        {
+            FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::HTTP_PROXY_CONFIG_FILE, false);
+            break;
+        }
+        default:
+        {
+            LOGM_ERROR(
+                TAG,
+                "Undefined config type of file %s, file permission was not able to be verified",
+                expandedPath.c_str());
+        }
+    }
 
     ifstream setting(expandedPath.c_str());
     if (!setting.is_open())
@@ -2236,8 +2832,31 @@ bool Config::ParseConfigFile(const string &file, bool isRuntimeConfig)
         return false;
     }
     Aws::Crt::JsonView jsonView = Aws::Crt::JsonView(jsonObj);
-    // Parse, validate and store config file content
-    config.LoadFromJson(jsonView);
+    switch (configFileType)
+    {
+        case DEVICE_CLIENT_ESSENTIAL_CONFIG:
+        {
+            config.LoadFromJson(jsonView);
+            break;
+        }
+        case FLEET_PROVISIONING_RUNTIME_CONFIG:
+        {
+            config.LoadFromJson(jsonView);
+            break;
+        }
+        case HTTP_PROXY_CONFIG:
+        {
+            config.httpProxyConfig.LoadFromJson(jsonView);
+            break;
+        }
+        default:
+        {
+            LOGM_ERROR(
+                TAG,
+                "Undefined config type of file %s, was not able to parse config into json object",
+                expandedPath.c_str());
+        }
+    }
 
     LOGM_INFO(TAG, "Successfully fetched JSON config file: %s", Sanitize(contents).c_str());
     setting.close();
@@ -2307,7 +2926,8 @@ void Config::PrintHelpMessage()
         "%s <secure-element-pin>:\t\t\t\t\tThe user PIN for logging into PKCS#11 token.\n"
         "%s <secure-element-key-label>:\t\t\t\t\tThe Label of private key on the PKCS#11 token (optional). \n"
         "%s <secure-element-slot-id>:\t\t\t\t\tThe Slot ID containing PKCS#11 token to use (optional).\n"
-        "%s <secure-element-token-label>:\t\t\t\t\tThe Label of the PKCS#11 token to use (optional).\n";
+        "%s <secure-element-token-label>:\t\t\t\t\tThe Label of the PKCS#11 token to use (optional).\n"
+        "%s <http-proxy-config-file>:\t\t\t\tUse specified file path to load HTTP proxy configs\n";
 
     cout << FormatMessage(
         helpMessageTemplate,
@@ -2354,7 +2974,8 @@ void Config::PrintHelpMessage()
         PlainConfig::SecureElement::CLI_SECURE_ELEMENT_PIN,
         PlainConfig::SecureElement::CLI_SECURE_ELEMENT_KEY_LABEL,
         PlainConfig::SecureElement::CLI_SECURE_ELEMENT_SLOT_ID,
-        PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL);
+        PlainConfig::SecureElement::CLI_SECURE_ELEMENT_TOKEN_LABEL,
+        PlainConfig::HttpProxyConfig::CLI_HTTP_PROXY_CONFIG_PATH);
 }
 
 void Config::PrintVersion()

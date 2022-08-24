@@ -76,9 +76,19 @@ file(GLOB DC_TST "./*.cpp" /
         ${UTIL_TST})
 
 file(GLOB JOBS_TST "./jobs/*.cpp")
+file(GLOB ST_TST "./tunneling/*.cpp")
 
 if (NOT EXCLUDE_JOBS)
     list(APPEND DC_TST ${JOBS_TST})
+endif ()
+
+if (NOT EXCLUDE_ST)
+    list(APPEND DC_TST ${ST_TST})
+endif ()
+
+if (NOT EXCLUDE_DD)
+    file(GLOB DD_TST "./devicedefender/*.cpp")
+    list(APPEND DC_TST ${DD_TST})
 endif ()
 
 if (NOT EXCLUDE_FP)

@@ -33,11 +33,12 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Jobs;
 using namespace Aws::Iotjobs;
 
+constexpr char JobsFeature::NAME[];
 const std::string JobsFeature::DEFAULT_JOBS_HANDLER_DIR = "~/.aws-iot-device-client/jobs/";
 
 string JobsFeature::getName()
 {
-    return string("Jobs");
+    return NAME;
 }
 
 void JobsFeature::ackSubscribeToNextJobChanged(int ioError)

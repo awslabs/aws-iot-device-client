@@ -3,6 +3,7 @@
 
 #include "ClientBaseNotification.h"
 #include "Feature.h"
+#include "FeatureRegistry.h"
 #include "SharedCrtResourceManager.h"
 #include "Version.h"
 #include "config/Config.h"
@@ -94,10 +95,9 @@ using namespace Aws::Iot::DeviceClient::SensorPublish;
 
 const char *TAG = "Main.cpp";
 
-vector<Feature *> features;
+shared_ptr<FeatureRegistry> features;
 shared_ptr<SharedCrtResourceManager> resourceManager;
 unique_ptr<LockFile> lockFile;
-mutex featuresReadWriteLock;
 bool attemptingShutdown{false};
 Config config;
 
@@ -131,32 +131,24 @@ bool init(int argc, char *argv[])
  */
 void shutdown()
 {
-    featuresReadWriteLock.lock(); // LOCK
-    // Make a copy of the features vector for thread safety
-    vector<Feature *> featuresCopy = features;
-    featuresReadWriteLock.unlock(); // UNLOCK
-
-    if (!attemptingShutdown && !featuresCopy.empty())
+    LOG_DEBUG(TAG, "Inside of shutdown()");
+    if (!attemptingShutdown && features->getSize() != 0)
     {
         attemptingShutdown = true;
 
-        for (auto &feature : featuresCopy)
-        {
-            LOGM_DEBUG(TAG, "Attempting shutdown of %s", feature->getName().c_str());
-            feature->stop();
-        }
-
-        resourceManager->dumpMemTrace();
+        LOG_DEBUG(TAG, "Calling stop all");
+        features->stopAll();
     }
-    else
-    {
+    resourceManager->dumpMemTrace();
+
+    LOG_INFO(TAG, "All features have stopped");
 // terminate program
 #if !defined(DISABLE_MQTT)
-        resourceManager.get()->disconnect();
+    resourceManager->disconnect();
 #endif
-        LoggerFactory::getLoggerInstance().get()->shutdown();
-        exit(0);
-    }
+    LoggerFactory::getLoggerInstance().get()->shutdown();
+    resourceManager.reset();
+    exit(0);
 }
 
 /**
@@ -171,59 +163,44 @@ void deviceClientAbort(const string &reason)
     exit(EXIT_FAILURE);
 }
 
-void handle_feature_stopped(const Feature *feature)
-{
-    featuresReadWriteLock.lock(); // LOCK
-
-    for (int i = 0; (unsigned)i < features.size(); i++)
-    {
-        if (features.at(i) == feature)
-        {
-            // Performing bookkeeping so we know when all features have stopped
-            // and the entire program can be shutdown
-            features.erase(features.begin() + i);
-        }
-    }
-
-    const int size = features.size();
-    featuresReadWriteLock.unlock(); // UNLOCK
-
-    if (0 == size)
-    {
-        LOG_INFO(TAG, "All features have stopped");
-        shutdown();
-    }
-}
-
 void attemptConnection()
 {
-    Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 900 * 1000, -1, nullptr};
-    auto publishLambda = []() -> bool {
-        int connectionStatus = resourceManager.get()->establishConnection(config.config);
-        if (SharedCrtResourceManager::ABORT == connectionStatus)
-        {
-            LOGM_ERROR(
-                TAG,
-                "*** %s: Failed to establish the MQTT Client. Please verify your AWS "
-                "IoT credentials, "
-                "configuration and/or certificate policy. ***",
-                DC_FATAL_ERROR);
-            LoggerFactory::getLoggerInstance()->shutdown();
-            deviceClientAbort("Failed to establish MQTT connection due to credential/configuration error");
-            return true;
-        }
-        else if (SharedCrtResourceManager::SUCCESS == connectionStatus)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    };
-    std::thread attemptConnectionThread(
-        [retryConfig, publishLambda] { Retry::exponentialBackoff(retryConfig, publishLambda); });
-    attemptConnectionThread.join();
+    try
+    {
+        Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 900 * 1000, -1, nullptr};
+        auto publishLambda = []() -> bool {
+            int connectionStatus = resourceManager.get()->establishConnection(config.config);
+            if (SharedCrtResourceManager::ABORT == connectionStatus)
+            {
+                LOGM_ERROR(
+                    TAG,
+                    "*** %s: Failed to establish the MQTT Client. Please verify your AWS "
+                    "IoT credentials, "
+                    "configuration and/or certificate policy. ***",
+                    DC_FATAL_ERROR);
+                LoggerFactory::getLoggerInstance()->shutdown();
+                deviceClientAbort("Failed to establish MQTT connection due to credential/configuration error");
+                return true;
+            }
+            else if (SharedCrtResourceManager::SUCCESS == connectionStatus)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        };
+        std::thread attemptConnectionThread(
+            [retryConfig, publishLambda] { Retry::exponentialBackoff(retryConfig, publishLambda); });
+        attemptConnectionThread.join();
+    }
+    catch (const std::exception &e)
+    {
+        LOGM_ERROR(TAG, "Error attempting to connect: %s", e.what());
+        LoggerFactory::getLoggerInstance()->shutdown();
+        deviceClientAbort("Failure from attemptConnection");
+    }
 }
 
 namespace Aws
@@ -250,7 +227,6 @@ namespace Aws
                         case ClientBaseEventNotification::FEATURE_STOPPED:
                         {
                             LOGM_INFO(TAG, "%s has stopped", feature->getName().c_str());
-                            handle_feature_stopped(feature);
                             break;
                         }
                         default:
@@ -305,10 +281,15 @@ namespace Aws
 int main(int argc, char *argv[])
 {
     CliArgs cliArgs;
-    if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
+    if (Config::CheckTerminalArgs(argc, argv))
     {
         LoggerFactory::getLoggerInstance()->shutdown();
         return 0;
+    }
+    if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
+    {
+        LoggerFactory::getLoggerInstance()->shutdown();
+        return 1;
     }
 
     if (!LoggerFactory::reconfigure(config.config) &&
@@ -337,6 +318,7 @@ int main(int argc, char *argv[])
     {
         return -1;
     }
+    features = make_shared<FeatureRegistry>();
 
     LOGM_INFO(TAG, "Now running AWS IoT Device Client version %s", DEVICE_CLIENT_VERSION_FULL);
 
@@ -351,7 +333,7 @@ int main(int argc, char *argv[])
     shared_ptr<DefaultClientBaseNotifier> listener =
         shared_ptr<DefaultClientBaseNotifier>(new DefaultClientBaseNotifier);
     resourceManager = shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager);
-    if (!resourceManager.get()->initialize(config.config, &features))
+    if (!resourceManager.get()->initialize(config.config, features))
     {
         LOGM_ERROR(TAG, "*** %s: Failed to initialize AWS CRT SDK.", DC_FATAL_ERROR);
         LoggerFactory::getLoggerInstance()->shutdown();
@@ -375,7 +357,9 @@ int main(int argc, char *argv[])
          */
         FleetProvisioning fleetProvisioning;
         if (!fleetProvisioning.ProvisionDevice(resourceManager, config.config) ||
-            !config.ParseConfigFile(Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, true) ||
+            !config.ParseConfigFile(
+                Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
+                Aws::Iot::DeviceClient::Config::FLEET_PROVISIONING_RUNTIME_CONFIG) ||
             !config.ValidateAndStoreRuntimeConfig())
         {
             LOGM_ERROR(
@@ -431,99 +415,103 @@ int main(int argc, char *argv[])
 #    endif
 #endif
 
-    featuresReadWriteLock.lock(); // LOCK
-
 #if !defined(EXCLUDE_JOBS)
-    unique_ptr<JobsFeature> jobs;
     if (config.config.jobs.enabled)
     {
+        shared_ptr<JobsFeature> jobs;
         LOG_INFO(TAG, "Jobs is enabled");
-        jobs = unique_ptr<JobsFeature>(new JobsFeature());
+        jobs = make_shared<JobsFeature>();
         jobs->init(resourceManager->getConnection(), listener, config.config);
-        features.push_back(jobs.get());
+        features->add(jobs->getName(), jobs);
     }
     else
     {
         LOG_INFO(TAG, "Jobs is disabled");
+        features->add(JobsFeature::NAME, nullptr);
     }
 #endif
 
 #if !defined(EXCLUDE_ST)
-    unique_ptr<SecureTunnelingFeature> tunneling;
     if (config.config.tunneling.enabled)
     {
+        shared_ptr<SecureTunnelingFeature> tunneling;
         LOG_INFO(TAG, "Secure Tunneling is enabled");
-        tunneling = unique_ptr<SecureTunnelingFeature>(new SecureTunnelingFeature());
+        tunneling = make_shared<SecureTunnelingFeature>();
         tunneling->init(resourceManager, listener, config.config);
-        features.push_back(tunneling.get());
+        features->add(tunneling->getName(), tunneling);
     }
     else
     {
         LOG_INFO(TAG, "Secure Tunneling is disabled");
+        features->add(SecureTunnelingFeature::NAME, nullptr);
     }
 #endif
 
 #if !defined(EXCLUDE_DD)
-    unique_ptr<DeviceDefenderFeature> deviceDefender;
     if (config.config.deviceDefender.enabled)
     {
+        shared_ptr<DeviceDefenderFeature> deviceDefender;
         LOG_INFO(TAG, "Device Defender is enabled");
-        deviceDefender = unique_ptr<DeviceDefenderFeature>(new DeviceDefenderFeature());
+        deviceDefender = make_shared<DeviceDefenderFeature>();
         deviceDefender->init(resourceManager, listener, config.config);
-        features.push_back(deviceDefender.get());
+        features->add(deviceDefender->getName(), deviceDefender);
     }
     else
     {
         LOG_INFO(TAG, "Device Defender is disabled");
+        features->add(DeviceDefenderFeature::NAME, nullptr);
     }
 #endif
 
 #if !defined(EXCLUDE_SHADOW)
 #    if !defined(EXCLUDE_SAMPLE_SHADOW)
-    unique_ptr<SampleShadowFeature> sampleShadow;
     if (config.config.sampleShadow.enabled)
     {
+        shared_ptr<SampleShadowFeature> sampleShadow;
         LOG_INFO(TAG, "Sample shadow is enabled");
-        sampleShadow = unique_ptr<SampleShadowFeature>(new SampleShadowFeature());
+        sampleShadow = make_shared<SampleShadowFeature>();
         sampleShadow->init(resourceManager, listener, config.config);
-        features.push_back(sampleShadow.get());
+        features->add(sampleShadow->getName(), sampleShadow);
     }
     else
     {
         LOG_INFO(TAG, "Sample shadow is disabled");
+        features->add(SampleShadowFeature::NAME, nullptr);
     }
 #    endif
 #endif
 
 #if !defined(EXCLUDE_SAMPLES)
 #    if !defined(EXCLUDE_PUBSUB)
-    unique_ptr<PubSubFeature> pubSub;
     if (config.config.pubSub.enabled)
     {
+        shared_ptr<PubSubFeature> pubSub;
         LOG_INFO(TAG, "PubSub is enabled");
-        pubSub = unique_ptr<PubSubFeature>(new PubSubFeature());
+        pubSub = make_shared<PubSubFeature>();
         pubSub->init(resourceManager, listener, config.config);
-        features.push_back(pubSub.get());
+        features->add(pubSub->getName(), pubSub);
     }
     else
     {
         LOG_INFO(TAG, "Pub Sub is disabled");
+        features->add(PubSubFeature::NAME, nullptr);
     }
 #    endif
 #endif
 
 #if !defined(EXCLUDE_SENSOR_PUBLISH)
-    unique_ptr<SensorPublishFeature> sensorPublish;
     if (config.config.sensorPublish.enabled)
     {
+        shared_ptr<SensorPublishFeature> sensorPublish;
         LOG_INFO(TAG, "Sensor Publish is enabled");
-        sensorPublish = unique_ptr<SensorPublishFeature>(new SensorPublishFeature());
+        sensorPublish = make_shared<SensorPublishFeature>();
         sensorPublish->init(resourceManager, listener, config.config);
-        features.push_back(sensorPublish.get());
+        features->add(sensorPublish->getName(), sensorPublish);
     }
     else
     {
         LOG_INFO(TAG, "Sensor Publish is disabled");
+        features->add(SensorPublishFeature::NAME, nullptr);
     }
 #else
     if (config.config.sensorPublish.enabled)
@@ -538,7 +526,6 @@ int main(int argc, char *argv[])
 #endif
 
     resourceManager->startDeviceClientFeatures();
-    featuresReadWriteLock.unlock(); // UNLOCK
 
     // Now allow this thread to sleep until it's interrupted by a signal
     while (true)

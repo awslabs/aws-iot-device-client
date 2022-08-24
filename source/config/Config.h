@@ -45,6 +45,7 @@ namespace Aws
                 static constexpr int LOG_DIR = 745;
                 static constexpr int PUBSUB_DIR = 745;
                 static constexpr int PKCS11_LIB_DIR = 700;
+                static constexpr int SENSOR_PUBLISH_ADDR_DIR = 700;
 
                 /** Files **/
                 static constexpr int PRIVATE_KEY = 600;
@@ -52,14 +53,14 @@ namespace Aws
                 static constexpr int ROOT_CA = 644;
                 static constexpr int CSR_FILE = 600;
                 static constexpr int LOG_FILE = 600;
-                static constexpr int CONFIG_FILE = 644;
-                static constexpr int RUNTIME_CONFIG_FILE = 644;
+                static constexpr int CONFIG_FILE = 640;
+                static constexpr int RUNTIME_CONFIG_FILE = 640;
                 static constexpr int JOB_HANDLER = 700;
                 static constexpr int PUB_SUB_FILES = 600;
                 static constexpr int SAMPLE_SHADOW_FILES = 600;
                 static constexpr int SENSOR_PUBLISH_ADDR_FILE = 660;
-                static constexpr int SENSOR_PUBLISH_ADDR_DIR = 700;
                 static constexpr int PKCS11_LIB_FILE = 640;
+                static constexpr int HTTP_PROXY_CONFIG_FILE = 600;
             };
 
             struct PlainConfig : public LoadableFromJsonAndCliAndEnvironment
@@ -68,6 +69,8 @@ namespace Aws
                 bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                 bool LoadFromEnvironment() override;
                 bool Validate() const override;
+                /** Serialize configurations To Json Object **/
+                void SerializeToObject(Crt::JsonObject &object) const;
 
                 static constexpr char CLI_ENDPOINT[] = "--endpoint";
                 static constexpr char CLI_CERT[] = "--cert";
@@ -116,7 +119,10 @@ namespace Aws
                     int ParseDeviceClientLogLevel(std::string value);
                     Aws::Crt::LogLevel ParseSDKLogLevel(std::string value);
                     std::string ParseDeviceClientLogType(std::string value);
-
+                    std::string StringifyDeviceClientLogLevel(int level) const;
+                    std::string StringifySDKLogLevel(Aws::Crt::LogLevel level) const;
+                    /** Serialize logging configurations To Json Object **/
+                    void SerializeToObject(Crt::JsonObject &object) const;
                     static constexpr char LOG_TYPE_FILE[] = "file";
                     static constexpr char LOG_TYPE_STDOUT[] = "stdout";
 
@@ -137,12 +143,12 @@ namespace Aws
                     static constexpr char JSON_KEY_SDK_LOG_FILE[] = "sdk-log-file";
 
                     int deviceClientlogLevel{3};
-                    std::string deviceClientLogtype;
-                    std::string deviceClientLogFile;
+                    std::string deviceClientLogtype{LOG_TYPE_STDOUT};
+                    std::string deviceClientLogFile{"/var/log/aws-iot-device-client/aws-iot-device-client.log"};
 
-                    bool sdkLoggingEnabled = false;
-                    Aws::Crt::LogLevel sdkLogLevel = Aws::Crt::LogLevel::Trace;
-                    std::string sdkLogFile;
+                    bool sdkLoggingEnabled{false};
+                    Aws::Crt::LogLevel sdkLogLevel{Aws::Crt::LogLevel::Trace};
+                    std::string sdkLogFile{"/var/log/aws-iot-device-client/sdk.log"};
                 };
                 LogConfig logConfig;
 
@@ -219,6 +225,8 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
+                    /** Serialize fleet provisioning configurations To Json Object **/
+                    void SerializeToObject(Crt::JsonObject &object) const;
 
                     static constexpr char CLI_ENABLE_FLEET_PROVISIONING[] = "--enable-fleet-provisioning";
                     static constexpr char CLI_FLEET_PROVISIONING_TEMPLATE_NAME[] = "--fleet-provisioning-template-name";
@@ -247,6 +255,8 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
+                    /** Serialize fleet provisioning runtime configurations To Json Object **/
+                    void SerializeToObject(Crt::JsonObject &object) const;
 
                     static constexpr char JSON_KEY_COMPLETED_FLEET_PROVISIONING[] = "completed-fp";
                     static constexpr char JSON_KEY_CERT[] = "cert";
@@ -260,6 +270,33 @@ namespace Aws
                     Aws::Crt::Optional<std::string> thingName;
                 };
                 FleetProvisioningRuntimeConfig fleetProvisioningRuntimeConfig;
+
+                struct HttpProxyConfig : public LoadableFromJsonAndCliAndEnvironment
+                {
+                    bool LoadFromJson(const Crt::JsonView &json) override;
+                    bool LoadFromCliArgs(const CliArgs &cliArgs) override;
+                    bool LoadFromEnvironment() override { return true; }
+                    bool Validate() const override;
+
+                    static constexpr char CLI_HTTP_PROXY_CONFIG_PATH[] = "--http-proxy-config";
+
+                    static constexpr char JSON_KEY_HTTP_PROXY_ENABLED[] = "http-proxy-enabled";
+                    static constexpr char JSON_KEY_HTTP_PROXY_HOST[] = "http-proxy-host";
+                    static constexpr char JSON_KEY_HTTP_PROXY_PORT[] = "http-proxy-port";
+                    static constexpr char JSON_KEY_HTTP_PROXY_AUTH_METHOD[] = "http-proxy-auth-method";
+                    static constexpr char JSON_KEY_HTTP_PROXY_USERNAME[] = "http-proxy-username";
+                    static constexpr char JSON_KEY_HTTP_PROXY_PASSWORD[] = "http-proxy-password";
+
+                    bool httpProxyEnabled{false};
+                    bool httpProxyAuthEnabled{false};
+                    Aws::Crt::Optional<std::string> proxyConfigPath;
+                    Aws::Crt::Optional<std::string> proxyHost;
+                    Aws::Crt::Optional<int> proxyPort;
+                    Aws::Crt::Optional<std::string> proxyAuthMethod;
+                    Aws::Crt::Optional<std::string> proxyUsername;
+                    Aws::Crt::Optional<std::string> proxyPassword;
+                };
+                HttpProxyConfig httpProxyConfig;
 
                 struct PubSub : public LoadableFromJsonAndCliAndEnvironment
                 {
@@ -298,6 +335,7 @@ namespace Aws
                     bool Validate() const override;
                     /** Serialize SampleShadow feature To Json Object **/
                     void SerializeToObject(Crt::JsonObject &object) const;
+                    bool createShadowOutputFile();
 
                     static constexpr char CLI_ENABLE_SAMPLE_SHADOW[] = "--enable-sample-shadow";
                     static constexpr char CLI_SAMPLE_SHADOW_NAME[] = "--shadow-name";
@@ -308,6 +346,8 @@ namespace Aws
                     static constexpr char JSON_SAMPLE_SHADOW_NAME[] = "shadow-name";
                     static constexpr char JSON_SAMPLE_SHADOW_INPUT_FILE[] = "shadow-input-file";
                     static constexpr char JSON_SAMPLE_SHADOW_OUTPUT_FILE[] = "shadow-output-file";
+
+                    static constexpr int MAXIMUM_SHADOW_INPUT_FILE_SIZE = 8 * 1024;
 
                     bool enabled{false};
                     Aws::Crt::Optional<std::string> shadowName;
@@ -322,6 +362,8 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
+                    /** Serialize config shadow configurations To Json Object **/
+                    void SerializeToObject(Crt::JsonObject &object) const;
 
                     static constexpr char CLI_ENABLE_CONFIG_SHADOW[] = "--enable-config-shadow";
                     static constexpr char JSON_ENABLE_CONFIG_SHADOW[] = "enabled";
@@ -368,6 +410,8 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override;
                     bool Validate() const override;
+                    /** Serialize sensor publish configurations To Json Object **/
+                    void SerializeToObject(Crt::JsonObject &object) const;
 
                     static constexpr char JSON_SENSORS[] = "sensors";
                     static constexpr char JSON_ENABLED[] = "enabled";
@@ -439,16 +483,30 @@ namespace Aws
                 static constexpr char DEFAULT_CONFIG_FILE[] = "~/.aws-iot-device-client/aws-iot-device-client.conf";
                 static constexpr char DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] =
                     "~/.aws-iot-device-client/aws-iot-device-client-runtime.conf";
+                static constexpr char DEFAULT_HTTP_PROXY_CONFIG_FILE[] = "~/.aws-iot-device-client/http-proxy.conf";
                 static constexpr char DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[] = "~/.aws-iot-device-client/sample-shadow/";
+                static constexpr char DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[] = "default-sample-shadow-document";
 
                 static constexpr char CLI_HELP[] = "--help";
                 static constexpr char CLI_VERSION[] = "--version";
                 static constexpr char CLI_EXPORT_DEFAULT_SETTINGS[] = "--export-default-settings";
                 static constexpr char CLI_CONFIG_FILE[] = "--config-file";
 
+                /**
+                 * \brief Enum defining several config file types
+                 */
+                enum ConfigFileType
+                {
+                    DEVICE_CLIENT_ESSENTIAL_CONFIG,
+                    FLEET_PROVISIONING_RUNTIME_CONFIG,
+                    HTTP_PROXY_CONFIG
+                };
+
+                static bool CheckTerminalArgs(int argc, char *argv[]);
                 static bool ParseCliArgs(int argc, char *argv[], CliArgs &cliArgs);
                 bool ValidateAndStoreRuntimeConfig();
-                bool ParseConfigFile(const std::string &file, bool isRuntimeConfig);
+                bool ValidateAndStoreHttpProxyConfig();
+                bool ParseConfigFile(const std::string &file, ConfigFileType configFileType);
                 bool init(const CliArgs &cliArgs);
 
                 /**

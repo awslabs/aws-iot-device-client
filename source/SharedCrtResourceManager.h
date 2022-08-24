@@ -5,6 +5,7 @@
 #define DEVICE_CLIENT_SHAREDCRTRESOURCEMANAGER_H
 
 #include "Feature.h"
+#include "FeatureRegistry.h"
 #include "config/Config.h"
 
 #include <atomic>
@@ -42,7 +43,7 @@ namespace Aws
                 std::shared_ptr<Crt::Mqtt::MqttConnection> connection;
                 aws_allocator *allocator{nullptr};
                 aws_mem_trace_level memTraceLevel{AWS_MEMTRACE_NONE};
-                std::vector<Feature *> *features;
+                std::shared_ptr<Util::FeatureRegistry> features;
 
                 bool setupLogging(const PlainConfig &config);
 
@@ -73,7 +74,7 @@ namespace Aws
                 static const int RETRY = 1;
                 static const int ABORT = 2;
 
-                bool initialize(const PlainConfig &config, std::vector<Feature *> *features);
+                bool initialize(const PlainConfig &config, std::shared_ptr<Util::FeatureRegistry> featureRegistry);
 
                 void initializeAWSHttpLib();
 
@@ -89,7 +90,7 @@ namespace Aws
 
                 virtual aws_allocator *getAllocator();
 
-                Aws::Crt::Io::ClientBootstrap *getClientBootstrap();
+                virtual Aws::Crt::Io::ClientBootstrap *getClientBootstrap();
 
                 void disconnect();
 

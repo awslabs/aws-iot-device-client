@@ -32,6 +32,7 @@ class ConfigTestFixture : public ::testing::Test
 {
   public:
     ConfigTestFixture() = default;
+    string outputPath;
 
     void SetUp() override
     {
@@ -55,6 +56,11 @@ class ConfigTestFixture : public ::testing::Test
 
         mode_t invalidPerms = validPerms | S_IRWXO;
         FileUtils::CreateDirectoryWithPermissions(addrPathInvalid.c_str(), invalidPerms);
+
+        ostringstream outputPathStream;
+        outputPathStream << Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR << Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
+
+        outputPath = FileUtils::ExtractExpandedPath(outputPathStream.str().c_str());
     }
 
     void TearDown() override
@@ -249,6 +255,34 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
     AssertDefaultFeaturesEnabled(config);
 }
 
+TEST_F(ConfigTestFixture, ExtractExpandedPathFailureConfig)
+{
+    constexpr char badCertCharacter[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file|",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value"
+})";
+    constexpr char badKeyCharacter[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file|",
+    "thing-name": "thing-name value"
+})";
+    PlainConfig config;
+
+    JsonObject jsonObjectBadCert(badCertCharacter);
+    JsonView jsonViewBadCert = jsonObjectBadCert.View();
+
+    JsonObject jsonObjectBadKey(badKeyCharacter);
+    JsonView jsonViewBadKey = jsonObjectBadKey.View();
+
+    ASSERT_THROW(config.LoadFromJson(jsonViewBadCert), wordexp_fail_error);
+    ASSERT_THROW(config.LoadFromJson(jsonViewBadKey), wordexp_fail_error);
+}
+
 TEST_F(ConfigTestFixture, HappyCaseMinimumCli)
 {
     CliArgs cliArgs = makeMinimumCliArgs();
@@ -262,6 +296,28 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumCli)
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
     AssertDefaultFeaturesEnabled(config);
+}
+
+TEST_F(ConfigTestFixture, ExtractExpandedPathFailureCLI)
+{
+    CliArgs badCertCharacter = CliArgs{
+        {PlainConfig::CLI_ENDPOINT, "endpoint value"},
+        {PlainConfig::CLI_CERT, filePath + "|"},
+        {PlainConfig::CLI_KEY, filePath},
+        {PlainConfig::CLI_THING_NAME, "thing-name value"},
+    };
+
+    CliArgs badKeyCharacter = CliArgs{
+        {PlainConfig::CLI_ENDPOINT, "endpoint value"},
+        {PlainConfig::CLI_CERT, filePath},
+        {PlainConfig::CLI_KEY, filePath + "|"},
+        {PlainConfig::CLI_THING_NAME, "thing-name value"},
+    };
+
+    PlainConfig config;
+
+    ASSERT_THROW(config.LoadFromCliArgs(badCertCharacter), wordexp_fail_error);
+    ASSERT_THROW(config.LoadFromCliArgs(badKeyCharacter), wordexp_fail_error);
 }
 
 /**
@@ -1200,6 +1256,9 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigAddr)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Invalid permissions on addr.
     ASSERT_TRUE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
@@ -1232,6 +1291,9 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopicEmpty)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Empty mqtt_topic.
     ASSERT_TRUE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
@@ -1264,6 +1326,9 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopic)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Invalid mqtt_topic.
     ASSERT_TRUE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
@@ -1296,6 +1361,9 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigEomDelimiter)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Invalid eom_delimiter.
     ASSERT_TRUE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
@@ -1332,6 +1400,9 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigNegativeIntegers)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Invalid integer values.
     ASSERT_TRUE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
@@ -1365,6 +1436,9 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigBufferCapacityTooSmall)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // Buffer capacity too small.
     ASSERT_TRUE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
@@ -1398,6 +1472,9 @@ TEST_F(ConfigTestFixture, SensorPublishDisableFeature)
     PlainConfig config;
     config.LoadFromJson(jsonView);
 
+#if defined(EXCLUDE_SENSOR_PUBLISH)
+    GTEST_SKIP();
+#endif
     ASSERT_FALSE(config.Validate()); // All sensors disabled, then disable feature.
     ASSERT_FALSE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
@@ -1559,6 +1636,74 @@ TEST_F(ConfigTestFixture, SecureElementCli)
     ASSERT_TRUE(config.Validate());
 }
 #endif
+
+TEST_F(ConfigTestFixture, HTTPProxyConfigHappy)
+{
+    constexpr char jsonString[] = R"(
+{
+  "http-proxy-enabled": true,
+  "http-proxy-host": "10.0.0.1",
+  "http-proxy-port": "8888",
+  "http-proxy-auth-method": "UserNameAndPassword",
+  "http-proxy-username": "testUserName",
+  "http-proxy-password": "12345"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig::HttpProxyConfig httpProxyConfig;
+    httpProxyConfig.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(httpProxyConfig.httpProxyEnabled);
+    ASSERT_STREQ("10.0.0.1", httpProxyConfig.proxyHost->c_str());
+    ASSERT_EQ(8888, httpProxyConfig.proxyPort.value());
+    ASSERT_TRUE(httpProxyConfig.httpProxyAuthEnabled);
+    ASSERT_STREQ("UserNameAndPassword", httpProxyConfig.proxyAuthMethod->c_str());
+    ASSERT_STREQ("testUserName", httpProxyConfig.proxyUsername->c_str());
+    ASSERT_STREQ("12345", httpProxyConfig.proxyPassword->c_str());
+}
+
+TEST_F(ConfigTestFixture, HTTPProxyConfigDisabled)
+{
+    constexpr char jsonString[] = R"(
+{
+  "http-proxy-enabled": false,
+  "http-proxy-host": "10.0.0.1",
+  "http-proxy-port": "8888",
+  "http-proxy-auth-method": "UserNameAndPassword",
+  "http-proxy-username": "testUserName",
+  "http-proxy-password": "12345"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig::HttpProxyConfig httpProxyConfig;
+    httpProxyConfig.LoadFromJson(jsonView);
+
+    ASSERT_FALSE(httpProxyConfig.httpProxyEnabled);
+}
+
+TEST_F(ConfigTestFixture, HTTPProxyConfigNoAuth)
+{
+    constexpr char jsonString[] = R"(
+{
+  "http-proxy-enabled": true,
+  "http-proxy-host": "10.0.0.1",
+  "http-proxy-port": "8888",
+  "http-proxy-auth-method": "None"
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig::HttpProxyConfig httpProxyConfig;
+    httpProxyConfig.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(httpProxyConfig.httpProxyEnabled);
+    ASSERT_STREQ("10.0.0.1", httpProxyConfig.proxyHost->c_str());
+    ASSERT_EQ(8888, httpProxyConfig.proxyPort.value());
+    ASSERT_FALSE(httpProxyConfig.httpProxyAuthEnabled);
+    ASSERT_STREQ("None", httpProxyConfig.proxyAuthMethod->c_str());
+}
 
 TEST(Config, MemoryTrace)
 {

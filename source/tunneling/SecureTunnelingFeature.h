@@ -7,6 +7,8 @@
 #include "../ClientBaseNotifier.h"
 #include "../Feature.h"
 #include "../SharedCrtResourceManager.h"
+#include "IotSecureTunnelingClientWrapper.h"
+#include "SecureTunnelingContext.h"
 #include <aws/iotdevicecommon/IotDevice.h>
 #include <aws/iotsecuretunneling/SecureTunnelingNotifyResponse.h>
 
@@ -18,14 +20,13 @@ namespace Aws
         {
             namespace SecureTunneling
             {
-                class SecureTunnelingContext;
-
                 /**
                  * \brief Provides IoT Secure Tunneling related functionality within the Device Client
                  */
                 class SecureTunnelingFeature : public Feature
                 {
                   public:
+                    static constexpr char NAME[] = "Secure Tunneling";
                     /**
                      * \brief Constructor
                      */
@@ -34,7 +35,7 @@ namespace Aws
                     /**
                      * \brief Destructor
                      */
-                    ~SecureTunnelingFeature() override;
+                    virtual ~SecureTunnelingFeature() override;
 
                     /**
                      * \brief Initializes the Secure Tunneling feature with all the required setup information, event
@@ -115,6 +116,20 @@ namespace Aws
                     std::string GetEndpoint(const std::string &region);
 
                     /**
+                     * \brief Get the IotSecureTunneling client
+                     */
+                    virtual std::shared_ptr<AbstractIotSecureTunnelingClient> createClient();
+
+                    /**
+                     * \brief a helper function to get SecureTunnelingContext in order to facilitate testing
+                     * Pass an empty unique_ptr and set value in order to allow mocking
+                     */
+                    virtual std::unique_ptr<SecureTunnelingContext> createContext(
+                        const std::string &accessToken,
+                        const std::string &region,
+                        const uint16_t &port);
+
+                    /**
                      * \brief Callback when a secure tunnel is shutdown
                      *
                      * @param contextToRemove a SecureTunnelingContext that represents the secure tunnel that was
@@ -147,6 +162,10 @@ namespace Aws
                      */
                     std::shared_ptr<SharedCrtResourceManager> mSharedCrtResourceManager;
 
+                    /**
+                     * \brief Wrapper around the IotSecureTunnelingClient to facilitate testing
+                     */
+                    std::shared_ptr<AbstractIotSecureTunnelingClient> iotSecureTunnelingClient;
                     /**
                      * \brief A resource required to initialize the IoT SDK
                      */

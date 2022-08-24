@@ -29,6 +29,7 @@ namespace Aws
                 class PubSubFeature : public Feature
                 {
                   public:
+                    static constexpr char NAME[] = "Pub Sub Sample";
                     static constexpr char DEFAULT_PUBLISH_FILE[] = "~/.aws-iot-device-client/pubsub/publish-file.txt";
                     static constexpr char DEFAULT_SUBSCRIBE_FILE[] =
                         "~/.aws-iot-device-client/pubsub/subscribe-file.txt";
@@ -62,15 +63,6 @@ namespace Aws
                     static constexpr char TAG[] = "samples/PubSubFeature.cpp";
 
                     /**
-                     * \brief Default payload if no publish file was provided
-                     */
-                    static const std::string DEFAULT_PUBLISH_PAYLOAD;
-                    /**
-                     * \brief Subscription payload used to retrigger the publish actions
-                     */
-                    static const std::string PUBLISH_TRIGGER_PAYLOAD;
-
-                    /**
                      * \brief The resource manager used to manage CRT resources
                      */
                     std::shared_ptr<SharedCrtResourceManager> resourceManager;
@@ -96,6 +88,14 @@ namespace Aws
                      * \brief Topic to write subscription payloads to
                      */
                     std::string subFile = DEFAULT_SUBSCRIBE_FILE;
+                    /**
+                     * \brief Default payload if no publish file was provided
+                     */
+                    static const std::string DEFAULT_PUBLISH_PAYLOAD;
+                    /**
+                     * \brief Subscription payload used to retrigger the publish actions
+                     */
+                    static const std::string PUBLISH_TRIGGER_PAYLOAD;
 
                     /**
                      * \brief Workflow function for publishing data to the configured topic

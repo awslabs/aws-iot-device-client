@@ -11,6 +11,7 @@
 #include "../ClientBaseNotifier.h"
 #include "../Feature.h"
 #include "../SharedCrtResourceManager.h"
+#include "ReportTaskWrapper.h"
 
 namespace Aws
 {
@@ -26,6 +27,8 @@ namespace Aws
                 class DeviceDefenderFeature : public Feature
                 {
                   public:
+                    static constexpr char NAME[] = "Device Defender";
+
                     DeviceDefenderFeature() = default;
 
                     /**
@@ -49,12 +52,7 @@ namespace Aws
                     int start() override;
                     int stop() override;
 
-                  private:
-                    /**
-                     * \brief Used by the logger to specify that log messages are coming from the Device Defender
-                     * feature
-                     */
-                    static constexpr char TAG[] = "DeviceDefender.cpp";
+                  protected:
                     /**
                      * \brief An interval in seconds used to determine how often to publish reports
                      */
@@ -63,6 +61,13 @@ namespace Aws
                      * \brief the ThingName to use
                      */
                     std::string thingName;
+
+                  private:
+                    /**
+                     * \brief Used by the logger to specify that log messages are coming from the Device Defender
+                     * feature
+                     */
+                    static constexpr char TAG[] = "DeviceDefender.cpp";
                     /**
                      * \brief The resource manager used to manage CRT resources
                      */
@@ -95,10 +100,21 @@ namespace Aws
                      * $aws/things/<thingName>/defender/metrics/json/rejected
                      */
                     static constexpr char TOPIC_REJECTED[] = "/rejected";
+
+                    /**
+                     * \brief The format of the Topic Filter
+                     */
+                    static constexpr char TOPIC_FORMAT[] = "%s%s%s%s";
+
+                    /**
+                     * \brief Factory method for ReportTask to facilitate mocking
+                     */
+                    virtual std::shared_ptr<AbstractReportTask> createReportTask();
+
                     /**
                      * \brief The Iot Device Defender SDK task responsible for publishing the reports
                      */
-                    std::shared_ptr<Aws::Iotdevicedefenderv1::ReportTask> task;
+                    std::shared_ptr<AbstractReportTask> task;
 
                     /**
                      * \brief Called by feature start, this will build the task, add it to the eventLoopGroup in
@@ -111,6 +127,16 @@ namespace Aws
                      * Device Defender SDK task, & unsubscribe from the accepted/rejected Device Defender MQTT topics
                      */
                     void stopDeviceDefender();
+
+                    /**
+                     * \brief Subscribes to Topic Filter Accepted/Rejected
+                     */
+                    virtual void subscribeToTopicFilter();
+
+                    /**
+                     * \Brief Unsubscribes to Topic Filter Accepted/Rejected
+                     */
+                    virtual void unsubscribeToTopicFilter();
                 };
             } // namespace DeviceDefender
         }     // namespace DeviceClient

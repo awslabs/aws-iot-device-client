@@ -21,7 +21,8 @@ Root Certificate Authority | 644               | **Yes**
 CSR File  | 600               | **Yes**
 Log File  | 600               | **Yes**
 Job Handler | 700               | **Yes**
-Config File | 640               | **Yes**
+Config File | 640               | **Recommended**
+HTTP Proxy Config File | 600           | **Recommended**
 Pub/Sub Files | 600               | **Yes**
 Sensor Pubilsh Pathname Socket | 660               | **Yes**
 PKCS11 Library File | 640               | **Yes**
