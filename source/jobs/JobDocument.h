@@ -9,8 +9,6 @@
 #include <aws/crt/Optional.h>
 #include <map>
 
-using namespace Aws::Crt;
-
 namespace Aws
 {
     namespace Iot
@@ -24,7 +22,7 @@ namespace Aws
                 class LoadableFromJobDocument
                 {
                   public:
-                    virtual void LoadFromJobDocument(const JsonView &json) = 0;
+                    virtual void LoadFromJobDocument(const Crt::JsonView &json) = 0;
                     virtual bool Validate() const = 0;
                     virtual ~LoadableFromJobDocument() = default;
 
@@ -33,9 +31,9 @@ namespace Aws
 
                 struct PlainJobDocument : public LoadableFromJobDocument
                 {
-                    void LoadFromJobDocument(const JsonView &json) override;
+                    void LoadFromJobDocument(const Crt::JsonView &json) override;
                     bool Validate() const override;
-                    static std::vector<std::string> ParseToVectorString(const JsonView &json);
+                    static std::vector<std::string> ParseToVectorString(const Crt::JsonView &json);
 
                     static constexpr char ACTION_TYPE_RUN_HANDLER[] = "runHandler";
 
@@ -55,11 +53,11 @@ namespace Aws
                     static constexpr char OLD_SCHEMA_VERSION[] = "0.0";
 
                     std::string version;
-                    Optional<bool> includeStdOut{false};
+                    Crt::Optional<bool> includeStdOut{false};
 
                     struct JobCondition : public LoadableFromJobDocument
                     {
-                        void LoadFromJobDocument(const JsonView &json) override;
+                        void LoadFromJobDocument(const Crt::JsonView &json) override;
                         bool Validate() const override;
 
                         static constexpr char JSON_KEY_CONDITION_KEY[] = "key";
@@ -68,13 +66,13 @@ namespace Aws
 
                         std::string conditionKey;
                         std::vector<std::string> conditionValue;
-                        Optional<std::string> type{"stringEqual"};
+                        Crt::Optional<std::string> type{"stringEqual"};
                     };
-                    Optional<std::vector<JobCondition>> conditions;
+                    Crt::Optional<std::vector<JobCondition>> conditions;
 
                     struct JobAction : public LoadableFromJobDocument
                     {
-                        void LoadFromJobDocument(const JsonView &json) override;
+                        void LoadFromJobDocument(const Crt::JsonView &json) override;
                         bool Validate() const override;
 
                         static constexpr char JSON_KEY_NAME[] = "name";
@@ -89,7 +87,7 @@ namespace Aws
 
                         struct ActionInput : public LoadableFromJobDocument
                         {
-                            void LoadFromJobDocument(const JsonView &json) override;
+                            void LoadFromJobDocument(const Crt::JsonView &json) override;
                             bool Validate() const override;
 
                             static constexpr char JSON_KEY_HANDLER[] = "handler";
@@ -97,17 +95,17 @@ namespace Aws
                             static constexpr char JSON_KEY_PATH[] = "path";
 
                             std::string handler;
-                            Optional<std::vector<std::string>> args;
-                            Optional<std::string> path;
+                            Crt::Optional<std::vector<std::string>> args;
+                            Crt::Optional<std::string> path;
                         };
                         ActionInput input;
-                        Optional<std::string> runAsUser{""};
-                        Optional<int> allowStdErr;
-                        Optional<bool> ignoreStepFailure{false};
+                        Crt::Optional<std::string> runAsUser{""};
+                        Crt::Optional<int> allowStdErr;
+                        Crt::Optional<bool> ignoreStepFailure{false};
                     };
                     std::vector<JobAction> steps;
 
-                    Optional<JobAction> finalStep;
+                    Crt::Optional<JobAction> finalStep;
                 };
 
             } // namespace Jobs

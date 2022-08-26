@@ -216,7 +216,7 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         csrAcceptedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
-    auto onCsrRejectedSubAck = [&](int ioErr) {
+    auto onCsrRejectedSubAck = [this](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
             LOGM_ERROR(
@@ -240,7 +240,7 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         csrPublishCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
-    auto onCsrAccepted = [&](CreateCertificateFromCsrResponse *response, int ioErr) {
+    auto onCsrAccepted = [this](CreateCertificateFromCsrResponse *response, int ioErr) {
         if (ioErr == AWS_OP_SUCCESS)
         {
             LOGM_INFO(TAG, "CreateCertificateFromCsrResponse certificateId: %s. ***", response->CertificateId->c_str());

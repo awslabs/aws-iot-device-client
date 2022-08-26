@@ -8,7 +8,7 @@
 #include <sys/stat.h> /* mkdir(2) */
 #include <thread>
 
-#define TIMESTAMP_BUFFER_SIZE 25
+constexpr int TIMESTAMP_BUFFER_SIZE = 25;
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Logging;
@@ -112,7 +112,7 @@ void FileLogger::run()
     {
         unique_ptr<LogMessage> message = logQueue->getNextLog();
 
-        if (NULL != message)
+        if (nullptr != message)
         {
             writeLogMessage(std::move(message));
         }
@@ -174,7 +174,7 @@ void FileLogger::flush()
     while (logQueue->hasNextLog())
     {
         unique_ptr<LogMessage> message = logQueue->getNextLog();
-        if (NULL != message)
+        if (nullptr != message)
         {
             writeLogMessage(std::move(message));
         }

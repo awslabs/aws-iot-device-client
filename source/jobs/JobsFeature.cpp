@@ -665,7 +665,7 @@ void JobsFeature::runJobs()
 }
 
 int JobsFeature::init(
-    shared_ptr<Mqtt::MqttConnection> connection,
+    shared_ptr<Crt::Mqtt::MqttConnection> connection,
     shared_ptr<ClientBaseNotifier> notifier,
     const PlainConfig &config)
 {

@@ -29,7 +29,7 @@ namespace Aws
                     /**
                      * \brief The default constructor is hidden as private since it shouldn't be used
                      */
-                    EphemeralPromise(){};
+                    EphemeralPromise() = default;
                     /**
                      * \brief The time to live for this promise in milliseconds
                      */
