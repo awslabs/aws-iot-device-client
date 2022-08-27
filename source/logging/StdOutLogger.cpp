@@ -7,7 +7,7 @@
 #include <sstream>
 #include <thread>
 
-#define TIMESTAMP_BUFFER_SIZE 25
+constexpr int TIMESTAMP_BUFFER_SIZE = 25;
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Logging;
@@ -29,7 +29,7 @@ void StdOutLogger::run()
     {
         unique_ptr<LogMessage> message = logQueue->getNextLog();
 
-        if (NULL != message)
+        if (nullptr != message)
         {
             writeLogMessage(std::move(message));
         }
@@ -79,7 +79,7 @@ void StdOutLogger::flush()
     while (logQueue->hasNextLog())
     {
         unique_ptr<LogMessage> message = logQueue->getNextLog();
-        if (NULL != message)
+        if (nullptr != message)
         {
             writeLogMessage(std::move(message));
         }

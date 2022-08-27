@@ -28,7 +28,7 @@ constexpr char PubSubFeature::NAME[];
 constexpr char PubSubFeature::DEFAULT_PUBLISH_FILE[];
 constexpr char PubSubFeature::DEFAULT_SUBSCRIBE_FILE[];
 
-#define MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES 128000
+constexpr int MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES = 128000;
 
 const std::string PubSubFeature::DEFAULT_PUBLISH_PAYLOAD = R"({"Hello": "World!"})";
 const std::string PubSubFeature::PUBLISH_TRIGGER_PAYLOAD = "DC-Publish";
@@ -74,7 +74,7 @@ bool PubSubFeature::createPubSub(const PlainConfig &config, std::string filePath
             return false;
         }
         // Write payload data in newly created empty file.
-        if (payload != NULL)
+        if (payload != nullptr)
         {
             FileUtils::WriteToFile(filePath, payload);
         }
@@ -129,7 +129,7 @@ int PubSubFeature::init(
     }
     subFile = FileUtils::ExtractExpandedPath(subFile);
 
-    if (!createPubSub(config, subFile, NULL))
+    if (!createPubSub(config, subFile, nullptr))
     {
         LOG_ERROR(TAG, "Failed to create subscribe directory or file");
     }
@@ -183,10 +183,10 @@ int PubSubFeature::start()
     LOGM_INFO(TAG, "Starting %s", getName().c_str());
 
     auto onSubAck =
-        [&](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void {
+        [this](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void {
         LOGM_DEBUG(TAG, "SubAck: PacketId:(%s), ErrorCode:%d", getName().c_str(), errorCode);
     };
-    auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void {
+    auto onRecvData = [this](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void {
         LOGM_DEBUG(TAG, "Message received on subscribe topic, size: %zu bytes", payload.len);
         if (string((char *)payload.buffer, payload.len) == PUBLISH_TRIGGER_PAYLOAD)
         {
@@ -213,7 +213,7 @@ int PubSubFeature::start()
 
 int PubSubFeature::stop()
 {
-    auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void {
+    auto onUnsubscribe = [](MqttConnection &connection, uint16_t packetId, int errorCode) -> void {
         LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%u, ErrorCode:%d", packetId, errorCode);
     };
 

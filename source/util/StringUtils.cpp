@@ -16,7 +16,7 @@ namespace Aws
         {
             namespace Util
             {
-                string vFormatMessage(const char *message, va_list args)
+                string vFormatMessage(const char message[], va_list args)
                 {
                     va_list copy;
                     va_copy(copy, args);
@@ -37,7 +37,7 @@ namespace Aws
                     return buffer;
                 }
 
-                string FormatMessage(const char *message, ...)
+                string FormatMessage(const char message[], ...)
                 {
                     va_list args;
                     va_start(args, message);

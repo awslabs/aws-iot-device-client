@@ -93,7 +93,7 @@ using namespace Aws::Iot::DeviceClient::Shadow;
 using namespace Aws::Iot::DeviceClient::SensorPublish;
 #endif
 
-const char *TAG = "Main.cpp";
+constexpr char TAG[] = "Main.cpp";
 
 shared_ptr<FeatureRegistry> features;
 shared_ptr<SharedCrtResourceManager> resourceManager;
@@ -328,7 +328,7 @@ int main(int argc, char *argv[])
     int received_signal;
     sigaddset(&sigset, SIGINT);
     sigaddset(&sigset, SIGHUP);
-    sigprocmask(SIG_BLOCK, &sigset, 0);
+    sigprocmask(SIG_BLOCK, &sigset, nullptr);
 
     shared_ptr<DefaultClientBaseNotifier> listener =
         shared_ptr<DefaultClientBaseNotifier>(new DefaultClientBaseNotifier);
