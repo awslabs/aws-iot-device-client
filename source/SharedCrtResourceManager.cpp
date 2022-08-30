@@ -44,7 +44,7 @@ bool SharedCrtResourceManager::initialize(
     return initialized;
 }
 
-bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
+bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config) const
 {
     struct stat fileInfo;
     bool locatedAll = true;
@@ -109,7 +109,7 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     return locatedAll;
 }
 
-bool SharedCrtResourceManager::setupLogging(const PlainConfig &config)
+bool SharedCrtResourceManager::setupLogging(const PlainConfig &config) const
 {
     // Absolute path to the sdk log file.
     std::string logFilePath{DEFAULT_SDK_LOG_FILE};
@@ -534,7 +534,7 @@ void SharedCrtResourceManager::disconnect()
     }
 }
 
-void SharedCrtResourceManager::startDeviceClientFeatures()
+void SharedCrtResourceManager::startDeviceClientFeatures() const
 {
     LOG_INFO(TAG, "Starting Device Client features.");
     features->startAll();

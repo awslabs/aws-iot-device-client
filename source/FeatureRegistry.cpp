@@ -50,7 +50,7 @@ void FeatureRegistry::disable(const std::string &name)
 std::size_t FeatureRegistry::getSize() const
 {
     std::lock_guard<std::mutex> lock(featuresLock);
-    return count_if(features.begin(), features.end(), [](const std::pair<string, std::shared_ptr<Feature>> feature) {
+    return count_if(features.begin(), features.end(), [](const std::pair<string, std::shared_ptr<Feature>> &feature) {
         return feature.second != nullptr;
     });
 }
@@ -59,7 +59,7 @@ void FeatureRegistry::stopAll()
 {
     std::lock_guard<std::mutex> lock(featuresLock);
 
-    for (auto feature : features)
+    for (auto &feature : features)
     {
         if (feature.second != nullptr)
         {
@@ -74,7 +74,7 @@ void FeatureRegistry::startAll() const
 {
     std::lock_guard<std::mutex> lock(featuresLock);
 
-    for (auto feature : features)
+    for (auto &feature : features)
     {
         if (feature.second != nullptr)
         {

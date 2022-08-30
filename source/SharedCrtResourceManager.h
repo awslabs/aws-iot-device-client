@@ -45,7 +45,7 @@ namespace Aws
                 aws_mem_trace_level memTraceLevel{AWS_MEMTRACE_NONE};
                 std::shared_ptr<Util::FeatureRegistry> features;
 
-                bool setupLogging(const PlainConfig &config);
+                bool setupLogging(const PlainConfig &config) const;
 
                 int buildClient(const PlainConfig &config);
 
@@ -55,7 +55,7 @@ namespace Aws
                 /**
                  * inheritable for testing
                  */
-                bool locateCredentials(const PlainConfig &config);
+                bool locateCredentials(const PlainConfig &config) const;
 
               public:
                 SharedCrtResourceManager() = default;
@@ -80,7 +80,7 @@ namespace Aws
 
                 int establishConnection(const PlainConfig &config);
 
-                void startDeviceClientFeatures();
+                void startDeviceClientFeatures() const;
 
                 virtual std::shared_ptr<Crt::Mqtt::MqttConnection> getConnection();
 
