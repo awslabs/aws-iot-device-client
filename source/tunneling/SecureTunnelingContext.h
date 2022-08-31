@@ -88,20 +88,20 @@ namespace Aws
                      *
                      * @param data data received from the local TCP port
                      */
-                    void OnTcpForwardDataReceive(const Crt::ByteBuf &data);
+                    void OnTcpForwardDataReceive(const Crt::ByteBuf &data) const;
 
                   private:
                     /**
                      * \brief Create a Secure Tunnel instance
                      */
                     virtual std::shared_ptr<SecureTunnelWrapper> CreateSecureTunnel(
-                        Aws::Iotsecuretunneling::OnConnectionComplete onConnectionComplete,
-                        Aws::Iotsecuretunneling::OnConnectionShutdown onConnectionShutdown,
-                        Aws::Iotsecuretunneling::OnSendDataComplete onSendDataComplete,
-                        Aws::Iotsecuretunneling::OnDataReceive onDataReceive,
-                        Aws::Iotsecuretunneling::OnStreamStart onStreamStart,
-                        Aws::Iotsecuretunneling::OnStreamReset onStreamReset,
-                        Aws::Iotsecuretunneling::OnSessionReset onSessionReset);
+                        const Aws::Iotsecuretunneling::OnConnectionComplete &onConnectionComplete,
+                        const Aws::Iotsecuretunneling::OnConnectionShutdown &onConnectionShutdown,
+                        const Aws::Iotsecuretunneling::OnSendDataComplete &onSendDataComplete,
+                        const Aws::Iotsecuretunneling::OnDataReceive &onDataReceive,
+                        const Aws::Iotsecuretunneling::OnStreamStart &onStreamStart,
+                        const Aws::Iotsecuretunneling::OnStreamReset &onStreamReset,
+                        const Aws::Iotsecuretunneling::OnSessionReset &onSessionReset);
 
                     /**
                      * \brief Create a Tcp Forward instance
@@ -125,7 +125,7 @@ namespace Aws
                     /**
                      * \brief Callback when secure tunnel connection is complete
                      */
-                    void OnConnectionComplete();
+                    void OnConnectionComplete() const;
 
                     /**
                      * \brief Callback when secure tunnel connection is shutdown
@@ -137,14 +137,14 @@ namespace Aws
                      *
                      * @param errorCode error code
                      */
-                    void OnSendDataComplete(int errorCode);
+                    void OnSendDataComplete(int errorCode) const;
 
                     /**
                      * \brief Callback when data is received from secure tunnel
                      *
                      * @param data data received from the secure tunnel
                      */
-                    void OnDataReceive(const Crt::ByteBuf &data);
+                    void OnDataReceive(const Crt::ByteBuf &data) const;
 
                     /**
                      * \brief Callback when secure tunnel stream_start is received

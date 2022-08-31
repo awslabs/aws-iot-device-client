@@ -49,7 +49,7 @@ namespace Aws
                  * @return string in 'first:second' form
                  */
 
-                std::string addString(Aws::Crt::String first, Aws::Crt::String second);
+                std::string addString(const Aws::Crt::String &first, const Aws::Crt::String &second);
 
                 /**
                  * \brief Given an input map object, will return the string form of the map

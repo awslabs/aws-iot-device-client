@@ -67,7 +67,7 @@ namespace Aws
                     return output.str();
                 }
 
-                string addString(Aws::Crt::String first, Aws::Crt::String second)
+                string addString(const Aws::Crt::String &first, const Aws::Crt::String &second)
                 {
                     string jsonTemplate = R"("%s": "%s")";
                     //  The message string used over here must be NULL terminated

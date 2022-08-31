@@ -100,7 +100,7 @@ namespace Aws
 
                     if (!config.tunneling.subscribeNotification)
                     {
-                        std::unique_ptr<SecureTunnelingContext> context =
+                        auto context =
                             unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
                                 mSharedCrtResourceManager,
                                 mRootCa,
@@ -217,7 +217,7 @@ namespace Aws
                     }
                 }
 
-                void SecureTunnelingFeature::OnSubscribeComplete(int ioErr)
+                void SecureTunnelingFeature::OnSubscribeComplete(int ioErr) const
                 {
                     LOG_DEBUG(TAG, "Subscribed to tunnel notification topic");
 
@@ -266,8 +266,7 @@ namespace Aws
 
                 std::shared_ptr<AbstractIotSecureTunnelingClient> SecureTunnelingFeature::createClient()
                 {
-                    return std::shared_ptr<AbstractIotSecureTunnelingClient>(
-                        new IotSecureTunnelingClientWrapper(mSharedCrtResourceManager->getConnection()));
+                    return std::make_shared<IotSecureTunnelingClientWrapper>(mSharedCrtResourceManager->getConnection());
                 }
 
                 void SecureTunnelingFeature::OnConnectionShutdown(SecureTunnelingContext *contextToRemove)
