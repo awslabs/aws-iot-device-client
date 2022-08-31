@@ -49,6 +49,9 @@ namespace Aws
                      */
                     const char *DEFAULT_PATH_KEYWORD = "default";
 
+                    const char *RUN_HANDLER_TYPE = "runHandler";
+                    const char *RUN_COMMAND_TYPE = "runCommand";
+
                     /**
                      * \brief The number of lines received on STDERR from the child process
                      *
@@ -80,7 +83,7 @@ namespace Aws
                      */
                     std::string buildCommand(
                         Optional<std::string> path,
-                        const std::string &handler,
+                        const Optional<std::string> &handler,
                         const std::string &jobHandlerDir) const;
 
                     /**
@@ -91,6 +94,8 @@ namespace Aws
                      * @return an integer representing the return code of the executed process
                      */
                     int exec_cmd(const std::string &operation, PlainJobDocument::JobAction action);
+
+                    int exec_shellCommand(const std::string &command, PlainJobDocument::JobAction action);
 
                     /**
                      * \brief Executes the given set of steps (actions) in sequence as provided in the job document

@@ -40,7 +40,7 @@ void AssertInputEqual(
     const PlainJobDocument::JobAction::ActionInput &input1,
     const PlainJobDocument::JobAction::ActionInput &input2)
 {
-    ASSERT_STREQ(input1.handler.c_str(), input2.handler.c_str());
+    ASSERT_STREQ(input1.handler->c_str(), input2.handler->c_str());
     AssertVectorEqual(input1.args, input2.args);
     ASSERT_STREQ(input1.path->c_str(), input2.path->c_str());
 }

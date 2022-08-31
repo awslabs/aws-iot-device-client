@@ -14,6 +14,7 @@ using namespace Aws::Iot::DeviceClient::Logging;
 constexpr char LoadableFromJobDocument::TAG[];
 
 constexpr char PlainJobDocument::ACTION_TYPE_RUN_HANDLER[];
+constexpr char PlainJobDocument::ACTION_TYPE_RUN_COMMAND[];
 
 constexpr char PlainJobDocument::JSON_KEY_VERSION[];
 constexpr char PlainJobDocument::JSON_KEY_INCLUDESTDOUT[];
@@ -233,6 +234,7 @@ constexpr char PlainJobDocument::JobAction::JSON_KEY_INPUT[];
 constexpr char PlainJobDocument::JobAction::JSON_KEY_RUNASUSER[];
 constexpr char PlainJobDocument::JobAction::JSON_KEY_ALLOWSTDERR[];
 constexpr char PlainJobDocument::JobAction::JSON_KEY_IGNORESTEPFAILURE[];
+std::string currentType;
 
 void PlainJobDocument::JobAction::LoadFromJobDocument(const JsonView &json)
 {
@@ -246,6 +248,7 @@ void PlainJobDocument::JobAction::LoadFromJobDocument(const JsonView &json)
     if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsString())
     {
         type = json.GetString(jsonKey).c_str();
+        currentType = type;
     }
 
     jsonKey = JSON_KEY_INPUT;
@@ -289,7 +292,7 @@ bool PlainJobDocument::JobAction::Validate() const
         return false;
     }
 
-    if (type != ACTION_TYPE_RUN_HANDLER)
+    if (type != ACTION_TYPE_RUN_HANDLER && type != ACTION_TYPE_RUN_COMMAND)
     {
         LOGM_ERROR(
             TAG,
@@ -309,6 +312,7 @@ bool PlainJobDocument::JobAction::Validate() const
 
 constexpr char PlainJobDocument::JobAction::ActionInput::JSON_KEY_HANDLER[];
 constexpr char PlainJobDocument::JobAction::ActionInput::JSON_KEY_ARGS[];
+constexpr char PlainJobDocument::JobAction::ActionInput::JSON_KEY_COMMANDS[];
 constexpr char PlainJobDocument::JobAction::ActionInput::JSON_KEY_PATH[];
 
 void PlainJobDocument::JobAction::ActionInput::LoadFromJobDocument(const JsonView &json)
@@ -325,6 +329,12 @@ void PlainJobDocument::JobAction::ActionInput::LoadFromJobDocument(const JsonVie
         args = ParseToVectorString(json.GetJsonObject(jsonKey));
     }
 
+    jsonKey = JSON_KEY_COMMANDS;
+    if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsListType())
+    {
+        commands = ParseToVectorString(json.GetJsonObject(jsonKey));
+    }
+
     jsonKey = JSON_KEY_PATH;
     if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsString())
     {
@@ -334,11 +344,24 @@ void PlainJobDocument::JobAction::ActionInput::LoadFromJobDocument(const JsonVie
 
 bool PlainJobDocument::JobAction::ActionInput::Validate() const
 {
-    if (handler.empty())
+    if (currentType == ACTION_TYPE_RUN_HANDLER)
     {
-        LOGM_ERROR(
-            TAG, "*** %s: Required field ActionInput Handler is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
-        return false;
+        if (!handler.has_value() || handler->empty())
+        {
+            LOGM_ERROR(
+                TAG, "*** %s: Required field ActionInput Handler is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
+            return false;
+        }
+    }
+
+    if (currentType == ACTION_TYPE_RUN_COMMAND)
+    {
+        if (!commands.has_value() || commands->empty())
+        {
+            LOGM_ERROR(
+                TAG, "*** %s: Required field ActionInput commands is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
+            return false;
+        }
     }
 
     return true;

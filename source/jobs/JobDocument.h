@@ -38,6 +38,7 @@ namespace Aws
                     static std::vector<std::string> ParseToVectorString(const JsonView &json);
 
                     static constexpr char ACTION_TYPE_RUN_HANDLER[] = "runHandler";
+                    static constexpr char ACTION_TYPE_RUN_COMMAND[] = "runCommand";
 
                     static constexpr char JSON_KEY_VERSION[] = "version";
                     static constexpr char JSON_KEY_INCLUDESTDOUT[] = "includeStdOut";
@@ -95,10 +96,12 @@ namespace Aws
                             static constexpr char JSON_KEY_HANDLER[] = "handler";
                             static constexpr char JSON_KEY_ARGS[] = "args";
                             static constexpr char JSON_KEY_PATH[] = "path";
+                            static constexpr char JSON_KEY_COMMANDS[] = "commands";
 
-                            std::string handler;
+                            Optional<std::string> handler;
                             Optional<std::vector<std::string>> args;
                             Optional<std::string> path;
+                            Optional<std::vector<std::string>> commands;
                         };
                         ActionInput input;
                         Optional<std::string> runAsUser{""};
