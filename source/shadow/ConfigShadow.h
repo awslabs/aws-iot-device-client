@@ -43,7 +43,7 @@ namespace Aws
                     void resetClientConfigWithJSON(
                         PlainConfig &config,
                         Crt::JsonView &deltaView,
-                        Crt::JsonView &desiredView);
+                        Crt::JsonView &desiredView) const;
 
                   private:
                     static constexpr char TAG[] = "ConfigShadow.cpp";
@@ -128,14 +128,14 @@ namespace Aws
                      * @param response information about the updated shadow state
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    void updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError);
+                    void updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError) const;
                     /**
                      * \brief Executed if our request to UpdateNamedShadow is rejected
                      *
                      * @param rejectedError information about the rejection
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    void updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError);
+                    void updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError) const;
                     /**
                      * \brief Acknowledgement that IoT Core has received our request for subscription to
                      * UpdateNamedShadow Accepted
@@ -199,7 +199,7 @@ namespace Aws
                      * @param config device client local configuration
                      * @param jsonObj contains all device client features' configuration
                      */
-                    void loadFeatureConfigIntoJsonObject(PlainConfig &config, Aws::Crt::JsonObject &jsonObj);
+                    void loadFeatureConfigIntoJsonObject(PlainConfig &config, Aws::Crt::JsonObject &jsonObj) const;
                 };
             } // namespace Shadow
         }     // namespace DeviceClient
