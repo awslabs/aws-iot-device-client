@@ -40,7 +40,7 @@ namespace Aws
                      * @param params Template parameters given as JSON escaped string
                      * @return false if failed parsing template parameters
                      */
-                    bool MapParameters(const Aws::Crt::Optional<std::string> &params);
+                    bool MapParameters(Aws::Crt::Optional<std::string> params);
 
                   private:
                     /**
