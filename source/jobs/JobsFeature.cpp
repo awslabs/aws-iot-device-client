@@ -54,7 +54,7 @@ void JobsFeature::ackSubscribeToNextJobChanged(int ioError)
     }
 }
 
-void JobsFeature::ackStartNextPendingJobPub(int ioError)
+void JobsFeature::ackStartNextPendingJobPub(int ioError) const
 {
     LOGM_DEBUG(TAG, "Ack received for StartNextPendingJobPub with code {%d}", ioError);
 }
@@ -83,7 +83,7 @@ void JobsFeature::ackSubscribeToStartNextJobRejected(int ioError)
     }
 }
 
-void JobsFeature::ackUpdateJobExecutionStatus(int ioError)
+void JobsFeature::ackUpdateJobExecutionStatus(int ioError) const
 {
     LOGM_DEBUG(TAG, "Ack received for PublishUpdateJobExecutionStatus with code {%d}", ioError);
 }
@@ -366,9 +366,9 @@ void JobsFeature::updateJobExecutionStatusRejectedHandler(Iotjobs::RejectedError
 }
 
 void JobsFeature::publishUpdateJobExecutionStatus(
-    JobExecutionData data,
-    JobExecutionStatusInfo statusInfo,
-    function<void(void)> onCompleteCallback)
+    const JobExecutionData &data,
+    const JobExecutionStatusInfo &statusInfo,
+    const function<void(void)> &onCompleteCallback)
 {
     LOG_DEBUG(TAG, "Attempting to update job execution status!");
 
@@ -382,7 +382,7 @@ void JobsFeature::publishUpdateJobExecutionStatus(
     if (!statusInfo.stdoutput.empty())
     {
         // We want the most recent output since we can only include 1024 characters in the job execution update
-        int startPos = statusInfo.stdoutput.size() > MAX_STATUS_DETAIL_LENGTH
+        size_t startPos = statusInfo.stdoutput.size() > MAX_STATUS_DETAIL_LENGTH
                            ? statusInfo.stdoutput.size() - MAX_STATUS_DETAIL_LENGTH
                            : 0;
         // TODO We need to add filtering of invalid characters for the status details that may come from weird
@@ -397,7 +397,7 @@ void JobsFeature::publishUpdateJobExecutionStatus(
 
     if (!statusInfo.stderror.empty())
     {
-        int startPos = statusInfo.stderror.size() > MAX_STATUS_DETAIL_LENGTH
+        size_t startPos = statusInfo.stderror.size() > MAX_STATUS_DETAIL_LENGTH
                            ? statusInfo.stderror.size() - MAX_STATUS_DETAIL_LENGTH
                            : 0;
         // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
@@ -411,10 +411,10 @@ void JobsFeature::publishUpdateJobExecutionStatus(
 }
 
 void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
-    Aws::Iotjobs::JobExecutionData data,
-    JobsFeature::JobExecutionStatusInfo statusInfo,
-    Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> statusDetails,
-    std::function<void(void)> onCompleteCallback)
+    const Aws::Iotjobs::JobExecutionData &data,
+    const JobsFeature::JobExecutionStatusInfo &statusInfo,
+    const Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> &statusDetails,
+    const std::function<void(void)> &onCompleteCallback)
 {
     /** When we update the job execution status, we need to perform an exponential
      * backoff in case our request gets throttled. Otherwise, if we never properly
@@ -711,10 +711,10 @@ int JobsFeature::stop()
 
 std::shared_ptr<AbstractIotJobsClient> JobsFeature::createJobsClient()
 {
-    return std::shared_ptr<AbstractIotJobsClient>(new IotJobsClientWrapper(mqttConnection));
+    return std::make_shared<IotJobsClientWrapper>(mqttConnection);
 }
 
 std::shared_ptr<JobEngine> JobsFeature::createJobEngine()
 {
-    return std::shared_ptr<JobEngine>(new JobEngine());
+    return std::make_shared<JobEngine>();
 }

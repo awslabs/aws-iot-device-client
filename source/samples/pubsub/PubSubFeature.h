@@ -33,7 +33,7 @@ namespace Aws
                     static constexpr char DEFAULT_PUBLISH_FILE[] = "~/.aws-iot-device-client/pubsub/publish-file.txt";
                     static constexpr char DEFAULT_SUBSCRIBE_FILE[] =
                         "~/.aws-iot-device-client/pubsub/subscribe-file.txt";
-                    bool createPubSub(const PlainConfig &config, std::string absFilePath, const aws_byte_buf *payload);
+                    bool createPubSub(const PlainConfig &config, const std::string &absFilePath, const aws_byte_buf *payload) const;
                     /**
                      * \brief Initializes the PubSub feature with all the required setup information, event
                      * handlers, and the SharedCrtResourceManager
@@ -106,7 +106,7 @@ namespace Aws
                      * @param buf Buffer to read data into
                      * @return 0 on success
                      */
-                    int getPublishFileData(aws_byte_buf *buf);
+                    int getPublishFileData(aws_byte_buf *buf) const;
                 };
             } // namespace Samples
         }     // namespace DeviceClient

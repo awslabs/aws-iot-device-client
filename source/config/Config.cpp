@@ -2676,7 +2676,7 @@ bool Config::init(const CliArgs &cliArgs)
 
         return config.Validate();
     }
-    catch (const std::invalid_argument &e)
+    catch (const std::exception &e)
     {
         LOGM_ERROR(TAG, "Error while initializing configuration: %s", e.what());
         return false;

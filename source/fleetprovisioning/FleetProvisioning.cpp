@@ -593,7 +593,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
  * Helper methods
  */
 
-bool FleetProvisioning::LocateDeviceKey(const string &filePath)
+bool FleetProvisioning::LocateDeviceKey(const string &filePath) const
 {
     struct stat info;
     bool locatedDeviceKey = true;
@@ -680,7 +680,7 @@ bool FleetProvisioning::ExportRuntimeConfig(
     const std::string &runtimeCertPath,
     const std::string &runtimeKeyPath,
     const std::string &runtimeThingName,
-    const std::string &runtimeDeviceConfig)
+    const std::string &runtimeDeviceConfig) const
 {
     string jsonTemplate = R"({
 "%s": {
@@ -719,7 +719,7 @@ bool FleetProvisioning::ExportRuntimeConfig(
     return true;
 }
 
-bool FleetProvisioning::MapParameters(const Aws::Crt::Optional<std::string> params)
+bool FleetProvisioning::MapParameters(const Aws::Crt::Optional<std::string> &params)
 {
     if (params.has_value())
     {

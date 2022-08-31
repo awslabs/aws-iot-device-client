@@ -40,10 +40,8 @@ namespace Aws
                     std::chrono::time_point<std::chrono::system_clock> creationTime;
 
                   public:
-                    explicit EphemeralPromise(std::chrono::milliseconds ttlMillis)
+                    explicit EphemeralPromise(std::chrono::milliseconds ttlMillis) : ttlMillis(ttlMillis), creationTime(std::chrono::system_clock::now())
                     {
-                        this->ttlMillis = ttlMillis;
-                        this->creationTime = std::chrono::system_clock::now();
                     }
 
                     /**

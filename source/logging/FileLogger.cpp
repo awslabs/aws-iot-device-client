@@ -92,7 +92,7 @@ bool FileLogger::start(const PlainConfig &config)
     return false;
 }
 
-void FileLogger::writeLogMessage(unique_ptr<LogMessage> message)
+void FileLogger::writeLogMessage(unique_ptr<LogMessage> message) const
 {
     char time_buffer[TIMESTAMP_BUFFER_SIZE];
     LogUtil::generateTimestamp(message->getTime(), TIMESTAMP_BUFFER_SIZE, time_buffer);
@@ -124,7 +124,7 @@ void FileLogger::queueLog(
     LogLevel level,
     const char *tag,
     std::chrono::time_point<std::chrono::system_clock> t,
-    string message)
+    const string &message)
 {
     logQueue.get()->addLog(unique_ptr<LogMessage>(new LogMessage(level, tag, t, message)));
 }

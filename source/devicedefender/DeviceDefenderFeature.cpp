@@ -100,15 +100,15 @@ std::shared_ptr<AbstractReportTask> DeviceDefender::DeviceDefenderFeature::creat
 
     std::shared_ptr<Aws::Iotdevicedefenderv1::ReportTask> reportTask = taskBuilder.Build();
 
-    return std::shared_ptr<AbstractReportTask>(new ReportTaskWrapper(reportTask));
+    return std::make_shared<ReportTaskWrapper>(reportTask);
 }
 void DeviceDefender::DeviceDefenderFeature::subscribeToTopicFilter()
 {
-    auto onRecvData = [](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void {
+    auto onRecvData = [](MqttConnection &, const String &topic, const ByteBuf &payload) -> void {
         LOGM_DEBUG(TAG, "Recv: Topic:(%s), Payload:%s", topic.c_str(), (char *)payload.buffer);
     };
     auto onSubAck =
-        [this](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void {
+        [this](MqttConnection &, uint16_t, const String &, QOS, int errorCode) -> void {
         LOGM_DEBUG(TAG, "SubAck: PacketId:(%s), ErrorCode:%i", getName().c_str(), errorCode);
     };
     resourceManager->getConnection()->Subscribe(
@@ -124,7 +124,7 @@ void DeviceDefender::DeviceDefenderFeature::subscribeToTopicFilter()
 }
 void DeviceDefender::DeviceDefenderFeature::unsubscribeToTopicFilter()
 {
-    auto onUnsubscribe = [](MqttConnection &connection, uint16_t packetId, int errorCode) -> void {
+    auto onUnsubscribe = [](MqttConnection &, uint16_t packetId, int errorCode) -> void {
         LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%i, ErrorCode:%i", packetId, errorCode);
     };
     resourceManager->getConnection()->Unsubscribe(

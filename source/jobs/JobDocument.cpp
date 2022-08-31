@@ -133,7 +133,7 @@ vector<string> PlainJobDocument::ParseToVectorString(const JsonView &json)
 
     for (const auto &i : json.AsArray())
     {
-        plainVector.push_back(i.AsString().c_str());
+        plainVector.emplace_back(i.AsString().c_str());
     }
     return plainVector;
 }
@@ -175,12 +175,9 @@ bool PlainJobDocument::Validate() const
         }
     }
 
-    if (finalStep.has_value())
+    if (finalStep.has_value() && !finalStep->Validate())
     {
-        if (!finalStep->Validate())
-        {
-            return false;
-        }
+        return false;
     }
     return true;
 }
