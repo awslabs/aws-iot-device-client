@@ -364,6 +364,7 @@ bool FileUtils::IsValidFilePath(const string &filePath)
             break;
         case WRDE_NOSPACE:
             wordfree(&word);
+            break;
         default:
             return false;
     }
