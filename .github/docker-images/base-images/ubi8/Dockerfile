@@ -23,15 +23,6 @@ RUN yum --disableplugin=subscription-manager -y update \
     && rm -rf /var/cache/yum
 
 ###############################################################################
-# Install cppcheck
-# cppcheck package is not available from Redhat Linux default repositories
-# Install and enable epel repository.
-# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/add-repositories.html
-###############################################################################
-RUN yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-RUN yum --enablerepo=epel install -y cppcheck
-
-###############################################################################
 # Install pre-built CMake
 ###############################################################################
 WORKDIR /tmp
@@ -88,6 +79,18 @@ RUN wget https://sourceware.org/pub/valgrind/valgrind-3.19.0.tar.bz2 \
     && cd valgrind-3.19.0 \
     && ./configure \
     && make \
+    && make install
+
+###############################################################################
+# Install cppcheck
+###############################################################################
+WORKDIR /tmp
+RUN wget https://github.com/danmar/cppcheck/archive/2.9.tar.gz \
+    && tar zxvf 2.9.tar.gz \
+    && cd cppcheck-2.9 \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
     && make install
 
 ################################################################################

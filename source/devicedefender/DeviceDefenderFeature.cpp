@@ -29,6 +29,8 @@ constexpr char DeviceDefenderFeature::TOPIC_ACCEPTED[];
 constexpr char DeviceDefenderFeature::TOPIC_REJECTED[];
 constexpr char DeviceDefenderFeature::TOPIC_FORMAT[];
 
+DeviceDefenderFeature::DeviceDefenderFeature() : interval(0) {}
+
 string DeviceDefenderFeature::getName()
 {
     return NAME;
@@ -68,14 +70,14 @@ int DeviceDefenderFeature::init(
 int DeviceDefenderFeature::start()
 {
     startDeviceDefender();
-    baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STARTED);
+    baseNotifier->onEvent(static_cast<Feature *>(this), ClientBaseEventNotification::FEATURE_STARTED);
     return 0;
 }
 
 int DeviceDefenderFeature::stop()
 {
     stopDeviceDefender();
-    baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
+    baseNotifier->onEvent(static_cast<Feature *>(this), ClientBaseEventNotification::FEATURE_STOPPED);
     return 0;
 }
 std::shared_ptr<AbstractReportTask> DeviceDefender::DeviceDefenderFeature::createReportTask()
@@ -105,7 +107,7 @@ std::shared_ptr<AbstractReportTask> DeviceDefender::DeviceDefenderFeature::creat
 void DeviceDefender::DeviceDefenderFeature::subscribeToTopicFilter()
 {
     auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void {
-        LOGM_DEBUG(TAG, "Recv: Topic:(%s), Payload:%s", topic.c_str(), (char *)payload.buffer);
+        LOGM_DEBUG(TAG, "Recv: Topic:(%s), Payload:%s", topic.c_str(), reinterpret_cast<char *>(payload.buffer));
     };
     auto onSubAck =
         [&](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void {

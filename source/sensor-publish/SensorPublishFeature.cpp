@@ -88,7 +88,7 @@ int SensorPublishFeature::start()
         }
     }
 
-    mBaseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STARTED);
+    mBaseNotifier->onEvent(static_cast<Feature *>(this), ClientBaseEventNotification::FEATURE_STARTED);
 
     return Feature::SUCCESS;
 }
@@ -105,7 +105,7 @@ int SensorPublishFeature::stop()
         }
     }
 
-    mBaseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
+    mBaseNotifier->onEvent(static_cast<Feature *>(this), ClientBaseEventNotification::FEATURE_STOPPED);
 
     return Feature::SUCCESS;
 }
