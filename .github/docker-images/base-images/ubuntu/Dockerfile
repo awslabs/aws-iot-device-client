@@ -67,6 +67,14 @@ RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://sourceware.
     && make install
 
 ###############################################################################
+# Install coverity build tool
+###############################################################################
+WORKDIR /tmp
+RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://scan.coverity.com/download/linux64 --post-data "REDACTED" -O coverity_tool.tgz \
+    && tar zxvf coverity_tool.tgz
+ENV PATH $PATH:/tmp/cov-analysis-linux64-2022.6.0/bin/
+
+###############################################################################
 # Install Aws Iot Device Sdk Cpp v2
 ###############################################################################
 WORKDIR /home/aws-iot-device-client
