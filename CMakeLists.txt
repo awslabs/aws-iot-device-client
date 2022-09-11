@@ -116,7 +116,7 @@ if (NOT EXCLUDE_SHADOW)
         file(GLOB CONFIG_SHADOW_SRC "source/shadow/ConfigShadow.cpp")
         list(APPEND DC_SRC ${CONFIG_SHADOW_SRC})
     endif ()
-    if (NOT EXCLUDE_CONFIG_SHADOW)
+    if (NOT EXCLUDE_SAMPLE_SHADOW)
         file(GLOB SAMPLE_SHADOW_SRC "source/shadow/SampleShadowFeature.cpp")
         list(APPEND DC_SRC ${SAMPLE_SHADOW_SRC})
     endif ()
@@ -208,6 +208,14 @@ endif ()
 
 if (NOT EXCLUDE_DD)
     set(DEP_DC_LIBS ${DEP_DC_LIBS} IotDeviceCommon-cpp IotDeviceDefender-cpp aws-c-iot)
+endif ()
+
+if (NOT EXCLUDE_PUBSUB)
+    set(DEP_DC_LIBS ${DEP_DC_LIBS} IotDeviceCommon-cpp aws-c-iot)
+endif ()
+
+if (NOT EXCLUDE_SAMPLE_SHADOW)
+    set(DEP_DC_LIBS ${DEP_DC_LIBS} IotShadow-cpp IotIdentity-cpp)
 endif ()
 
 if (NOT EXCLUDE_JOBS)
