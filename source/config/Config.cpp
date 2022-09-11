@@ -1540,6 +1540,12 @@ bool PlainConfig::PubSub::LoadFromJson(const Crt::JsonView &json)
         }
     }
 
+    jsonKey = JSON_PUB_SUB_PUBLISH_ON_CHANGE;
+    if (json.ValueExists(jsonKey))
+    {
+        publishOnChange = json.GetBool(jsonKey);
+    }
+
     return true;
 }
 
