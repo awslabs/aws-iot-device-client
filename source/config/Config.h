@@ -318,12 +318,14 @@ namespace Aws
                     static constexpr char JSON_PUB_SUB_PUBLISH_FILE[] = "publish-file";
                     static constexpr char JSON_PUB_SUB_SUBSCRIBE_TOPIC[] = "subscribe-topic";
                     static constexpr char JSON_PUB_SUB_SUBSCRIBE_FILE[] = "subscribe-file";
+                    static constexpr char JSON_PUB_SUB_PUBLISH_ON_CHANGE[] = "publish-on-change";
 
                     bool enabled{false};
                     Aws::Crt::Optional<std::string> publishTopic;
                     Aws::Crt::Optional<std::string> publishFile;
                     Aws::Crt::Optional<std::string> subscribeTopic;
                     Aws::Crt::Optional<std::string> subscribeFile;
+                    bool publishOnChange;
                 };
                 PubSub pubSub;
 

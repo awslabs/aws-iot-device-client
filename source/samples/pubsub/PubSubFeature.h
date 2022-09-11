@@ -71,7 +71,10 @@ namespace Aws
                      * attention
                      */
                     std::shared_ptr<ClientBaseNotifier> baseNotifier;
-
+                    /**
+                     * \brief Whether the DeviceClient base has requested this feature to stop.
+                     */
+                    std::atomic<bool> needStop{false};
                     /**
                      * \brief Topic for publishing data to
                      */
@@ -80,6 +83,10 @@ namespace Aws
                      * \brief Location of file containing data to publish
                      */
                     std::string pubFile = DEFAULT_PUBLISH_FILE;
+                    /**
+                     * \brief Whether or not to start the inotify thread to republish changes.
+                     */
+                    bool publishOnChange = false;
                     /**
                      * \brief Topic to subscribe to
                      */
@@ -107,6 +114,12 @@ namespace Aws
                      * @return 0 on success
                      */
                     int getPublishFileData(aws_byte_buf *buf);
+                    /**
+                     * \brief A file monitor to detect any changes related to the input file.
+                     * Once any data is modified in the publish-file, the client will publish
+                     * the data to the publish-topic.
+                     */
+                    void runFileMonitor();
                 };
             } // namespace Samples
         }     // namespace DeviceClient

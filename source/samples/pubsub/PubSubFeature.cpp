@@ -13,6 +13,11 @@
 
 #include <utility>
 
+// Included below for publishing on changes
+#include <unistd.h>
+#include <thread>
+#include <sys/inotify.h>
+
 using namespace std;
 using namespace Aws;
 using namespace Aws::Iot;
@@ -29,6 +34,12 @@ constexpr char PubSubFeature::DEFAULT_PUBLISH_FILE[];
 constexpr char PubSubFeature::DEFAULT_SUBSCRIBE_FILE[];
 
 #define MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES 128000
+
+// Definitions for inode notify
+#define MAX_EVENTS 1000                           /* Maximum number of events to process*/
+#define LEN_NAME 16                               /* Assuming that the length of the filename won't exceed 16 bytes*/
+#define EVENT_SIZE (sizeof(struct inotify_event)) /*size of one event*/
+#define EVENT_BUFSIZE (MAX_EVENTS * (EVENT_SIZE + LEN_NAME)) /*size of buffer used to store the data of events*/
 
 string PubSubFeature::getName()
 {
@@ -105,6 +116,7 @@ int PubSubFeature::init(
     thingName = *config.thingName;
     pubTopic = config.pubSub.publishTopic.value();
     subTopic = config.pubSub.subscribeTopic.value();
+    publishOnChange = config.pubSub.publishOnChange;
 
     if (config.pubSub.publishFile.has_value() && !config.pubSub.publishFile->empty())
     {
@@ -132,6 +144,90 @@ int PubSubFeature::init(
     }
 
     return AWS_OP_SUCCESS;
+}
+
+void PubSubFeature::runFileMonitor()
+{
+    int len = 0;
+    int fd = 0;
+    int dir_wd = 0;
+    int file_wd = 0;
+    char buf[EVENT_BUFSIZE];
+    fd = inotify_init();
+
+    string fileDir = FileUtils::ExtractParentDirectory(pubFile.c_str());
+    string fileName = pubFile.substr(fileDir.length());
+
+    if (fd == -1)
+    {
+        LOGM_ERROR(TAG, "Encountered error %d while initializing the inode notify system return s%", fd);
+        return;
+    }
+
+    dir_wd = inotify_add_watch(fd, fileDir.c_str(), IN_CREATE);
+    if (dir_wd == -1)
+    {
+        LOGM_ERROR(TAG, "Encountered error %d while adding the watch for input file's parent directory", fd);
+        goto exit;
+    }
+
+    file_wd = inotify_add_watch(fd, pubFile.c_str(), IN_CLOSE_WRITE);
+    if (file_wd == -1)
+    {
+        LOGM_ERROR(TAG, "Encountered error %d while adding the watch for target file", fd);
+        goto exit;
+    }
+
+    while (!needStop.load())
+    {
+        len = read(fd, buf, EVENT_BUFSIZE);
+        if (len <= 0)
+        {
+            LOG_WARN(TAG, "Couldn't monitor any more target file modify events as it reaches max read buffer size");
+            goto exit;
+        }
+
+        for (int i = 0; i < len;)
+        {
+            struct inotify_event *e = (struct inotify_event *)&buf[i];
+
+            if (e->mask & IN_CREATE)
+            {
+                if (strcmp(e->name, fileName.c_str()) != 0)
+                    goto next;
+
+                if (e->mask & IN_ISDIR)
+                    goto next;
+
+                LOG_DEBUG(TAG, "New file is created with the same name of the target file.");
+                publishFileData();
+                file_wd = inotify_add_watch(fd, pubFile.c_str(), IN_CLOSE_WRITE | IN_DELETE_SELF);
+            }
+
+            if (e->mask & IN_CLOSE_WRITE)
+            {
+                LOG_DEBUG(TAG, "The target file is modified, start updating the shadow");
+                publishFileData();
+            }
+
+            if (e->mask & IN_DELETE_SELF)
+            {
+                if (e->mask & IN_ISDIR)
+                    goto next;
+
+                LOG_DEBUG(TAG, "The target file is deleted by itself, removing the watch");
+                inotify_rm_watch(fd, file_wd);
+            }
+        next:
+            i += EVENT_SIZE + e->len;
+        }
+
+        this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+exit:
+    inotify_rm_watch(fd, file_wd);
+    inotify_rm_watch(fd, dir_wd);
+    close(fd);
 }
 
 int PubSubFeature::getPublishFileData(aws_byte_buf *buf)
@@ -204,12 +300,18 @@ int PubSubFeature::start()
     // is received
     publishFileData();
 
+    if (publishOnChange) {
+        thread file_monitor_thread(&PubSubFeature::runFileMonitor, this);
+        file_monitor_thread.detach();
+    }
+
     baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STARTED);
     return AWS_OP_SUCCESS;
 }
 
 int PubSubFeature::stop()
 {
+    needStop.store(true);
     auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void {
         LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%u, ErrorCode:%d", packetId, errorCode);
     };
