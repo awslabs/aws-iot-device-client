@@ -10,12 +10,10 @@
 #include <aws/iotdevicecommon/IotDevice.h>
 #include <iostream>
 #include <sys/stat.h>
-
+#include <thread>
+#include <unistd.h>
 #include <utility>
 
-// Included below for publishing on changes
-#include <unistd.h>
-#include <thread>
 #include <sys/inotify.h>
 
 using namespace std;
@@ -34,8 +32,6 @@ constexpr char PubSubFeature::DEFAULT_PUBLISH_FILE[];
 constexpr char PubSubFeature::DEFAULT_SUBSCRIBE_FILE[];
 
 #define MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES 128000
-
-// Definitions for inode notify
 #define MAX_EVENTS 1000                           /* Maximum number of events to process*/
 #define LEN_NAME 16                               /* Assuming that the length of the filename won't exceed 16 bytes*/
 #define EVENT_SIZE (sizeof(struct inotify_event)) /*size of one event*/
@@ -315,6 +311,7 @@ int PubSubFeature::start()
 int PubSubFeature::stop()
 {
     needStop.store(true);
+
     auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void {
         LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%u, ErrorCode:%d", packetId, errorCode);
     };
