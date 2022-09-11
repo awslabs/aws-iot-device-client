@@ -234,7 +234,7 @@ void SampleShadowFeature::runFileMonitor()
         len = read(fd, buf, EVENT_BUFSIZE);
         if (len <= 0)
         {
-            LOG_WARN(TAG, "Couldn't monitor ant more target file modify events as it reaches max read buffer size");
+            LOG_WARN(TAG, "Couldn't monitor any more target file modify events as it reaches max read buffer size");
             goto exit;
         }
 
