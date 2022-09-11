@@ -1479,6 +1479,7 @@ constexpr char PlainConfig::PubSub::JSON_PUB_SUB_PUBLISH_TOPIC[];
 constexpr char PlainConfig::PubSub::JSON_PUB_SUB_PUBLISH_FILE[];
 constexpr char PlainConfig::PubSub::JSON_PUB_SUB_SUBSCRIBE_TOPIC[];
 constexpr char PlainConfig::PubSub::JSON_PUB_SUB_SUBSCRIBE_FILE[];
+constexpr char PlainConfig::PubSub::JSON_PUB_SUB_PUBLISH_ON_CHANGE[];
 
 bool PlainConfig::PubSub::LoadFromJson(const Crt::JsonView &json)
 {
