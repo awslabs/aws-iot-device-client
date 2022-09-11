@@ -326,7 +326,7 @@ namespace Aws
                     Aws::Crt::Optional<std::string> publishFile;
                     Aws::Crt::Optional<std::string> subscribeTopic;
                     Aws::Crt::Optional<std::string> subscribeFile;
-                    bool publishOnChange;
+                    bool publishOnChange{false};
                 };
                 PubSub pubSub;
 

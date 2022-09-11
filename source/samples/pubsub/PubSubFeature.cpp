@@ -222,12 +222,14 @@ void PubSubFeature::runFileMonitor()
                 LOG_DEBUG(TAG, "The target file is deleted by itself, removing the watch");
                 inotify_rm_watch(fd, file_wd);
             }
+
         next:
             i += EVENT_SIZE + e->len;
         }
 
         this_thread::sleep_for(std::chrono::milliseconds(500));
     }
+
 exit:
     inotify_rm_watch(fd, file_wd);
     inotify_rm_watch(fd, dir_wd);
@@ -300,7 +302,8 @@ int PubSubFeature::start()
     // is received
     publishFileData();
 
-    if (publishOnChange) {
+    if (publishOnChange)
+    {
         thread file_monitor_thread(&PubSubFeature::runFileMonitor, this);
         file_monitor_thread.detach();
     }
