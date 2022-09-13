@@ -57,6 +57,10 @@ namespace Aws
                      */
                     virtual ~SecureTunnelingContext();
 
+                    // Non-copyable.
+                    SecureTunnelingContext(const SecureTunnelingContext &) = delete;
+                    SecureTunnelingContext &operator=(const SecureTunnelingContext &) = delete;
+
                     /**
                      * \brief Check to see if we have seen and processed the given MQTT notification
                      *

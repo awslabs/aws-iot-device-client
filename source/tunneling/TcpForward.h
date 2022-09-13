@@ -50,6 +50,10 @@ namespace Aws
                      */
                     virtual ~TcpForward();
 
+                    // Non-copyable.
+                    TcpForward(const TcpForward &) = delete;
+                    TcpForward &operator=(const TcpForward &) = delete;
+
                     /**
                      * \brief Connect to the local TCP socket
                      */

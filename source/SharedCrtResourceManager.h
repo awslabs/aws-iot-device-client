@@ -62,6 +62,10 @@ namespace Aws
 
                 virtual ~SharedCrtResourceManager();
 
+                // Non-copyable.
+                SharedCrtResourceManager(const SharedCrtResourceManager &) = delete;
+                SharedCrtResourceManager &operator=(const SharedCrtResourceManager &) = delete;
+
                 /**
                  * \brief Full path to the default log file used by the AWS CRT SDK.
                  *
