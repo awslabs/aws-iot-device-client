@@ -398,10 +398,11 @@ foo:
 1. Add `Foo.py` to our Job Handler Directory: By default, the Jobs feature will look at `~/.aws-iot-device-client/jobs/`
    for a handler,
    so we should put `Foo.py` here (where `~/` represents the home directory of the user that will run the Device Client
-   - `/root` if we're
-   running the AWS IoT Device Client as a service, or `/home/ubuntu/` if we're running under the default Ubuntu user).
-   The new path
-   then looks something like `/home/ubuntu/.aws-iot-device-client/jobs/Foo.py`.
+    - `/root` if we're
+      running the AWS IoT Device Client as a service, or `/home/ubuntu/` if we're running under the default Ubuntu user)
+      .
+      The new path
+      then looks something like `/home/ubuntu/.aws-iot-device-client/jobs/Foo.py`.
 
 **Note: It is important to note that the Device Client passes `runAsUser` job field value as first argument for starting
 the handler script and then attaches remaining job `args` list values.**

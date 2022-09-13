@@ -370,8 +370,8 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     /*
      * This will execute when an mqtt connect has completed or failed.
      */
-    auto onConnectionCompleted =
-        [this, &connectionCompletedPromise](const Mqtt::MqttConnection &, int errorCode, Mqtt::ReturnCode returnCode, bool)
+    auto onConnectionCompleted = [this, &connectionCompletedPromise](
+                                     const Mqtt::MqttConnection &, int errorCode, Mqtt::ReturnCode returnCode, bool)
     {
         if (errorCode)
         {
