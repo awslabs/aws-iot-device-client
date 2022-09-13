@@ -282,7 +282,7 @@ namespace Aws
                     auto it = find_if(
                         mContexts.begin(),
                         mContexts.end(),
-                        [&](unique_ptr<SecureTunnelingContext> &c) { return c.get() == contextToRemove; });
+                        [&](const unique_ptr<SecureTunnelingContext> &c) { return c.get() == contextToRemove; });
                     mContexts.erase(std::remove(mContexts.begin(), mContexts.end(), *it));
                 }
 

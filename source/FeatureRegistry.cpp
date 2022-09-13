@@ -60,7 +60,7 @@ void FeatureRegistry::stopAll()
 {
     std::lock_guard<std::mutex> lock(featuresLock);
 
-    for (auto &feature : features)
+    for (const auto &feature : features)
     {
         if (feature.second != nullptr)
         {

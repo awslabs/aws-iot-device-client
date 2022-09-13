@@ -105,9 +105,9 @@ std::shared_ptr<AbstractReportTask> DeviceDefender::DeviceDefenderFeature::creat
 }
 void DeviceDefender::DeviceDefenderFeature::subscribeToTopicFilter()
 {
-    auto onRecvData = [](MqttConnection &, const String &topic, const ByteBuf &payload) -> void
+    auto onRecvData = [](const MqttConnection &, const String &topic, const ByteBuf &payload) -> void
     { LOGM_DEBUG(TAG, "Recv: Topic:(%s), Payload:%s", topic.c_str(), (char *)payload.buffer); };
-    auto onSubAck = [this](MqttConnection &, uint16_t, const String &, QOS, int errorCode) -> void
+    auto onSubAck = [this](const MqttConnection &, uint16_t, const String &, QOS, int errorCode) -> void
     { LOGM_DEBUG(TAG, "SubAck: PacketId:(%s), ErrorCode:%i", getName().c_str(), errorCode); };
     resourceManager->getConnection()->Subscribe(
         FormatMessage(TOPIC_FORMAT, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_ACCEPTED).c_str(),
@@ -122,7 +122,7 @@ void DeviceDefender::DeviceDefenderFeature::subscribeToTopicFilter()
 }
 void DeviceDefender::DeviceDefenderFeature::unsubscribeToTopicFilter()
 {
-    auto onUnsubscribe = [](MqttConnection &, uint16_t packetId, int errorCode) -> void
+    auto onUnsubscribe = [](const MqttConnection &, uint16_t packetId, int errorCode) -> void
     { LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%i, ErrorCode:%i", packetId, errorCode); };
     resourceManager->getConnection()->Unsubscribe(
         FormatMessage(TOPIC_FORMAT, TOPIC_PRE, thingName.c_str(), TOPIC_POST, TOPIC_ACCEPTED).c_str(), onUnsubscribe);

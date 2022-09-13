@@ -171,7 +171,7 @@ void PubSubFeature::publishFileData()
         LOG_ERROR(TAG, "Failed to read publish file... Skipping publish");
         return;
     }
-    auto onPublishComplete = [payload, this](Mqtt::MqttConnection &, uint16_t, int errorCode) mutable
+    auto onPublishComplete = [payload, this](const Mqtt::MqttConnection &, uint16_t, int errorCode) mutable
     {
         LOGM_DEBUG(TAG, "PublishCompAck: PacketId:(%s), ErrorCode:%d", getName().c_str(), errorCode);
         aws_byte_buf_clean_up_secure(&payload);
@@ -184,9 +184,9 @@ int PubSubFeature::start()
 {
     LOGM_INFO(TAG, "Starting %s", getName().c_str());
 
-    auto onSubAck = [this](MqttConnection &, uint16_t, const String &, QOS, int errorCode) -> void
+    auto onSubAck = [this](const MqttConnection &, uint16_t, const String &, QOS, int errorCode) -> void
     { LOGM_DEBUG(TAG, "SubAck: PacketId:(%s), ErrorCode:%d", getName().c_str(), errorCode); };
-    auto onRecvData = [this](MqttConnection &, const String &, const ByteBuf &payload) -> void
+    auto onRecvData = [this](const MqttConnection &, const String &, const ByteBuf &payload) -> void
     {
         LOGM_DEBUG(TAG, "Message received on subscribe topic, size: %zu bytes", payload.len);
         if (string((char *)payload.buffer, payload.len) == PUBLISH_TRIGGER_PAYLOAD)
@@ -211,7 +211,7 @@ int PubSubFeature::start()
 
 int PubSubFeature::stop()
 {
-    auto onUnsubscribe = [](MqttConnection &, uint16_t packetId, int errorCode) -> void
+    auto onUnsubscribe = [](const MqttConnection &, uint16_t packetId, int errorCode) -> void
     { LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%u, ErrorCode:%d", packetId, errorCode); };
 
     resourceManager->getConnection()->Unsubscribe(subTopic.c_str(), onUnsubscribe);
