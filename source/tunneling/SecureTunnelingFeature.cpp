@@ -48,7 +48,10 @@ namespace Aws
                     return 0;
                 }
 
-                string SecureTunnelingFeature::getName() { return NAME; }
+                string SecureTunnelingFeature::getName()
+                {
+                    return NAME;
+                }
 
                 int SecureTunnelingFeature::start()
                 {
@@ -89,7 +92,10 @@ namespace Aws
                     return result->second;
                 }
 
-                bool SecureTunnelingFeature::IsValidPort(int port) { return 1 <= port && port <= 65535; }
+                bool SecureTunnelingFeature::IsValidPort(int port)
+                {
+                    return 1 <= port && port <= 65535;
+                }
 
                 void SecureTunnelingFeature::LoadFromConfig(const PlainConfig &config)
                 {
@@ -100,14 +106,13 @@ namespace Aws
 
                     if (!config.tunneling.subscribeNotification)
                     {
-                        auto context =
-                            unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
-                                mSharedCrtResourceManager,
-                                mRootCa,
-                                *config.tunneling.destinationAccessToken,
-                                GetEndpoint(*config.tunneling.region),
-                                static_cast<uint16_t>(config.tunneling.port.value()),
-                                bind(&SecureTunnelingFeature::OnConnectionShutdown, this, placeholders::_1)));
+                        auto context = unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
+                            mSharedCrtResourceManager,
+                            mRootCa,
+                            *config.tunneling.destinationAccessToken,
+                            GetEndpoint(*config.tunneling.region),
+                            static_cast<uint16_t>(config.tunneling.port.value()),
+                            bind(&SecureTunnelingFeature::OnConnectionShutdown, this, placeholders::_1)));
                         mContexts.push_back(std::move(context));
                     }
                 }
@@ -266,16 +271,18 @@ namespace Aws
 
                 std::shared_ptr<AbstractIotSecureTunnelingClient> SecureTunnelingFeature::createClient()
                 {
-                    return std::make_shared<IotSecureTunnelingClientWrapper>(mSharedCrtResourceManager->getConnection());
+                    return std::make_shared<IotSecureTunnelingClientWrapper>(
+                        mSharedCrtResourceManager->getConnection());
                 }
 
                 void SecureTunnelingFeature::OnConnectionShutdown(SecureTunnelingContext *contextToRemove)
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingFeature::OnConnectionShutdown");
 
-                    auto it = find_if(mContexts.begin(), mContexts.end(), [&](unique_ptr<SecureTunnelingContext> &c) {
-                        return c.get() == contextToRemove;
-                    });
+                    auto it = find_if(
+                        mContexts.begin(),
+                        mContexts.end(),
+                        [&](unique_ptr<SecureTunnelingContext> &c) { return c.get() == contextToRemove; });
                     mContexts.erase(std::remove(mContexts.begin(), mContexts.end(), *it));
                 }
 

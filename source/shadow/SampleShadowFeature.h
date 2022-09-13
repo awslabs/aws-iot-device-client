@@ -127,7 +127,8 @@ namespace Aws
                      * @param response information about the latest shadow document
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    void updateNamedShadowEventHandler(Iotshadow::ShadowUpdatedEvent *shadowUpdatedEvent, int ioError) const;
+                    void updateNamedShadowEventHandler(Iotshadow::ShadowUpdatedEvent *shadowUpdatedEvent, int ioError)
+                        const;
                     /**
                      * \brief Executed if our request to UpdateNamedShadow is accepted and the delta exists in current
                      * shadow Will do the shadow sync after receiving the message from update/shadow/delta topic so a

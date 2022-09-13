@@ -48,7 +48,8 @@ namespace Aws
                         LogLevel level,
                         const std::string &tag,
                         std::chrono::time_point<std::chrono::system_clock> time,
-                        const std::string &message) : level(level), tag(tag), time(time), message(message)
+                        const std::string &message)
+                        : level(level), tag(tag), time(time), message(message)
                     {
                     }
                     ~LogMessage() = default;

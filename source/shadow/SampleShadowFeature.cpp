@@ -41,8 +41,8 @@ constexpr char SampleShadowFeature::NAME[];
 constexpr char SampleShadowFeature::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[];
 constexpr int SampleShadowFeature::DEFAULT_WAIT_TIME_SECONDS;
 
-constexpr int MAX_EVENTS = 1000;                           /* Maximum number of events to process*/
-constexpr int LEN_NAME = 16;                               /* Assuming that the length of the filename won't exceed 16 bytes*/
+constexpr int MAX_EVENTS = 1000;                  /* Maximum number of events to process*/
+constexpr int LEN_NAME = 16;                      /* Assuming that the length of the filename won't exceed 16 bytes*/
 #define EVENT_SIZE (sizeof(struct inotify_event)) /*size of one event*/
 #define EVENT_BUFSIZE (MAX_EVENTS * (EVENT_SIZE + LEN_NAME)) /*size of buffer used to store the data of events*/
 
@@ -95,7 +95,8 @@ void SampleShadowFeature::updateNamedShadowRejectedHandler(Iotshadow::ErrorRespo
     }
 }
 
-void SampleShadowFeature::updateNamedShadowEventHandler(Iotshadow::ShadowUpdatedEvent *shadowUpdatedEvent, int ioError) const
+void SampleShadowFeature::updateNamedShadowEventHandler(Iotshadow::ShadowUpdatedEvent *shadowUpdatedEvent, int ioError)
+    const
 {
     if (ioError)
     {

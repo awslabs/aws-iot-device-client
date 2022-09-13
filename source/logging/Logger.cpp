@@ -11,7 +11,8 @@ using namespace Aws::Iot::DeviceClient;
 using namespace std;
 using namespace std::chrono;
 
-constexpr char TIMESTAMP_FORMAT[] = "%Y-%m-%dT%H:%M:%S."; // ISO 8601 "2011-10-08T07:07:09.178Z", ms will be calculated last
+constexpr char TIMESTAMP_FORMAT[] =
+    "%Y-%m-%dT%H:%M:%S."; // ISO 8601 "2011-10-08T07:07:09.178Z", ms will be calculated last
 
 void LogUtil::generateTimestamp(
     std::chrono::time_point<std::chrono::system_clock> t,

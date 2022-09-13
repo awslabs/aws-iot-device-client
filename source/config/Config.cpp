@@ -1074,7 +1074,7 @@ bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
     jsonKey = JSON_KEY_TEMPLATE_PARAMETERS;
     if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
-            templateParameters = json.GetString(jsonKey).c_str();
+        templateParameters = json.GetString(jsonKey).c_str();
     }
 
     jsonKey = JSON_KEY_CSR_FILE;
@@ -2276,13 +2276,13 @@ bool PlainConfig::SensorPublish::Validate() const
         {
             setting.enabled = false;
         }
-        if (setting.mqttDeadLetterTopic.has_value() && !setting.mqttDeadLetterTopic.value().empty()
-            && !MqttUtils::ValidateAwsIotMqttTopicName(setting.mqttDeadLetterTopic.value()))
+        if (setting.mqttDeadLetterTopic.has_value() && !setting.mqttDeadLetterTopic.value().empty() &&
+            !MqttUtils::ValidateAwsIotMqttTopicName(setting.mqttDeadLetterTopic.value()))
         {
             setting.enabled = false;
         }
-        if (setting.mqttHeartbeatTopic.has_value() && !setting.mqttHeartbeatTopic.value().empty()
-            && !MqttUtils::ValidateAwsIotMqttTopicName(setting.mqttHeartbeatTopic.value()))
+        if (setting.mqttHeartbeatTopic.has_value() && !setting.mqttHeartbeatTopic.value().empty() &&
+            !MqttUtils::ValidateAwsIotMqttTopicName(setting.mqttHeartbeatTopic.value()))
         {
             setting.enabled = false;
         }

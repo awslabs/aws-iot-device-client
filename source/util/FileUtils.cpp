@@ -29,9 +29,7 @@ int FileUtils::Mkdirs(const std::string &path)
     }
     for (size_t i = 1; i < path.length(); i++)
     {
-        if (path[i] == '/' &&
-            mkdir(path.substr(0, i).c_str(), S_IRWXU) != 0 &&
-            errno != EEXIST)
+        if (path[i] == '/' && mkdir(path.substr(0, i).c_str(), S_IRWXU) != 0 && errno != EEXIST)
         {
             return -1;
         }

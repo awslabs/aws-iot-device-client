@@ -383,8 +383,8 @@ void JobsFeature::publishUpdateJobExecutionStatus(
     {
         // We want the most recent output since we can only include 1024 characters in the job execution update
         size_t startPos = statusInfo.stdoutput.size() > MAX_STATUS_DETAIL_LENGTH
-                           ? statusInfo.stdoutput.size() - MAX_STATUS_DETAIL_LENGTH
-                           : 0;
+                              ? statusInfo.stdoutput.size() - MAX_STATUS_DETAIL_LENGTH
+                              : 0;
         // TODO We need to add filtering of invalid characters for the status details that may come from weird
         // process output. The valid values for a statusDetail value are '[^\p{C}]+ which translates into
         // "everything other than invisible control characters and unused code points" (See
@@ -398,8 +398,8 @@ void JobsFeature::publishUpdateJobExecutionStatus(
     if (!statusInfo.stderror.empty())
     {
         size_t startPos = statusInfo.stderror.size() > MAX_STATUS_DETAIL_LENGTH
-                           ? statusInfo.stderror.size() - MAX_STATUS_DETAIL_LENGTH
-                           : 0;
+                              ? statusInfo.stderror.size() - MAX_STATUS_DETAIL_LENGTH
+                              : 0;
         // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
         // cppcheck-suppress danglingTemporaryLifetime
         statusDetails["stderr"] = statusInfo.stderror.substr(startPos, statusInfo.stderror.size()).c_str();
@@ -429,7 +429,8 @@ void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
         retryConfig.needStopFlag = nullptr;
     }
 
-    auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool {
+    auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool
+    {
         // We first need to make sure that we haven't previously leaked any promises into our map
         unique_lock<mutex> leakLock(updateJobExecutionPromisesLock);
         for (auto keyPromise = updateJobExecutionPromises.cbegin(); keyPromise != updateJobExecutionPromises.cend();
@@ -517,9 +518,9 @@ void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
         this->updateJobExecutionPromises.erase(clientToken.c_str());
         return finished;
     };
-    std::thread updateJobExecutionThread([retryConfig, publishLambda, onCompleteCallback] {
-        Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);
-    });
+    std::thread updateJobExecutionThread(
+        [retryConfig, publishLambda, onCompleteCallback]
+        { Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback); });
     updateJobExecutionThread.detach();
 }
 
@@ -567,7 +568,8 @@ bool JobsFeature::isDuplicateNotification(JobExecutionData job)
 
 void JobsFeature::initJob(const JobExecutionData &job)
 {
-    auto shutdownHandler = [this]() -> void {
+    auto shutdownHandler = [this]() -> void
+    {
         handlingJob.store(false);
         if (needStop.load())
         {
@@ -598,7 +600,8 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
 {
     LOGM_INFO(TAG, "Executing job: %s", job.JobId->c_str());
 
-    auto shutdownHandler = [this]() -> void {
+    auto shutdownHandler = [this]() -> void
+    {
         handlingJob.store(false);
         if (needStop.load())
         {
@@ -607,7 +610,8 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
         }
     };
     // TODO: Add support for checking condition
-    auto runJob = [this, job, jobDocument, shutdownHandler]() {
+    auto runJob = [this, job, jobDocument, shutdownHandler]()
+    {
         auto engine = createJobEngine();
         // execute all action steps in sequence as provided in job document
         int executionStatus = engine->exec_steps(jobDocument, jobHandlerDir);
