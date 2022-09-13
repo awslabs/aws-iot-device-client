@@ -124,7 +124,10 @@ namespace Aws
                     mTcpForward->Connect();
                 }
 
-                void SecureTunnelingContext::DisconnectFromTcpForward() { mTcpForward.reset(); }
+                void SecureTunnelingContext::DisconnectFromTcpForward()
+                {
+                    mTcpForward.reset();
+                }
 
                 void SecureTunnelingContext::OnConnectionComplete() const
                 {
