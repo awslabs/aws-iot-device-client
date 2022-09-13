@@ -76,6 +76,14 @@ RUN wget https://sourceware.org/pub/valgrind/valgrind-3.19.0.tar.bz2 \
     && make \
     && make install
 
+###############################################################################
+# Install coverity build tool (optional)
+###############################################################################
+#WORKDIR /tmp
+#RUN wget https://scan.coverity.com/download/linux64 --post-data "REDACTED" -O coverity_tool.tgz \
+#    && tar zxvf coverity_tool.tgz --one-top-level=cov --strip-components=1
+#ENV PATH $PATH:/tmp/cov/bin/
+
 # ###############################################################################
 # # Install Aws Iot Device Sdk Cpp v2
 # ###############################################################################
