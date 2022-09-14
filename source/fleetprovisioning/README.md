@@ -64,27 +64,30 @@ You can navigate to the *AWS IoT console -> Secure -> Policies* to create and at
 
 ```
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "iot:Connect",
-      "Resource": "arn:aws:iot:us-east-1:1234567890:client/${iot:Connection.Thing.ThingName}"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iot:Publish",
-        "iot:Receive"
-      ],
-      "Resource": "arn:aws:iot:us-east-1:1234567890:topic/$aws/certificates/*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": "iot:Subscribe",
-      "Resource": "arn:aws:iot:us-east-1:1234567890:topicfilter/$aws/certificates/*"
-    }
-  ]
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": ["iot:Connect"],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": ["iot:Publish","iot:Receive"],
+            "Resource": [
+                "arn:aws:iot:<aws-region>:<aws-account-id>:topic/$aws/certificates/create/*",
+                "arn:aws:iot:<aws-region>:<aws-account-id>:topic/$aws/provisioning-templates/<templateName>/provision/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": "iot:Subscribe",
+            "Resource": [
+                "arn:aws:iot:<aws-region>:<aws-account-id>:topicfilter/$aws/certificates/create/*",
+                "arn:aws:iot:<aws-region>:<aws-account-id>:topicfilter/$aws/provisioning-templates/<templateName>/provision/*"
+            ]
+        }
+    ]
 }
 
 ```
