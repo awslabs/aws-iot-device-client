@@ -4,6 +4,7 @@
 #include "JobDocument.h"
 #include "../logging/LoggerFactory.h"
 #include <aws/crt/JsonObject.h>
+#include <set>
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Jobs;
@@ -234,7 +235,8 @@ constexpr char PlainJobDocument::JobAction::JSON_KEY_INPUT[];
 constexpr char PlainJobDocument::JobAction::JSON_KEY_RUNASUSER[];
 constexpr char PlainJobDocument::JobAction::JSON_KEY_ALLOWSTDERR[];
 constexpr char PlainJobDocument::JobAction::JSON_KEY_IGNORESTEPFAILURE[];
-std::string currentType;
+const static std::set<std::string> SUPPORTED_ACTION_TYPES{Aws::Iot::DeviceClient::Jobs::PlainJobDocument::ACTION_TYPE_RUN_HANDLER, Aws::Iot::DeviceClient::Jobs::PlainJobDocument::ACTION_TYPE_RUN_COMMAND};
+
 
 void PlainJobDocument::JobAction::LoadFromJobDocument(const JsonView &json)
 {
@@ -248,7 +250,6 @@ void PlainJobDocument::JobAction::LoadFromJobDocument(const JsonView &json)
     if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsString())
     {
         type = json.GetString(jsonKey).c_str();
-        currentType = type;
     }
 
     jsonKey = JSON_KEY_INPUT;
@@ -257,6 +258,7 @@ void PlainJobDocument::JobAction::LoadFromJobDocument(const JsonView &json)
         ActionInput temp;
         temp.LoadFromJobDocument(json.GetJsonObject(jsonKey));
         input = temp;
+        input.currentType = type;
     }
 
     jsonKey = JSON_KEY_RUNASUSER;
@@ -292,7 +294,7 @@ bool PlainJobDocument::JobAction::Validate() const
         return false;
     }
 
-    if (type != ACTION_TYPE_RUN_HANDLER && type != ACTION_TYPE_RUN_COMMAND)
+    if (SUPPORTED_ACTION_TYPES.count(type) < 0)
     {
         LOGM_ERROR(
             TAG,
@@ -352,6 +354,12 @@ bool PlainJobDocument::JobAction::ActionInput::Validate() const
                 TAG, "*** %s: Required field ActionInput Handler is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
             return false;
         }
+        if(commands.has_value() && !commands->empty())
+        {
+            LOGM_ERROR(
+                TAG, "*** %s: Commands should not be provided for a runHanlder-type job ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
+            return false;
+        }
     }
 
     if (currentType == ACTION_TYPE_RUN_COMMAND)
@@ -360,6 +368,29 @@ bool PlainJobDocument::JobAction::ActionInput::Validate() const
         {
             LOGM_ERROR(
                 TAG, "*** %s: Required field ActionInput commands is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
+            return false;
+        }
+
+        auto isSpace =  [](const char& c) { return isspace(static_cast<unsigned char>(c)); };
+        const auto& command = commands->front();
+        if (find_if(command.cbegin(), command.cend(), isSpace) != command.cend())
+        {
+            LOGM_ERROR(
+                TAG, "*** %s: Required field ActionInput commands contains space characters ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
+            return false;
+        }
+
+        if(handler.has_value() && !handler->empty())
+        {
+            LOGM_ERROR(
+                TAG, "*** %s: Handler should not be provided for a runCommand-type job ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
+            return false;
+        }
+
+        if(path.has_value() && !path->empty())
+        {
+            LOGM_ERROR(
+                TAG, "*** %s: Path should not be provided for a runCommand-type job ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
             return false;
         }
     }

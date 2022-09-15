@@ -115,7 +115,7 @@ string JobEngine::buildCommand(Optional<string> path, const Optional<std::string
         LOG_DEBUG(TAG, "Assuming executable is in PATH");
     }
 
-    commandStream << handler->c_str();
+    commandStream << (handler ? handler->c_str() : "");
 
     if (operationOwnedByDeviceClient)
     {
@@ -156,8 +156,7 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, const std::strin
     else if(action.type == PlainJobDocument::ACTION_TYPE_RUN_COMMAND)
     {
         //build commands for runCommand type
-        string first_string = action.input.commands->front();
-        command = first_string.substr(0, first_string.find(' '));
+        command = action.input.commands->front();
     }
     else
     {
@@ -177,9 +176,9 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, const std::strin
     else if (action.input.commands.has_value())
     {
         //print out commands on console
-        for (const auto &eachCommand : action.input.commands.value())
+        for (size_t i = 1; i < action.input.commands->size(); i++)
         {
-            argsStringForLogging << eachCommand << " ";
+            argsStringForLogging << action.input.commands->at(i) << " ";
         }
     }
     else
@@ -372,8 +371,8 @@ int JobEngine::exec_shellCommand(const std::string &command, PlainJobDocument::J
 
 
 
-    int status1, status2;
-    int execStatus1, execStatus2;
+    int status1 = 0 , status2 = 0;
+    int execStatus1 = 0, execStatus2 = 0;
     int pid1 = vfork();
     if (pid1 < 0)
     {
@@ -388,36 +387,41 @@ int JobEngine::exec_shellCommand(const std::string &command, PlainJobDocument::J
         if(rc == -1)
         {
             auto err = errno;
-            LOGM_DEBUG(TAG, "Failed to invoke execvp system call to execute action step: %s (%d)", strerror(err), err);
+            LOGM_ERROR(TAG, "Failed to invoke execvp system call to execute action step: %s (%d)", strerror(err), err);
             _exit(rc);
-            //
+
         }
-        LOGM_DEBUG(TAG, "execvp() %d", rc);
         _exit(0);
     }
     else
     {
+        LOGM_DEBUG(TAG, "Parent process now running, child PID is %d", pid1);
         do
         {
             // TODO: do not wait for infinite time for child process to complete
             int waitReturn = waitpid(pid1, &status1, 0);
             if (waitReturn == -1)
             {
-                LOG_WARN(TAG, "Failed to wait for child process");
+                LOG_WARN(TAG, "Failed to wait for child process to verify user");
             }
+            execStatus1 = WEXITSTATUS(status1);
+            LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", execStatus1);
 
-            LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", status1);
-            execStatus1 = status1;
         } while (!WIFEXITED(status1) && !WIFSIGNALED(status1));
 
     }
 
     std::unique_ptr<const char *[]> argv2(new const char *[4]);
+    argv2[0] = "/bin/bash";
+    argv2[1] = "-c";
+    argv2[2] = "command -v sudo";
+    argv2[3] = nullptr;
+    /**
     argv2[0] = "command";
     argv2[1] = "-v";
     argv2[2] = "sudo";
     argv2[3] = nullptr;
-
+*/
     int pid2 = vfork();
     if (pid2 < 0)
     {
@@ -428,36 +432,147 @@ int JobEngine::exec_shellCommand(const std::string &command, PlainJobDocument::J
     {
         LOG_DEBUG(TAG, "Child process now running, verifying sudo");
 
-        if(execvp(argv2[0], const_cast<char *const *>(argv2.get())) == -1)
+        auto rc = execvp(argv2[0], const_cast<char *const *>(argv2.get()));
+        if(rc == -1)
         {
-            LOGM_DEBUG(TAG, "Failed to invoke execvp system call to execute action step: %s ", strerror(errno));
+            auto err = errno;
+            LOGM_ERROR(TAG, "Failed to invoke execvp system call to execute action step: %s (%d)", strerror(err), err);
+            _exit(rc);
+
         }
-        _exit(1);
+        _exit(0);
     }
     else
     {
+        LOGM_DEBUG(TAG, "Parent process now running, child PID is %d", pid2);
         do
         {
             // TODO: do not wait for infinite time for child process to complete
             int waitReturn = waitpid(pid2, &status2, 0);
             if (waitReturn == -1)
             {
-                LOG_WARN(TAG, "Failed to wait for child process");
+                LOG_WARN(TAG, "Failed to wait for child process to verify sudo");
             }
+            execStatus2 = WEXITSTATUS(status2);
+            LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", execStatus2);
 
-            LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", status2);
-            execStatus2 = status2;
         } while (!WIFEXITED(status2) && !WIFSIGNALED(status2));
 
     }
 
     int returnCode;
+    int execStatus = 0;
+    LOGM_DEBUG(TAG, "execStatus1: %d, execStatus2: %d", execStatus1, execStatus2);
 
     //if two verifications succeeds, build command using sudo -u $user -n $@ and execute
-    if(execStatus1 == -1 || execStatus2 == -1)
+    if(execStatus1 != 0 || execStatus2 != 0)
     {
         LOG_WARN(TAG, "username or sudo command not found");
-        //still execute code?
+        // Establish some file descriptors which we'll use to redirect stdout and
+        // stderr from the child process back into our logger
+        int stdout[] = {0, 0};
+        int stderr[] = {0, 0};
+
+        if (pipe(stdout) < 0)
+        {
+            LOG_ERROR(TAG, "failed allocating pipe for child STDOUT redirect");
+            return CMD_FAILURE;
+        }
+
+        if (pipe(stderr) < 0)
+        {
+            close(stdout[PIPE_READ]);
+            close(stdout[PIPE_WRITE]);
+            LOG_ERROR(TAG, "failed allocating pipe for child STDERR redirect");
+            return CMD_FAILURE;
+        }
+        /**
+        * \brief Create char array argv[] storing arguments to pass to execvp() function.
+        * argv[0] executable path
+        * argv[1] Linux user name
+        * argv[2:] arguments required for executing the executable file..
+         */
+        size_t argSize = 0;
+        if (action.input.commands.has_value())
+        {
+            argSize = action.input.commands->size();
+        }
+        std::unique_ptr<const char *[]> argv(new const char *[argSize + 2]);
+        argv[0] = command.c_str();
+        argv[argSize + 1] = nullptr;
+        for (size_t i = 0; i < argSize; i++)
+        {
+            argv[i + 1] = action.input.commands->at(i).c_str();
+        }
+
+
+        int execResult;
+        int pid = vfork();
+        if (pid < 0)
+        {
+            LOGM_ERROR(TAG, "Failed to create child process, fork returned %d", pid);
+            return CMD_FAILURE;
+        }
+        else if (pid == 0)
+        {
+            // Child process
+            LOG_DEBUG(TAG, "Child process now running");
+
+            // redirect stdout
+            if (dup2(stdout[PIPE_WRITE], STDOUT_FILENO) == -1)
+            {
+                LOGM_WARN(TAG, "Failed to duplicate STDOUT pipe, errno {%d}, stdout will likely be unavailable", errno);
+            }
+
+            // redirect stderr
+            if (dup2(stderr[PIPE_WRITE], STDERR_FILENO) == -1)
+            {
+                LOGM_WARN(TAG, "Failed to duplicate STDERR pipe, errno {%d}, stderr will likely be unavailable", errno);
+            }
+
+            // all these are for use by parent only
+            // TODO we need to make sure ALL file handles get closed, including those within the MQTTConnectionManager
+            close(stdout[PIPE_READ]);
+            close(stdout[PIPE_WRITE]);
+            close(stderr[PIPE_READ]);
+            close(stderr[PIPE_WRITE]);
+
+            LOG_DEBUG(TAG, "Child process about to call execvp");
+
+            if (execvp(argv[0], const_cast<char *const *>(argv.get())) == -1)
+            {
+                LOGM_DEBUG(TAG, "Failed to invoke execvp system call to execute action step: %s ", strerror(errno));
+            }
+            // If the exec fails we need to exit the child process
+            _exit(1);
+        }
+        else
+        {
+            // parent process
+            LOGM_DEBUG(TAG, "Parent process now running, child PID is %d", pid);
+            // close unused file descriptors
+            close(stdout[PIPE_WRITE]);
+            close(stderr[PIPE_WRITE]);
+
+            // Set up some threads to process the output from the child process
+            thread stdOutProcessor(&JobEngine::processCmdOutput, this, stdout[PIPE_READ], false, pid);
+            stdOutProcessor.join();
+            thread stdErrProcessor(&JobEngine::processCmdOutput, this, stderr[PIPE_READ], true, pid);
+            stdErrProcessor.join();
+
+            do
+            {
+                // TODO: do not wait for infinite time for child process to complete
+                int waitReturn = waitpid(pid, &execResult, 0);
+                if (waitReturn == -1)
+                {
+                    LOG_WARN(TAG, "Failed to wait for child process");
+                }
+                execStatus = WEXITSTATUS(execResult);
+                LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", execStatus);
+                returnCode = execStatus;
+            } while (!WIFEXITED(execResult) && !WIFSIGNALED(execResult));
+        }
     }
     else
     {
@@ -498,7 +613,7 @@ int JobEngine::exec_shellCommand(const std::string &command, PlainJobDocument::J
         argv[argSize + 4] = nullptr;
         for (size_t i = 0; i < argSize; i++)
         {
-            argv[i + 4] = action.input.args->at(i).c_str();
+            argv[i + 4] = action.input.commands->at(i).c_str();
         }
 
         int execResult;
@@ -563,9 +678,9 @@ int JobEngine::exec_shellCommand(const std::string &command, PlainJobDocument::J
                 {
                     LOG_WARN(TAG, "Failed to wait for child process");
                 }
-
-                LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", execResult);
-                returnCode = execResult;
+                execStatus = WEXITSTATUS(execResult);
+                LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", execStatus);
+                returnCode = execStatus;
             } while (!WIFEXITED(execResult) && !WIFSIGNALED(execResult));
         }
     }

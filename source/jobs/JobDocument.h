@@ -98,6 +98,8 @@ namespace Aws
                             static constexpr char JSON_KEY_PATH[] = "path";
                             static constexpr char JSON_KEY_COMMANDS[] = "commands";
 
+                            std::string currentType;
+
                             Optional<std::string> handler;
                             Optional<std::vector<std::string>> args;
                             Optional<std::string> path;
