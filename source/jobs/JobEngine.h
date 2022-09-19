@@ -93,9 +93,11 @@ namespace Aws
                      * @param args the arguments to pass to that command
                      * @return an integer representing the return code of the executed process
                      */
-                    int exec_cmd(const std::string &operation, PlainJobDocument::JobAction action);
+                    int exec_cmd(std::unique_ptr<const char *[]> & argv);
 
-                    int exec_shellCommand(const std::string &command, PlainJobDocument::JobAction action);
+                    int exec_verification(std::unique_ptr<const char *[]> & argv);
+
+                    int exec_shellCommand(PlainJobDocument::JobAction action);
 
                     /**
                      * \brief Executes the given set of steps (actions) in sequence as provided in the job document
