@@ -1,0 +1,455 @@
+name: Docker Builds
+
+# This workflow will build and publish Device Client Docker images to the integration test repository upon merge to development branch
+# Once the integration tests have passed and the development branch is merged to main branch this workflow will build and publish
+# the Docker images to the aws-iot-device-client repository as part of the public release of that Device Client version.
+
+on:
+  push:
+    branches: ['pre-release', 'main']
+  pull_request:
+    branches: ['pre-release', 'main']
+    types: [opened, closed]
+
+env:
+  PACKAGE_NAME: aws-iot-device-client
+  IMAGE_NAME: aws-iot-device-client
+  ECR_BASE_REPO: aws-iot-device-client/aws-iot-device-client-base-images
+  ECR_TEST_REPO: aws-iot-device-client/pre-release
+  ECR_REPO: aws-iot-device-client/aws-iot-device-client
+
+jobs:
+  # This job builds the Device Client Docker image using the ubuntu base image in the ECR repository
+  # It then runs the Device Client to output the version to be used in the subsequent jobs.
+  versioning:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Build Device Client
+        id: build-device-client
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          target: deploy
+          build-args: |
+            OS=ubuntu:18.04
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-ubuntu-latest
+          push: false
+      - name: Get Version
+        id: get-version
+        run: |
+          version=$(docker run ${{ steps.build-device-client.outputs.imageid }} --version)
+          echo "::set-output name=version::$version"
+  build-docker-image-ubuntu-amd64:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    needs: [versioning]
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: public.ecr.aws/${{ env.ECR_REPO }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build Device Client Test Image
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=ubuntu:18.04
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-ubuntu-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_TEST_REPO }}:amd64-ubuntu-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_TEST_REPO }}:amd64-ubuntu-latest
+      - name: Build Device Client Docker Image
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=ubuntu:18.04
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-ubuntu-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_REPO }}:amd64-ubuntu-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_REPO }}:amd64-ubuntu-latest
+          platforms: linux/amd64
+          labels: ${{ steps.meta.outputs.labels }}
+  build-docker-image-ubuntu-arm64:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    needs: [versioning]
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: public.ecr.aws/${{ env.ECR_REPO }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build Device Client Test Image
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=ubuntu:18.04
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:arm64-ubuntu-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_TEST_REPO }}:arm64-ubuntu-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_TEST_REPO }}:arm64-ubuntu-latest
+          platforms: linux/arm64
+      - name: Build Device Client Docker Image
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=ubuntu:18.04
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:arm64-ubuntu-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_REPO }}:arm64-ubuntu-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_REPO }}:arm64-ubuntu-latest
+          platforms: linux/arm64
+          labels: ${{ steps.meta.outputs.labels }}
+  build-docker-image-ubuntu-armv7:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    needs: [versioning]
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: public.ecr.aws/${{ env.ECR_REPO }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build Device Client Test Image
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=ubuntu:18.04
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:armv7-ubuntu-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_TEST_REPO }}:armv7-ubuntu-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_TEST_REPO }}:armv7-ubuntu-latest
+          platforms: linux/arm/v7
+      - name: Build Device Client Docker Image
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=ubuntu:18.04
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:armv7-ubuntu-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_REPO }}:armv7-ubuntu-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_REPO }}:armv7-ubuntu-latest
+          platforms: linux/arm/v7
+          labels: ${{ steps.meta.outputs.labels }}
+  build-docker-image-amazonlinux-amd64:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    needs: [versioning]
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: public.ecr.aws/${{ env.ECR_REPO }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build Device Client Test Image
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=amazonlinux:latest
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-amazonlinux-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_TEST_REPO }}:amd64-amazonlinux-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_TEST_REPO }}:amd64-amazonlinux-latest
+          platforms: linux/amd64
+      - name: Build Device Client Docker Image
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=amazonlinux:latest
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-amazonlinux-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_REPO }}:amd64-amazonlinux-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_REPO }}:amd64-amazonlinux-latest
+          platforms: linux/amd64
+          labels: ${{ steps.meta.outputs.labels }}
+  build-docker-image-amazonlinux-arm64:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    needs: [versioning]
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: public.ecr.aws/${{ env.ECR_REPO }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build Device Client Test Image
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=amazonlinux:latest
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:arm64-amazonlinux-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_TEST_REPO }}:arm64-amazonlinux-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_TEST_REPO }}:arm64-amazonlinux-latest
+          platforms: linux/arm64
+      - name: Build Device Client Docker Image
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=amazonlinux:latest
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:arm64-amazonlinux-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_REPO }}:arm64-amazonlinux-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_REPO }}:arm64-amazonlinux-latest
+          platforms: linux/arm64
+          labels: ${{ steps.meta.outputs.labels }}
+  build-docker-image-ubi8-amd64:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    needs: [versioning]
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: public.ecr.aws/${{ env.ECR_REPO }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build Device Client Test Image
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=registry.access.redhat.com/ubi8/ubi
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-ubi8-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_TEST_REPO }}:amd64-ubi8-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_TEST_REPO }}:amd64-ubi8-latest
+          platforms: linux/amd64
+      - name: Build Device Client Docker Image
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=registry.access.redhat.com/ubi8/ubi
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-ubi8-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_REPO }}:amd64-ubi8-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_REPO }}:amd64-ubi8-latest
+          platforms: linux/amd64
+          labels: ${{ steps.meta.outputs.labels }}
+  build-docker-image-ubi8-arm64:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    needs: [versioning]
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: public.ecr.aws/${{ env.ECR_REPO }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build Device Client Test Image
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=registry.access.redhat.com/ubi8/ubi
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:arm64-ubi8-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_TEST_REPO }}:arm64-ubi8-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_TEST_REPO }}:arm64-ubi8-latest
+          platforms: linux/arm64
+      - name: Build Device Client Docker Image
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=registry.access.redhat.com/ubi8/ubi
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:arm64-ubi8-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_REPO }}:arm64-ubi8-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_REPO }}:arm64-ubi8-latest
+          platforms: linux/arm64
+          labels: ${{ steps.meta.outputs.labels }}

@@ -8,29 +8,27 @@ on:
     branches:
       - '*'
 
+env:
+  PACKAGE_NAME: aws-iot-device-client
+  ECR_BASE_REPO: aws-iot-device-client/aws-iot-device-client-base-images
+
 jobs:
   clang-format:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+        aws-region: us-east-1
+    - name: Login to ECR
+      run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
     - name: Checkout Sources
       uses: actions/checkout@v1
     - name: clang-format script
       run: |
-        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-        export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/ubuntu-18-x64:latest
+        export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
         docker pull $DOCKER_IMAGE
         docker run --mount type=bind,source=$(pwd),target=/src --workdir /src --entrypoint /src/format-check.sh $DOCKER_IMAGE
-
-  cppcheck:
-    runs-on: ubuntu-latest
-    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
-    steps:
-    - name: Checkout Sources
-      uses: actions/checkout@v1
-    - name: cppcheck script
-      run: |
-        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u awslabs --password-stdin
-        export DOCKER_IMAGE=ghcr.io/awslabs/aws-iot-device-client/amazonlinux:latest
-        docker pull $DOCKER_IMAGE
-        docker run --mount type=bind,source=$(pwd),target=/src --workdir /src --entrypoint /src/run-cppcheck.sh $DOCKER_IMAGE
