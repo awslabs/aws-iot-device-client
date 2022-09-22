@@ -1599,6 +1599,7 @@ bool PlainConfig::PubSub::LoadFromCliArgs(const CliArgs &cliArgs)
     {
         publishOnChange = cliArgs.at(PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_ON_CHANGE).compare("true") == 0;
     }
+
     return true;
 }
 
