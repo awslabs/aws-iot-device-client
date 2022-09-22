@@ -45,6 +45,9 @@ jobs:
           images: public.ecr.aws/${{ env.ECR_REPO }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+      - name: Inject coverity credentials
+        run: |
+          sed -i "s/# Install coverity build tool (optional)/$(echo "${{ secrets.COVERITY_DOWNLOAD_UBUNTU }}")/" .github/docker-images/base-images/ubuntu/Dockerfile
       - name: Build Ubuntu Base Image
         uses: docker/build-push-action@v3
         with:
@@ -82,6 +85,9 @@ jobs:
           images: public.ecr.aws/${{ env.ECR_REPO }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+      - name: Inject coverity credentials
+        run: |
+          sed -i "s/# Install coverity build tool (optional)/$(echo "${{ secrets.COVERITY_DOWNLOAD_UBUNTU }}")/" .github/docker-images/base-images/ubuntu/Dockerfile
       - name: Build Ubuntu Base Image
         uses: docker/build-push-action@v3
         with:
@@ -120,6 +126,9 @@ jobs:
           images: public.ecr.aws/${{ env.ECR_REPO }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+      - name: Inject coverity credentials
+        run: |
+          sed -i "s/# Install coverity build tool (optional)/$(echo "${{ secrets.COVERITY_DOWNLOAD_UBUNTU }}")/" .github/docker-images/base-images/ubuntu/Dockerfile
       - name: Build ubuntu Base Image
         uses: docker/build-push-action@v3
         with:
@@ -157,7 +166,10 @@ jobs:
           images: public.ecr.aws/${{ env.ECR_REPO }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Build ubuntu base image
+      - name: Inject coverity credentials
+        run: |
+          sed -i "s/# Install coverity build tool (optional)/$(echo "${{ secrets.COVERITY_DOWNLOAD }}")/" .github/docker-images/base-images/amazonlinux/Dockerfile
+      - name: Build amazonlinux base image
         uses: docker/build-push-action@v3
         with:
           file: .github/docker-images/base-images/amazonlinux/Dockerfile
@@ -194,6 +206,9 @@ jobs:
           images: public.ecr.aws/${{ env.ECR_REPO }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+      - name: Inject coverity credentials
+        run: |
+          sed -i "s/# Install coverity build tool (optional)/$(echo "${{ secrets.COVERITY_DOWNLOAD }}")/" .github/docker-images/base-images/amazonlinux/Dockerfile
       - name: Build amazonlinux base image
         uses: docker/build-push-action@v3
         with:
@@ -231,6 +246,9 @@ jobs:
           images: public.ecr.aws/${{ env.ECR_REPO }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+      - name: Inject coverity credentials
+        run: |
+          sed -i "s/# Install coverity build tool (optional)/$(echo "${{ secrets.COVERITY_DOWNLOAD }}")/" .github/docker-images/base-images/ubi8/Dockerfile
       - name: Build ubi8 Base Image
         uses: docker/build-push-action@v3
         with:
@@ -268,6 +286,9 @@ jobs:
           images: public.ecr.aws/${{ env.ECR_REPO }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+      - name: Inject coverity credentials
+        run: |
+          sed -i "s/# Install coverity build tool (optional)/$(echo "${{ secrets.COVERITY_DOWNLOAD }}")/" .github/docker-images/base-images/ubi8/Dockerfile
       - name: Build ubi8 base image
         uses: docker/build-push-action@v3
         with:
