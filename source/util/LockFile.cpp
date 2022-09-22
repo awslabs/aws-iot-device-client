@@ -16,14 +16,16 @@ using namespace Aws::Iot::DeviceClient::Logging;
 constexpr char LockFile::TAG[];
 constexpr char LockFile::FILE_NAME[];
 
-LockFile::LockFile(const std::string &filedir, const std::string &process) : dir(filedir)
+LockFile::LockFile(const std::string &filedir, const std::string &process, const std::string &thingName) : dir(filedir)
 {
     string fullPath = dir + FILE_NAME;
     ifstream fileIn(fullPath);
     if (fileIn)
     {
+        string storedThingName;
         string storedPid;
-        if (fileIn >> storedPid && !(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
+        if (fileIn >> storedThingName && storedThingName == thingName
+            && fileIn >> storedPid && !(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
         {
             string processPath = "/proc/" + storedPid + "/cmdline";
             string basename = process.substr(process.find_last_of("/\\") + 1);
@@ -62,6 +64,8 @@ LockFile::LockFile(const std::string &filedir, const std::string &process) : dir
     }
 
     string pid = to_string(getpid());
+    fputs(thingName.c_str(), file);
+    fputs(string("\n").c_str(), file);
     fputs(pid.c_str(), file);
     fclose(file);
 }
