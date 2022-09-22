@@ -1495,6 +1495,7 @@ constexpr char PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_TOPIC[];
 constexpr char PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE[];
 constexpr char PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC[];
 constexpr char PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE[];
+constexpr char PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_ON_CHANGE[];
 
 constexpr char PlainConfig::PubSub::JSON_ENABLE_PUB_SUB[];
 constexpr char PlainConfig::PubSub::JSON_PUB_SUB_PUBLISH_TOPIC[];
@@ -1593,6 +1594,10 @@ bool PlainConfig::PubSub::LoadFromCliArgs(const CliArgs &cliArgs)
     if (cliArgs.count(PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE))
     {
         subscribeFile = FileUtils::ExtractExpandedPath(cliArgs.at(PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE));
+    }
+    if (cliArgs.count(PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_ON_CHANGE))
+    {
+        publishOnChange = cliArgs.at(PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_ON_CHANGE).compare("true") == 0;
     }
     return true;
 }
@@ -2975,6 +2980,7 @@ void Config::PrintHelpMessage()
         PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_FILE,
         PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_TOPIC,
         PlainConfig::PubSub::CLI_PUB_SUB_SUBSCRIBE_FILE,
+        PlainConfig::PubSub::CLI_PUB_SUB_PUBLISH_ON_CHANGE,
         PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_NAME,
         PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_INPUT_FILE,
         PlainConfig::SampleShadow::CLI_SAMPLE_SHADOW_OUTPUT_FILE,

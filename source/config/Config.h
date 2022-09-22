@@ -312,6 +312,7 @@ namespace Aws
                     static constexpr char CLI_PUB_SUB_PUBLISH_FILE[] = "--publish-file";
                     static constexpr char CLI_PUB_SUB_SUBSCRIBE_TOPIC[] = "--subscribe-topic";
                     static constexpr char CLI_PUB_SUB_SUBSCRIBE_FILE[] = "--subscribe-file";
+                    static constexpr char CLI_PUB_SUB_PUBLISH_ON_CHANGE[] = "--publish-on-change";
 
                     static constexpr char JSON_ENABLE_PUB_SUB[] = "enabled";
                     static constexpr char JSON_PUB_SUB_PUBLISH_TOPIC[] = "publish-topic";
