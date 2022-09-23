@@ -15,7 +15,7 @@ TEST(LockFile, normalCreation)
 {
     string path = "/run/lock/";
     string filename = "devicecl.lock";
-    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "./aws-iot-device-client"});
+    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "./aws-iot-device-client", ""});
 
     ifstream fileIn(path + filename);
     ASSERT_TRUE(fileIn);
@@ -31,7 +31,7 @@ TEST(LockFile, earlyDeletion)
 {
     string path = "/run/lock/";
     string filename = "devicecl.lock";
-    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
+    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", ""});
     lockFile.reset();
 
     ifstream fileIn(path + filename);
@@ -41,17 +41,17 @@ TEST(LockFile, earlyDeletion)
 TEST(LockFile, multipleFiles)
 {
     string path = "/run/lock/";
-    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
+    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", ""});
 
-    EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"}), std::runtime_error);
+    EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", ""}), std::runtime_error);
 }
 
 TEST(LockFile, multipleFilesWithExtendedPath)
 {
     string path = "/run/lock/";
-    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
+    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", ""});
 
-    EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "directory/test-aws-iot-device-client"}), std::runtime_error);
+    EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "directory/test-aws-iot-device-client", ""}), std::runtime_error);
 }
 
 TEST(LockFile, staleFile)
@@ -69,7 +69,7 @@ TEST(LockFile, staleFile)
         }
         fileOut.close();
 
-        unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client"});
+        unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", ""});
 
         ifstream fileIn(path + filename);
         ASSERT_TRUE(fileIn);
