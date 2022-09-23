@@ -1,14 +1,12 @@
-name: Docker Builds
+name: Docker pre-release Builds
 
-# This workflow will build and publish Device Client Docker images to the integration test repository upon merge to development branch
-# Once the integration tests have passed and the development branch is merged to main branch this workflow will build and publish
-# the Docker images to the aws-iot-device-client repository as part of the public release of that Device Client version.
+# This workflow will build and publish Device Client Docker images to the pre-release repository upon merge to pre-release branch
 
 on:
   push:
-    branches: ['pre-release', 'main']
+    branches: ['pre-release']
   pull_request:
-    branches: ['pre-release', 'main']
+    branches: ['pre-release']
     types: [opened, closed]
 
 env:
@@ -96,21 +94,6 @@ jobs:
           tags: |
             public.ecr.aws/${{ env.ECR_TEST_REPO }}:amd64-ubuntu-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_REPO }}:amd64-ubuntu-latest
-      - name: Build Device Client Docker Image
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v3
-        with:
-          file: .github/docker-images/Dockerfile
-          context: .
-          build-args: |
-            OS=ubuntu:18.04
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-ubuntu-latest
-          push: true
-          tags: |
-            public.ecr.aws/${{ env.ECR_REPO }}:amd64-ubuntu-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_REPO }}:amd64-ubuntu-latest
-          platforms: linux/amd64
-          labels: ${{ steps.meta.outputs.labels }}
   build-docker-image-ubuntu-arm64:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
@@ -153,21 +136,6 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_REPO }}:arm64-ubuntu-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_REPO }}:arm64-ubuntu-latest
           platforms: linux/arm64
-      - name: Build Device Client Docker Image
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v3
-        with:
-          file: .github/docker-images/Dockerfile
-          context: .
-          build-args: |
-            OS=ubuntu:18.04
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:arm64-ubuntu-latest
-          push: true
-          tags: |
-            public.ecr.aws/${{ env.ECR_REPO }}:arm64-ubuntu-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_REPO }}:arm64-ubuntu-latest
-          platforms: linux/arm64
-          labels: ${{ steps.meta.outputs.labels }}
   build-docker-image-ubuntu-armv7:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
@@ -210,21 +178,6 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_REPO }}:armv7-ubuntu-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_REPO }}:armv7-ubuntu-latest
           platforms: linux/arm/v7
-      - name: Build Device Client Docker Image
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v3
-        with:
-          file: .github/docker-images/Dockerfile
-          context: .
-          build-args: |
-            OS=ubuntu:18.04
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:armv7-ubuntu-latest
-          push: true
-          tags: |
-            public.ecr.aws/${{ env.ECR_REPO }}:armv7-ubuntu-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_REPO }}:armv7-ubuntu-latest
-          platforms: linux/arm/v7
-          labels: ${{ steps.meta.outputs.labels }}
   build-docker-image-amazonlinux-amd64:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
@@ -267,21 +220,6 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_REPO }}:amd64-amazonlinux-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_REPO }}:amd64-amazonlinux-latest
           platforms: linux/amd64
-      - name: Build Device Client Docker Image
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v3
-        with:
-          file: .github/docker-images/Dockerfile
-          context: .
-          build-args: |
-            OS=amazonlinux:latest
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-amazonlinux-latest
-          push: true
-          tags: |
-            public.ecr.aws/${{ env.ECR_REPO }}:amd64-amazonlinux-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_REPO }}:amd64-amazonlinux-latest
-          platforms: linux/amd64
-          labels: ${{ steps.meta.outputs.labels }}
   build-docker-image-amazonlinux-arm64:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
@@ -324,21 +262,6 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_REPO }}:arm64-amazonlinux-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_REPO }}:arm64-amazonlinux-latest
           platforms: linux/arm64
-      - name: Build Device Client Docker Image
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v3
-        with:
-          file: .github/docker-images/Dockerfile
-          context: .
-          build-args: |
-            OS=amazonlinux:latest
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:arm64-amazonlinux-latest
-          push: true
-          tags: |
-            public.ecr.aws/${{ env.ECR_REPO }}:arm64-amazonlinux-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_REPO }}:arm64-amazonlinux-latest
-          platforms: linux/arm64
-          labels: ${{ steps.meta.outputs.labels }}
   build-docker-image-ubi8-amd64:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
@@ -381,21 +304,6 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_REPO }}:amd64-ubi8-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_REPO }}:amd64-ubi8-latest
           platforms: linux/amd64
-      - name: Build Device Client Docker Image
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v3
-        with:
-          file: .github/docker-images/Dockerfile
-          context: .
-          build-args: |
-            OS=registry.access.redhat.com/ubi8/ubi
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-ubi8-latest
-          push: true
-          tags: |
-            public.ecr.aws/${{ env.ECR_REPO }}:amd64-ubi8-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_REPO }}:amd64-ubi8-latest
-          platforms: linux/amd64
-          labels: ${{ steps.meta.outputs.labels }}
   build-docker-image-ubi8-arm64:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
@@ -438,18 +346,3 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_REPO }}:arm64-ubi8-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_REPO }}:arm64-ubi8-latest
           platforms: linux/arm64
-      - name: Build Device Client Docker Image
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v3
-        with:
-          file: .github/docker-images/Dockerfile
-          context: .
-          build-args: |
-            OS=registry.access.redhat.com/ubi8/ubi
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:arm64-ubi8-latest
-          push: true
-          tags: |
-            public.ecr.aws/${{ env.ECR_REPO }}:arm64-ubi8-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_REPO }}:arm64-ubi8-latest
-          platforms: linux/arm64
-          labels: ${{ steps.meta.outputs.labels }}
