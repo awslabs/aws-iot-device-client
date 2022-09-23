@@ -2,7 +2,6 @@
 
 compileMode="default"
 stMode=false
-sharedLibs=false
 OPENSSL_VERSION=1.1.1n
 
 # Check if first argument is compile mode
@@ -13,9 +12,6 @@ if [ "$compileModeArgument" = "compile-mode" ]; then
     st_component_mode)
     compileMode="st_component_mode"
     ;;
-    shared_lib_mode)
-    sharedLibs=true
-    ;;
     armhf_cross_mode)
     compileMode="armhf_cross_mode"
     ;;
@@ -24,18 +20,6 @@ if [ "$compileModeArgument" = "compile-mode" ]; then
     ;;
     aarch64_cross_mode)
     compileMode="aarch64_cross_mode"
-    ;;
-    armhf_cross_mode_shared_libs)
-    compileMode="armhf_cross_mode"
-    sharedLibs=true
-    ;;
-    mips_cross_mode_shared_libs)
-    compileMode="mips_cross_mode"
-    sharedLibs=true
-    ;;
-    aarch64_cross_mode_shared_libs)
-    compileMode="aarch64_cross_mode"
-    sharedLibs=true
     ;;
     st_armhf_cross_mode)
     compileMode="armhf_cross_mode"
@@ -126,10 +110,6 @@ case $compileMode in
     if [ "$stMode" = true ]; then
       # Set CMake flags for ST mode
       cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON -DEXCLUDE_SENSOR_PUBLISH=ON ../
-    elif [ "$sharedLibs" = true ]; then
-      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake -DBUILD_SDK=ON ../
-      make install DESTDIR=./shared_install_dir
-      chmod 0777 ./shared_install_dir
     else
       cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-armhf.cmake ../
     fi
@@ -156,13 +136,7 @@ case $compileMode in
     make -j 4
     make install
     cd ..
-    if [ "$sharedLibs" = true ]; then
-      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake -DS2N_NO_PQ=ON ../
-      make install DESTDIR=./shared_install_dir
-      chmod 0777 ./shared_install_dir
-    else
-      cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake -DS2N_NO_PQ=ON ../
-    fi
+    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-mips.cmake -DS2N_NO_PQ=ON ../
     cmake --build . --target aws-iot-device-client
     cmake --build . --target test-aws-iot-device-client
     exit $?
@@ -189,10 +163,6 @@ case $compileMode in
     if [ "$stMode" = true ]; then
       # Set CMake flags for ST mode
       cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON -DEXCLUDE_JOBS=ON -DEXCLUDE_DD=ON -DEXCLUDE_FP=ON -DDISABLE_MQTT=ON -DEXCLUDE_SENSOR_PUBLISH=ON ../
-    elif [ "$sharedLibs" = true ]; then
-      cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake -DBUILD_SDK=ON ../
-      make install DESTDIR=./shared_install_dir
-      chmod 0777 ./shared_install_dir
     else
       cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-aarch64.cmake ../
     fi
@@ -200,14 +170,56 @@ case $compileMode in
     cmake --build . --target test-aws-iot-device-client
     exit $?
     ;;
+    #################################
+    powerpc64_cross_mode)
+    apt-get update
+    apt-get install --assume-yes software-properties-common
+    apt-get install --assume-yes build-essential
+    apt-get install --assume-yes gcc-powerpc-linux-gnu
+    apt-get install --assume-yes g++-powerpc-linux-gnu
+    apt-get install --assume-yes gdb-multiarch
+    wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
+    tar -xvzf openssl-${OPENSSL_VERSION}.tar.gz
+    export INSTALL_DIR=/usr/lib/aarch64-linux-gnu
+    cd openssl-${OPENSSL_VERSION}
+    ./Configure linux-aarch64 shared \
+      --prefix=$INSTALL_DIR --openssldir=$INSTALL_DIR/openssl \
+      --cross-compile-prefix=/usr/bin/powerpc-linux-gnu-
+    make depend
+    make -j 4
+    make install
+    cd ..
+    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-ppc64.cmake ../
+    cmake --build . --target aws-iot-device-client
+    cmake --build . --target test-aws-iot-device-client
+    exit $?
+    ;;
+    #################################
+    powerpc64le_cross_mode)
+    apt-get update
+    apt-get install --assume-yes software-properties-common
+    apt-get install --assume-yes build-essential
+    apt-get install --assume-yes gcc-powerpc64le-linux-gnu
+    apt-get install --assume-yes g++-powerpc64le-linux-gnu
+    apt-get install --assume-yes gdb-multiarch
+    wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
+    tar -xvzf openssl-${OPENSSL_VERSION}.tar.gz
+    export INSTALL_DIR=/usr/lib/aarch64-linux-gnu
+    cd openssl-${OPENSSL_VERSION}
+    ./Configure linux-aarch64 shared \
+      --prefix=$INSTALL_DIR --openssldir=$INSTALL_DIR/openssl \
+      --cross-compile-prefix=/usr/bin/powerpc64le-linux-gnu-
+    make depend
+    make -j 4
+    make install
+    cd ..
+    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake-toolchain/Toolchain-ppc64.cmake ../
+    cmake --build . --target aws-iot-device-client
+    cmake --build . --target test-aws-iot-device-client
+    exit $?
+    ;;
     *)
-    if [ "$sharedLibs" = false ]; then
       cmake ../ -DBUILD_SDK=OFF -DBUILD_TEST_DEPS=OFF -DLINK_DL=ON
-    else
-      cmake ../ -DBUILD_SHARED_LIBS=ON -DBUILD_SDK=ON -DLINK_DL=ON
-      make install DESTDIR=./shared_install_dir
-      chmod 0777 ./shared_install_dir
-    fi
     ;;
 esac
 

@@ -1,0 +1,37 @@
+name: Doxygen
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+    types: [opened, closed]
+
+jobs:
+  update-doxygen:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - name: Create local changes
+      run: |
+        sudo apt-get install doxygen
+        cd docs
+        doxygen
+        cp -r ./html/* ./
+        rm -rf ./html
+        git add .
+    - name: Commit files
+      run: |
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git commit -m "Auto-generate Doxygen documentation via Github Actions" -a
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: gh-pages
+        force: true
