@@ -1,4 +1,6 @@
-FROM registry.redhat.io/ubi8/ubi
+#Using this Registry so that authentication is not necessary
+#https://access.redhat.com/RegistryAuthentication
+FROM registry.access.redhat.com/ubi8/ubi AS base
 
 ARG OPENSSL_VERSION=1.1.1n
 
@@ -104,6 +106,19 @@ RUN mkdir sdk-cpp-workspace \
     && cmake -DCMAKE_INSTALL_PREFIX="/usr" -DUSE_OPENSSL=ON -DBUILD_DEPS=ON ../aws-iot-device-sdk-cpp-v2 \
     && cmake --build . --target install
 
-ADD entry-script.sh /home/entry-script
+ADD .github/docker-images/entry-script.sh /home/entry-script
 RUN chmod a+x /home/entry-script
 ENTRYPOINT ["/home/entry-script"]
+
+FROM base AS deploy
+
+###############################################################################
+# Copy and build device client
+###############################################################################
+COPY . /root/aws-iot-device-client
+RUN mkdir -p /root/aws-iot-device-client/build \
+    && cd /root/aws-iot-device-client/build \
+    && cmake .. \
+    && cmake --build . --target aws-iot-device-client
+
+ENTRYPOINT ["/root/aws-iot-device-client/build/aws-iot-device-client"]
