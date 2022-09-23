@@ -56,12 +56,12 @@ void PlainJobDocument::LoadFromJobDocument(const JsonView &json)
             JobAction jobAction;
             // Save Job Action name and handler field value with operation field value
             jobAction.name = json.GetString(jsonKey).c_str();
-            jobAction.input.handler = jobAction.name;
+            jobAction.handlerInput->handler = jobAction.name;
 
             jsonKey = JSON_KEY_ARGS;
             if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsListType())
             {
-                jobAction.input.args = ParseToVectorString(json.GetJsonObject(jsonKey));
+                jobAction.handlerInput->args = ParseToVectorString(json.GetJsonObject(jsonKey));
             }
 
             // Old Schema only supports runHandler type of action
@@ -76,7 +76,7 @@ void PlainJobDocument::LoadFromJobDocument(const JsonView &json)
             jsonKey = JSON_KEY_PATH;
             if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsString())
             {
-                jobAction.input.path = json.GetString(jsonKey).c_str();
+                jobAction.handlerInput->path = json.GetString(jsonKey).c_str();
             }
 
             steps.push_back(jobAction);
@@ -235,8 +235,9 @@ constexpr char PlainJobDocument::JobAction::JSON_KEY_INPUT[];
 constexpr char PlainJobDocument::JobAction::JSON_KEY_RUNASUSER[];
 constexpr char PlainJobDocument::JobAction::JSON_KEY_ALLOWSTDERR[];
 constexpr char PlainJobDocument::JobAction::JSON_KEY_IGNORESTEPFAILURE[];
-const static std::set<std::string> SUPPORTED_ACTION_TYPES{Aws::Iot::DeviceClient::Jobs::PlainJobDocument::ACTION_TYPE_RUN_HANDLER, Aws::Iot::DeviceClient::Jobs::PlainJobDocument::ACTION_TYPE_RUN_COMMAND};
-
+const static std::set<std::string> SUPPORTED_ACTION_TYPES{
+    Aws::Iot::DeviceClient::Jobs::PlainJobDocument::ACTION_TYPE_RUN_HANDLER,
+    Aws::Iot::DeviceClient::Jobs::PlainJobDocument::ACTION_TYPE_RUN_COMMAND};
 
 void PlainJobDocument::JobAction::LoadFromJobDocument(const JsonView &json)
 {
@@ -255,10 +256,18 @@ void PlainJobDocument::JobAction::LoadFromJobDocument(const JsonView &json)
     jsonKey = JSON_KEY_INPUT;
     if (json.ValueExists(jsonKey))
     {
-        ActionInput temp;
-        temp.LoadFromJobDocument(json.GetJsonObject(jsonKey));
-        input = temp;
-        input.currentType = type;
+        if (type == PlainJobDocument::ACTION_TYPE_RUN_HANDLER)
+        {
+            ActionHandlerInput temp;
+            temp.LoadFromJobDocument(json.GetJsonObject(jsonKey));
+            handlerInput = temp;
+        }
+        else
+        {
+            ActionCommandInput temp;
+            temp.LoadFromJobDocument(json.GetJsonObject(jsonKey));
+            commandInput = temp;
+        }
     }
 
     jsonKey = JSON_KEY_RUNASUSER;
@@ -294,7 +303,7 @@ bool PlainJobDocument::JobAction::Validate() const
         return false;
     }
 
-    if (SUPPORTED_ACTION_TYPES.count(type) < 0)
+    if (SUPPORTED_ACTION_TYPES.count(type) == 0)
     {
         LOGM_ERROR(
             TAG,
@@ -304,20 +313,29 @@ bool PlainJobDocument::JobAction::Validate() const
         return false;
     }
 
-    if (!input.Validate())
+    if (type == PlainJobDocument::ACTION_TYPE_RUN_HANDLER)
     {
-        return false;
+        if (!handlerInput->Validate())
+        {
+            return false;
+        }
+    }
+    else
+    {
+        if (!commandInput->Validate())
+        {
+            return false;
+        }
     }
 
     return true;
 }
 
-constexpr char PlainJobDocument::JobAction::ActionInput::JSON_KEY_HANDLER[];
-constexpr char PlainJobDocument::JobAction::ActionInput::JSON_KEY_ARGS[];
-constexpr char PlainJobDocument::JobAction::ActionInput::JSON_KEY_COMMANDS[];
-constexpr char PlainJobDocument::JobAction::ActionInput::JSON_KEY_PATH[];
+constexpr char PlainJobDocument::JobAction::ActionHandlerInput::JSON_KEY_HANDLER[];
+constexpr char PlainJobDocument::JobAction::ActionHandlerInput::JSON_KEY_ARGS[];
+constexpr char PlainJobDocument::JobAction::ActionHandlerInput::JSON_KEY_PATH[];
 
-void PlainJobDocument::JobAction::ActionInput::LoadFromJobDocument(const JsonView &json)
+void PlainJobDocument::JobAction::ActionHandlerInput::LoadFromJobDocument(const JsonView &json)
 {
     const char *jsonKey = JSON_KEY_HANDLER;
     if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsString())
@@ -331,12 +349,6 @@ void PlainJobDocument::JobAction::ActionInput::LoadFromJobDocument(const JsonVie
         args = ParseToVectorString(json.GetJsonObject(jsonKey));
     }
 
-    jsonKey = JSON_KEY_COMMANDS;
-    if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsListType())
-    {
-        commands = ParseToVectorString(json.GetJsonObject(jsonKey));
-    }
-
     jsonKey = JSON_KEY_PATH;
     if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsString())
     {
@@ -344,55 +356,47 @@ void PlainJobDocument::JobAction::ActionInput::LoadFromJobDocument(const JsonVie
     }
 }
 
-bool PlainJobDocument::JobAction::ActionInput::Validate() const
+bool PlainJobDocument::JobAction::ActionHandlerInput::Validate() const
 {
-    if (currentType == ACTION_TYPE_RUN_HANDLER)
+    if (handler.empty())
     {
-        if (!handler.has_value() || handler->empty())
-        {
-            LOGM_ERROR(
-                TAG, "*** %s: Required field ActionInput Handler is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
-            return false;
-        }
-        if(commands.has_value() && !commands->empty())
-        {
-            LOGM_ERROR(
-                TAG, "*** %s: Commands should not be provided for a runHanlder-type job ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
-            return false;
-        }
+        LOGM_ERROR(
+            TAG, "*** %s: Required field ActionInput Handler is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
+        return false;
     }
 
-    if (currentType == ACTION_TYPE_RUN_COMMAND)
+    return true;
+}
+
+constexpr char PlainJobDocument::JobAction::ActionCommandInput::JSON_KEY_COMMAND[];
+
+void PlainJobDocument::JobAction::ActionCommandInput::LoadFromJobDocument(const JsonView &json)
+{
+    const char *jsonKey = JSON_KEY_COMMAND;
+    if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsListType())
     {
-        if (!commands.has_value() || commands->empty())
-        {
-            LOGM_ERROR(
-                TAG, "*** %s: Required field ActionInput commands is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
-            return false;
-        }
+        command = ParseToVectorString(json.GetJsonObject(jsonKey));
+    }
+}
 
-        auto isSpace =  [](const char& c) { return isspace(static_cast<unsigned char>(c)); };
-        const auto& command = commands->front();
-        if (find_if(command.cbegin(), command.cend(), isSpace) != command.cend())
-        {
-            LOGM_ERROR(
-                TAG, "*** %s: Required field ActionInput commands contains space characters ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
-            return false;
-        }
+bool PlainJobDocument::JobAction::ActionCommandInput::Validate() const
+{
+    if (command.empty())
+    {
+        LOGM_ERROR(
+            TAG, "*** %s: Required field ActionInput commands is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
+        return false;
+    }
 
-        if(handler.has_value() && !handler->empty())
-        {
-            LOGM_ERROR(
-                TAG, "*** %s: Handler should not be provided for a runCommand-type job ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
-            return false;
-        }
-
-        if(path.has_value() && !path->empty())
-        {
-            LOGM_ERROR(
-                TAG, "*** %s: Path should not be provided for a runCommand-type job ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
-            return false;
-        }
+    auto isSpace = [](const char &c) { return isspace(static_cast<unsigned char>(c)); };
+    const auto &firstCommand = command.front();
+    if (find_if(firstCommand.cbegin(), firstCommand.cend(), isSpace) != firstCommand.cend())
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Required field ActionInput commands contains space characters ***",
+            DeviceClient::Jobs::DC_INVALID_JOB_DOC);
+        return false;
     }
 
     return true;

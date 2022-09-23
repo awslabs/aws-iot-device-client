@@ -83,7 +83,7 @@ namespace Aws
                      */
                     std::string buildCommand(
                         Optional<std::string> path,
-                        const Optional<std::string> &handler,
+                        const std::string &handler,
                         const std::string &jobHandlerDir) const;
 
                     /**
@@ -93,9 +93,9 @@ namespace Aws
                      * @param args the arguments to pass to that command
                      * @return an integer representing the return code of the executed process
                      */
-                    int exec_cmd(std::unique_ptr<const char *[]> & argv);
+                    int exec_cmd(std::unique_ptr<const char *[]> &argv);
 
-                    int exec_verification(std::unique_ptr<const char *[]> & argv);
+                    int exec_verification(std::unique_ptr<const char *[]> &argv);
 
                     int exec_shellCommand(PlainJobDocument::JobAction action);
 

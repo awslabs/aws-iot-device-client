@@ -36,13 +36,20 @@ void AssertConditionEqual(
     }
 }
 
-void AssertInputEqual(
-    const PlainJobDocument::JobAction::ActionInput &input1,
-    const PlainJobDocument::JobAction::ActionInput &input2)
+void AssertHandlerInputEqual(
+    const Optional<PlainJobDocument::JobAction::ActionHandlerInput> &input1,
+    const Optional<PlainJobDocument::JobAction::ActionHandlerInput> &input2)
 {
-    ASSERT_STREQ(input1.handler->c_str(), input2.handler->c_str());
-    AssertVectorEqual(input1.args, input2.args);
-    ASSERT_STREQ(input1.path->c_str(), input2.path->c_str());
+    ASSERT_STREQ(input1->handler.c_str(), input2->handler.c_str());
+    AssertVectorEqual(input1->args, input2->args);
+    ASSERT_STREQ(input1->path->c_str(), input2->path->c_str());
+}
+
+void AssertCommandInputEqual(
+    const Optional<PlainJobDocument::JobAction::ActionCommandInput> &input1,
+    const Optional<PlainJobDocument::JobAction::ActionCommandInput> &input2)
+{
+    AssertVectorEqual(input1->command, input2->command);
 }
 
 void AssertStepEqual(const vector<PlainJobDocument::JobAction> &step1, const vector<PlainJobDocument::JobAction> &step2)
@@ -54,7 +61,14 @@ void AssertStepEqual(const vector<PlainJobDocument::JobAction> &step1, const vec
     {
         ASSERT_STREQ(iterator1->name.c_str(), iterator2->name.c_str());
         ASSERT_STREQ(iterator1->type.c_str(), iterator2->type.c_str());
-        AssertInputEqual(iterator1->input, iterator2->input);
+        if (iterator1->type == "runHandler")
+        {
+            AssertHandlerInputEqual(iterator1->handlerInput, iterator2->handlerInput);
+        }
+        else
+        {
+            AssertCommandInputEqual(iterator1->commandInput, iterator2->commandInput);
+        }
         ASSERT_STREQ(iterator1->runAsUser->c_str(), iterator2->runAsUser->c_str());
         ASSERT_TRUE(iterator1->allowStdErr.value() == iterator2->allowStdErr.value());
         ASSERT_TRUE(iterator2->ignoreStepFailure);
@@ -110,6 +124,21 @@ TEST(JobDocument, SampleJobDocument)
         },
         {
             "action": {
+                "name": "displayDirectory",
+                "type": "runCommand",
+                "input": {
+                    "command": [
+                        "ls",
+                        "/tmp"
+                    ]
+                },
+                "runAsUser": "user1",
+                "allowStdErr": 8,
+                "ignoreStepFailure": "true"
+            }
+        },
+        {
+            "action": {
                 "name": "validateAppStatus",
                 "type": "runHandler",
                 "input": {
@@ -154,9 +183,19 @@ TEST(JobDocument, SampleJobDocument)
     for (const auto &i : jobDocument.steps)
     {
         cout << i.name.c_str() << "\n";
-        for (const auto &j : *i.input.args)
+        if (i.type == "runHandler")
         {
-            cout << j.c_str() << "\n";
+            for (const auto &j : *i.handlerInput->args)
+            {
+                cout << j.c_str() << "\n";
+            }
+        }
+        else
+        {
+            for (const auto &j : i.commandInput->command)
+            {
+                cout << j.c_str() << "\n";
+            }
         }
     }
 
@@ -187,14 +226,17 @@ TEST(JobDocument, SampleJobDocument)
         cout << i.type->c_str() << "\n";
     }
 
-    PlainJobDocument::JobAction action1, action2, action3;
+    PlainJobDocument::JobAction action1, action2, action3, action4;
+    PlainJobDocument::JobAction::ActionHandlerInput handlerInput1, handlerInput2, handlerInput4;
+    PlainJobDocument::JobAction::ActionCommandInput commandInput3;
     std::vector<PlainJobDocument::JobAction> steps;
 
     action1.name = "downloadJobHandler";
     action1.type = "runHandler";
-    action1.input.handler = "download-file.sh";
-    action1.input.args = {{"presignedUrl"}, {"/tmp/aws-iot-device-client/"}};
-    action1.input.path = "path to handler";
+    handlerInput1.handler = "download-file.sh";
+    handlerInput1.args = {{"presignedUrl"}, {"/tmp/aws-iot-device-client/"}};
+    handlerInput1.path = "path to handler";
+    action1.handlerInput = handlerInput1;
     action1.runAsUser = "user1";
     action1.allowStdErr = 8;
     action1.ignoreStepFailure = true;
@@ -202,39 +244,52 @@ TEST(JobDocument, SampleJobDocument)
 
     action2.name = "installApplicationAndReboot";
     action2.type = "runHandler";
-    action2.input.handler = "install-app.sh";
-    action2.input.args = {{"applicationName"}, {"active"}};
-    action2.input.path = "path to handler";
+    handlerInput2.handler = "install-app.sh";
+    handlerInput2.args = {{"applicationName"}, {"active"}};
+    handlerInput2.path = "path to handler";
+    action2.handlerInput = handlerInput2;
     action2.runAsUser = "user1";
     action2.allowStdErr = 8;
     action2.ignoreStepFailure = true;
     steps.push_back(action2);
 
-    action3.name = "validateAppStatus";
-    action3.type = "runHandler";
-    action3.input.handler = "validate-app-status.sh";
-    action3.input.args = {{"applicationName"}, {"active"}};
-    action3.input.path = "path to handler";
+    action3.name = "displayDirectory";
+    action3.type = "runCommand";
+    commandInput3.command = {{"ls"}, {"/tmp"}};
+    action3.commandInput = commandInput3;
     action3.runAsUser = "user1";
     action3.allowStdErr = 8;
     action3.ignoreStepFailure = true;
     steps.push_back(action3);
 
+    action4.name = "validateAppStatus";
+    action4.type = "runHandler";
+    handlerInput4.handler = "validate-app-status.sh";
+    handlerInput4.args = {{"applicationName"}, {"active"}};
+    handlerInput4.path = "path to handler";
+    action4.handlerInput = handlerInput4;
+    action4.runAsUser = "user1";
+    action4.allowStdErr = 8;
+    action4.ignoreStepFailure = true;
+    steps.push_back(action4);
+
     AssertStepEqual(steps, jobDocument.steps);
 
     PlainJobDocument::JobAction finalAction;
+    PlainJobDocument::JobAction::ActionHandlerInput finalhandlerInput;
     finalAction.name = "deleteDownloadedHandler";
     finalAction.type = "runHandler";
-    finalAction.input.handler = "validate-app-status.sh";
-    finalAction.input.args = {{"applicationName"}, {"active"}};
-    finalAction.input.path = "path to handler";
+    finalhandlerInput.handler = "validate-app-status.sh";
+    finalhandlerInput.args = {{"applicationName"}, {"active"}};
+    finalhandlerInput.path = "path to handler";
+    finalAction.handlerInput = finalhandlerInput;
     finalAction.runAsUser = "user1";
     finalAction.allowStdErr = 8;
     finalAction.ignoreStepFailure = true;
 
     ASSERT_STREQ(finalAction.name.c_str(), jobDocument.finalStep->name.c_str());
     ASSERT_STREQ(finalAction.type.c_str(), jobDocument.finalStep->type.c_str());
-    AssertInputEqual(finalAction.input, jobDocument.finalStep->input);
+    AssertHandlerInputEqual(finalAction.handlerInput, jobDocument.finalStep->handlerInput);
     ASSERT_STREQ(finalAction.runAsUser->c_str(), jobDocument.finalStep->runAsUser->c_str());
     ASSERT_EQ(finalAction.allowStdErr.value(), jobDocument.finalStep->allowStdErr.value());
     ASSERT_TRUE(jobDocument.finalStep->ignoreStepFailure);
@@ -358,6 +413,18 @@ TEST(JobDocument, MinimumJobDocument)
         },
         {
             "action": {
+                "name": "displayDirectory",
+                "type": "runCommand",
+                "input": {
+                    "command": [
+                        "ls",
+                        "/tmp"
+                    ]
+                }
+            }
+        },
+        {
+            "action": {
                 "name": "validateAppStatus",
                 "type": "runHandler",
                 "input": {
@@ -424,6 +491,108 @@ TEST(JobDocument, MissingRequiredFieldsValue)
                 "ignoreStepFailure": "true"
             }
         },
+        {
+            "action": {
+                "name": "validateAppStatus",
+                "type": "runHandler",
+                "input": {
+                    "handler": "validate-app-status.sh",
+                    "args": [
+                        "applicationName",
+                        "active"
+                    ],
+                    "path": "path to handler"
+                },
+                "runAsUser": "user1",
+                "allowStdErr": "8",
+                "ignoreStepFailure": "true"
+            }
+        }
+    ],
+    "finalStep": {
+        "action": {
+            "name": "deleteDownloadedHandler",
+            "type": "runHandler",
+            "input": {
+                 "handler": "validate-app-status.sh",
+                 "args": [
+                    "applicationName",
+                    "active"
+                ],
+                "path": "path to handler"
+             },
+            "runAsUser": "user1",
+            "allowStdErr": "8",
+            "ignoreStepFailure": "true"
+        }
+    }
+    })";
+
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainJobDocument jobDocument;
+    jobDocument.LoadFromJobDocument(jsonView);
+
+    ASSERT_FALSE(jobDocument.Validate());
+}
+
+TEST(JobDocument, MissingRequiredCommandFields)
+{
+    constexpr char jsonString[] = R"(
+{
+    "version": "1.0",
+    "includeStdOut": "true",
+    "conditions": [{
+                    "key" : "operatingSystem",
+                    "value": ["ubuntu", "redhat"],
+                     "type": "stringEqual"
+                 },
+                 {
+                    "key" : "OS",
+                     "value": ["16.0"],
+                     "type": "stringEqual"
+    }],
+    "steps": [{
+            "action": {
+                "name": "downloadJobHandler",
+                "type": "runHandler",
+                "input": {
+                    "handler": "download-file.sh",
+                    "args": ["presignedUrl", "/tmp/aws-iot-device-client/"],
+                    "path": "path to handler"
+                },
+                "runAsUser": "user1",
+                "allowStdErr": "8",
+                "ignoreStepFailure": "true"
+            }
+        },
+        {
+            "action": {
+                "name": "installApplicationAndReboot",
+                "type": "runHandler",
+                "input": {
+                    "handler": "install-app.sh",
+                    "args": [
+                        "applicationName",
+                        "active"
+                    ],
+                    "path": "path to handler"
+                },
+                "runAsUser": "user1",
+                "allowStdErr": "8",
+                "ignoreStepFailure": "true"
+            }
+        },
+{
+    "action": {
+        "name": "displayDirectory",
+        "type": "runCommand",
+        "input": {
+            "command":
+        }
+    }
+},
         {
             "action": {
                 "name": "validateAppStatus",

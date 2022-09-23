@@ -88,7 +88,7 @@ namespace Aws
                         std::string name;
                         std::string type;
 
-                        struct ActionInput : public LoadableFromJobDocument
+                        struct ActionHandlerInput : public LoadableFromJobDocument
                         {
                             void LoadFromJobDocument(const JsonView &json) override;
                             bool Validate() const override;
@@ -96,16 +96,23 @@ namespace Aws
                             static constexpr char JSON_KEY_HANDLER[] = "handler";
                             static constexpr char JSON_KEY_ARGS[] = "args";
                             static constexpr char JSON_KEY_PATH[] = "path";
-                            static constexpr char JSON_KEY_COMMANDS[] = "commands";
 
-                            std::string currentType;
-
-                            Optional<std::string> handler;
+                            std::string handler;
                             Optional<std::vector<std::string>> args;
                             Optional<std::string> path;
-                            Optional<std::vector<std::string>> commands;
                         };
-                        ActionInput input;
+                        Optional<ActionHandlerInput> handlerInput;
+
+                        struct ActionCommandInput : public LoadableFromJobDocument
+                        {
+                            void LoadFromJobDocument(const JsonView &json) override;
+                            bool Validate() const override;
+
+                            static constexpr char JSON_KEY_COMMAND[] = "command";
+
+                            std::vector<std::string> command;
+                        };
+                        Optional<ActionCommandInput> commandInput;
                         Optional<std::string> runAsUser{""};
                         Optional<int> allowStdErr;
                         Optional<bool> ignoreStepFailure{false};
