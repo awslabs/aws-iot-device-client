@@ -24,8 +24,8 @@ LockFile::LockFile(const std::string &filedir, const std::string &process, const
     {
         string storedThingName;
         string storedPid;
-        if (fileIn >> storedThingName && storedThingName == thingName
-            && fileIn >> storedPid && !(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
+        if (fileIn >> storedThingName && storedThingName == thingName && fileIn >> storedPid &&
+            !(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
         {
             string processPath = "/proc/" + storedPid + "/cmdline";
             string basename = process.substr(process.find_last_of("/\\") + 1);
