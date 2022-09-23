@@ -1,4 +1,4 @@
-name: Docker pre-release Builds
+name: Docker main Builds
 
 # When all workflows have passed and the pre-release branch is merged to main branch this workflow will build and publish
 # the Docker images to the aws-iot-device-client repository as part of the public release of that Device Client version.
