@@ -15,7 +15,8 @@ TEST(LockFile, normalCreation)
 {
     string path = "/run/lock/";
     string filename = "devicecl.lock";
-    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "./aws-iot-device-client", ""});
+    string thingname = "thing";
+    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "./aws-iot-device-client", thingname});
 
     ifstream fileIn(path + filename);
     ASSERT_TRUE(fileIn);
@@ -31,7 +32,8 @@ TEST(LockFile, earlyDeletion)
 {
     string path = "/run/lock/";
     string filename = "devicecl.lock";
-    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", ""});
+    string thingname = "thing";
+    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", thingname});
     lockFile.reset();
 
     ifstream fileIn(path + filename);
@@ -41,23 +43,26 @@ TEST(LockFile, earlyDeletion)
 TEST(LockFile, multipleFiles)
 {
     string path = "/run/lock/";
-    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", ""});
+    string thingname = "thing";
+    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", thingname});
 
-    EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", ""}), std::runtime_error);
+    EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", thingname}), std::runtime_error);
 }
 
 TEST(LockFile, multipleFilesWithExtendedPath)
 {
     string path = "/run/lock/";
-    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", ""});
+    string thingname = "thing";
+    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", thingname});
 
-    EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "directory/test-aws-iot-device-client", ""}), std::runtime_error);
+    EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "directory/test-aws-iot-device-client", thingname}), std::runtime_error);
 }
 
 TEST(LockFile, staleFile)
 {
     string path = "/run/lock/";
     string filename = "devicecl.lock";
+    string thingname = "thing";
     string pidMax;
     ifstream pidFile("/proc/sys/kernel/pid_max");
     if (pidFile && pidFile >> pidMax)
@@ -69,7 +74,7 @@ TEST(LockFile, staleFile)
         }
         fileOut.close();
 
-        unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", ""});
+        unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", thingname});
 
         ifstream fileIn(path + filename);
         ASSERT_TRUE(fileIn);
