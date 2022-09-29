@@ -309,7 +309,7 @@ bool PlainJobDocument::JobAction::Validate() const
             TAG,
             "*** %s: Required field Action Type with invalid value: %s ***",
             DeviceClient::Jobs::DC_INVALID_JOB_DOC,
-            type.c_str());
+            Util::Sanitize(type).c_str());
         return false;
     }
 
@@ -384,7 +384,7 @@ bool PlainJobDocument::JobAction::ActionCommandInput::Validate() const
     if (command.empty())
     {
         LOGM_ERROR(
-            TAG, "*** %s: Required field ActionInput commands is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
+            TAG, "*** %s: Required field ActionInput command is missing ***", DeviceClient::Jobs::DC_INVALID_JOB_DOC);
         return false;
     }
 
@@ -394,8 +394,9 @@ bool PlainJobDocument::JobAction::ActionCommandInput::Validate() const
     {
         LOGM_ERROR(
             TAG,
-            "*** %s: Required field ActionInput commands contains space characters ***",
-            DeviceClient::Jobs::DC_INVALID_JOB_DOC);
+            "*** %s: Required field ActionInput command's first element contains space characters: %s ***",
+            DeviceClient::Jobs::DC_INVALID_JOB_DOC,
+            Util::Sanitize(firstCommand).c_str());
         return false;
     }
 

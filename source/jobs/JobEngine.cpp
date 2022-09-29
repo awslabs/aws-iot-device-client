@@ -323,12 +323,14 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
 
         LOG_DEBUG(TAG, "Child process about to call execvp");
 
-        if (execvp(argv[0], const_cast<char *const *>(argv.get())) == -1)
+        auto rc = execvp(argv[0], const_cast<char *const *>(argv.get()));
+        if (rc == -1)
         {
-            LOGM_DEBUG(TAG, "Failed to invoke execvp system call to execute action step: %s ", strerror(errno));
+            auto err = errno;
+            LOGM_ERROR(TAG, "Failed to invoke execvp system call to execute action step: %s (%d)", strerror(err), err);
+            _exit(rc);
         }
-        // If the exec fails we need to exit the child process
-        _exit(1);
+        _exit(0);
     }
     else
     {
@@ -350,11 +352,11 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
             int waitReturn = waitpid(pid, &execResult, 0);
             if (waitReturn == -1)
             {
-                LOG_WARN(TAG, "Failed to wait for child process");
+                LOGM_WARN(TAG, "Failed to wait for child process: %d", pid);
             }
 
-            LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", execResult);
-            returnCode = execResult;
+            returnCode = WEXITSTATUS(execResult);
+            LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", returnCode);
         } while (!WIFEXITED(execResult) && !WIFSIGNALED(execResult));
     }
     return returnCode;
@@ -368,7 +370,8 @@ int JobEngine::exec_verification(std::unique_ptr<const char *[]> &argv)
 
     if (pid < 0)
     {
-        LOGM_ERROR(TAG, "Failed to create child process, fork returned %d", pid);
+        auto err = errno;
+        LOGM_ERROR(TAG, "Failed to create child process, fork returned: %s (%d)", strerror(err), err);
         return CMD_FAILURE;
     }
     else if (pid == 0)
@@ -393,7 +396,7 @@ int JobEngine::exec_verification(std::unique_ptr<const char *[]> &argv)
             int waitReturn = waitpid(pid, &status, 0);
             if (waitReturn == -1)
             {
-                LOG_WARN(TAG, "Failed to wait for child process to verify user");
+                LOGM_WARN(TAG, "Failed to wait for child process: %d", pid);
             }
             execStatus = WEXITSTATUS(status);
             LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", execStatus);

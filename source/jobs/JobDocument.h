@@ -88,6 +88,9 @@ namespace Aws
                         std::string name;
                         std::string type;
 
+                        /**
+                         * ActionHandlerInput - Invokes a handler script specified by a managed job template.
+                         */
                         struct ActionHandlerInput : public LoadableFromJobDocument
                         {
                             void LoadFromJobDocument(const JsonView &json) override;
@@ -103,6 +106,9 @@ namespace Aws
                         };
                         Optional<ActionHandlerInput> handlerInput;
 
+                        /**
+                         * ActionCommandInput - Invokes arbitrary commands specified in a job document.
+                         */
                         struct ActionCommandInput : public LoadableFromJobDocument
                         {
                             void LoadFromJobDocument(const JsonView &json) override;
