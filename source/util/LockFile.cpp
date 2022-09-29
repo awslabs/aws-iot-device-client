@@ -58,16 +58,16 @@ LockFile::LockFile(const std::string &filedir, const std::string &process, const
     FILE *file = fopen(fullPath.c_str(), "wx");
     if (!file)
     {
-        LOGM_ERROR(TAG, "Unable to open lockfile: %s", Sanitize(fullPath).c_str());
-
-        throw runtime_error{"Can not write to lockfile."};
+        LOGM_ERROR(TAG, "Unable to open lockfile. File may be in use or does not exist: %s", Sanitize(fullPath).c_str());
     }
-
-    string pid = to_string(getpid());
-    fputs(thingName.c_str(), file);
-    fputs(string("\n").c_str(), file);
-    fputs(pid.c_str(), file);
-    fclose(file);
+    else
+    {
+        string pid = to_string(getpid());
+        fputs(thingName.c_str(), file);
+        fputs(string("\n").c_str(), file);
+        fputs(pid.c_str(), file);
+        fclose(file);
+    }
 }
 
 LockFile::~LockFile()
