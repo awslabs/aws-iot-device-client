@@ -262,7 +262,7 @@ void PlainJobDocument::JobAction::LoadFromJobDocument(const JsonView &json)
             temp.LoadFromJobDocument(json.GetJsonObject(jsonKey));
             handlerInput = temp;
         }
-        else
+        else if (type == PlainJobDocument::ACTION_TYPE_RUN_COMMAND)
         {
             ActionCommandInput temp;
             temp.LoadFromJobDocument(json.GetJsonObject(jsonKey));
@@ -320,7 +320,7 @@ bool PlainJobDocument::JobAction::Validate() const
             return false;
         }
     }
-    else
+    else if (type == PlainJobDocument::ACTION_TYPE_RUN_COMMAND)
     {
         if (!commandInput->Validate())
         {

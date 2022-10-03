@@ -168,6 +168,7 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, const std::strin
     ostringstream argsStringForLogging;
     if (action.type == RUN_HANDLER_TYPE && action.handlerInput->args.has_value())
     {
+        // build logstream for runHandler to print out on console
         for (const auto &eachArgument : action.handlerInput->args.value())
         {
             argsStringForLogging << eachArgument << " ";
@@ -175,7 +176,7 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, const std::strin
     }
     else if (action.type == RUN_COMMAND_TYPE)
     {
-        // print out commands on console
+        // build logstream for runCommand to print out on console
         for (size_t i = 1; i < action.commandInput->command.size(); i++)
         {
             argsStringForLogging << action.commandInput->command.at(i) << " ";
@@ -197,28 +198,9 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, const std::strin
     int actionExecutionStatus;
     if (action.type == RUN_HANDLER_TYPE)
     {
-        /**
-         * \brief Create char array argv[] storing arguments to pass to execvp() function.
-         * argv[0] executable path
-         * argv[1] Linux user name
-         * argv[2:] arguments required for executing the executable file..
-         */
-        size_t argSize = 0;
-        if (action.handlerInput->args.has_value())
-        {
-            argSize = action.handlerInput->args->size();
-        }
-        std::unique_ptr<const char *[]> argv(new const char *[argSize + 3]);
-        argv[0] = command.c_str();
-        argv[1] = action.runAsUser->c_str();
-        argv[argSize + 2] = nullptr;
-        for (size_t i = 0; i < argSize; i++)
-        {
-            argv[i + 2] = action.handlerInput->args->at(i).c_str();
-        }
-        actionExecutionStatus = exec_cmd(argv);
+        actionExecutionStatus = exec_handlerScript(command, action);
     }
-    else
+    else if (action.type == RUN_COMMAND_TYPE)
     {
         actionExecutionStatus = exec_shellCommand(action);
     }
@@ -362,7 +344,7 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
     return returnCode;
 }
 
-int JobEngine::exec_verification(std::unique_ptr<const char *[]> &argv)
+int JobEngine::exec_process(std::unique_ptr<const char *[]> &argv)
 {
     int status = 0;
     int execStatus = 0;
@@ -406,29 +388,72 @@ int JobEngine::exec_verification(std::unique_ptr<const char *[]> &argv)
     return execStatus;
 }
 
-int JobEngine::exec_shellCommand(PlainJobDocument::JobAction action)
+int JobEngine::exec_handlerScript(const std::string &command, PlainJobDocument::JobAction action)
 {
+    /**
+     * \brief Create char array argv[] storing arguments to pass to execvp() function.
+     * argv[0] executable path
+     * argv[1] Linux user name
+     * argv[2:] arguments required for executing the executable file..
+     */
+    int actionExecutionStatus;
+    size_t argSize = 0;
+    if (action.handlerInput->args.has_value())
+    {
+        argSize = action.handlerInput->args->size();
+    }
+    std::unique_ptr<const char *[]> argv(new const char *[argSize + 3]);
+    argv[0] = command.c_str();
+    argv[1] = action.runAsUser->c_str();
+    argv[argSize + 2] = nullptr;
+    for (size_t i = 0; i < argSize; i++)
+    {
+        argv[i + 2] = action.handlerInput->args->at(i).c_str();
+    }
+    actionExecutionStatus = exec_cmd(argv);
+    return actionExecutionStatus;
+}
+
+bool JobEngine::verifySudoAndUser(PlainJobDocument::JobAction action)
+{
+    int execStatus1;
     // first to run command id $user and /bin/bash -c "command -v sudo" to verify user and sudo
     std::unique_ptr<const char *[]> argv1(new const char *[3]);
     argv1[0] = "id";
     argv1[1] = action.runAsUser->c_str();
     argv1[2] = nullptr;
 
-    int execStatus1 = 0;
-    int execStatus2 = 0;
-    execStatus1 = exec_verification(argv1);
+    execStatus1 = exec_process(argv1);
 
-    std::unique_ptr<const char *[]> argv2(new const char *[4]);
-    argv2[0] = "/bin/bash";
-    argv2[1] = "-c";
-    argv2[2] = "command -v sudo";
-    argv2[3] = nullptr;
+    if (execStatus1 == 0)
+    {
+        std::unique_ptr<const char *[]> argv2(new const char *[4]);
+        argv2[0] = "/bin/bash";
+        argv2[1] = "-c";
+        argv2[2] = "command -v sudo";
+        argv2[3] = nullptr;
 
-    execStatus2 = exec_verification(argv2);
+        int execStatus2 = exec_process(argv2);
+        if (execStatus2 != 0)
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+    return true;
+}
 
+int JobEngine::exec_shellCommand(PlainJobDocument::JobAction action)
+{
     int returnCode;
+    bool verification;
 
-    if (execStatus1 != 0 || execStatus2 != 0)
+    verification = verifySudoAndUser(action);
+
+    if (!verification)
     {
         // if one of two verification fails, execute command without "sudo" and "$user"
         LOG_WARN(TAG, "username or sudo command not found");

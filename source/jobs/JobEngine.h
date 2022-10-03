@@ -87,16 +87,43 @@ namespace Aws
                         const std::string &jobHandlerDir) const;
 
                     /**
-                     * \brief Executes the given command (action) and passes the provided vector of arguments to that
-                     * command
-                     * @param action the command to execute
-                     * @param args the arguments to pass to that command
+                     * \brief Executes the argv, consists of command and arguments, using execvp().
+                     * This function also opens two pipes to process outputs from child processes.
+                     * @param argv the arguments to pass to execvp() to execute
                      * @return an integer representing the return code of the executed process
                      */
                     int exec_cmd(std::unique_ptr<const char *[]> &argv);
 
-                    int exec_verification(std::unique_ptr<const char *[]> &argv);
+                    /**
+                     * \brief Executes the argv, consists of command and arguments, using execvp()
+                     * This function only returns the exit code of child processes
+                     * @param argv the arguments to pass to execvp() to execute
+                     * @return an integer representing the return code of the executed process
+                     */
+                    int exec_process(std::unique_ptr<const char *[]> &argv);
 
+                    /**
+                     * \brief Verifies if "sudo" and "$user" exists
+                     * @param action the action provided in job document to execute
+                     * @return an boolean indicating verification succeeds or fails
+                     */
+                    bool verifySudoAndUser(PlainJobDocument::JobAction action);
+
+                    /**
+                     * \brief Builds argv for "runHandler" type of jobs and makes calls to exec_cmd()
+                     * to execute
+                     * @param command the command built from handler and path and used by execvp() to execute
+                     * @param action the action provided in job document to execute
+                     * @return an integer representing the return code of the executed process
+                     */
+                    int exec_handlerScript(const std::string &command, PlainJobDocument::JobAction action);
+
+                    /**
+                     * \brief Builds argv for "runCommand" type of jobs and makes calls to exec_cmd()
+                     * to execute
+                     * @param action the action provided in job document to execute
+                     * @return an boolean indicating verification succeeds or fails
+                     */
                     int exec_shellCommand(PlainJobDocument::JobAction action);
 
                     /**

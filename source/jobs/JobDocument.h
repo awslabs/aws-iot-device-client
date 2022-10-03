@@ -89,7 +89,7 @@ namespace Aws
                         std::string type;
 
                         /**
-                         * ActionHandlerInput - Invokes a handler script specified by a managed job template.
+                         * ActionHandlerInput - Invokes a handler script specified in a job document.
                          */
                         struct ActionHandlerInput : public LoadableFromJobDocument
                         {
