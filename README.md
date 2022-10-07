@@ -75,6 +75,12 @@ The AWS IoT Device Client is currently compatible with x86_64, aarch64, armv7l, 
 
 ### Docker
 
+#### Prerequisites
+Docker is the only prerequisite to build, pull, and run Device Client containers. If you do not have Docker installed please
+visit this [link](https://docs.docker.com/get-docker/) to get started.
+
+
+#### Building and Pulling images
 The AWS IoT Device Client currently provides several docker images on various platforms and Linux distributions.
 
 To build a Docker image from the repository locally simply run the [docker-build.sh](docker-build.sh) script with your
