@@ -57,7 +57,9 @@ TEST(LockFile, multipleFilesWithExtendedPath)
     string thingName = "thing";
     unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", thingName});
 
-    EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "directory/test-aws-iot-device-client", thingName}), std::runtime_error);
+    EXPECT_THROW(
+        unique_ptr<LockFile>(new LockFile{path, "directory/test-aws-iot-device-client", thingName}),
+        std::runtime_error);
 }
 
 TEST(LockFile, staleFile)
@@ -76,7 +78,8 @@ TEST(LockFile, staleFile)
         }
         fileOut.close();
 
-        unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", thingName});
+        unique_ptr<LockFile> lockFile =
+            unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", thingName});
 
         ifstream fileIn(path + fileName);
         ASSERT_TRUE(fileIn);
