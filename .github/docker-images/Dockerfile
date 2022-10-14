@@ -19,4 +19,6 @@ FROM ${OS} AS minimum_size
 COPY --from=deploy /root/aws-iot-device-client/build/aws-iot-device-client ./aws-iot-device-client
 COPY --from=deploy /root/aws-iot-device-client/sample-job-handlers /root/.aws-iot-device-client/jobs
 
-ENTRYPOINT ["./aws-iot-device-client"]
+RUN chmod 700 /root/.aws-iot-device-client/jobs/*.sh
+
+ENTRYPOINT ["/aws-iot-device-client"]
