@@ -4,6 +4,7 @@
 #include "JobDocument.h"
 #include "../logging/LoggerFactory.h"
 #include <aws/crt/JsonObject.h>
+#include <regex>
 #include <set>
 
 using namespace std;
@@ -139,6 +140,27 @@ vector<string> PlainJobDocument::ParseToVectorString(const JsonView &json)
         plainVector.push_back(i.AsString().c_str());
     }
     return plainVector;
+}
+
+vector<string> PlainJobDocument::SplitStringByComma(const string &stringToSplit)
+{
+    regex delim{R"((\\,|[^,])+)"};
+
+    vector<string> tokens;
+    copy(
+        sregex_token_iterator{begin(stringToSplit), end(stringToSplit), delim},
+        sregex_token_iterator{},
+        back_inserter(tokens));
+    return tokens;
+}
+
+void PlainJobDocument::replace_all(std::string &inout, const std::string &what, const std::string &with)
+{
+    for (std::string::size_type pos{}; inout.npos != (pos = inout.find(what.data(), pos, what.length()));
+         pos += with.length())
+    {
+        inout.replace(pos, what.length(), with.data(), with.length());
+    }
 }
 
 bool PlainJobDocument::Validate() const
@@ -375,7 +397,12 @@ void PlainJobDocument::JobAction::ActionCommandInput::LoadFromJobDocument(const 
     const char *jsonKey = JSON_KEY_COMMAND;
     if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsListType())
     {
-        command = ParseToVectorString(json.GetJsonObject(jsonKey));
+        vector<string> tokens = SplitStringByComma(ParseToVectorString(json.GetJsonObject(jsonKey)).front());
+        for (auto token : tokens)
+        {
+            replace_all(token, R"(\,)", ",");
+            command.emplace_back(token);
+        }
     }
 }
 

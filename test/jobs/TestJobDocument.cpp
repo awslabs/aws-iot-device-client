@@ -128,8 +128,7 @@ TEST(JobDocument, SampleJobDocument)
                 "type": "runCommand",
                 "input": {
                     "command": [
-                        "ls",
-                        "/tmp"
+                        "ls,/tmp"
                     ]
                 },
                 "runAsUser": "user1",
@@ -417,8 +416,7 @@ TEST(JobDocument, MinimumJobDocument)
                 "type": "runCommand",
                 "input": {
                     "command": [
-                        "ls",
-                        "/tmp"
+                        "ls,/tmp"
                     ]
                 }
             }
@@ -584,15 +582,15 @@ TEST(JobDocument, MissingRequiredCommandFields)
                 "ignoreStepFailure": "true"
             }
         },
-{
-    "action": {
-        "name": "displayDirectory",
-        "type": "runCommand",
-        "input": {
-            "command":
-        }
-    }
-},
+        {
+            "action": {
+                "name": "displayDirectory",
+                "type": "runCommand",
+                "input": {
+                    "command":
+                }
+            }
+        },
         {
             "action": {
                 "name": "validateAppStatus",
@@ -629,6 +627,35 @@ TEST(JobDocument, MissingRequiredCommandFields)
         }
     }
     })";
+
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainJobDocument jobDocument;
+    jobDocument.LoadFromJobDocument(jsonView);
+
+    ASSERT_FALSE(jobDocument.Validate());
+}
+
+TEST(JobDocument, CommandFieldsIsEmpty)
+{
+    constexpr char jsonString[] = R"(
+{
+    "version": "1.0",
+    "steps": [
+        {
+            "action": {
+                "name": "displayDirectory",
+                "type": "runCommand",
+                "input": {
+                    "command": [
+                        ""
+                    ]
+                }
+            }
+        }
+    ]
+})";
 
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
@@ -686,18 +713,17 @@ TEST(JobDocument, CommandContainsSpaceCharacters)
                 "ignoreStepFailure": "true"
             }
         },
-{
-    "action": {
-        "name": "displayDirectory",
-        "type": "runCommand",
-        "input": {
-            "command": [
-                "ls ",
-                "\tmp"
-            ]
-        }
-    }
-},
+        {
+            "action": {
+                "name": "displayDirectory",
+                "type": "runCommand",
+                "input": {
+                    "command": [
+                        "ls ,/tmp"
+                    ]
+                }
+            }
+        },
         {
             "action": {
                 "name": "validateAppStatus",
