@@ -1,13 +1,10 @@
-name: Pre-release CI
+name: E2E CI
 
 # This workflow will build and publish Device Client Docker images to the pre-release repository upon merge to pre-release branch
 
 on:
-  push:
-    branches: ['pre-release']
-  pull_request:
-    branches: ['pre-release']
-    types: [opened, closed]
+  pull_request_target:
+    branches: '*'
 
 env:
   PACKAGE_NAME: aws-iot-device-client
@@ -22,7 +19,9 @@ jobs:
   # It then runs the Device Client to output the version to be used in the subsequent jobs.
   versioning:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    environment:
+      name: development
+    if: github.event.pull_request.head.repo.full_name != github.repository
     outputs:
       version: ${{ steps.get-version.outputs.version }}
     steps:
@@ -56,7 +55,9 @@ jobs:
           echo "::set-output name=version::$version"
   build-docker-image-ubuntu:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    environment:
+      name: development
+    if: github.event.pull_request.head.repo.full_name != github.repository
     needs: [versioning]
     strategy:
       matrix:
@@ -96,7 +97,9 @@ jobs:
           platforms: linux/${{matrix.architecture}}
   build-docker-image-ubuntu-armv7:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    environment:
+      name: development
+    if: github.event.pull_request.head.repo.full_name != github.repository
     needs: [versioning]
     permissions:
       id-token: write
@@ -135,7 +138,9 @@ jobs:
           platforms: linux/arm/v7
   build-docker-image-amazonlinux:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    environment:
+      name: development
+    if: github.event.pull_request.head.repo.full_name != github.repository
     needs: [versioning]
     strategy:
       matrix:
@@ -175,7 +180,9 @@ jobs:
           platforms: linux/${{matrix.architecture}}
   build-docker-image-ubi8:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    environment:
+      name: development
+    if: github.event.pull_request.head.repo.full_name != github.repository
     needs: [versioning]
     strategy:
       matrix:
@@ -215,7 +222,9 @@ jobs:
           platforms: linux/${{matrix.architecture}}
   e2e-tests-ubuntu:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    environment:
+      name: development
+    if: github.event.pull_request.head.repo.full_name != github.repository
     needs: [ versioning, build-docker-image-ubuntu ]
     strategy:
       fail-fast: false
@@ -261,7 +270,8 @@ jobs:
           docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-ubuntu-armv7:
     runs-on: ubuntu-latest
-#    if: github.event.pull_request.merged == true
+    environment:
+      name: development
     if: ${{ false }} # Disabled for now as local proxy builds take too long. Re-enable if binary or image becomes available.
     needs: [ versioning, build-docker-image-ubuntu-armv7 ]
     steps:
@@ -303,9 +313,11 @@ jobs:
         run: |
           docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-amazonlinux:
-    # The amazonlinux integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SHH in centOS integration test image
+    # The amazonlinux integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in centOS integration test image
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    environment:
+      name: development
+    if: github.event.pull_request.head.repo.full_name != github.repository
     needs: [ versioning, build-docker-image-amazonlinux ]
     strategy:
       fail-fast: false
@@ -350,9 +362,11 @@ jobs:
         run: |
           docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --skip-st --clean-up
   e2e-tests-ubi8:
-    # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SHH in centOS integration test image
+    # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in centOS integration test image
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    environment:
+      name: development
+    if: github.event.pull_request.head.repo.full_name != github.repository
     needs: [ versioning, build-docker-image-ubi8 ]
     strategy:
       fail-fast: false
