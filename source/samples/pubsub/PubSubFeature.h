@@ -33,7 +33,10 @@ namespace Aws
                     static constexpr char DEFAULT_PUBLISH_FILE[] = "~/.aws-iot-device-client/pubsub/publish-file.txt";
                     static constexpr char DEFAULT_SUBSCRIBE_FILE[] =
                         "~/.aws-iot-device-client/pubsub/subscribe-file.txt";
-                    bool createPubSub(const PlainConfig &config, std::string absFilePath, const aws_byte_buf *payload);
+                    bool createPubSub(
+                        const PlainConfig &config,
+                        const std::string &absFilePath,
+                        const aws_byte_buf *payload) const;
                     /**
                      * \brief Initializes the PubSub feature with all the required setup information, event
                      * handlers, and the SharedCrtResourceManager
@@ -91,11 +94,11 @@ namespace Aws
                     /**
                      * \brief Default payload if no publish file was provided
                      */
-                    const std::string DEFAULT_PUBLISH_PAYLOAD = "Hello World!";
+                    static const std::string DEFAULT_PUBLISH_PAYLOAD;
                     /**
                      * \brief Subscription payload used to retrigger the publish actions
                      */
-                    const std::string PUBLISH_TRIGGER_PAYLOAD = "DC-Publish";
+                    static const std::string PUBLISH_TRIGGER_PAYLOAD;
 
                     /**
                      * \brief Workflow function for publishing data to the configured topic
@@ -106,7 +109,7 @@ namespace Aws
                      * @param buf Buffer to read data into
                      * @return 0 on success
                      */
-                    int getPublishFileData(aws_byte_buf *buf);
+                    int getPublishFileData(aws_byte_buf *buf) const;
                 };
             } // namespace Samples
         }     // namespace DeviceClient
@@ -114,3 +117,4 @@ namespace Aws
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_SAMPLESFEATURE_H
+

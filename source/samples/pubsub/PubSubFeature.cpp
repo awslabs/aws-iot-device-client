@@ -28,14 +28,18 @@ constexpr char PubSubFeature::NAME[];
 constexpr char PubSubFeature::DEFAULT_PUBLISH_FILE[];
 constexpr char PubSubFeature::DEFAULT_SUBSCRIBE_FILE[];
 
-#define MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES 128000
+constexpr int MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES = 128000;
+
+const std::string PubSubFeature::DEFAULT_PUBLISH_PAYLOAD = R"({"Hello": "World!"})";
+const std::string PubSubFeature::PUBLISH_TRIGGER_PAYLOAD = "DC-Publish";
 
 string PubSubFeature::getName()
 {
     return NAME;
 }
 
-bool PubSubFeature::createPubSub(const PlainConfig &config, std::string filePath, const aws_byte_buf *payload)
+bool PubSubFeature::createPubSub(const PlainConfig &config, const std::string &filePath, const aws_byte_buf *payload)
+    const
 {
     std::string pubSubFileDir = FileUtils::ExtractParentDirectory(filePath);
     LOGM_INFO(TAG, "Creating Pub/Sub file: %s", filePath.c_str());
@@ -71,7 +75,7 @@ bool PubSubFeature::createPubSub(const PlainConfig &config, std::string filePath
             return false;
         }
         // Write payload data in newly created empty file.
-        if (payload != NULL)
+        if (payload != nullptr)
         {
             FileUtils::WriteToFile(filePath, payload);
         }
@@ -126,7 +130,7 @@ int PubSubFeature::init(
     }
     subFile = FileUtils::ExtractExpandedPath(subFile);
 
-    if (!createPubSub(config, subFile, NULL))
+    if (!createPubSub(config, subFile, nullptr))
     {
         LOG_ERROR(TAG, "Failed to create subscribe directory or file");
     }
@@ -134,7 +138,7 @@ int PubSubFeature::init(
     return AWS_OP_SUCCESS;
 }
 
-int PubSubFeature::getPublishFileData(aws_byte_buf *buf)
+int PubSubFeature::getPublishFileData(aws_byte_buf *buf) const
 {
     size_t publishFileSize = FileUtils::GetFileSize(pubFile);
     if (publishFileSize > MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES)
@@ -167,7 +171,7 @@ void PubSubFeature::publishFileData()
         LOG_ERROR(TAG, "Failed to read publish file... Skipping publish");
         return;
     }
-    auto onPublishComplete = [payload, this](Mqtt::MqttConnection &, uint16_t packetId, int errorCode) mutable {
+    auto onPublishComplete = [payload, this](const Mqtt::MqttConnection &, uint16_t, int errorCode) mutable {
         LOGM_DEBUG(TAG, "PublishCompAck: PacketId:(%s), ErrorCode:%d", getName().c_str(), errorCode);
         aws_byte_buf_clean_up_secure(&payload);
     };
@@ -179,22 +183,18 @@ int PubSubFeature::start()
 {
     LOGM_INFO(TAG, "Starting %s", getName().c_str());
 
-    auto onSubAck =
-        [&](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void {
+    auto onSubAck = [this](const MqttConnection &, uint16_t, const String &, QOS, int errorCode) -> void {
         LOGM_DEBUG(TAG, "SubAck: PacketId:(%s), ErrorCode:%d", getName().c_str(), errorCode);
     };
-    auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void {
+    auto onRecvData = [this](const MqttConnection &, const String &, const ByteBuf &payload) -> void {
         LOGM_DEBUG(TAG, "Message received on subscribe topic, size: %zu bytes", payload.len);
         if (string((char *)payload.buffer, payload.len) == PUBLISH_TRIGGER_PAYLOAD)
         {
             publishFileData();
         }
-        if (subFile != "")
+        if (subFile != "" && FileUtils::WriteToFile(subFile, &payload) != 0)
         {
-            if (FileUtils::WriteToFile(subFile, &payload) != 0)
-            {
-                LOG_ERROR(TAG, "Failure writing incoming payload to subscribe file... Skipping");
-            }
+            LOG_ERROR(TAG, "Failure writing incoming payload to subscribe file... Skipping");
         }
     };
 
@@ -210,7 +210,7 @@ int PubSubFeature::start()
 
 int PubSubFeature::stop()
 {
-    auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void {
+    auto onUnsubscribe = [](const MqttConnection &, uint16_t packetId, int errorCode) -> void {
         LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%u, ErrorCode:%d", packetId, errorCode);
     };
 
