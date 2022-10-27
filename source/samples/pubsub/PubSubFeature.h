@@ -117,4 +117,3 @@ namespace Aws
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_SAMPLESFEATURE_H
-
