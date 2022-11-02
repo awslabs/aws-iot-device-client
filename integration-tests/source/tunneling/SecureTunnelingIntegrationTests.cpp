@@ -22,8 +22,8 @@ extern string THING_NAME;
 extern string PORT;
 extern string REGION;
 extern bool SKIP_ST;
+extern string LOCAL_PROXY_PATH;
 
-const string LOCAL_PROXY_PATH = "/localproxy";
 const string TEST_TUNNEL_PATH = "/test-tunnel.sh";
 
 class TestSecureTunnelingFixture : public ::testing::Test
@@ -67,6 +67,7 @@ class TestSecureTunnelingFixture : public ::testing::Test
         }
         else
         {
+            printf("Skipping Secure Tunneling Tests\n");
             GTEST_SKIP();
         }
     }
