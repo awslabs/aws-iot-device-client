@@ -1,4 +1,4 @@
-name: E2E CI
+name: E2E CI (Fork)
 
 # This workflow will build and publish Device Client Docker images to the pre-release repository upon merge to pre-release branch
 

@@ -1,4 +1,4 @@
-name: Build
+name: Build (Fork)
 
 on:
   pull_request_target:
