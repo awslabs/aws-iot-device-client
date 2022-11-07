@@ -64,11 +64,11 @@ Existing [Sample Job Handlers](../../sample-job-handlers)
   "name":"Install wget package on the device"
   ...
   ```
-  `type` *string* (Required): This attribute defines the type of step to be executed. We currently only support actions of the type `runHandler` in `version` `"1.0"` of the Job Document Schema.
+  `type` *string* (Required): This attribute defines the type of step to be executed. We currently support actions of the type `runHandler` or `runCommand` in `version` `"1.0"` of the Job Document Schema. `runCommand` is only supported using NEW job document schema.
     
   ```
   ...
-  "type":"runHandler"
+  "type":"runHandler" or "runCommand"
   ...
   ```  
   `runAsUser` *string* (Optional): This attribute defines the name of the local user on the IoT device that executes this single step. 
@@ -91,7 +91,7 @@ Existing [Sample Job Handlers](../../sample-job-handlers)
 
   `input` *JSON* (Required): This attribute defines the supporting parameters / arguments required to execute your step as part of the Job execution.
 
-  The `input` attribute further consists of three fields: `handler`, `args`, and `path`. 
+  The `input` attribute consists of different fields between types. For `runHandler` type, it further consists of three fields: `handler`, `args`, and `path`. 
   
   `handler` *string* (Required): This field declares the name of the handler script to be executed for your step as part of the Job execution.
     
@@ -125,7 +125,17 @@ Else you can also specify a different handler directory for your step in the fol
  "path": "/home/ubuntu/my-job-handler-folder"
  ...
  ```
-    
+For `runCommand` type, `input` field consists of only one field: `command`.
+
+`command` *string array* (Required): This field stores one command provided by the customer to be executed on devices. The format of `command` needs to be comma separated. For example, `aws iot describe-endpoint --endpoint-type XXX --region XXX --endpoint https://xxxxx` needs to be comma separated into `"aws,iot,describe-endpoint,--endpoint-type,XXX,--region,XXX,--endpoint,https://xxxxx"`. If command itself contains comma, the comma needs to be escaped. For example, `echo Hello, I am Device Client.` needs to be transformed into `echo,Hello//, I am Device Client.`. Lastly, The first string of the command cannot contain any space characters.
+```
+...
+"command": ["echo,Hello World!"]
+...
+```    
+
+**Note**: Once a job document is received by Device Client and parsed successfully, `input` will be stored into `handlerInput` or `commandInput` according to the `type` of the job document. `handlerInput` consists of `handler`, `args` and `path` and `commandInput` only consists of `command`.
+
   **Example of Step Field:**
    
  ```
@@ -144,6 +154,26 @@ Else you can also specify a different handler directory for your step in the fol
                       "dos2unix"
                   ],
                   "path": "default"
+              }
+          }
+      }
+  ]
+  ...
+  ```
+
+ ```
+  ...
+  "steps": [
+      {
+          "action": {
+              "name": "print-greeting",
+              "type": "runCommand",
+              "runAsUser": "root",
+              "ignoreStepFailure":"true",
+              "input": {
+                  "command": [
+                      "echo,Hello World!"
+                  ]
               }
           }
       }

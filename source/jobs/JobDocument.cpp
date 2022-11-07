@@ -397,11 +397,15 @@ void PlainJobDocument::JobAction::ActionCommandInput::LoadFromJobDocument(const 
     const char *jsonKey = JSON_KEY_COMMAND;
     if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsListType())
     {
-        vector<string> tokens = SplitStringByComma(ParseToVectorString(json.GetJsonObject(jsonKey)).front());
-        for (auto token : tokens)
+        vector<string> commandArray = ParseToVectorString(json.GetJsonObject(jsonKey));
+        if (!commandArray.empty())
         {
-            replace_all(token, R"(\,)", ",");
-            command.emplace_back(token);
+            vector<string> tokens = SplitStringByComma(commandArray.front());
+            for (auto token : tokens)
+            {
+                replace_all(token, R"(\,)", ",");
+                command.emplace_back(token);
+            }
         }
     }
 }

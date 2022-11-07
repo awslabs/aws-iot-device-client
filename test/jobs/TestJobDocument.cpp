@@ -648,9 +648,7 @@ TEST(JobDocument, CommandFieldsIsEmpty)
                 "name": "displayDirectory",
                 "type": "runCommand",
                 "input": {
-                    "command": [
-                        ""
-                    ]
+                    "command": []
                 }
             }
         }
