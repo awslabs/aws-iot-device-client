@@ -127,7 +127,7 @@ Else you can also specify a different handler directory for your step in the fol
  ```
 For `runCommand` type, `input` field consists of only one field: `command`.
 
-`command` *string array* (Required): This field stores one command provided by the customer to be executed on devices. The format of `command` needs to be comma separated. For example, `aws iot describe-endpoint --endpoint-type XXX --region XXX --endpoint https://xxxxx` needs to be comma separated into `"aws,iot,describe-endpoint,--endpoint-type,XXX,--region,XXX,--endpoint,https://xxxxx"`. If command itself contains comma, the comma needs to be escaped. For example, `echo Hello, I am Device Client.` needs to be transformed into `echo,Hello//, I am Device Client.`. Lastly, The first string of the command cannot contain any space characters.
+`command` *string array* (Required): This field stores one command provided by the customer to be executed on devices. The format of `command` needs to be comma separated. For example, `aws iot describe-endpoint --endpoint-type XXX --region XXX --endpoint https://xxxxx` needs to be comma separated into `"aws,iot,describe-endpoint,--endpoint-type,XXX,--region,XXX,--endpoint,https://xxxxx"`. If command itself contains comma, the comma needs to be escaped. For example, `echo Hello, I am Device Client.` needs to be transformed into `echo,Hello\\, I am Device Client.`. Lastly, The first string of the command cannot contain any space characters.
 ```
 ...
 "command": ["echo,Hello World!"]
