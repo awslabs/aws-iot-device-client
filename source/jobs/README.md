@@ -127,7 +127,9 @@ Else you can also specify a different handler directory for your step in the fol
  ```
 For `runCommand` type, `input` field consists of only one field: `command`.
 
-`command` *string array* (Required): This field stores one command provided by the customer to be executed on devices. The format of `command` needs to be comma separated. For example, `aws iot describe-endpoint --endpoint-type XXX --region XXX --endpoint https://xxxxx` needs to be comma separated into `"aws,iot,describe-endpoint,--endpoint-type,XXX,--region,XXX,--endpoint,https://xxxxx"`. If command itself contains comma, the comma needs to be escaped. For example, `echo Hello, I am Device Client.` needs to be transformed into `echo,Hello\\, I am Device Client.`. Lastly, The first string of the command cannot contain any space characters.
+`command` *string array* (Required): This field stores one command provided by the customer to be executed on devices. The format of `command` needs to be comma separated. For example, `aws iot describe-endpoint --endpoint-type XXX --region XXX --endpoint https://xxxxx` needs to be comma separated into `"aws,iot,describe-endpoint,--endpoint-type,XXX,--region,XXX,--endpoint,https://xxxxx"`. If command itself contains comma, the comma needs to be escaped. For example, `echo Hello, I am Device Client.` needs to be transformed into `echo,Hello\\, I am Device Client.`. The first string of the command cannot contain any space characters. 
+
+Lastly, the permission used to execute `command` will be the value of `runAsUser`. if no user is provided, it will use the permission of the user which runs device client. Therefore, if a command needs to use `root` permission, simply provide `root` for `runAsUser` instead of adding `sudo` in front of `command`, because device client will execute the command in the form of `sudo -u $user -n command` if `sudo` is installed and `user` is found.
 ```
 ...
 "command": ["echo,Hello World!"]
