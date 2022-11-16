@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - '*'
-  pull_request:
+  pull_request_target:
     branches:
       - '*'
 
@@ -15,7 +15,7 @@ env:
 jobs:
   build-ubuntu:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -29,6 +29,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -55,7 +57,7 @@ jobs:
 
   build-amazonlinux:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -69,6 +71,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -76,10 +80,26 @@ jobs:
           export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-amazonlinux-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
+      - name: Archive amazonlinux Build Artifact
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.amazonlinux.x64.${{ env.PACKAGE_NAME }}.static"
+          path: |
+            ./build/${{ env.PACKAGE_NAME }}
+      - name: Archive setup files
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.amazonlinux.x64.${{ env.PACKAGE_NAME }}.static"
+          path: |
+            ./setup/
 
   build-rhel-ubi8:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -93,6 +113,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -119,7 +141,7 @@ jobs:
 
   gpp-compat:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     strategy:
       matrix:
         version: [ 5, 6, 7, 8, 11 ]
@@ -136,6 +158,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -146,7 +170,7 @@ jobs:
 
   clangpp-compat:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     strategy:
       matrix:
         version: [ 5.0, 6.0, 7, 8, 9, 11 ]
@@ -163,6 +187,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -173,7 +199,7 @@ jobs:
 
   build-armhf32:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -187,6 +213,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -213,7 +241,7 @@ jobs:
 
   build-mips32:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -227,6 +255,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -253,7 +283,7 @@ jobs:
 
   build-aarch64:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -267,6 +297,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -293,7 +325,7 @@ jobs:
 
   build-ppc64:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -307,6 +339,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -333,7 +367,7 @@ jobs:
 
   build-ppc64le:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -347,6 +381,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -373,7 +409,7 @@ jobs:
 
   build-st-ubuntu-18-amd64:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -387,6 +423,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -405,7 +443,7 @@ jobs:
 
   build-st-ubuntu-18-arm64:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -419,6 +457,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -437,7 +477,7 @@ jobs:
 
   build-st-ubuntu-18-armv7:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -451,6 +491,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}

@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - '*'
-  pull_request:
+  pull_request_target:
     branches:
       - '*'
 
@@ -15,7 +15,7 @@ env:
 jobs:
   cppcheck:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -27,6 +27,9 @@ jobs:
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
       - name: Checkout Sources
         uses: actions/checkout@v1
+        with:
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: cppcheck script
         run: |
           export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-amazonlinux-latest
