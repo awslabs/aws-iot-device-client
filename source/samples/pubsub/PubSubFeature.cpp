@@ -35,7 +35,7 @@ const std::string PubSubFeature::PUBLISH_TRIGGER_PAYLOAD = "DC-Publish";
 
 string PubSubFeature::getName()
 {
-    return NAME;
+        return NAME;
 }
 
 bool PubSubFeature::createPubSub(const PlainConfig &config, const std::string &filePath, const aws_byte_buf *payload)
