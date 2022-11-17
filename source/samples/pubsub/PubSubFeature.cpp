@@ -35,7 +35,7 @@ const std::string PubSubFeature::PUBLISH_TRIGGER_PAYLOAD = "DC-Publish";
 
 string PubSubFeature::getName()
 {
-        return NAME;
+    return NAME;
 }
 
 bool PubSubFeature::createPubSub(const PlainConfig &config, const std::string &filePath, const aws_byte_buf *payload)
@@ -48,7 +48,7 @@ bool PubSubFeature::createPubSub(const PlainConfig &config, const std::string &f
         // Create an empty directory with the expected permissions.
         if (!FileUtils::CreateDirectoryWithPermissions(pubSubFileDir.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH))
         {
-                return false;
+            return false;
         }
     }
     else
