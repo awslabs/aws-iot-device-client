@@ -50,6 +50,7 @@ jobs:
           file: .github/docker-images/Dockerfile
           context: .
           target: deploy
+          no-cache: true
           build-args: |
             OS=ubuntu:18.04
             BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-ubuntu-latest
