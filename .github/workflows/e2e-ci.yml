@@ -33,6 +33,8 @@ jobs:
         run: pwd
       - name: List
         run: ls
+      - name: User
+        run: whoami
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
