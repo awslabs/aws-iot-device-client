@@ -7,10 +7,10 @@ FROM ${BASE_IMAGE} AS deploy
 # Copy and build device client
 ###############################################################################
 COPY . /root/aws-iot-device-client
-RUN mkdir -p /root/aws-iot-device-client/build \
-    && cd /root/aws-iot-device-client/build \
-    && cmake .. \
-    && cmake --build . --target aws-iot-device-client
+RUN mkdir -p /root/aws-iot-device-client/build
+RUN cd /root/aws-iot-device-client/build
+RUN cmake ..
+RUN cmake --build . --target aws-iot-device-client
 
 ENTRYPOINT ["/root/aws-iot-device-client/build/aws-iot-device-client"]
 
