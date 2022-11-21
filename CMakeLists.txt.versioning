@@ -44,7 +44,7 @@ if (GIT_VERSION AND NOT ${GIT_INFO} STREQUAL "")
         OUTPUT_STRIP_TRAILING_WHITESPACE
         RESULT_VARIABLE exit)
 
-    if (exit NOTEQUAL 0)
+    if (NOT exit EQUAL 0)
         load_version_from_file()
         return()
     endif()
@@ -56,7 +56,7 @@ if (GIT_VERSION AND NOT ${GIT_INFO} STREQUAL "")
         OUTPUT_STRIP_TRAILING_WHITESPACE
         RESULT_VARIABLE exit)
 
-    if (exit NOTEQUAL 0)
+    if (NOT exit EQUAL 0)
         load_version_from_file()
         return()
     endif()
@@ -68,7 +68,7 @@ if (GIT_VERSION AND NOT ${GIT_INFO} STREQUAL "")
         OUTPUT_STRIP_TRAILING_WHITESPACE
         RESULT_VARIABLE exit)
 
-    if (exit NOTEQUAL 0)
+    if (NOT exit EQUAL 0)
         load_version_from_file()
         return()
     endif()
