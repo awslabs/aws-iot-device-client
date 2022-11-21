@@ -9,6 +9,8 @@ FROM ${BASE_IMAGE} AS deploy
 COPY . /root/aws-iot-device-client
 RUN mkdir -p /root/aws-iot-device-client/build
 RUN cd /root/aws-iot-device-client/build
+RUN pwd
+RUN ls
 RUN cmake ..
 RUN cmake --build . --target aws-iot-device-client
 
