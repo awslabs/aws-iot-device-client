@@ -1,12 +1,8 @@
 name: Cppcheck
 
 on:
-  push:
-    branches:
-      - '*'
-  pull_request_target:
-    branches:
-      - '*'
+  workflow_run:
+    workflows: ["Approval"]
 
 env:
   PACKAGE_NAME: aws-iot-device-client
