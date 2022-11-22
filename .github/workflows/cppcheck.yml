@@ -3,6 +3,8 @@ name: Cppcheck
 on:
   workflow_run:
     workflows: ["Approval"]
+    branches: '*'
+    types: [completed]
 
 env:
   PACKAGE_NAME: aws-iot-device-client
