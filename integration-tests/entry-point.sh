@@ -8,9 +8,6 @@ CERT_PATH=${CERT_DIRECTORY}cert.crt
 KEY_PATH=${CERT_DIRECTORY}key.pem
 ROOT_CA_PATH=${CERT_DIRECTORY}AmazonRootCA1.pem
 
-# Ensure /run/lock exists
-mkdir -p /run/lock > dev/null
-
 # create Certificate Directory
 mkdir -p ${CERT_DIRECTORY}
 
