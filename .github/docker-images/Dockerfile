@@ -2,10 +2,10 @@
 ARG OS
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE} AS deploy
+
 ###############################################################################
 # Copy and build device client
 ###############################################################################
-
 COPY . /root/aws-iot-device-client
 RUN mkdir -p /root/aws-iot-device-client/build \
     && cd /root/aws-iot-device-client/build \
