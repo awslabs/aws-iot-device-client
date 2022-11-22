@@ -1,9 +1,12 @@
 name: Lint
 
 on:
-  workflow_run:
-    workflows: ["Approval"]
-    types: [completed]
+  push:
+    branches:
+      - '*'
+  pull_request_target:
+    branches:
+      - '*'
 
 env:
   PACKAGE_NAME: aws-iot-device-client

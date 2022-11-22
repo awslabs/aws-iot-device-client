@@ -3,10 +3,12 @@ name: E2E CI
 # This workflow will build and publish Device Client Docker images to the pre-release repository upon merge to pre-release branch
 
 on:
-  workflow_run:
-    workflows: [Approval]
-    branches: '*'
-    types: [completed]
+  push:
+    branches:
+      - '*'
+  pull_request_target:
+    branches:
+      - '*'
 
 env:
   PACKAGE_NAME: aws-iot-device-client
