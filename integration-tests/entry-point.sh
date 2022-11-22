@@ -57,13 +57,15 @@ chmod 640 ${CONFIG_PATH}
 # start ssh
 service ssh start || true
 
+# Start Device Client for a short time without lockfile dir
+rm -rf /run/lock
 ./aws-iot-device-client 2>&1 &
-
 sleep 2
 pkill -f aws-iot-device-client
 
 # Ensure /run/lock exists
 mkdir -p /run/lock > dev/null
+chmod /run/lock 777
 
 # start Device Client
 ./aws-iot-device-client 2>&1 &
