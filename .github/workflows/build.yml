@@ -13,6 +13,7 @@ env:
 jobs:
   build-ubuntu:
     runs-on: ubuntu-latest
+    environment: development
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
@@ -56,6 +57,7 @@ jobs:
   build-amazonlinux:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
+    needs: [ build-ubuntu ]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -98,6 +100,7 @@ jobs:
   build-rhel-ubi8:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
+    needs: [ build-ubuntu ]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -140,6 +143,7 @@ jobs:
   gpp-compat:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
+    needs: [ build-ubuntu ]
     strategy:
       matrix:
         version: [ 5, 6, 7, 8, 11 ]
@@ -169,6 +173,7 @@ jobs:
   clangpp-compat:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
+    needs: [ build-ubuntu ]
     strategy:
       matrix:
         version: [ 5.0, 6.0, 7, 8, 9, 11 ]
@@ -198,6 +203,7 @@ jobs:
   build-armhf32:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
+    needs: [ build-ubuntu ]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -240,6 +246,7 @@ jobs:
   build-mips32:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
+    needs: [ build-ubuntu ]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -282,6 +289,7 @@ jobs:
   build-aarch64:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
+    needs: [ build-ubuntu ]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -324,6 +332,7 @@ jobs:
   build-ppc64:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
+    needs: [ build-ubuntu ]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -366,6 +375,7 @@ jobs:
   build-ppc64le:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
+    needs: [ build-ubuntu ]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -408,6 +418,7 @@ jobs:
   build-st-ubuntu-18-amd64:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
+    needs: [ build-ubuntu ]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -442,6 +453,7 @@ jobs:
   build-st-ubuntu-18-arm64:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
+    needs: [ build-ubuntu ]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -476,6 +488,7 @@ jobs:
   build-st-ubuntu-18-armv7:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
+    needs: [ build-ubuntu ]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1

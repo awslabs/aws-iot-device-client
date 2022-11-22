@@ -20,6 +20,7 @@ jobs:
   # This job builds the Device Client Docker image using the ubuntu base image in the ECR repository
   # It then runs the Device Client to output the version to be used in the subsequent jobs.
   versioning:
+    environment: development
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     outputs:

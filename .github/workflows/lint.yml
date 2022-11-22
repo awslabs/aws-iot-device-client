@@ -12,6 +12,7 @@ env:
 jobs:
   clang-format:
     runs-on: ubuntu-latest
+    environment: development
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
