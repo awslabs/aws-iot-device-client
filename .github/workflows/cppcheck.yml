@@ -2,7 +2,7 @@ name: Cppcheck
 
 on:
   workflow_run:
-    workflows: ["Approval"]
+    workflows: [Approval]
     branches: '*'
     types: [completed]
 
