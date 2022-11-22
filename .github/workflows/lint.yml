@@ -25,7 +25,7 @@ jobs:
       - name: Checkout Sources
         uses: actions/checkout@v2
         with:
-          ref: $
+          ref: ${{ github.event.workflow_run.head_branch }}
       - name: clang-format script
         run: |
           git branch
