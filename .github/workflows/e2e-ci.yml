@@ -43,10 +43,6 @@ jobs:
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
       - name: Build Device Client
         id: build-device-client
         uses: docker/build-push-action@v3
