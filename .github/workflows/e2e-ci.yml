@@ -56,7 +56,7 @@ jobs:
           file: .github/docker-images/Dockerfile
           context: .
           target: deploy
-          tags: versioning/dc:latest
+          tags: versioning/dc
           build-args: |
             OS=ubuntu:18.04
             BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-ubuntu-latest
@@ -64,8 +64,8 @@ jobs:
       - name: Get Version
         id: get-version
         run: |
-          echo "hello"
-          echo "imageid ${{ steps.build-device-client.outputs.imageid }}"
+          version=$(docker run versioning/dc --version)
+          echo "::set-output name=version::$version"
   build-docker-image-ubuntu:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request_target') && (github.event.pull_request.head.repo.full_name != github.repository))
