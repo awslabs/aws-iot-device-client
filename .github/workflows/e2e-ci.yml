@@ -29,7 +29,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Working Directory
         run: pwd
@@ -56,7 +55,6 @@ jobs:
           file: .github/docker-images/Dockerfile
           context: .
           target: deploy
-          tags: versioning/dc
           build-args: |
             OS=ubuntu:18.04
             BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-ubuntu-latest
@@ -64,7 +62,7 @@ jobs:
       - name: Get Version
         id: get-version
         run: |
-          version=$(docker run versioning/dc --version)
+          version=$(docker run ${{ steps.build-device-client.outputs.imageid }} --version)
           echo "::set-output name=version::$version"
   build-docker-image-ubuntu:
     runs-on: ubuntu-latest
