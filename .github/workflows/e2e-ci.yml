@@ -64,6 +64,7 @@ jobs:
       - name: Get Version
         id: get-version
         run: |
+          echo "imageid ${{ steps.build-device-client.outputs.imageid }}"
           version=$(docker run versioning/dc:latest --version)
           echo "::set-output name=version::$version"
   build-docker-image-ubuntu:
