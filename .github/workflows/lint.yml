@@ -2,8 +2,7 @@ name: Lint
 
 on:
   workflow_run:
-    workflows: [Approval]
-    branches: '*'
+    workflows: ["Approval"]
     types: [completed]
 
 env:
@@ -24,7 +23,7 @@ jobs:
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
       - name: Checkout Sources
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
         with:
           ref: $
       - name: clang-format script
