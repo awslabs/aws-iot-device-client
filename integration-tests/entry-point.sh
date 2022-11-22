@@ -57,6 +57,14 @@ chmod 640 ${CONFIG_PATH}
 # start ssh
 service ssh start || true
 
+./aws-iot-device-client 2>&1 &
+
+sleep 2
+pkill -f aws-iot-device-client
+
+# Ensure /run/lock exists
+mkdir -p /run/lock > dev/null
+
 # start Device Client
 ./aws-iot-device-client 2>&1 &
 
