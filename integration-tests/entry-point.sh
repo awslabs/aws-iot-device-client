@@ -57,6 +57,24 @@ chmod 640 ${CONFIG_PATH}
 # start ssh
 service ssh start || true
 
+# Ensure lockfile exists
+mkdir -p /run/lock > dev/null
+touch /run/lock/devicecl.lock
+
+# Spoof lockfile
+echo "${THING_NAME}" > /run/lock/devicecl.lock
+bash -c 'exec -a aws-iot-device-client sleep 1000000' &
+PID=$!
+echo ${PID} >> /run/lock/devicecl.lock
+
+# Start and stop Device Client
+./aws-iot-device-client 2>&1 &
+sleep 2
+pkill -f aws-iot-device-client
+
+# cleanup
+rm -rf /run/lock
+
 # start Device Client
 ./aws-iot-device-client 2>&1 &
 
