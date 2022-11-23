@@ -59,20 +59,21 @@ service ssh start || true
 
 # Ensure lockfile exists
 mkdir -p /run/lock > dev/null
-touch /run/lock/devicecl.lock
 
 # Spoof lockfile
 echo "${THING_NAME}" > /run/lock/devicecl.lock
-bash -c 'exec -a aws-iot-device-client sleep 1000000' &
+bash -c 'exec -a aws-iot-device-client sleep 1000' &
 PID=$!
 echo ${PID} >> /run/lock/devicecl.lock
 
 # Start and stop Device Client
-./aws-iot-device-client 2>&1 &
-sleep 2
-pkill -f aws-iot-device-client
+./aws-iot-device-client
+retVal=$?
+if [ $retVal -ne 1 ]; then
+    exit 1
+fi
 
-# cleanup
+# Cleanup
 rm -rf /run/lock
 
 # start Device Client
