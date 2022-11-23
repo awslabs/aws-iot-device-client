@@ -122,7 +122,7 @@ bool init(int argc, char *argv[])
         LoggerFactory::getLoggerInstance().get()->shutdown();
         return false;
     }
-    return true;
+        return true;
 }
 
 /**
