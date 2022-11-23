@@ -66,11 +66,20 @@ bash -c 'exec -a aws-iot-device-client sleep 1000' &
 PID=$!
 echo ${PID} >> /run/lock/devicecl.lock
 
-# Start and stop Device Client
-./aws-iot-device-client
+# TEST: Start and stop Device Client
+# 1. Run DC
+# 2. Kill dummy process
+# 3. Kill Device Client. If Device Client has already exited as expected, then pkill will return 1, and we pass the test
+./aws-iot-device-client &
+
+# give some buffer time for the background instance of DC to run its logic.
+sleep 1
+kill $PID
+pkill -f aws-iot-device-client
 retVal=$?
 if [ $retVal -ne 1 ]; then
-    exit 1
+  echo 'TEST FAILURE: Device Client ran with a valid lockfile already in place.'
+  exit 1
 fi
 
 # Cleanup
