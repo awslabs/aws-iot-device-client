@@ -27,9 +27,10 @@ jobs:
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
       - name: Checkout Sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v1
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: clang-format script
         run: |
           git branch
