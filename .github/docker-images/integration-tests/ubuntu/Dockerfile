@@ -96,6 +96,13 @@ COPY --from=build_integration_tests /root/integration-tests/build/aws-iot-device
 COPY --from=build_integration_tests /root/integration-tests/source/tunneling/test-tunnel.sh /test-tunnel.sh
 COPY --from=build_integration_tests /root/integration-tests/entry-point.sh /entry-point.sh
 
+COPY ./.github/docker-images/oss-compliance /root/oss-compliance
+RUN HOME_DIR=/root \
+    && chmod +x ${HOME_DIR}/oss-compliance/generate-oss-compliance.sh \
+    && chmod +x ${HOME_DIR}/oss-compliance/test/test-oss-compliance.sh \
+    && bash ${HOME_DIR}/oss-compliance/generate-oss-compliance.sh ${HOME_DIR} \
+    && rm -rf ${HOME_DIR}/oss-compliance*
+
 RUN chmod a+x /entry-point.sh
 RUN chmod a+x /test-tunnel.sh
 RUN chmod 700 /root/.aws-iot-device-client/jobs/*.sh
