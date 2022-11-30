@@ -35,7 +35,6 @@ namespace Aws
                 {
                     void LoadFromJobDocument(const JsonView &json) override;
                     bool Validate() const override;
-                    static void replace_all(std::string &inout, const std::string &what, const std::string &with);
 
                     static constexpr char ACTION_TYPE_RUN_HANDLER[] = "runHandler";
                     static constexpr char ACTION_TYPE_RUN_COMMAND[] = "runCommand";

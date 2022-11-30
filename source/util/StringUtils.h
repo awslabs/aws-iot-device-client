@@ -99,6 +99,15 @@ namespace Aws
                  * @return vector of string split by comma
                  */
                 std::vector<std::string> SplitStringByComma(const std::string &stringToSplit);
+
+                /**
+                 * \brief Replace all substrings found inside the given input string
+                 * @param inout String to be manipulated
+                 * @param what Substring within @param inout to be replaced
+                 * @param with Input string that replaces @param what
+                 * @return String with all selected substring replaced
+                 */
+                void replace_all(std::string &inout, const std::string &what, const std::string &with);
             } // namespace Util
         }     // namespace DeviceClient
     }         // namespace Iot

@@ -129,6 +129,16 @@ namespace Aws
                         back_inserter(tokens));
                     return tokens;
                 }
+
+                void replace_all(std::string &inout, const std::string &what, const std::string &with)
+                {
+                    for (std::string::size_type pos{};
+                         inout.npos != (pos = inout.find(what.data(), pos, what.length()));
+                         pos += with.length())
+                    {
+                        inout.replace(pos, what.length(), with.data(), with.length());
+                    }
+                }
             } // namespace Util
         }     // namespace DeviceClient
     }         // namespace Iot

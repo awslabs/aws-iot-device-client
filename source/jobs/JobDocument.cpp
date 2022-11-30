@@ -132,15 +132,6 @@ void PlainJobDocument::LoadFromJobDocument(const JsonView &json)
     }
 }
 
-void PlainJobDocument::replace_all(std::string &inout, const std::string &what, const std::string &with)
-{
-    for (std::string::size_type pos{}; inout.npos != (pos = inout.find(what.data(), pos, what.length()));
-         pos += with.length())
-    {
-        inout.replace(pos, what.length(), with.data(), with.length());
-    }
-}
-
 bool PlainJobDocument::Validate() const
 {
     if (version.empty())
@@ -382,7 +373,7 @@ void PlainJobDocument::JobAction::ActionCommandInput::LoadFromJobDocument(const 
             vector<string> tokens = Util::SplitStringByComma(commandString);
             for (auto token : tokens)
             {
-                replace_all(token, R"(\,)", ",");
+                Util::replace_all(token, R"(\,)", ",");
                 command.emplace_back(token);
             }
         }

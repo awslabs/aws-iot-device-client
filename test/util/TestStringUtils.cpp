@@ -149,3 +149,12 @@ TEST(StringUtils, SplitStringByComma)
     ASSERT_TRUE(expected.size() == actual.size());
     ASSERT_TRUE(equal(expected.begin(), expected.end(), actual.begin()));
 }
+
+TEST(StringUtils, replace_all)
+{
+    string actual{"hello\\,world!"};
+    string expected{"hello,world!"};
+    replace_all(actual, R"(\,)", ",");
+
+    ASSERT_STREQ(actual.c_str(), expected.c_str());
+}
