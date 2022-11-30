@@ -127,9 +127,7 @@ TEST(JobDocument, SampleJobDocument)
                 "name": "displayDirectory",
                 "type": "runCommand",
                 "input": {
-                    "command": [
-                        "ls,/tmp"
-                    ]
+                    "command": "ls,/tmp"
                 },
                 "runAsUser": "user1",
                 "allowStdErr": 8,
@@ -415,9 +413,7 @@ TEST(JobDocument, MinimumJobDocument)
                 "name": "displayDirectory",
                 "type": "runCommand",
                 "input": {
-                    "command": [
-                        "ls,/tmp"
-                    ]
+                    "command": "ls,/tmp"
                 }
             }
         },
@@ -535,108 +531,6 @@ TEST(JobDocument, MissingRequiredFieldsValue)
     ASSERT_FALSE(jobDocument.Validate());
 }
 
-TEST(JobDocument, MissingRequiredCommandFields)
-{
-    constexpr char jsonString[] = R"(
-{
-    "version": "1.0",
-    "includeStdOut": "true",
-    "conditions": [{
-                    "key" : "operatingSystem",
-                    "value": ["ubuntu", "redhat"],
-                     "type": "stringEqual"
-                 },
-                 {
-                    "key" : "OS",
-                     "value": ["16.0"],
-                     "type": "stringEqual"
-    }],
-    "steps": [{
-            "action": {
-                "name": "downloadJobHandler",
-                "type": "runHandler",
-                "input": {
-                    "handler": "download-file.sh",
-                    "args": ["presignedUrl", "/tmp/aws-iot-device-client/"],
-                    "path": "path to handler"
-                },
-                "runAsUser": "user1",
-                "allowStdErr": "8",
-                "ignoreStepFailure": "true"
-            }
-        },
-        {
-            "action": {
-                "name": "installApplicationAndReboot",
-                "type": "runHandler",
-                "input": {
-                    "handler": "install-app.sh",
-                    "args": [
-                        "applicationName",
-                        "active"
-                    ],
-                    "path": "path to handler"
-                },
-                "runAsUser": "user1",
-                "allowStdErr": "8",
-                "ignoreStepFailure": "true"
-            }
-        },
-        {
-            "action": {
-                "name": "displayDirectory",
-                "type": "runCommand",
-                "input": {
-                    "command":
-                }
-            }
-        },
-        {
-            "action": {
-                "name": "validateAppStatus",
-                "type": "runHandler",
-                "input": {
-                    "handler": "validate-app-status.sh",
-                    "args": [
-                        "applicationName",
-                        "active"
-                    ],
-                    "path": "path to handler"
-                },
-                "runAsUser": "user1",
-                "allowStdErr": "8",
-                "ignoreStepFailure": "true"
-            }
-        }
-    ],
-    "finalStep": {
-        "action": {
-            "name": "deleteDownloadedHandler",
-            "type": "runHandler",
-            "input": {
-                 "handler": "validate-app-status.sh",
-                 "args": [
-                    "applicationName",
-                    "active"
-                ],
-                "path": "path to handler"
-             },
-            "runAsUser": "user1",
-            "allowStdErr": "8",
-            "ignoreStepFailure": "true"
-        }
-    }
-    })";
-
-    JsonObject jsonObject(jsonString);
-    JsonView jsonView = jsonObject.View();
-
-    PlainJobDocument jobDocument;
-    jobDocument.LoadFromJobDocument(jsonView);
-
-    ASSERT_FALSE(jobDocument.Validate());
-}
-
 TEST(JobDocument, CommandFieldsIsEmpty)
 {
     constexpr char jsonString[] = R"(
@@ -648,7 +542,7 @@ TEST(JobDocument, CommandFieldsIsEmpty)
                 "name": "displayDirectory",
                 "type": "runCommand",
                 "input": {
-                    "command": []
+                    "command":
                 }
             }
         }
@@ -716,9 +610,7 @@ TEST(JobDocument, CommandContainsSpaceCharacters)
                 "name": "displayDirectory",
                 "type": "runCommand",
                 "input": {
-                    "command": [
-                        "ls ,/tmp"
-                    ]
+                    "command": "ls ,/tmp"
                 }
             }
         },

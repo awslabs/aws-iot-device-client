@@ -5,6 +5,7 @@
 #include "../config/Config.h"
 #include <cstdarg>
 #include <map>
+#include <regex>
 
 using namespace std;
 
@@ -103,6 +104,30 @@ namespace Aws
                     s.erase(0, s.find_first_not_of(any));
                     s.erase(s.find_last_not_of(any) + 1);
                     return s;
+                }
+
+                vector<string> ParseToVectorString(const JsonView &json)
+                {
+                    vector<string> plainVector;
+
+                    for (const auto &i : json.AsArray())
+                    {
+                        // cppcheck-suppress useStlAlgorithm
+                        plainVector.push_back(i.AsString().c_str());
+                    }
+                    return plainVector;
+                }
+
+                vector<string> SplitStringByComma(const string &stringToSplit)
+                {
+                    regex delim{R"((\\,|[^,])+)"};
+
+                    vector<string> tokens;
+                    copy(
+                        sregex_token_iterator{begin(stringToSplit), end(stringToSplit), delim},
+                        sregex_token_iterator{},
+                        back_inserter(tokens));
+                    return tokens;
                 }
             } // namespace Util
         }     // namespace DeviceClient

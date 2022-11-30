@@ -3,6 +3,7 @@
 
 #include "JobDocument.h"
 #include "../logging/LoggerFactory.h"
+#include "../util/StringUtils.h"
 #include <aws/crt/JsonObject.h>
 #include <regex>
 #include <set>
@@ -12,6 +13,7 @@ using namespace Aws::Iot::DeviceClient::Jobs;
 using namespace Aws::Iot;
 using namespace Aws::Crt;
 using namespace Aws::Iot::DeviceClient::Logging;
+using namespace Aws::Iot::DeviceClient::Util;
 
 constexpr char LoadableFromJobDocument::TAG[];
 
@@ -62,7 +64,7 @@ void PlainJobDocument::LoadFromJobDocument(const JsonView &json)
             jsonKey = JSON_KEY_ARGS;
             if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsListType())
             {
-                jobAction.handlerInput->args = ParseToVectorString(json.GetJsonObject(jsonKey));
+                jobAction.handlerInput->args = Util::ParseToVectorString(json.GetJsonObject(jsonKey));
             }
 
             // Old Schema only supports runHandler type of action
@@ -128,30 +130,6 @@ void PlainJobDocument::LoadFromJobDocument(const JsonView &json)
             }
         }
     }
-}
-
-vector<string> PlainJobDocument::ParseToVectorString(const JsonView &json)
-{
-    vector<string> plainVector;
-
-    for (const auto &i : json.AsArray())
-    {
-        // cppcheck-suppress useStlAlgorithm
-        plainVector.push_back(i.AsString().c_str());
-    }
-    return plainVector;
-}
-
-vector<string> PlainJobDocument::SplitStringByComma(const string &stringToSplit)
-{
-    regex delim{R"((\\,|[^,])+)"};
-
-    vector<string> tokens;
-    copy(
-        sregex_token_iterator{begin(stringToSplit), end(stringToSplit), delim},
-        sregex_token_iterator{},
-        back_inserter(tokens));
-    return tokens;
 }
 
 void PlainJobDocument::replace_all(std::string &inout, const std::string &what, const std::string &with)
@@ -225,7 +203,7 @@ void PlainJobDocument::JobCondition::LoadFromJobDocument(const JsonView &json)
     jsonKey = JSON_KEY_CONDITION_VALUE;
     if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsListType())
     {
-        conditionValue = ParseToVectorString(json.GetJsonObject(jsonKey));
+        conditionValue = Util::ParseToVectorString(json.GetJsonObject(jsonKey));
     }
 
     jsonKey = JSON_KEY_TYPE;
@@ -368,7 +346,7 @@ void PlainJobDocument::JobAction::ActionHandlerInput::LoadFromJobDocument(const 
     jsonKey = JSON_KEY_ARGS;
     if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsListType())
     {
-        args = ParseToVectorString(json.GetJsonObject(jsonKey));
+        args = Util::ParseToVectorString(json.GetJsonObject(jsonKey));
     }
 
     jsonKey = JSON_KEY_PATH;
@@ -395,12 +373,13 @@ constexpr char PlainJobDocument::JobAction::ActionCommandInput::JSON_KEY_COMMAND
 void PlainJobDocument::JobAction::ActionCommandInput::LoadFromJobDocument(const JsonView &json)
 {
     const char *jsonKey = JSON_KEY_COMMAND;
-    if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsListType())
+    if (json.ValueExists(jsonKey))
     {
-        vector<string> commandArray = ParseToVectorString(json.GetJsonObject(jsonKey));
-        if (!commandArray.empty())
+        string commandString = json.GetString(jsonKey).c_str();
+        ;
+        if (!commandString.empty())
         {
-            vector<string> tokens = SplitStringByComma(commandArray.front());
+            vector<string> tokens = Util::SplitStringByComma(commandString);
             for (auto token : tokens)
             {
                 replace_all(token, R"(\,)", ",");
