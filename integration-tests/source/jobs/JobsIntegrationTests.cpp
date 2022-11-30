@@ -70,15 +70,15 @@ TEST_F(TestJobsFixture, InstallPackages)
     ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
 }
 
-TEST_F(TestJobsFixture, RemovePackages)
-{
-    string jobId = "Remove-Packages-" + resourceHandler->GetTimeStamp();
-    resourceHandler->CreateJob(jobId, REMOVE_PACKAGES_JOB_DOC);
-
-    ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
-
-    jobId = "Verify-Packages-Removed-" + resourceHandler->GetTimeStamp();
-    resourceHandler->CreateJob(jobId, VERIFY_PACKAGES_REMOVED_JOB_DOC);
-
-    ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
-}
+//TEST_F(TestJobsFixture, RemovePackages)
+//{
+//    string jobId = "Remove-Packages-" + resourceHandler->GetTimeStamp();
+//    resourceHandler->CreateJob(jobId, REMOVE_PACKAGES_JOB_DOC);
+//
+//    ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
+//
+//    jobId = "Verify-Packages-Removed-" + resourceHandler->GetTimeStamp();
+//    resourceHandler->CreateJob(jobId, VERIFY_PACKAGES_REMOVED_JOB_DOC);
+//
+//    ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
+//}
