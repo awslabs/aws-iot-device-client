@@ -29,8 +29,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -71,8 +69,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -113,8 +109,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -158,8 +152,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -187,8 +179,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -213,8 +203,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -255,8 +243,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -297,8 +283,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -339,8 +323,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -381,8 +363,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -423,8 +403,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -457,8 +435,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
@@ -491,8 +467,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: ${{github.event.pull_request.head.ref}}
-          repository: ${{github.event.pull_request.head.repo.full_name}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
