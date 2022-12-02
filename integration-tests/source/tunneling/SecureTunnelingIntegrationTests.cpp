@@ -45,17 +45,15 @@ class TestSecureTunnelingFixture : public ::testing::Test
                 sourceToken = openTunnelResult.GetSourceAccessToken();
                 string loglevel = "6";
 
-                std::unique_ptr<const char *[]> argv(new const char *[10]);
+                std::unique_ptr<const char *[]> argv(new const char *[8]);
                 argv[0] = LOCAL_PROXY_PATH.c_str();
                 argv[1] = "-s";
                 argv[2] = PORT.c_str();
                 argv[3] = "-r";
                 argv[4] = REGION.c_str();
-                argv[5] = "-v";
-                argv[6] = loglevel.c_str();
-                argv[7] = "-t";
-                argv[8] = sourceToken.c_str();
-                argv[9] = nullptr;
+                argv[5] = "-t";
+                argv[6] = sourceToken.c_str();
+                argv[7] = nullptr;
 
                 PID = fork();
                 if (PID == 0)
