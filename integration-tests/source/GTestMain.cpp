@@ -26,7 +26,7 @@ std::string REGION = "us-east-1";
 std::string PORT = "5555";
 bool CLEAN_UP = false;
 bool SKIP_FP = false;
-bool SKIP_ST = true;
+bool SKIP_ST = false;
 
 std::string ExtractExpandedPath(const std::string &filePath)
 {
