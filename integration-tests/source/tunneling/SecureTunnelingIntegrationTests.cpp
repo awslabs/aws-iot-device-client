@@ -43,7 +43,6 @@ class TestSecureTunnelingFixture : public ::testing::Test
                     resourceHandler->OpenTunnel(THING_NAME);
                 tunnelId = openTunnelResult.GetTunnelId();
                 sourceToken = openTunnelResult.GetSourceAccessToken();
-                string loglevel = "6";
 
                 std::unique_ptr<const char *[]> argv(new const char *[8]);
                 argv[0] = LOCAL_PROXY_PATH.c_str();
