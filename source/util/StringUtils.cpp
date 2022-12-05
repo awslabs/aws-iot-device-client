@@ -98,7 +98,6 @@ namespace Aws
 
                 string TrimRightCopy(string s, const string &any) { return s.erase(s.find_last_not_of(any) + 1); }
 
-                // cppcheck-suppress unusedFunction
                 string TrimCopy(string s, const string &any)
                 {
                     s.erase(0, s.find_first_not_of(any));
@@ -130,10 +129,9 @@ namespace Aws
                     return tokens;
                 }
 
-                void replace_all(std::string &inout, const std::string &what, const std::string &with)
+                void replace_all(string &inout, const string &what, const string &with)
                 {
-                    for (std::string::size_type pos{};
-                         inout.npos != (pos = inout.find(what.data(), pos, what.length()));
+                    for (string::size_type pos{}; inout.npos != (pos = inout.find(what.data(), pos, what.length()));
                          pos += with.length())
                     {
                         inout.replace(pos, what.length(), with.data(), with.length());

@@ -367,14 +367,15 @@ void PlainJobDocument::JobAction::ActionCommandInput::LoadFromJobDocument(const 
     if (json.ValueExists(jsonKey))
     {
         string commandString = json.GetString(jsonKey).c_str();
-        ;
+
         if (!commandString.empty())
         {
             vector<string> tokens = Util::SplitStringByComma(commandString);
             for (auto token : tokens)
             {
                 Util::replace_all(token, R"(\,)", ",");
-                command.emplace_back(token);
+                // trim all leading and trailing space characters including tabs, newlines etc.
+                command.emplace_back(Util::TrimCopy(token, " \t\n\v\f\r"));
             }
         }
     }
@@ -395,7 +396,7 @@ bool PlainJobDocument::JobAction::ActionCommandInput::Validate() const
     {
         LOGM_ERROR(
             TAG,
-            "*** %s: Required field ActionInput command's first element contains space characters: %s ***",
+            "*** %s: Required field ActionInput command's first word contains space characters: %s ***",
             DeviceClient::Jobs::DC_INVALID_JOB_DOC,
             Util::Sanitize(firstCommand).c_str());
         return false;
