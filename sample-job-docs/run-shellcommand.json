@@ -7,7 +7,7 @@
         "name": "Create New Directory",
         "type": "runCommand",
         "input": {
-          "args": "mkdir,newDir"
+          "command": "mkdir,newDir"
         },
         "runAsUser": "root"
       }
