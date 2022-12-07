@@ -8,7 +8,7 @@
 **Description**:
 Cross-compiling allows you to compile for a **specific architecture** while on a **different architecture**. For example, you may want to compile the Device Client for a Raspberry Pi (ARMhf). Using Cmake toolchains you could compile the binary on your laptop (x86_64) and then transfer it over.  This is extremely useful, as some *(especially really constrained)* devices won't have the resources to complete the build process.  Even if your devices can complete the build, it is often times much easier to build in a central location (like your developer laptop) and then distribute the artifacts to appropriate devices. 
 
-The `cmake-toolchain` folder contains toolchains files that will make cross compiling for other architectures easier (This does not include the compilers). Currently we have toolchain files to support cross compiling for the following architectures; **MIPS32**, **ARMhf**, andx **AArch64**.
+The `cmake-toolchain` folder contains toolchains files that will make cross compiling for other architectures easier (This does not include the compilers). Currently we have toolchain files to support cross compiling for the following architectures; **MIPS32**, **ARMhf**, **AArch64**, **PowerPC64**, and **PowerPC64le**.
 
 You can specify one of the given build toolchains when running cmake:
 ```

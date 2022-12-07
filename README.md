@@ -53,7 +53,7 @@ The modular IoT Device Client consists of a “base client” and discrete “cl
   when you onboard a fleet of devices using the [Fleet Provisioning capability](https://docs.aws.amazon.com/iot/latest/developerguide/provision-wo-cert.html) of AWS IoT Core. It creates a device specific certificate and private key, and registers the device on AWS IoT Core.
 * The client-side Named Shadows feature enables you to control your IoT device using [AWS IoT Named Shadows](https://docs.aws.amazon.com/iot/latest/developerguide/iot-device-shadows.html). Shadows can store your device's state information and make it available to your device, AWS IoT services, your custom  apps and other AWS services whether the device is online and connected to AWS IoT or not.
 ### List of Supported Platforms
-The AWS IoT Device Client currently works on IoT devices with common microprocessors (x86_64, ARM architectures), and common Linux software environments (Debian, Ubuntu, and RHEL).
+The AWS IoT Device Client is currently compatible with x86_64, aarch64, armv7l, mips32, ppc64, and ppc64le architectures and common Linux software environments (Debian, Ubuntu, and RHEL).
 
 ## Installation
 *__Sections:__*
@@ -72,6 +72,18 @@ The AWS IoT Device Client currently works on IoT devices with common microproces
 * [aws-iot-device-sdk-cpp-v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2) commit hash located in `CMakeLists.txt.awssdk`
 
 *Note:* The TLS stack, and the version of the SDK mentioned above is what our CI uses.  You could potentially use a different TLS stack for example, we just don't actively test or support this.
+
+### Docker
+
+The AWS IoT Device Client currently provides several dockerfiles for various platforms and Linux distributions.
+
+To build a Docker image from the repository locally simply run the [docker-build.sh](docker-build.sh) script with your
+preferred OS (ubuntu/amazonlinux/ubi8) (e.g. docker-build.sh ubuntu) if no OS is passed the build will default to ubuntu (18.04).
+
+#### Docker Files
+
+- [Base Images:](.github/docker-images/base-images) Multi-stage Dockerfiles which will build dependencies only (target=**base**) or build the Device Client from your current directory(target=**deploy**).
+- [Dockerfile:](.github/docker-images/Dockerfile) Takes two BUILD_ARGS: OS(ubuntu/amazonlinux/ubi8) and BASE_IMAGE(Image URI). Build target **deploy** will build Device Client from your current directory using the provided BASE_IMAGE. Build target **minimum_size** will build a minimum sized Docker image with the Device Client binary using the BASE_IMAGE.
 
 ### Building from source
 

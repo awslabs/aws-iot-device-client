@@ -17,6 +17,23 @@ execute_process(COMMAND git log --pretty=format:'%h' -n 1
                 OUTPUT_VARIABLE GIT_INFO
                 ERROR_QUIET)
 
+function (load_version_from_file)
+    # Git is not available (this is the case if the source is packaged as an archive), get version from file
+    file(STRINGS ${CMAKE_SOURCE_DIR}/.version ${PROJECT_NAME}_VERSION_LIST)
+    string(REPLACE "*" ";" ${PROJECT_NAME}_VERSION_LIST ${${PROJECT_NAME}_VERSION_LIST})
+    # Set partial versions
+    list(GET ${PROJECT_NAME}_VERSION_LIST 0 ${PROJECT_NAME}_VERSION_STRING_FULL)
+    list(GET ${PROJECT_NAME}_VERSION_LIST 1 ${PROJECT_NAME}_VERSION_STRING)
+    list(GET ${PROJECT_NAME}_VERSION_LIST 2 ${PROJECT_NAME}_VERSION_MAJOR)
+    list(GET ${PROJECT_NAME}_VERSION_LIST 3 ${PROJECT_NAME}_VERSION_MINOR)
+    list(GET ${PROJECT_NAME}_VERSION_LIST 4 ${PROJECT_NAME}_VERSION_PATCH)
+    list(GET ${PROJECT_NAME}_VERSION_LIST 5 ${PROJECT_NAME}_VERSION_AHEAD)
+    list(GET ${PROJECT_NAME}_VERSION_LIST 6 ${PROJECT_NAME}_VERSION_GIT_SHA)
+    unset(${PROJECT_NAME}_VERSION_LIST)
+
+    message("-- Failed to infer patch version from git, loaded AWS IoT Device Client version from file: ${${PROJECT_NAME}_VERSION_STRING_FULL}")
+endfunction()
+
 if (GIT_VERSION AND NOT ${GIT_INFO} STREQUAL "")
     message("-- Using Git to calculate AWS IoT Device Client version information...")
 
@@ -24,19 +41,37 @@ if (GIT_VERSION AND NOT ${GIT_INFO} STREQUAL "")
     execute_process(COMMAND ${GIT_EXECUTABLE} describe --abbrev=0 --tags --match "v[0-9]*"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_VARIABLE ${PROJECT_NAME}_VERSION_STRING
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE exit)
+
+    if (NOT exit EQUAL 0)
+        load_version_from_file()
+        return()
+    endif()
 
     # Determine how many commits since last tag
     execute_process(COMMAND ${GIT_EXECUTABLE} rev-list ${${PROJECT_NAME}_VERSION_STRING}..HEAD --count
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_VARIABLE ${PROJECT_NAME}_VERSION_AHEAD
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE exit)
+
+    if (NOT exit EQUAL 0)
+        load_version_from_file()
+        return()
+    endif()
 
     # Get current commit SHA from git
     execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_VARIABLE ${PROJECT_NAME}_VERSION_GIT_SHA
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE exit)
+
+    if (NOT exit EQUAL 0)
+        load_version_from_file()
+        return()
+    endif()
 
     # Collect the partial versions into a list
     string(REGEX MATCHALL "[0-9]+" ${PROJECT_NAME}_PARTIAL_VERSION_LIST
@@ -67,19 +102,7 @@ if (GIT_VERSION AND NOT ${GIT_INFO} STREQUAL "")
         "*" ${${PROJECT_NAME}_VERSION_PATCH}
         "*" ${${PROJECT_NAME}_VERSION_AHEAD}
         "*" ${${PROJECT_NAME}_VERSION_GIT_SHA})
-else()
-    # Git is not available (this is the case if the source is packaged as an archive), get version from file
-    file(STRINGS ${CMAKE_SOURCE_DIR}/.version ${PROJECT_NAME}_VERSION_LIST)
-    string(REPLACE "*" ";" ${PROJECT_NAME}_VERSION_LIST ${${PROJECT_NAME}_VERSION_LIST})
-    # Set partial versions
-    list(GET ${PROJECT_NAME}_VERSION_LIST 0 ${PROJECT_NAME}_VERSION_STRING_FULL)
-    list(GET ${PROJECT_NAME}_VERSION_LIST 1 ${PROJECT_NAME}_VERSION_STRING)
-    list(GET ${PROJECT_NAME}_VERSION_LIST 2 ${PROJECT_NAME}_VERSION_MAJOR)
-    list(GET ${PROJECT_NAME}_VERSION_LIST 3 ${PROJECT_NAME}_VERSION_MINOR)
-    list(GET ${PROJECT_NAME}_VERSION_LIST 4 ${PROJECT_NAME}_VERSION_PATCH)
-    list(GET ${PROJECT_NAME}_VERSION_LIST 5 ${PROJECT_NAME}_VERSION_AHEAD)
-    list(GET ${PROJECT_NAME}_VERSION_LIST 6 ${PROJECT_NAME}_VERSION_GIT_SHA)
-    unset(${PROJECT_NAME}_VERSION_LIST)
 
-    message("-- Loaded AWS IoT Device Client version: ${${PROJECT_NAME}_VERSION_STRING_FULL}")
+    # exit from cmake processing
+    return()
 endif()
