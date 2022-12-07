@@ -7,9 +7,8 @@ ARG OPENSSL_VERSION=1.1.1n
 ###############################################################################
 # Install prereqs
 ###############################################################################
-RUN subscription-manager config --rhsm.manage_repos=0
-RUN yum --disableplugin=subscription-manager -y update \
-    && yum --disableplugin=subscription-manager -y install \
+RUN yum -y update \
+    && yum -y install \
     tar \
     bzip2 \
     git \
