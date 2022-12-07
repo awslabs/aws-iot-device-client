@@ -59,7 +59,7 @@ jobs:
     needs: [versioning]
     strategy:
       matrix:
-        architecture: [amd64, arm64, armv7]
+        architecture: [amd64, arm64]
     permissions:
       id-token: write
       contents: read
