@@ -9,12 +9,13 @@ for c in 1 10 20 30 100 1024 10240; do
       echo "Failed to scp to port ${PORT}"
       exit 1;
     fi
-    cksum2=$(ssh -o StrictHostKeyChecking=no -p ${PORT} root@localhost cksum /tmp/zeros1) ;
+    cksum=$(md5sum /tmp/zeros | cut -d  ' ' -f 1)
+    cksum2=$(ssh -o StrictHostKeyChecking=no -p ${PORT} root@localhost md5sum /tmp/zeros1 | cut -d  ' ' -f 1) ;
     if [ "$?" -ne 0 ] ; then
       echo "Failed to ssh to port ${PORT}"
       exit 1;
     fi
-    if cmp --silent -- /tmp/zeros /tmp/zeros1 ; then
+    if [ "$cksum" = "$cksum2" ] ; then
       echo "Files match"
     else
       echo "Files do not match"
