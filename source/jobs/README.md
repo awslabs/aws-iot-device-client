@@ -173,9 +173,7 @@ Lastly, the permission used to execute `command` will be the value of `runAsUser
               "runAsUser": "root",
               "ignoreStepFailure":"true",
               "input": {
-                  "command": [
-                      "echo,Hello World!"
-                  ]
+                  "command": "echo,Hello World!"
               }
           }
       }
