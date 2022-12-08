@@ -35,7 +35,7 @@ static constexpr char VERIFY_PACKAGES_REMOVED_JOB_DOC[] =
     "\"default\" }, \"runAsUser\": \"root\" } }]}";
 static constexpr char RUN_COMMAND_PRINT_GREETING_JOB_DOC[] =
     "{ \"version\": \"1.0\", \"steps\": [ { \"action\": { \"name\": \"Print Greeting\", \"type\": "
-    "\"runCommand\", \"input\": { \"command\": [ \"echo,Hello World\" ] }, \"runAsUser\": \"root\" } }]}";
+    "\"runCommand\", \"input\": { \"command\": \"echo,Hello World\" }, \"runAsUser\": \"root\" } }]}";
 
 class TestJobsFixture : public ::testing::Test
 {
