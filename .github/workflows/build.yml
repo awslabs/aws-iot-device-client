@@ -76,6 +76,22 @@ jobs:
           export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-amazonlinux-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
+      - name: Archive amazonlinux Build Artifact
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.amazonlinux.x64.${{ env.PACKAGE_NAME }}.static"
+          path: |
+            ./build/${{ env.PACKAGE_NAME }}
+      - name: Archive setup files
+        uses: actions/upload-artifact@v2
+        # Run for main branch only
+        if: github.ref == 'refs/heads/main'
+        with:
+          name: "DC.amazonlinux.x64.${{ env.PACKAGE_NAME }}.static"
+          path: |
+            ./setup/
 
   build-rhel-ubi8:
     runs-on: ubuntu-latest
@@ -97,7 +113,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubi8-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
       - name: Archive rhel-ubi8 Build Artifact
