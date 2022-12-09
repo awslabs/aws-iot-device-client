@@ -19,6 +19,13 @@ FROM ${OS} AS minimum_size
 COPY --from=deploy /root/aws-iot-device-client/build/aws-iot-device-client ./aws-iot-device-client
 COPY --from=deploy /root/aws-iot-device-client/sample-job-handlers /root/.aws-iot-device-client/jobs
 
+COPY ./.github/docker-images/oss-compliance /root/oss-compliance
+RUN HOME_DIR=/root \
+    && chmod +x ${HOME_DIR}/oss-compliance/generate-oss-compliance.sh \
+    && chmod +x ${HOME_DIR}/oss-compliance/test/test-oss-compliance.sh \
+    && bash ${HOME_DIR}/oss-compliance/generate-oss-compliance.sh ${HOME_DIR} \
+    && rm -rf ${HOME_DIR}/oss-compliance*
+
 RUN chmod 700 /root/.aws-iot-device-client/jobs/*.sh
 
 ENTRYPOINT ["/aws-iot-device-client"]
