@@ -7,9 +7,8 @@ ARG OPENSSL_VERSION=1.1.1n
 ###############################################################################
 # Install prereqs
 ###############################################################################
-RUN subscription-manager config --rhsm.manage_repos=0
-RUN yum --disableplugin=subscription-manager -y update \
-    && yum --disableplugin=subscription-manager -y install \
+RUN yum -y update \
+    && yum -y install \
     tar \
     bzip2 \
     git \
@@ -105,6 +104,13 @@ RUN mkdir sdk-cpp-workspace \
     && cd aws-iot-device-sdk-cpp-v2-build \
     && cmake -DCMAKE_INSTALL_PREFIX="/usr" -DUSE_OPENSSL=ON -DBUILD_DEPS=ON ../aws-iot-device-sdk-cpp-v2 \
     && cmake --build . --target install
+
+COPY ./.github/docker-images/oss-compliance /root/oss-compliance
+RUN HOME_DIR=/root \
+    && chmod +x ${HOME_DIR}/oss-compliance/generate-oss-compliance.sh \
+    && chmod +x ${HOME_DIR}/oss-compliance/test/test-oss-compliance.sh \
+    && bash ${HOME_DIR}/oss-compliance/generate-oss-compliance.sh ${HOME_DIR} \
+    && rm -rf ${HOME_DIR}/oss-compliance*
 
 ADD .github/docker-images/entry-script.sh /home/entry-script
 RUN chmod a+x /home/entry-script
