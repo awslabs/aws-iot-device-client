@@ -58,6 +58,7 @@ jobs:
   build-docker-image-ubuntu:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    # versioning output is needed for the image tag
     needs: [versioning]
     strategy:
       matrix:
@@ -98,6 +99,7 @@ jobs:
   build-docker-image-ubuntu-armv7:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    # versioning output is needed for the image tag
     needs: [versioning]
     permissions:
       id-token: write
@@ -137,6 +139,7 @@ jobs:
   build-docker-image-amazonlinux:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    # versioning output is needed for the image tag
     needs: [versioning]
     strategy:
       matrix:
@@ -177,6 +180,7 @@ jobs:
   build-docker-image-ubi8:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    # versioning output is needed for the image tag
     needs: [versioning]
     strategy:
       matrix:
@@ -217,7 +221,8 @@ jobs:
   e2e-tests-ubuntu:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
-    needs: [ build-docker-image-ubuntu ]
+    # versioning output is needed for the image tag
+    needs: [ versioning, build-docker-image-ubuntu ]
     strategy:
       fail-fast: false
       matrix:
@@ -263,7 +268,8 @@ jobs:
   e2e-tests-ubuntu-armv7:
     runs-on: ubuntu-latest
     if: ${{ false }} # Disabled for now as local proxy builds take too long. Re-enable if binary or image becomes available.
-    needs: [ build-docker-image-ubuntu-armv7 ]
+    # versioning output is needed for the image tag
+    needs: [ versioning, build-docker-image-ubuntu-armv7 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -306,7 +312,8 @@ jobs:
     # The amazonlinux integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in centOS integration test image
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
-    needs: [ build-docker-image-amazonlinux ]
+    # versioning output is needed for the image tag
+    needs: [ versioning, build-docker-image-amazonlinux ]
     strategy:
       fail-fast: false
       matrix:
@@ -353,7 +360,8 @@ jobs:
     # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in centOS integration test image
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
-    needs: [ build-docker-image-ubi8 ]
+    # versioning output is needed for the image tag
+    needs: [ versioning, build-docker-image-ubi8 ]
     strategy:
       fail-fast: false
       matrix:
