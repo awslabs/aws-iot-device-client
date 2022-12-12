@@ -35,9 +35,9 @@ namespace Aws
                 {
                     void LoadFromJobDocument(const JsonView &json) override;
                     bool Validate() const override;
-                    static std::vector<std::string> ParseToVectorString(const JsonView &json);
 
                     static constexpr char ACTION_TYPE_RUN_HANDLER[] = "runHandler";
+                    static constexpr char ACTION_TYPE_RUN_COMMAND[] = "runCommand";
 
                     static constexpr char JSON_KEY_VERSION[] = "version";
                     static constexpr char JSON_KEY_INCLUDESTDOUT[] = "includeStdOut";
@@ -87,7 +87,10 @@ namespace Aws
                         std::string name;
                         std::string type;
 
-                        struct ActionInput : public LoadableFromJobDocument
+                        /**
+                         * ActionHandlerInput - Invokes a handler script specified in a job document.
+                         */
+                        struct ActionHandlerInput : public LoadableFromJobDocument
                         {
                             void LoadFromJobDocument(const JsonView &json) override;
                             bool Validate() const override;
@@ -100,7 +103,21 @@ namespace Aws
                             Optional<std::vector<std::string>> args;
                             Optional<std::string> path;
                         };
-                        ActionInput input;
+                        Optional<ActionHandlerInput> handlerInput;
+
+                        /**
+                         * ActionCommandInput - Invokes arbitrary commands specified in a job document.
+                         */
+                        struct ActionCommandInput : public LoadableFromJobDocument
+                        {
+                            void LoadFromJobDocument(const JsonView &json) override;
+                            bool Validate() const override;
+
+                            static constexpr char JSON_KEY_COMMAND[] = "command";
+
+                            std::vector<std::string> command;
+                        };
+                        Optional<ActionCommandInput> commandInput;
                         Optional<std::string> runAsUser{""};
                         Optional<int> allowStdErr;
                         Optional<bool> ignoreStepFailure{false};
