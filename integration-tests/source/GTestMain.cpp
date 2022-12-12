@@ -17,6 +17,7 @@ static constexpr char FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] =
 static constexpr char CLI_THING_NAME[] = "--thing-name";
 static constexpr char CLI_REGION[] = "--region";
 static constexpr char CLI_PORT[] = "--port";
+static constexpr char CLI_LOCAL_PROXY_PATH[] = "--localproxy";
 static constexpr char CLI_CLEAN_UP[] = "--clean-up";
 static constexpr char CLI_SKIP_ST[] = "--skip-st";
 static constexpr char CLI_HELP[] = "--help";
@@ -24,6 +25,7 @@ static constexpr char CLI_HELP[] = "--help";
 std::string THING_NAME;
 std::string REGION = "us-east-1";
 std::string PORT = "5555";
+std::string LOCAL_PROXY_PATH = "/localproxy";
 bool CLEAN_UP = false;
 bool SKIP_FP = false;
 bool SKIP_ST = false;
@@ -65,6 +67,7 @@ void PrintHelp()
     printf("--thing-name        Thing Group ARN to run the tests against\n");
     printf("--region            The AWS Region to run the tests. Example: us-east-1\n");
     printf("--port              The local port to run Local Proxy.\n");
+    printf("--localproxy        Path to local proxy binary for Secure Tunneling tests.\n");
     printf("--skip-st           Skip Secure Tunneling integration tests\n");
     printf(
         "--clean-up          (Caution) Pass this flag kill to Device Client on the devices delete the provisioned IoT "
@@ -90,6 +93,10 @@ bool parseCliArgs(int argc, char **argv)
         else if (currentArg == CLI_PORT)
         {
             PORT = argv[++i];
+        }
+        else if (currentArg == CLI_LOCAL_PROXY_PATH)
+        {
+            LOCAL_PROXY_PATH = argv[++i];
         }
         else if (currentArg == CLI_SKIP_ST)
         {
