@@ -59,7 +59,6 @@ class TestFleetProvisioningFixture : public ::testing::Test
 
 TEST_F(TestFleetProvisioningFixture, HappyPath)
 {
-    cout << "This is Calvin's PR";
     string jobId = FP_JOB_ID + resourceHandler->GetTimeStamp();
     resourceHandler->CreateJob(jobId, HEALTH_CHECK_JOB_DOC);
 
