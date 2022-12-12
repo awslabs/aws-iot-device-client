@@ -611,3 +611,21 @@ TEST(JobDocument, SpaceCharactersContainedWithinFirstWordOfCommand)
 
     ASSERT_FALSE(jobDocument.Validate());
 }
+
+TEST(JobDocument, oldJobDocumentCompatibility)
+{
+    constexpr char jsonString[] = R"(
+{
+    "operation": "download-file.sh",
+    "args": ["https://github.com/awslabs/aws-iot-device-client/archive/refs/tags/v1.3.tar.gz", "/tmp/Downloaded_File.tar.gz"],
+    "path": "default"
+})";
+
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainJobDocument jobDocument;
+    jobDocument.LoadFromJobDocument(jsonView);
+
+    ASSERT_TRUE(jobDocument.Validate());
+}

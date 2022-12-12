@@ -57,16 +57,16 @@ void PlainJobDocument::LoadFromJobDocument(const JsonView &json)
         if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsString())
         {
             JobAction jobAction;
+            JobAction::ActionHandlerInput temp;
             // Save Job Action name and handler field value with operation field value
             jobAction.name = json.GetString(jsonKey).c_str();
-            jobAction.handlerInput->handler = jobAction.name;
+            temp.handler = jobAction.name;
 
             jsonKey = JSON_KEY_ARGS;
             if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsListType())
             {
-                jobAction.handlerInput->args = Util::ParseToVectorString(json.GetJsonObject(jsonKey));
+                temp.args = Util::ParseToVectorString(json.GetJsonObject(jsonKey));
             }
-
             // Old Schema only supports runHandler type of action
             jobAction.type = ACTION_TYPE_RUN_HANDLER;
 
@@ -79,8 +79,10 @@ void PlainJobDocument::LoadFromJobDocument(const JsonView &json)
             jsonKey = JSON_KEY_PATH;
             if (json.ValueExists(jsonKey) && json.GetJsonObject(jsonKey).IsString())
             {
-                jobAction.handlerInput->path = json.GetString(jsonKey).c_str();
+                temp.path = json.GetString(jsonKey).c_str();
             }
+
+            jobAction.handlerInput = temp;
 
             steps.push_back(jobAction);
         }
