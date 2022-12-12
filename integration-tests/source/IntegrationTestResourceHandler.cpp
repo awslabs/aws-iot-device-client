@@ -12,6 +12,7 @@
 #include <aws/iot/model/DescribeJobExecutionRequest.h>
 #include <aws/iot/model/DescribeJobExecutionResult.h>
 #include <aws/iot/model/DescribeThingRequest.h>
+#include <aws/iot/model/DescribeThingResult.h>
 #include <aws/iot/model/DetachPolicyRequest.h>
 #include <aws/iot/model/DetachThingPrincipalRequest.h>
 #include <aws/iot/model/ListAttachedPoliciesRequest.h>
@@ -299,11 +300,24 @@ void IntegrationTestResourceHandler::CloseTunnel(const string &tunnelId)
     ioTSecureTunnelingClient.CloseTunnel(request);
 }
 
-std::string IntegrationTestResourceHandler::GetTargetArn(const std::string &target)
+std::string IntegrationTestResourceHandler::GetTargetArn(const std::string &thingName)
 {
+    std::string arn;
+
     DescribeThingRequest request;
-    request.SetThingName(target);
-    return iotClient.DescribeThing(request).GetResult().GetThingArn();
+    request.SetThingName(thingName);
+
+    DescribeThingOutcome outcome = iotClient.DescribeThing(request);
+
+    if (!outcome.IsSuccess())
+    {
+        printf("Failed to Describe Thing: %s\n%s\n", thingName.c_str(), outcome.GetError().GetMessage().c_str());
+    }
+    else
+    {
+        arn = outcome.GetResult().GetThingArn();
+    }
+    return arn;
 }
 std::string IntegrationTestResourceHandler::GetResourceId(const std::string &resource)
 {
