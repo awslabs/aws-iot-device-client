@@ -26,7 +26,7 @@ class IntegrationTestResourceHandler
     void CleanUpThingAndCert(const std::string &thingName);
     std::string GetTimeStamp();
     Aws::IoT::Model::JobExecutionStatus GetJobExecutionStatusWithRetry(const std::string &jobId);
-    std::string GetTargetArn(const std::string &target);
+    std::string GetTargetArn(const std::string &thingName);
 
   protected:
     Aws::IoT::IoTClient iotClient;
