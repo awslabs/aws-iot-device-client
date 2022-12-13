@@ -113,7 +113,7 @@ bool init(int argc, char *argv[])
         string filename = config.config.lockFilePath;
         if (!filename.empty())
         {
-            string thing = "";
+            string thing;
             if (config.config.thingName.has_value() && !config.config.thingName.value().empty())
             {
                 thing = config.config.thingName.value();
