@@ -62,7 +62,7 @@ mkdir -p /run/lock > dev/null
 
 # Spoof lockfile
 echo "${THING_NAME}" > /run/lock/devicecl.lock
-bash -c 'exec -a aws-iot-device-client sleep 1000' &
+bash -c 'sleep 1000' &
 FAKE_PID=$!
 echo ${FAKE_PID} >> /run/lock/devicecl.lock
 sleep 5
@@ -71,7 +71,8 @@ sleep 5
 # 1. Run DC
 # 2. Kill dummy process
 # 3. Kill Device Client. If Device Client has already exited as expected, then pkill will return 1, and we pass the test
-./aws-iot-device-client &
+cp aws-iot-device-client sleep
+./sleep &
 DC_PID=$!
 
 # give some buffer time for the background instance of DC to run its logic.
