@@ -68,7 +68,7 @@ echo ${FAKE_PID} >> /run/lock/devicecl.lock
 sleep 5
 
 # TEST: Start and stop Device Client
-# 1. Run DC
+# 1. Rename aws-iot-device-client to sleep and exec binary
 # 2. Kill dummy process
 # 3. Kill Device Client. If Device Client has already exited as expected, then pkill will return 1, and we pass the test
 cp aws-iot-device-client sleep
