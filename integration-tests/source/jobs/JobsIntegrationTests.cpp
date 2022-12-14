@@ -33,6 +33,9 @@ static constexpr char VERIFY_PACKAGES_REMOVED_JOB_DOC[] =
     "{ \"version\": \"1.0\", \"steps\": [ { \"action\": { \"name\": \"Verify Packages Removed\", \"type\": "
     "\"runHandler\", \"input\": { \"handler\": \"verify-packages-removed.sh\", \"args\": [ \"dos2unix\" ], \"path\": "
     "\"default\" }, \"runAsUser\": \"root\" } }]}";
+static constexpr char RUN_COMMAND_PRINT_GREETING_JOB_DOC[] =
+    "{ \"version\": \"1.0\", \"steps\": [ { \"action\": { \"name\": \"Print Greeting\", \"type\": "
+    "\"runCommand\", \"input\": { \"command\": \"echo,Hello World\" }, \"runAsUser\": \"root\" } }]}";
 
 class TestJobsFixture : public ::testing::Test
 {
@@ -79,6 +82,14 @@ TEST_F(TestJobsFixture, RemovePackages)
 
     jobId = "Verify-Packages-Removed-" + resourceHandler->GetTimeStamp();
     resourceHandler->CreateJob(jobId, VERIFY_PACKAGES_REMOVED_JOB_DOC);
+
+    ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
+}
+
+TEST_F(TestJobsFixture, PrintGreeting)
+{
+    string jobId = "Print-Greeting-" + resourceHandler->GetTimeStamp();
+    resourceHandler->CreateJob(jobId, RUN_COMMAND_PRINT_GREETING_JOB_DOC);
 
     ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
 }

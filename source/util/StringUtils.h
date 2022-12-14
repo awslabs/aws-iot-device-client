@@ -1,8 +1,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+#include <aws/crt/JsonObject.h>
 #include <aws/crt/Types.h>
 #include <string>
+
+using namespace Aws::Crt;
 
 namespace Aws
 {
@@ -82,6 +85,29 @@ namespace Aws
                  * @return string with leftmost and rightmost characters removed
                  */
                 std::string TrimCopy(std::string s, const std::string &any);
+
+                /**
+                 * \brief Given an input JsonView object, will return vector of string form of JsonView
+                 * @param json Input JsonView
+                 * @return vector of string form of JsonView
+                 */
+                std::vector<std::string> ParseToVectorString(const JsonView &json);
+
+                /**
+                 * \brief Split the given input string by comma into a vector of string, escaped comma will be ignored
+                 * @param stringToSplit Input string
+                 * @return vector of string split by comma
+                 */
+                std::vector<std::string> SplitStringByComma(const std::string &stringToSplit);
+
+                /**
+                 * \brief Replace all substrings found inside the given input string
+                 * @param inout String to be manipulated
+                 * @param what Substring within @param inout to be replaced
+                 * @param with Input string that replaces @param what
+                 * @return String with all selected substring replaced
+                 */
+                void replace_all(std::string &inout, const std::string &what, const std::string &with);
             } // namespace Util
         }     // namespace DeviceClient
     }         // namespace Iot

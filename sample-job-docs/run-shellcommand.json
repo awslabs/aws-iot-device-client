@@ -1,0 +1,16 @@
+{
+  "_comment": "This sample JSON file can be used for creating a new directory newDir at the current filepath.",
+  "version": "1.0",
+  "steps": [
+    {
+      "action": {
+        "name": "Create New Directory",
+        "type": "runCommand",
+        "input": {
+          "command": "mkdir,newDir"
+        },
+        "runAsUser": "root"
+      }
+    }
+  ]
+}
