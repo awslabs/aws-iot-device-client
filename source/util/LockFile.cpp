@@ -37,20 +37,15 @@ LockFile::LockFile(const std::string &filedir, const std::string &process, const
 
             // check if process contains name
             bool one;
-            bool three;
             one = cmd.is_open();
-            three = cmdline.find(basename) != string::npos;
+            cmd >> cmdline;
 
             if (one)
             {
                 LOG_INFO(TAG, "found cmdline");
             }
-            if (three)
-            {
-                LOG_INFO(TAG, "found proc name");
-            }
 
-            if (cmd && cmd >> cmdline && three)
+            if (cmdline.find(basename) != string::npos)
             {
                 LOGM_ERROR(
                     TAG,
