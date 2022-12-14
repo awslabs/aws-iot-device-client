@@ -4,6 +4,7 @@
 #include "../../source/config/Config.h"
 #include "../../source/util/StringUtils.h"
 #include "gtest/gtest.h"
+#include <aws/crt/JsonObject.h>
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient;
@@ -121,4 +122,39 @@ TEST(StringUtils, trimMultiChar)
     ASSERT_EQ("b", TrimCopy("/a/b/c/", "/ac"));      // Match.
     ASSERT_EQ("/a/b/c/", TrimCopy("/a/b/c/", "ac")); // No match.
     ASSERT_EQ("", TrimCopy("", "/"));                // Empty string.
+}
+
+TEST(StringUtils, ParseToStringVector)
+{
+    constexpr char jsonString[] = R"(
+{
+    "args": ["hello", "world"]
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    vector<string> expected{"hello", "world"};
+    vector<string> actual = ParseToVectorString(jsonView.GetJsonObject("args"));
+
+    ASSERT_TRUE(expected.size() == actual.size());
+    ASSERT_TRUE(equal(expected.begin(), expected.end(), actual.begin()));
+}
+
+TEST(StringUtils, SplitStringByComma)
+{
+    string stringToSplit{"hello,world\\,!"};
+    vector<string> expected{"hello", "world\\,!"};
+    vector<string> actual = SplitStringByComma(stringToSplit);
+
+    ASSERT_TRUE(expected.size() == actual.size());
+    ASSERT_TRUE(equal(expected.begin(), expected.end(), actual.begin()));
+}
+
+TEST(StringUtils, replace_all)
+{
+    string actual{"hello\\,world!"};
+    string expected{"hello,world!"};
+    replace_all(actual, R"(\,)", ",");
+
+    ASSERT_STREQ(actual.c_str(), expected.c_str());
 }
