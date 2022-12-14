@@ -42,7 +42,7 @@ LockFile::LockFile(const std::string &filedir, const std::string &process, const
 
             if (one)
             {
-                LOG_INFO(TAG, "found cmdline");
+                LOGM_INFO(TAG, "found cmdline: %s", cmdline.c_str());
             }
 
             if (cmdline.find(basename) != string::npos)
