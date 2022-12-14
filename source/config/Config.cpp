@@ -326,15 +326,6 @@ bool PlainConfig::Validate() const
     {
         return false;
     }
-    if (lockFilePath.empty() || !FileUtils::IsValidFilePath(lockFilePath))
-    {
-        LOGM_ERROR(
-            Config::TAG,
-            "*** %s: Invalid Lock File Path %s ***",
-            DeviceClient::DC_FATAL_ERROR,
-            Sanitize(lockFilePath).c_str());
-        return false;
-    }
     if (rootCa.has_value() && !rootCa->empty() && FileUtils::FileExists(rootCa->c_str()))
     {
         string parentDir = FileUtils::ExtractParentDirectory(rootCa->c_str());
