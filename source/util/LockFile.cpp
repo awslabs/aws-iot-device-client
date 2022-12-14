@@ -18,22 +18,39 @@ constexpr char LockFile::FILE_NAME[];
 
 LockFile::LockFile(const std::string &filedir, const std::string &process, const std::string &thingName) : dir(filedir)
 {
+    LOG_INFO(TAG, "looking for lockfile");
     string fullPath = dir + FILE_NAME;
     ifstream fileIn(fullPath);
     if (fileIn)
     {
+        LOG_INFO(TAG, "found lockfile");
         string storedThingName;
         string storedPid;
         if (fileIn >> storedThingName && storedThingName == thingName && fileIn >> storedPid &&
             !(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
         {
+            LOG_INFO(TAG, "found process");
             string processPath = "/proc/" + storedPid + "/cmdline";
             string basename = process.substr(process.find_last_of("/\\") + 1);
             string cmdline;
             ifstream cmd(processPath.c_str());
 
             // check if process contains name
-            if (cmd && cmd >> cmdline && cmdline.find(basename) != string::npos)
+            bool one;
+            bool three;
+            one = cmd.is_open();
+            three = cmdline.find(basename) != string::npos;
+
+            if (one)
+            {
+                LOG_INFO(TAG, "found cmdline");
+            }
+            if (three)
+            {
+                LOG_INFO(TAG, "found proc name");
+            }
+
+            if (cmd && cmd >> cmdline && three)
             {
                 LOGM_ERROR(
                     TAG,
