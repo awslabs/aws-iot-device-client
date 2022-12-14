@@ -65,7 +65,6 @@ echo "${THING_NAME}" > /run/lock/devicecl.lock
 bash -c 'sleep 1000' &
 FAKE_PID=$!
 echo ${FAKE_PID} >> /run/lock/devicecl.lock
-sleep 5
 
 # TEST: Start and stop Device Client
 # 1. Rename aws-iot-device-client to sleep and exec binary
