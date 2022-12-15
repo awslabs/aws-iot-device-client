@@ -139,10 +139,10 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, const std::strin
     string command;
     if (action.type == PlainJobDocument::ACTION_TYPE_RUN_HANDLER)
     {
-        // build command
+        // build command for runHandler type
         try
         {
-            command = buildCommand(action.input.path, action.input.handler, jobHandlerDir);
+            command = buildCommand(action.handlerInput->path, action.handlerInput->handler, jobHandlerDir);
         }
         catch (exception &e)
         {
@@ -153,6 +153,11 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, const std::strin
             return;
         }
     }
+    else if (action.type == PlainJobDocument::ACTION_TYPE_RUN_COMMAND)
+    {
+        // build commands for runCommand type
+        command = action.commandInput->command.front();
+    }
     else
     {
         LOG_ERROR(TAG, "Job Document received with invalid action type.");
@@ -161,11 +166,20 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, const std::strin
     }
 
     ostringstream argsStringForLogging;
-    if (action.input.args.has_value())
+    if (action.type == RUN_HANDLER_TYPE && action.handlerInput->args.has_value())
     {
-        for (const auto &eachArgument : action.input.args.value())
+        // build logstream for runHandler to print out on console
+        for (const auto &eachArgument : action.handlerInput->args.value())
         {
             argsStringForLogging << eachArgument << " ";
+        }
+    }
+    else if (action.type == RUN_COMMAND_TYPE)
+    {
+        // build logstream for runCommand to print out on console
+        for (size_t i = 1; i < action.commandInput->command.size(); i++)
+        {
+            argsStringForLogging << action.commandInput->command.at(i) << " ";
         }
     }
     else
@@ -181,7 +195,15 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, const std::strin
         Util::Sanitize(action.runAsUser->c_str()).c_str(),
         Util::Sanitize(argsStringForLogging.str()).c_str());
 
-    int actionExecutionStatus = exec_cmd(command, action);
+    int actionExecutionStatus;
+    if (action.type == RUN_HANDLER_TYPE)
+    {
+        actionExecutionStatus = exec_handlerScript(command, action);
+    }
+    else if (action.type == RUN_COMMAND_TYPE)
+    {
+        actionExecutionStatus = exec_shellCommand(action);
+    }
 
     if (!action.ignoreStepFailure.value())
     {
@@ -228,7 +250,7 @@ int JobEngine::exec_steps(PlainJobDocument jobDocument, const std::string &jobHa
     return executionStatus;
 }
 
-int JobEngine::exec_cmd(const string &operation, PlainJobDocument::JobAction action)
+int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
 {
     // Establish some file descriptors which we'll use to redirect stdout and
     // stderr from the child process back into our logger
@@ -247,26 +269,6 @@ int JobEngine::exec_cmd(const string &operation, PlainJobDocument::JobAction act
         close(stdout[PIPE_WRITE]);
         LOG_ERROR(TAG, "failed allocating pipe for child STDERR redirect");
         return CMD_FAILURE;
-    }
-
-    /**
-     * \brief Create char array argv[] storing arguments to pass to execvp() function.
-     * argv[0] executable path
-     * argv[1] Linux user name
-     * argv[2:] arguments required for executing the executable file..
-     */
-    size_t argSize = 0;
-    if (action.input.args.has_value())
-    {
-        argSize = action.input.args->size();
-    }
-    std::unique_ptr<const char *[]> argv(new const char *[argSize + 3]);
-    argv[0] = operation.c_str();
-    argv[1] = action.runAsUser->c_str();
-    argv[argSize + 2] = nullptr;
-    for (size_t i = 0; i < argSize; i++)
-    {
-        argv[i + 2] = action.input.args->at(i).c_str();
     }
 
     int execResult;
@@ -303,12 +305,14 @@ int JobEngine::exec_cmd(const string &operation, PlainJobDocument::JobAction act
 
         LOG_DEBUG(TAG, "Child process about to call execvp");
 
-        if (execvp(operation.c_str(), const_cast<char *const *>(argv.get())) == -1)
+        auto rc = execvp(argv[0], const_cast<char *const *>(argv.get()));
+        if (rc == -1)
         {
-            LOGM_DEBUG(TAG, "Failed to invoke execvp system call to execute action step: %s ", strerror(errno));
+            auto err = errno;
+            LOGM_ERROR(TAG, "Failed to invoke execvp system call to execute action step: %s (%d)", strerror(err), err);
+            _exit(rc);
         }
-        // If the exec fails we need to exit the child process
-        _exit(1);
+        _exit(0);
     }
     else
     {
@@ -330,12 +334,165 @@ int JobEngine::exec_cmd(const string &operation, PlainJobDocument::JobAction act
             int waitReturn = waitpid(pid, &execResult, 0);
             if (waitReturn == -1)
             {
-                LOG_WARN(TAG, "Failed to wait for child process");
+                LOGM_WARN(TAG, "Failed to wait for child process: %d", pid);
             }
 
-            LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", execResult);
-            returnCode = execResult;
+            returnCode = WEXITSTATUS(execResult);
+            LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", returnCode);
         } while (!WIFEXITED(execResult) && !WIFSIGNALED(execResult));
+    }
+    return returnCode;
+}
+
+int JobEngine::exec_process(std::unique_ptr<const char *[]> &argv)
+{
+    int status = 0;
+    int execStatus = 0;
+    int pid = vfork();
+
+    if (pid < 0)
+    {
+        auto err = errno;
+        LOGM_ERROR(TAG, "Failed to create child process, fork returned: %s (%d)", strerror(err), err);
+        return CMD_FAILURE;
+    }
+    else if (pid == 0)
+    {
+        LOG_DEBUG(TAG, "Child process now running.");
+
+        auto rc = execvp(argv[0], const_cast<char *const *>(argv.get()));
+        if (rc == -1)
+        {
+            auto err = errno;
+            LOGM_ERROR(TAG, "Failed to invoke execvp system call to execute action step: %s (%d)", strerror(err), err);
+            _exit(rc);
+        }
+        _exit(0);
+    }
+    else
+    {
+        LOGM_DEBUG(TAG, "Parent process now running, child PID is %d", pid);
+        do
+        {
+            // TODO: do not wait for infinite time for child process to complete
+            int waitReturn = waitpid(pid, &status, 0);
+            if (waitReturn == -1)
+            {
+                LOGM_WARN(TAG, "Failed to wait for child process: %d", pid);
+            }
+            execStatus = WEXITSTATUS(status);
+            LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", execStatus);
+
+        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+    }
+    return execStatus;
+}
+
+int JobEngine::exec_handlerScript(const std::string &command, PlainJobDocument::JobAction action)
+{
+    /**
+     * \brief Create char array argv[] storing arguments to pass to execvp() function.
+     * argv[0] executable path
+     * argv[1] Linux user name
+     * argv[2:] arguments required for executing the executable file..
+     */
+    int actionExecutionStatus;
+    size_t argSize = 0;
+    if (action.handlerInput->args.has_value())
+    {
+        argSize = action.handlerInput->args->size();
+    }
+    std::unique_ptr<const char *[]> argv(new const char *[argSize + 3]);
+    argv[0] = command.c_str();
+    argv[1] = action.runAsUser->c_str();
+    argv[argSize + 2] = nullptr;
+    for (size_t i = 0; i < argSize; i++)
+    {
+        argv[i + 2] = action.handlerInput->args->at(i).c_str();
+    }
+    actionExecutionStatus = exec_cmd(argv);
+    return actionExecutionStatus;
+}
+
+bool JobEngine::verifySudoAndUser(PlainJobDocument::JobAction action)
+{
+    int execStatus1;
+    // first to run command id $user and /bin/bash -c "command -v sudo" to verify user and sudo
+    std::unique_ptr<const char *[]> argv1(new const char *[3]);
+    argv1[0] = "id";
+    argv1[1] = action.runAsUser->c_str();
+    argv1[2] = nullptr;
+
+    execStatus1 = exec_process(argv1);
+
+    if (execStatus1 == 0)
+    {
+        std::unique_ptr<const char *[]> argv2(new const char *[4]);
+        argv2[0] = "/bin/bash";
+        argv2[1] = "-c";
+        argv2[2] = "command -v sudo";
+        argv2[3] = nullptr;
+
+        int execStatus2 = exec_process(argv2);
+        if (execStatus2 != 0)
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+    return true;
+}
+
+int JobEngine::exec_shellCommand(PlainJobDocument::JobAction action)
+{
+    int returnCode;
+    bool verification;
+
+    verification = verifySudoAndUser(action);
+
+    if (!verification)
+    {
+        // if one of two verification fails, execute command without "sudo" and "$user"
+        LOG_WARN(TAG, "username or sudo command not found");
+
+        size_t argSize = action.commandInput->command.size();
+        std::unique_ptr<const char *[]> argv(new const char *[argSize + 1]);
+        argv[argSize] = nullptr;
+        for (size_t i = 0; i < argSize; i++)
+        {
+            argv[i] = action.commandInput->command.at(i).c_str();
+        }
+        // print out argv for debug
+        for (size_t i = 0; i < argSize; ++i)
+        {
+            LOGM_DEBUG(TAG, "argv[%lu]: %s", i, (argv.get())[i]);
+        }
+        returnCode = exec_cmd(argv);
+    }
+    else
+    {
+        // if two verifications succeeds, build command using sudo -u $user -n $@ and execute
+        size_t argSize = action.commandInput->command.size();
+        std::unique_ptr<const char *[]> argv(new const char *[argSize + 5]);
+        argv[0] = "sudo";
+        argv[1] = "-u";
+        argv[2] = action.runAsUser->c_str();
+        argv[3] = "-n";
+        argv[argSize + 4] = nullptr;
+        for (size_t i = 0; i < argSize; i++)
+        {
+            argv[i + 4] = action.commandInput->command.at(i).c_str();
+        }
+        // print out argv to debug
+        for (size_t i = 0; i < argSize + 4; ++i)
+        {
+            LOGM_DEBUG(TAG, "argv[%lu]: %s", i, (argv.get())[i]);
+        }
+
+        returnCode = exec_cmd(argv);
     }
     return returnCode;
 }

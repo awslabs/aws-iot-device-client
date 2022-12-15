@@ -1,4 +1,4 @@
-name: Docker main Builds
+name: Release CI
 
 # When all workflows have passed and the pre-release branch is merged to main branch this workflow will build and publish
 # the Docker images to the aws-iot-device-client repository as part of the public release of that Device Client version.
@@ -53,10 +53,13 @@ jobs:
         run: |
           version=$(docker run ${{ steps.build-device-client.outputs.imageid }} --version)
           echo "::set-output name=version::$version"
-  build-docker-image-ubuntu-amd64:
+  build-docker-image-ubuntu:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     needs: [versioning]
+    strategy:
+      matrix:
+        architecture: [amd64, arm64]
     permissions:
       id-token: write
       contents: read
@@ -82,63 +85,19 @@ jobs:
           images: public.ecr.aws/${{ env.ECR_REPO }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Build Device Client Docker Image
+      - name: Build Device Client Image
         uses: docker/build-push-action@v3
         with:
           file: .github/docker-images/Dockerfile
           context: .
           build-args: |
             OS=ubuntu:18.04
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-ubuntu-latest
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:${{matrix.architecture}}-ubuntu-latest
           push: true
           tags: |
-            public.ecr.aws/${{ env.ECR_REPO }}:amd64-ubuntu-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_REPO }}:amd64-ubuntu-latest
-          platforms: linux/amd64
-          labels: ${{ steps.meta.outputs.labels }}
-  build-docker-image-ubuntu-arm64:
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
-    needs: [versioning]
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
-          aws-region: us-east-1
-      - name: Login to ECR
-        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: public.ecr.aws/${{ env.ECR_REPO }}
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Build Device Client Docker Image
-        uses: docker/build-push-action@v3
-        with:
-          file: .github/docker-images/Dockerfile
-          context: .
-          build-args: |
-            OS=ubuntu:18.04
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:arm64-ubuntu-latest
-          push: true
-          tags: |
-            public.ecr.aws/${{ env.ECR_REPO }}:arm64-ubuntu-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_REPO }}:arm64-ubuntu-latest
-          platforms: linux/arm64
-          labels: ${{ steps.meta.outputs.labels }}
+            public.ecr.aws/${{ env.ECR_REPO }}:${{matrix.architecture}}-ubuntu-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_REPO }}:${{matrix.architecture}}-ubuntu-latest
+          platforms: linux/${{matrix.architecture}}
   build-docker-image-ubuntu-armv7:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
@@ -168,7 +127,7 @@ jobs:
           images: public.ecr.aws/${{ env.ECR_REPO }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Build Device Client Docker Image
+      - name: Build Device Client Image
         uses: docker/build-push-action@v3
         with:
           file: .github/docker-images/Dockerfile
@@ -181,11 +140,13 @@ jobs:
             public.ecr.aws/${{ env.ECR_REPO }}:armv7-ubuntu-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_REPO }}:armv7-ubuntu-latest
           platforms: linux/arm/v7
-          labels: ${{ steps.meta.outputs.labels }}
-  build-docker-image-amazonlinux-amd64:
+  build-docker-image-amazonlinux:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     needs: [versioning]
+    strategy:
+      matrix:
+        architecture: [ amd64, arm64 ]
     permissions:
       id-token: write
       contents: read
@@ -211,24 +172,26 @@ jobs:
           images: public.ecr.aws/${{ env.ECR_REPO }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Build Device Client Docker Image
+      - name: Build Device Client Image
         uses: docker/build-push-action@v3
         with:
           file: .github/docker-images/Dockerfile
           context: .
           build-args: |
             OS=amazonlinux:latest
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-amazonlinux-latest
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:${{matrix.architecture}}-amazonlinux-latest
           push: true
           tags: |
-            public.ecr.aws/${{ env.ECR_REPO }}:amd64-amazonlinux-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_REPO }}:amd64-amazonlinux-latest
-          platforms: linux/amd64
-          labels: ${{ steps.meta.outputs.labels }}
-  build-docker-image-amazonlinux-arm64:
+            public.ecr.aws/${{ env.ECR_REPO }}:${{matrix.architecture}}-amazonlinux-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_REPO }}:${{matrix.architecture}}-amazonlinux-latest
+          platforms: linux/${{matrix.architecture}}
+  build-docker-image-ubi8:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     needs: [versioning]
+    strategy:
+      matrix:
+        architecture: [ amd64, arm64 ]
     permissions:
       id-token: write
       contents: read
@@ -254,103 +217,16 @@ jobs:
           images: public.ecr.aws/${{ env.ECR_REPO }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Build Device Client Docker Image
-        uses: docker/build-push-action@v3
-        with:
-          file: .github/docker-images/Dockerfile
-          context: .
-          build-args: |
-            OS=amazonlinux:latest
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:arm64-amazonlinux-latest
-          push: true
-          tags: |
-            public.ecr.aws/${{ env.ECR_REPO }}:arm64-amazonlinux-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_REPO }}:arm64-amazonlinux-latest
-          platforms: linux/arm64
-          labels: ${{ steps.meta.outputs.labels }}
-  build-docker-image-ubi8-amd64:
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
-    needs: [versioning]
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
-          aws-region: us-east-1
-      - name: Login to ECR
-        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: public.ecr.aws/${{ env.ECR_REPO }}
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Build Device Client Docker Image
+      - name: Build Device Client Image
         uses: docker/build-push-action@v3
         with:
           file: .github/docker-images/Dockerfile
           context: .
           build-args: |
             OS=registry.access.redhat.com/ubi8/ubi
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:amd64-ubi8-latest
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:${{matrix.architecture}}-ubi8-latest
           push: true
           tags: |
-            public.ecr.aws/${{ env.ECR_REPO }}:amd64-ubi8-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_REPO }}:amd64-ubi8-latest
-          platforms: linux/amd64
-          labels: ${{ steps.meta.outputs.labels }}
-  build-docker-image-ubi8-arm64:
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
-    needs: [versioning]
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
-          aws-region: us-east-1
-      - name: Login to ECR
-        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: public.ecr.aws/${{ env.ECR_REPO }}
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Build Device Client Docker Image
-        uses: docker/build-push-action@v3
-        with:
-          file: .github/docker-images/Dockerfile
-          context: .
-          build-args: |
-            OS=registry.access.redhat.com/ubi8/ubi
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:arm64-ubi8-latest
-          push: true
-          tags: |
-            public.ecr.aws/${{ env.ECR_REPO }}:arm64-ubi8-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_REPO }}:arm64-ubi8-latest
-          platforms: linux/arm64
-          labels: ${{ steps.meta.outputs.labels }}
+            public.ecr.aws/${{ env.ECR_REPO }}:${{matrix.architecture}}--ubi8-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_REPO }}:${{matrix.architecture}}--ubi8-latest
+          platforms: linux/${{matrix.architecture}}

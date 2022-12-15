@@ -18,19 +18,34 @@ PlainJobDocument::JobAction createJobAction(
     string type,
     string handler,
     std::vector<std::string> args,
+    std::vector<std::string> command,
     string path,
+    const char *runAsUser,
     bool ignoreStepFailure)
 {
-    PlainJobDocument::JobAction::ActionInput input;
-    input.handler = handler;
-    input.args = args;
-    input.path = path;
-
     PlainJobDocument::JobAction action;
     action.name = name;
     action.type = type;
+    if (runAsUser != nullptr)
+    {
+        action.runAsUser = runAsUser;
+    }
     action.ignoreStepFailure = ignoreStepFailure;
-    action.input = input;
+
+    if (type == "runHandler")
+    {
+        PlainJobDocument::JobAction::ActionHandlerInput input;
+        input.handler = handler;
+        input.args = args;
+        input.path = path;
+        action.handlerInput = input;
+    }
+    else
+    {
+        PlainJobDocument::JobAction::ActionCommandInput input;
+        input.command = command;
+        action.commandInput = input;
+    }
 
     return action;
 }
@@ -58,6 +73,7 @@ PlainJobDocument createTestJobDocument(
 const string testHandlerDirectoryPath = "/tmp/device-client-tests";
 const string successHandlerPath = testHandlerDirectoryPath + "/successHandler";
 const string errorHandlerPath = testHandlerDirectoryPath + "/errorHandler";
+const string successCreatedFile = testHandlerDirectoryPath + "/test-success";
 
 const string testStdout = "This is test stdout";
 const string testStderr = "This is test stderr";
@@ -84,6 +100,7 @@ class TestJobEngine : public testing::Test
     {
         std::remove(successHandlerPath.c_str());
         std::remove(errorHandlerPath.c_str());
+        std::remove(successCreatedFile.c_str());
         std::remove(testHandlerDirectoryPath.c_str());
     }
 };
@@ -92,8 +109,9 @@ TEST_F(TestJobEngine, ExecuteStepsHappy)
 {
     vector<PlainJobDocument::JobAction> steps;
     vector<std::string> args;
-    steps.push_back(
-        createJobAction("testAction", "runHandler", "successHandler", args, "/tmp/device-client-tests/", false));
+    vector<std::string> command;
+    steps.push_back(createJobAction(
+        "testAction", "runHandler", "successHandler", args, command, "/tmp/device-client-tests/", nullptr, false));
     PlainJobDocument jobDocument = createTestJobDocument(steps, true);
     JobEngine jobEngine;
 
@@ -106,10 +124,11 @@ TEST_F(TestJobEngine, ExecuteSucceedThenFail)
 {
     vector<PlainJobDocument::JobAction> steps;
     vector<std::string> args;
-    steps.push_back(
-        createJobAction("testAction", "runHandler", "successHandler", args, "/tmp/device-client-tests/", false));
-    PlainJobDocument::JobAction finalStep =
-        createJobAction("testAction", "runHandler", "errorHandler", args, "/tmp/device-client-tests/", false);
+    vector<std::string> command;
+    steps.push_back(createJobAction(
+        "testAction", "runHandler", "successHandler", args, command, "/tmp/device-client-tests/", nullptr, false));
+    PlainJobDocument::JobAction finalStep = createJobAction(
+        "testAction", "runHandler", "errorHandler", args, command, "/tmp/device-client-tests/", nullptr, false);
     PlainJobDocument jobDocument = createTestJobDocument(steps, finalStep, true);
     JobEngine jobEngine;
 
@@ -123,8 +142,9 @@ TEST_F(TestJobEngine, ExecuteFinalStepOnly)
 {
     vector<PlainJobDocument::JobAction> steps;
     vector<std::string> args;
-    PlainJobDocument::JobAction finalStep =
-        createJobAction("testAction", "runHandler", "successHandler", args, "/tmp/device-client-tests/", false);
+    vector<std::string> command;
+    PlainJobDocument::JobAction finalStep = createJobAction(
+        "testAction", "runHandler", "successHandler", args, command, "/tmp/device-client-tests/", nullptr, false);
     PlainJobDocument jobDocument = createTestJobDocument(steps, finalStep, true);
     JobEngine jobEngine;
 
@@ -137,8 +157,9 @@ TEST_F(TestJobEngine, ExecuteStepsError)
 {
     vector<PlainJobDocument::JobAction> steps;
     vector<std::string> args;
-    steps.push_back(
-        createJobAction("testAction", "runHandler", "errorHandler", args, "/tmp/device-client-tests/", false));
+    vector<std::string> command;
+    steps.push_back(createJobAction(
+        "testAction", "runHandler", "errorHandler", args, command, "/tmp/device-client-tests/", nullptr, false));
     PlainJobDocument jobDocument = createTestJobDocument(steps, true);
     JobEngine jobEngine;
 
@@ -158,4 +179,52 @@ TEST_F(TestJobEngine, ExecuteNoSteps)
     ASSERT_EQ(executionStatus, 0);
     ASSERT_EQ(jobEngine.getStdOut().length(), 0);
     ASSERT_EQ(jobEngine.getStdErr().length(), 0);
+}
+
+TEST_F(TestJobEngine, ExecuteRunCommandWithInvalidUser)
+{
+    vector<PlainJobDocument::JobAction> steps;
+    vector<std::string> args;
+    vector<std::string> command;
+    command.emplace_back("touch");
+    command.emplace_back(successCreatedFile);
+    steps.push_back(createJobAction("testCreateFile", "runCommand", "", args, command, "", "fake", false));
+    PlainJobDocument jobDocument = createTestJobDocument(steps, true);
+    JobEngine jobEngine;
+
+    int executionStatus = jobEngine.exec_steps(jobDocument, testHandlerDirectoryPath);
+    ASSERT_EQ(executionStatus, 0);
+    ASSERT_TRUE(FileUtils::FileExists(successCreatedFile));
+}
+
+TEST_F(TestJobEngine, ExecuteRunCommandWithEmptyUser)
+{
+    vector<PlainJobDocument::JobAction> steps;
+    vector<std::string> args;
+    vector<std::string> command;
+    command.emplace_back("touch");
+    command.emplace_back(successCreatedFile);
+    steps.push_back(createJobAction("testCreateFile", "runCommand", "", args, command, "", nullptr, false));
+    PlainJobDocument jobDocument = createTestJobDocument(steps, true);
+    JobEngine jobEngine;
+
+    int executionStatus = jobEngine.exec_steps(jobDocument, testHandlerDirectoryPath);
+    ASSERT_EQ(executionStatus, 0);
+    ASSERT_TRUE(FileUtils::FileExists(successCreatedFile));
+}
+
+TEST_F(TestJobEngine, ExecuteRunCommandWithUser)
+{
+    vector<PlainJobDocument::JobAction> steps;
+    vector<std::string> args;
+    vector<std::string> command;
+    command.emplace_back("touch");
+    command.emplace_back(successCreatedFile);
+    steps.push_back(createJobAction("testCreateFile", "runCommand", "", args, command, "", "root", false));
+    PlainJobDocument jobDocument = createTestJobDocument(steps, true);
+    JobEngine jobEngine;
+
+    int executionStatus = jobEngine.exec_steps(jobDocument, testHandlerDirectoryPath);
+    ASSERT_EQ(executionStatus, 0);
+    ASSERT_TRUE(FileUtils::FileExists(successCreatedFile));
 }

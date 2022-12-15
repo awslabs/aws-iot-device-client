@@ -33,9 +33,9 @@ namespace Aws
                 {
                     void LoadFromJobDocument(const Crt::JsonView &json) override;
                     bool Validate() const override;
-                    static std::vector<std::string> ParseToVectorString(const Crt::JsonView &json);
 
                     static constexpr char ACTION_TYPE_RUN_HANDLER[] = "runHandler";
+                    static constexpr char ACTION_TYPE_RUN_COMMAND[] = "runCommand";
 
                     static constexpr char JSON_KEY_VERSION[] = "version";
                     static constexpr char JSON_KEY_INCLUDESTDOUT[] = "includeStdOut";
@@ -85,7 +85,10 @@ namespace Aws
                         std::string name;
                         std::string type;
 
-                        struct ActionInput : public LoadableFromJobDocument
+                        /**
+                         * ActionHandlerInput - Invokes a handler script specified in a job document.
+                         */
+                        struct ActionHandlerInput : public LoadableFromJobDocument
                         {
                             void LoadFromJobDocument(const Crt::JsonView &json) override;
                             bool Validate() const override;
@@ -98,10 +101,24 @@ namespace Aws
                             Crt::Optional<std::vector<std::string>> args;
                             Crt::Optional<std::string> path;
                         };
-                        ActionInput input;
-                        Crt::Optional<std::string> runAsUser{""};
-                        Crt::Optional<int> allowStdErr;
-                        Crt::Optional<bool> ignoreStepFailure{false};
+                        Optional<ActionHandlerInput> handlerInput;
+
+                        /**
+                         * ActionCommandInput - Invokes arbitrary commands specified in a job document.
+                         */
+                        struct ActionCommandInput : public LoadableFromJobDocument
+                        {
+                            void LoadFromJobDocument(const JsonView &json) override;
+                            bool Validate() const override;
+
+                            static constexpr char JSON_KEY_COMMAND[] = "command";
+
+                            std::vector<std::string> command;
+                        };
+                        Optional<ActionCommandInput> commandInput;
+                        Optional<std::string> runAsUser{""};
+                        Optional<int> allowStdErr;
+                        Optional<bool> ignoreStepFailure{false};
                     };
                     std::vector<JobAction> steps;
 

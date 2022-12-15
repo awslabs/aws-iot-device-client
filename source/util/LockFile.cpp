@@ -16,21 +16,22 @@ using namespace Aws::Iot::DeviceClient::Logging;
 constexpr char LockFile::TAG[];
 constexpr char LockFile::FILE_NAME[];
 
-LockFile::LockFile(const std::string &filedir, const std::string &process) : dir(filedir)
+LockFile::LockFile(const std::string &filedir, const std::string &process, const std::string &thingName) : dir(filedir)
 {
+    LOG_DEBUG(TAG, "creating lockfile");
     string fullPath = dir + FILE_NAME;
     ifstream fileIn(fullPath);
     if (fileIn)
     {
+        string storedThingName;
         string storedPid;
-        if (fileIn >> storedPid && !(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
+        if (fileIn >> storedThingName && storedThingName == thingName && fileIn >> storedPid &&
+            !(kill(stoi(storedPid), 0) == -1 && errno == ESRCH))
         {
             string processPath = "/proc/" + storedPid + "/cmdline";
             string basename = process.substr(process.find_last_of("/\\") + 1);
             string cmdline;
             ifstream cmd(processPath.c_str());
-
-            // check if process contains name
             if (cmd && cmd >> cmdline && cmdline.find(basename) != string::npos)
             {
                 LOGM_ERROR(
@@ -56,14 +57,17 @@ LockFile::LockFile(const std::string &filedir, const std::string &process) : dir
     FILE *file = fopen(fullPath.c_str(), "wx");
     if (!file)
     {
-        LOGM_ERROR(TAG, "Unable to open lockfile: %s", Sanitize(fullPath).c_str());
-
-        throw runtime_error{"Can not write to lockfile."};
+        LOGM_ERROR(
+            TAG, "Unable to open lockfile. File may be in use or does not exist: %s", Sanitize(fullPath).c_str());
     }
-
-    string pid = to_string(getpid());
-    fputs(pid.c_str(), file);
-    fclose(file);
+    else
+    {
+        string pid = to_string(getpid());
+        fputs(thingName.c_str(), file);
+        fputs(string("\n").c_str(), file);
+        fputs(pid.c_str(), file);
+        fclose(file);
+    }
 }
 
 LockFile::~LockFile()

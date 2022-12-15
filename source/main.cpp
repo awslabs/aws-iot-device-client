@@ -113,7 +113,13 @@ bool init(int argc, char *argv[])
         string filename = config.config.lockFilePath;
         if (!filename.empty())
         {
-            lockFile = unique_ptr<LockFile>(new LockFile{filename, argv[0]});
+            string thing;
+            if (config.config.thingName.has_value() && !config.config.thingName.value().empty())
+            {
+                thing = config.config.thingName.value();
+            }
+
+            lockFile = unique_ptr<LockFile>(new LockFile{filename, argv[0], thing});
         }
     }
     catch (std::runtime_error &e)
@@ -316,7 +322,7 @@ int main(int argc, char *argv[])
      */
     if (!init(argc, argv))
     {
-        return -1;
+        return 1;
     }
     features = make_shared<FeatureRegistry>();
 
@@ -534,6 +540,9 @@ int main(int argc, char *argv[])
         switch (received_signal)
         {
             case SIGINT:
+                shutdown();
+                break;
+            case SIGTERM:
                 shutdown();
                 break;
             case SIGHUP:

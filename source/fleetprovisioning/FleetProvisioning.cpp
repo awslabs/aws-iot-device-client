@@ -714,7 +714,7 @@ bool FleetProvisioning::ExportRuntimeConfig(
         runtimeDeviceConfig.c_str());
     LOGM_INFO(TAG, "Exported runtime configurations to: %s", file.c_str());
 
-    chmod(expandedPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    chmod(expandedPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP);
     FileUtils::ValidateFilePermissions(expandedPath.c_str(), Permissions::RUNTIME_CONFIG_FILE, false);
     return true;
 }

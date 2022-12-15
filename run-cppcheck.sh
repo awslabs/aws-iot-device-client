@@ -26,4 +26,4 @@ cppcheck \
     --inline-suppr \
     --error-exitcode=1 \
     -i test \
-    source
+    source integration-tests/source
