@@ -9,6 +9,8 @@
 #include <aws/crt/Optional.h>
 #include <map>
 
+using namespace Aws::Crt;
+
 namespace Aws
 {
     namespace Iot
