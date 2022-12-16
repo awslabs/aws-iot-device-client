@@ -26,9 +26,9 @@ jobs:
         mkdir build
         cmake . -B build
         build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} cmake --build build/ --target aws-iot-device-client
-        cmake --build build/ --target test-aws-iot-device-client
     - name: Build and Run Tests
       run: |
+        cmake --build build/ --target test-aws-iot-device-client
         ./build/test/test-aws-iot-device-client
     - name: Run sonar-scanner
       env:
