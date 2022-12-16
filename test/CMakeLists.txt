@@ -110,7 +110,7 @@ if (NOT EXCLUDE_SENSOR_PUBLISH)
 endif ()
 
 list(APPEND DC_SRC ${DC_TST})
-# list(FILTER DC_SRC EXCLUDE REGEX ".*main.cpp$")
+list(FILTER DC_SRC EXCLUDE REGEX ".*main.cpp$")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fprofile-arcs -ftest-coverage -w")
 set(HEADERS)
