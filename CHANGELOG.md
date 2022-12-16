@@ -9,6 +9,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Device Client stability issues when receiving signal interrupts](https://github.com/awslabs/aws-iot-device-client/issues/110)
 - [Device Client build failure with gcc v11](https://github.com/awslabs/aws-iot-device-client/issues/146)
 
+## [1.8.X] - 2022-12-15
+### Added
+* Support for new runCommand Job type (e.g. ["AWS-Run-Command" Managed Job Template](https://docs.aws.amazon.com/iot/latest/developerguide/job-templates-managed.html))  (#359)
+* Added cross-compilation support for PowerPC64 and PowerPC64le architectures (#328) (#329)
+* New GitHub workflows for building [Docker images](https://github.com/awslabs/aws-iot-device-client/tree/main/.github/docker-images) and publishing to [ECR](https://gallery.ecr.aws/aws-iot-device-client?page=1) (#328) (#329) (#355)
+
+### Fixed
+* Fixed permissions for files created by Device Client (#344) (#303) (#305)
+* Refactoring for testability and added unit tests (#275) (#313) (#309) (#317)
+* Bug fix caused by promise variable being called more than once during shutdown (#307)
+* Bug fix for lock file handler causing Device Client to fail on Amazon Linux Docker images (#332)
+
+## [1.7.X] - 2022-07-21
+### Added
+* Provisioning with Secure Element (PKCS#11) support. (#272)
+* HTTP proxy support. (#290)
+* Add `softhsm` in the docker build files. (#267)
+* Add more unit tests for jobs feature. (#266 #278)
+* Add `--version` CLI option. (#280)
+
+### Fixed
+* Bump ubuntu version from 16 to 18, fix build issues with gcc 11. (#249)
+* Bug fix for segmentation fault caused by empty root CA. Will default to default trust store if empty or invalid root-ca path is provided. (#262)
+* The systemd script now have `--config-file` flag with default directory in `/etc`. (#259)
+* Disable device defender by default. (#271)
+* Fix cross compilation issue. (#274)
+* Fix segmentation fault when closing secure tunnel with null WebSocket. (#276)
+* Add check for return code from `wordexp` in implementation of `FileUtils::ExtractExpandedPath`. (#288)
+* Fixes CLI parsing bug when command is unrecognized. (#289)
+* Replace third party clang format action with `clang-format` from CI image. (#291)
+* Documentation and README updates. (#261)
+
+## [1.6.X] - 2022-05-06
+### Added
+* Sensor Publish over MQTT feature (#260)
+* Modifies download file handler to allow for passing in a directory to store file (#238)
+* Prevent multiple processes (#236)
+
+### Fixed
+* Upgrade openssl version to 1.1.1n to address CVE-2022-0778 (#228)
+* Updated DD code to subscribe & unsubscribe to `/rejected` topic (#224)
+* Secure tunneling deadlock fix. (#219)
+* Bug fix for pub sub creation (#214)
+* Device Client bug fixes for (1) reboot action, (2) Docker images and (3) DC versioning (#210)
 
 ## [1.5.X] - 2021-12-16
 ### Added
