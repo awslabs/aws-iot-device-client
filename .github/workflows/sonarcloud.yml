@@ -10,6 +10,7 @@ on:
 jobs:
   sonarcloud:
     runs-on: ubuntu-latest
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     env:
       CC: gcc-9
       CXX: g++-9
@@ -32,8 +33,15 @@ jobs:
       run: |
         cmake --build build/ --target test-aws-iot-device-client
         ./build/test/test-aws-iot-device-client
+    - name: Run coverage
+      run: |
+        mkdir coverage-dir
+        cd coverage-dir
+        find ../build/test/CMakeFiles/test-aws-iot-device-client.dir/__/source -name '*.o' | xargs gcov --preserve-paths
+        cd ..
     - name: Run sonar-scanner
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: sonar-scanner --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}" # Consult https://docs.sonarcloud.io/advanced-setup/ci-based-analysis/sonarscanner-cli/ for more information and options
+      run: sonar-scanner --define sonar.cfamily.build-wrapper-output="${{ env.BUILD_WRAPPER_OUT_DIR }}" --define sonar.cfamily.gcov.reportsPath="coverage-dir"
+      # Consult https://docs.sonarcloud.io/advanced-setup/ci-based-analysis/sonarscanner-cli/ for more information and options
