@@ -115,7 +115,6 @@ string JobEngine::buildCommand(Optional<string> path, const std::string &handler
         LOG_DEBUG(TAG, "Assuming executable is in PATH");
     }
 
-    // cppcheck-suppress stlcstrStream
     commandStream << handler.c_str();
 
     if (operationOwnedByDeviceClient)
@@ -261,8 +260,6 @@ int JobEngine::exec_cmd(const string &operation, PlainJobDocument::JobAction act
     {
         argSize = action.input.args->size();
     }
-
-    // cppcheck-suppress leakReturnValNotUsed
     std::unique_ptr<const char *[]> argv(new const char *[argSize + 3]);
     argv[0] = operation.c_str();
     argv[1] = action.runAsUser->c_str();

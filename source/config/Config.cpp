@@ -2571,7 +2571,7 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
         {PlainConfig::HttpProxyConfig::CLI_HTTP_PROXY_CONFIG_PATH, true, nullptr}};
 
     map<string, ArgumentDefinition> argumentDefinitionMap;
-    for (const auto &i : argumentDefinitions)
+    for (auto &i : argumentDefinitions)
     {
         argumentDefinitionMap[i.cliFlag] = i;
     }

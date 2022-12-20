@@ -185,7 +185,7 @@ int PubSubFeature::start()
     };
     auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void {
         LOGM_DEBUG(TAG, "Message received on subscribe topic, size: %zu bytes", payload.len);
-        if (string(reinterpret_cast<char *>(payload.buffer), payload.len) == PUBLISH_TRIGGER_PAYLOAD)
+        if (string((char *)payload.buffer, payload.len) == PUBLISH_TRIGGER_PAYLOAD)
         {
             publishFileData();
         }
@@ -204,7 +204,7 @@ int PubSubFeature::start()
     // is received
     publishFileData();
 
-    baseNotifier->onEvent(static_cast<Feature *>(this), ClientBaseEventNotification::FEATURE_STARTED);
+    baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STARTED);
     return AWS_OP_SUCCESS;
 }
 
@@ -215,6 +215,6 @@ int PubSubFeature::stop()
     };
 
     resourceManager->getConnection()->Unsubscribe(subTopic.c_str(), onUnsubscribe);
-    baseNotifier->onEvent(static_cast<Feature *>(this), ClientBaseEventNotification::FEATURE_STOPPED);
+    baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
     return AWS_OP_SUCCESS;
 }

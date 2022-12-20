@@ -43,7 +43,7 @@ namespace Aws
                      * \brief Default Constructor
                      */
 
-                    TcpForward();
+                    TcpForward() = default;
 
                     /**
                      * \brief Destructor

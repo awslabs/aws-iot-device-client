@@ -29,7 +29,7 @@ namespace Aws
                   public:
                     static constexpr char NAME[] = "Device Defender";
 
-                    DeviceDefenderFeature();
+                    DeviceDefenderFeature() = default;
 
                     /**
                      * \brief Initializes the Device Defender feature with all the required setup information, event

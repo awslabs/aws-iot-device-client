@@ -32,8 +32,6 @@ namespace Aws
                     aws_byte_buf_init(&mSendBuffer, sharedCrtResourceManager->getAllocator(), 1);
                 }
 
-                TcpForward::TcpForward() : mPort(0) {}
-
                 TcpForward::~TcpForward()
                 {
                     if (mConnected)

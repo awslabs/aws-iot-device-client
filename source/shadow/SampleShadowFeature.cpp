@@ -423,13 +423,13 @@ int SampleShadowFeature::start()
         file_monitor_thread.detach();
     }
 
-    baseNotifier->onEvent(static_cast<Feature *>(this), ClientBaseEventNotification::FEATURE_STARTED);
+    baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STARTED);
     return AWS_OP_SUCCESS;
 }
 
 int SampleShadowFeature::stop()
 {
     needStop.store(true);
-    baseNotifier->onEvent(static_cast<Feature *>(this), ClientBaseEventNotification::FEATURE_STOPPED);
+    baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
     return AWS_OP_SUCCESS;
 }
