@@ -53,7 +53,7 @@ void ConfigShadow::getNamedShadowAcceptedHandler(Iotshadow::GetShadowResponse *r
     configShadowExistsPromise.set_value(ioError == AWS_OP_SUCCESS);
 }
 
-void ConfigShadow::updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError)
+void ConfigShadow::updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError) const
 {
     if (ioError)
     {
@@ -61,7 +61,7 @@ void ConfigShadow::updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowRespo
     }
 }
 
-void ConfigShadow::updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError)
+void ConfigShadow::updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError) const
 {
     if (ioError)
     {
@@ -226,7 +226,7 @@ bool ConfigShadow::fetchRemoteConfigShadow(Iotshadow::IotShadowClient iotShadowC
     return futureShadowGetCompletedPromise.get();
 }
 
-void ConfigShadow::loadFeatureConfigIntoJsonObject(PlainConfig &config, Aws::Crt::JsonObject &jsonObj)
+void ConfigShadow::loadFeatureConfigIntoJsonObject(PlainConfig &config, Aws::Crt::JsonObject &jsonObj) const
 {
     JsonObject tunneling;
     config.tunneling.SerializeToObject(tunneling);
@@ -255,7 +255,7 @@ void ConfigShadow::loadFeatureConfigIntoJsonObject(PlainConfig &config, Aws::Crt
 void ConfigShadow::resetClientConfigWithJSON(
     PlainConfig &config,
     Crt::JsonView &deltaJsonView,
-    Crt::JsonView &desiredJsonView)
+    Crt::JsonView &desiredJsonView) const
 {
     if (desiredJsonView.ValueExists(PlainConfig::JSON_KEY_JOBS) &&
         deltaJsonView.ValueExists(PlainConfig::JSON_KEY_JOBS))

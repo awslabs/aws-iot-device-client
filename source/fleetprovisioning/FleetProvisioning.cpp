@@ -37,7 +37,7 @@ constexpr int FleetProvisioning::DEFAULT_WAIT_TIME_SECONDS;
 bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient identityClient)
 {
     LOG_INFO(TAG, "Provisioning new device certificate and private key using CreateKeysAndCertificate API");
-    auto onKeysAcceptedSubAck = [&](int ioErr) {
+    auto onKeysAcceptedSubAck = [this](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
             LOGM_ERROR(
@@ -49,7 +49,7 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
         keysAcceptedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
-    auto onKeysRejectedSubAck = [&](int ioErr) {
+    auto onKeysRejectedSubAck = [this](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
             LOGM_ERROR(
@@ -61,7 +61,7 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
         keysRejectedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
-    auto onKeysPublishSubAck = [&](int ioErr) {
+    auto onKeysPublishSubAck = [this](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
             LOGM_ERROR(
@@ -73,7 +73,7 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
         keysPublishCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
-    auto onKeysAccepted = [&](CreateKeysAndCertificateResponse *response, int ioErr) {
+    auto onKeysAccepted = [this](CreateKeysAndCertificateResponse *response, int ioErr) {
         if (ioErr == AWS_OP_SUCCESS)
         {
             LOGM_INFO(TAG, "CreateKeysAndCertificateResponse certificateId: %s.", response->CertificateId->c_str());
@@ -129,7 +129,7 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
         }
     };
 
-    auto onKeysRejected = [&](ErrorResponse *error, int ioErr) {
+    auto onKeysRejected = [this](ErrorResponse *error, int ioErr) {
         if (ioErr == AWS_OP_SUCCESS)
         {
             LOGM_ERROR(
@@ -204,7 +204,7 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
 bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient identityClient)
 {
     LOG_INFO(TAG, "Provisioning new device certificate using CreateCertificateFromCsr API");
-    auto onCsrAcceptedSubAck = [&](int ioErr) {
+    auto onCsrAcceptedSubAck = [this](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
             LOGM_ERROR(
@@ -216,7 +216,7 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         csrAcceptedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
-    auto onCsrRejectedSubAck = [&](int ioErr) {
+    auto onCsrRejectedSubAck = [this](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
             LOGM_ERROR(
@@ -228,7 +228,7 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         csrRejectedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
-    auto onCsrPublishSubAck = [&](int ioErr) {
+    auto onCsrPublishSubAck = [this](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
             LOGM_ERROR(
@@ -240,7 +240,7 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         csrPublishCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
-    auto onCsrAccepted = [&](CreateCertificateFromCsrResponse *response, int ioErr) {
+    auto onCsrAccepted = [this](CreateCertificateFromCsrResponse *response, int ioErr) {
         if (ioErr == AWS_OP_SUCCESS)
         {
             LOGM_INFO(TAG, "CreateCertificateFromCsrResponse certificateId: %s. ***", response->CertificateId->c_str());
@@ -284,7 +284,7 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
         }
     };
 
-    auto onCsrRejected = [&](ErrorResponse *error, int ioErr) {
+    auto onCsrRejected = [this](ErrorResponse *error, int ioErr) {
         if (ioErr == AWS_OP_SUCCESS)
         {
             LOGM_ERROR(
@@ -362,7 +362,7 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
 }
 bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityClient)
 {
-    auto onRegisterAcceptedSubAck = [&](int ioErr) {
+    auto onRegisterAcceptedSubAck = [this](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
             LOGM_ERROR(
@@ -374,7 +374,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         registerAcceptedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
-    auto onRegisterRejectedSubAck = [&](int ioErr) {
+    auto onRegisterRejectedSubAck = [this](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
             LOGM_ERROR(
@@ -386,7 +386,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         registerRejectedCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
-    auto onRegisterPublishSubAck = [&](int ioErr) {
+    auto onRegisterPublishSubAck = [this](int ioErr) {
         if (ioErr != AWS_OP_SUCCESS)
         {
             LOGM_ERROR(
@@ -398,7 +398,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         registerPublishCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
-    auto onRegisterAccepted = [&](RegisterThingResponse *response, int ioErr) {
+    auto onRegisterAccepted = [this](RegisterThingResponse *response, int ioErr) {
         if (ioErr == AWS_OP_SUCCESS)
         {
             LOGM_INFO(TAG, "RegisterThingResponse ThingName: %s.", response->ThingName->c_str());
@@ -413,7 +413,7 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         registerThingCompletedPromise.set_value(ioErr == AWS_OP_SUCCESS);
     };
 
-    auto onRegisterRejected = [&](ErrorResponse *error, int ioErr) {
+    auto onRegisterRejected = [this](ErrorResponse *error, int ioErr) {
         if (ioErr == AWS_OP_SUCCESS)
         {
             LOGM_ERROR(
@@ -593,7 +593,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
  * Helper methods
  */
 
-bool FleetProvisioning::LocateDeviceKey(const string &filePath)
+bool FleetProvisioning::LocateDeviceKey(const string &filePath) const
 {
     struct stat info;
     bool locatedDeviceKey = true;
@@ -680,7 +680,7 @@ bool FleetProvisioning::ExportRuntimeConfig(
     const std::string &runtimeCertPath,
     const std::string &runtimeKeyPath,
     const std::string &runtimeThingName,
-    const std::string &runtimeDeviceConfig)
+    const std::string &runtimeDeviceConfig) const
 {
     string jsonTemplate = R"({
 "%s": {
@@ -719,7 +719,7 @@ bool FleetProvisioning::ExportRuntimeConfig(
     return true;
 }
 
-bool FleetProvisioning::MapParameters(const Aws::Crt::Optional<std::string> params)
+bool FleetProvisioning::MapParameters(Aws::Crt::Optional<std::string> params)
 {
     if (params.has_value())
     {

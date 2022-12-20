@@ -171,12 +171,9 @@ bool PlainJobDocument::Validate() const
         }
     }
 
-    if (finalStep.has_value())
+    if (finalStep.has_value() && !finalStep->Validate())
     {
-        if (!finalStep->Validate())
-        {
-            return false;
-        }
+        return false;
     }
     return true;
 }

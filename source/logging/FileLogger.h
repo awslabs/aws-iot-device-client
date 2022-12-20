@@ -62,7 +62,7 @@ namespace Aws
                      * This method will write the log message to the file specified for logging
                      * @param message the message to log
                      */
-                    void writeLogMessage(std::unique_ptr<LogMessage> message);
+                    void writeLogMessage(std::unique_ptr<LogMessage> message) const;
 
                     /**
                      * \brief Creates the directories required as part of the full path to the desired log file
@@ -86,7 +86,7 @@ namespace Aws
                         LogLevel level,
                         const char *tag,
                         std::chrono::time_point<std::chrono::system_clock> t,
-                        std::string message) override;
+                        const std::string &message) override;
 
                   public:
                     /**

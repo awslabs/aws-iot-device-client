@@ -42,7 +42,7 @@ namespace Aws
                   public:
                     // Our default content size limit for LimitedStreamBuffer maps to the max allowed number
                     // of characters for job status details, since that's the main use of this class
-                    LimitedStreamBuffer() { this->contentsSizeLimit = 1024; }
+                    LimitedStreamBuffer() : contentsSizeLimit(1024) {}
 
                     ~LimitedStreamBuffer() = default;
 
@@ -50,13 +50,13 @@ namespace Aws
                      * \brief We provide an additional constructor with a configurable sizeLimit for testing
                      * @param sizeLimit the maximum size of the LimitedStreamBuffer
                      */
-                    explicit LimitedStreamBuffer(size_t sizeLimit) { this->contentsSizeLimit = sizeLimit; }
+                    explicit LimitedStreamBuffer(size_t sizeLimit) : contentsSizeLimit(sizeLimit) {}
 
                     /**
                      * \brief Add the given string to the LimitedStreamBuffer
                      * @param value the value to add
                      */
-                    void addString(std::string value);
+                    void addString(const std::string &value);
 
                     /**
                      * \brief Generates a string value from the contents of the buffer

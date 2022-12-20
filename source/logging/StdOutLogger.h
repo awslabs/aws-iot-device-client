@@ -53,14 +53,14 @@ namespace Aws
                      * This method will write the log message to the file specified for logging
                      * @param message the message to log
                      */
-                    void writeLogMessage(std::unique_ptr<LogMessage> message);
+                    void writeLogMessage(std::unique_ptr<LogMessage> message) const;
 
                   protected:
                     virtual void queueLog(
                         LogLevel level,
                         const char *tag,
                         std::chrono::time_point<std::chrono::system_clock> t,
-                        std::string message) override;
+                        const std::string &message) override;
 
                   public:
                     virtual bool start(const PlainConfig &config) override;

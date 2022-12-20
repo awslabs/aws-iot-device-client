@@ -298,6 +298,8 @@ bool PlainConfig::LoadFromEnvironment()
                 LOG_DEBUG(Config::TAG, "Set AWS_CRT_MEMORY_TRACING=AWS_MEMTRACE_STACKS");
                 memTraceLevel = AWS_MEMTRACE_STACKS;
                 break;
+            default:
+                break;
         }
     }
 
@@ -407,12 +409,9 @@ bool PlainConfig::Validate() const
         return false;
     }
 #endif
-    if (secureElement.enabled)
+    if (secureElement.enabled && !secureElement.Validate())
     {
-        if (!secureElement.Validate())
-        {
-            return false;
-        }
+        return false;
     }
 #if !defined(EXCLUDE_SENSOR_PUBLISH)
     if (!sensorPublish.Validate())
@@ -519,7 +518,7 @@ constexpr char PlainConfig::LogConfig::JSON_KEY_ENABLE_SDK_LOGGING[];
 constexpr char PlainConfig::LogConfig::JSON_KEY_SDK_LOG_LEVEL[];
 constexpr char PlainConfig::LogConfig::JSON_KEY_SDK_LOG_FILE[];
 
-int PlainConfig::LogConfig::ParseDeviceClientLogLevel(string level)
+int PlainConfig::LogConfig::ParseDeviceClientLogLevel(const string &level) const
 {
     string temp = level;
     std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c) { return std::toupper(c); });
@@ -547,7 +546,7 @@ int PlainConfig::LogConfig::ParseDeviceClientLogLevel(string level)
     }
 }
 
-Aws::Crt::LogLevel PlainConfig::LogConfig::ParseSDKLogLevel(string level)
+Aws::Crt::LogLevel PlainConfig::LogConfig::ParseSDKLogLevel(const string &level) const
 {
     string temp = level;
     std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c) { return std::toupper(c); });
@@ -583,7 +582,7 @@ Aws::Crt::LogLevel PlainConfig::LogConfig::ParseSDKLogLevel(string level)
     }
 }
 
-string PlainConfig::LogConfig::ParseDeviceClientLogType(string value)
+string PlainConfig::LogConfig::ParseDeviceClientLogType(const string &value) const
 {
     string temp = value;
     // Convert to lowercase for comparisons
@@ -613,13 +612,10 @@ string PlainConfig::LogConfig::StringifyDeviceClientLogLevel(int level) const
     {
         case DeviceClient::Logging::LogLevel::ERROR:
             return "ERROR";
-            break;
         case DeviceClient::Logging::LogLevel::WARN:
             return "WARN";
-            break;
         case DeviceClient::Logging::LogLevel::INFO:
             return "INFO";
-            break;
         case DeviceClient::Logging::LogLevel::DEBUG:
             return "DEBUG";
     }
@@ -1067,12 +1063,9 @@ bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
     }
 
     jsonKey = JSON_KEY_TEMPLATE_PARAMETERS;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
-        if (!json.GetString(jsonKey).empty())
-        {
-            templateParameters = json.GetString(jsonKey).c_str();
-        }
+        templateParameters = json.GetString(jsonKey).c_str();
     }
 
     jsonKey = JSON_KEY_CSR_FILE;
@@ -1149,20 +1142,14 @@ bool PlainConfig::FleetProvisioning::Validate() const
         return false;
     }
 
-    if (csrFile.has_value() && !csrFile->empty())
+    if (csrFile.has_value() && !csrFile->empty() && !FileUtils::IsValidFilePath(csrFile->c_str()))
     {
-        if (!FileUtils::IsValidFilePath(csrFile->c_str()))
-        {
-            return false;
-        }
+        return false;
     }
 
-    if (deviceKey.has_value() && !deviceKey->empty())
+    if (deviceKey.has_value() && !deviceKey->empty() && !FileUtils::IsValidFilePath(deviceKey->c_str()))
     {
-        if (!FileUtils::IsValidFilePath(deviceKey->c_str()))
-        {
-            return false;
-        }
+        return false;
     }
 
     return true;
@@ -1724,12 +1711,9 @@ bool PlainConfig::SampleShadow::LoadFromJson(const Crt::JsonView &json)
     }
 
     jsonKey = JSON_SAMPLE_SHADOW_OUTPUT_FILE;
-    if (json.ValueExists(jsonKey))
+    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
     {
-        if (!json.GetString(jsonKey).empty())
-        {
-            shadowOutputFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
-        }
+        shadowOutputFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
     }
 
     return true;
@@ -1758,12 +1742,9 @@ bool PlainConfig::SampleShadow::LoadFromCliArgs(const CliArgs &cliArgs)
     }
 
     // setting `shadowOutputFile` value to default if no value was passed by user via CLI or JSON config.
-    if (!shadowOutputFile.has_value() || shadowOutputFile->empty())
+    if ((!shadowOutputFile.has_value() || shadowOutputFile->empty()) && !createShadowOutputFile())
     {
-        if (!createShadowOutputFile())
-        {
-            return false;
-        }
+        return false;
     }
 
     return true;
@@ -2286,19 +2267,15 @@ bool PlainConfig::SensorPublish::Validate() const
         {
             setting.enabled = false;
         }
-        if (setting.mqttDeadLetterTopic.has_value() && !setting.mqttDeadLetterTopic.value().empty())
+        if (setting.mqttDeadLetterTopic.has_value() && !setting.mqttDeadLetterTopic.value().empty() &&
+            !MqttUtils::ValidateAwsIotMqttTopicName(setting.mqttDeadLetterTopic.value()))
         {
-            if (!MqttUtils::ValidateAwsIotMqttTopicName(setting.mqttDeadLetterTopic.value()))
-            {
-                setting.enabled = false;
-            }
+            setting.enabled = false;
         }
-        if (setting.mqttHeartbeatTopic.has_value() && !setting.mqttHeartbeatTopic.value().empty())
+        if (setting.mqttHeartbeatTopic.has_value() && !setting.mqttHeartbeatTopic.value().empty() &&
+            !MqttUtils::ValidateAwsIotMqttTopicName(setting.mqttHeartbeatTopic.value()))
         {
-            if (!MqttUtils::ValidateAwsIotMqttTopicName(setting.mqttHeartbeatTopic.value()))
-            {
-                setting.enabled = false;
-            }
+            setting.enabled = false;
         }
 
         // Validate that delimiter is non-empty and valid.
@@ -2715,7 +2692,7 @@ bool Config::ValidateAndStoreRuntimeConfig()
     return true;
 }
 
-bool Config::ValidateAndStoreHttpProxyConfig()
+bool Config::ValidateAndStoreHttpProxyConfig() const
 {
     // check if all values are present and also check if the files are present then only overwrite values
     if (!config.httpProxyConfig.Validate())
@@ -2815,14 +2792,14 @@ bool Config::ParseConfigFile(const string &file, ConfigFileType configFileType)
     }
 
     std::string contents((std::istreambuf_iterator<char>(setting)), std::istreambuf_iterator<char>());
-    Crt::JsonObject jsonObj = Aws::Crt::JsonObject(contents.c_str());
+    auto jsonObj = Aws::Crt::JsonObject(contents.c_str());
     if (!jsonObj.WasParseSuccessful())
     {
         LOGM_ERROR(
             TAG, "Couldn't parse JSON config file. GetErrorMessage returns: %s", jsonObj.GetErrorMessage().c_str());
         return false;
     }
-    Aws::Crt::JsonView jsonView = Aws::Crt::JsonView(jsonObj);
+    auto jsonView = Aws::Crt::JsonView(jsonObj);
     switch (configFileType)
     {
         case DEVICE_CLIENT_ESSENTIAL_CONFIG:

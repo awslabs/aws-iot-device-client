@@ -33,11 +33,11 @@ bool ProxyUtils::ValidateHostIpAddress(const std::string &ipAddress)
     struct in_addr addr;
     // cppcheck-suppress variableScope
     uint32_t IPv4Identifier;
-    int result = inet_pton(AF_INET, ipAddress.c_str(), &(addr));
+    int result = inet_pton(AF_INET, ipAddress.c_str(), &addr);
 
     if (result > 0)
     {
-        IPv4Identifier = ntohl(*((uint32_t *)&(addr)));
+        IPv4Identifier = ntohl(*((uint32_t *)&addr));
         return IsIpAddressPrivate(IPv4Identifier);
     }
     return false;

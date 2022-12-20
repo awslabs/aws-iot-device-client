@@ -25,6 +25,7 @@ namespace Aws
             class LoadableFromJsonAndCliAndEnvironment
             {
               public:
+                virtual ~LoadableFromJsonAndCliAndEnvironment() = default;
                 virtual bool LoadFromJson(const Crt::JsonView &json) = 0;
                 virtual bool LoadFromCliArgs(const CliArgs &cliArgs) = 0;
                 virtual bool LoadFromEnvironment() = 0;
@@ -116,9 +117,9 @@ namespace Aws
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override { return true; }
                     bool Validate() const override;
-                    int ParseDeviceClientLogLevel(std::string value);
-                    Aws::Crt::LogLevel ParseSDKLogLevel(std::string value);
-                    std::string ParseDeviceClientLogType(std::string value);
+                    int ParseDeviceClientLogLevel(const std::string &value) const;
+                    Aws::Crt::LogLevel ParseSDKLogLevel(const std::string &value) const;
+                    std::string ParseDeviceClientLogType(const std::string &value) const;
                     std::string StringifyDeviceClientLogLevel(int level) const;
                     std::string StringifySDKLogLevel(Aws::Crt::LogLevel level) const;
                     /** Serialize logging configurations To Json Object **/
@@ -505,7 +506,7 @@ namespace Aws
                 static bool CheckTerminalArgs(int argc, char *argv[]);
                 static bool ParseCliArgs(int argc, char *argv[], CliArgs &cliArgs);
                 bool ValidateAndStoreRuntimeConfig();
-                bool ValidateAndStoreHttpProxyConfig();
+                bool ValidateAndStoreHttpProxyConfig() const;
                 bool ParseConfigFile(const std::string &file, ConfigFileType configFileType);
                 bool init(const CliArgs &cliArgs);
 
