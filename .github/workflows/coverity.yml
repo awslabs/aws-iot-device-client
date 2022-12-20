@@ -29,4 +29,4 @@ jobs:
         run: |
           export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-amazonlinux-latest
           docker pull $DOCKER_IMAGE
-          docker run --mount type=bind,source=$(pwd),target=/src --workdir /src --entrypoint /src/coverity-build.sh --env "${{ secrets.COVERITY_TOKEN }}" --env "${{ secrets.EMAIL }}" --end $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/src --workdir /src --entrypoint /src/coverity-build.sh --env COVERITY_TOKEN="${{ secrets.COVERITY_TOKEN }}" --env COVERITY_EMAIL="${{ secrets.COVERITY_EMAIL }}" $DOCKER_IMAGE
