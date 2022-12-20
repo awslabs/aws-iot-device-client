@@ -1,17 +1,17 @@
-name: coverity
+name: Coverity
 
 on:
   push:
-    branches: ['*']
+    branches: ['main']
   pull_request:
-    branches: ['*']
+    branches: ['main']
 
 env:
   PACKAGE_NAME: aws-iot-device-client
   ECR_BASE_REPO: aws-iot-device-client/aws-iot-device-client-base-images
 
 jobs:
-  coverity:
+  build-wrapper:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
