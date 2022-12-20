@@ -27,6 +27,6 @@ jobs:
         uses: actions/checkout@v1
       - name: coverity script
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-amazonlinux-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/src --workdir /src --entrypoint /src/coverity-build.sh --env COVERITY_TOKEN="${{ secrets.COVERITY_TOKEN }}" --env COVERITY_EMAIL="${{ secrets.COVERITY_EMAIL }}" $DOCKER_IMAGE
