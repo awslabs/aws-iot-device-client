@@ -64,9 +64,9 @@ namespace Aws
                      * @return a bool representing whether the retryableFunction was successful or not
                      */
                     static bool exponentialBackoff(
-                        ExponentialRetryConfig config,
-                        std::function<bool()> retryableFunction,
-                        std::function<void()> onComplete = nullptr);
+                        const ExponentialRetryConfig &config,
+                        const std::function<bool()> &retryableFunction,
+                        const std::function<void()> &onComplete = nullptr);
                 };
             } // namespace Util
         }     // namespace DeviceClient

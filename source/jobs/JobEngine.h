@@ -82,7 +82,7 @@ namespace Aws
                      * for the given job handler are inappropriate, this function will thrown an exception.
                      */
                     std::string buildCommand(
-                        Optional<std::string> path,
+                        Crt::Optional<std::string> path,
                         const std::string &handler,
                         const std::string &jobHandlerDir) const;
 

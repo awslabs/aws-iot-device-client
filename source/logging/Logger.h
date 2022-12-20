@@ -53,6 +53,7 @@ namespace Aws
                      * \brief The runtime log level for the IoT Device Client
                      */
                     int logLevel = (int)LogLevel::DEBUG;
+
                     /**
                      * \brief Implemented by the underlying logger implementation to pass responsibility for managing
                      * the log message from the Logger interface to the logger implementation
@@ -70,7 +71,7 @@ namespace Aws
                         LogLevel level,
                         const char *tag,
                         std::chrono::time_point<std::chrono::system_clock> t,
-                        std::string message) = 0;
+                        const std::string &message) = 0;
 
                     /**
                      * \brief Sets the level of the Logger implementation (DEBUG, INFO, WARN, ERROR)

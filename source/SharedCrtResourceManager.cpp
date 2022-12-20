@@ -44,7 +44,7 @@ bool SharedCrtResourceManager::initialize(
     return initialized;
 }
 
-bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
+bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config) const
 {
     struct stat fileInfo;
     bool locatedAll = true;
@@ -109,7 +109,7 @@ bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config)
     return locatedAll;
 }
 
-bool SharedCrtResourceManager::setupLogging(const PlainConfig &config)
+bool SharedCrtResourceManager::setupLogging(const PlainConfig &config) const
 {
     // Absolute path to the sdk log file.
     std::string logFilePath{DEFAULT_SDK_LOG_FILE};
@@ -370,7 +370,8 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     /*
      * This will execute when an mqtt connect has completed or failed.
      */
-    auto onConnectionCompleted = [&](Mqtt::MqttConnection &, int errorCode, Mqtt::ReturnCode returnCode, bool) {
+    auto onConnectionCompleted = [this, &connectionCompletedPromise](
+                                     const Mqtt::MqttConnection &, int errorCode, Mqtt::ReturnCode returnCode, bool) {
         if (errorCode)
         {
             LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(errorCode));
@@ -394,7 +395,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     /*
      * Invoked when a disconnect message has completed.
      */
-    auto onDisconnect = [&](Mqtt::MqttConnection & /*conn*/) {
+    auto onDisconnect = [this](const Mqtt::MqttConnection & /*conn*/) {
         {
             LOG_INFO(TAG, "MQTT Connection is now disconnected");
             connectionClosedPromise.set_value();
@@ -404,7 +405,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     /*
      * Invoked when connection is interrupted.
      */
-    auto OnConnectionInterrupted = [&](Mqtt::MqttConnection &, int errorCode) {
+    auto OnConnectionInterrupted = [this](const Mqtt::MqttConnection &, int errorCode) {
         {
             if (errorCode)
             {
@@ -420,7 +421,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     /*
      * Invoked when connection is resumed.
      */
-    auto OnConnectionResumed = [&](Mqtt::MqttConnection &, int returnCode, bool) {
+    auto OnConnectionResumed = [this](const Mqtt::MqttConnection &, int returnCode, bool) {
         {
             LOGM_INFO(TAG, "MQTT connection resumed with return code: %d", returnCode);
         }
@@ -529,7 +530,7 @@ void SharedCrtResourceManager::disconnect()
     }
 }
 
-void SharedCrtResourceManager::startDeviceClientFeatures()
+void SharedCrtResourceManager::startDeviceClientFeatures() const
 {
     LOG_INFO(TAG, "Starting Device Client features.");
     features->startAll();
