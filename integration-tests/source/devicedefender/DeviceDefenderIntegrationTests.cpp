@@ -19,6 +19,7 @@ extern std::string REGION;
 class TestDeviceDefenderFeature : public ::testing::Test
 {
   public:
+    // cppcheck-suppress unusedFunction
     void SetUp() override
     {
         SDKOptions options;
@@ -52,10 +53,10 @@ TEST_F(TestDeviceDefenderFeature, VerifyViolations)
 {
     vector<ActiveViolation> violations;
     int maxWaitTime = 630;
-    while(maxWaitTime > 0)
+    while (maxWaitTime > 0)
     {
         violations = resourceHandler->GetViolations(THING_NAME);
-        if(violations.size() == metrics.size())
+        if (violations.size() == metrics.size())
         {
             break;
         }
