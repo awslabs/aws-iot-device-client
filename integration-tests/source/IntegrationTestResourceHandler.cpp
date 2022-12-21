@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "IntegrationTestResourceHandler.h"
+#include <aws/iot/model/AttachSecurityProfileRequest.h>
 #include <aws/iot/model/CreateJobRequest.h>
 #include <aws/iot/model/CreateJobResult.h>
 #include <aws/iot/model/CreateSecurityProfileRequest.h>
@@ -26,8 +27,6 @@
 #include <aws/iot/model/ListThingPrincipalsResult.h>
 #include <aws/iot/model/ListThingsInThingGroupRequest.h>
 #include <aws/iot/model/UpdateCertificateRequest.h>
-#include <aws/iot/model/AttachSecurityProfileRequest.h>
-#include <aws/iot/model/AttachSecurityProfileResult.h>
 #include <aws/iotsecuretunneling/model/CloseTunnelRequest.h>
 #include <aws/iotsecuretunneling/model/DescribeTunnelRequest.h>
 #include <aws/iotsecuretunneling/model/DescribeTunnelResult.h>
@@ -402,7 +401,7 @@ void IntegrationTestResourceHandler::AttachSecurityProfile(const std::string &pr
 
     AttachSecurityProfileOutcome outcome = iotClient.AttachSecurityProfile(request);
 
-    if(!outcome.IsSuccess())
+    if (!outcome.IsSuccess())
     {
         if (!outcome.IsSuccess())
         {
