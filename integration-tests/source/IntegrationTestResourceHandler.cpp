@@ -4,8 +4,11 @@
 #include "IntegrationTestResourceHandler.h"
 #include <aws/iot/model/CreateJobRequest.h>
 #include <aws/iot/model/CreateJobResult.h>
+#include <aws/iot/model/CreateSecurityProfileRequest.h>
+#include <aws/iot/model/CreateSecurityProfileResult.h>
 #include <aws/iot/model/DeleteCertificateRequest.h>
 #include <aws/iot/model/DeleteJobRequest.h>
+#include <aws/iot/model/DeleteSecurityProfileRequest.h>
 #include <aws/iot/model/DeleteThingGroupRequest.h>
 #include <aws/iot/model/DeleteThingRequest.h>
 #include <aws/iot/model/DescribeCertificateRequest.h>
@@ -15,12 +18,16 @@
 #include <aws/iot/model/DescribeThingResult.h>
 #include <aws/iot/model/DetachPolicyRequest.h>
 #include <aws/iot/model/DetachThingPrincipalRequest.h>
+#include <aws/iot/model/ListActiveViolationsRequest.h>
+#include <aws/iot/model/ListActiveViolationsResult.h>
 #include <aws/iot/model/ListAttachedPoliciesRequest.h>
 #include <aws/iot/model/ListJobExecutionsForJobRequest.h>
 #include <aws/iot/model/ListThingPrincipalsRequest.h>
 #include <aws/iot/model/ListThingPrincipalsResult.h>
 #include <aws/iot/model/ListThingsInThingGroupRequest.h>
 #include <aws/iot/model/UpdateCertificateRequest.h>
+#include <aws/iot/model/AttachSecurityProfileRequest.h>
+#include <aws/iot/model/AttachSecurityProfileResult.h>
 #include <aws/iotsecuretunneling/model/CloseTunnelRequest.h>
 #include <aws/iotsecuretunneling/model/DescribeTunnelRequest.h>
 #include <aws/iotsecuretunneling/model/DescribeTunnelResult.h>
@@ -322,4 +329,103 @@ std::string IntegrationTestResourceHandler::GetTargetArn(const std::string &thin
 std::string IntegrationTestResourceHandler::GetResourceId(const std::string &resource)
 {
     return resource.substr(resource.find('/'));
+}
+vector<ActiveViolation> IntegrationTestResourceHandler::GetViolations(const string &thingName)
+{
+    vector<ActiveViolation> violations;
+
+    ListActiveViolationsRequest request;
+    request.SetThingName(thingName);
+
+    ListActiveViolationsOutcome outcome = iotClient.ListActiveViolations(request);
+
+    if (!outcome.IsSuccess())
+    {
+        printf(
+            "Failed to List Active Violations for: %s\n%s\n",
+            thingName.c_str(),
+            outcome.GetError().GetMessage().c_str());
+    }
+    else
+    {
+        violations = outcome.GetResult().GetActiveViolations();
+    }
+    return violations;
+}
+void IntegrationTestResourceHandler::CreateAndAttachSecurityProfile(
+    const string &profileName,
+    const vector<std::string> &metrics)
+{
+    MetricValue metricValue;
+    metricValue.SetCount(1L);
+
+    BehaviorCriteria criteria;
+    criteria.SetComparisonOperator(ComparisonOperator::less_than);
+    criteria.SetDurationSeconds(300);
+    criteria.SetValue(metricValue);
+    criteria.SetConsecutiveDatapointsToAlarm(1);
+    criteria.SetConsecutiveDatapointsToClear(1);
+
+    CreateSecurityProfileRequest request;
+    request.SetSecurityProfileName(profileName);
+
+    for (const string &metric : metrics)
+    {
+        Behavior behavior;
+        behavior.SetCriteria(criteria);
+        behavior.SetMetric(metric);
+        behavior.SetName(metric);
+
+        request.AddBehaviors(behavior);
+    }
+
+    CreateSecurityProfileOutcome outcome = iotClient.CreateSecurityProfile(request);
+
+    if (!outcome.IsSuccess())
+    {
+        printf(
+            "Failed to create Security Profile: %s\n%s\n",
+            profileName.c_str(),
+            outcome.GetError().GetMessage().c_str());
+    }
+
+    AttachSecurityProfile(profileName);
+}
+
+void IntegrationTestResourceHandler::AttachSecurityProfile(const std::string &profileName)
+{
+    string allThingsArn = targetArn.substr(0, targetArn.find_last_of(':') + 1) + "all/things";
+
+    AttachSecurityProfileRequest request;
+    request.SetSecurityProfileName(profileName);
+    request.SetSecurityProfileTargetArn(allThingsArn);
+
+    AttachSecurityProfileOutcome outcome = iotClient.AttachSecurityProfile(request);
+
+    if(!outcome.IsSuccess())
+    {
+        if (!outcome.IsSuccess())
+        {
+            printf(
+                "Failed to attach Security Profile: %s\n%s\n",
+                profileName.c_str(),
+                outcome.GetError().GetMessage().c_str());
+        }
+    }
+}
+
+void IntegrationTestResourceHandler::DeleteSecurityProfile(const string &profileName)
+{
+    DeleteSecurityProfileRequest request;
+    request.SetSecurityProfileName(profileName);
+
+    DeleteSecurityProfileOutcome outcome = iotClient.DeleteSecurityProfile(request);
+
+    if (!outcome.IsSuccess())
+    {
+        printf(
+            "Failed to delete Security Profile: %s\n%s\n",
+            profileName.c_str(),
+            outcome.GetError().GetMessage().c_str());
+    }
 }

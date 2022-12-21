@@ -48,6 +48,10 @@ chmod 745 ${OUTPUT_DIR}
         \"enabled\":	true,
         \"template-name\": \"aws-iot-device-client\",
         \"device-key\": \"${KEY_PATH}\"
+      },
+      \"device-defender\": {
+      	\"enabled\": true,
+      	\"interval\": 300
       }
     }"
 # output the config & set permissions
