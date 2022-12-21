@@ -189,14 +189,14 @@ namespace Aws
                      * @param ioError a non-zero code here indicates a problem. Turn on logging in IoT Core
                      * and check CloudWatch for more insights on errors
                      */
-                    void ackStartNextPendingJobPub(int ioError);
+                    void ackStartNextPendingJobPub(int ioError) const;
                     /**
                      * \brief Acknowledgement that IoT Core has received our UpdateJobExecutionStatus message
                      *
                      * @param ioError a non-zero code here indicates a problem. Turn on logging in IoT Core
                      * and check CloudWatch for more insights on errors
                      */
-                    void ackUpdateJobExecutionStatus(int ioError);
+                    void ackUpdateJobExecutionStatus(int ioError) const;
                     void ackSubscribeToUpdateJobExecutionAccepted(int ioError);
                     void ackSubscribeToUpdateJobExecutionRejected(int ioError);
                     std::promise<int> updateAcceptedPromise;
@@ -215,15 +215,15 @@ namespace Aws
                      * the child process
                      */
                     void publishUpdateJobExecutionStatus(
-                        Aws::Iotjobs::JobExecutionData data,
-                        JobExecutionStatusInfo statusInfo,
-                        std::function<void(void)> onCompleteCallback = nullptr);
+                        const Aws::Iotjobs::JobExecutionData &data,
+                        const JobExecutionStatusInfo &statusInfo,
+                        const std::function<void(void)> &onCompleteCallback = nullptr);
 
                     virtual void publishUpdateJobExecutionStatusWithRetry(
-                        Aws::Iotjobs::JobExecutionData data,
-                        JobExecutionStatusInfo statusInfo,
-                        Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> statusDetails,
-                        std::function<void(void)> onCompleteCallback);
+                        const Aws::Iotjobs::JobExecutionData &data,
+                        const JobExecutionStatusInfo &statusInfo,
+                        const Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> &statusDetails,
+                        const std::function<void(void)> &onCompleteCallback);
                     /**
                      * \brief Creates a subscription to the startNextPendingJobExecution topic
                      */

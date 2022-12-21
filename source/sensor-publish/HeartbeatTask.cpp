@@ -37,7 +37,7 @@ HeartbeatTask::HeartbeatTask(
     AWS_ZERO_STRUCT(mTask);
     aws_task_init(
         &mTask,
-        [](struct aws_task *task, void *arg, enum aws_task_status status) {
+        [](struct aws_task *, void *arg, enum aws_task_status status) {
             if (status == AWS_TASK_STATUS_CANCELED)
             {
                 return; // Ignore canceled tasks.
@@ -127,7 +127,7 @@ void HeartbeatTask::publish()
         AWS_MQTT_QOS_AT_LEAST_ONCE,
         false,
         &mPayload,
-        [](struct aws_mqtt_client_connection *connection, uint16_t packet_id, int error_code, void *userdata) {
+        [](struct aws_mqtt_client_connection *, uint16_t packet_id, int error_code, void *userdata) {
             auto *self = static_cast<HeartbeatTask *>(userdata);
             if (error_code)
             {

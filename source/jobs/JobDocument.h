@@ -24,7 +24,7 @@ namespace Aws
                 class LoadableFromJobDocument
                 {
                   public:
-                    virtual void LoadFromJobDocument(const JsonView &json) = 0;
+                    virtual void LoadFromJobDocument(const Crt::JsonView &json) = 0;
                     virtual bool Validate() const = 0;
                     virtual ~LoadableFromJobDocument() = default;
 
@@ -33,11 +33,11 @@ namespace Aws
 
                 struct PlainJobDocument : public LoadableFromJobDocument
                 {
-                    void LoadFromJobDocument(const JsonView &json) override;
+                    void LoadFromJobDocument(const Crt::JsonView &json) override;
                     bool Validate() const override;
-                    static std::vector<std::string> ParseToVectorString(const JsonView &json);
 
                     static constexpr char ACTION_TYPE_RUN_HANDLER[] = "runHandler";
+                    static constexpr char ACTION_TYPE_RUN_COMMAND[] = "runCommand";
 
                     static constexpr char JSON_KEY_VERSION[] = "version";
                     static constexpr char JSON_KEY_INCLUDESTDOUT[] = "includeStdOut";
@@ -55,11 +55,11 @@ namespace Aws
                     static constexpr char OLD_SCHEMA_VERSION[] = "0.0";
 
                     std::string version;
-                    Optional<bool> includeStdOut{false};
+                    Crt::Optional<bool> includeStdOut{false};
 
                     struct JobCondition : public LoadableFromJobDocument
                     {
-                        void LoadFromJobDocument(const JsonView &json) override;
+                        void LoadFromJobDocument(const Crt::JsonView &json) override;
                         bool Validate() const override;
 
                         static constexpr char JSON_KEY_CONDITION_KEY[] = "key";
@@ -68,13 +68,13 @@ namespace Aws
 
                         std::string conditionKey;
                         std::vector<std::string> conditionValue;
-                        Optional<std::string> type{"stringEqual"};
+                        Crt::Optional<std::string> type{"stringEqual"};
                     };
-                    Optional<std::vector<JobCondition>> conditions;
+                    Crt::Optional<std::vector<JobCondition>> conditions;
 
                     struct JobAction : public LoadableFromJobDocument
                     {
-                        void LoadFromJobDocument(const JsonView &json) override;
+                        void LoadFromJobDocument(const Crt::JsonView &json) override;
                         bool Validate() const override;
 
                         static constexpr char JSON_KEY_NAME[] = "name";
@@ -87,9 +87,12 @@ namespace Aws
                         std::string name;
                         std::string type;
 
-                        struct ActionInput : public LoadableFromJobDocument
+                        /**
+                         * ActionHandlerInput - Invokes a handler script specified in a job document.
+                         */
+                        struct ActionHandlerInput : public LoadableFromJobDocument
                         {
-                            void LoadFromJobDocument(const JsonView &json) override;
+                            void LoadFromJobDocument(const Crt::JsonView &json) override;
                             bool Validate() const override;
 
                             static constexpr char JSON_KEY_HANDLER[] = "handler";
@@ -97,17 +100,31 @@ namespace Aws
                             static constexpr char JSON_KEY_PATH[] = "path";
 
                             std::string handler;
-                            Optional<std::vector<std::string>> args;
-                            Optional<std::string> path;
+                            Crt::Optional<std::vector<std::string>> args;
+                            Crt::Optional<std::string> path;
                         };
-                        ActionInput input;
+                        Optional<ActionHandlerInput> handlerInput;
+
+                        /**
+                         * ActionCommandInput - Invokes arbitrary commands specified in a job document.
+                         */
+                        struct ActionCommandInput : public LoadableFromJobDocument
+                        {
+                            void LoadFromJobDocument(const JsonView &json) override;
+                            bool Validate() const override;
+
+                            static constexpr char JSON_KEY_COMMAND[] = "command";
+
+                            std::vector<std::string> command;
+                        };
+                        Optional<ActionCommandInput> commandInput;
                         Optional<std::string> runAsUser{""};
                         Optional<int> allowStdErr;
                         Optional<bool> ignoreStepFailure{false};
                     };
                     std::vector<JobAction> steps;
 
-                    Optional<JobAction> finalStep;
+                    Crt::Optional<JobAction> finalStep;
                 };
 
             } // namespace Jobs

@@ -93,7 +93,7 @@ using namespace Aws::Iot::DeviceClient::Shadow;
 using namespace Aws::Iot::DeviceClient::SensorPublish;
 #endif
 
-const char *TAG = "Main.cpp";
+constexpr char TAG[] = "Main.cpp";
 
 shared_ptr<FeatureRegistry> features;
 shared_ptr<SharedCrtResourceManager> resourceManager;
@@ -113,7 +113,13 @@ bool init(int argc, char *argv[])
         string filename = config.config.lockFilePath;
         if (!filename.empty())
         {
-            lockFile = unique_ptr<LockFile>(new LockFile{filename, argv[0]});
+            string thing;
+            if (config.config.thingName.has_value() && !config.config.thingName.value().empty())
+            {
+                thing = config.config.thingName.value();
+            }
+
+            lockFile = unique_ptr<LockFile>(new LockFile{filename, argv[0], thing});
         }
     }
     catch (std::runtime_error &e)
@@ -296,7 +302,7 @@ int main(int argc, char *argv[])
         dynamic_cast<StdOutLogger *>(LoggerFactory::getLoggerInstance().get()) == nullptr)
     {
         // We attempted to start a non-stdout logger and failed, so we should fall back to STDOUT
-        config.config.logConfig.deviceClientLogtype = config.config.logConfig.LOG_TYPE_STDOUT;
+        config.config.logConfig.deviceClientLogtype = PlainConfig::LogConfig::LOG_TYPE_STDOUT;
         LoggerFactory::reconfigure(config.config);
     }
 
@@ -316,7 +322,7 @@ int main(int argc, char *argv[])
      */
     if (!init(argc, argv))
     {
-        return -1;
+        return 1;
     }
     features = make_shared<FeatureRegistry>();
 
@@ -328,11 +334,10 @@ int main(int argc, char *argv[])
     int received_signal;
     sigaddset(&sigset, SIGINT);
     sigaddset(&sigset, SIGHUP);
-    sigprocmask(SIG_BLOCK, &sigset, 0);
+    sigprocmask(SIG_BLOCK, &sigset, nullptr);
 
-    shared_ptr<DefaultClientBaseNotifier> listener =
-        shared_ptr<DefaultClientBaseNotifier>(new DefaultClientBaseNotifier);
-    resourceManager = shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager);
+    auto listener = std::make_shared<DefaultClientBaseNotifier>();
+    resourceManager = std::make_shared<SharedCrtResourceManager>();
     if (!resourceManager.get()->initialize(config.config, features))
     {
         LOGM_ERROR(TAG, "*** %s: Failed to initialize AWS CRT SDK.", DC_FATAL_ERROR);
@@ -537,10 +542,14 @@ int main(int argc, char *argv[])
             case SIGINT:
                 shutdown();
                 break;
+            case SIGTERM:
+                shutdown();
+                break;
             case SIGHUP:
                 resourceManager->dumpMemTrace();
                 break;
+            default:
+                break;
         }
     }
-    return 0;
 }

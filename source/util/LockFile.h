@@ -31,7 +31,7 @@ namespace Aws
                      * @param filedir directory the lockfile will be written to
                      * @param process the executable path passed in by argv[0], usually aws-iot-device-client
                      */
-                    explicit LockFile(const std::string &filedir, const std::string &process);
+                    LockFile(const std::string &filedir, const std::string &process, const std::string &thingName);
                     /**
                      * This class uses RAII for resource management. Destructor will be called on program exit and the
                      * file will be deleted.

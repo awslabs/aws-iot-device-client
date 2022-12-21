@@ -126,7 +126,7 @@ namespace Aws
 
                 void SecureTunnelingContext::DisconnectFromTcpForward() { mTcpForward.reset(); }
 
-                void SecureTunnelingContext::OnConnectionComplete()
+                void SecureTunnelingContext::OnConnectionComplete() const
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingContext::OnConnectionComplete");
                 }
@@ -137,7 +137,7 @@ namespace Aws
                     mOnConnectionShutdown(this);
                 }
 
-                void SecureTunnelingContext::OnSendDataComplete(int errorCode)
+                void SecureTunnelingContext::OnSendDataComplete(int errorCode) const
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingContext::OnSendDataComplete");
                     if (errorCode)
@@ -146,7 +146,7 @@ namespace Aws
                     }
                 }
 
-                void SecureTunnelingContext::OnDataReceive(const Crt::ByteBuf &data)
+                void SecureTunnelingContext::OnDataReceive(const Crt::ByteBuf &data) const
                 {
                     LOGM_DEBUG(TAG, "SecureTunnelingContext::OnDataReceive data.len=%zu", data.len);
                     mTcpForward->SendData(aws_byte_cursor_from_buf(&data));
@@ -170,7 +170,7 @@ namespace Aws
                     DisconnectFromTcpForward();
                 }
 
-                void SecureTunnelingContext::OnTcpForwardDataReceive(const Crt::ByteBuf &data)
+                void SecureTunnelingContext::OnTcpForwardDataReceive(const Crt::ByteBuf &data) const
                 {
                     LOGM_DEBUG(TAG, "SecureTunnelingContext::OnTcpForwardDataReceive data.len=%zu", data.len);
                     mSecureTunnel->SendData(aws_byte_cursor_from_buf(&data));
@@ -183,15 +183,15 @@ namespace Aws
                 }
 
                 std::shared_ptr<SecureTunnelWrapper> SecureTunnelingContext::CreateSecureTunnel(
-                    Aws::Iotsecuretunneling::OnConnectionComplete onConnectionComplete,
-                    Aws::Iotsecuretunneling::OnConnectionShutdown onConnectionShutdown,
-                    Aws::Iotsecuretunneling::OnSendDataComplete onSendDataComplete,
-                    Aws::Iotsecuretunneling::OnDataReceive onDataReceive,
-                    Aws::Iotsecuretunneling::OnStreamStart onStreamStart,
-                    Aws::Iotsecuretunneling::OnStreamReset onStreamReset,
-                    Aws::Iotsecuretunneling::OnSessionReset onSessionReset)
+                    const Aws::Iotsecuretunneling::OnConnectionComplete &onConnectionComplete,
+                    const Aws::Iotsecuretunneling::OnConnectionShutdown &onConnectionShutdown,
+                    const Aws::Iotsecuretunneling::OnSendDataComplete &onSendDataComplete,
+                    const Aws::Iotsecuretunneling::OnDataReceive &onDataReceive,
+                    const Aws::Iotsecuretunneling::OnStreamStart &onStreamStart,
+                    const Aws::Iotsecuretunneling::OnStreamReset &onStreamReset,
+                    const Aws::Iotsecuretunneling::OnSessionReset &onSessionReset)
                 {
-                    return std::shared_ptr<SecureTunnelWrapper>(new SecureTunnelWrapper(
+                    return std::make_shared<SecureTunnelWrapper>(
                         mSharedCrtResourceManager->getAllocator(),
                         mSharedCrtResourceManager->getClientBootstrap(),
                         Crt::Io::SocketOptions(),
@@ -205,15 +205,15 @@ namespace Aws
                         onDataReceive,
                         onStreamStart,
                         onStreamReset,
-                        onSessionReset));
+                        onSessionReset);
                 }
 
                 std::shared_ptr<TcpForward> SecureTunnelingContext::CreateTcpForward()
                 {
-                    return std::shared_ptr<TcpForward>(new TcpForward(
+                    return std::make_shared<TcpForward>(
                         mSharedCrtResourceManager,
                         mPort,
-                        bind(&SecureTunnelingContext::OnTcpForwardDataReceive, this, placeholders::_1)));
+                        bind(&SecureTunnelingContext::OnTcpForwardDataReceive, this, placeholders::_1));
                 }
             } // namespace SecureTunneling
         }     // namespace DeviceClient

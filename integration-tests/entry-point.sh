@@ -8,9 +8,6 @@ CERT_PATH=${CERT_DIRECTORY}cert.crt
 KEY_PATH=${CERT_DIRECTORY}key.pem
 ROOT_CA_PATH=${CERT_DIRECTORY}AmazonRootCA1.pem
 
-# Ensure /run/lock exists
-mkdir -p /run/lock > dev/null
-
 # create Certificate Directory
 mkdir -p ${CERT_DIRECTORY}
 
@@ -59,6 +56,36 @@ chmod 640 ${CONFIG_PATH}
 
 # start ssh
 service ssh start || true
+
+# Ensure lockfile exists
+mkdir -p /run/lock > dev/null
+
+# Spoof lockfile
+echo "${THING_NAME}" > /run/lock/devicecl.lock
+bash -c 'sleep 1000' &
+FAKE_PID=$!
+echo ${FAKE_PID} >> /run/lock/devicecl.lock
+
+# TEST: Start and stop Device Client
+# 1. Rename aws-iot-device-client to sleep and exec binary
+# 2. Kill dummy process
+# 3. Kill Device Client. If Device Client has already exited as expected, then pkill will return 1, and we pass the test
+cp aws-iot-device-client sleep
+./sleep &
+DC_PID=$!
+
+# give some buffer time for the background instance of DC to run its logic.
+sleep 5
+kill $FAKE_PID
+kill $DC_PID
+retVal=$?
+if [ $retVal -ne 1 ]; then
+  echo 'TEST FAILURE: Device Client ran with a valid lockfile already in place.'
+  exit 1
+fi
+
+# Cleanup
+rm -rf /run/lock
 
 # start Device Client
 ./aws-iot-device-client 2>&1 &

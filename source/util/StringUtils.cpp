@@ -5,6 +5,7 @@
 #include "../config/Config.h"
 #include <cstdarg>
 #include <map>
+#include <regex>
 
 using namespace std;
 
@@ -16,7 +17,7 @@ namespace Aws
         {
             namespace Util
             {
-                string vFormatMessage(const char *message, va_list args)
+                string vFormatMessage(const char message[], va_list args)
                 {
                     va_list copy;
                     va_copy(copy, args);
@@ -37,7 +38,7 @@ namespace Aws
                     return buffer;
                 }
 
-                string FormatMessage(const char *message, ...)
+                string FormatMessage(const char message[], ...)
                 {
                     va_list args;
                     va_start(args, message);
@@ -67,7 +68,7 @@ namespace Aws
                     return output.str();
                 }
 
-                string addString(Aws::Crt::String first, Aws::Crt::String second)
+                string addString(const Aws::Crt::String &first, const Aws::Crt::String &second)
                 {
                     string jsonTemplate = R"("%s": "%s")";
                     //  The message string used over here must be NULL terminated
@@ -97,12 +98,44 @@ namespace Aws
 
                 string TrimRightCopy(string s, const string &any) { return s.erase(s.find_last_not_of(any) + 1); }
 
-                // cppcheck-suppress unusedFunction
                 string TrimCopy(string s, const string &any)
                 {
                     s.erase(0, s.find_first_not_of(any));
                     s.erase(s.find_last_not_of(any) + 1);
                     return s;
+                }
+
+                vector<string> ParseToVectorString(const JsonView &json)
+                {
+                    vector<string> plainVector;
+
+                    for (const auto &i : json.AsArray())
+                    {
+                        // cppcheck-suppress useStlAlgorithm
+                        plainVector.push_back(i.AsString().c_str());
+                    }
+                    return plainVector;
+                }
+
+                vector<string> SplitStringByComma(const string &stringToSplit)
+                {
+                    regex delim{R"((\\,|[^,])+)"};
+
+                    vector<string> tokens;
+                    copy(
+                        sregex_token_iterator{begin(stringToSplit), end(stringToSplit), delim},
+                        sregex_token_iterator{},
+                        back_inserter(tokens));
+                    return tokens;
+                }
+
+                void replace_all(string &inout, const string &what, const string &with)
+                {
+                    for (string::size_type pos{}; inout.npos != (pos = inout.find(what.data(), pos, what.length()));
+                         pos += with.length())
+                    {
+                        inout.replace(pos, what.length(), with.data(), with.length());
+                    }
                 }
             } // namespace Util
         }     // namespace DeviceClient

@@ -112,6 +112,7 @@ endif ()
 list(APPEND DC_SRC ${DC_TST})
 list(FILTER DC_SRC EXCLUDE REGEX ".*main.cpp$")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fprofile-arcs -ftest-coverage")
 set(HEADERS)
 add_executable(${GTEST_PROJECT} ${DC_SRC})
 

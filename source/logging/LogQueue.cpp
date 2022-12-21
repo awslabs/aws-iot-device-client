@@ -35,7 +35,7 @@ std::unique_ptr<LogMessage> LogQueue::getNextLog()
 
     if (logQueue.empty())
     {
-        return NULL;
+        return nullptr;
     }
     else
     {
@@ -51,7 +51,7 @@ void LogQueue::shutdown()
     unique_lock<mutex> shutdownLock(queueLock);
     // We need to prepend the queue with a null message so that any waiting threads are interrupted and do not process
     // any of the log messages.
-    logQueue.push_front(NULL);
+    logQueue.push_front(nullptr);
 
     isShutdown = true;
 

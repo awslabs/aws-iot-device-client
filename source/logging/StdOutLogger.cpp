@@ -7,14 +7,14 @@
 #include <sstream>
 #include <thread>
 
-#define TIMESTAMP_BUFFER_SIZE 25
+constexpr int TIMESTAMP_BUFFER_SIZE = 25;
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr int StdOutLogger::DEFAULT_WAIT_TIME_MILLISECONDS;
 
-void StdOutLogger::writeLogMessage(unique_ptr<LogMessage> message)
+void StdOutLogger::writeLogMessage(unique_ptr<LogMessage> message) const
 {
     char time_buffer[TIMESTAMP_BUFFER_SIZE];
     LogUtil::generateTimestamp(message->getTime(), TIMESTAMP_BUFFER_SIZE, time_buffer);
@@ -29,7 +29,7 @@ void StdOutLogger::run()
     {
         unique_ptr<LogMessage> message = logQueue->getNextLog();
 
-        if (NULL != message)
+        if (nullptr != message)
         {
             writeLogMessage(std::move(message));
         }
@@ -79,7 +79,7 @@ void StdOutLogger::flush()
     while (logQueue->hasNextLog())
     {
         unique_ptr<LogMessage> message = logQueue->getNextLog();
-        if (NULL != message)
+        if (nullptr != message)
         {
             writeLogMessage(std::move(message));
         }
@@ -90,7 +90,7 @@ void StdOutLogger::queueLog(
     LogLevel level,
     const char *tag,
     std::chrono::time_point<std::chrono::system_clock> t,
-    std::string message)
+    const std::string &message)
 {
     logQueue.get()->addLog(unique_ptr<LogMessage>(new LogMessage(level, tag, t, message)));
 }
