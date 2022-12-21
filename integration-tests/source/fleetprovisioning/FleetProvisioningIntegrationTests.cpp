@@ -23,7 +23,7 @@ extern std::string REGION;
 extern std::string PORT;
 extern bool SKIP_FP;
 
-class TestFleetProvisioningFixture : public ::testing::Test
+class TestFleetProvisioningFeature : public ::testing::Test
 {
   public:
     // cppcheck-suppress unusedFunction
@@ -57,7 +57,7 @@ class TestFleetProvisioningFixture : public ::testing::Test
     unique_ptr<IntegrationTestResourceHandler> resourceHandler;
 };
 
-TEST_F(TestFleetProvisioningFixture, HappyPath)
+TEST_F(TestFleetProvisioningFeature, HappyPath)
 {
     string jobId = FP_JOB_ID + resourceHandler->GetTimeStamp();
     resourceHandler->CreateJob(jobId, HEALTH_CHECK_JOB_DOC);

@@ -16,16 +16,41 @@ class IntegrationTestResourceHandler
 {
   public:
     explicit IntegrationTestResourceHandler(const Aws::Client::ClientConfiguration &clientConfig);
+
+    /**
+     * Secure Tunneling test util methods
+     */
     Aws::IoTSecureTunneling::Model::OpenTunnelResult OpenTunnel(const std::string &thingName);
+
     Aws::IoTSecureTunneling::Model::ConnectionStatus GetTunnelSourceConnectionStatusWithRetry(
         const std::string &tunnelId);
+
     void CloseTunnel(const std::string &tunnelId);
+
+    /**
+     * Jobs test util methods
+     */
     void CreateJob(const std::string &jobId, const std::string &jobDoc);
 
-    void CleanUp();
     void CleanUpThingAndCert(const std::string &thingName);
+
     std::string GetTimeStamp();
+
     Aws::IoT::Model::JobExecutionStatus GetJobExecutionStatusWithRetry(const std::string &jobId);
+
+    /**
+     * Device Defender test util methods
+     */
+    std::vector<Aws::IoT::Model::ActiveViolation> GetViolations(const std::string &thingName);
+
+    void CreateAndAttachSecurityProfile(const std::string &profileName, const std::vector<std::string> &metrics);
+
+    void DeleteSecurityProfile(const std::string &profileName);
+
+    /**
+     * Misc util methods
+     */
+    void CleanUp();
     std::string GetTargetArn(const std::string &thingName);
 
   protected:
@@ -43,6 +68,7 @@ class IntegrationTestResourceHandler
     void DeleteCertificate(const std::string &certificateId);
     void DeleteThing(const std::string &thingName);
     std::string GetResourceId(const std::string &resource);
+    void AttachSecurityProfile(const std::string &profileName);
 
     std::string targetArn;
 };
