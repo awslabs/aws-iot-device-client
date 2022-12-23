@@ -11,11 +11,13 @@ cd build
 cmake ..
 cov-build --dir cov-int cmake --build . --target aws-iot-device-client
 chmod +x aws-iot-device-client
+VERSION=$(./aws-iot-device-client --version)
+echo "$VERSION"
 tar czvf aws-iot-device-client.tgz cov-int
 
 curl --form token="$COVERITY_TOKEN" \
   --form email="$COVERITY_EMAIL" \
   --form file=@aws-iot-device-client.tgz \
-  --form version="$(./aws-iot-device-client --version)" \
+  --form version="$VERSION" \
   --form description="aws-iot-device-client" \
   https://scan.coverity.com/builds?project=aws-iot-device-client
