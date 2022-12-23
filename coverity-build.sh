@@ -10,6 +10,9 @@ mkdir build
 cd build
 cmake ..
 cov-build --dir cov-int cmake --build . --target aws-iot-device-client
+ls
+cd cov-int
+ls
 chmod +x aws-iot-device-client
 VERSION=$(./aws-iot-device-client --version)
 echo "$VERSION"
