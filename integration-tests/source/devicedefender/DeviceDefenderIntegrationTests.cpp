@@ -52,6 +52,7 @@ class TestDeviceDefenderFeature : public ::testing::Test
 TEST_F(TestDeviceDefenderFeature, VerifyViolations)
 {
     vector<ActiveViolation> violations;
+    // Check for active violations for 10 minutes 30 seconds. Metrics interval is five minutes.
     int maxWaitTime = 630;
     while (maxWaitTime > 0)
     {
