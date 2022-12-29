@@ -403,13 +403,10 @@ void IntegrationTestResourceHandler::AttachSecurityProfile(const std::string &pr
 
     if (!outcome.IsSuccess())
     {
-        if (!outcome.IsSuccess())
-        {
-            printf(
-                "Failed to attach Security Profile: %s\n%s\n",
-                profileName.c_str(),
-                outcome.GetError().GetMessage().c_str());
-        }
+        printf(
+            "Failed to attach Security Profile: %s\n%s\n",
+            profileName.c_str(),
+            outcome.GetError().GetMessage().c_str());
     }
 }
 
