@@ -59,7 +59,10 @@ class MockSecureTunnel : public SecureTunnelWrapper
 class MockTcpForward : public TcpForward
 {
   public:
-    MockTcpForward() : TcpForward() {}
+    MockTcpForward(std::shared_ptr<SharedCrtResourceManager> sharedCrtResourceManager, uint16_t port)
+        : TcpForward(sharedCrtResourceManager, port)
+    {
+    }
     MOCK_METHOD(int, Connect, (), (override));
     MOCK_METHOD(int, SendData, (const Crt::ByteCursor &data), (override));
 };
@@ -71,7 +74,7 @@ class TestSecureTunnelContext : public testing::Test
     {
         manager = shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager());
         tunnel = shared_ptr<MockSecureTunnel>(new MockSecureTunnel());
-        tcpForward = shared_ptr<MockTcpForward>(new MockTcpForward());
+        tcpForward = shared_ptr<MockTcpForward>(new MockTcpForward(manager, port));
         rootCa = "root-ca-value";
         accessToken = "access-token-value";
         endpoint = "endpoint-value";
