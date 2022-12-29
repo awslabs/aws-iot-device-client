@@ -44,9 +44,9 @@ class TestDeviceDefenderFeature : public ::testing::Test
 };
 
 /**
- * To test Device Defender we are creating a Security Profile to create violations for any ( > 1) metrics output and using this
- * to facilitate testing. This is a simple test to verify the metrics are being emitted by the Device Client by verifying
- * metrics are causing violations. Verifying Packets In/Out & Bytes In/Out greater than 1.
+ * To test Device Defender we are creating a Security Profile to create violations for any ( > 1) metrics output and
+ * using this to facilitate testing. This is a simple test to verify the metrics are being emitted by the Device Client
+ * by verifying metrics are causing violations. Verifying Packets In/Out & Bytes In/Out greater than 1.
  */
 
 TEST_F(TestDeviceDefenderFeature, VerifyViolations)
