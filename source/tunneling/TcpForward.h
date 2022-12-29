@@ -40,12 +40,6 @@ namespace Aws
                         const OnTcpForwardDataReceive &onTcpForwardDataReceive);
 
                     /**
-                     * \brief Default Constructor
-                     */
-
-                    TcpForward() = default;
-
-                    /**
                      * \brief Destructor
                      */
                     virtual ~TcpForward();
