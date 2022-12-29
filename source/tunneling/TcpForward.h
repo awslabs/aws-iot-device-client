@@ -40,10 +40,9 @@ namespace Aws
                         const OnTcpForwardDataReceive &onTcpForwardDataReceive);
 
                     /**
-                     * \brief Default Constructor
+                     * \brief Constructor with no callback
                      */
-
-                    TcpForward() = default;
+                    TcpForward(std::shared_ptr<SharedCrtResourceManager> sharedCrtResourceManager, uint16_t port);
 
                     /**
                      * \brief Destructor

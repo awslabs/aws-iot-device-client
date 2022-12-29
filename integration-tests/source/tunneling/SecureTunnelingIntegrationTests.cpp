@@ -44,6 +44,7 @@ class TestSecureTunnelingFixture : public ::testing::Test
                 tunnelId = openTunnelResult.GetTunnelId();
                 sourceToken = openTunnelResult.GetSourceAccessToken();
 
+                // cppcheck-suppress leakReturnValNotUsed
                 std::unique_ptr<const char *[]> argv(new const char *[8]);
                 argv[0] = LOCAL_PROXY_PATH.c_str();
                 argv[1] = "-s";
@@ -99,6 +100,8 @@ TEST_F(TestSecureTunnelingFixture, SCP)
         GTEST_FAIL();
     }
     printf("Running %s script...\n", TEST_TUNNEL_PATH.c_str());
+
+    // cppcheck-suppress leakReturnValNotUsed
     std::unique_ptr<const char *[]> argv(new const char *[3]);
     argv[0] = TEST_TUNNEL_PATH.c_str();
     argv[1] = PORT.c_str();

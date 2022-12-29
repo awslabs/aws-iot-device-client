@@ -32,6 +32,13 @@ namespace Aws
                     aws_byte_buf_init(&mSendBuffer, sharedCrtResourceManager->getAllocator(), 1);
                 }
 
+                TcpForward::TcpForward(
+                    std::shared_ptr<SharedCrtResourceManager> sharedCrtResourceManager,
+                    uint16_t port)
+                    : mSharedCrtResourceManager(sharedCrtResourceManager), mPort(port)
+                {
+                }
+
                 TcpForward::~TcpForward()
                 {
                     if (mConnected)
