@@ -26,7 +26,6 @@ extern bool SKIP_FP;
 class TestFleetProvisioningFeature : public ::testing::Test
 {
   public:
-    // cppcheck-suppress unusedFunction
     void SetUp() override
     {
         if (!SKIP_FP)
