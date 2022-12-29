@@ -75,7 +75,6 @@ void PrintHelp()
     printf("--help              Print this message\n");
 }
 
-// cppcheck-suppress constParameter
 // GoogleTest modifies argv so not const
 bool parseCliArgs(int argc, char **argv)
 {

@@ -99,7 +99,7 @@ int FileUtils::ReadFromFile(const std::string &pathToFile, aws_byte_buf *data, s
         LOGM_ERROR(FileUtils::TAG, "Unable to open file: '%s'", Sanitize(pathToFile).c_str());
         return AWS_OP_ERR;
     }
-    file.read((char *)data->buffer, size);
+    file.read(reinterpret_cast<char *>(data->buffer), size);
     data->len = size;
 
     if (!file)
@@ -122,7 +122,7 @@ int FileUtils::WriteToFile(const std::string &pathToFile, const aws_byte_buf *da
         LOGM_ERROR(FileUtils::TAG, "Unable to open file: '%s'", Sanitize(pathToFile).c_str());
         return AWS_OP_ERR;
     }
-    file.write((char *)data->buffer, data->len);
+    file.write(reinterpret_cast<char *>(data->buffer), data->len);
     if (!file)
     {
         file.close();

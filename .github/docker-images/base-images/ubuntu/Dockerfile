@@ -14,7 +14,6 @@ RUN apt-get update -qq \
     curl \
     build-essential \
     wget \
-    cppcheck \
     libc6-dbg \
     softhsm \
     && apt-get clean
@@ -64,6 +63,18 @@ RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://sourceware.
     && cd valgrind-3.19.0 \
     && ./configure \
     && make \
+    && make install
+
+###############################################################################
+# Install cppcheck
+###############################################################################
+WORKDIR /tmp
+RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://github.com/danmar/cppcheck/archive/2.9.tar.gz \
+    && tar zxvf 2.9.tar.gz \
+    && cd cppcheck-2.9 \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
     && make install
 
 ###############################################################################

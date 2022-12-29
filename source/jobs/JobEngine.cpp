@@ -115,7 +115,7 @@ string JobEngine::buildCommand(Crt::Optional<string> path, const std::string &ha
         LOG_DEBUG(TAG, "Assuming executable is in PATH");
     }
 
-    commandStream << handler.c_str();
+    commandStream << handler;
 
     if (operationOwnedByDeviceClient)
     {
@@ -402,6 +402,8 @@ int JobEngine::exec_handlerScript(const std::string &command, PlainJobDocument::
     {
         argSize = action.handlerInput->args->size();
     }
+
+    // cppcheck-suppress leakReturnValNotUsed
     std::unique_ptr<const char *[]> argv(new const char *[argSize + 3]);
     argv[0] = command.c_str();
     argv[1] = action.runAsUser->c_str();
@@ -418,6 +420,8 @@ bool JobEngine::verifySudoAndUser(PlainJobDocument::JobAction action)
 {
     int execStatus1;
     // first to run command id $user and /bin/bash -c "command -v sudo" to verify user and sudo
+
+    // cppcheck-suppress leakReturnValNotUsed
     std::unique_ptr<const char *[]> argv1(new const char *[3]);
     argv1[0] = "id";
     argv1[1] = action.runAsUser->c_str();
@@ -427,6 +431,7 @@ bool JobEngine::verifySudoAndUser(PlainJobDocument::JobAction action)
 
     if (execStatus1 == 0)
     {
+        // cppcheck-suppress leakReturnValNotUsed
         std::unique_ptr<const char *[]> argv2(new const char *[4]);
         argv2[0] = "/bin/bash";
         argv2[1] = "-c";
@@ -459,6 +464,8 @@ int JobEngine::exec_shellCommand(PlainJobDocument::JobAction action)
         LOG_WARN(TAG, "username or sudo command not found");
 
         size_t argSize = action.commandInput->command.size();
+
+        // cppcheck-suppress leakReturnValNotUsed
         std::unique_ptr<const char *[]> argv(new const char *[argSize + 1]);
         argv[argSize] = nullptr;
         for (size_t i = 0; i < argSize; i++)
@@ -476,6 +483,8 @@ int JobEngine::exec_shellCommand(PlainJobDocument::JobAction action)
     {
         // if two verifications succeeds, build command using sudo -u $user -n $@ and execute
         size_t argSize = action.commandInput->command.size();
+
+        // cppcheck-suppress leakReturnValNotUsed
         std::unique_ptr<const char *[]> argv(new const char *[argSize + 5]);
         argv[0] = "sudo";
         argv[1] = "-u";

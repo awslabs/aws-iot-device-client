@@ -391,7 +391,6 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         // http://www.unicode.org/reports/tr18/#General_Category_Property)
 
         // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
-        // cppcheck-suppress danglingTemporaryLifetime
         statusDetails["stdout"] = statusInfo.stdoutput.substr(startPos, statusInfo.stdoutput.size()).c_str();
     }
 
@@ -401,12 +400,10 @@ void JobsFeature::publishUpdateJobExecutionStatus(
                               ? statusInfo.stderror.size() - MAX_STATUS_DETAIL_LENGTH
                               : 0;
         // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
-        // cppcheck-suppress danglingTemporaryLifetime
         statusDetails["stderr"] = statusInfo.stderror.substr(startPos, statusInfo.stderror.size()).c_str();
     }
 
     // NOTE(marcoaz): statusDetails is captured by value
-    // cppcheck-suppress danglingTemporaryLifetime
     publishUpdateJobExecutionStatusWithRetry(data, statusInfo, statusDetails, onCompleteCallback);
 }
 
@@ -572,7 +569,7 @@ void JobsFeature::initJob(const JobExecutionData &job)
         if (needStop.load())
         {
             LOGM_INFO(TAG, "Shutting down %s now that job execution is complete", getName().c_str());
-            baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
+            baseNotifier->onEvent(static_cast<Feature *>(this), ClientBaseEventNotification::FEATURE_STOPPED);
         }
     };
 
@@ -603,7 +600,7 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
         if (needStop.load())
         {
             LOGM_INFO(TAG, "Shutting down %s now that job execution is complete", getName().c_str());
-            baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
+            baseNotifier->onEvent(static_cast<Feature *>(this), ClientBaseEventNotification::FEATURE_STOPPED);
         }
     };
     // TODO: Add support for checking condition
@@ -694,7 +691,7 @@ int JobsFeature::start()
     thread jobs_thread(&JobsFeature::runJobs, this);
     jobs_thread.detach();
 
-    baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STARTED);
+    baseNotifier->onEvent(static_cast<Feature *>(this), ClientBaseEventNotification::FEATURE_STARTED);
     return 0;
 }
 
@@ -703,7 +700,7 @@ int JobsFeature::stop()
     needStop.store(true);
     if (!handlingJob.load())
     {
-        baseNotifier->onEvent((Feature *)this, ClientBaseEventNotification::FEATURE_STOPPED);
+        baseNotifier->onEvent(static_cast<Feature *>(this), ClientBaseEventNotification::FEATURE_STOPPED);
     }
 
     return 0;
