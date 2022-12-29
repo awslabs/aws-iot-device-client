@@ -391,7 +391,6 @@ void JobsFeature::publishUpdateJobExecutionStatus(
         // http://www.unicode.org/reports/tr18/#General_Category_Property)
 
         // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
-
         statusDetails["stdout"] = statusInfo.stdoutput.substr(startPos, statusInfo.stdoutput.size()).c_str();
     }
 
@@ -401,12 +400,10 @@ void JobsFeature::publishUpdateJobExecutionStatus(
                               ? statusInfo.stderror.size() - MAX_STATUS_DETAIL_LENGTH
                               : 0;
         // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
-
         statusDetails["stderr"] = statusInfo.stderror.substr(startPos, statusInfo.stderror.size()).c_str();
     }
 
     // NOTE(marcoaz): statusDetails is captured by value
-
     publishUpdateJobExecutionStatusWithRetry(data, statusInfo, statusDetails, onCompleteCallback);
 }
 
