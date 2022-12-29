@@ -29,10 +29,7 @@ constexpr char DeviceDefenderFeature::TOPIC_ACCEPTED[];
 constexpr char DeviceDefenderFeature::TOPIC_REJECTED[];
 constexpr char DeviceDefenderFeature::TOPIC_FORMAT[];
 
-DeviceDefenderFeature::DeviceDefenderFeature()
-{
-    interval = 300;
-}
+DeviceDefenderFeature::DeviceDefenderFeature() : interval(300) {}
 
 string DeviceDefenderFeature::getName()
 {
