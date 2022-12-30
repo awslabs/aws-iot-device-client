@@ -30,7 +30,9 @@ class TestDeviceDefenderFeature : public ::testing::Test
             resourceHandler =
                 unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
 
-            resourceHandler->CreateAndAttachSecurityProfile(THING_NAME, metrics);
+            securityProfileName = THING_NAME + resourceHandler->GetTimeStamp();
+
+            resourceHandler->CreateAndAttachSecurityProfile(securityProfileName, metrics);
         }
     }
     void TearDown() override
@@ -40,6 +42,7 @@ class TestDeviceDefenderFeature : public ::testing::Test
         Aws::ShutdownAPI(options);
     }
     unique_ptr<IntegrationTestResourceHandler> resourceHandler;
+    string securityProfileName;
     vector<std::string> metrics{"aws:all-bytes-in", "aws:all-bytes-out", "aws:all-packets-in", "aws:all-packets-out"};
 };
 
@@ -54,15 +57,16 @@ TEST_F(TestDeviceDefenderFeature, VerifyViolations)
     vector<ActiveViolation> violations;
     // Check for active violations for 10 minutes 30 seconds. Metrics interval is five minutes.
     int maxWaitTime = 630;
+    const int interval = 30;
     while (maxWaitTime > 0)
     {
-        violations = resourceHandler->GetViolations(THING_NAME);
+        violations = resourceHandler->GetViolations(THING_NAME, securityProfileName);
         if (violations.size() == metrics.size())
         {
             break;
         }
-        this_thread::sleep_for(std::chrono::seconds(10));
-        maxWaitTime -= 10;
+        this_thread::sleep_for(std::chrono::seconds(interval));
+        maxWaitTime -= interval;
     }
 
     ASSERT_EQ(violations.size(), metrics.size());

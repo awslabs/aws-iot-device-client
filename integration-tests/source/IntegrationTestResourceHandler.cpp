@@ -58,6 +58,8 @@ void IntegrationTestResourceHandler::CreateJob(const string &jobId, const string
 
     CreateJobOutcome outcome = iotClient.CreateJob(request);
 
+    printf("Creating Job: %s\n", jobId.c_str());
+
     if (outcome.IsSuccess())
     {
         jobsToCleanUp.push_back(jobId);
@@ -174,6 +176,7 @@ void IntegrationTestResourceHandler::DeleteCertificate(const string &certificate
 
     DeleteCertificateOutcome outcome = iotClient.DeleteCertificate(request);
 
+    printf("Deleting Certificate: %s\n", certificateId.c_str());
     if (!outcome.IsSuccess())
     {
         printf(
@@ -287,6 +290,8 @@ Aws::IoTSecureTunneling::Model::OpenTunnelResult IntegrationTestResourceHandler:
 
     OpenTunnelOutcome outcome = ioTSecureTunnelingClient.OpenTunnel(request);
 
+    printf("Opening tunnel to Thing: %s\n", thingName.c_str());
+
     if (!outcome.IsSuccess())
     {
         printf("Failed to open tunnel to Thing: %s\n%s\n", thingName.c_str(), outcome.GetError().GetMessage().c_str());
@@ -329,12 +334,14 @@ std::string IntegrationTestResourceHandler::GetResourceId(const std::string &res
 {
     return resource.substr(resource.find('/'));
 }
-vector<ActiveViolation> IntegrationTestResourceHandler::GetViolations(const string &thingName)
+vector<ActiveViolation> IntegrationTestResourceHandler::GetViolations(
+    const string &thingName,
+    const std::string &profileName)
 {
     vector<ActiveViolation> violations;
 
     ListActiveViolationsRequest request;
-    request.SetSecurityProfileName(thingName);
+    request.SetSecurityProfileName(profileName);
 
     ListActiveViolationsOutcome outcome = iotClient.ListActiveViolations(request);
 
@@ -347,14 +354,24 @@ vector<ActiveViolation> IntegrationTestResourceHandler::GetViolations(const stri
     }
     else
     {
-
+        // Filter out violations that are not for this ThingName
+        // cppcheck-suppression useStlAlgorithm
         for (const ActiveViolation &violation : outcome.GetResult().GetActiveViolations())
         {
             if (violation.GetThingName() == thingName)
             {
+                printf(
+                    "Found violation for Security Profile: %s Behavior: %s\n",
+                    thingName.c_str(),
+                    violation.GetBehavior().GetName().c_str());
+
                 violations.push_back(violation);
             }
         }
+    }
+    if (violations.empty())
+    {
+        printf("Found no violations for Security Profile: %s\n", profileName.c_str());
     }
     return violations;
 }
@@ -387,6 +404,8 @@ void IntegrationTestResourceHandler::CreateAndAttachSecurityProfile(
 
     CreateSecurityProfileOutcome outcome = iotClient.CreateSecurityProfile(request);
 
+    printf("Creating Security Profile: %s\n", profileName.c_str());
+
     if (!outcome.IsSuccess())
     {
         printf(
@@ -408,6 +427,8 @@ void IntegrationTestResourceHandler::AttachSecurityProfile(const std::string &pr
 
     AttachSecurityProfileOutcome outcome = iotClient.AttachSecurityProfile(request);
 
+    printf("Attaching Security Profile: %s\n", profileName.c_str());
+
     if (!outcome.IsSuccess())
     {
         printf(
@@ -423,6 +444,8 @@ void IntegrationTestResourceHandler::DeleteSecurityProfile(const string &profile
     request.SetSecurityProfileName(profileName);
 
     DeleteSecurityProfileOutcome outcome = iotClient.DeleteSecurityProfile(request);
+
+    printf("Deleting Security Profile: %s\n", profileName.c_str());
 
     if (!outcome.IsSuccess())
     {
