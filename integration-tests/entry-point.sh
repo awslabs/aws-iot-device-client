@@ -34,7 +34,7 @@ chmod 745 ${OUTPUT_DIR}
       \"thing-name\":	\"${THING_NAME}\",
       \"root-ca\":	\"${ROOT_CA_PATH}\",
       \"logging\":	{
-        \"level\":	\"INFO\",
+        \"level\":	\"DEBUG\",
         \"type\":	\"STDOUT\"
       },
       \"jobs\":	{

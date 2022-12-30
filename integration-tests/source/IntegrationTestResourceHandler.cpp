@@ -176,7 +176,6 @@ void IntegrationTestResourceHandler::DeleteCertificate(const string &certificate
 
     DeleteCertificateOutcome outcome = iotClient.DeleteCertificate(request);
 
-    printf("Deleting Certificate: %s\n", certificateId.c_str());
     if (!outcome.IsSuccess())
     {
         printf(
