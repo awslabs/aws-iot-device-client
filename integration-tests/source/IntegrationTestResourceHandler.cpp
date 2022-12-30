@@ -334,7 +334,7 @@ vector<ActiveViolation> IntegrationTestResourceHandler::GetViolations(const stri
     vector<ActiveViolation> violations;
 
     ListActiveViolationsRequest request;
-    request.SetThingName(thingName);
+    request.SetSecurityProfileName(thingName);
 
     ListActiveViolationsOutcome outcome = iotClient.ListActiveViolations(request);
 
@@ -347,7 +347,14 @@ vector<ActiveViolation> IntegrationTestResourceHandler::GetViolations(const stri
     }
     else
     {
-        violations = outcome.GetResult().GetActiveViolations();
+
+        for (const ActiveViolation &violation : outcome.GetResult().GetActiveViolations())
+        {
+            if (violation.GetThingName() == thingName)
+            {
+                violations.push_back(violation);
+            }
+        }
     }
     return violations;
 }
