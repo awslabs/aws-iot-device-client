@@ -36,7 +36,7 @@ class TestDeviceDefenderFeature : public ::testing::Test
             resourceHandler->CreateThingGroup(thingGroupName);
             resourceHandler->AddThingToThingGroup(thingGroupName, THING_NAME);
 
-            resourceHandler->CreateAndAttachSecurityProfile(securityProfileName, THING_NAME, metrics);
+            resourceHandler->CreateAndAttachSecurityProfile(securityProfileName, thingGroupName, metrics);
         }
     }
     void TearDown() override
