@@ -461,11 +461,11 @@ void IntegrationTestResourceHandler::DeleteThingGroup(const string &thingGroupNa
 
     DeleteThingGroupOutcome outcome = iotClient.DeleteThingGroup(request);
 
-    printf("Deleting Thing Group: %s", thingGroupName.c_str());
+    printf("Deleting Thing Group: %s\n", thingGroupName.c_str());
 
     if (!outcome.IsSuccess())
     {
-        printf("Failed to delete Thing Group: %s", thingGroupName.c_str());
+        printf("Failed to delete Thing Group: %s\n", thingGroupName.c_str());
     }
 }
 void IntegrationTestResourceHandler::CreateThingGroup(const string &thingGroupName)
@@ -477,7 +477,7 @@ void IntegrationTestResourceHandler::CreateThingGroup(const string &thingGroupNa
 
     if (!outcome.IsSuccess())
     {
-        printf("Failed to create Thing Group: %s", thingGroupName.c_str());
+        printf("Failed to create Thing Group: %s\n", thingGroupName.c_str());
     }
     else
     {
@@ -494,6 +494,6 @@ void IntegrationTestResourceHandler::AddThingToThingGroup(const string &thingGro
 
     if (!outcome.IsSuccess())
     {
-        printf("Failed to add Thing: %s to Thing Group: %s", thingName.c_str(), thingGroupName.c_str());
+        printf("Failed to add Thing: %s to Thing Group: %s\n", thingName.c_str(), thingGroupName.c_str());
     }
 }

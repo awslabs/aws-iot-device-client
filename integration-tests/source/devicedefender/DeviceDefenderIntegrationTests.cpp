@@ -30,7 +30,7 @@ class TestDeviceDefenderFeature : public ::testing::Test
             resourceHandler =
                 unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
 
-            securityProfileName = THING_NAME + resourceHandler->GetTimeStamp();
+            securityProfileName = "Integration-Test-Security-Profile-" + resourceHandler->GetTimeStamp();
             thingGroupName = "group-" + THING_NAME;
 
             resourceHandler->CreateThingGroup(thingGroupName);
