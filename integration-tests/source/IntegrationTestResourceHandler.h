@@ -71,6 +71,7 @@ class IntegrationTestResourceHandler
     void DeleteThing(const std::string &thingName);
     std::string GetResourceId(const std::string &resource);
     void AttachSecurityProfile(const std::string &profileName);
+    void DeleteThingGroup(const std::string &thingGroupName);
 
     std::string targetArn;
 };

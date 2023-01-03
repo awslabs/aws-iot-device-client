@@ -27,6 +27,8 @@
 #include <aws/iot/model/ListThingPrincipalsResult.h>
 #include <aws/iot/model/ListThingsInThingGroupRequest.h>
 #include <aws/iot/model/UpdateCertificateRequest.h>
+#include <aws/iot/model/DeleteThingGroupRequest.h>
+#include <aws/iot/model/DeleteThingGroupResult.h>
 #include <aws/iotsecuretunneling/model/CloseTunnelRequest.h>
 #include <aws/iotsecuretunneling/model/DescribeTunnelRequest.h>
 #include <aws/iotsecuretunneling/model/DescribeTunnelResult.h>
@@ -210,6 +212,7 @@ void IntegrationTestResourceHandler::CleanUpThingAndCert(const std::string &thin
         DeleteCertificate(certificateId);
         DeleteThing(thingName);
     }
+    DeleteThingGroup(thingName);
 }
 
 std::string IntegrationTestResourceHandler::GetTimeStamp()
@@ -353,20 +356,7 @@ vector<ActiveViolation> IntegrationTestResourceHandler::GetViolations(
     }
     else
     {
-        // Filter out violations that are not for this ThingName
-        // cppcheck-suppression useStlAlgorithm
-        for (const ActiveViolation &violation : outcome.GetResult().GetActiveViolations())
-        {
-            if (violation.GetThingName() == thingName)
-            {
-                printf(
-                    "Found violation for Security Profile: %s Behavior: %s\n",
-                    thingName.c_str(),
-                    violation.GetBehavior().GetName().c_str());
-
-                violations.push_back(violation);
-            }
-        }
+        violations = outcome.GetResult().GetActiveViolations();
     }
     if (violations.empty())
     {
@@ -418,11 +408,11 @@ void IntegrationTestResourceHandler::CreateAndAttachSecurityProfile(
 
 void IntegrationTestResourceHandler::AttachSecurityProfile(const std::string &profileName)
 {
-    string allThingsArn = targetArn.substr(0, targetArn.find_last_of(':') + 1) + "all/things";
+    string thingGroupArn = targetArn.substr(0, targetArn.find_last_of(':') + 1) + "thinggroup/" + THING_NAME;
 
     AttachSecurityProfileRequest request;
     request.SetSecurityProfileName(profileName);
-    request.SetSecurityProfileTargetArn(allThingsArn);
+    request.SetSecurityProfileTargetArn(thingGroupArn);
 
     AttachSecurityProfileOutcome outcome = iotClient.AttachSecurityProfile(request);
 
@@ -452,5 +442,19 @@ void IntegrationTestResourceHandler::DeleteSecurityProfile(const string &profile
             "Failed to delete Security Profile: %s\n%s\n",
             profileName.c_str(),
             outcome.GetError().GetMessage().c_str());
+    }
+}
+void IntegrationTestResourceHandler::DeleteThingGroup(const string &thingGroupName)
+{
+    DeleteThingGroupRequest request;
+    request.SetThingGroupName(thingGroupName);
+
+    DeleteThingGroupOutcome outcome = iotClient.DeleteThingGroup(request);
+
+    printf("Deleting Thing Group: %s", thingGroupName.c_str());
+
+    if(!outcome.IsSuccess())
+    {
+        printf("Failed to delete Thing Group: %s", thingGroupName.c_str());
     }
 }
