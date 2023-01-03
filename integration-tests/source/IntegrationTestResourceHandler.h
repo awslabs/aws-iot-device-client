@@ -45,13 +45,18 @@ class IntegrationTestResourceHandler
         const std::string &thingName,
         const std::string &profileName);
 
-    void CreateAndAttachSecurityProfile(const std::string &profileName, const std::vector<std::string> &metrics);
+    void CreateAndAttachSecurityProfile(
+        const std::string &profileName,
+        const std::string &thingGroupName,
+        const std::vector<std::string> &metrics);
 
     void DeleteSecurityProfile(const std::string &profileName);
 
     /**
      * Misc util methods
      */
+    void CreateThingGroup(const std::string &thingGroupName);
+    void AddThingToThingGroup(const std::string &thingGroupName, const std::string &thingName);
     void CleanUp();
     std::string GetTargetArn(const std::string &thingName);
 
@@ -60,6 +65,7 @@ class IntegrationTestResourceHandler
     Aws::IoTSecureTunneling::IoTSecureTunnelingClient ioTSecureTunnelingClient;
     std::list<std::string> jobsToCleanUp;
     std::list<std::string> tunnelsToCleanup;
+    std::list<std::string> thingGroupsToCleanup;
 
   private:
     Aws::IoT::Model::JobExecutionStatus GetJobExecutionStatus(const std::string &jobId);
@@ -70,7 +76,7 @@ class IntegrationTestResourceHandler
     void DeleteCertificate(const std::string &certificateId);
     void DeleteThing(const std::string &thingName);
     std::string GetResourceId(const std::string &resource);
-    void AttachSecurityProfile(const std::string &profileName);
+    void AttachSecurityProfile(const std::string &profileName, const std::string &thingGroupName);
     void DeleteThingGroup(const std::string &thingGroupName);
 
     std::string targetArn;

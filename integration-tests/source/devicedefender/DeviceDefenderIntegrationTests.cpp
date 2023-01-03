@@ -31,18 +31,24 @@ class TestDeviceDefenderFeature : public ::testing::Test
                 unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
 
             securityProfileName = THING_NAME + resourceHandler->GetTimeStamp();
+            thingGroupName = "group-" + THING_NAME;
 
-            resourceHandler->CreateAndAttachSecurityProfile(securityProfileName, metrics);
+            resourceHandler->CreateThingGroup(thingGroupName);
+            resourceHandler->AddThingToThingGroup(thingGroupName, THING_NAME);
+
+            resourceHandler->CreateAndAttachSecurityProfile(securityProfileName, THING_NAME, metrics);
         }
     }
     void TearDown() override
     {
         resourceHandler->DeleteSecurityProfile(THING_NAME);
+        resourceHandler->CleanUp();
         SDKOptions options;
         Aws::ShutdownAPI(options);
     }
     unique_ptr<IntegrationTestResourceHandler> resourceHandler;
     string securityProfileName;
+    string thingGroupName;
     vector<std::string> metrics{"aws:all-bytes-in", "aws:all-bytes-out", "aws:all-packets-in", "aws:all-packets-out"};
 };
 

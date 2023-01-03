@@ -2,15 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "IntegrationTestResourceHandler.h"
+#include <aws/iot/model/AddThingToThingGroupRequest.h>
+#include <aws/iot/model/AddThingToThingGroupResult.h>
 #include <aws/iot/model/AttachSecurityProfileRequest.h>
 #include <aws/iot/model/CreateJobRequest.h>
 #include <aws/iot/model/CreateJobResult.h>
 #include <aws/iot/model/CreateSecurityProfileRequest.h>
 #include <aws/iot/model/CreateSecurityProfileResult.h>
+#include <aws/iot/model/CreateThingGroupRequest.h>
+#include <aws/iot/model/CreateThingGroupResult.h>
 #include <aws/iot/model/DeleteCertificateRequest.h>
 #include <aws/iot/model/DeleteJobRequest.h>
 #include <aws/iot/model/DeleteSecurityProfileRequest.h>
 #include <aws/iot/model/DeleteThingGroupRequest.h>
+#include <aws/iot/model/DeleteThingGroupResult.h>
 #include <aws/iot/model/DeleteThingRequest.h>
 #include <aws/iot/model/DescribeCertificateRequest.h>
 #include <aws/iot/model/DescribeJobExecutionRequest.h>
@@ -27,8 +32,6 @@
 #include <aws/iot/model/ListThingPrincipalsResult.h>
 #include <aws/iot/model/ListThingsInThingGroupRequest.h>
 #include <aws/iot/model/UpdateCertificateRequest.h>
-#include <aws/iot/model/DeleteThingGroupRequest.h>
-#include <aws/iot/model/DeleteThingGroupResult.h>
 #include <aws/iotsecuretunneling/model/CloseTunnelRequest.h>
 #include <aws/iotsecuretunneling/model/DescribeTunnelRequest.h>
 #include <aws/iotsecuretunneling/model/DescribeTunnelResult.h>
@@ -195,6 +198,10 @@ void IntegrationTestResourceHandler::CleanUp()
     for (const string &tunnelId : tunnelsToCleanup)
     {
         CloseTunnel(tunnelId);
+    }
+    for (const string &thingGroup : thingGroupsToCleanup)
+    {
+        DeleteThingGroup(thingGroup);
     }
 }
 
@@ -366,6 +373,7 @@ vector<ActiveViolation> IntegrationTestResourceHandler::GetViolations(
 }
 void IntegrationTestResourceHandler::CreateAndAttachSecurityProfile(
     const string &profileName,
+    const string &thingGroupName,
     const vector<std::string> &metrics)
 {
     MetricValue metricValue;
@@ -403,12 +411,14 @@ void IntegrationTestResourceHandler::CreateAndAttachSecurityProfile(
             outcome.GetError().GetMessage().c_str());
     }
 
-    AttachSecurityProfile(profileName);
+    AttachSecurityProfile(profileName, thingGroupName);
 }
 
-void IntegrationTestResourceHandler::AttachSecurityProfile(const std::string &profileName)
+void IntegrationTestResourceHandler::AttachSecurityProfile(
+    const std::string &profileName,
+    const std::string &thingGroupName)
 {
-    string thingGroupArn = targetArn.substr(0, targetArn.find_last_of(':') + 1) + "thinggroup/" + THING_NAME;
+    string thingGroupArn = targetArn.substr(0, targetArn.find_last_of(':') + 1) + "thinggroup/" + thingGroupName;
 
     AttachSecurityProfileRequest request;
     request.SetSecurityProfileName(profileName);
@@ -453,8 +463,37 @@ void IntegrationTestResourceHandler::DeleteThingGroup(const string &thingGroupNa
 
     printf("Deleting Thing Group: %s", thingGroupName.c_str());
 
-    if(!outcome.IsSuccess())
+    if (!outcome.IsSuccess())
     {
         printf("Failed to delete Thing Group: %s", thingGroupName.c_str());
+    }
+}
+void IntegrationTestResourceHandler::CreateThingGroup(const string &thingGroupName)
+{
+    CreateThingGroupRequest request;
+    request.SetThingGroupName(thingGroupName);
+
+    CreateThingGroupOutcome outcome = iotClient.CreateThingGroup(request);
+
+    if (!outcome.IsSuccess())
+    {
+        printf("Failed to create Thing Group: %s", thingGroupName.c_str());
+    }
+    else
+    {
+        thingGroupsToCleanup.push_back(thingGroupName);
+    }
+}
+void IntegrationTestResourceHandler::AddThingToThingGroup(const string &thingGroupName, const string &thingName)
+{
+    AddThingToThingGroupRequest request;
+    request.SetThingGroupName(thingGroupName);
+    request.SetThingName(thingName);
+
+    AddThingToThingGroupOutcome outcome = iotClient.AddThingToThingGroup(request);
+
+    if (!outcome.IsSuccess())
+    {
+        printf("Failed to add Thing: %s to Thing Group: %s", thingName.c_str(), thingGroupName.c_str());
     }
 }
