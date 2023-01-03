@@ -29,7 +29,7 @@ namespace Aws
                     /**
                      * \brief The default constructor is hidden as private since it shouldn't be used
                      */
-                    EphemeralPromise() = default;
+                    EphemeralPromise(){};
                     /**
                      * \brief The time to live for this promise in milliseconds
                      */
@@ -41,8 +41,9 @@ namespace Aws
 
                   public:
                     explicit EphemeralPromise(std::chrono::milliseconds ttlMillis)
-                        : ttlMillis(ttlMillis), creationTime(std::chrono::system_clock::now())
                     {
+                        this->ttlMillis = ttlMillis;
+                        this->creationTime = std::chrono::system_clock::now();
                     }
 
                     /**

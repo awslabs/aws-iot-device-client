@@ -112,14 +112,14 @@ namespace Aws
                      * @param response information about the updated shadow state
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    void updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError) const;
+                    void updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError);
                     /**
                      * \brief Executed if our request to UpdateNamedShadow is rejected
                      *
                      * @param rejectedError information about the rejection
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    void updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError) const;
+                    void updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError);
                     /**
                      * \brief Executed if our request to UpdateNamedShadow is accepted
                      * The response received on the shadow/update/document topic will be writen to the output file
@@ -127,8 +127,7 @@ namespace Aws
                      * @param response information about the latest shadow document
                      * @param ioError a non-zero error code indicates a problem
                      */
-                    void updateNamedShadowEventHandler(Iotshadow::ShadowUpdatedEvent *shadowUpdatedEvent, int ioError)
-                        const;
+                    void updateNamedShadowEventHandler(Iotshadow::ShadowUpdatedEvent *shadowUpdatedEvent, int ioError);
                     /**
                      * \brief Executed if our request to UpdateNamedShadow is accepted and the delta exists in current
                      * shadow Will do the shadow sync after receiving the message from update/shadow/delta topic so a
@@ -175,7 +174,7 @@ namespace Aws
                      * @param ioError a non-zero code here indicates a problem. Turn on logging in IoT Core
                      * and check CloudWatch for more insights on errors
                      */
-                    void ackUpdateNamedShadowStatus(int ioError) const;
+                    void ackUpdateNamedShadowStatus(int ioError);
                     /**
                      * \brief A function used to read and publish input data file to shadow
                      * @return true if readAndUpdateShadowFromFile successfully

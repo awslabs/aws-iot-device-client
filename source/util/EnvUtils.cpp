@@ -48,7 +48,7 @@ constexpr char JOBS_DIRECTORY_NAME[] = "jobs";
 
 constexpr char EnvUtils::TAG[];
 
-int EnvUtils::AppendCwdToPath() const
+int EnvUtils::AppendCwdToPath()
 {
     // Use a vector of char as buffer for path to current working directory.
     //

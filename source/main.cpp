@@ -93,7 +93,7 @@ using namespace Aws::Iot::DeviceClient::Shadow;
 using namespace Aws::Iot::DeviceClient::SensorPublish;
 #endif
 
-constexpr char TAG[] = "Main.cpp";
+const char *TAG = "Main.cpp";
 
 shared_ptr<FeatureRegistry> features;
 shared_ptr<SharedCrtResourceManager> resourceManager;
@@ -302,7 +302,7 @@ int main(int argc, char *argv[])
         dynamic_cast<StdOutLogger *>(LoggerFactory::getLoggerInstance().get()) == nullptr)
     {
         // We attempted to start a non-stdout logger and failed, so we should fall back to STDOUT
-        config.config.logConfig.deviceClientLogtype = PlainConfig::LogConfig::LOG_TYPE_STDOUT;
+        config.config.logConfig.deviceClientLogtype = config.config.logConfig.LOG_TYPE_STDOUT;
         LoggerFactory::reconfigure(config.config);
     }
 
@@ -334,10 +334,11 @@ int main(int argc, char *argv[])
     int received_signal;
     sigaddset(&sigset, SIGINT);
     sigaddset(&sigset, SIGHUP);
-    sigprocmask(SIG_BLOCK, &sigset, nullptr);
+    sigprocmask(SIG_BLOCK, &sigset, 0);
 
-    auto listener = std::make_shared<DefaultClientBaseNotifier>();
-    resourceManager = std::make_shared<SharedCrtResourceManager>();
+    shared_ptr<DefaultClientBaseNotifier> listener =
+        shared_ptr<DefaultClientBaseNotifier>(new DefaultClientBaseNotifier);
+    resourceManager = shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager);
     if (!resourceManager.get()->initialize(config.config, features))
     {
         LOGM_ERROR(TAG, "*** %s: Failed to initialize AWS CRT SDK.", DC_FATAL_ERROR);
@@ -548,8 +549,7 @@ int main(int argc, char *argv[])
             case SIGHUP:
                 resourceManager->dumpMemTrace();
                 break;
-            default:
-                break;
         }
     }
+    return 0;
 }

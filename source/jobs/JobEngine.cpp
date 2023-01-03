@@ -14,9 +14,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-constexpr int PIPE_READ = 0;
-constexpr int PIPE_WRITE = 1;
-constexpr int CMD_FAILURE = 1;
+#define PIPE_READ 0
+#define PIPE_WRITE 1
+#define CMD_FAILURE 1
 
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Jobs;
@@ -27,7 +27,7 @@ void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
 {
     array<char, 1024> buffer;
     unique_ptr<FILE, decltype(&fclose)> pipe(fdopen(fd, "r"), &fclose);
-    if (nullptr == pipe.get())
+    if (NULL == pipe.get())
     {
         LOGM_ERROR(
             TAG, "Failed to open pipe to %s for job, errno: %s", isStdErr ? "STDERR" : "STDOUT", strerror(errno));
@@ -82,7 +82,7 @@ void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
     }
 }
 
-string JobEngine::buildCommand(Crt::Optional<string> path, const std::string &handler, const std::string &jobHandlerDir)
+string JobEngine::buildCommand(Optional<string> path, const std::string &handler, const std::string &jobHandlerDir)
     const
 {
     ostringstream commandStream;

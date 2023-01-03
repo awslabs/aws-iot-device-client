@@ -246,10 +246,10 @@ class MockJobsFeature : public JobsFeature
     MOCK_METHOD(
         void,
         publishUpdateJobExecutionStatusWithRetry,
-        (const Aws::Iotjobs::JobExecutionData &data,
-         const JobsFeature::JobExecutionStatusInfo &statusInfo,
-         (const Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> &statusDetails),
-         const std::function<void(void)> &onCompleteCallback),
+        (Aws::Iotjobs::JobExecutionData data,
+         JobsFeature::JobExecutionStatusInfo statusInfo,
+         (Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> statusDetails),
+         std::function<void(void)> onCompleteCallback),
         (override));
 };
 

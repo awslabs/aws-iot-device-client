@@ -81,7 +81,7 @@ int DeviceDefenderFeature::stop()
 std::shared_ptr<AbstractReportTask> DeviceDefender::DeviceDefenderFeature::createReportTask()
 {
 
-    auto onCancelled = [this](void *userData) -> void {
+    auto onCancelled = [&](void *userData) -> void {
         LOGM_DEBUG(TAG, "task called onCancelled for thing: %s", thingName.c_str());
         stop();
     };
@@ -94,20 +94,21 @@ std::shared_ptr<AbstractReportTask> DeviceDefender::DeviceDefenderFeature::creat
     taskBuilder.WithTaskPeriodSeconds((uint32_t)interval);
     taskBuilder.WithNetworkConnectionSamplePeriodSeconds((uint32_t)interval);
     taskBuilder.WithTaskCancelledHandler(onCancelled);
-    taskBuilder.WithTaskCancellationUserData(nullptr);
+    taskBuilder.WithTaskCancellationUserData(NULL);
 
     LOGM_INFO(TAG, "%s task builder interval: %i", getName().c_str(), interval);
 
     std::shared_ptr<Aws::Iotdevicedefenderv1::ReportTask> reportTask = taskBuilder.Build();
 
-    return std::make_shared<ReportTaskWrapper>(reportTask);
+    return std::shared_ptr<AbstractReportTask>(new ReportTaskWrapper(reportTask));
 }
 void DeviceDefender::DeviceDefenderFeature::subscribeToTopicFilter()
 {
-    auto onRecvData = [](const MqttConnection &, const String &topic, const ByteBuf &payload) -> void {
+    auto onRecvData = [&](MqttConnection &connection, const String &topic, const ByteBuf &payload) -> void {
         LOGM_DEBUG(TAG, "Recv: Topic:(%s), Payload:%s", topic.c_str(), (char *)payload.buffer);
     };
-    auto onSubAck = [this](const MqttConnection &, uint16_t, const String &, QOS, int errorCode) -> void {
+    auto onSubAck =
+        [&](MqttConnection &connection, uint16_t packetId, const String &topic, QOS qos, int errorCode) -> void {
         LOGM_DEBUG(TAG, "SubAck: PacketId:(%s), ErrorCode:%i", getName().c_str(), errorCode);
     };
     resourceManager->getConnection()->Subscribe(
@@ -123,7 +124,7 @@ void DeviceDefender::DeviceDefenderFeature::subscribeToTopicFilter()
 }
 void DeviceDefender::DeviceDefenderFeature::unsubscribeToTopicFilter()
 {
-    auto onUnsubscribe = [](const MqttConnection &, uint16_t packetId, int errorCode) -> void {
+    auto onUnsubscribe = [&](MqttConnection &connection, uint16_t packetId, int errorCode) -> void {
         LOGM_DEBUG(TAG, "Unsubscribing: PacketId:%i, ErrorCode:%i", packetId, errorCode);
     };
     resourceManager->getConnection()->Unsubscribe(

@@ -49,8 +49,11 @@ namespace Aws
                         const std::string &tag,
                         std::chrono::time_point<std::chrono::system_clock> time,
                         const std::string &message)
-                        : level(level), tag(tag), time(time), message(message)
                     {
+                        this->level = level;
+                        this->tag = tag;
+                        this->time = time;
+                        this->message = message;
                     }
                     ~LogMessage() = default;
 
@@ -58,17 +61,17 @@ namespace Aws
                      * \brief Returns the LogLevel of the message
                      * @return the desired LogLevel o fthe message
                      */
-                    LogLevel getLevel() const { return level; }
+                    LogLevel getLevel() { return level; }
                     /**
                      * \brief Returns the message tag
                      * @return the message tag
                      */
-                    std::string getTag() const { return tag; }
+                    std::string getTag() { return tag; }
                     /**
                      * \brief Returns the time that the message was generated
                      * @return the time that the message was generated
                      */
-                    std::chrono::time_point<std::chrono::system_clock> getTime() const { return time; }
+                    std::chrono::time_point<std::chrono::system_clock> getTime() { return time; }
                     /**
                      * \brief Returns the log message
                      * @return the log message

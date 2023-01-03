@@ -24,7 +24,7 @@ namespace Aws
             class Feature
             {
               public:
-                virtual ~Feature() = default;
+                virtual ~Feature() {}
 
                 /**
                  * \brief Status code returned when feature is successfully started or stopped

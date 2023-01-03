@@ -40,7 +40,7 @@ namespace Aws
                      * @param params Template parameters given as JSON escaped string
                      * @return false if failed parsing template parameters
                      */
-                    bool MapParameters(Aws::Crt::Optional<std::string> params);
+                    bool MapParameters(const Aws::Crt::Optional<std::string> params);
 
                   private:
                     /**
@@ -197,7 +197,7 @@ namespace Aws
                         const std::string &runtimeCertPath,
                         const std::string &runtimeKeyPath,
                         const std::string &runtimeThingName,
-                        const std::string &runtimeDeviceConfig) const;
+                        const std::string &runtimeDeviceConfig);
 
                     /**
                      * \brief gets CSR file content
@@ -213,7 +213,7 @@ namespace Aws
                      * @param filePath device private key location
                      * @return returns false if client is not able to find the file or if valid permissions are not set
                      */
-                    bool LocateDeviceKey(const std::string &filePath) const;
+                    bool LocateDeviceKey(const std::string &filePath);
                 };
             } // namespace FleetProvisioningNS
         }     // namespace DeviceClient

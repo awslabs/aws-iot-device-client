@@ -21,7 +21,7 @@ namespace Aws
                 TcpForward::TcpForward(
                     std::shared_ptr<SharedCrtResourceManager> sharedCrtResourceManager,
                     uint16_t port,
-                    const OnTcpForwardDataReceive &onTcpForwardDataReceive)
+                    OnTcpForwardDataReceive onTcpForwardDataReceive)
                     : mSharedCrtResourceManager(sharedCrtResourceManager), mPort(port),
                       mOnTcpForwardDataReceive(onTcpForwardDataReceive)
                 {
@@ -92,7 +92,7 @@ namespace Aws
                     self->OnReadable(socket, error_code);
                 }
 
-                void TcpForward::OnConnectionResult(struct aws_socket *, int error_code)
+                void TcpForward::OnConnectionResult(struct aws_socket *socket, int error_code)
                 {
                     LOG_DEBUG(TAG, "TcpForward::OnConnectionResult");
                     if (error_code)
@@ -108,7 +108,7 @@ namespace Aws
                     }
                 }
 
-                void TcpForward::OnWriteCompleted(struct aws_socket *, int error_code, size_t bytes_written) const
+                void TcpForward::OnWriteCompleted(struct aws_socket *socket, int error_code, size_t bytes_written)
                 {
                     if (error_code)
                     {
@@ -120,7 +120,7 @@ namespace Aws
                     }
                 }
 
-                void TcpForward::OnReadable(struct aws_socket *, int error_code)
+                void TcpForward::OnReadable(struct aws_socket *socket, int error_code)
                 {
                     LOGM_DEBUG(TAG, "TcpForward::OnReadable error_code=%d", error_code);
 

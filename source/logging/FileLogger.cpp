@@ -8,7 +8,7 @@
 #include <sys/stat.h> /* mkdir(2) */
 #include <thread>
 
-constexpr int TIMESTAMP_BUFFER_SIZE = 25;
+#define TIMESTAMP_BUFFER_SIZE 25
 
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Logging;
@@ -92,7 +92,7 @@ bool FileLogger::start(const PlainConfig &config)
     return false;
 }
 
-void FileLogger::writeLogMessage(unique_ptr<LogMessage> message) const
+void FileLogger::writeLogMessage(unique_ptr<LogMessage> message)
 {
     char time_buffer[TIMESTAMP_BUFFER_SIZE];
     LogUtil::generateTimestamp(message->getTime(), TIMESTAMP_BUFFER_SIZE, time_buffer);
@@ -112,7 +112,7 @@ void FileLogger::run()
     {
         unique_ptr<LogMessage> message = logQueue->getNextLog();
 
-        if (nullptr != message)
+        if (NULL != message)
         {
             writeLogMessage(std::move(message));
         }
@@ -124,7 +124,7 @@ void FileLogger::queueLog(
     LogLevel level,
     const char *tag,
     std::chrono::time_point<std::chrono::system_clock> t,
-    const string &message)
+    string message)
 {
     logQueue.get()->addLog(unique_ptr<LogMessage>(new LogMessage(level, tag, t, message)));
 }
@@ -174,7 +174,7 @@ void FileLogger::flush()
     while (logQueue->hasNextLog())
     {
         unique_ptr<LogMessage> message = logQueue->getNextLog();
-        if (nullptr != message)
+        if (NULL != message)
         {
             writeLogMessage(std::move(message));
         }

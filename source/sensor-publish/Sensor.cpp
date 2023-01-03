@@ -56,7 +56,7 @@ Sensor::Sensor(
     AWS_ZERO_STRUCT(mConnectTask);
     aws_task_init(
         &mConnectTask,
-        [](struct aws_task *, void *arg, enum aws_task_status status) {
+        [](struct aws_task *task, void *arg, enum aws_task_status status) {
             if (status == AWS_TASK_STATUS_CANCELED)
             {
                 return; // Ignore canceled tasks.
@@ -400,7 +400,7 @@ void Sensor::publishOneMessage(const aws_byte_cursor *payload)
         AWS_MQTT_QOS_AT_LEAST_ONCE,
         false,
         payload,
-        [](struct aws_mqtt_client_connection *, uint16_t packet_id, int error_code, void *userdata) {
+        [](struct aws_mqtt_client_connection *connection, uint16_t packet_id, int error_code, void *userdata) {
             auto *self = static_cast<Sensor *>(userdata);
             if (error_code)
             {

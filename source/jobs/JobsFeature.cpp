@@ -54,7 +54,7 @@ void JobsFeature::ackSubscribeToNextJobChanged(int ioError)
     }
 }
 
-void JobsFeature::ackStartNextPendingJobPub(int ioError) const
+void JobsFeature::ackStartNextPendingJobPub(int ioError)
 {
     LOGM_DEBUG(TAG, "Ack received for StartNextPendingJobPub with code {%d}", ioError);
 }
@@ -83,7 +83,7 @@ void JobsFeature::ackSubscribeToStartNextJobRejected(int ioError)
     }
 }
 
-void JobsFeature::ackUpdateJobExecutionStatus(int ioError) const
+void JobsFeature::ackUpdateJobExecutionStatus(int ioError)
 {
     LOGM_DEBUG(TAG, "Ack received for PublishUpdateJobExecutionStatus with code {%d}", ioError);
 }
@@ -366,9 +366,9 @@ void JobsFeature::updateJobExecutionStatusRejectedHandler(Iotjobs::RejectedError
 }
 
 void JobsFeature::publishUpdateJobExecutionStatus(
-    const JobExecutionData &data,
-    const JobExecutionStatusInfo &statusInfo,
-    const function<void(void)> &onCompleteCallback)
+    JobExecutionData data,
+    JobExecutionStatusInfo statusInfo,
+    function<void(void)> onCompleteCallback)
 {
     LOG_DEBUG(TAG, "Attempting to update job execution status!");
 
@@ -382,9 +382,9 @@ void JobsFeature::publishUpdateJobExecutionStatus(
     if (!statusInfo.stdoutput.empty())
     {
         // We want the most recent output since we can only include 1024 characters in the job execution update
-        size_t startPos = statusInfo.stdoutput.size() > MAX_STATUS_DETAIL_LENGTH
-                              ? statusInfo.stdoutput.size() - MAX_STATUS_DETAIL_LENGTH
-                              : 0;
+        int startPos = statusInfo.stdoutput.size() > MAX_STATUS_DETAIL_LENGTH
+                           ? statusInfo.stdoutput.size() - MAX_STATUS_DETAIL_LENGTH
+                           : 0;
         // TODO We need to add filtering of invalid characters for the status details that may come from weird
         // process output. The valid values for a statusDetail value are '[^\p{C}]+ which translates into
         // "everything other than invisible control characters and unused code points" (See
@@ -397,9 +397,9 @@ void JobsFeature::publishUpdateJobExecutionStatus(
 
     if (!statusInfo.stderror.empty())
     {
-        size_t startPos = statusInfo.stderror.size() > MAX_STATUS_DETAIL_LENGTH
-                              ? statusInfo.stderror.size() - MAX_STATUS_DETAIL_LENGTH
-                              : 0;
+        int startPos = statusInfo.stderror.size() > MAX_STATUS_DETAIL_LENGTH
+                           ? statusInfo.stderror.size() - MAX_STATUS_DETAIL_LENGTH
+                           : 0;
         // NOTE(marcoaz): Aws::Crt::String does not convert from std::string
         // cppcheck-suppress danglingTemporaryLifetime
         statusDetails["stderr"] = statusInfo.stderror.substr(startPos, statusInfo.stderror.size()).c_str();
@@ -411,10 +411,10 @@ void JobsFeature::publishUpdateJobExecutionStatus(
 }
 
 void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
-    const Aws::Iotjobs::JobExecutionData &data,
-    const JobsFeature::JobExecutionStatusInfo &statusInfo,
-    const Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> &statusDetails,
-    const std::function<void(void)> &onCompleteCallback)
+    Aws::Iotjobs::JobExecutionData data,
+    JobsFeature::JobExecutionStatusInfo statusInfo,
+    Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> statusDetails,
+    std::function<void(void)> onCompleteCallback)
 {
     /** When we update the job execution status, we need to perform an exponential
      * backoff in case our request gets throttled. Otherwise, if we never properly
@@ -665,7 +665,7 @@ void JobsFeature::runJobs()
 }
 
 int JobsFeature::init(
-    shared_ptr<Crt::Mqtt::MqttConnection> connection,
+    shared_ptr<Mqtt::MqttConnection> connection,
     shared_ptr<ClientBaseNotifier> notifier,
     const PlainConfig &config)
 {
@@ -711,10 +711,10 @@ int JobsFeature::stop()
 
 std::shared_ptr<AbstractIotJobsClient> JobsFeature::createJobsClient()
 {
-    return std::make_shared<IotJobsClientWrapper>(mqttConnection);
+    return std::shared_ptr<AbstractIotJobsClient>(new IotJobsClientWrapper(mqttConnection));
 }
 
 std::shared_ptr<JobEngine> JobsFeature::createJobEngine()
 {
-    return std::make_shared<JobEngine>();
+    return std::shared_ptr<JobEngine>(new JobEngine());
 }

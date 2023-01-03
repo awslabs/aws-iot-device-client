@@ -74,7 +74,7 @@ namespace Aws
                      * \brief Append the current working directory to PATH environment variable.
                      * @return 0 on success or non-zero on error
                      */
-                    int AppendCwdToPath() const;
+                    int AppendCwdToPath();
 
                   protected:
                     OSInterfacePtr os;

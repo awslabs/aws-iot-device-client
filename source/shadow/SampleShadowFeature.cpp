@@ -41,8 +41,8 @@ constexpr char SampleShadowFeature::NAME[];
 constexpr char SampleShadowFeature::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[];
 constexpr int SampleShadowFeature::DEFAULT_WAIT_TIME_SECONDS;
 
-constexpr int MAX_EVENTS = 1000;                  /* Maximum number of events to process*/
-constexpr int LEN_NAME = 16;                      /* Assuming that the length of the filename won't exceed 16 bytes*/
+#define MAX_EVENTS 1000                           /* Maximum number of events to process*/
+#define LEN_NAME 16                               /* Assuming that the length of the filename won't exceed 16 bytes*/
 #define EVENT_SIZE (sizeof(struct inotify_event)) /*size of one event*/
 #define EVENT_BUFSIZE (MAX_EVENTS * (EVENT_SIZE + LEN_NAME)) /*size of buffer used to store the data of events*/
 
@@ -73,7 +73,7 @@ int SampleShadowFeature::init(
     return AWS_OP_SUCCESS;
 }
 
-void SampleShadowFeature::updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError) const
+void SampleShadowFeature::updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError)
 {
     if (ioError)
     {
@@ -81,7 +81,7 @@ void SampleShadowFeature::updateNamedShadowAcceptedHandler(Iotshadow::UpdateShad
     }
 }
 
-void SampleShadowFeature::updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError) const
+void SampleShadowFeature::updateNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError)
 {
     if (ioError)
     {
@@ -96,7 +96,6 @@ void SampleShadowFeature::updateNamedShadowRejectedHandler(Iotshadow::ErrorRespo
 }
 
 void SampleShadowFeature::updateNamedShadowEventHandler(Iotshadow::ShadowUpdatedEvent *shadowUpdatedEvent, int ioError)
-    const
 {
     if (ioError)
     {
@@ -143,7 +142,7 @@ void SampleShadowFeature::updateNamedShadowDeltaHandler(
         std::bind(&SampleShadowFeature::ackUpdateNamedShadowStatus, this, std::placeholders::_1));
 }
 
-void SampleShadowFeature::ackUpdateNamedShadowStatus(int ioError) const
+void SampleShadowFeature::ackUpdateNamedShadowStatus(int ioError)
 {
     LOGM_DEBUG(TAG, "Ack received for updateNamedShadowStatus with code {%d}", ioError);
 }
@@ -198,7 +197,7 @@ void SampleShadowFeature::ackSubscribeToUpdateDelta(int ioError)
 
 void SampleShadowFeature::runFileMonitor()
 {
-    ssize_t len = 0;
+    int len = 0;
     string fileDir = FileUtils::ExtractParentDirectory(inputFile.c_str());
     string fileName = inputFile.substr(fileDir.length());
     char buf[EVENT_BUFSIZE];
@@ -240,7 +239,7 @@ void SampleShadowFeature::runFileMonitor()
 
         for (int i = 0; i < len;)
         {
-            auto *e = (struct inotify_event *)&buf[i];
+            struct inotify_event *e = (struct inotify_event *)&buf[i];
 
             if (e->mask & IN_CREATE)
             {

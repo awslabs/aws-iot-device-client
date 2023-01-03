@@ -7,7 +7,7 @@ using namespace std;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Logging;
 
-shared_ptr<Logger> LoggerFactory::logger = std::make_shared<StdOutLogger>();
+shared_ptr<Logger> LoggerFactory::logger = shared_ptr<Logger>(new StdOutLogger());
 
 shared_ptr<Logger> LoggerFactory::getLoggerInstance()
 {
@@ -16,7 +16,7 @@ shared_ptr<Logger> LoggerFactory::getLoggerInstance()
 
 bool LoggerFactory::reconfigure(const PlainConfig &config)
 {
-    if (config.logConfig.deviceClientLogtype == PlainConfig::LogConfig::LOG_TYPE_FILE &&
+    if (config.logConfig.deviceClientLogtype == config.logConfig.LOG_TYPE_FILE &&
         dynamic_cast<FileLogger *>(logger.get()) == nullptr)
     {
         logger->stop();
@@ -25,7 +25,7 @@ bool LoggerFactory::reconfigure(const PlainConfig &config)
         logger->setLogQueue(std::move(logQueue));
     }
     else if (
-        config.logConfig.deviceClientLogtype == PlainConfig::LogConfig::LOG_TYPE_STDOUT &&
+        config.logConfig.deviceClientLogtype == config.logConfig.LOG_TYPE_STDOUT &&
         dynamic_cast<StdOutLogger *>(logger.get()) == nullptr)
     {
         logger->stop();

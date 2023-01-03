@@ -8,7 +8,7 @@
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Jobs;
 
-void LimitedStreamBuffer::addString(const string &value)
+void LimitedStreamBuffer::addString(string value)
 {
     unique_lock<mutex> addLock(bufferLock);
 
@@ -23,7 +23,7 @@ void LimitedStreamBuffer::addString(const string &value)
 
     while (contentsSize + value.size() > contentsSizeLimit)
     {
-        size_t frontSize = buffer.front().size();
+        int frontSize = buffer.front().size();
         buffer.pop_front();
         contentsSize = contentsSize - frontSize;
     }

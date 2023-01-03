@@ -12,9 +12,9 @@ using namespace Aws::Iot::DeviceClient::Util;
 const char *Retry::TAG = "Retry.cpp";
 
 bool Retry::exponentialBackoff(
-    const ExponentialRetryConfig &config,
-    const function<bool()> &retryableFunction,
-    const function<void()> &onComplete)
+    ExponentialRetryConfig config,
+    function<bool()> retryableFunction,
+    function<void()> onComplete)
 {
     bool needToStop = false;
     if (config.needStopFlag != nullptr)

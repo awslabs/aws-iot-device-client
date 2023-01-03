@@ -100,13 +100,14 @@ namespace Aws
 
                     if (!config.tunneling.subscribeNotification)
                     {
-                        auto context = unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
-                            mSharedCrtResourceManager,
-                            mRootCa,
-                            *config.tunneling.destinationAccessToken,
-                            GetEndpoint(*config.tunneling.region),
-                            static_cast<uint16_t>(config.tunneling.port.value()),
-                            bind(&SecureTunnelingFeature::OnConnectionShutdown, this, placeholders::_1)));
+                        std::unique_ptr<SecureTunnelingContext> context =
+                            unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
+                                mSharedCrtResourceManager,
+                                mRootCa,
+                                *config.tunneling.destinationAccessToken,
+                                GetEndpoint(*config.tunneling.region),
+                                static_cast<uint16_t>(config.tunneling.port.value()),
+                                bind(&SecureTunnelingFeature::OnConnectionShutdown, this, placeholders::_1)));
                         mContexts.push_back(std::move(context));
                     }
                 }
@@ -216,7 +217,7 @@ namespace Aws
                     }
                 }
 
-                void SecureTunnelingFeature::OnSubscribeComplete(int ioErr) const
+                void SecureTunnelingFeature::OnSubscribeComplete(int ioErr)
                 {
                     LOG_DEBUG(TAG, "Subscribed to tunnel notification topic");
 
@@ -265,18 +266,17 @@ namespace Aws
 
                 std::shared_ptr<AbstractIotSecureTunnelingClient> SecureTunnelingFeature::createClient()
                 {
-                    return std::make_shared<IotSecureTunnelingClientWrapper>(
-                        mSharedCrtResourceManager->getConnection());
+                    return std::shared_ptr<AbstractIotSecureTunnelingClient>(
+                        new IotSecureTunnelingClientWrapper(mSharedCrtResourceManager->getConnection()));
                 }
 
                 void SecureTunnelingFeature::OnConnectionShutdown(SecureTunnelingContext *contextToRemove)
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingFeature::OnConnectionShutdown");
 
-                    auto it =
-                        find_if(mContexts.begin(), mContexts.end(), [&](const unique_ptr<SecureTunnelingContext> &c) {
-                            return c.get() == contextToRemove;
-                        });
+                    auto it = find_if(mContexts.begin(), mContexts.end(), [&](unique_ptr<SecureTunnelingContext> &c) {
+                        return c.get() == contextToRemove;
+                    });
                     mContexts.erase(std::remove(mContexts.begin(), mContexts.end(), *it));
                 }
 

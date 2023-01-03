@@ -49,10 +49,6 @@ namespace Aws
 
                     ~AwsSocket() { aws_socket_clean_up(&socket); }
 
-                    // Non-copyable.
-                    AwsSocket(const AwsSocket &) = delete;
-                    AwsSocket &operator=(const AwsSocket &) = delete;
-
                     /**
                      * \brief init wraps aws_socket_init
                      */

@@ -105,7 +105,7 @@ namespace Aws
                      *
                      * @param ioErr error code
                      */
-                    void OnSubscribeComplete(int ioErr) const;
+                    void OnSubscribeComplete(int ioErr);
 
                     /**
                      * \brief Get the secure tunneling data plain endpoint given an AWS region
