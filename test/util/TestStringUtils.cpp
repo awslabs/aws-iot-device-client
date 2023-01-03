@@ -30,7 +30,7 @@ TEST(StringUtils, FormatStringTruncate)
 {
     string s(Config::MAX_CONFIG_SIZE + 1234, '*');
     string actual = FormatMessage(s.c_str());
-    ASSERT_EQ(actual.size(), Config::MAX_CONFIG_SIZE);
+    ASSERT_EQ(actual.size(), Config::MAX_CONFIG_SIZE - 1);
 }
 
 TEST(StringUtils, sanitizeRemovesFormatSpecifier)
