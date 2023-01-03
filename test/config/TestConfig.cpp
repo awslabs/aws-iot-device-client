@@ -878,7 +878,7 @@ TEST_F(ConfigTestFixture, SDKLoggingConfigurationJson)
     "thing-name": "thing-name value",
     "logging": {
         "level": "DEBUG",
-        "type": "STDOUT",
+        "type": "FILE",
         "file": "device-client.log",
         "enable-sdk-logging": true,
         "sdk-log-level": "warn",
@@ -897,7 +897,7 @@ TEST_F(ConfigTestFixture, SDKLoggingConfigurationJson)
 
     // Also make sure none of the device client log API settings have been modified
     ASSERT_EQ(3, config.logConfig.deviceClientlogLevel);
-    ASSERT_STREQ("stdout", config.logConfig.deviceClientLogtype.c_str());
+    ASSERT_STREQ("file", config.logConfig.deviceClientLogtype.c_str());
     ASSERT_STREQ("device-client.log", config.logConfig.deviceClientLogFile.c_str());
 }
 
