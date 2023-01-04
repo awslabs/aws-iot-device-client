@@ -41,7 +41,7 @@ class TestDeviceDefenderFeature : public ::testing::Test
     }
     void TearDown() override
     {
-        resourceHandler->DeleteSecurityProfile(THING_NAME);
+        resourceHandler->DeleteSecurityProfile(securityProfileName);
         resourceHandler->CleanUp();
         SDKOptions options;
         Aws::ShutdownAPI(options);
@@ -66,7 +66,7 @@ TEST_F(TestDeviceDefenderFeature, VerifyViolations)
     const int interval = 30;
     while (maxWaitTime > 0)
     {
-        violations = resourceHandler->GetViolations(THING_NAME, securityProfileName);
+        violations = resourceHandler->GetViolations(securityProfileName);
         if (violations.size() == metrics.size())
         {
             break;

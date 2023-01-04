@@ -41,9 +41,7 @@ class IntegrationTestResourceHandler
     /**
      * Device Defender test util methods
      */
-    std::vector<Aws::IoT::Model::ActiveViolation> GetViolations(
-        const std::string &thingName,
-        const std::string &profileName);
+    std::vector<Aws::IoT::Model::ActiveViolation> GetViolations(const std::string &profileName);
 
     void CreateAndAttachSecurityProfile(
         const std::string &profileName,

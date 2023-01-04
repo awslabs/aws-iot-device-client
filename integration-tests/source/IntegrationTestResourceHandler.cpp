@@ -343,9 +343,7 @@ std::string IntegrationTestResourceHandler::GetResourceId(const std::string &res
 {
     return resource.substr(resource.find('/'));
 }
-vector<ActiveViolation> IntegrationTestResourceHandler::GetViolations(
-    const string &thingName,
-    const std::string &profileName)
+vector<ActiveViolation> IntegrationTestResourceHandler::GetViolations(const std::string &profileName)
 {
     vector<ActiveViolation> violations;
 
@@ -358,7 +356,7 @@ vector<ActiveViolation> IntegrationTestResourceHandler::GetViolations(
     {
         printf(
             "Failed to List Active Violations for: %s\n%s\n",
-            thingName.c_str(),
+            profileName.c_str(),
             outcome.GetError().GetMessage().c_str());
     }
     else
