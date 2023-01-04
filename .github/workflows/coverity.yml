@@ -2,9 +2,9 @@ name: Coverity
 
 on:
   push:
-    branches: ['*']
+    branches: ['main']
   pull_request:
-    branches: ['*']
+    branches: ['main']
 
 env:
   PACKAGE_NAME: aws-iot-device-client
