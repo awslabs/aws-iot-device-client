@@ -34,9 +34,10 @@ constexpr char PubSubFeature::DEFAULT_SUBSCRIBE_FILE[];
 constexpr size_t MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES = 128000;
 // Definitions for inode notify
 constexpr size_t MAX_EVENTS = 1000; /* Maximum number of events to process */
-constexpr size_t LEN_NAME = 16; /* Assuming that the length of the filename won't exceed 16 bytes */
+constexpr size_t LEN_NAME = 16;     /* Assuming that the length of the filename won't exceed 16 bytes */
 constexpr size_t EVENT_SIZE = (sizeof(struct inotify_event)); /* size of one event */
-constexpr size_t EVENT_BUFSIZE = (MAX_EVENTS * (EVENT_SIZE + LEN_NAME)); /* size of buffer used to store the data of events */
+constexpr size_t EVENT_BUFSIZE =
+    (MAX_EVENTS * (EVENT_SIZE + LEN_NAME)); /* size of buffer used to store the data of events */
 
 const std::string PubSubFeature::DEFAULT_PUBLISH_PAYLOAD = R"({"Hello": "World!"})";
 const std::string PubSubFeature::PUBLISH_TRIGGER_PAYLOAD = "DC-Publish";
