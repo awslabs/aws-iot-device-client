@@ -65,8 +65,8 @@ TEST_F(TestDeviceDefenderFeature, VerifyViolations)
 {
     vector<ActiveViolation> violations;
     // Check for active violations for 10 minutes 30 seconds. Metrics interval is five minutes.
-    int waitTime = WAIT_TIME
-    while (maxWaitTime > 0)
+    int waitTime = WAIT_TIME;
+    while (waitTime > 0)
     {
         violations = resourceHandler->GetViolations(securityProfileName);
         if (violations.size() == metrics.size())
@@ -74,7 +74,7 @@ TEST_F(TestDeviceDefenderFeature, VerifyViolations)
             break;
         }
         this_thread::sleep_for(std::chrono::seconds(INTERVAL));
-        maxWaitTime -= INTERVAL;
+        waitTime -= INTERVAL;
     }
 
     ASSERT_EQ(violations.size(), metrics.size());
