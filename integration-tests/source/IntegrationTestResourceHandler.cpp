@@ -219,7 +219,6 @@ void IntegrationTestResourceHandler::CleanUpThingAndCert(const std::string &thin
         DeleteCertificate(certificateId);
         DeleteThing(thingName);
     }
-    DeleteThingGroup(thingName);
 }
 
 std::string IntegrationTestResourceHandler::GetTimeStamp()
