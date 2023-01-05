@@ -381,7 +381,7 @@ void IntegrationTestResourceHandler::CreateAndAttachSecurityProfile(
     criteria.SetDurationSeconds(300);
     criteria.SetValue(metricValue);
     criteria.SetConsecutiveDatapointsToAlarm(1);
-    criteria.SetConsecutiveDatapointsToClear(1);
+    criteria.SetConsecutiveDatapointsToClear(100);
 
     CreateSecurityProfileRequest request;
     request.SetSecurityProfileName(profileName);
