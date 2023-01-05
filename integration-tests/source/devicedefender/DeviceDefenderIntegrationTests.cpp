@@ -16,6 +16,9 @@ using namespace std;
 extern std::string THING_NAME;
 extern std::string REGION;
 
+static const int WAIT_TIME = 1000;
+static const int INTERVAL = 10;
+
 class TestDeviceDefenderFeature : public ::testing::Test
 {
   public:
@@ -62,8 +65,7 @@ TEST_F(TestDeviceDefenderFeature, VerifyViolations)
 {
     vector<ActiveViolation> violations;
     // Check for active violations for 10 minutes 30 seconds. Metrics interval is five minutes.
-    int maxWaitTime = 630;
-    const int interval = 30;
+    int waitTime = WAIT_TIME
     while (maxWaitTime > 0)
     {
         violations = resourceHandler->GetViolations(securityProfileName);
@@ -71,8 +73,8 @@ TEST_F(TestDeviceDefenderFeature, VerifyViolations)
         {
             break;
         }
-        this_thread::sleep_for(std::chrono::seconds(interval));
-        maxWaitTime -= interval;
+        this_thread::sleep_for(std::chrono::seconds(INTERVAL));
+        maxWaitTime -= INTERVAL;
     }
 
     ASSERT_EQ(violations.size(), metrics.size());
