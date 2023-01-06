@@ -32,8 +32,6 @@ if id "$user" 2>/dev/null && command -v "sudo" > /dev/null; then
     echo "Did not find $REBOOT_LOCK_FILE"
     date "+%s" > $REBOOT_LOCK_FILE
     sudo -u "$user" -n reboot || true
-    rm $REBOOT_LOCK_FILE
-    exit 1
   fi
 else
   echo "username or sudo command not found"
