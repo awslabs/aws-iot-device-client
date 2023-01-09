@@ -482,7 +482,7 @@ void IntegrationTestResourceHandler::LogError(
     const std::string &errorMessage)
 {
     std::string message = logMessage + " " + resource + " " + errorMessage;
-    Aws::OStringStream ss(logMessage);
+    Aws::OStringStream ss(message);
 
     logger->LogStream(Aws::Utils::Logging::LogLevel::Error, TAG, ss);
 }
