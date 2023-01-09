@@ -7,6 +7,7 @@ CERT_DIRECTORY=${OUTPUT_DIR}certs/
 CERT_PATH=${CERT_DIRECTORY}cert.crt
 KEY_PATH=${CERT_DIRECTORY}key.pem
 ROOT_CA_PATH=${CERT_DIRECTORY}AmazonRootCA1.pem
+SDK_LOG_FILE=/var/log/aws-iot-device-client/sdk.log
 
 # create Certificate Directory
 mkdir -p ${CERT_DIRECTORY}
@@ -35,7 +36,10 @@ chmod 745 ${OUTPUT_DIR}
       \"root-ca\":	\"${ROOT_CA_PATH}\",
       \"logging\":	{
         \"level\":	\"DEBUG\",
-        \"type\":	\"STDOUT\"
+        \"type\":	\"STDOUT\",
+        \"enable-sdk-logging\": true,
+        \"sdk-log-level\": \"DEBUG\",
+        \"sdk-log-file\": \"${SDK_LOG_FILE}\"
       },
       \"jobs\":	{
         \"enabled\": true,
@@ -93,6 +97,8 @@ rm -rf /run/lock
 
 # start Device Client
 ./aws-iot-device-client 2>&1 &
+
+tail -f ${SDK_LOG_FILE} 2>&1 &
 
 # Wait for Fleet Provisioning
 RUNTIME_CONFIG=~/.aws-iot-device-client/aws-iot-device-client-runtime.conf
