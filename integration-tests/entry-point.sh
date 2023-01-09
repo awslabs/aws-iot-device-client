@@ -98,8 +98,6 @@ rm -rf /run/lock
 # start Device Client
 ./aws-iot-device-client 2>&1 &
 
-tail -f ${SDK_LOG_FILE} 2>&1 &
-
 # Wait for Fleet Provisioning
 RUNTIME_CONFIG=~/.aws-iot-device-client/aws-iot-device-client-runtime.conf
 TIMEOUT=60
@@ -110,6 +108,9 @@ until [ -f "$RUNTIME_CONFIG" ] ; do
     break
   fi
 done
+
+# tail SDK log file
+tail -f ${SDK_LOG_FILE} 2>&1 &
 
 # Run integration tests
 ./aws-iot-device-client-integration-tests $@
