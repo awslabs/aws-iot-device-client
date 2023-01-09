@@ -5,6 +5,7 @@
 #include <string>
 
 #include <aws/core/utils/ARN.h>
+#include <aws/core/utils/logging/ConsoleLogSystem.h>
 #include <aws/iot/IoTClient.h>
 #include <aws/iot/model/JobExecutionStatus.h>
 #include <aws/iotsecuretunneling/IoTSecureTunnelingClient.h>
@@ -76,6 +77,9 @@ class IntegrationTestResourceHandler
     std::string GetResourceId(const std::string &resource);
     void AttachSecurityProfile(const std::string &profileName, const std::string &thingGroupName);
     void DeleteThingGroup(const std::string &thingGroupName);
+    void Log(Aws::Utils::Logging::LogLevel logLevel, const std::string &logMessage, const std::string &resource);
+    void LogError(const std::string &logMessage, const std::string &resource, const std::string &errorMessage);
 
     std::string targetArn;
+    std::unique_ptr<Aws::Utils::Logging::ConsoleLogSystem> logger;
 };

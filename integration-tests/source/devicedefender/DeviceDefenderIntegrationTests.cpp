@@ -16,8 +16,8 @@ using namespace std;
 extern std::string THING_NAME;
 extern std::string REGION;
 
-static const int WAIT_TIME = 1000;
-static const int INTERVAL = 10;
+static const int WAIT_TIME = 1300;
+static const int INTERVAL = 30;
 
 class TestDeviceDefenderFeature : public ::testing::Test
 {

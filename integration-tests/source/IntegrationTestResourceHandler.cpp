@@ -46,13 +46,17 @@ using namespace Aws::IoTSecureTunneling::Model;
 using namespace Aws::Client;
 using namespace Aws::IoT;
 using namespace Aws::IoT::Model;
+using namespace Aws::Utils;
 
 extern std::string THING_NAME;
+
+static const char *TAG = "IntegrationTestResourceHandler.cpp";
 
 IntegrationTestResourceHandler::IntegrationTestResourceHandler(const ClientConfiguration &clientConfig)
     : iotClient(IoTClient(clientConfig)), ioTSecureTunnelingClient(IoTSecureTunnelingClient(clientConfig))
 {
     targetArn = GetTargetArn(THING_NAME);
+    logger = make_unique<Aws::Utils::Logging::ConsoleLogSystem>(Aws::Utils::Logging::LogLevel::Info);
 }
 void IntegrationTestResourceHandler::CreateJob(const string &jobId, const string &jobDoc)
 {
@@ -63,15 +67,13 @@ void IntegrationTestResourceHandler::CreateJob(const string &jobId, const string
 
     CreateJobOutcome outcome = iotClient.CreateJob(request);
 
-    printf("Creating Job: %s\n", jobId.c_str());
-
     if (outcome.IsSuccess())
     {
         jobsToCleanUp.push_back(jobId);
     }
     else
     {
-        printf("Failed to create Job: %s\n", outcome.GetError().GetMessage().c_str());
+        LogError("Failed to Create Job", jobId, outcome.GetError().GetMessage());
     }
 }
 
@@ -85,10 +87,7 @@ JobExecutionStatus IntegrationTestResourceHandler::GetJobExecutionStatus(const s
 
     if (!outcome.IsSuccess())
     {
-        printf(
-            "Failed to describe job execution for Job: %s\n%s\n",
-            jobId.c_str(),
-            outcome.GetError().GetMessage().c_str());
+        LogError("Failed to describe job execution for Job", jobId, outcome.GetError().GetMessage());
     }
     return outcome.GetResult().GetExecution().GetStatus();
 }
@@ -101,7 +100,7 @@ void IntegrationTestResourceHandler::DeleteJob(const std::string &jobId)
     DeleteJobOutcome outcome = iotClient.DeleteJob(request);
     if (!outcome.IsSuccess())
     {
-        printf("Failed to delete Job: %s\n%s\n", jobId.c_str(), outcome.GetError().GetMessage().c_str());
+        LogError("Failed to Delete Job", jobId, outcome.GetError().GetMessage());
     }
 }
 void IntegrationTestResourceHandler::DeleteThing(const std::string &thingName)
@@ -113,7 +112,7 @@ void IntegrationTestResourceHandler::DeleteThing(const std::string &thingName)
 
     if (!outcome.IsSuccess())
     {
-        printf("Failed to delete Thing: %s\n%s\n", thingName.c_str(), outcome.GetError().GetMessage().c_str());
+        LogError("Failed to delete Thing", thingName, outcome.GetError().GetMessage());
     }
 }
 
@@ -133,10 +132,7 @@ vector<Aws::Utils::ARN> IntegrationTestResourceHandler::ListCertsForThing(const 
     }
     else
     {
-        printf(
-            "Failed to list Certificates for Thing: %s\n%s\n",
-            thingName.c_str(),
-            outcome.GetError().GetMessage().c_str());
+        LogError("Failed to list Certificates for Thing", thingName, outcome.GetError().GetMessage());
     }
 
     return certs;
@@ -152,10 +148,7 @@ void IntegrationTestResourceHandler::DeactivateCertificate(const string &certifi
 
     if (!outcome.IsSuccess())
     {
-        printf(
-            "Failed to deactivate Certificate: %s\n%s\n",
-            certificateId.c_str(),
-            outcome.GetError().GetMessage().c_str());
+        LogError("Failed to de-activate Certificate", certificateId, outcome.GetError().GetMessage());
     }
 }
 
@@ -169,7 +162,7 @@ void IntegrationTestResourceHandler::DetachCertificate(const string &thingName, 
 
     if (!outcome.IsSuccess())
     {
-        printf("Failed to detach Certificate: %s\n", outcome.GetError().GetMessage().c_str());
+        LogError("Failed to detach Certificate from Thing", thingName, outcome.GetError().GetMessage());
     }
 }
 
@@ -183,8 +176,7 @@ void IntegrationTestResourceHandler::DeleteCertificate(const string &certificate
 
     if (!outcome.IsSuccess())
     {
-        printf(
-            "Failed to delete Certificate: %s\n%s\n", certificateId.c_str(), outcome.GetError().GetMessage().c_str());
+        LogError("Failed to delete Certificate", certificateId, outcome.GetError().GetMessage());
     }
 }
 
@@ -246,7 +238,7 @@ JobExecutionStatus IntegrationTestResourceHandler::GetJobExecutionStatusWithRetr
 
     if (status == JobExecutionStatus::IN_PROGRESS)
     {
-        printf("JobExecution for Job  %s still IN_PROGRESS state after max retries \n", jobId.c_str());
+        LogError("JobExecution for Job", jobId, "still IN_PROGRESS after max retries");
     }
 
     return status;
@@ -270,7 +262,7 @@ ConnectionStatus IntegrationTestResourceHandler::GetTunnelSourceConnectionStatus
 
         if (!outcome.IsSuccess())
         {
-            printf("Failed to describe Tunnel: %s\n%s\n", tunnelId.c_str(), outcome.GetError().GetMessage().c_str());
+            LogError("Failed to describe Tunnel", tunnelId, outcome.GetError().GetMessage());
         }
         else
         {
@@ -298,11 +290,9 @@ Aws::IoTSecureTunneling::Model::OpenTunnelResult IntegrationTestResourceHandler:
 
     OpenTunnelOutcome outcome = ioTSecureTunnelingClient.OpenTunnel(request);
 
-    printf("Opening tunnel to Thing: %s\n", thingName.c_str());
-
     if (!outcome.IsSuccess())
     {
-        printf("Failed to open tunnel to Thing: %s\n%s\n", thingName.c_str(), outcome.GetError().GetMessage().c_str());
+        LogError("Failed to open Tunnel to Thing", thingName, outcome.GetError().GetMessage());
     }
     else
     {
@@ -330,7 +320,7 @@ std::string IntegrationTestResourceHandler::GetTargetArn(const std::string &thin
 
     if (!outcome.IsSuccess())
     {
-        printf("Failed to Describe Thing: %s\n%s\n", thingName.c_str(), outcome.GetError().GetMessage().c_str());
+        LogError("Failed to describe Thing", thingName, outcome.GetError().GetMessage());
     }
     else
     {
@@ -353,10 +343,7 @@ vector<ActiveViolation> IntegrationTestResourceHandler::GetViolations(const std:
 
     if (!outcome.IsSuccess())
     {
-        printf(
-            "Failed to List Active Violations for: %s\n%s\n",
-            profileName.c_str(),
-            outcome.GetError().GetMessage().c_str());
+        LogError("Failed to list Active Violations for", profileName, outcome.GetError().GetMessage());
     }
     else
     {
@@ -364,7 +351,7 @@ vector<ActiveViolation> IntegrationTestResourceHandler::GetViolations(const std:
     }
     if (violations.empty())
     {
-        printf("Found no violations for Security Profile: %s\n", profileName.c_str());
+        Log(Logging::LogLevel::Info, "Found no violations for Security Profile", profileName);
     }
     return violations;
 }
@@ -398,14 +385,11 @@ void IntegrationTestResourceHandler::CreateAndAttachSecurityProfile(
 
     CreateSecurityProfileOutcome outcome = iotClient.CreateSecurityProfile(request);
 
-    printf("Creating Security Profile: %s\n", profileName.c_str());
+    Log(Logging::LogLevel::Info, "Creating Security Profile", profileName);
 
     if (!outcome.IsSuccess())
     {
-        printf(
-            "Failed to create Security Profile: %s\n%s\n",
-            profileName.c_str(),
-            outcome.GetError().GetMessage().c_str());
+        LogError("Failed to create Security Profile", profileName, outcome.GetError().GetMessage());
     }
 
     AttachSecurityProfile(profileName, thingGroupName);
@@ -423,14 +407,9 @@ void IntegrationTestResourceHandler::AttachSecurityProfile(
 
     AttachSecurityProfileOutcome outcome = iotClient.AttachSecurityProfile(request);
 
-    printf("Attaching Security Profile: %s\n", profileName.c_str());
-
     if (!outcome.IsSuccess())
     {
-        printf(
-            "Failed to attach Security Profile: %s\n%s\n",
-            profileName.c_str(),
-            outcome.GetError().GetMessage().c_str());
+        LogError("Failed to attach Security Profile", profileName, outcome.GetError().GetMessage());
     }
 }
 
@@ -441,14 +420,9 @@ void IntegrationTestResourceHandler::DeleteSecurityProfile(const string &profile
 
     DeleteSecurityProfileOutcome outcome = iotClient.DeleteSecurityProfile(request);
 
-    printf("Deleting Security Profile: %s\n", profileName.c_str());
-
     if (!outcome.IsSuccess())
     {
-        printf(
-            "Failed to delete Security Profile: %s\n%s\n",
-            profileName.c_str(),
-            outcome.GetError().GetMessage().c_str());
+        LogError("Failed to delete Security Profile", profileName, outcome.GetError().GetMessage());
     }
 }
 void IntegrationTestResourceHandler::DeleteThingGroup(const string &thingGroupName)
@@ -458,11 +432,9 @@ void IntegrationTestResourceHandler::DeleteThingGroup(const string &thingGroupNa
 
     DeleteThingGroupOutcome outcome = iotClient.DeleteThingGroup(request);
 
-    printf("Deleting Thing Group: %s\n", thingGroupName.c_str());
-
     if (!outcome.IsSuccess())
     {
-        printf("Failed to delete Thing Group: %s\n", thingGroupName.c_str());
+        LogError("Failed to Delete Thing Group", thingGroupName, outcome.GetError().GetMessage());
     }
 }
 void IntegrationTestResourceHandler::CreateThingGroup(const string &thingGroupName)
@@ -474,7 +446,7 @@ void IntegrationTestResourceHandler::CreateThingGroup(const string &thingGroupNa
 
     if (!outcome.IsSuccess())
     {
-        printf("Failed to create Thing Group: %s\n", thingGroupName.c_str());
+        LogError("Failed to create Thing Group", thingGroupName, outcome.GetError().GetMessage());
     }
     else
     {
@@ -491,6 +463,26 @@ void IntegrationTestResourceHandler::AddThingToThingGroup(const string &thingGro
 
     if (!outcome.IsSuccess())
     {
-        printf("Failed to add Thing: %s to Thing Group: %s\n", thingName.c_str(), thingGroupName.c_str());
+        LogError("Failed to add Thing to Thing Group", thingName, outcome.GetError().GetMessage());
     }
+}
+void IntegrationTestResourceHandler::Log(
+    Aws::Utils::Logging::LogLevel logLevel,
+    const std::string &logMessage,
+    const std::string &resource)
+{
+    std::string message = logMessage + " " + resource;
+    Aws::OStringStream ss(message);
+
+    logger->LogStream(logLevel, TAG, ss);
+}
+void IntegrationTestResourceHandler::LogError(
+    const string &logMessage,
+    const std::string &resource,
+    const std::string &errorMessage)
+{
+    std::string message = logMessage + " " + resource + " " + errorMessage;
+    Aws::OStringStream ss(logMessage);
+
+    logger->LogStream(Aws::Utils::Logging::LogLevel::Error, TAG, ss);
 }
