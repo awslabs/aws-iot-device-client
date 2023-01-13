@@ -227,6 +227,6 @@ jobs:
             BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:${{matrix.architecture}}-ubi8-latest
           push: true
           tags: |
-            public.ecr.aws/${{ env.ECR_REPO }}:${{matrix.architecture}}--ubi8-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_REPO }}:${{matrix.architecture}}--ubi8-latest
+            public.ecr.aws/${{ env.ECR_REPO }}:${{matrix.architecture}}-ubi8-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_REPO }}:${{matrix.architecture}}-ubi8-latest
           platforms: linux/${{matrix.architecture}}

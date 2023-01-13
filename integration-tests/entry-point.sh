@@ -7,6 +7,7 @@ CERT_DIRECTORY=${OUTPUT_DIR}certs/
 CERT_PATH=${CERT_DIRECTORY}cert.crt
 KEY_PATH=${CERT_DIRECTORY}key.pem
 ROOT_CA_PATH=${CERT_DIRECTORY}AmazonRootCA1.pem
+SDK_LOG_FILE=/var/log/aws-iot-device-client/sdk.log
 
 # create Certificate Directory
 mkdir -p ${CERT_DIRECTORY}
@@ -34,8 +35,11 @@ chmod 745 ${OUTPUT_DIR}
       \"thing-name\":	\"${THING_NAME}\",
       \"root-ca\":	\"${ROOT_CA_PATH}\",
       \"logging\":	{
-        \"level\":	\"INFO\",
-        \"type\":	\"STDOUT\"
+        \"level\":	\"DEBUG\",
+        \"type\":	\"STDOUT\",
+        \"enable-sdk-logging\": true,
+        \"sdk-log-level\": \"TRACE\",
+        \"sdk-log-file\": \"${SDK_LOG_FILE}\"
       },
       \"jobs\":	{
         \"enabled\": true,
@@ -48,6 +52,10 @@ chmod 745 ${OUTPUT_DIR}
         \"enabled\":	true,
         \"template-name\": \"aws-iot-device-client\",
         \"device-key\": \"${KEY_PATH}\"
+      },
+      \"device-defender\": {
+      	\"enabled\": true,
+      	\"interval\": 300
       }
     }"
 # output the config & set permissions
@@ -100,6 +108,9 @@ until [ -f "$RUNTIME_CONFIG" ] ; do
     break
   fi
 done
+
+# tail SDK log file
+tail -f ${SDK_LOG_FILE} 2>&1 &
 
 # Run integration tests
 ./aws-iot-device-client-integration-tests $@
