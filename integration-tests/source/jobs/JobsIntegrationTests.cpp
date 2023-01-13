@@ -36,6 +36,11 @@ static constexpr char VERIFY_PACKAGES_REMOVED_JOB_DOC[] =
 static constexpr char RUN_COMMAND_PRINT_GREETING_JOB_DOC[] =
     "{ \"version\": \"1.0\", \"steps\": [ { \"action\": { \"name\": \"Print Greeting\", \"type\": "
     "\"runCommand\", \"input\": { \"command\": \"echo,Hello World\" }, \"runAsUser\": \"root\" } }]}";
+static constexpr char RESTART_SERVICES_JOB_DOC[] =
+    "{ \"version\": \"1.0\", \"steps\": [ { \"action\": { \"name\": \"Restart Services\", \"type\": \"runHandler\", "
+    "\"input\": { \"handler\": \"restart-services.sh\", \"args\": [ \"aws-iot-device-client\" ], \"path\": \"default\" "
+    "}, "
+    "\"runAsUser\": \"root\" } }]}";
 
 class TestJobsFixture : public ::testing::Test
 {
@@ -90,6 +95,14 @@ TEST_F(TestJobsFixture, PrintGreeting)
 {
     string jobId = "Print-Greeting-" + resourceHandler->GetTimeStamp();
     resourceHandler->CreateJob(jobId, RUN_COMMAND_PRINT_GREETING_JOB_DOC);
+
+    ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
+}
+
+TEST_F(TestJobsFixture, RestartServices)
+{
+    string jobId = "Restart-Services-" + resourceHandler->GetTimeStamp();
+    resourceHandler->CreateJob(jobId, RESTART_SERVICES_JOB_DOC);
 
     ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
 }
