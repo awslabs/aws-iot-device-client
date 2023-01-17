@@ -14,7 +14,7 @@ PID=$(pidof aws-iot-device-client)
 
 for service in $services
 do
-  if [[ service == 'aws-iot-device-client']];
+  if [ service = "aws-iot-device-client" ];
   then
     if id "$user" 2>/dev/null && command -v "sudo" > /dev/null; then
       if sudo -u "$user" -n test -f "$RESTART_LOCK_FILE"; then
@@ -25,28 +25,28 @@ do
         LOCK_FILE_PID=$(cat $RESTART_LOCK_FILE)
       fi
     fi
-    if [[ "$LOCK_FILE_PID" != "0"]]; then
-      if [[ "$LOCK_FILE_PID" == "$PID" ]]; then
+    if [ "$LOCK_FILE_PID" != "0" ]; then
+      if [ "$LOCK_FILE_PID" = "$PID" ]; then
         echo "Failed to restart aws-iot-device-client"
         exit 1;
       else
         echo "Successfully restarted aws-iot-device-client"
+        rm $RESTART_LOCK_FILE
         continue;
       fi
     else
-      pidof aws-iot-device-client > $RESTART_LOCK_FILE
+      echo $PID > $RESTART_LOCK_FILE
     fi
   fi
-  if command -v "systemctl" > /dev/null;
-  then
+
+  if command -v "systemctl" > /dev/null; then
     if id "$user" 2>/dev/null && command -v "sudo" > /dev/null; then
       sudo -u "$user" -n systemctl restart "$service"
     else
       echo "username or sudo command not found"
       systemctl restart "$service"
     fi
-  elif command -v "service" > /dev/null;
-  then
+  elif command -v "service" > /dev/null; then
     if id "$user" 2>/dev/null && command -v "sudo" > /dev/null; then
       sudo -u "$user" -n service "$service" restart
     else
