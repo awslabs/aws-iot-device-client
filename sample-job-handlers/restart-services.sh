@@ -14,6 +14,9 @@ PID=$(pidof aws-iot-device-client)
 
 for service in $services
 do
+  # If this script is used to restart Device Client then the Job will not be updated to completed. On restart, the Device
+  # Client will begin to execute the Job again. Therefore, to avoid an infinite loop here we need to use a lock file to
+  # check if the Device Client had already been restarted.
   if [ service = "aws-iot-device-client" ];
   then
     if id "$user" 2>/dev/null && command -v "sudo" > /dev/null; then
