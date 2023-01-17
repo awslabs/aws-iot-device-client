@@ -195,7 +195,7 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, const std::strin
         Util::Sanitize(action.runAsUser->c_str()).c_str(),
         Util::Sanitize(argsStringForLogging.str()).c_str());
 
-    int actionExecutionStatus;
+    int actionExecutionStatus = 0;
     if (action.type == RUN_HANDLER_TYPE)
     {
         actionExecutionStatus = exec_handlerScript(command, action);
