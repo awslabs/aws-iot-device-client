@@ -700,7 +700,8 @@ bool FleetProvisioning::ExportRuntimeConfig(
         LOGM_ERROR(TAG, "*** %s: Unable to open file: '%s' ***", DeviceClient::DC_FATAL_ERROR, file.c_str());
         return false;
     }
-    clientConfig << FormatMessage(
+
+    string formattedMsg = FormatMessage(
         jsonTemplate.c_str(),
         PlainConfig::JSON_KEY_RUNTIME_CONFIG,
         PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_COMPLETED_FLEET_PROVISIONING,
@@ -712,6 +713,9 @@ bool FleetProvisioning::ExportRuntimeConfig(
         runtimeThingName.c_str(),
         PlainConfig::FleetProvisioningRuntimeConfig::JSON_KEY_DEVICE_CONFIG,
         runtimeDeviceConfig.c_str());
+
+    LOG_DEBUG(TAG, formattedMsg.c_str());
+    clientConfig << formattedMsg;
     LOGM_INFO(TAG, "Exported runtime configurations to: %s", file.c_str());
 
     chmod(expandedPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP);
