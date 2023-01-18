@@ -28,13 +28,14 @@ namespace Aws
                     // truncated
                     formattedMsgSize = std::min(formattedMsgSize, Config::MAX_CONFIG_SIZE - 1) + 1;
 
-                    std::unique_ptr<char[]> buffer(new char[formattedMsgSize]);
+                    std::string buffer;
+                    buffer.resize(formattedMsgSize);
 
                     va_copy(copy, args);
-                    vsnprintf(buffer.get(), formattedMsgSize, message, copy);
+                    vsnprintf(&buffer[0], formattedMsgSize, message, copy);
                     va_end(copy);
 
-                    return string(buffer.get(), buffer.get() + formattedMsgSize - 1);
+                    return buffer;
                 }
 
                 string FormatMessage(const char message[], ...)
