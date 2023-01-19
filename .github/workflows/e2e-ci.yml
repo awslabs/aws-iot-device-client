@@ -226,7 +226,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        architecture: [ amd64 ] # arm64 left out for now as local proxy builds take too long. Re-enable if binary or image becomes available
+        architecture: [ amd64, arm64 ] # arm64 left out for now as local proxy builds take too long. Re-enable if binary or image becomes available
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -267,8 +267,6 @@ jobs:
           docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-ubuntu-armv7:
     runs-on: ubuntu-latest
-    if: ${{ false }} # Disabled for now as local proxy builds take too long. Re-enable if binary or image becomes available.
-    # versioning output is needed for the image tag
     needs: [ versioning, build-docker-image-ubuntu-armv7 ]
     steps:
       - name: Checkout
