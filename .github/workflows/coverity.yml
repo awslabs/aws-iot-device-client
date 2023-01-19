@@ -1,19 +1,17 @@
-name: Lint
+name: Coverity
 
 on:
   push:
-    branches:
-      - '*'
+    branches: ['main']
   pull_request:
-    branches:
-      - '*'
+    branches: ['main']
 
 env:
   PACKAGE_NAME: aws-iot-device-client
   ECR_BASE_REPO: aws-iot-device-client/aws-iot-device-client-base-images
 
 jobs:
-  clang-format:
+  build-wrapper:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
@@ -27,8 +25,8 @@ jobs:
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
       - name: Checkout Sources
         uses: actions/checkout@v1
-      - name: clang-format script
+      - name: coverity script
         run: |
           export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
           docker pull $DOCKER_IMAGE
-          docker run --mount type=bind,source=$(pwd),target=/src --workdir /src --entrypoint /src/static-checks/format-check.sh $DOCKER_IMAGE
+          docker run --mount type=bind,source=$(pwd),target=/src --workdir /src --entrypoint /src/static-checks/coverity-build.sh --env COVERITY_TOKEN="${{ secrets.COVERITY_TOKEN }}" --env COVERITY_EMAIL="${{ secrets.COVERITY_EMAIL }}" $DOCKER_IMAGE

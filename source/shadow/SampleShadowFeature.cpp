@@ -392,7 +392,6 @@ void SampleShadowFeature::readAndUpdateShadowFromFile()
 
     ShadowState state;
     state.Reported = jsonObj;
-    state.Desired = jsonObj;
     updateNamedShadowRequest.State = state;
 
     Aws::Crt::UUID uuid;

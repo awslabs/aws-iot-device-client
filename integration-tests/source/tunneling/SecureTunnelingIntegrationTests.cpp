@@ -26,7 +26,7 @@ extern string LOCAL_PROXY_PATH;
 
 const string TEST_TUNNEL_PATH = "/test-tunnel.sh";
 
-class TestSecureTunnelingFixture : public ::testing::Test
+class TestSecureTunnelingFeature : public ::testing::Test
 {
   public:
     void SetUp() override
@@ -91,7 +91,7 @@ class TestSecureTunnelingFixture : public ::testing::Test
     int PID;
 };
 
-TEST_F(TestSecureTunnelingFixture, SCP)
+TEST_F(TestSecureTunnelingFeature, SCP)
 {
     if (resourceHandler->GetTunnelSourceConnectionStatusWithRetry(tunnelId) !=
         Aws::IoTSecureTunneling::Model::ConnectionStatus::CONNECTED)

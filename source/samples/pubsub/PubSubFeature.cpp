@@ -246,6 +246,7 @@ void PubSubFeature::publishFileData()
     if (getPublishFileData(&payload) != AWS_OP_SUCCESS)
     {
         LOG_ERROR(TAG, "Failed to read publish file... Skipping publish");
+        aws_byte_buf_clean_up_secure(&payload);
         return;
     }
     auto onPublishComplete = [payload, this](const Mqtt::MqttConnection &, uint16_t, int errorCode) mutable {

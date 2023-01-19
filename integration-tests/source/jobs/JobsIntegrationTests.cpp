@@ -17,6 +17,11 @@ using namespace std;
 extern std::string THING_NAME;
 extern std::string REGION;
 
+static constexpr char DOWNLOAD_FILE_JOB_DOC[] =
+    "{ \"version\": \"1.0\", \"steps\": [{ \"action\": { \"name\": \"Download File\", \"type\": \"runHandler\", "
+    "\"input\": { \"handler\": \"download-file.sh\", \"args\": [ "
+    "\"https://github.com/awslabs/aws-iot-device-client/blob/main/README.md\", "
+    "\"/tmp/README.md\" ],\"path\": \"default\" },\"runAsUser\": \"root\" } } ] }";
 static constexpr char INSTALL_PACKAGES_JOB_DOC[] =
     "{ \"version\": \"1.0\", \"steps\": [ { \"action\": { \"name\": \"Install Packages\", \"type\": \"runHandler\", "
     "\"input\": { \"handler\": \"install-packages.sh\", \"args\": [ \"dos2unix\" ], \"path\": \"default\" }, "
@@ -37,7 +42,7 @@ static constexpr char RUN_COMMAND_PRINT_GREETING_JOB_DOC[] =
     "{ \"version\": \"1.0\", \"steps\": [ { \"action\": { \"name\": \"Print Greeting\", \"type\": "
     "\"runCommand\", \"input\": { \"command\": \"echo,Hello World\" }, \"runAsUser\": \"root\" } }]}";
 
-class TestJobsFixture : public ::testing::Test
+class TestJobsFeature : public ::testing::Test
 {
   public:
     void SetUp() override
@@ -60,7 +65,7 @@ class TestJobsFixture : public ::testing::Test
     unique_ptr<IntegrationTestResourceHandler> resourceHandler;
 };
 
-TEST_F(TestJobsFixture, InstallPackages)
+TEST_F(TestJobsFeature, InstallPackages)
 {
     string jobId = "Install-Packages-" + resourceHandler->GetTimeStamp();
     resourceHandler->CreateJob(jobId, INSTALL_PACKAGES_JOB_DOC);
@@ -73,7 +78,7 @@ TEST_F(TestJobsFixture, InstallPackages)
     ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
 }
 
-TEST_F(TestJobsFixture, RemovePackages)
+TEST_F(TestJobsFeature, RemovePackages)
 {
     string jobId = "Remove-Packages-" + resourceHandler->GetTimeStamp();
     resourceHandler->CreateJob(jobId, REMOVE_PACKAGES_JOB_DOC);
@@ -86,7 +91,15 @@ TEST_F(TestJobsFixture, RemovePackages)
     ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
 }
 
-TEST_F(TestJobsFixture, PrintGreeting)
+TEST_F(TestJobsFeature, DownloadFile)
+{
+    string jobId = "Download-File-" + resourceHandler->GetTimeStamp();
+    resourceHandler->CreateJob(jobId, DOWNLOAD_FILE_JOB_DOC);
+
+    ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
+}
+
+TEST_F(TestJobsFeature, PrintGreeting)
 {
     string jobId = "Print-Greeting-" + resourceHandler->GetTimeStamp();
     resourceHandler->CreateJob(jobId, RUN_COMMAND_PRINT_GREETING_JOB_DOC);

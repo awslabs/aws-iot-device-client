@@ -2,11 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "IntegrationTestResourceHandler.h"
+#include <aws/iot/model/AddThingToThingGroupRequest.h>
+#include <aws/iot/model/AddThingToThingGroupResult.h>
+#include <aws/iot/model/AttachSecurityProfileRequest.h>
 #include <aws/iot/model/CreateJobRequest.h>
 #include <aws/iot/model/CreateJobResult.h>
+#include <aws/iot/model/CreateSecurityProfileRequest.h>
+#include <aws/iot/model/CreateSecurityProfileResult.h>
+#include <aws/iot/model/CreateThingGroupRequest.h>
+#include <aws/iot/model/CreateThingGroupResult.h>
 #include <aws/iot/model/DeleteCertificateRequest.h>
 #include <aws/iot/model/DeleteJobRequest.h>
+#include <aws/iot/model/DeleteSecurityProfileRequest.h>
 #include <aws/iot/model/DeleteThingGroupRequest.h>
+#include <aws/iot/model/DeleteThingGroupResult.h>
 #include <aws/iot/model/DeleteThingRequest.h>
 #include <aws/iot/model/DescribeCertificateRequest.h>
 #include <aws/iot/model/DescribeJobExecutionRequest.h>
@@ -15,6 +24,8 @@
 #include <aws/iot/model/DescribeThingResult.h>
 #include <aws/iot/model/DetachPolicyRequest.h>
 #include <aws/iot/model/DetachThingPrincipalRequest.h>
+#include <aws/iot/model/ListActiveViolationsRequest.h>
+#include <aws/iot/model/ListActiveViolationsResult.h>
 #include <aws/iot/model/ListAttachedPoliciesRequest.h>
 #include <aws/iot/model/ListJobExecutionsForJobRequest.h>
 #include <aws/iot/model/ListThingPrincipalsRequest.h>
@@ -35,13 +46,17 @@ using namespace Aws::IoTSecureTunneling::Model;
 using namespace Aws::Client;
 using namespace Aws::IoT;
 using namespace Aws::IoT::Model;
+using namespace Aws::Utils;
 
 extern std::string THING_NAME;
+
+static const char *TAG = "IntegrationTestResourceHandler.cpp";
 
 IntegrationTestResourceHandler::IntegrationTestResourceHandler(const ClientConfiguration &clientConfig)
     : iotClient(IoTClient(clientConfig)), ioTSecureTunnelingClient(IoTSecureTunnelingClient(clientConfig))
 {
     targetArn = GetTargetArn(THING_NAME);
+    logger = make_unique<Aws::Utils::Logging::ConsoleLogSystem>(Aws::Utils::Logging::LogLevel::Info);
 }
 void IntegrationTestResourceHandler::CreateJob(const string &jobId, const string &jobDoc)
 {
@@ -58,7 +73,7 @@ void IntegrationTestResourceHandler::CreateJob(const string &jobId, const string
     }
     else
     {
-        printf("Failed to create Job: %s\n", outcome.GetError().GetMessage().c_str());
+        Log(Logging::LogLevel::Error, "Failed to Create Job", jobId, outcome.GetError().GetMessage());
     }
 }
 
@@ -72,10 +87,10 @@ JobExecutionStatus IntegrationTestResourceHandler::GetJobExecutionStatus(const s
 
     if (!outcome.IsSuccess())
     {
-        printf(
-            "Failed to describe job execution for Job: %s\n%s\n",
-            jobId.c_str(),
-            outcome.GetError().GetMessage().c_str());
+        Log(Logging::LogLevel::Error,
+            "Failed to describe job execution for Job",
+            jobId,
+            outcome.GetError().GetMessage());
     }
     return outcome.GetResult().GetExecution().GetStatus();
 }
@@ -88,7 +103,7 @@ void IntegrationTestResourceHandler::DeleteJob(const std::string &jobId)
     DeleteJobOutcome outcome = iotClient.DeleteJob(request);
     if (!outcome.IsSuccess())
     {
-        printf("Failed to delete Job: %s\n%s\n", jobId.c_str(), outcome.GetError().GetMessage().c_str());
+        Log(Logging::LogLevel::Error, "Failed to Delete Job", jobId, outcome.GetError().GetMessage());
     }
 }
 void IntegrationTestResourceHandler::DeleteThing(const std::string &thingName)
@@ -100,7 +115,7 @@ void IntegrationTestResourceHandler::DeleteThing(const std::string &thingName)
 
     if (!outcome.IsSuccess())
     {
-        printf("Failed to delete Thing: %s\n%s\n", thingName.c_str(), outcome.GetError().GetMessage().c_str());
+        Log(Logging::LogLevel::Error, "Failed to delete Thing", thingName, outcome.GetError().GetMessage());
     }
 }
 
@@ -120,10 +135,10 @@ vector<Aws::Utils::ARN> IntegrationTestResourceHandler::ListCertsForThing(const 
     }
     else
     {
-        printf(
-            "Failed to list Certificates for Thing: %s\n%s\n",
-            thingName.c_str(),
-            outcome.GetError().GetMessage().c_str());
+        Log(Logging::LogLevel::Error,
+            "Failed to list Certificates for Thing",
+            thingName,
+            outcome.GetError().GetMessage());
     }
 
     return certs;
@@ -139,10 +154,10 @@ void IntegrationTestResourceHandler::DeactivateCertificate(const string &certifi
 
     if (!outcome.IsSuccess())
     {
-        printf(
-            "Failed to deactivate Certificate: %s\n%s\n",
-            certificateId.c_str(),
-            outcome.GetError().GetMessage().c_str());
+        Log(Logging::LogLevel::Error,
+            "Failed to de-activate Certificate",
+            certificateId,
+            outcome.GetError().GetMessage());
     }
 }
 
@@ -156,7 +171,10 @@ void IntegrationTestResourceHandler::DetachCertificate(const string &thingName, 
 
     if (!outcome.IsSuccess())
     {
-        printf("Failed to detach Certificate: %s\n", outcome.GetError().GetMessage().c_str());
+        Log(Logging::LogLevel::Error,
+            "Failed to detach Certificate from Thing",
+            thingName,
+            outcome.GetError().GetMessage());
     }
 }
 
@@ -170,8 +188,7 @@ void IntegrationTestResourceHandler::DeleteCertificate(const string &certificate
 
     if (!outcome.IsSuccess())
     {
-        printf(
-            "Failed to delete Certificate: %s\n%s\n", certificateId.c_str(), outcome.GetError().GetMessage().c_str());
+        Log(Logging::LogLevel::Error, "Failed to delete Certificate", certificateId, outcome.GetError().GetMessage());
     }
 }
 
@@ -185,6 +202,10 @@ void IntegrationTestResourceHandler::CleanUp()
     for (const string &tunnelId : tunnelsToCleanup)
     {
         CloseTunnel(tunnelId);
+    }
+    for (const string &thingGroup : thingGroupsToCleanup)
+    {
+        DeleteThingGroup(thingGroup);
     }
 }
 
@@ -229,7 +250,7 @@ JobExecutionStatus IntegrationTestResourceHandler::GetJobExecutionStatusWithRetr
 
     if (status == JobExecutionStatus::IN_PROGRESS)
     {
-        printf("JobExecution for Job  %s still IN_PROGRESS state after max retries \n", jobId.c_str());
+        Log(Logging::LogLevel::Error, "JobExecution for Job", jobId, "still IN_PROGRESS after max retries");
     }
 
     return status;
@@ -253,7 +274,7 @@ ConnectionStatus IntegrationTestResourceHandler::GetTunnelSourceConnectionStatus
 
         if (!outcome.IsSuccess())
         {
-            printf("Failed to describe Tunnel: %s\n%s\n", tunnelId.c_str(), outcome.GetError().GetMessage().c_str());
+            Log(Logging::LogLevel::Error, "Failed to describe Tunnel", tunnelId, outcome.GetError().GetMessage());
         }
         else
         {
@@ -283,7 +304,7 @@ Aws::IoTSecureTunneling::Model::OpenTunnelResult IntegrationTestResourceHandler:
 
     if (!outcome.IsSuccess())
     {
-        printf("Failed to open tunnel to Thing: %s\n%s\n", thingName.c_str(), outcome.GetError().GetMessage().c_str());
+        Log(Logging::LogLevel::Error, "Failed to open Tunnel to Thing", thingName, outcome.GetError().GetMessage());
     }
     else
     {
@@ -311,7 +332,7 @@ std::string IntegrationTestResourceHandler::GetTargetArn(const std::string &thin
 
     if (!outcome.IsSuccess())
     {
-        printf("Failed to Describe Thing: %s\n%s\n", thingName.c_str(), outcome.GetError().GetMessage().c_str());
+        Log(Logging::LogLevel::Error, "Failed to describe Thing", thingName, outcome.GetError().GetMessage());
     }
     else
     {
@@ -322,4 +343,165 @@ std::string IntegrationTestResourceHandler::GetTargetArn(const std::string &thin
 std::string IntegrationTestResourceHandler::GetResourceId(const std::string &resource)
 {
     return resource.substr(resource.find('/'));
+}
+vector<ActiveViolation> IntegrationTestResourceHandler::GetViolations(const std::string &profileName)
+{
+    vector<ActiveViolation> violations;
+
+    ListActiveViolationsRequest request;
+    request.SetSecurityProfileName(profileName);
+
+    ListActiveViolationsOutcome outcome = iotClient.ListActiveViolations(request);
+
+    if (!outcome.IsSuccess())
+    {
+        Log(Logging::LogLevel::Error,
+            "Failed to list Active Violations for",
+            profileName,
+            outcome.GetError().GetMessage());
+    }
+    else
+    {
+        violations = outcome.GetResult().GetActiveViolations();
+    }
+    if (violations.empty())
+    {
+        Log(Logging::LogLevel::Info, "Found no violations for Security Profile", profileName);
+    }
+    return violations;
+}
+void IntegrationTestResourceHandler::CreateAndAttachSecurityProfile(
+    const string &profileName,
+    const string &thingGroupName,
+    const vector<std::string> &metrics)
+{
+    MetricValue metricValue;
+    metricValue.SetCount(1L);
+
+    BehaviorCriteria criteria;
+    criteria.SetComparisonOperator(ComparisonOperator::less_than);
+    criteria.SetDurationSeconds(300);
+    criteria.SetValue(metricValue);
+    criteria.SetConsecutiveDatapointsToAlarm(1);
+    criteria.SetConsecutiveDatapointsToClear(10);
+
+    CreateSecurityProfileRequest request;
+    request.SetSecurityProfileName(profileName);
+
+    for (const string &metric : metrics)
+    {
+        Behavior behavior;
+        behavior.SetCriteria(criteria);
+        behavior.SetMetric(metric);
+        behavior.SetName(metric);
+
+        request.AddBehaviors(behavior);
+    }
+
+    CreateSecurityProfileOutcome outcome = iotClient.CreateSecurityProfile(request);
+
+    Log(Logging::LogLevel::Info, "Creating Security Profile", profileName);
+
+    if (!outcome.IsSuccess())
+    {
+        Log(Logging::LogLevel::Error,
+            "Failed to create Security Profile",
+            profileName,
+            outcome.GetError().GetMessage());
+    }
+
+    AttachSecurityProfile(profileName, thingGroupName);
+}
+
+void IntegrationTestResourceHandler::AttachSecurityProfile(
+    const std::string &profileName,
+    const std::string &thingGroupName)
+{
+    string thingGroupArn = targetArn.substr(0, targetArn.find_last_of(':') + 1) + "thinggroup/" + thingGroupName;
+
+    AttachSecurityProfileRequest request;
+    request.SetSecurityProfileName(profileName);
+    request.SetSecurityProfileTargetArn(thingGroupArn);
+
+    AttachSecurityProfileOutcome outcome = iotClient.AttachSecurityProfile(request);
+
+    if (!outcome.IsSuccess())
+    {
+        Log(Logging::LogLevel::Error,
+            "Failed to attach Security Profile",
+            profileName,
+            outcome.GetError().GetMessage());
+    }
+}
+
+void IntegrationTestResourceHandler::DeleteSecurityProfile(const string &profileName)
+{
+    DeleteSecurityProfileRequest request;
+    request.SetSecurityProfileName(profileName);
+
+    DeleteSecurityProfileOutcome outcome = iotClient.DeleteSecurityProfile(request);
+
+    if (!outcome.IsSuccess())
+    {
+        Log(Logging::LogLevel::Error,
+            "Failed to delete Security Profile",
+            profileName,
+            outcome.GetError().GetMessage());
+    }
+}
+void IntegrationTestResourceHandler::DeleteThingGroup(const string &thingGroupName)
+{
+    DeleteThingGroupRequest request;
+    request.SetThingGroupName(thingGroupName);
+
+    DeleteThingGroupOutcome outcome = iotClient.DeleteThingGroup(request);
+
+    if (!outcome.IsSuccess())
+    {
+        Log(Logging::LogLevel::Error, "Failed to Delete Thing Group", thingGroupName, outcome.GetError().GetMessage());
+    }
+}
+void IntegrationTestResourceHandler::CreateThingGroup(const string &thingGroupName)
+{
+    CreateThingGroupRequest request;
+    request.SetThingGroupName(thingGroupName);
+
+    CreateThingGroupOutcome outcome = iotClient.CreateThingGroup(request);
+
+    if (!outcome.IsSuccess())
+    {
+        Log(Logging::LogLevel::Error, "Failed to create Thing Group", thingGroupName, outcome.GetError().GetMessage());
+    }
+    else
+    {
+        thingGroupsToCleanup.push_back(thingGroupName);
+    }
+}
+void IntegrationTestResourceHandler::AddThingToThingGroup(const string &thingGroupName, const string &thingName)
+{
+    AddThingToThingGroupRequest request;
+    request.SetThingGroupName(thingGroupName);
+    request.SetThingName(thingName);
+
+    AddThingToThingGroupOutcome outcome = iotClient.AddThingToThingGroup(request);
+
+    if (!outcome.IsSuccess())
+    {
+        Log(Logging::LogLevel::Error, "Failed to add Thing to Thing Group", thingName, outcome.GetError().GetMessage());
+    }
+}
+void IntegrationTestResourceHandler::Log(
+    Aws::Utils::Logging::LogLevel logLevel,
+    const std::string &logMessage,
+    const std::string &resource,
+    const std::string &errorMessage)
+{
+    Aws::OStringStream ss;
+    ss << logMessage << string{" "} << resource;
+    if (logLevel == Logging::LogLevel::Error)
+    {
+        ss << string{" "} << errorMessage;
+    }
+
+    logger->LogStream(logLevel, TAG, ss);
 }

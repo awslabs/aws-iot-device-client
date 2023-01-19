@@ -674,7 +674,7 @@ bool PlainConfig::LogConfig::LoadFromJson(const Crt::JsonView &json)
     }
 
     jsonKey = JSON_KEY_LOG_FILE;
-    if (json.ValueExists(jsonKey))
+    if ((deviceClientLogtype == LOG_TYPE_FILE) && json.ValueExists(jsonKey))
     {
         if (!json.GetString(jsonKey).empty())
         {
@@ -1049,47 +1049,53 @@ bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
         enabled = json.GetBool(jsonKey);
     }
 
-    jsonKey = JSON_KEY_TEMPLATE_NAME;
-    if (json.ValueExists(jsonKey))
+    if (enabled)
     {
-        if (!json.GetString(jsonKey).empty())
+        jsonKey = JSON_KEY_TEMPLATE_NAME;
+        if (json.ValueExists(jsonKey))
         {
-            templateName = json.GetString(jsonKey).c_str();
+            if (!json.GetString(jsonKey).empty())
+            {
+                templateName = json.GetString(jsonKey).c_str();
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
         }
-        else
-        {
-            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
-        }
-    }
 
-    jsonKey = JSON_KEY_TEMPLATE_PARAMETERS;
-    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
-    {
-        templateParameters = json.GetString(jsonKey).c_str();
-    }
+        jsonKey = JSON_KEY_TEMPLATE_PARAMETERS;
+        if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
+        {
+            templateParameters = json.GetString(jsonKey).c_str();
+        }
 
-    jsonKey = JSON_KEY_CSR_FILE;
-    if (json.ValueExists(jsonKey))
-    {
-        if (!json.GetString(jsonKey).empty())
+        jsonKey = JSON_KEY_CSR_FILE;
+        if (json.ValueExists(jsonKey))
         {
-            csrFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            if (!json.GetString(jsonKey).empty())
+            {
+                csrFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
         }
-        else
+        jsonKey = JSON_KEY_DEVICE_KEY;
+        if (json.ValueExists(jsonKey))
         {
-            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
-        }
-    }
-    jsonKey = JSON_KEY_DEVICE_KEY;
-    if (json.ValueExists(jsonKey))
-    {
-        if (!json.GetString(jsonKey).empty())
-        {
-            deviceKey = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
-        }
-        else
-        {
-            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            if (!json.GetString(jsonKey).empty())
+            {
+                deviceKey = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
         }
     }
 
@@ -1194,36 +1200,41 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromJson(const Crt::JsonVi
         completedFleetProvisioning = json.GetBool(jsonKey);
     }
 
-    jsonKey = JSON_KEY_CERT;
-    if (json.ValueExists(jsonKey))
+    if (completedFleetProvisioning)
     {
-        if (!json.GetString(jsonKey).empty())
+        jsonKey = JSON_KEY_CERT;
+        if (json.ValueExists(jsonKey))
         {
-            cert = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            if (!json.GetString(jsonKey).empty())
+            {
+                cert = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
         }
-        else
-        {
-            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
-        }
-    }
 
-    jsonKey = JSON_KEY_KEY;
-    if (json.ValueExists(jsonKey))
-    {
-        if (!json.GetString(jsonKey).empty())
+        jsonKey = JSON_KEY_KEY;
+        if (json.ValueExists(jsonKey))
         {
-            key = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            if (!json.GetString(jsonKey).empty())
+            {
+                key = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
         }
-        else
-        {
-            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
-        }
-    }
 
-    jsonKey = JSON_KEY_THING_NAME;
-    if (json.ValueExists(jsonKey))
-    {
-        thingName = json.GetString(jsonKey).c_str();
+        jsonKey = JSON_KEY_THING_NAME;
+        if (json.ValueExists(jsonKey))
+        {
+            thingName = json.GetString(jsonKey).c_str();
+        }
     }
 
     return true;
@@ -1489,55 +1500,62 @@ bool PlainConfig::PubSub::LoadFromJson(const Crt::JsonView &json)
         enabled = json.GetBool(jsonKey);
     }
 
-    jsonKey = JSON_PUB_SUB_PUBLISH_TOPIC;
-    if (json.ValueExists(jsonKey))
+    if (enabled)
     {
-        if (!json.GetString(jsonKey).empty())
+        jsonKey = JSON_PUB_SUB_PUBLISH_TOPIC;
+        if (json.ValueExists(jsonKey))
         {
-            publishTopic = json.GetString(jsonKey).c_str();
+            if (!json.GetString(jsonKey).empty())
+            {
+                publishTopic = json.GetString(jsonKey).c_str();
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
         }
-        else
-        {
-            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
-        }
-    }
 
-    jsonKey = JSON_PUB_SUB_PUBLISH_FILE;
-    if (json.ValueExists(jsonKey))
-    {
-        if (!json.GetString(jsonKey).empty())
+        jsonKey = JSON_PUB_SUB_PUBLISH_FILE;
+        if (json.ValueExists(jsonKey))
         {
-            publishFile = json.GetString(jsonKey).c_str();
+            if (!json.GetString(jsonKey).empty())
+            {
+                publishFile = json.GetString(jsonKey).c_str();
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
         }
-        else
-        {
-            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
-        }
-    }
 
-    jsonKey = JSON_PUB_SUB_SUBSCRIBE_TOPIC;
-    if (json.ValueExists(jsonKey))
-    {
-        if (!json.GetString(jsonKey).empty())
+        jsonKey = JSON_PUB_SUB_SUBSCRIBE_TOPIC;
+        if (json.ValueExists(jsonKey))
         {
-            subscribeTopic = json.GetString(jsonKey).c_str();
+            if (!json.GetString(jsonKey).empty())
+            {
+                subscribeTopic = json.GetString(jsonKey).c_str();
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
         }
-        else
-        {
-            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
-        }
-    }
 
-    jsonKey = JSON_PUB_SUB_SUBSCRIBE_FILE;
-    if (json.ValueExists(jsonKey))
-    {
-        if (!json.GetString(jsonKey).empty())
+        jsonKey = JSON_PUB_SUB_SUBSCRIBE_FILE;
+        if (json.ValueExists(jsonKey))
         {
-            subscribeFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
-        }
-        else
-        {
-            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            if (!json.GetString(jsonKey).empty())
+            {
+                subscribeFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
         }
     }
 
@@ -1690,37 +1708,42 @@ bool PlainConfig::SampleShadow::LoadFromJson(const Crt::JsonView &json)
         enabled = json.GetBool(jsonKey);
     }
 
-    jsonKey = JSON_SAMPLE_SHADOW_NAME;
-    if (!json.GetString(jsonKey).empty())
+    if (enabled)
     {
-        shadowName = json.GetString(jsonKey).c_str();
-    }
-    else
-    {
-        LOGM_WARN(
-            Config::TAG, "Shadow Name {%s} was provided in the JSON configuration file with an empty value", jsonKey);
-    }
-
-    jsonKey = JSON_SAMPLE_SHADOW_INPUT_FILE;
-    if (json.ValueExists(jsonKey))
-    {
+        jsonKey = JSON_SAMPLE_SHADOW_NAME;
         if (!json.GetString(jsonKey).empty())
         {
-            shadowInputFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            shadowName = json.GetString(jsonKey).c_str();
         }
         else
         {
             LOGM_WARN(
                 Config::TAG,
-                "Input file {%s} was provided in the JSON configuration file with an empty value",
+                "Shadow Name {%s} was provided in the JSON configuration file with an empty value",
                 jsonKey);
         }
-    }
 
-    jsonKey = JSON_SAMPLE_SHADOW_OUTPUT_FILE;
-    if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
-    {
-        shadowOutputFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        jsonKey = JSON_SAMPLE_SHADOW_INPUT_FILE;
+        if (json.ValueExists(jsonKey))
+        {
+            if (!json.GetString(jsonKey).empty())
+            {
+                shadowInputFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG,
+                    "Input file {%s} was provided in the JSON configuration file with an empty value",
+                    jsonKey);
+            }
+        }
+
+        jsonKey = JSON_SAMPLE_SHADOW_OUTPUT_FILE;
+        if (json.ValueExists(jsonKey) && !json.GetString(jsonKey).empty())
+        {
+            shadowOutputFile = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+        }
     }
 
     return true;
@@ -1907,68 +1930,76 @@ bool PlainConfig::SecureElement::LoadFromJson(const Crt::JsonView &json)
         enabled = json.GetBool(jsonKey);
     }
 
-    jsonKey = JSON_PKCS11_LIB;
-    if (json.ValueExists(jsonKey))
+    if (enabled)
     {
-        if (!json.GetString(jsonKey).empty())
+        jsonKey = JSON_PKCS11_LIB;
+        if (json.ValueExists(jsonKey))
         {
-            pkcs11Lib = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            if (!json.GetString(jsonKey).empty())
+            {
+                pkcs11Lib = FileUtils::ExtractExpandedPath(json.GetString(jsonKey).c_str());
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
         }
-        else
-        {
-            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
-        }
-    }
 
-    jsonKey = JSON_SECURE_ELEMENT_PIN;
-    if (json.ValueExists(jsonKey))
-    {
-        if (!json.GetString(jsonKey).empty())
+        jsonKey = JSON_SECURE_ELEMENT_PIN;
+        if (json.ValueExists(jsonKey))
         {
-            secureElementPin = json.GetString(jsonKey).c_str();
+            if (!json.GetString(jsonKey).empty())
+            {
+                secureElementPin = json.GetString(jsonKey).c_str();
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
         }
-        else
-        {
-            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
-        }
-    }
 
-    jsonKey = JSON_SECURE_ELEMENT_KEY_LABEL;
-    if (json.ValueExists(jsonKey))
-    {
-        if (!json.GetString(jsonKey).empty())
+        jsonKey = JSON_SECURE_ELEMENT_KEY_LABEL;
+        if (json.ValueExists(jsonKey))
         {
-            secureElementKeyLabel = json.GetString(jsonKey).c_str();
+            if (!json.GetString(jsonKey).empty())
+            {
+                secureElementKeyLabel = json.GetString(jsonKey).c_str();
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
         }
-        else
-        {
-            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
-        }
-    }
 
-    jsonKey = JSON_SECURE_ELEMENT_SLOT_ID;
-    if (json.ValueExists(jsonKey))
-    {
-        if (json.GetInt64(jsonKey))
+        jsonKey = JSON_SECURE_ELEMENT_SLOT_ID;
+        if (json.ValueExists(jsonKey))
         {
-            secureElementSlotId = json.GetInt64(jsonKey);
+            if (json.GetInt64(jsonKey))
+            {
+                secureElementSlotId = json.GetInt64(jsonKey);
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
         }
-        else
-        {
-            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
-        }
-    }
 
-    jsonKey = JSON_SECURE_ELEMENT_TOKEN_LABEL;
-    if (json.ValueExists(jsonKey))
-    {
-        if (!json.GetString(jsonKey).empty())
+        jsonKey = JSON_SECURE_ELEMENT_TOKEN_LABEL;
+        if (json.ValueExists(jsonKey))
         {
-            secureElementTokenLabel = json.GetString(jsonKey).c_str();
-        }
-        else
-        {
-            LOGM_WARN(Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            if (!json.GetString(jsonKey).empty())
+            {
+                secureElementTokenLabel = json.GetString(jsonKey).c_str();
+            }
+            else
+            {
+                LOGM_WARN(
+                    Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
+            }
         }
     }
 
