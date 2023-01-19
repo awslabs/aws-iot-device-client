@@ -186,48 +186,29 @@ void PubSubFeature::runFileMonitor()
         if (len <= 0)
         {
             LOG_WARN(TAG, "Couldn't monitor any more target file modify events as it reaches max read buffer size");
-            goto exit;
+            break;
         }
 
         for (int i = 0; i < len;)
         {
             struct inotify_event *e = (struct inotify_event *)&buf[i];
 
-            if (e->mask & IN_CREATE)
+            if (e->mask & IN_CREATE && strcmp(e->name, fileName.c_str()) == 0 && !(e->mask & IN_ISDIR))
             {
-                if (strcmp(e->name, fileName.c_str()) != 0)
-                    goto next;
-
-                if (e->mask & IN_ISDIR)
-                    goto next;
-
                 LOG_DEBUG(TAG, "New file is created with the same name of the target file.");
                 publishFileData();
-                file_wd = inotify_add_watch(fd, pubFile.c_str(), IN_CLOSE_WRITE | IN_DELETE_SELF);
+                file_wd = inotify_add_watch(fd, pubFile.c_str(), IN_CLOSE_WRITE);
             }
-
-            if (e->mask & IN_CLOSE_WRITE)
+            else if (e->mask & IN_CLOSE_WRITE)
             {
                 LOG_DEBUG(TAG, "The target file is modified, start updating the shadow");
                 publishFileData();
             }
 
-            if (e->mask & IN_DELETE_SELF)
-            {
-                if (e->mask & IN_ISDIR)
-                    goto next;
-
-                LOG_DEBUG(TAG, "The target file is deleted by itself, removing the watch");
-                inotify_rm_watch(fd, file_wd);
-            }
-
-        next:
             i += EVENT_SIZE + e->len;
         }
-
         this_thread::sleep_for(std::chrono::milliseconds(500));
     }
-
 exit:
     inotify_rm_watch(fd, file_wd);
     inotify_rm_watch(fd, dir_wd);
