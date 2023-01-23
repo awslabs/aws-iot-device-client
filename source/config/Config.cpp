@@ -1490,6 +1490,7 @@ constexpr char PlainConfig::PubSub::JSON_PUB_SUB_PUBLISH_TOPIC[];
 constexpr char PlainConfig::PubSub::JSON_PUB_SUB_PUBLISH_FILE[];
 constexpr char PlainConfig::PubSub::JSON_PUB_SUB_SUBSCRIBE_TOPIC[];
 constexpr char PlainConfig::PubSub::JSON_PUB_SUB_SUBSCRIBE_FILE[];
+constexpr char PlainConfig::PubSub::JSON_PUB_SUB_PUBLISH_ON_CHANGE[];
 
 bool PlainConfig::PubSub::LoadFromJson(const Crt::JsonView &json)
 {
@@ -1556,6 +1557,12 @@ bool PlainConfig::PubSub::LoadFromJson(const Crt::JsonView &json)
                     Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
             }
         }
+    }
+
+    jsonKey = JSON_PUB_SUB_PUBLISH_ON_CHANGE;
+    if (json.ValueExists(jsonKey))
+    {
+        publishOnChange = json.GetBool(jsonKey);
     }
 
     return true;

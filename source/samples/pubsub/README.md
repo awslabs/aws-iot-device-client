@@ -9,6 +9,8 @@ The Pub Sub sample feature was designed to illustrate how you might take advanta
 
 The feature also allows you to retrigger the publish action by sending a message with the payload `DC-Publish` to the configured `subscribe-topic`.
 
+The feature also allows you to retrigger the publish action by watching file changes to `publish-file` with the `publish-on-change` flag. Note: when `publish-on-change` is enabled, the feature takes advantage of the system inode notify events.
+
 #### Configuring the Pub Sub Sample feature via the JSON configuration file
 ```
 {
@@ -19,7 +21,8 @@ The feature also allows you to retrigger the publish action by sending a message
 			"publish-topic": "replace_with_publish_topic",
 			"publish-file": "replace_with_publish_file",
 			"subscribe-topic": "replace_with_subscribe_topic",
-			"subscribe-file": "replace_with_subscribe_file"
+			"subscribe-file": "replace_with_subscribe_file",
+			"publish-on-change": true
 			}
 		}
 	}
