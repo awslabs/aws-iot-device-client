@@ -45,7 +45,7 @@ LockFile::LockFile(const std::string &filedir, const std::string &process, const
         // remove stale pid file
         if (remove(fullPath.c_str()))
         {
-            LOGM_WARN(TAG, "Unable to remove stale lockfile: %s", Sanitize(fullPath).c_str());
+            LOGM_ERROR(TAG, "Unable to remove stale lockfile: %s", Sanitize(fullPath).c_str());
         }
     }
     fileIn.close();
@@ -53,7 +53,7 @@ LockFile::LockFile(const std::string &filedir, const std::string &process, const
     FILE *file = fopen(fullPath.c_str(), "wx");
     if (!file)
     {
-        LOGM_WARN(
+        LOGM_ERROR(
             TAG, "Unable to open lockfile. File may be in use or does not exist: %s", Sanitize(fullPath).c_str());
     }
     else
