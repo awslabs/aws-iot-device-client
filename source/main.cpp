@@ -346,10 +346,10 @@ int main(int argc, char *argv[])
          */
 #    if !defined(DISABLE_MQTT)
         /**
-        * init() is currently responsible for making sure only 1 instance of Device Client is running at a given time.
-        * In the future, we may want to move other Device Client startup logic into this function.
-        * returns false if an exception is thrown
-        */
+         * init() is currently responsible for making sure only 1 instance of Device Client is running at a given time.
+         * In the future, we may want to move other Device Client startup logic into this function.
+         * returns false if an exception is thrown
+         */
         if (!init(argc, argv))
         {
             return 1;
@@ -385,10 +385,10 @@ int main(int argc, char *argv[])
      */
 #if !defined(DISABLE_MQTT)
     /**
-    * init() is currently responsible for making sure only 1 instance of Device Client is running at a given time.
-    * In the future, we may want to move other Device Client startup logic into this function.
-    * returns false if an exception is thrown
-    */
+     * init() is currently responsible for making sure only 1 instance of Device Client is running at a given time.
+     * In the future, we may want to move other Device Client startup logic into this function.
+     * returns false if an exception is thrown
+     */
     if (!init(argc, argv))
     {
         return 1;
