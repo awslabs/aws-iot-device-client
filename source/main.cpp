@@ -315,15 +315,6 @@ int main(int argc, char *argv[])
         LOG_WARN(TAG, "Unable to append current working directory to PATH environment variable.");
     }
 
-    /**
-     * init() is currently responsible for making sure only 1 instance of Device Client is running at a given time.
-     * In the future, we may want to move other Device Client startup logic into this function.
-     * returns false if an exception is thrown
-     */
-    if (!init(argc, argv))
-    {
-        return 1;
-    }
     features = make_shared<FeatureRegistry>();
 
     LOGM_INFO(TAG, "Now running AWS IoT Device Client version %s", DEVICE_CLIENT_VERSION_FULL);
@@ -354,6 +345,11 @@ int main(int argc, char *argv[])
          * Establish MQTT connection using claim certificates and private key to provision the device/thing.
          */
 #    if !defined(DISABLE_MQTT)
+        /**
+        * init() is currently responsible for making sure only 1 instance of Device Client is running at a given time.
+        * In the future, we may want to move other Device Client startup logic into this function.
+        * returns false if an exception is thrown
+        */
         if (!init(argc, argv))
         {
             return 1;
@@ -388,6 +384,11 @@ int main(int argc, char *argv[])
      * features.
      */
 #if !defined(DISABLE_MQTT)
+    /**
+    * init() is currently responsible for making sure only 1 instance of Device Client is running at a given time.
+    * In the future, we may want to move other Device Client startup logic into this function.
+    * returns false if an exception is thrown
+    */
     if (!init(argc, argv))
     {
         return 1;
