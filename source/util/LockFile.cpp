@@ -34,18 +34,22 @@ LockFile::LockFile(const std::string &filedir, const std::string &process, const
             ifstream cmd(processPath.c_str());
             if (cmd && cmd >> cmdline && cmdline.find(basename) != string::npos)
             {
-                LOGM_WARN(
+                LOGM_ERROR(
                     TAG,
                     "Pid %s associated with active process %s in lockfile: %s",
                     Sanitize(storedPid).c_str(),
                     Sanitize(process).c_str(),
                     Sanitize(fullPath).c_str());
+
+                throw runtime_error{"Device Client is already running."};
             }
         }
         // remove stale pid file
         if (remove(fullPath.c_str()))
         {
             LOGM_ERROR(TAG, "Unable to remove stale lockfile: %s", Sanitize(fullPath).c_str());
+
+            throw runtime_error{"Error removing stale lockfile."};
         }
     }
     fileIn.close();

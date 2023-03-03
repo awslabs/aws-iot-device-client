@@ -354,6 +354,10 @@ int main(int argc, char *argv[])
          * Establish MQTT connection using claim certificates and private key to provision the device/thing.
          */
 #    if !defined(DISABLE_MQTT)
+        if (!init(argc, argv))
+        {
+            return 1;
+        }
         attemptConnection();
 #    endif
 
@@ -384,6 +388,10 @@ int main(int argc, char *argv[])
      * features.
      */
 #if !defined(DISABLE_MQTT)
+    if (!init(argc, argv))
+    {
+        return 1;
+    }
     attemptConnection();
 #endif
 
