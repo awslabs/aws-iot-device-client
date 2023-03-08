@@ -155,7 +155,7 @@ cmake --build . --target test-aws-iot-device-client
 ### Static Analysis
 * [Sonarcloud](https://sonarcloud.io) code analysis results are viewable at: https://sonarcloud.io/project/overview?id=awslabs_aws-iot-device-client
 * [Cppcheck](https://cppcheck.sourceforge.io/) is a lightweight, open-source tool that has been configured to run on against every commit. To run the analysis manually: `./static-checks/run-cppcheck.sh`
-* [Coverity](https://scan.coverity.com) checks our main branch against the rules from the MISRA coding standard.
+* [Coverity](https://scan.coverity.com) checks our main branch against rules from the MISRA coding standard.
 
 
 ### AWS Documentation
