@@ -1772,7 +1772,7 @@ bool PlainConfig::SampleShadow::LoadFromCliArgs(const CliArgs &cliArgs)
     }
 
     // setting `shadowOutputFile` value to default if no value was passed by user via CLI or JSON config.
-    if ((!shadowOutputFile.has_value() || shadowOutputFile->empty()) && !createShadowOutputFile())
+    if (enabled && (!shadowOutputFile.has_value() || shadowOutputFile->empty()) && !createShadowOutputFile())
     {
         return false;
     }
