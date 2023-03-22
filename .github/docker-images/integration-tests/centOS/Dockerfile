@@ -2,7 +2,16 @@ ARG OS
 ARG PRE_RELEASE_IMAGE
 FROM  ${OS} AS build_integration_tests
 
-RUN yum update -y && yum install -y libcurl-devel openssl-devel libuuid-devel cmake3 make gcc gcc-c++ git
+RUN yum update -y && yum install -y glibc-devel openssl11-devel libuuid-devel cmake3 make gcc gcc-c++ git zlib-devel libtool autoconf automake
+
+RUN wget https://github.com/curl/curl/archive/refs/tags/curl-8_0_1.tar.gz \
+    && tar xzvf curl-8_0_1.tar.gz \
+    && cd curl-curl-8_0_1 \
+    && autoreconf -fi \
+    && ./configure --with-ssl --with-libssl-prefix=/usr/local/ssl \
+    && make \
+    && make install \
+    && cp /usr/local/bin/curl /usr/bin/curl
 
 COPY ./integration-tests /root/integration-tests
 RUN mkdir -p /root/integration-tests/build \
