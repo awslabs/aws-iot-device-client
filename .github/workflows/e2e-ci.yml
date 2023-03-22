@@ -337,7 +337,7 @@ jobs:
         id: build-test-runner
         uses: docker/build-push-action@v3
         with:
-          file: .github/docker-images/integration-tests/centOS/Dockerfile
+          file: .github/docker-images/integration-tests/amazonlinux/Dockerfile
           context: .
           build-args: |
             OS=amazonlinux:latest
@@ -385,7 +385,7 @@ jobs:
         id: build-test-runner
         uses: docker/build-push-action@v3
         with:
-          file: .github/docker-images/integration-tests/centOS/Dockerfile
+          file: .github/docker-images/integration-tests/ubi8/Dockerfile
           context: .
           build-args: |
             OS=registry.access.redhat.com/ubi8/ubi
