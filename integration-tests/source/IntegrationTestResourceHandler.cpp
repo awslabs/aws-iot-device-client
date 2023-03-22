@@ -56,7 +56,7 @@ IntegrationTestResourceHandler::IntegrationTestResourceHandler(const ClientConfi
     : iotClient(IoTClient(clientConfig)), ioTSecureTunnelingClient(IoTSecureTunnelingClient(clientConfig))
 {
     targetArn = GetTargetArn(THING_NAME);
-    logger = make_unique<Aws::Utils::Logging::ConsoleLogSystem>(Aws::Utils::Logging::LogLevel::Info);
+    logger = std::unique_ptr<Aws::Utils::Logging::ConsoleLogSystem>(new Aws::Utils::Logging::ConsoleLogSystem(Aws::Utils::Logging::LogLevel::Info));
 }
 void IntegrationTestResourceHandler::CreateJob(const string &jobId, const string &jobDoc)
 {

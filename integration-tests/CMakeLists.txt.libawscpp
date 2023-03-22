@@ -4,7 +4,7 @@ include(ExternalProject)
 
 ExternalProject_Add(aws-sdk-cpp
     GIT_REPOSITORY    https://github.com/aws/aws-sdk-cpp.git
-    GIT_TAG           9de005a8452fb4bb88f686a6da5d9fa70cd01847
+    GIT_TAG           1.8.17
     LIST_SEPARATOR    "|"
     CMAKE_ARGS       -DBUILD_SHARED_LIBS=OFF
                      -DBUILD_ONLY=iot|iotsecuretunneling
