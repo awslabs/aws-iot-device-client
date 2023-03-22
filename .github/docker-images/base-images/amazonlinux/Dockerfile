@@ -23,9 +23,9 @@ RUN yum -y update \
 # Install pre-built CMake
 ###############################################################################
 WORKDIR /tmp
-RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3.10.0.tar.gz -o cmake-3.10.0.tar.gz \
-    && tar -zxvf cmake-3.10.0.tar.gz \
-    && cd cmake-3.10.0 \
+RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.13.0/cmake-3.13.0.tar.gz -o cmake-3.13.0.tar.gz \
+    && tar -zxvf cmake-3.13.0.tar.gz \
+    && cd cmake-3.13.0 \
     && ./bootstrap \
     && make -j 4 \
     && make install
