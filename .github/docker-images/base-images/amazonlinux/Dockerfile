@@ -11,7 +11,7 @@ RUN yum -y update \
     bzip2 \
     git \
     wget \
-    curl \
+    perl \
     sudo \
     make \
     gcc \
