@@ -340,7 +340,7 @@ jobs:
           file: .github/docker-images/integration-tests/centOS/Dockerfile
           context: .
           build-args: |
-            OS=amazonlinux:latest
+            OS=amazonlinux:2022.0.20221207.4
             PRE_RELEASE_IMAGE=public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:${{matrix.architecture}}-amazonlinux-${{ needs.versioning.outputs.version }}
             BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:${{matrix.architecture}}-amazonlinux-latest
           push: true
