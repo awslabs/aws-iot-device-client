@@ -170,7 +170,7 @@ jobs:
           file: .github/docker-images/Dockerfile
           context: .
           build-args: |
-            OS=amazonlinux:latest
+            OS=amazonlinux:2022.0.20221207.4
             BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:${{matrix.architecture}}-amazonlinux-latest
           push: true
           tags: |
