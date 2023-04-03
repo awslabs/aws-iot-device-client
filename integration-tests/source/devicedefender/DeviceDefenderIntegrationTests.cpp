@@ -5,6 +5,7 @@
 #include <aws/core/Aws.h>
 #include <aws/iot/IoTClient.h>
 #include <gtest/gtest.h>
+#include <thread>
 
 using namespace Aws;
 using namespace Aws::Auth;
