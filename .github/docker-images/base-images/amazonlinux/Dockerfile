@@ -17,6 +17,7 @@ RUN yum -y update \
     gcc \
     gcc-c++ \
     softhsm \
+    zlib-devel \
     && yum clean all \
     && rm -rf /var/cache/yum
 

@@ -16,6 +16,7 @@ RUN apt-get update -qq \
     wget \
     libc6-dbg \
     softhsm \
+    zlib1g-dev \
     && apt-get clean
 
 ###############################################################################
