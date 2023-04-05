@@ -122,7 +122,7 @@ class GlobalEnvironment : public ::testing::Environment
 {
   public:
     ~GlobalEnvironment() override {}
-
+    // cppcheck-suppress unusedFunction
     void SetUp() override
     {
         Aws::InitAPI(options);
