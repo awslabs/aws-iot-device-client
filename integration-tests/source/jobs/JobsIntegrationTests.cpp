@@ -45,7 +45,6 @@ static constexpr char RUN_COMMAND_PRINT_GREETING_JOB_DOC[] =
 
 class TestJobsFeature : public ::testing::Test
 {
-
 };
 
 TEST_F(TestJobsFeature, InstallPackages)

@@ -35,9 +35,8 @@ class TestSecureTunnelingFeature : public ::testing::Test
         {
             ClientConfiguration clientConfig;
             resourceHandler =
-                    unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
-            Aws::IoTSecureTunneling::Model::OpenTunnelResult openTunnelResult =
-                    resourceHandler->OpenTunnel(THING_NAME);
+                unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+            Aws::IoTSecureTunneling::Model::OpenTunnelResult openTunnelResult = resourceHandler->OpenTunnel(THING_NAME);
             tunnelId = openTunnelResult.GetTunnelId();
             sourceToken = openTunnelResult.GetSourceAccessToken();
 

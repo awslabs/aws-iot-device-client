@@ -35,10 +35,7 @@ class TestDeviceDefenderFeature : public ::testing::Test
 
         resourceHandler->CreateAndAttachSecurityProfile(securityProfileName, thingGroupName, metrics);
     }
-    void TearDown() override
-    {
-        resourceHandler->DeleteSecurityProfile(securityProfileName);
-    }
+    void TearDown() override { resourceHandler->DeleteSecurityProfile(securityProfileName); }
     string securityProfileName;
     string thingGroupName;
     vector<std::string> metrics{"aws:all-bytes-in", "aws:all-bytes-out", "aws:all-packets-in", "aws:all-packets-out"};

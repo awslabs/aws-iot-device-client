@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "IntegrationTestResourceHandler.h"
+#include <aws/core/Aws.h>
 #include <aws/iot/model/AddThingToThingGroupRequest.h>
 #include <aws/iot/model/AddThingToThingGroupResult.h>
 #include <aws/iot/model/AttachSecurityProfileRequest.h>
@@ -36,7 +37,6 @@
 #include <aws/iotsecuretunneling/model/DescribeTunnelRequest.h>
 #include <aws/iotsecuretunneling/model/DescribeTunnelResult.h>
 #include <aws/iotsecuretunneling/model/OpenTunnelRequest.h>
-#include <aws/core/Aws.h>
 #include <thread>
 
 using namespace std;
@@ -507,5 +507,3 @@ void IntegrationTestResourceHandler::Log(
 
     logger->LogStream(logLevel, TAG, ss);
 }
-
-

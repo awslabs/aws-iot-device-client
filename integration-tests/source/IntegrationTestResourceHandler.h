@@ -4,6 +4,7 @@
 #include <list>
 #include <string>
 
+#include <aws/core/Aws.h>
 #include <aws/core/utils/ARN.h>
 #include <aws/core/utils/logging/ConsoleLogSystem.h>
 #include <aws/iot/IoTClient.h>
@@ -12,7 +13,6 @@
 #include <aws/iotsecuretunneling/model/ConnectionStatus.h>
 #include <aws/iotsecuretunneling/model/OpenTunnelResult.h>
 #include <gtest/gtest.h>
-#include <aws/core/Aws.h>
 
 class IntegrationTestResourceHandler
 {

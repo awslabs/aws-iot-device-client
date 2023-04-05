@@ -130,7 +130,7 @@ class GlobalEnvironment : public ::testing::Environment
             Aws::Client::ClientConfiguration clientConfig;
             clientConfig.region = REGION;
             resourceHandler =
-                    std::shared_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+                std::shared_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
         }
     }
 
