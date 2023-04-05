@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "../IntegrationTestResourceHandler.h"
-#include <aws/core/Aws.h>
 #include <aws/iot/model/ListThingsInThingGroupRequest.h>
 #include <aws/iotsecuretunneling/IoTSecureTunnelingClient.h>
 #include <aws/iotsecuretunneling/model/ConnectionStatus.h>
@@ -23,6 +22,7 @@ extern string PORT;
 extern string REGION;
 extern bool SKIP_ST;
 extern string LOCAL_PROXY_PATH;
+extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 
 const string TEST_TUNNEL_PATH = "/test-tunnel.sh";
 
@@ -33,36 +33,32 @@ class TestSecureTunnelingFeature : public ::testing::Test
     {
         if (!SKIP_ST)
         {
-
-            Aws::InitAPI(options);
-            {
-                ClientConfiguration clientConfig;
-                resourceHandler =
+            ClientConfiguration clientConfig;
+            resourceHandler =
                     unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
-                Aws::IoTSecureTunneling::Model::OpenTunnelResult openTunnelResult =
+            Aws::IoTSecureTunneling::Model::OpenTunnelResult openTunnelResult =
                     resourceHandler->OpenTunnel(THING_NAME);
-                tunnelId = openTunnelResult.GetTunnelId();
-                sourceToken = openTunnelResult.GetSourceAccessToken();
+            tunnelId = openTunnelResult.GetTunnelId();
+            sourceToken = openTunnelResult.GetSourceAccessToken();
 
-                // cppcheck-suppress leakReturnValNotUsed
-                std::unique_ptr<const char *[]> argv(new const char *[8]);
-                argv[0] = LOCAL_PROXY_PATH.c_str();
-                argv[1] = "-s";
-                argv[2] = PORT.c_str();
-                argv[3] = "-r";
-                argv[4] = REGION.c_str();
-                argv[5] = "-t";
-                argv[6] = sourceToken.c_str();
-                argv[7] = nullptr;
+            // cppcheck-suppress leakReturnValNotUsed
+            std::unique_ptr<const char *[]> argv(new const char *[8]);
+            argv[0] = LOCAL_PROXY_PATH.c_str();
+            argv[1] = "-s";
+            argv[2] = PORT.c_str();
+            argv[3] = "-r";
+            argv[4] = REGION.c_str();
+            argv[5] = "-t";
+            argv[6] = sourceToken.c_str();
+            argv[7] = nullptr;
 
-                PID = fork();
-                if (PID == 0)
+            PID = fork();
+            if (PID == 0)
+            {
+                printf("Started Child Process to run Local Proxy\n");
+                if (execvp(LOCAL_PROXY_PATH.c_str(), const_cast<char *const *>(argv.get())) == -1)
                 {
-                    printf("Started Child Process to run Local Proxy\n");
-                    if (execvp(LOCAL_PROXY_PATH.c_str(), const_cast<char *const *>(argv.get())) == -1)
-                    {
-                        printf("Failed to initialize Local Proxy.\n");
-                    }
+                    printf("Failed to initialize Local Proxy.\n");
                 }
             }
         }
@@ -78,14 +74,7 @@ class TestSecureTunnelingFeature : public ::testing::Test
         {
             _exit(0);
         }
-        if (!SKIP_ST)
-        {
-            resourceHandler->CleanUp();
-            Aws::ShutdownAPI(options);
-        }
     }
-    SDKOptions options;
-    unique_ptr<IntegrationTestResourceHandler> resourceHandler;
     string tunnelId;
     string sourceToken;
     int PID;

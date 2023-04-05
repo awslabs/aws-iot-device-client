@@ -12,6 +12,7 @@
 #include <aws/iotsecuretunneling/model/ConnectionStatus.h>
 #include <aws/iotsecuretunneling/model/OpenTunnelResult.h>
 #include <gtest/gtest.h>
+#include <aws/core/Aws.h>
 
 class IntegrationTestResourceHandler
 {
@@ -85,4 +86,5 @@ class IntegrationTestResourceHandler
 
     std::string targetArn;
     std::unique_ptr<Aws::Utils::Logging::ConsoleLogSystem> logger;
+    Aws::SDKOptions options;
 };

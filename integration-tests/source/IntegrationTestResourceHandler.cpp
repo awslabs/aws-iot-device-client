@@ -36,7 +36,7 @@
 #include <aws/iotsecuretunneling/model/DescribeTunnelRequest.h>
 #include <aws/iotsecuretunneling/model/DescribeTunnelResult.h>
 #include <aws/iotsecuretunneling/model/OpenTunnelRequest.h>
-
+#include <aws/core/Aws.h>
 #include <thread>
 
 using namespace std;
@@ -59,6 +59,7 @@ IntegrationTestResourceHandler::IntegrationTestResourceHandler(const ClientConfi
     logger = unique_ptr<Aws::Utils::Logging::ConsoleLogSystem>(
         new Aws::Utils::Logging::ConsoleLogSystem(Aws::Utils::Logging::LogLevel::Info));
 }
+
 void IntegrationTestResourceHandler::CreateJob(const string &jobId, const string &jobDoc)
 {
     CreateJobRequest request;
@@ -506,3 +507,5 @@ void IntegrationTestResourceHandler::Log(
 
     logger->LogStream(logLevel, TAG, ss);
 }
+
+
