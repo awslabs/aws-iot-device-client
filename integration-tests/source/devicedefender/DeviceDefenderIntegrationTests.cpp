@@ -24,7 +24,6 @@ static const int INTERVAL = 30;
 class TestDeviceDefenderFeature : public ::testing::Test
 {
   public:
-    // cppcheck-suppress unusedFunction
     void SetUp() override
     {
         securityProfileName = "Integration-Test-Security-Profile-" + resourceHandler->GetTimeStamp();
