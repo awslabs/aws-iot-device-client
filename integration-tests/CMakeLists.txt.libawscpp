@@ -8,6 +8,7 @@ ExternalProject_Add(aws-sdk-cpp
     LIST_SEPARATOR    "|"
     CMAKE_ARGS       -DBUILD_SHARED_LIBS=OFF
                      -DBUILD_ONLY=iot|iotsecuretunneling
+                     -DOPENSSL_USE_STATIC_LIBS:BOOLEAN=TRUE
                      -DENABLE_TESTING=OFF
     TEST_COMMAND      ""
 )
