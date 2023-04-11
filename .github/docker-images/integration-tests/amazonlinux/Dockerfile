@@ -10,9 +10,8 @@ RUN yum -y update && yum -y install \
         zlib-devel \
         zlib-static
 
-WORKDIR /tmp
-RUN mkdir /curl && git clone https://github.com/curl/curl.git curl --branch curl-8_0_1 \
-        && cd curl \
+RUN mkdir /curl && git clone https://github.com/curl/curl.git /curl --branch curl-8_0_1 \
+        && cd /curl \
         && autoreconf -fi \
         && ./configure --disable-shared --enable-static --with-openssl=/usr/local --with-zlib=/usr/lib64 \
         && make \
