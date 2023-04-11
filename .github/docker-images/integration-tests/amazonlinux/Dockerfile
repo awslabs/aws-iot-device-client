@@ -1,0 +1,49 @@
+ARG BASE_IMAGE
+ARG PRE_RELEASE_IMAGE
+FROM  ${BASE_IMAGE} AS build_integration_tests
+
+RUN yum -y update && yum -y install \
+        autoconf \
+        libtool \
+        perl \
+        softhsm \
+        zlib-devel \
+        zlib-static
+
+WORKDIR /tmp
+RUN mkdir /curl && git clone https://github.com/curl/curl.git curl --branch curl-8_0_1 \
+        && cd curl \
+        && autoreconf -fi \
+        && ./configure --disable-shared --enable-static --with-openssl=/usr/local --with-zlib=/usr/lib64 \
+        && make \
+        && make install
+
+COPY ./integration-tests /root/integration-tests
+RUN mkdir -p /root/integration-tests/build \
+    && cd /root/integration-tests/build \
+    && cmake .. \
+    && cmake --build . --target aws-iot-device-client-integration-tests
+
+# Actual docker image
+FROM ${PRE_RELEASE_IMAGE} AS runner
+
+# Install openssl for libssl dependency.
+RUN yum update -y && yum install -y libatomic libcurl-devel openssl-devel libuuid-devel wget && \
+    rm -rf /var/cache/yum && \
+    yum clean all
+
+
+COPY --from=build_integration_tests /root/integration-tests/build/aws-iot-device-client-integration-tests /aws-iot-device-client-integration-tests
+COPY --from=build_integration_tests /root/integration-tests/entry-point.sh /entry-point.sh
+
+COPY ./.github/docker-images/oss-compliance /root/oss-compliance
+RUN HOME_DIR=/root \
+    && chmod +x ${HOME_DIR}/oss-compliance/generate-oss-compliance.sh \
+    && chmod +x ${HOME_DIR}/oss-compliance/test/test-oss-compliance.sh \
+    && bash ${HOME_DIR}/oss-compliance/generate-oss-compliance.sh ${HOME_DIR} \
+    && rm -rf ${HOME_DIR}/oss-compliance*
+
+RUN chmod a+x /entry-point.sh
+RUN chmod 700 /root/.aws-iot-device-client/jobs/*.sh
+
+ENTRYPOINT ["/entry-point.sh"]

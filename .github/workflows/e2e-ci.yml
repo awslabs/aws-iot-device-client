@@ -309,7 +309,7 @@ jobs:
         run: |
           docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-amazonlinux:
-    # The amazonlinux integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in centOS integration test image
+    # The amazonlinux integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     # versioning output is needed for the image tag
@@ -337,7 +337,7 @@ jobs:
         id: build-test-runner
         uses: docker/build-push-action@v3
         with:
-          file: .github/docker-images/integration-tests/centOS/Dockerfile
+          file: .github/docker-images/integration-tests/amazonlinux/Dockerfile
           context: .
           build-args: |
             PRE_RELEASE_IMAGE=public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:${{matrix.architecture}}-amazonlinux-${{ needs.versioning.outputs.version }}
@@ -356,7 +356,7 @@ jobs:
         run: |
           docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --skip-st --clean-up
   e2e-tests-ubi8:
-    # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in centOS integration test image
+    # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     # versioning output is needed for the image tag
@@ -384,7 +384,7 @@ jobs:
         id: build-test-runner
         uses: docker/build-push-action@v3
         with:
-          file: .github/docker-images/integration-tests/centOS/Dockerfile
+          file: .github/docker-images/integration-tests/ubi8/Dockerfile
           context: .
           build-args: |
             OS=registry.access.redhat.com/ubi8/ubi
