@@ -74,7 +74,7 @@ WORKDIR /home/aws-iot-securetunneling-localproxy/
 
 FROM ${BASE_IMAGE} AS build_integration_tests
 
-RUN apt-get update && apt-get install -y libcurl4-openssl-dev libssl-dev uuid-dev zlib1g-dev libpulse-dev
+RUN #apt-get update && apt-get install -y libcurl4-openssl-dev libssl-dev uuid-dev zlib1g-dev libpulse-dev
 
 COPY ./integration-tests /root/integration-tests
 RUN mkdir -p /root/integration-tests/build \

@@ -4,11 +4,14 @@ include(ExternalProject)
 
 ExternalProject_Add(aws-sdk-cpp
     GIT_REPOSITORY    https://github.com/aws/aws-sdk-cpp.git
-    GIT_TAG           1.10.57
+    GIT_TAG           1.11.56
     LIST_SEPARATOR    "|"
     CMAKE_ARGS       -DBUILD_SHARED_LIBS=OFF
                      -DBUILD_ONLY=iot|iotsecuretunneling
-                     -DOPENSSL_USE_STATIC_LIBS:BOOLEAN=TRUE
                      -DENABLE_TESTING=OFF
+                     -DFORCE_SHARED_CRT=OFF
+                     -DUSE_CRT_HTTP_CLIENT=ON
+                     -DOPENSSL_USE_STATIC_LIBS:BOOLEAN=TRUE
+                     -DZLIB_USE_STATIC_LIBS=ON
     TEST_COMMAND      ""
 )

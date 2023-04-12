@@ -2,7 +2,7 @@ ARG BASE_IMAGE
 ARG PRE_RELEASE_IMAGE
 FROM  ${BASE_IMAGE} AS build_integration_tests
 
-RUN yum update -y && yum install -y libcurl-devel openssl-devel libuuid-devel make gcc gcc-c++ git zlib-devel
+RUN #yum update -y && yum install -y libcurl-devel openssl-devel libuuid-devel make gcc gcc-c++ git zlib-devel
 
 COPY ./integration-tests /root/integration-tests
 RUN mkdir -p /root/integration-tests/build \
