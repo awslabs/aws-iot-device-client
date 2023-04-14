@@ -33,7 +33,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubuntu-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
       - name: Archive ubuntu Build Artifact
@@ -73,7 +73,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-amazonlinux-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-amazonlinux-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
       - name: Archive amazonlinux Build Artifact
@@ -113,7 +113,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubi8-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubi8-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
       - name: Archive rhel-ubi8 Build Artifact
@@ -156,7 +156,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubuntu-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compiler=g++-${{ matrix.version }}
 
@@ -183,7 +183,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubuntu-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compiler=clang-${{ matrix.version }}
 
@@ -207,7 +207,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubuntu-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=armhf_cross_mode
       - name: Archive armhf32 Build Artifact
@@ -247,7 +247,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubuntu-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=mips_cross_mode
       - name: Archive mips32 Build Artifact
@@ -287,7 +287,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubuntu-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=aarch64_cross_mode
       - name: Archive aarch64 Build Artifact
@@ -327,7 +327,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubuntu-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=ppc64_cross_mode
       - name: Archive aarch64 Build Artifact
@@ -367,7 +367,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubuntu-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=ppc64le_cross_mode
       - name: Archive aarch64 Build Artifact
@@ -387,7 +387,7 @@ jobs:
           path: |
             ./setup/
 
-  build-st-ubuntu-18-amd64:
+  build-st-ubuntu-18-x_86_64:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
@@ -407,7 +407,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubuntu-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_component_mode
       - name: Archive ST Ubuntu aarch64 Build Artifact
@@ -419,7 +419,7 @@ jobs:
           path: |
             ./build/${{ env.PACKAGE_NAME }}
 
-  build-st-ubuntu-18-arm64:
+  build-st-ubuntu-18-aarch64:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
@@ -439,7 +439,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubuntu-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_aarch64_cross_mode
       - name: Archive ST Ubuntu aarch64 Build Artifact
@@ -471,7 +471,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubuntu-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_armhf_cross_mode
       - name: Archive st armhf32 Build Artifact

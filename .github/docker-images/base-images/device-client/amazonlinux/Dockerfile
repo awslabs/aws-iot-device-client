@@ -1,4 +1,4 @@
-FROM amazonlinux:2022.0.20221207.4 as base
+FROM amazonlinux:2.0.20230307.0 as base
 
 ARG OPENSSL_VERSION=1.1.1n
 
@@ -21,16 +21,6 @@ RUN yum -y update \
     && yum clean all \
     && rm -rf /var/cache/yum
 
-# Install pre-built CMake
-###############################################################################
-WORKDIR /tmp
-RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3.10.0.tar.gz -o cmake-3.10.0.tar.gz \
-    && tar -zxvf cmake-3.10.0.tar.gz \
-    && cd cmake-3.10.0 \
-    && ./bootstrap \
-    && make -j 4 \
-    && make install
-
 ###############################################################################
 # Install OpenSSL 1.1.1
 ###############################################################################
@@ -41,6 +31,16 @@ RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
     && ./config \
     && make \
     && sudo make install
+
+# Install pre-built CMake
+###############################################################################
+WORKDIR /tmp
+RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.24.4/cmake-3.24.4.tar.gz -o cmake-3.24.4.tar.gz \
+        && tar -zxvf cmake-3.24.4.tar.gz \
+        && cd cmake-3.24.4 \
+        && ./bootstrap \
+        && make -j 4 \
+        && make install
 
 ###############################################################################
 # Clone and build Google Test

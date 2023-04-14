@@ -5,6 +5,7 @@
 #include <aws/core/Aws.h>
 #include <aws/iot/IoTClient.h>
 #include <gtest/gtest.h>
+#include <thread>
 
 using namespace Aws;
 using namespace Aws::Auth;
@@ -15,6 +16,7 @@ using namespace std;
 
 extern std::string THING_NAME;
 extern std::string REGION;
+extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 
 static const int WAIT_TIME = 1300;
 static const int INTERVAL = 30;
@@ -22,34 +24,17 @@ static const int INTERVAL = 30;
 class TestDeviceDefenderFeature : public ::testing::Test
 {
   public:
-    // cppcheck-suppress unusedFunction
     void SetUp() override
     {
-        SDKOptions options;
-        Aws::InitAPI(options);
-        {
-            ClientConfiguration clientConfig;
-            clientConfig.region = REGION;
-            resourceHandler =
-                unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+        securityProfileName = "Integration-Test-Security-Profile-" + resourceHandler->GetTimeStamp();
+        thingGroupName = "group-" + THING_NAME;
 
-            securityProfileName = "Integration-Test-Security-Profile-" + resourceHandler->GetTimeStamp();
-            thingGroupName = "group-" + THING_NAME;
+        resourceHandler->CreateThingGroup(thingGroupName);
+        resourceHandler->AddThingToThingGroup(thingGroupName, THING_NAME);
 
-            resourceHandler->CreateThingGroup(thingGroupName);
-            resourceHandler->AddThingToThingGroup(thingGroupName, THING_NAME);
-
-            resourceHandler->CreateAndAttachSecurityProfile(securityProfileName, thingGroupName, metrics);
-        }
+        resourceHandler->CreateAndAttachSecurityProfile(securityProfileName, thingGroupName, metrics);
     }
-    void TearDown() override
-    {
-        resourceHandler->DeleteSecurityProfile(securityProfileName);
-        resourceHandler->CleanUp();
-        SDKOptions options;
-        Aws::ShutdownAPI(options);
-    }
-    unique_ptr<IntegrationTestResourceHandler> resourceHandler;
+    void TearDown() override { resourceHandler->DeleteSecurityProfile(securityProfileName); }
     string securityProfileName;
     string thingGroupName;
     vector<std::string> metrics{"aws:all-bytes-in", "aws:all-bytes-out", "aws:all-packets-in", "aws:all-packets-out"};

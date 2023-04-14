@@ -22,6 +22,7 @@ static constexpr char CLI_CLEAN_UP[] = "--clean-up";
 static constexpr char CLI_SKIP_ST[] = "--skip-st";
 static constexpr char CLI_HELP[] = "--help";
 
+std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 std::string THING_NAME;
 std::string REGION = "us-east-1";
 std::string PORT = "5555";
@@ -121,25 +122,28 @@ class GlobalEnvironment : public ::testing::Environment
 {
   public:
     ~GlobalEnvironment() override {}
+    // cppcheck-suppress unusedFunction
+    void SetUp() override
+    {
+        Aws::InitAPI(options);
+        {
+            Aws::Client::ClientConfiguration clientConfig;
+            clientConfig.region = REGION;
+            resourceHandler =
+                std::shared_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+        }
+    }
 
     // cppcheck-suppress unusedFunction
     void TearDown() override
     {
+        resourceHandler->CleanUp();
         if (CLEAN_UP)
         {
-            Aws::InitAPI(options);
-            {
-                Aws::Client::ClientConfiguration clientConfig;
-                clientConfig.region = REGION;
-                resourceHandler =
-                    std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
-                resourceHandler->CleanUpThingAndCert(THING_NAME);
-            }
-            Aws::ShutdownAPI(options);
+            resourceHandler->CleanUpThingAndCert(THING_NAME);
         }
     }
     Aws::SDKOptions options;
-    std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
 };
 
 int main(int argc, char **argv)

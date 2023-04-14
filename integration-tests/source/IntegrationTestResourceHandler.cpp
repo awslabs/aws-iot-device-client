@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "IntegrationTestResourceHandler.h"
+#include <aws/core/Aws.h>
 #include <aws/iot/model/AddThingToThingGroupRequest.h>
 #include <aws/iot/model/AddThingToThingGroupResult.h>
 #include <aws/iot/model/AttachSecurityProfileRequest.h>
@@ -36,7 +37,6 @@
 #include <aws/iotsecuretunneling/model/DescribeTunnelRequest.h>
 #include <aws/iotsecuretunneling/model/DescribeTunnelResult.h>
 #include <aws/iotsecuretunneling/model/OpenTunnelRequest.h>
-
 #include <thread>
 
 using namespace std;
@@ -56,8 +56,10 @@ IntegrationTestResourceHandler::IntegrationTestResourceHandler(const ClientConfi
     : iotClient(IoTClient(clientConfig)), ioTSecureTunnelingClient(IoTSecureTunnelingClient(clientConfig))
 {
     targetArn = GetTargetArn(THING_NAME);
-    logger = make_unique<Aws::Utils::Logging::ConsoleLogSystem>(Aws::Utils::Logging::LogLevel::Info);
+    logger = unique_ptr<Aws::Utils::Logging::ConsoleLogSystem>(
+        new Aws::Utils::Logging::ConsoleLogSystem(Aws::Utils::Logging::LogLevel::Info));
 }
+
 void IntegrationTestResourceHandler::CreateJob(const string &jobId, const string &jobDoc)
 {
     CreateJobRequest request;
