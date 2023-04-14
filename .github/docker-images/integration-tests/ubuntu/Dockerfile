@@ -1,79 +1,159 @@
-#ARG OS
+ARG OS
 ARG BASE_IMAGE
-#ARG PRE_RELEASE_IMAGE
-#FROM ${OS} AS build_localproxy
-#
-## Install Prerequisites
-#
-#RUN apt update && apt upgrade -y && \
-#	apt install -y git libboost-all-dev autoconf automake \
-#	wget libtool curl make g++ unzip cmake libssl-dev
-#
-## Install Dependencies
-#
-#RUN mkdir /home/dependencies
-#WORKDIR /home/dependencies
-#
-#RUN wget https://www.zlib.net/zlib-1.2.13.tar.gz -O /tmp/zlib-1.2.13.tar.gz && \
-#	tar xzvf /tmp/zlib-1.2.13.tar.gz && \
-#	cd zlib-1.2.13 && \
-#	./configure && \
-#	make && \
-#	make install && \
-#	cd /home/dependencies
-#
-#RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.gz -O /tmp/boost.tar.gz && \
-#	tar xzvf /tmp/boost.tar.gz && \
-#	cd boost_1_79_0 && \
-#	./bootstrap.sh && \
-#	./b2 install link=static && \
-#	cd /home/dependencies
-#
-#RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protobuf-all-3.17.3.tar.gz -O /tmp/protobuf-all-3.17.3.tar.gz && \
-#	tar xzvf /tmp/protobuf-all-3.17.3.tar.gz && \
-#	cd protobuf-3.17.3 && \
-#	mkdir build && \
-#	cd build && \
-#	cmake ../cmake && \
-#	make && \
-#	make install && \
-#	cd /home/dependencies
-#
-#RUN git clone https://github.com/openssl/openssl.git && \
-#	cd openssl && \
-#	git checkout OpenSSL_1_1_1-stable && \
-#	./config && \
-#	make depend && \
-#	make all && \
-#	cd /home/dependencies
-#
-#RUN git clone --branch v2.13.6 https://github.com/catchorg/Catch2.git && \
-#	cd Catch2 && \
-#	mkdir build && \
-#	cd build && \
-#	cmake ../ && \
-#	make && \
-#	make install && \
-#	cd /home/dependencies
-#
-#RUN git clone https://github.com/aws-samples/aws-iot-securetunneling-localproxy && \
-#	cd aws-iot-securetunneling-localproxy && \
-#	mkdir build && \
-#	cd build && \
-#	cmake ../ && \
-#	make
-#
-#RUN mkdir -p /home/aws-iot-securetunneling-localproxy && \
-#	cd /home/aws-iot-securetunneling-localproxy && \
-#	cp /home/dependencies/aws-iot-securetunneling-localproxy/build/bin/* /home/aws-iot-securetunneling-localproxy/
-#
-#RUN rm -rf /home/dependencies
-#
-#WORKDIR /home/aws-iot-securetunneling-localproxy/
+ARG PRE_RELEASE_IMAGE
+FROM ${OS} AS build_localproxy
+
+# Install Prerequisites
+
+RUN apt update && apt upgrade -y && \
+	apt install -y git libboost-all-dev autoconf automake \
+	wget libtool curl make g++ unzip cmake libssl-dev
+
+# Install Dependencies
+
+RUN mkdir /home/dependencies
+WORKDIR /home/dependencies
+
+RUN wget https://www.zlib.net/zlib-1.2.13.tar.gz -O /tmp/zlib-1.2.13.tar.gz && \
+	tar xzvf /tmp/zlib-1.2.13.tar.gz && \
+	cd zlib-1.2.13 && \
+	./configure && \
+	make && \
+	make install && \
+	cd /home/dependencies
+
+RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.gz -O /tmp/boost.tar.gz && \
+	tar xzvf /tmp/boost.tar.gz && \
+	cd boost_1_79_0 && \
+	./bootstrap.sh && \
+	./b2 install link=static && \
+	cd /home/dependencies
+
+RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protobuf-all-3.17.3.tar.gz -O /tmp/protobuf-all-3.17.3.tar.gz && \
+	tar xzvf /tmp/protobuf-all-3.17.3.tar.gz && \
+	cd protobuf-3.17.3 && \
+	mkdir build && \
+	cd build && \
+	cmake ../cmake && \
+	make && \
+	make install && \
+	cd /home/dependencies
+
+RUN git clone https://github.com/openssl/openssl.git && \
+	cd openssl && \
+	git checkout OpenSSL_1_1_1-stable && \
+	./config && \
+	make depend && \
+	make all && \
+	cd /home/dependencies
+
+RUN git clone --branch v2.13.6 https://github.com/catchorg/Catch2.git && \
+	cd Catch2 && \
+	mkdir build && \
+	cd build && \
+	cmake ../ && \
+	make && \
+	make install && \
+	cd /home/dependencies
+
+RUN git clone https://github.com/aws-samples/aws-iot-securetunneling-localproxy && \
+	cd aws-iot-securetunneling-localproxy && \
+	mkdir build && \
+	cd build && \
+	cmake ../ && \
+	make
+
+RUN mkdir -p /home/aws-iot-securetunneling-localproxy && \
+	cd /home/aws-iot-securetunneling-localproxy && \
+	cp /home/dependencies/aws-iot-securetunneling-localproxy/build/bin/* /home/aws-iot-securetunneling-localproxy/
+
+RUN rm -rf /home/dependencies
+
+WORKDIR /home/aws-iot-securetunneling-localproxy/
 
 FROM ${BASE_IMAGE} AS build_integration_tests
 
 RUN apt-get update && apt-get install -y uuid-dev zlib1g-dev libpulse-dev
+
+COPY ./integration-tests /root/integration-tests
+RUN mkdir -p /root/integration-tests/build \
+    && cd /root/integration-tests/build \
+    && cmake .. \
+    && cmake --build . --target aws-iot-device-client-integration-tests
+
+ARG PRE_RELEASE_IMAGE
+FROM ${OS} AS build_localproxy
+
+# Install Prerequisites
+
+RUN apt update && apt upgrade -y && \
+	apt install -y git libboost-all-dev autoconf automake \
+	wget libtool curl make g++ unzip cmake libssl-dev
+
+# Install Dependencies
+
+RUN mkdir /home/dependencies
+WORKDIR /home/dependencies
+
+RUN wget https://www.zlib.net/zlib-1.2.13.tar.gz -O /tmp/zlib-1.2.13.tar.gz && \
+	tar xzvf /tmp/zlib-1.2.13.tar.gz && \
+	cd zlib-1.2.13 && \
+	./configure && \
+	make && \
+	make install && \
+	cd /home/dependencies
+
+RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.gz -O /tmp/boost.tar.gz && \
+	tar xzvf /tmp/boost.tar.gz && \
+	cd boost_1_79_0 && \
+	./bootstrap.sh && \
+	./b2 install link=static && \
+	cd /home/dependencies
+
+RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protobuf-all-3.17.3.tar.gz -O /tmp/protobuf-all-3.17.3.tar.gz && \
+	tar xzvf /tmp/protobuf-all-3.17.3.tar.gz && \
+	cd protobuf-3.17.3 && \
+	mkdir build && \
+	cd build && \
+	cmake ../cmake && \
+	make && \
+	make install && \
+	cd /home/dependencies
+
+RUN git clone https://github.com/openssl/openssl.git && \
+	cd openssl && \
+	git checkout OpenSSL_1_1_1-stable && \
+	./config && \
+	make depend && \
+	make all && \
+	cd /home/dependencies
+
+RUN git clone --branch v2.13.6 https://github.com/catchorg/Catch2.git && \
+	cd Catch2 && \
+	mkdir build && \
+	cd build && \
+	cmake ../ && \
+	make && \
+	make install && \
+	cd /home/dependencies
+
+RUN git clone https://github.com/aws-samples/aws-iot-securetunneling-localproxy && \
+	cd aws-iot-securetunneling-localproxy && \
+    git checkout 851de4cc2b48861b835327d005000c7d0c81d11b && \
+	mkdir build && \
+	cd build && \
+	cmake ../ && \
+	make
+
+RUN mkdir -p /home/aws-iot-securetunneling-localproxy && \
+	cd /home/aws-iot-securetunneling-localproxy && \
+	cp /home/dependencies/aws-iot-securetunneling-localproxy/build/bin/* /home/aws-iot-securetunneling-localproxy/
+
+RUN rm -rf /home/dependencies
+
+WORKDIR /home/aws-iot-securetunneling-localproxy/
+
+FROM ${BASE_IMAGE} AS build_integration_tests
 
 COPY ./integration-tests /root/integration-tests
 RUN mkdir -p /root/integration-tests/build \

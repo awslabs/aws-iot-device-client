@@ -4,6 +4,7 @@
 #include <list>
 #include <string>
 
+#include <aws/core/Aws.h>
 #include <aws/core/utils/ARN.h>
 #include <aws/core/utils/logging/ConsoleLogSystem.h>
 #include <aws/iot/IoTClient.h>
@@ -85,4 +86,5 @@ class IntegrationTestResourceHandler
 
     std::string targetArn;
     std::unique_ptr<Aws::Utils::Logging::ConsoleLogSystem> logger;
+    Aws::SDKOptions options;
 };
