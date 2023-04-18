@@ -56,7 +56,7 @@ jobs:
         run: |
           version=$(docker run ${{ steps.build-device-client.outputs.imageid }} --version)
           echo "::set-output name=version::$version"
-  build-docker-image-ubuntu-86_64:
+  build-docker-image-ubuntu-x86_64:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     # versioning output is needed for the image tag
@@ -330,7 +330,7 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     # versioning output is needed for the image tag
-    needs: [ versioning, build-docker-image-ubuntu ]
+    needs: [ versioning, build-docker-image-ubuntu-x86_64 ]
     strategy:
       fail-fast: false
     steps:
@@ -376,7 +376,7 @@ jobs:
     if: ${{ false }} # Disabled for now. aarch64 local proxy build takes too long
 #    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     # versioning output is needed for the image tag
-    needs: [ versioning, build-docker-image-ubuntu ]
+    needs: [ versioning, build-docker-image-ubuntu-aarch64 ]
     strategy:
       fail-fast: false
     steps:
