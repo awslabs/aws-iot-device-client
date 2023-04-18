@@ -1,3 +1,4 @@
+ARG OS
 ARG BASE_IMAGE
 ARG PRE_RELEASE_IMAGE
 FROM ${OS} AS build_localproxy
