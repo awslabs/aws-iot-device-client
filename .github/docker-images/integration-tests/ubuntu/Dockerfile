@@ -1,4 +1,3 @@
-ARG OS
 ARG BASE_IMAGE
 ARG PRE_RELEASE_IMAGE
 FROM ${OS} AS build_localproxy
@@ -74,7 +73,7 @@ WORKDIR /home/aws-iot-securetunneling-localproxy/
 
 FROM ${BASE_IMAGE} AS build_integration_tests
 
-RUN #apt-get update && apt-get install -y libcurl4-openssl-dev libssl-dev uuid-dev zlib1g-dev libpulse-dev
+RUN apt-get update && apt-get install -y uuid-dev zlib1g-dev libpulse-dev
 
 COPY ./integration-tests /root/integration-tests
 RUN mkdir -p /root/integration-tests/build \
@@ -83,7 +82,7 @@ RUN mkdir -p /root/integration-tests/build \
     && cmake --build . --target aws-iot-device-client-integration-tests
 
 # Actual docker image
-FROM ${PRE_RELEASE_IMAGE} AS runner
+FROM ${BASE_IMAGE} AS runner
 RUN apt-get update && apt-get install -y libcurl4-openssl-dev libssl-dev uuid-dev zlib1g-dev libpulse-dev wget ssh ca-certificates wget apt-utils
 
 RUN mkdir -p /home/aws-iot-securetunneling-localproxy/certs && \

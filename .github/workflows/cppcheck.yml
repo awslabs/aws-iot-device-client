@@ -29,6 +29,6 @@ jobs:
         uses: actions/checkout@v1
       - name: cppcheck script
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:amd64-amazonlinux-latest
+          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-amazonlinux-latest
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/src --workdir /src --entrypoint /src/static-checks/run-cppcheck.sh $DOCKER_IMAGE

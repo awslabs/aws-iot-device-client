@@ -1,22 +1,36 @@
-FROM ubuntu:18.04 AS base
-
-ENV DEBIAN_FRONTEND=noninteractive
+#Using this Registry so that authentication is not necessary
+#https://access.redhat.com/RegistryAuthentication
+FROM registry.access.redhat.com/ubi8/ubi AS base
 
 ARG OPENSSL_VERSION=1.1.1n
 
 ###############################################################################
 # Install prereqs
 ###############################################################################
-RUN apt-get update -qq \
-    && apt-get -y install \
+RUN yum -y update \
+    && yum -y install \
+    tar \
+    bzip2 \
     git \
-    clang-format \
-    curl \
-    build-essential \
     wget \
-    libc6-dbg \
-    softhsm \
-    && apt-get clean
+    curl \
+    sudo \
+    make \
+    gcc \
+    gcc-c++ \
+    && yum clean all \
+    && rm -rf /var/cache/yum
+
+###############################################################################
+# Install pre-built CMake
+###############################################################################
+WORKDIR /tmp
+RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3.10.0.tar.gz -o cmake-3.10.0.tar.gz \
+    && tar -zxvf cmake-3.10.0.tar.gz \
+    && cd cmake-3.10.0 \
+    && ./bootstrap \
+    && make \
+    && make install
 
 ###############################################################################
 # Install OpenSSL 1.1.1
@@ -27,38 +41,39 @@ RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
     && cd openssl-${OPENSSL_VERSION} \
     && ./config \
     && make \
-    && make install \
-    && ldconfig
+    && make install
 
 ###############################################################################
-# Install pre-built CMake
+# Install softhsm v2.3.0 from source
 ###############################################################################
+
 WORKDIR /tmp
-RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3.10.0.tar.gz -o cmake-3.10.0.tar.gz \
-    && tar -zxvf cmake-3.10.0.tar.gz \
-    && cd cmake-3.10.0 \
-    && ./bootstrap \
-    && make -j 2 \
+RUN wget https://dist.opendnssec.org/source/softhsm-2.3.0.tar.gz \
+    && tar -xzf softhsm-2.3.0.tar.gz \
+    && cd softhsm-2.3.0 \
+    && ./configure --disable-gost \
+    && make \
     && make install
 
 ###############################################################################
 # Clone and build Google Test
 ###############################################################################
 WORKDIR /tmp
-RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://github.com/google/googletest/archive/release-1.10.0.tar.gz \
-    && tar xf release-1.10.0.tar.gz \
-    && cd googletest-release-1.10.0 \
+RUN curl -sSL https://github.com/google/googletest/archive/release-1.11.0.tar.gz -o release-1.11.0.tar.gz \
+    && tar xf release-1.11.0.tar.gz \
+    && cd googletest-release-1.11.0 \
     && cmake -DBUILD_SHARED_LIBS=ON . \
     && make \
     && cp -a googletest/include/gtest /usr/include/ \
     && cp -a googlemock/include/gmock /usr/include/ \
-    && cp -a lib/* /usr/lib/
+    && cp -a lib/* /usr/lib64/ \
+    && rm -f /tmp/release-1.11.0.tar.gz
 
 ###############################################################################
 # Clone and build valgrind
 ###############################################################################
 WORKDIR /tmp
-RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://sourceware.org/pub/valgrind/valgrind-3.19.0.tar.bz2 \
+RUN wget https://sourceware.org/pub/valgrind/valgrind-3.19.0.tar.bz2 \
     && tar jxvf valgrind-3.19.0.tar.bz2 \
     && cd valgrind-3.19.0 \
     && ./configure \
@@ -69,7 +84,7 @@ RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://sourceware.
 # Install cppcheck
 ###############################################################################
 WORKDIR /tmp
-RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://github.com/danmar/cppcheck/archive/2.9.tar.gz \
+RUN wget https://github.com/danmar/cppcheck/archive/2.9.tar.gz \
     && tar zxvf 2.9.tar.gz \
     && cd cppcheck-2.9 \
     && mkdir build \
@@ -77,9 +92,9 @@ RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://github.com/
     && cmake .. \
     && make install
 
-###############################################################################
+################################################################################
 # Install Aws Iot Device Sdk Cpp v2
-###############################################################################
+################################################################################
 WORKDIR /home/aws-iot-device-client
 RUN mkdir sdk-cpp-workspace \
     && cd sdk-cpp-workspace \
