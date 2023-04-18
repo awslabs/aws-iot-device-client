@@ -88,11 +88,11 @@ jobs:
           context: .
           build-args: |
             OS=ubuntu:18.04
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:x86-64-ubuntu-latest
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:x86_64-ubuntu-latest
           push: true
           tags: |
-            public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:x86-64-ubuntu-${{ needs.versioning.outputs.version }}
-            public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:x86-64-ubuntu-latest
+            public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:x86_64-ubuntu-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:x86_64-ubuntu-latest
           platforms: linux/amd64
   build-docker-image-ubuntu-aarch64:
     runs-on: ubuntu-latest
