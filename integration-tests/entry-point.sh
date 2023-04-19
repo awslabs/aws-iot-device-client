@@ -114,3 +114,7 @@ tail -f ${SDK_LOG_FILE} 2>&1 &
 
 # Run integration tests
 ./aws-iot-device-client-integration-tests $@
+
+DC_PID=$(pidof aws-iot-device-client)
+
+kill $DC_PID
