@@ -142,6 +142,7 @@ class GlobalEnvironment : public ::testing::Environment
         {
             resourceHandler->CleanUpThingAndCert(THING_NAME);
         }
+        Aws::ShutdownAPI(options);
     }
     Aws::SDKOptions options;
 };
