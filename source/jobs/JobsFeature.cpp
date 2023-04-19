@@ -348,9 +348,8 @@ void JobsFeature::updateJobExecutionStatusRejectedHandler(Iotjobs::RejectedError
     UpdateJobExecutionResponseType responseCode = NON_RETRYABLE_ERROR;
     Iotjobs::RejectedErrorCode rejectedErrorCode = rejectedError->Code.value();
 
-    if (rejectedErrorCode != Iotjobs::RejectedErrorCode::RequestThrottled &&
-        rejectedErrorCode != Iotjobs::RejectedErrorCode::ResourceNotFound &&
-        rejectedErrorCode != Iotjobs::RejectedErrorCode::InternalError)
+    if (rejectedErrorCode == Iotjobs::RejectedErrorCode::RequestThrottled ||
+        rejectedErrorCode == Iotjobs::RejectedErrorCode::InternalError)
     {
         responseCode = RETRYABLE_ERROR;
     }
