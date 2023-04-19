@@ -198,7 +198,6 @@ void IntegrationTestResourceHandler::CleanUp()
 {
     for (const string &job : jobsToCleanUp)
     {
-        Log(Logging::LogLevel::INFO, "Cleaning up Job", job);
         DeleteJob(job);
         this_thread::sleep_for(chrono::milliseconds(200));
     }
@@ -208,7 +207,6 @@ void IntegrationTestResourceHandler::CleanUp()
     }
     for (const string &thingGroup : thingGroupsToCleanup)
     {
-        Log(Logging::LogLevel::INFO, "Cleaning up Thing Group", thingGroup);
         DeleteThingGroup(thingGroup);
     }
 }
