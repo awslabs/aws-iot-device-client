@@ -536,7 +536,7 @@ jobs:
           context: .
           build-args: |
             PRE_RELEASE_IMAGE=public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:aarch64-amazonlinux-${{ needs.versioning.outputs.version }}
-            BASE_IMAGE=public.ecr.aws/${{ env.ECR_INTEG_BASE_REPO }}:x86_64-amazonlinux-latest
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_INTEG_BASE_REPO }}:aarch64-amazonlinux-latest
           push: true
           tags: |
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-amazonlinux-${{ needs.versioning.outputs.version }}
