@@ -13,6 +13,6 @@ ExternalProject_Add(aws-sdk-cpp
                      -DUSE_CRT_HTTP_CLIENT=ON
                      -DOPENSSL_USE_STATIC_LIBS:BOOLEAN=TRUE
                      -DZLIB_USE_STATIC_LIBS=ON
-                     -DCMAKE_BUILD_TYPE=DEBUG
+                     -DCMAKE_BUILD_TYPE=Debug
     TEST_COMMAND      ""
 )
