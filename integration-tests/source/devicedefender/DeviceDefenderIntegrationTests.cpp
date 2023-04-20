@@ -26,6 +26,17 @@ class TestDeviceDefenderFeature : public ::testing::Test
   public:
     void SetUp() override
     {
+        options.ioOptions.clientBootstrap_create_fn = []{
+            Aws::Crt::Io::EventLoopGroup eventLoopGroup( 1 );
+            Aws::Crt::Io::DefaultHostResolver defaultHostResolver(eventLoopGroup, 8, 30);
+            return Aws::MakeShared<Aws::Crt::Io::ClientBootstrap>("Aws_Init_Cleanup", eventLoopGroup, defaultHostResolver);
+        };
+        Aws::InitAPI(options);
+
+        Aws::Client::ClientConfiguration clientConfig;
+        clientConfig.region = REGION;
+        resourceHandler = std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+
         securityProfileName = "Integration-Test-Security-Profile-" + resourceHandler->GetTimeStamp();
         thingGroupName = "group-" + THING_NAME;
 
@@ -35,6 +46,8 @@ class TestDeviceDefenderFeature : public ::testing::Test
         resourceHandler->CreateAndAttachSecurityProfile(securityProfileName, thingGroupName, metrics);
     }
     void TearDown() override { resourceHandler->DeleteSecurityProfile(securityProfileName); }
+    std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
+    Aws::SDKOptions options;
     string securityProfileName;
     string thingGroupName;
     vector<std::string> metrics{"aws:all-bytes-in", "aws:all-bytes-out", "aws:all-packets-in", "aws:all-packets-out"};

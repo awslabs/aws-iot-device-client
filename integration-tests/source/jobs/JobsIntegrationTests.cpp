@@ -45,6 +45,22 @@ static constexpr char RUN_COMMAND_PRINT_GREETING_JOB_DOC[] =
 
 class TestJobsFeature : public ::testing::Test
 {
+public:
+    TestJobsFeature() {
+        options.ioOptions.clientBootstrap_create_fn = []{
+            Aws::Crt::Io::EventLoopGroup eventLoopGroup( 1 );
+            Aws::Crt::Io::DefaultHostResolver defaultHostResolver(eventLoopGroup, 8, 30);
+            return Aws::MakeShared<Aws::Crt::Io::ClientBootstrap>("Aws_Init_Cleanup", eventLoopGroup, defaultHostResolver);
+        };
+        Aws::InitAPI(options);
+
+        Aws::Client::ClientConfiguration clientConfig;
+        clientConfig.region = REGION;
+        resourceHandler = std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+    }
+    ~TestJobsFeature() {}
+    Aws::SDKOptions options;
+    std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
 };
 
 TEST_F(TestJobsFeature, InstallPackages)

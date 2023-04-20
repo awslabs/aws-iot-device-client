@@ -33,9 +33,17 @@ class TestSecureTunnelingFeature : public ::testing::Test
     {
         if (!SKIP_ST)
         {
-            ClientConfiguration clientConfig;
-            resourceHandler =
-                unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+            options.ioOptions.clientBootstrap_create_fn = []{
+                Aws::Crt::Io::EventLoopGroup eventLoopGroup( 1 );
+                Aws::Crt::Io::DefaultHostResolver defaultHostResolver(eventLoopGroup, 8, 30);
+                return Aws::MakeShared<Aws::Crt::Io::ClientBootstrap>("Aws_Init_Cleanup", eventLoopGroup, defaultHostResolver);
+            };
+            Aws::InitAPI(options);
+
+            Aws::Client::ClientConfiguration clientConfig;
+            clientConfig.region = REGION;
+            resourceHandler = std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+
             Aws::IoTSecureTunneling::Model::OpenTunnelResult openTunnelResult = resourceHandler->OpenTunnel(THING_NAME);
             tunnelId = openTunnelResult.GetTunnelId();
             sourceToken = openTunnelResult.GetSourceAccessToken();
@@ -74,6 +82,8 @@ class TestSecureTunnelingFeature : public ::testing::Test
             _exit(0);
         }
     }
+    std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
+    Aws::SDKOptions options;
     string tunnelId;
     string sourceToken;
     int PID;
