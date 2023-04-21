@@ -22,7 +22,6 @@ static constexpr char CLI_CLEAN_UP[] = "--clean-up";
 static constexpr char CLI_SKIP_ST[] = "--skip-st";
 static constexpr char CLI_HELP[] = "--help";
 
-
 std::string THING_NAME;
 std::string REGION = "us-east-1";
 std::string PORT = "5555";
@@ -156,12 +155,15 @@ int main(int argc, char **argv)
         rc = RUN_ALL_TESTS();
         Aws::Client::ClientConfiguration clientConfig;
         clientConfig.region = REGION;
-        auto resourceHandler = std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
-        if(CLEAN_UP) {
-            resourceHandler->CleanUpThingAndCert(THING_NAME);
-        } else
+        auto resourceHandler =
+            std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+        if (CLEAN_UP)
         {
-            //For local testing to validate API hasn't shutdown
+            resourceHandler->CleanUpThingAndCert(THING_NAME);
+        }
+        else
+        {
+            // For local testing to validate API hasn't shutdown
             resourceHandler->GetTargetArn(THING_NAME);
         }
         resourceHandler.reset();
