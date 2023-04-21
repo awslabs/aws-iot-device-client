@@ -22,7 +22,7 @@ static constexpr char CLI_CLEAN_UP[] = "--clean-up";
 static constexpr char CLI_SKIP_ST[] = "--skip-st";
 static constexpr char CLI_HELP[] = "--help";
 
-std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
+
 std::string THING_NAME;
 std::string REGION = "us-east-1";
 std::string PORT = "5555";
@@ -118,38 +118,6 @@ bool parseCliArgs(int argc, char **argv)
     }
     return true;
 }
-class GlobalEnvironment : public ::testing::Environment
-{
-  public:
-    ~GlobalEnvironment() override {}
-    // cppcheck-suppress unusedFunction
-    void SetUp() override {}
-
-    // cppcheck-suppress unusedFunction
-    void TearDown() override
-    {
-        options.ioOptions.clientBootstrap_create_fn = [] {
-            Aws::Crt::Io::EventLoopGroup eventLoopGroup(1);
-            Aws::Crt::Io::DefaultHostResolver defaultHostResolver(eventLoopGroup, 8, 30);
-            return Aws::MakeShared<Aws::Crt::Io::ClientBootstrap>(
-                "Aws_Init_Cleanup", eventLoopGroup, defaultHostResolver);
-        };
-
-        Aws::InitAPI(options);
-        {
-            Aws::Client::ClientConfiguration clientConfig;
-            clientConfig.region = REGION;
-            resourceHandler =
-                std::shared_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
-        }
-        resourceHandler->CleanUp();
-        if (CLEAN_UP)
-        {
-            resourceHandler->CleanUpThingAndCert(THING_NAME);
-        }
-    }
-    Aws::SDKOptions options;
-};
 
 int main(int argc, char **argv)
 {
@@ -180,6 +148,24 @@ int main(int argc, char **argv)
         printf("Unknown Exception while parsing test arguments");
     }
 
-    ::testing::AddGlobalTestEnvironment(new GlobalEnvironment());
-    return RUN_ALL_TESTS();
+    int rc = 1;
+
+    Aws::SDKOptions options;
+    Aws::InitAPI(options);
+    {
+        rc = RUN_ALL_TESTS();
+        Aws::Client::ClientConfiguration clientConfig;
+        clientConfig.region = REGION;
+        auto resourceHandler = std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+        if(CLEAN_UP) {
+            resourceHandler->CleanUpThingAndCert(THING_NAME);
+        } else
+        {
+            //For local testing to validate API hasn't shutdown
+            resourceHandler->GetTargetArn(THING_NAME);
+        }
+        resourceHandler.reset();
+    }
+    Aws::ShutdownAPI(options);
+    return rc;
 }

@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "../TestBase.h"
+#include "../IntegrationTestResourceHandler.h"
 #include <gtest/gtest.h>
 #include <thread>
 
@@ -19,12 +19,11 @@ extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 static const int WAIT_TIME = 1300;
 static const int INTERVAL = 30;
 
-class TestDeviceDefenderFeature : public TestBase
+class TestDeviceDefenderFeature : public testing::Test
 {
   public:
     void SetUp() override
     {
-        init();
 
         Aws::Client::ClientConfiguration clientConfig;
         clientConfig.region = REGION;
@@ -40,6 +39,7 @@ class TestDeviceDefenderFeature : public TestBase
         resourceHandler->CreateAndAttachSecurityProfile(securityProfileName, thingGroupName, metrics);
     }
     void TearDown() override { resourceHandler->DeleteSecurityProfile(securityProfileName); }
+    std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
     string securityProfileName;
     string thingGroupName;
     vector<std::string> metrics{"aws:all-bytes-in", "aws:all-bytes-out", "aws:all-packets-in", "aws:all-packets-out"};

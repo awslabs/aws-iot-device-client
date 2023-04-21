@@ -86,5 +86,4 @@ class IntegrationTestResourceHandler
 
     std::string targetArn;
     std::unique_ptr<Aws::Utils::Logging::ConsoleLogSystem> logger;
-    Aws::SDKOptions options;
 };

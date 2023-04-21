@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "../TestBase.h"
+#include "../IntegrationTestResourceHandler.h"
 #include <aws/iot/model/CreateJobRequest.h>
 #include <gtest/gtest.h>
 
@@ -41,18 +41,18 @@ static constexpr char RUN_COMMAND_PRINT_GREETING_JOB_DOC[] =
     "{ \"version\": \"1.0\", \"steps\": [ { \"action\": { \"name\": \"Print Greeting\", \"type\": "
     "\"runCommand\", \"input\": { \"command\": \"echo,Hello World\" }, \"runAsUser\": \"root\" } }]}";
 
-class TestJobsFeature : public TestBase
+class TestJobsFeature : public ::testing::Test
 {
   public:
     TestJobsFeature()
     {
-        init();
         Aws::Client::ClientConfiguration clientConfig;
         clientConfig.region = REGION;
         resourceHandler =
             std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
     }
     ~TestJobsFeature() {}
+    std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
 };
 
 TEST_F(TestJobsFeature, InstallPackages)

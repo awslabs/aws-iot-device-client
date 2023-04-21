@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "../TestBase.h"
+#include "../IntegrationTestResourceHandler.h"
 #include <aws/iot/model/ListThingsInThingGroupRequest.h>
 #include <aws/iotsecuretunneling/IoTSecureTunnelingClient.h>
 #include <aws/iotsecuretunneling/model/ConnectionStatus.h>
@@ -26,15 +26,13 @@ extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 
 const string TEST_TUNNEL_PATH = "/test-tunnel.sh";
 
-class TestSecureTunnelingFeature : public TestBase
+class TestSecureTunnelingFeature : public ::testing::Test
 {
   public:
     void SetUp() override
     {
         if (!SKIP_ST)
         {
-            init();
-
             Aws::Client::ClientConfiguration clientConfig;
             clientConfig.region = REGION;
             resourceHandler =
@@ -78,6 +76,7 @@ class TestSecureTunnelingFeature : public TestBase
             _exit(0);
         }
     }
+    std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
     string tunnelId;
     string sourceToken;
     int PID;
