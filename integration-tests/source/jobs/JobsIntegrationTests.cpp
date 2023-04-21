@@ -1,9 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "../IntegrationTestResourceHandler.h"
-#include <aws/core/Aws.h>
-#include <aws/iot/IoTClient.h>
+#include "../TestBase.h"
 #include <aws/iot/model/CreateJobRequest.h>
 #include <gtest/gtest.h>
 
@@ -43,24 +41,18 @@ static constexpr char RUN_COMMAND_PRINT_GREETING_JOB_DOC[] =
     "{ \"version\": \"1.0\", \"steps\": [ { \"action\": { \"name\": \"Print Greeting\", \"type\": "
     "\"runCommand\", \"input\": { \"command\": \"echo,Hello World\" }, \"runAsUser\": \"root\" } }]}";
 
-class TestJobsFeature : public ::testing::Test
+class TestJobsFeature : public TestBase
 {
-public:
-    TestJobsFeature() {
-        options.ioOptions.clientBootstrap_create_fn = []{
-            Aws::Crt::Io::EventLoopGroup eventLoopGroup( 1 );
-            Aws::Crt::Io::DefaultHostResolver defaultHostResolver(eventLoopGroup, 8, 30);
-            return Aws::MakeShared<Aws::Crt::Io::ClientBootstrap>("Aws_Init_Cleanup", eventLoopGroup, defaultHostResolver);
-        };
-        Aws::InitAPI(options);
-
+  public:
+    TestJobsFeature()
+    {
+        init();
         Aws::Client::ClientConfiguration clientConfig;
         clientConfig.region = REGION;
-        resourceHandler = std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+        resourceHandler =
+            std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
     }
     ~TestJobsFeature() {}
-    Aws::SDKOptions options;
-    std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
 };
 
 TEST_F(TestJobsFeature, InstallPackages)

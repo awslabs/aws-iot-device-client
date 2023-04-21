@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "../IntegrationTestResourceHandler.h"
+#include "../TestBase.h"
 #include <aws/iot/model/ListThingsInThingGroupRequest.h>
 #include <aws/iotsecuretunneling/IoTSecureTunnelingClient.h>
 #include <aws/iotsecuretunneling/model/ConnectionStatus.h>
@@ -26,23 +26,19 @@ extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 
 const string TEST_TUNNEL_PATH = "/test-tunnel.sh";
 
-class TestSecureTunnelingFeature : public ::testing::Test
+class TestSecureTunnelingFeature : public TestBase
 {
   public:
     void SetUp() override
     {
         if (!SKIP_ST)
         {
-            options.ioOptions.clientBootstrap_create_fn = []{
-                Aws::Crt::Io::EventLoopGroup eventLoopGroup( 1 );
-                Aws::Crt::Io::DefaultHostResolver defaultHostResolver(eventLoopGroup, 8, 30);
-                return Aws::MakeShared<Aws::Crt::Io::ClientBootstrap>("Aws_Init_Cleanup", eventLoopGroup, defaultHostResolver);
-            };
-            Aws::InitAPI(options);
+            init();
 
             Aws::Client::ClientConfiguration clientConfig;
             clientConfig.region = REGION;
-            resourceHandler = std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+            resourceHandler =
+                std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
 
             Aws::IoTSecureTunneling::Model::OpenTunnelResult openTunnelResult = resourceHandler->OpenTunnel(THING_NAME);
             tunnelId = openTunnelResult.GetTunnelId();
@@ -82,8 +78,6 @@ class TestSecureTunnelingFeature : public ::testing::Test
             _exit(0);
         }
     }
-    std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
-    Aws::SDKOptions options;
     string tunnelId;
     string sourceToken;
     int PID;

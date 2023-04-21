@@ -1,9 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "../IntegrationTestResourceHandler.h"
-#include <aws/core/Aws.h>
-#include <aws/iot/IoTClient.h>
+#include "../TestBase.h"
 #include <aws/iot/model/CreateJobRequest.h>
 #include <gtest/gtest.h>
 #include <thread>
@@ -24,7 +22,7 @@ extern std::string PORT;
 extern bool SKIP_FP;
 extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 
-class TestFleetProvisioningFeature : public ::testing::Test
+class TestFleetProvisioningFeature : public TestBase
 {
   public:
     void SetUp() override
@@ -33,19 +31,13 @@ class TestFleetProvisioningFeature : public ::testing::Test
         {
             GTEST_SKIP();
         }
-        options.ioOptions.clientBootstrap_create_fn = []{
-            Aws::Crt::Io::EventLoopGroup eventLoopGroup( 1 );
-            Aws::Crt::Io::DefaultHostResolver defaultHostResolver(eventLoopGroup, 8, 30);
-            return Aws::MakeShared<Aws::Crt::Io::ClientBootstrap>("Aws_Init_Cleanup", eventLoopGroup, defaultHostResolver);
-        };
-        Aws::InitAPI(options);
+        init();
 
         Aws::Client::ClientConfiguration clientConfig;
         clientConfig.region = REGION;
-        resourceHandler = std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+        resourceHandler =
+            std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
     }
-    std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
-    Aws::SDKOptions options;
 };
 
 TEST_F(TestFleetProvisioningFeature, HappyPath)

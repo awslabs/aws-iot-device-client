@@ -121,20 +121,18 @@ bool parseCliArgs(int argc, char **argv)
 class GlobalEnvironment : public ::testing::Environment
 {
   public:
-    ~GlobalEnvironment() override {
-    }
+    ~GlobalEnvironment() override {}
     // cppcheck-suppress unusedFunction
-    void SetUp() override
-    {
-    }
+    void SetUp() override {}
 
     // cppcheck-suppress unusedFunction
     void TearDown() override
     {
-        options.ioOptions.clientBootstrap_create_fn = []{
-            Aws::Crt::Io::EventLoopGroup eventLoopGroup( 1 );
+        options.ioOptions.clientBootstrap_create_fn = [] {
+            Aws::Crt::Io::EventLoopGroup eventLoopGroup(1);
             Aws::Crt::Io::DefaultHostResolver defaultHostResolver(eventLoopGroup, 8, 30);
-            return Aws::MakeShared<Aws::Crt::Io::ClientBootstrap>("Aws_Init_Cleanup", eventLoopGroup, defaultHostResolver);
+            return Aws::MakeShared<Aws::Crt::Io::ClientBootstrap>(
+                "Aws_Init_Cleanup", eventLoopGroup, defaultHostResolver);
         };
 
         Aws::InitAPI(options);
@@ -142,7 +140,7 @@ class GlobalEnvironment : public ::testing::Environment
             Aws::Client::ClientConfiguration clientConfig;
             clientConfig.region = REGION;
             resourceHandler =
-                    std::shared_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+                std::shared_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
         }
         resourceHandler->CleanUp();
         if (CLEAN_UP)
