@@ -248,84 +248,84 @@ jobs:
             public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:aarch64-amazonlinux-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:aarch64-amazonlinux-latest
           platforms: linux/arm64
-#  build-docker-image-ubi8-x86_64:
-#    runs-on: ubuntu-latest
-#    if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
-##    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
-#    # versioning output is needed for the image tag
-#    needs: [versioning]
-#    permissions:
-#      id-token: write
-#      contents: read
-#    steps:
-#      - name: Configure AWS Credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-#          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
-#          aws-region: us-east-1
-#      - name: Login to ECR
-#        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-#      - name: Checkout
-#        uses: actions/checkout@v2
-#        with:
-#          fetch-depth: 0
-#      - name: Set up QEMU
-#        uses: docker/setup-qemu-action@v2
-#      - name: Set up Docker Buildx
-#        uses: docker/setup-buildx-action@v2
-#      - name: Build Device Client Test Image
-#        uses: docker/build-push-action@v3
-#        with:
-#          file: .github/docker-images/Dockerfile
-#          context: .
-#          build-args: |
-#            OS=registry.access.redhat.com/ubi8/ubi
-#            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:x86_64-ubi8-latest
-#          push: true
-#          tags: |
-#            public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:x86_64-ubi8-${{ needs.versioning.outputs.version }}
-#            public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:x86_64-ubi8-latest
-#          platforms: linux/amd64
-#  build-docker-image-ubi8-aarch64:
-#    runs-on: ubuntu-latest
-#    if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
-##    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
-#    # versioning output is needed for the image tag
-#    needs: [versioning]
-#    permissions:
-#      id-token: write
-#      contents: read
-#    steps:
-#      - name: Configure AWS Credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-#          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
-#          aws-region: us-east-1
-#      - name: Login to ECR
-#        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-#      - name: Checkout
-#        uses: actions/checkout@v2
-#        with:
-#          fetch-depth: 0
-#      - name: Set up QEMU
-#        uses: docker/setup-qemu-action@v2
-#      - name: Set up Docker Buildx
-#        uses: docker/setup-buildx-action@v2
-#      - name: Build Device Client Test Image
-#        uses: docker/build-push-action@v3
-#        with:
-#          file: .github/docker-images/Dockerfile
-#          context: .
-#          build-args: |
-#            OS=registry.access.redhat.com/ubi8/ubi
-#            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:aarch64-ubi8-latest
-#          push: true
-#          tags: |
-#            public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:aarch64-ubi8-${{ needs.versioning.outputs.version }}
-#            public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:aarch64-ubi8-latest
-#          platforms: linux/arm64
+  build-docker-image-ubi8-x86_64:
+    runs-on: ubuntu-latest
+    if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
+#    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    # versioning output is needed for the image tag
+    needs: [versioning]
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build Device Client Test Image
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=registry.access.redhat.com/ubi8/ubi
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:x86_64-ubi8-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:x86_64-ubi8-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:x86_64-ubi8-latest
+          platforms: linux/amd64
+  build-docker-image-ubi8-aarch64:
+    runs-on: ubuntu-latest
+    if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
+#    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    # versioning output is needed for the image tag
+    needs: [versioning]
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build Device Client Test Image
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/Dockerfile
+          context: .
+          build-args: |
+            OS=registry.access.redhat.com/ubi8/ubi
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:aarch64-ubi8-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:aarch64-ubi8-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:aarch64-ubi8-latest
+          platforms: linux/arm64
   e2e-tests-ubuntu-x86_64:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
@@ -371,95 +371,95 @@ jobs:
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
           docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
-#  e2e-tests-ubuntu-aarch64:
-#    runs-on: ubuntu-latest
-#    if: ${{ false }} # Disabled for now. aarch64 local proxy build takes too long
-##    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
-#    # versioning output is needed for the image tag
-#    needs: [ versioning, build-docker-image-ubuntu-aarch64 ]
-#    strategy:
-#      fail-fast: false
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v2
-#        with:
-#          fetch-depth: 0
-#      - name: Configure AWS Credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-#          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
-#          aws-region: us-east-1
-#      - name: Login to ECR
-#        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-#      - name: Set up QEMU
-#        uses: docker/setup-qemu-action@v2
-#      - name: Build Integration Test Runner
-#        id: build-test-runner
-#        uses: docker/build-push-action@v3
-#        with:
-#          file: .github/docker-images/integration-tests/ubuntu/Dockerfile
-#          context: .
-#          build-args: |
-#            OS=ubuntu:18.04
-#            PRE_RELEASE_IMAGE=public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:aarch64-ubuntu-${{ needs.versioning.outputs.version }}
-#            BASE_IMAGE=public.ecr.aws/${{ env.ECR_INTEG_BASE_REPO }}:aarch64-ubuntu-latest
-#          push: true
-#          tags: |
-#            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubuntu-${{ needs.versioning.outputs.version }}
-#            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubuntu-latest
-#          platforms: linux/arm64
-#      - name: Run Tests
-#        env:
-#          IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
-#          CERTIFICATE: ${{ secrets.CLAIM_CERTIFICATE }}
-#          DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
-#          AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
-#        run: |
-#          docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
-#  e2e-tests-ubuntu-armv7:
-#    runs-on: ubuntu-latest
-#    if: ${{ false }} # Disabled for now as local proxy builds take too long. Re-enable if binary or image becomes available.
-#    # versioning output is needed for the image tag
-#    needs: [ versioning, build-docker-image-ubuntu-armv7 ]
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v2
-#        with:
-#          fetch-depth: 0
-#      - name: Configure AWS Credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-#          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
-#          aws-region: us-east-1
-#      - name: Login to ECR
-#        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-#      - name: Set up QEMU
-#        uses: docker/setup-qemu-action@v2
-#      - name: Build Integration Test Runner
-#        id: build-test-runner
-#        uses: docker/build-push-action@v3
-#        with:
-#          file: .github/docker-images/integration-tests/ubuntu/Dockerfile
-#          context: .
-#          build-args: |
-#            OS=ubuntu:18.04
-#            PRE_RELEASE_IMAGE=public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:armv7-ubuntu-${{ needs.versioning.outputs.version }}
-#            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:armv7-ubuntu-latest
-#          push: true
-#          tags: |
-#            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:armv7-ubuntu-${{ needs.versioning.outputs.version }}
-#            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:armv7-ubuntu-latest
-#          platforms: linux/arm/v7
-#      - name: Run Tests
-#        env:
-#          IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
-#          CERTIFICATE: ${{ secrets.CLAIM_CERTIFICATE }}
-#          DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
-#          AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
-#        run: |
-#          docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
+  e2e-tests-ubuntu-aarch64:
+    runs-on: ubuntu-latest
+    if: ${{ false }} # Disabled for now. aarch64 local proxy build takes too long
+#    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    # versioning output is needed for the image tag
+    needs: [ versioning, build-docker-image-ubuntu-aarch64 ]
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Build Integration Test Runner
+        id: build-test-runner
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/integration-tests/ubuntu/Dockerfile
+          context: .
+          build-args: |
+            OS=ubuntu:18.04
+            PRE_RELEASE_IMAGE=public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:aarch64-ubuntu-${{ needs.versioning.outputs.version }}
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_INTEG_BASE_REPO }}:aarch64-ubuntu-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubuntu-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubuntu-latest
+          platforms: linux/arm64
+      - name: Run Tests
+        env:
+          IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
+          CERTIFICATE: ${{ secrets.CLAIM_CERTIFICATE }}
+          DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
+          AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
+        run: |
+          docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
+  e2e-tests-ubuntu-armv7:
+    runs-on: ubuntu-latest
+    if: ${{ false }} # Disabled for now as local proxy builds take too long. Re-enable if binary or image becomes available.
+    # versioning output is needed for the image tag
+    needs: [ versioning, build-docker-image-ubuntu-armv7 ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Build Integration Test Runner
+        id: build-test-runner
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/integration-tests/ubuntu/Dockerfile
+          context: .
+          build-args: |
+            OS=ubuntu:18.04
+            PRE_RELEASE_IMAGE=public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:armv7-ubuntu-${{ needs.versioning.outputs.version }}
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:armv7-ubuntu-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:armv7-ubuntu-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:armv7-ubuntu-latest
+          platforms: linux/arm/v7
+      - name: Run Tests
+        env:
+          IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
+          CERTIFICATE: ${{ secrets.CLAIM_CERTIFICATE }}
+          DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
+          AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
+        run: |
+          docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-amazonlinux-x86_64:
     # The amazonlinux integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
     runs-on: ubuntu-latest
@@ -550,99 +550,99 @@ jobs:
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
           docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --skip-st --clean-up
-#  e2e-tests-ubi8-x86_64:
-#    # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
-#    runs-on: ubuntu-latest
-#    if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
-##    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
-#    # versioning output is needed for the image tag
-#    needs: [ versioning, build-docker-image-ubi8-x86_64 ]
-#    strategy:
-#      fail-fast: false
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v2
-#        with:
-#          fetch-depth: 0
-#      - name: Configure AWS Credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-#          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
-#          aws-region: us-east-1
-#      - name: Login to ECR
-#        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-#      - name: Set up QEMU
-#        uses: docker/setup-qemu-action@v2
-#      - name: Build Integration Test Runner
-#        id: build-test-runner
-#        uses: docker/build-push-action@v3
-#        with:
-#          file: .github/docker-images/integration-tests/ubi8/Dockerfile
-#          context: .
-#          build-args: |
-#            OS=registry.access.redhat.com/ubi8/ubi
-#            PRE_RELEASE_IMAGE=public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:x86_64-ubi8-${{ needs.versioning.outputs.version }}
-#            BASE_IMAGE=public.ecr.aws/${{ env.ECR_INTEG_BASE_REPO }}:x86_64-ubi8-latest
-#          push: true
-#          tags: |
-#            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-ubi8-${{ needs.versioning.outputs.version }}
-#            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-ubi8-latest
-#          platforms: linux/amd64
-#      - name: Run Tests
-#        env:
-#          IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
-#          CERTIFICATE: ${{ secrets.CLAIM_CERTIFICATE }}
-#          DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
-#          AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
-#        run: |
-#          docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --skip-st --clean-up
-#  e2e-tests-ubi8-aarch64:
-#    # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
-#    runs-on: ubuntu-latest
-#    if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
-#    #    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
-#    # versioning output is needed for the image tag
-#    needs: [ versioning, build-docker-image-ubi8-aarch64 ]
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        architecture: [x86_64, aarch64]
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v2
-#        with:
-#          fetch-depth: 0
-#      - name: Configure AWS Credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-#          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
-#          aws-region: us-east-1
-#      - name: Login to ECR
-#        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-#      - name: Set up QEMU
-#        uses: docker/setup-qemu-action@v2
-#      - name: Build Integration Test Runner
-#        id: build-test-runner
-#        uses: docker/build-push-action@v3
-#        with:
-#          file: .github/docker-images/integration-tests/ubi8/Dockerfile
-#          context: .
-#          build-args: |
-#            OS=registry.access.redhat.com/ubi8/ubi
-#            PRE_RELEASE_IMAGE=public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:aarch64-ubi8-${{ needs.versioning.outputs.version }}
-#            BASE_IMAGE=public.ecr.aws/${{ env.ECR_INTEG_BASE_REPO }}:aarch64-ubi8-latest
-#          push: true
-#          tags: |
-#            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubi8-${{ needs.versioning.outputs.version }}
-#            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubi8-latest
-#          platforms: linux/arm64
-#      - name: Run Tests
-#        env:
-#          IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
-#          CERTIFICATE: ${{ secrets.CLAIM_CERTIFICATE }}
-#          DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
-#          AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
-#        run: |
-#          docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --skip-st --clean-up
+  e2e-tests-ubi8-x86_64:
+    # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
+    runs-on: ubuntu-latest
+    if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
+#    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    # versioning output is needed for the image tag
+    needs: [ versioning, build-docker-image-ubi8-x86_64 ]
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Build Integration Test Runner
+        id: build-test-runner
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/integration-tests/ubi8/Dockerfile
+          context: .
+          build-args: |
+            OS=registry.access.redhat.com/ubi8/ubi
+            PRE_RELEASE_IMAGE=public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:x86_64-ubi8-${{ needs.versioning.outputs.version }}
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_INTEG_BASE_REPO }}:x86_64-ubi8-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-ubi8-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-ubi8-latest
+          platforms: linux/amd64
+      - name: Run Tests
+        env:
+          IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
+          CERTIFICATE: ${{ secrets.CLAIM_CERTIFICATE }}
+          DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
+          AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
+        run: |
+          docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --skip-st --clean-up
+  e2e-tests-ubi8-aarch64:
+    # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
+    runs-on: ubuntu-latest
+    if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
+    #    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    # versioning output is needed for the image tag
+    needs: [ versioning, build-docker-image-ubi8-aarch64 ]
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: [x86_64, aarch64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Build Integration Test Runner
+        id: build-test-runner
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/integration-tests/ubi8/Dockerfile
+          context: .
+          build-args: |
+            OS=registry.access.redhat.com/ubi8/ubi
+            PRE_RELEASE_IMAGE=public.ecr.aws/${{ env.ECR_PRE_RELEASE_REPO }}:aarch64-ubi8-${{ needs.versioning.outputs.version }}
+            BASE_IMAGE=public.ecr.aws/${{ env.ECR_INTEG_BASE_REPO }}:aarch64-ubi8-latest
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubi8-${{ needs.versioning.outputs.version }}
+            public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubi8-latest
+          platforms: linux/arm64
+      - name: Run Tests
+        env:
+          IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
+          CERTIFICATE: ${{ secrets.CLAIM_CERTIFICATE }}
+          DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
+          AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
+        run: |
+          docker run -e AWS_ACCESS_KEY_ID="$(echo ${{ secrets.INTEG_USER_KEY_ID }})" -e AWS_SECRET_ACCESS_KEY="$(echo ${{ secrets.INTEG_USER_KEY_SECRET }})" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --skip-st --clean-up
