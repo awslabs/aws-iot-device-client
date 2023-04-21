@@ -75,6 +75,7 @@ class TestSecureTunnelingFeature : public ::testing::Test
         {
             _exit(0);
         }
+        resourceHandler->CleanUp();
     }
     std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
     string tunnelId;

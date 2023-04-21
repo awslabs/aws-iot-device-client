@@ -44,14 +44,17 @@ static constexpr char RUN_COMMAND_PRINT_GREETING_JOB_DOC[] =
 class TestJobsFeature : public ::testing::Test
 {
   public:
-    TestJobsFeature()
+    void SetUp() override
     {
         Aws::Client::ClientConfiguration clientConfig;
         clientConfig.region = REGION;
         resourceHandler =
-            std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+                std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
     }
-    ~TestJobsFeature() {}
+    void TearDown() override
+    {
+        resourceHandler->CleanUp();
+    }
     std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
 };
 
