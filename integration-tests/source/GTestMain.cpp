@@ -12,7 +12,7 @@
 #include <wordexp.h>
 
 static constexpr char FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] =
-        "~/.aws-iot-device-client/aws-iot-device-client-runtime.conf";
+    "~/.aws-iot-device-client/aws-iot-device-client-runtime.conf";
 
 static constexpr char CLI_THING_NAME[] = "--thing-name";
 static constexpr char CLI_REGION[] = "--region";
@@ -56,7 +56,7 @@ std::string GetThingNameFromConfig()
     {
         std::string contents((std::istreambuf_iterator<char>(runtimeConfig)), std::istreambuf_iterator<char>());
         thingName =
-                Aws::Utils::Json::JsonValue(contents).View().GetObject("runtime-config").GetObject("thing-name").AsString();
+            Aws::Utils::Json::JsonValue(contents).View().GetObject("runtime-config").GetObject("thing-name").AsString();
         runtimeConfig.close();
     }
     return thingName;
@@ -71,8 +71,8 @@ void PrintHelp()
     printf("--localproxy        Path to local proxy binary for Secure Tunneling tests.\n");
     printf("--skip-st           Skip Secure Tunneling integration tests\n");
     printf(
-            "--clean-up          (Caution) Pass this flag kill to Device Client on the devices delete the provisioned IoT "
-            "Things designated by --thing-name.\n");
+        "--clean-up          (Caution) Pass this flag kill to Device Client on the devices delete the provisioned IoT "
+        "Things designated by --thing-name.\n");
     printf("--help              Print this message\n");
 }
 
@@ -120,7 +120,7 @@ bool parseCliArgs(int argc, char **argv)
 }
 class GlobalEnvironment : public ::testing::Environment
 {
-public:
+  public:
     ~GlobalEnvironment() override {}
 
     // cppcheck-suppress unusedFunction
@@ -129,7 +129,7 @@ public:
         Aws::Client::ClientConfiguration clientConfig;
         clientConfig.region = REGION;
         resourceHandler =
-                std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+            std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
     }
 
     // cppcheck-suppress unusedFunction

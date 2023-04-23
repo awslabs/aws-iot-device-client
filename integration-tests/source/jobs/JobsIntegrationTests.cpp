@@ -48,12 +48,9 @@ class TestJobsFeature : public ::testing::Test
         Aws::Client::ClientConfiguration clientConfig;
         clientConfig.region = REGION;
         resourceHandler =
-                std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+            std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
     }
-    void TearDown() override
-    {
-        resourceHandler->CleanUp();
-    }
+    void TearDown() override { resourceHandler->CleanUp(); }
     std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
 };
 

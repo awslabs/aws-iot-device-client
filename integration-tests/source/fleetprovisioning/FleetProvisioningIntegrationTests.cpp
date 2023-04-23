@@ -36,10 +36,7 @@ class TestFleetProvisioningFeature : public ::testing::Test
         resourceHandler =
             std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
     }
-    void TearDown() override
-    {
-        resourceHandler->CleanUp();
-    }
+    void TearDown() override { resourceHandler->CleanUp(); }
     std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
 };
 
