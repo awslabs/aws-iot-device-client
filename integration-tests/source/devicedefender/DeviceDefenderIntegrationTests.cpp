@@ -20,7 +20,6 @@ static const int INTERVAL = 30;
 class TestDeviceDefenderFeature : public testing::Test
 {
   public:
-    // cppcheck-suppress unusedFunction
     void SetUp() override
     {
 
@@ -37,7 +36,6 @@ class TestDeviceDefenderFeature : public testing::Test
 
         resourceHandler->CreateAndAttachSecurityProfile(securityProfileName, thingGroupName, metrics);
     }
-    // cppcheck-suppress unusedFunction
     void TearDown() override { resourceHandler->DeleteSecurityProfile(securityProfileName); }
     std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
     string securityProfileName;
