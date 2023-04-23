@@ -38,7 +38,7 @@ chmod 745 ${OUTPUT_DIR}
         \"level\":	\"DEBUG\",
         \"type\":	\"STDOUT\",
         \"enable-sdk-logging\": true,
-        \"sdk-log-level\": \"TRACE\",
+        \"sdk-log-level\": \"INFO\",
         \"sdk-log-file\": \"${SDK_LOG_FILE}\"
       },
       \"jobs\":	{

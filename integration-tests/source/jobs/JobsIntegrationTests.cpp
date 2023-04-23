@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "../IntegrationTestResourceHandler.h"
-#include <aws/core/Aws.h>
-#include <aws/iot/IoTClient.h>
 #include <aws/iot/model/CreateJobRequest.h>
 #include <gtest/gtest.h>
 
@@ -47,22 +45,13 @@ class TestJobsFeature : public ::testing::Test
   public:
     void SetUp() override
     {
-        SDKOptions options;
-        Aws::InitAPI(options);
-        {
-            ClientConfiguration clientConfig;
-            clientConfig.region = REGION;
-            resourceHandler =
-                unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
-        }
+        Aws::Client::ClientConfiguration clientConfig;
+        clientConfig.region = REGION;
+        resourceHandler =
+            std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
     }
-    void TearDown() override
-    {
-        resourceHandler->CleanUp();
-        SDKOptions options;
-        Aws::ShutdownAPI(options);
-    }
-    unique_ptr<IntegrationTestResourceHandler> resourceHandler;
+    void TearDown() override { resourceHandler->CleanUp(); }
+    std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
 };
 
 TEST_F(TestJobsFeature, InstallPackages)

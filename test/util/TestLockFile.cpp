@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+#include "../../source/util/FileUtils.h"
 #include "../../source/util/LockFile.h"
 #include "gtest/gtest.h"
 
@@ -11,7 +12,12 @@
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Util;
 
-TEST(LockFile, normalCreation)
+class LockFileTestFixture : public ::testing::Test
+{
+    void SetUp() override { FileUtils::CreateDirectoryWithPermissions("/run/lock", 0700); }
+};
+
+TEST_F(LockFileTestFixture, normalCreation)
 {
     string path = "/run/lock/";
     string fileName = "devicecl.lock";
@@ -30,7 +36,7 @@ TEST(LockFile, normalCreation)
     }
 }
 
-TEST(LockFile, earlyDeletion)
+TEST_F(LockFileTestFixture, earlyDeletion)
 {
     string path = "/run/lock/";
     string fileName = "devicecl.lock";
@@ -42,7 +48,7 @@ TEST(LockFile, earlyDeletion)
     ASSERT_FALSE(fileIn);
 }
 
-TEST(LockFile, multipleFiles)
+TEST_F(LockFileTestFixture, multipleFiles)
 {
     string path = "/run/lock/";
     string thingName = "thing";
@@ -51,7 +57,7 @@ TEST(LockFile, multipleFiles)
     EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", thingName}), std::runtime_error);
 }
 
-TEST(LockFile, multipleFilesWithExtendedPath)
+TEST_F(LockFileTestFixture, multipleFilesWithExtendedPath)
 {
     string path = "/run/lock/";
     string thingName = "thing";
@@ -62,7 +68,7 @@ TEST(LockFile, multipleFilesWithExtendedPath)
         std::runtime_error);
 }
 
-TEST(LockFile, staleFile)
+TEST_F(LockFileTestFixture, staleFile)
 {
     string path = "/run/lock/";
     string fileName = "devicecl.lock";

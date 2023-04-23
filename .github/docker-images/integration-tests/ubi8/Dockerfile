@@ -1,14 +1,14 @@
-ARG OS
+ARG BASE_IMAGE
 ARG PRE_RELEASE_IMAGE
-FROM  ${OS} AS build_integration_tests
+FROM  ${BASE_IMAGE} AS build_integration_tests
 
-RUN yum update -y && yum install -y libcurl-devel openssl-devel libuuid-devel cmake3 make gcc gcc-c++ git
+RUN #yum update -y && yum install -y libcurl-devel openssl-devel libuuid-devel make gcc gcc-c++ git zlib-devel
 
 COPY ./integration-tests /root/integration-tests
 RUN mkdir -p /root/integration-tests/build \
     && cd /root/integration-tests/build \
-    && cmake3 .. \
-    && cmake3 --build . --target aws-iot-device-client-integration-tests
+    && cmake .. -DCMAKE_BUILD_TYPE=DEBUG \
+    && cmake --build . --target aws-iot-device-client-integration-tests
 
 # Actual docker image
 FROM ${PRE_RELEASE_IMAGE} AS runner
