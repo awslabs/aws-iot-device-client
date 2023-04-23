@@ -14,8 +14,6 @@ using namespace std;
 
 extern std::string THING_NAME;
 extern std::string REGION;
-extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
-
 static const int WAIT_TIME = 1300;
 static const int INTERVAL = 30;
 

@@ -22,7 +22,6 @@ extern string PORT;
 extern string REGION;
 extern bool SKIP_ST;
 extern string LOCAL_PROXY_PATH;
-extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 
 const string TEST_TUNNEL_PATH = "/test-tunnel.sh";
 

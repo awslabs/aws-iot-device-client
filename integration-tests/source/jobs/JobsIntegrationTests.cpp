@@ -14,7 +14,6 @@ using namespace std;
 
 extern std::string THING_NAME;
 extern std::string REGION;
-extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 
 static constexpr char DOWNLOAD_FILE_JOB_DOC[] =
     "{ \"version\": \"1.0\", \"steps\": [{ \"action\": { \"name\": \"Download File\", \"type\": \"runHandler\", "

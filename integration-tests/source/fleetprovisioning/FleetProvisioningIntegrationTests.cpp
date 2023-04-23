@@ -20,7 +20,6 @@ extern std::string THING_NAME;
 extern std::string REGION;
 extern std::string PORT;
 extern bool SKIP_FP;
-extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 
 class TestFleetProvisioningFeature : public ::testing::Test
 {
