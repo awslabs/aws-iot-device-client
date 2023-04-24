@@ -22,6 +22,7 @@ extern string PORT;
 extern string REGION;
 extern bool SKIP_ST;
 extern string LOCAL_PROXY_PATH;
+extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 
 const string TEST_TUNNEL_PATH = "/test-tunnel.sh";
 
@@ -32,10 +33,6 @@ class TestSecureTunnelingFeature : public ::testing::Test
     {
         if (!SKIP_ST)
         {
-            Aws::Client::ClientConfiguration clientConfig;
-            clientConfig.region = REGION;
-            resourceHandler =
-                std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
 
             Aws::IoTSecureTunneling::Model::OpenTunnelResult openTunnelResult = resourceHandler->OpenTunnel(THING_NAME);
             tunnelId = openTunnelResult.GetTunnelId();
@@ -76,7 +73,6 @@ class TestSecureTunnelingFeature : public ::testing::Test
         }
         resourceHandler->CleanUp();
     }
-    std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
     string tunnelId;
     string sourceToken;
     int PID;

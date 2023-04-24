@@ -20,6 +20,7 @@ extern std::string THING_NAME;
 extern std::string REGION;
 extern std::string PORT;
 extern bool SKIP_FP;
+extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 
 class TestFleetProvisioningFeature : public ::testing::Test
 {
@@ -30,14 +31,8 @@ class TestFleetProvisioningFeature : public ::testing::Test
         {
             GTEST_SKIP();
         }
-
-        Aws::Client::ClientConfiguration clientConfig;
-        clientConfig.region = REGION;
-        resourceHandler =
-            std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
     }
     void TearDown() override { resourceHandler->CleanUp(); }
-    std::unique_ptr<IntegrationTestResourceHandler> resourceHandler;
 };
 
 TEST_F(TestFleetProvisioningFeature, HappyPath)
