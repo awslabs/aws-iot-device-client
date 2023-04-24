@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 project(aws-iot-device-client-integration-tests)
 
+set(OPENSSL_USE_STATIC_LIBS TRUE)
+find_package(OpenSSL REQUIRED)
+
+set(ZLIB_USE_STATIC_LIBS ON)
+find_package(ZLIB REQUIRED)
+
 #########################################
 # AWS C++ SDK dependency                #
 #########################################
@@ -41,4 +47,4 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
         ${CMAKE_BINARY_DIR}/googletest-build)
 include_directories(${CMAKE_BINARY_DIR}/googletest-src/googletest/include/)
 add_executable(aws-iot-device-client-integration-tests source/GTestMain.cpp source/fleetprovisioning/FleetProvisioningIntegrationTests.cpp source/IntegrationTestResourceHandler.cpp source/jobs/JobsIntegrationTests.cpp source/devicedefender/DeviceDefenderIntegrationTests.cpp source/tunneling/SecureTunnelingIntegrationTests.cpp)
-target_link_libraries(aws-iot-device-client-integration-tests gtest ${AWSSDK_LINK_LIBRARIES})
+target_link_libraries(aws-iot-device-client-integration-tests gtest ${AWSSDK_LINK_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto ZLIB::ZLIB)

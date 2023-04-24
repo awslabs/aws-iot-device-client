@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "../IntegrationTestResourceHandler.h"
-#include <aws/core/Aws.h>
-#include <aws/iot/IoTClient.h>
 #include <aws/iot/model/CreateJobRequest.h>
 #include <gtest/gtest.h>
 
@@ -16,6 +14,7 @@ using namespace std;
 
 extern std::string THING_NAME;
 extern std::string REGION;
+extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 
 static constexpr char DOWNLOAD_FILE_JOB_DOC[] =
     "{ \"version\": \"1.0\", \"steps\": [{ \"action\": { \"name\": \"Download File\", \"type\": \"runHandler\", "
@@ -45,24 +44,8 @@ static constexpr char RUN_COMMAND_PRINT_GREETING_JOB_DOC[] =
 class TestJobsFeature : public ::testing::Test
 {
   public:
-    void SetUp() override
-    {
-        SDKOptions options;
-        Aws::InitAPI(options);
-        {
-            ClientConfiguration clientConfig;
-            clientConfig.region = REGION;
-            resourceHandler =
-                unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
-        }
-    }
-    void TearDown() override
-    {
-        resourceHandler->CleanUp();
-        SDKOptions options;
-        Aws::ShutdownAPI(options);
-    }
-    unique_ptr<IntegrationTestResourceHandler> resourceHandler;
+    void SetUp() override {}
+    void TearDown() override { resourceHandler->CleanUp(); }
 };
 
 TEST_F(TestJobsFeature, InstallPackages)

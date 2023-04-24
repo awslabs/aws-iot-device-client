@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "../IntegrationTestResourceHandler.h"
-#include <aws/core/Aws.h>
-#include <aws/iot/IoTClient.h>
 #include <aws/iot/model/CreateJobRequest.h>
 #include <gtest/gtest.h>
 #include <thread>
@@ -22,38 +20,19 @@ extern std::string THING_NAME;
 extern std::string REGION;
 extern std::string PORT;
 extern bool SKIP_FP;
+extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 
 class TestFleetProvisioningFeature : public ::testing::Test
 {
   public:
     void SetUp() override
     {
-        if (!SKIP_FP)
+        if (SKIP_FP)
         {
-            Aws::InitAPI(options);
-            {
-                ClientConfiguration clientConfig;
-                clientConfig.region = REGION;
-                resourceHandler =
-                    unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
-            }
-        }
-        else
-        {
-            printf("Skipping Fleet Provisioning Tests. \n");
             GTEST_SKIP();
         }
     }
-    void TearDown() override
-    {
-        if (!SKIP_FP)
-        {
-            resourceHandler->CleanUp();
-            Aws::ShutdownAPI(options);
-        }
-    }
-    SDKOptions options;
-    unique_ptr<IntegrationTestResourceHandler> resourceHandler;
+    void TearDown() override { resourceHandler->CleanUp(); }
 };
 
 TEST_F(TestFleetProvisioningFeature, HappyPath)

@@ -4,6 +4,7 @@
 #include <list>
 #include <string>
 
+#include <aws/core/Aws.h>
 #include <aws/core/utils/ARN.h>
 #include <aws/core/utils/logging/ConsoleLogSystem.h>
 #include <aws/iot/IoTClient.h>
