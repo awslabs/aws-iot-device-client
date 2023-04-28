@@ -28,7 +28,7 @@ sudo ./setup.sh
 After completing the prompts, check if the config file exists in the proper directory. 
 By default, this will be `~/.aws-iot-device-client/aws-iot-device-client.conf` or `/etc/.aws-iot-device-client/aws-iot-device-client.conf` if you set up Device Client as a service.
 
-*Note: The Jobs, Secure Tunneling, and Device Defender features are **enabled** by default, while the Fleet Provisioning feature is **disabled** by default. You can use the JSON config file and/or CLI options to enable/disable any of these features.*
+*Note: The Jobs and Secure Tunneling features are **enabled** by default, while all other Device Client features are **disabled** by default. You can use the JSON config file and/or CLI options to enable/disable any of these features.*
 
 You can use the following command to see all of the CLI options available for the Device Client
 
