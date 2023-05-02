@@ -276,9 +276,9 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
         thingName = cliArgs.at(PlainConfig::CLI_THING_NAME).c_str();
     }
 
-    bool loadFeatureCliArgs = tunneling.LoadFromCliArgs(cliArgs);
+    bool loadFeatureCliArgs = tunneling.LoadFromCliArgs(cliArgs) && logConfig.LoadFromCliArgs(cliArgs);
 #if !defined(DISABLE_MQTT)
-    loadFeatureCliArgs = loadFeatureCliArgs && logConfig.LoadFromCliArgs(cliArgs) && jobs.LoadFromCliArgs(cliArgs) &&
+    loadFeatureCliArgs = loadFeatureCliArgs && jobs.LoadFromCliArgs(cliArgs) &&
                          deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs) &&
                          pubSub.LoadFromCliArgs(cliArgs) && sampleShadow.LoadFromCliArgs(cliArgs) &&
                          configShadow.LoadFromCliArgs(cliArgs) && secureElement.LoadFromCliArgs(cliArgs) &&
@@ -320,11 +320,10 @@ bool PlainConfig::LoadFromEnvironment()
         lockFilePath = lockFilePathStr;
     }
 
-    bool loadFeatureEnvironmentVar = tunneling.LoadFromEnvironment();
+    bool loadFeatureEnvironmentVar = tunneling.LoadFromEnvironment() && logConfig.LoadFromEnvironment();
 #if !defined(DISABLE_MQTT)
-    loadFeatureEnvironmentVar = loadFeatureEnvironmentVar && logConfig.LoadFromEnvironment() &&
-                                jobs.LoadFromEnvironment() && deviceDefender.LoadFromEnvironment() &&
-                                fleetProvisioning.LoadFromEnvironment() &&
+    loadFeatureEnvironmentVar = loadFeatureEnvironmentVar && jobs.LoadFromEnvironment() &&
+                                deviceDefender.LoadFromEnvironment() && fleetProvisioning.LoadFromEnvironment() &&
                                 fleetProvisioningRuntimeConfig.LoadFromEnvironment() && pubSub.LoadFromEnvironment() &&
                                 sampleShadow.LoadFromEnvironment() && configShadow.LoadFromEnvironment();
 #endif
