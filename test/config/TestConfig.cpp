@@ -1097,6 +1097,8 @@ TEST_F(ConfigTestFixture, PubSubSampleCli)
     remove(samplesFilePath.c_str());
 }
 
+#if !defined(DISABLE_MQTT)
+// These tests are not applicable if MQTT is disabled.
 TEST_F(ConfigTestFixture, SampleShadowCli)
 {
     string inputFilePath = "/tmp/inputFile";
@@ -1133,16 +1135,14 @@ TEST_F(ConfigTestFixture, SampleShadowCli)
     config.LoadFromCliArgs(cliArgs);
 
     ASSERT_TRUE(config.Validate());
-#if !defined(DISABLE_MQTT)
-    // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
     ASSERT_TRUE(config.sampleShadow.enabled);
     ASSERT_STREQ("shadow-name", config.sampleShadow.shadowName->c_str());
     ASSERT_STREQ(inputFilePath.c_str(), config.sampleShadow.shadowInputFile->c_str());
     ASSERT_STREQ(outputFilePath.c_str(), config.sampleShadow.shadowOutputFile->c_str());
-#endif
     remove(inputFilePath.c_str());
     remove(outputFilePath.c_str());
 }
+#endif
 
 TEST_F(ConfigTestFixture, SensorPublishMinimumConfig)
 {
