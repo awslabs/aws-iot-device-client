@@ -990,11 +990,14 @@ TEST_F(ConfigTestFixture, FleetProvisioningCli)
     config.LoadFromCliArgs(cliArgs);
 
     ASSERT_TRUE(config.Validate());
+#if !defined(DISABLE_MQTT)
+    // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
     ASSERT_TRUE(config.fleetProvisioning.enabled);
     ASSERT_STREQ("cli-template-name", config.fleetProvisioning.templateName->c_str());
     ASSERT_STREQ("{\"SerialNumber\": \"Device-SN\"}", config.fleetProvisioning.templateParameters->c_str());
     ASSERT_STREQ(filePath.c_str(), config.fleetProvisioning.csrFile->c_str());
     ASSERT_STREQ(filePath.c_str(), config.fleetProvisioning.deviceKey->c_str());
+#endif
 }
 
 TEST_F(ConfigTestFixture, DeviceDefenderCli)
@@ -1083,11 +1086,14 @@ TEST_F(ConfigTestFixture, PubSubSampleCli)
     config.LoadFromCliArgs(cliArgs);
 
     ASSERT_TRUE(config.Validate());
+#if !defined(DISABLE_MQTT)
+    // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
     ASSERT_TRUE(config.pubSub.enabled);
     ASSERT_STREQ("publish_topic", config.pubSub.publishTopic->c_str());
     ASSERT_STREQ(samplesFilePath.c_str(), config.pubSub.publishFile->c_str());
     ASSERT_STREQ("subscribe_topic", config.pubSub.subscribeTopic->c_str());
     ASSERT_STREQ(samplesFilePath.c_str(), config.pubSub.subscribeFile->c_str());
+#endif
     remove(samplesFilePath.c_str());
 }
 
@@ -1127,10 +1133,13 @@ TEST_F(ConfigTestFixture, SampleShadowCli)
     config.LoadFromCliArgs(cliArgs);
 
     ASSERT_TRUE(config.Validate());
+#if !defined(DISABLE_MQTT)
+    // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
     ASSERT_TRUE(config.sampleShadow.enabled);
     ASSERT_STREQ("shadow-name", config.sampleShadow.shadowName->c_str());
     ASSERT_STREQ(inputFilePath.c_str(), config.sampleShadow.shadowInputFile->c_str());
     ASSERT_STREQ(outputFilePath.c_str(), config.sampleShadow.shadowOutputFile->c_str());
+#endif
     remove(inputFilePath.c_str());
     remove(outputFilePath.c_str());
 }
