@@ -393,7 +393,7 @@ bool PlainConfig::Validate() const
         return false;
     }
 #endif
-#if !defined(EXCLUDE_ST) || !defined(DISABLE_MQTT)
+#if !defined(EXCLUDE_ST)
     if (!tunneling.Validate())
     {
         return false;
@@ -2682,6 +2682,8 @@ bool Config::init(const CliArgs &cliArgs)
             return false;
         }
 
+#if !defined(DISABLE_MQTT)
+        // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
         if (ParseConfigFile(
                 Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, FLEET_PROVISIONING_RUNTIME_CONFIG) &&
             ValidateAndStoreRuntimeConfig())
@@ -2691,7 +2693,10 @@ bool Config::init(const CliArgs &cliArgs)
                 "Successfully fetched Runtime config file '%s' and validated its content.",
                 Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
         }
+#endif
 
+#if !defined(DISABLE_MQTT)
+        // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
         if (ParseConfigFile(config.httpProxyConfig.proxyConfigPath->c_str(), HTTP_PROXY_CONFIG) &&
             config.httpProxyConfig.httpProxyEnabled)
         {
@@ -2710,6 +2715,7 @@ bool Config::init(const CliArgs &cliArgs)
                 config.httpProxyConfig.proxyConfigPath->c_str());
             return true;
         }
+#endif
 
         return config.Validate();
     }
