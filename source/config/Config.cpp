@@ -2683,7 +2683,7 @@ bool Config::init(const CliArgs &cliArgs)
         }
 
 #if !defined(DISABLE_MQTT)
-// ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
+        // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
         if (ParseConfigFile(
                 Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, FLEET_PROVISIONING_RUNTIME_CONFIG) &&
             ValidateAndStoreRuntimeConfig())
@@ -2696,7 +2696,7 @@ bool Config::init(const CliArgs &cliArgs)
 #endif
 
 #if !defined(DISABLE_MQTT)
-// ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
+        // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
         if (ParseConfigFile(config.httpProxyConfig.proxyConfigPath->c_str(), HTTP_PROXY_CONFIG) &&
             config.httpProxyConfig.httpProxyEnabled)
         {
