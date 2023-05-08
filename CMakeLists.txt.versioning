@@ -11,11 +11,13 @@
 
 cmake_minimum_required(VERSION 3.10)
 
+# Marking Device Client directory safe
+execute_process(COMMAND git config --global --add safe.directory ${CMAKE_CURRENT_SOURCE_DIR})
+
 # Check to make sure we have Git info for this package
 execute_process(COMMAND git log --pretty=format:'%h' -n 1
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                OUTPUT_VARIABLE GIT_INFO
-                ERROR_QUIET)
+                OUTPUT_VARIABLE GIT_INFO)
 
 function (load_version_from_file)
     # Git is not available (this is the case if the source is packaged as an archive), get version from file
