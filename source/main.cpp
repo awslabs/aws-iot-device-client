@@ -164,6 +164,12 @@ void shutdown()
  */
 void deviceClientAbort(const string &reason)
 {
+    if(resourceManager != NULL)
+    {
+        resourceManager->disconnect();
+        resourceManager.reset();
+    }
+    LoggerFactory::getLoggerInstance()->shutdown();
     cout << "AWS IoT Device Client must abort execution, reason: " << reason << endl;
     cout << "Please check the AWS IoT Device Client logs for more information" << endl;
     exit(EXIT_FAILURE);
@@ -184,7 +190,6 @@ void attemptConnection()
                     "IoT credentials, "
                     "configuration and/or certificate policy. ***",
                     DC_FATAL_ERROR);
-                LoggerFactory::getLoggerInstance()->shutdown();
                 deviceClientAbort("Failed to establish MQTT connection due to credential/configuration error");
                 return true;
             }
@@ -204,7 +209,6 @@ void attemptConnection()
     catch (const std::exception &e)
     {
         LOGM_ERROR(TAG, "Error attempting to connect: %s", e.what());
-        LoggerFactory::getLoggerInstance()->shutdown();
         deviceClientAbort("Failure from attemptConnection");
     }
 }
@@ -275,7 +279,6 @@ namespace Aws
                         TAG,
                         "*** %s: Aborting program due to unrecoverable feature error! ***",
                         DeviceClient::DC_FATAL_ERROR);
-                    LoggerFactory::getLoggerInstance()->shutdown();
                     deviceClientAbort(feature->getName() + " encountered an error");
 #endif
                 }
@@ -294,8 +297,9 @@ int main(int argc, char *argv[])
     }
     if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
     {
-        LoggerFactory::getLoggerInstance()->shutdown();
-        return 1;
+        LOGM_ERROR(
+            TAG, "*** %s: AWS IoT Device Client must abort execution, reason: Invalid configuration ***", DC_FATAL_ERROR);
+        deviceClientAbort("Invalid configuration");
     }
 
     if (!LoggerFactory::reconfigure(config.config) &&
@@ -328,23 +332,17 @@ int main(int argc, char *argv[])
     sigprocmask(SIG_BLOCK, &sigset, nullptr);
 
     auto listener = std::make_shared<DefaultClientBaseNotifier>();
-    resourceManager = std::make_shared<SharedCrtResourceManager>();
+
     if (!resourceManager.get()->initialize(config.config, features))
     {
         LOGM_ERROR(TAG, "*** %s: Failed to initialize AWS CRT SDK.", DC_FATAL_ERROR);
-        LoggerFactory::getLoggerInstance()->shutdown();
         deviceClientAbort("Failed to initialize AWS CRT SDK");
     }
 
-#if !defined(EXCLUDE_FP)
+#if !defined(EXCLUDE_FP) && !defined(DISABLE_MQTT)
     if (config.config.fleetProvisioning.enabled &&
         !config.config.fleetProvisioningRuntimeConfig.completedFleetProvisioning)
     {
-
-        /*
-         * Establish MQTT connection using claim certificates and private key to provision the device/thing.
-         */
-#    if !defined(DISABLE_MQTT)
         /**
          * init() is currently responsible for making sure only 1 instance of Device Client is running at a given time.
          * In the future, we may want to move other Device Client startup logic into this function.
@@ -352,10 +350,13 @@ int main(int argc, char *argv[])
          */
         if (!init(argc, argv))
         {
-            return 1;
+            LOGM_ERROR(TAG, "*** %s: An instance of Device Client is already running.", DC_FATAL_ERROR);
+            deviceClientAbort("An instance of Device Client is already running.");
         }
+        /*
+         * Establish MQTT connection using claim certificates and private key to provision the device/thing.
+         */
         attemptConnection();
-#    endif
 
         /*
          * Provision Device, parse new runtime conf file and validate its content.
@@ -373,16 +374,21 @@ int main(int argc, char *argv[])
                 "Please verify your AWS IoT credentials, "
                 "configuration, Fleet Provisioning Template, claim certificate and policy used. ***",
                 DC_FATAL_ERROR);
-            LoggerFactory::getLoggerInstance()->shutdown();
             deviceClientAbort("Fleet provisioning failed");
         }
         resourceManager->disconnect();
     }
+#else
+    if (config.config.fleetProvisioning.enabled)
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Fleet Provisioning configuration is enabled but feature is not compiled into binary.",
+            DC_FATAL_ERROR);
+        deviceClientAbort("Invalid configuration. Fleet Provisioning configuration is enabled but feature is not compiled into binary.");
+    }
 #endif
-    /*
-     * Establish MQTT connection using permanent certificate and private key to start and run AWS IoT Device Client
-     * features.
-     */
+
 #if !defined(DISABLE_MQTT)
     /**
      * init() is currently responsible for making sure only 1 instance of Device Client is running at a given time.
@@ -391,29 +397,41 @@ int main(int argc, char *argv[])
      */
     if (!init(argc, argv))
     {
-        return 1;
+        LOGM_ERROR(TAG, "*** %s: An instance of Device Client is already running.", DC_FATAL_ERROR);
+        deviceClientAbort("An instance of Device Client is already running.");
     }
+    /*
+     * Establish MQTT connection using permanent certificate and private key to start and run AWS IoT Device Client
+     * features.
+     */
     attemptConnection();
 #endif
 
-#if defined(EXCLUDE_SECURE_ELEMENT)
+#if defined(EXCLUDE_SECURE_ELEMENT) && !defined(DISABLE_MQTT)
     if (config.config.secureElement.enabled)
     {
         LOGM_ERROR(
             TAG,
             "*** %s: Secure Element configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
-        LoggerFactory::getLoggerInstance()->shutdown();
         deviceClientAbort("Invalid configuration");
     }
     else
     {
         LOG_INFO(TAG, "Provisioning with Secure Elements is disabled");
     }
+#else
+    if (config.config.secureElement.enabled)
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Secure Element configuration is enabled but feature is not compiled into binary.",
+            DC_FATAL_ERROR);
+        deviceClientAbort("Invalid configuration. Secure Element configuration is enabled but feature is not compiled into binary.");
+    }
 #endif
 
-#if !defined(EXCLUDE_SHADOW)
-#    if !defined(EXCLUDE_CONFIG_SHADOW)
+#if !defined(EXCLUDE_SHADOW) && !defined(EXCLUDE_CONFIG_SHADOW) && !defined(DISABLE_MQTT)
     if (config.config.configShadow.enabled)
     {
         LOG_INFO(TAG, "Config shadow is enabled");
@@ -426,10 +444,18 @@ int main(int argc, char *argv[])
     {
         LOG_INFO(TAG, "Config shadow is disabled");
     }
-#    endif
+#else
+    if (config.config.configShadow.enabled)
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Config Shadow configuration is enabled but feature is not compiled into binary.",
+            DC_FATAL_ERROR);
+        deviceClientAbort("Invalid configuration");
+    }
 #endif
 
-#if !defined(EXCLUDE_JOBS)
+#if !defined(EXCLUDE_JOBS) && !defined(DISABLE_MQTT)
     if (config.config.jobs.enabled)
     {
         shared_ptr<JobsFeature> jobs;
@@ -442,6 +468,15 @@ int main(int argc, char *argv[])
     {
         LOG_INFO(TAG, "Jobs is disabled");
         features->add(JobsFeature::NAME, nullptr);
+    }
+#else
+    if (config.config.jobs.enabled)
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Jobs configuration is enabled but feature is not compiled into binary.",
+            DC_FATAL_ERROR);
+        deviceClientAbort("Invalid configuration. Config Shadow configuration is enabled but feature is not compiled into binary.");
     }
 #endif
 
@@ -459,9 +494,18 @@ int main(int argc, char *argv[])
         LOG_INFO(TAG, "Secure Tunneling is disabled");
         features->add(SecureTunnelingFeature::NAME, nullptr);
     }
+#else
+    if (config.config.tunneling.enabled)
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Secure Tunneling configuration is enabled but feature is not compiled into binary.",
+            DC_FATAL_ERROR);
+        deviceClientAbort("Invalid configuration. Secure Tunneling configuration is enabled but feature is not compiled into binary.");
+    }
 #endif
 
-#if !defined(EXCLUDE_DD)
+#if !defined(EXCLUDE_DD) && !defined(DISABLE_MQTT)
     if (config.config.deviceDefender.enabled)
     {
         shared_ptr<DeviceDefenderFeature> deviceDefender;
@@ -475,10 +519,18 @@ int main(int argc, char *argv[])
         LOG_INFO(TAG, "Device Defender is disabled");
         features->add(DeviceDefenderFeature::NAME, nullptr);
     }
+#else
+    if (config.config.sampleShadow.enabled)
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Device Defender configuration is enabled but feature is not compiled into binary.",
+            DC_FATAL_ERROR);
+        deviceClientAbort("Invalid configuration. Device Defender configuration is enabled but feature is not compiled into binary.");
+    }
 #endif
 
-#if !defined(EXCLUDE_SHADOW)
-#    if !defined(EXCLUDE_SAMPLE_SHADOW)
+#if !defined(EXCLUDE_SHADOW) && !defined(EXCLUDE_SAMPLE_SHADOW) && !defined(DISABLE_MQTT)
     if (config.config.sampleShadow.enabled)
     {
         shared_ptr<SampleShadowFeature> sampleShadow;
@@ -492,11 +544,18 @@ int main(int argc, char *argv[])
         LOG_INFO(TAG, "Sample shadow is disabled");
         features->add(SampleShadowFeature::NAME, nullptr);
     }
-#    endif
+#else
+    if (config.config.sampleShadow.enabled)
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: Sample Shadow configuration is enabled but feature is not compiled into binary.",
+            DC_FATAL_ERROR);
+        deviceClientAbort("Invalid configuration. Sample Shadow configuration is enabled but feature is not compiled into binary.");
+    }
 #endif
 
-#if !defined(EXCLUDE_SAMPLES)
-#    if !defined(EXCLUDE_PUBSUB)
+#if !defined(EXCLUDE_SAMPLES) && !defined(EXCLUDE_PUBSUB) && !defined(DISABLE_MQTT)
     if (config.config.pubSub.enabled)
     {
         shared_ptr<PubSubFeature> pubSub;
@@ -510,10 +569,18 @@ int main(int argc, char *argv[])
         LOG_INFO(TAG, "Pub Sub is disabled");
         features->add(PubSubFeature::NAME, nullptr);
     }
-#    endif
+#else
+    if (config.config.pubSub.enabled)
+    {
+        LOGM_ERROR(
+            TAG,
+            "*** %s: PubSub sample configuration is enabled but feature is not compiled into binary.",
+            DC_FATAL_ERROR);
+        deviceClientAbort("Invalid configuration. PubSub sample configuration is enabled but feature is not compiled into binary.");
+    }
 #endif
 
-#if !defined(EXCLUDE_SENSOR_PUBLISH)
+#if !defined(EXCLUDE_SENSOR_PUBLISH) && !defined(DISABLE_MQTT)
     if (config.config.sensorPublish.enabled)
     {
         shared_ptr<SensorPublishFeature> sensorPublish;
@@ -534,8 +601,7 @@ int main(int argc, char *argv[])
             TAG,
             "*** %s: Sensor Publish configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
-        LoggerFactory::getLoggerInstance()->shutdown();
-        deviceClientAbort("Invalid configuration");
+        deviceClientAbort("Invalid configuration. Sensor Publish configuration is enabled but feature is not compiled into binary.");
     }
 #endif
 
