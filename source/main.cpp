@@ -332,6 +332,7 @@ int main(int argc, char *argv[])
     sigprocmask(SIG_BLOCK, &sigset, nullptr);
 
     auto listener = std::make_shared<DefaultClientBaseNotifier>();
+    resourceManager = std::make_shared<SharedCrtResourceManager>();
 
     if (!resourceManager.get()->initialize(config.config, features))
     {
