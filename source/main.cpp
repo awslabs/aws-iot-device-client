@@ -164,7 +164,7 @@ void shutdown()
  */
 void deviceClientAbort(const string &reason)
 {
-    if(resourceManager != NULL)
+    if (resourceManager != NULL)
     {
         resourceManager->disconnect();
         resourceManager.reset();
@@ -298,7 +298,9 @@ int main(int argc, char *argv[])
     if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
     {
         LOGM_ERROR(
-            TAG, "*** %s: AWS IoT Device Client must abort execution, reason: Invalid configuration ***", DC_FATAL_ERROR);
+            TAG,
+            "*** %s: AWS IoT Device Client must abort execution, reason: Invalid configuration ***",
+            DC_FATAL_ERROR);
         deviceClientAbort("Invalid configuration");
     }
 
@@ -386,7 +388,8 @@ int main(int argc, char *argv[])
             TAG,
             "*** %s: Fleet Provisioning configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
-        deviceClientAbort("Invalid configuration. Fleet Provisioning configuration is enabled but feature is not compiled into binary.");
+        deviceClientAbort("Invalid configuration. Fleet Provisioning configuration is enabled but feature is not "
+                          "compiled into binary.");
     }
 #endif
 
@@ -428,7 +431,8 @@ int main(int argc, char *argv[])
             TAG,
             "*** %s: Secure Element configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
-        deviceClientAbort("Invalid configuration. Secure Element configuration is enabled but feature is not compiled into binary.");
+        deviceClientAbort(
+            "Invalid configuration. Secure Element configuration is enabled but feature is not compiled into binary.");
     }
 #endif
 
@@ -474,10 +478,9 @@ int main(int argc, char *argv[])
     if (config.config.jobs.enabled)
     {
         LOGM_ERROR(
-            TAG,
-            "*** %s: Jobs configuration is enabled but feature is not compiled into binary.",
-            DC_FATAL_ERROR);
-        deviceClientAbort("Invalid configuration. Config Shadow configuration is enabled but feature is not compiled into binary.");
+            TAG, "*** %s: Jobs configuration is enabled but feature is not compiled into binary.", DC_FATAL_ERROR);
+        deviceClientAbort(
+            "Invalid configuration. Config Shadow configuration is enabled but feature is not compiled into binary.");
     }
 #endif
 
@@ -502,7 +505,8 @@ int main(int argc, char *argv[])
             TAG,
             "*** %s: Secure Tunneling configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
-        deviceClientAbort("Invalid configuration. Secure Tunneling configuration is enabled but feature is not compiled into binary.");
+        deviceClientAbort("Invalid configuration. Secure Tunneling configuration is enabled but feature is not "
+                          "compiled into binary.");
     }
 #endif
 
@@ -527,7 +531,8 @@ int main(int argc, char *argv[])
             TAG,
             "*** %s: Device Defender configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
-        deviceClientAbort("Invalid configuration. Device Defender configuration is enabled but feature is not compiled into binary.");
+        deviceClientAbort(
+            "Invalid configuration. Device Defender configuration is enabled but feature is not compiled into binary.");
     }
 #endif
 
@@ -552,7 +557,8 @@ int main(int argc, char *argv[])
             TAG,
             "*** %s: Sample Shadow configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
-        deviceClientAbort("Invalid configuration. Sample Shadow configuration is enabled but feature is not compiled into binary.");
+        deviceClientAbort(
+            "Invalid configuration. Sample Shadow configuration is enabled but feature is not compiled into binary.");
     }
 #endif
 
@@ -577,7 +583,8 @@ int main(int argc, char *argv[])
             TAG,
             "*** %s: PubSub sample configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
-        deviceClientAbort("Invalid configuration. PubSub sample configuration is enabled but feature is not compiled into binary.");
+        deviceClientAbort(
+            "Invalid configuration. PubSub sample configuration is enabled but feature is not compiled into binary.");
     }
 #endif
 
@@ -602,7 +609,8 @@ int main(int argc, char *argv[])
             TAG,
             "*** %s: Sensor Publish configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
-        deviceClientAbort("Invalid configuration. Sensor Publish configuration is enabled but feature is not compiled into binary.");
+        deviceClientAbort(
+            "Invalid configuration. Sensor Publish configuration is enabled but feature is not compiled into binary.");
     }
 #endif
 
