@@ -52,9 +52,13 @@ namespace Aws
                 int TcpForward::Connect()
                 {
                     aws_socket_endpoint endpoint{};
-                    string localhost = "127.0.0.1";
+                    /*string localhost = "127.0.0.1";
                     snprintf(endpoint.address, AWS_ADDRESS_MAX_LEN, "%s", localhost.c_str());
-                    endpoint.port = mPort;
+                    endpoint.port = mPort;*/
+
+                    string tiva = "169.254.0.5";
+                    snprintf(endpoint.address, AWS_ADDRESS_MAX_LEN, "%s", tiva.c_str());
+                    endpoint.port = 502;
 
                     aws_event_loop *eventLoop = aws_event_loop_group_get_next_loop(
                         mSharedCrtResourceManager->getEventLoopGroup()->GetUnderlyingHandle());
