@@ -4,7 +4,7 @@ Wants=network-online.target
 After=network.target network-online.target
 
 [Service]
-Environment="CONF_PATH=/etc/.aws-iot-device-client/aws-iot-device-client.conf"
+Environment="CONF_PATH=/etc/aws-iot-device-client/aws-iot-device-client.conf"
 ExecStart=/sbin/aws-iot-device-client --config-file $CONF_PATH
 
 [Install]
