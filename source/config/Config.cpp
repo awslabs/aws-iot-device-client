@@ -287,7 +287,7 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     return loadFeatureCliArgs;
 }
 
-bool PlainConfig::LoadFromEnvironment()
+void PlainConfig::LoadMemTraceLevelFromEnvironment()
 {
     const char *memTraceLevelStr = std::getenv("AWS_CRT_MEMORY_TRACING");
     if (memTraceLevelStr)
@@ -306,7 +306,10 @@ bool PlainConfig::LoadFromEnvironment()
                 break;
         }
     }
+}
 
+bool PlainConfig::LoadFromEnvironment()
+{
     const char *lockFilePathIn = std::getenv("LOCK_FILE_PATH");
     if (lockFilePathIn)
     {

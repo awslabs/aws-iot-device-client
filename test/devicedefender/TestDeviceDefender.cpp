@@ -83,8 +83,11 @@ class TestDeviceDefender : public testing::Test
   public:
     void SetUp()
     {
-        deviceDefender = unique_ptr<MockDDFeature>(new MockDDFeature());
         manager = shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager());
+        config.LoadMemTraceLevelFromEnvironment();
+        manager.get()->initializeAllocator(config.memTraceLevel);
+
+        deviceDefender = unique_ptr<MockDDFeature>(new MockDDFeature());
         notifier = shared_ptr<MockNotifier>(new MockNotifier());
         task = shared_ptr<MockReportTask>(new MockReportTask());
         config = getSimpleDDConfig();

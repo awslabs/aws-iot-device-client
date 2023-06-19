@@ -49,8 +49,6 @@ namespace Aws
 
                 int buildClient(const PlainConfig &config);
 
-                void initializeAllocator(const PlainConfig &config);
-
               protected:
                 /**
                  * inheritable for testing
@@ -79,6 +77,8 @@ namespace Aws
                 static const int ABORT = 2;
 
                 bool initialize(const PlainConfig &config, std::shared_ptr<Util::FeatureRegistry> featureRegistry);
+
+                void initializeAllocator(const aws_mem_trace_level &config);
 
                 void initializeAWSHttpLib();
 

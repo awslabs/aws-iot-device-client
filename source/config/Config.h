@@ -472,6 +472,7 @@ namespace Aws
                     mutable std::vector<SensorSettings> settings;
                 };
                 SensorPublish sensorPublish;
+                void LoadMemTraceLevelFromEnvironment();
             };
 
             class Config

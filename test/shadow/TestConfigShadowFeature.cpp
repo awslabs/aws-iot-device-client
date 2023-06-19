@@ -13,7 +13,24 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Shadow;
 using namespace std;
 
-TEST(ConfigShadowFeature, resetClientConfigWithValidJSON)
+class ConfigShadowFeature : public ::testing::Test
+{
+  public:
+    ConfigShadowFeature() = default;
+    shared_ptr<SharedCrtResourceManager> resourceManager;
+
+    void SetUp() override
+    {
+        resourceManager = std::make_shared<SharedCrtResourceManager>();
+
+        Aws::Iot::DeviceClient::PlainConfig configuration;
+        configuration.LoadMemTraceLevelFromEnvironment();
+        resourceManager.get()->initializeAllocator(configuration.memTraceLevel);
+
+    }
+};
+
+TEST_F(ConfigShadowFeature, resetClientConfigWithValidJSON)
 {
     constexpr char oldJsonString[] = R"(
 {
@@ -104,7 +121,7 @@ TEST(ConfigShadowFeature, resetClientConfigWithValidJSON)
     ASSERT_FALSE(config.jobs.enabled);
 }
 
-TEST(ConfigShadowFeature, resetClientConfigWithInvalidJSON)
+TEST_F(ConfigShadowFeature, resetClientConfigWithInvalidJSON)
 {
     constexpr char oldJsonString[] = R"(
 {

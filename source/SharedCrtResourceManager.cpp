@@ -39,7 +39,6 @@ bool SharedCrtResourceManager::initialize(
     std::shared_ptr<Util::FeatureRegistry> featureRegistry)
 {
     features = featureRegistry;
-    initializeAllocator(config);
     initialized = buildClient(config) == SharedCrtResourceManager::SUCCESS;
     return initialized;
 }
@@ -174,22 +173,23 @@ bool SharedCrtResourceManager::setupLogging(const PlainConfig &config) const
     return true;
 }
 
-void SharedCrtResourceManager::initializeAllocator(const PlainConfig &config)
+void SharedCrtResourceManager::initializeAllocator(const aws_mem_trace_level &configMemTraceLevel)
 {
-    allocator = aws_default_allocator();
-    memTraceLevel = config.memTraceLevel;
+    memTraceLevel = configMemTraceLevel;
     if (memTraceLevel != AWS_MEMTRACE_NONE)
     {
         // If memTraceLevel == AWS_MEMTRACE_STACKS(2), then by default 8 frames per stack are used.
         allocator = aws_mem_tracer_new(allocator, nullptr, memTraceLevel, 0);
     }
+
+    // We MUST declare an instance of the ApiHandle to perform global initialization
+    // of the SDK libraries
+    apiHandle = unique_ptr<ApiHandle>(new ApiHandle());
+
 }
 
 int SharedCrtResourceManager::buildClient(const PlainConfig &config)
 {
-    // We MUST declare an instance of the ApiHandle to perform global initialization
-    // of the SDK libraries
-    apiHandle = unique_ptr<ApiHandle>(new ApiHandle());
     if (config.logConfig.sdkLoggingEnabled)
     {
         if (!setupLogging(config))

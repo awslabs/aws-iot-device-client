@@ -4,6 +4,7 @@
 #include "../../source/config/Config.h"
 #include "../../source/util/FileUtils.h"
 #include "../../source/util/UniqueString.h"
+#include "../../source/SharedCrtResourceManager.h"
 
 #include <regex>
 #include <string>
@@ -33,6 +34,7 @@ class ConfigTestFixture : public ::testing::Test
   public:
     ConfigTestFixture() = default;
     string outputPath;
+    shared_ptr<SharedCrtResourceManager> resourceManager;
 
     void SetUp() override
     {
@@ -61,6 +63,13 @@ class ConfigTestFixture : public ::testing::Test
         outputPathStream << Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR << Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
 
         outputPath = FileUtils::ExtractExpandedPath(outputPathStream.str().c_str());
+
+        resourceManager = std::make_shared<SharedCrtResourceManager>();
+
+        PlainConfig configuration;
+        configuration.LoadMemTraceLevelFromEnvironment();
+        resourceManager.get()->initializeAllocator(configuration.memTraceLevel);
+
     }
 
     void TearDown() override
@@ -1729,7 +1738,7 @@ TEST(Config, MemoryTrace)
     {
         auto levelstr = std::to_string(level);
         ::setenv("AWS_CRT_MEMORY_TRACING", levelstr.c_str(), 1);
-        ASSERT_TRUE(config.LoadFromEnvironment()) << "read AWS_CRT_MEMORY_TRACING=" << level;
+        config.LoadMemTraceLevelFromEnvironment();
         ASSERT_EQ(config.memTraceLevel, level);
     }
 }

@@ -289,17 +289,11 @@ namespace Aws
 
 int main(int argc, char *argv[])
 {
-    auto listener = std::make_shared<DefaultClientBaseNotifier>();
-
-    features = make_shared<FeatureRegistry>();
-
     resourceManager = std::make_shared<SharedCrtResourceManager>();
 
-    if (!resourceManager.get()->initialize(config.config, features))
-    {
-        LOGM_ERROR(TAG, "*** %s: Failed to initialize AWS CRT SDK.", DC_FATAL_ERROR);
-        deviceClientAbort("Failed to initialize AWS CRT SDK");
-    }
+    config.config.LoadMemTraceLevelFromEnvironment();
+
+    resourceManager.get()->initializeAllocator(config.config.memTraceLevel);
 
     CliArgs cliArgs;
     if (Config::CheckTerminalArgs(argc, argv))
@@ -333,6 +327,8 @@ int main(int argc, char *argv[])
         LOG_WARN(TAG, "Unable to append current working directory to PATH environment variable.");
     }
 
+    features = make_shared<FeatureRegistry>();
+
     LOGM_INFO(TAG, "Now running AWS IoT Device Client version %s", DEVICE_CLIENT_VERSION_FULL);
 
     // Register for listening to interrupt signals
@@ -342,6 +338,13 @@ int main(int argc, char *argv[])
     sigaddset(&sigset, SIGINT);
     sigaddset(&sigset, SIGHUP);
     sigprocmask(SIG_BLOCK, &sigset, nullptr);
+
+    auto listener = std::make_shared<DefaultClientBaseNotifier>();
+    if (!resourceManager.get()->initialize(config.config, features))
+    {
+        LOGM_ERROR(TAG, "*** %s: Failed to initialize AWS CRT SDK.", DC_FATAL_ERROR);
+        deviceClientAbort("Failed to initialize AWS CRT SDK");
+    }
 
 #if !defined(EXCLUDE_FP) && !defined(DISABLE_MQTT)
     if (config.config.fleetProvisioning.enabled &&

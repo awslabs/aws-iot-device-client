@@ -9,7 +9,24 @@
 using namespace std;
 using namespace Aws::Iot::DeviceClient::FleetProvisioningNS;
 
-TEST(FleetProvisioning, EmptyTemplateParameters)
+class FleetProvisioningFeature : public ::testing::Test
+{
+  public:
+    FleetProvisioningFeature() = default;
+    shared_ptr<Aws::Iot::DeviceClient::SharedCrtResourceManager> resourceManager;
+
+    void SetUp() override
+    {
+        resourceManager = std::make_shared<Aws::Iot::DeviceClient::SharedCrtResourceManager>();
+
+        Aws::Iot::DeviceClient::PlainConfig configuration;
+        configuration.LoadMemTraceLevelFromEnvironment();
+        resourceManager.get()->initializeAllocator(configuration.memTraceLevel);
+
+    }
+};
+
+TEST_F(FleetProvisioningFeature, EmptyTemplateParameters)
 {
     Aws::Crt::Optional<std::string> params; // start with empty value
     FleetProvisioning fp;
@@ -17,7 +34,7 @@ TEST(FleetProvisioning, EmptyTemplateParameters)
     params = "{}"; // test empty JSON
 }
 
-TEST(FleetProvisioning, MalformedTemplateParameters)
+TEST_F(FleetProvisioningFeature, MalformedTemplateParameters)
 {
     Aws::Crt::Optional<std::string> params("{\"SerialNumber\" \"Device-SN\"}"); // test missing colon
     FleetProvisioning fp;
@@ -28,7 +45,7 @@ TEST(FleetProvisioning, MalformedTemplateParameters)
     ASSERT_FALSE(fp.MapParameters(params));
 }
 
-TEST(FleetProvisioning, ValidTemplateParameters)
+TEST_F(FleetProvisioningFeature, ValidTemplateParameters)
 {
     Aws::Crt::Optional<std::string> params("{\"SerialNumber\": \"Device-SN\"}"); // test single JSON property
     FleetProvisioning fp;

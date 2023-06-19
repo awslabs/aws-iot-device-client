@@ -3,6 +3,8 @@
 
 #include "../../source/jobs/JobDocument.h"
 #include "../../source/util/UniqueString.h"
+#include "../../source/SharedCrtResourceManager.h"
+
 #include "gtest/gtest.h"
 #include <algorithm>
 #include <aws/crt/JsonObject.h>
@@ -11,6 +13,23 @@ using namespace std;
 using namespace Aws::Crt;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Jobs;
+
+class JobDocumentFixture : public ::testing::Test
+{
+  public:
+    JobDocumentFixture() = default;
+    shared_ptr<SharedCrtResourceManager> resourceManager;
+
+    void SetUp() override
+    {
+        resourceManager = std::make_shared<SharedCrtResourceManager>();
+
+        PlainConfig configuration;
+        configuration.LoadMemTraceLevelFromEnvironment();
+        resourceManager.get()->initializeAllocator(configuration.memTraceLevel);
+
+    }
+};
 
 void AssertVectorEqual(const Optional<vector<string>> &vector1, const Optional<vector<string>> &vector2)
 {
@@ -75,7 +94,7 @@ void AssertStepEqual(const vector<PlainJobDocument::JobAction> &step1, const vec
     }
 }
 
-TEST(JobDocument, SampleJobDocument)
+TEST_F(JobDocumentFixture, SampleJobDocument)
 {
     constexpr char jsonString[] = R"(
 {
@@ -292,7 +311,7 @@ TEST(JobDocument, SampleJobDocument)
     ASSERT_TRUE(jobDocument.finalStep->ignoreStepFailure);
 }
 
-TEST(JobDocument, MissingRequiredFields)
+TEST_F(JobDocumentFixture, MissingRequiredFields)
 {
     constexpr char jsonString[] = R"(
 {
@@ -385,7 +404,7 @@ TEST(JobDocument, MissingRequiredFields)
     ASSERT_FALSE(jobDocument.Validate());
 }
 
-TEST(JobDocument, MinimumJobDocument)
+TEST_F(JobDocumentFixture, MinimumJobDocument)
 {
     constexpr char jsonString[] = R"(
 {
@@ -438,7 +457,7 @@ TEST(JobDocument, MinimumJobDocument)
     ASSERT_TRUE(jobDocument.Validate());
 }
 
-TEST(JobDocument, MissingRequiredFieldsValue)
+TEST_F(JobDocumentFixture, MissingRequiredFieldsValue)
 {
     constexpr char jsonString[] = R"(
 {
@@ -531,7 +550,7 @@ TEST(JobDocument, MissingRequiredFieldsValue)
     ASSERT_FALSE(jobDocument.Validate());
 }
 
-TEST(JobDocument, CommandFieldsIsEmpty)
+TEST_F(JobDocumentFixture, CommandFieldsIsEmpty)
 {
     constexpr char jsonString[] = R"(
 {
@@ -558,7 +577,7 @@ TEST(JobDocument, CommandFieldsIsEmpty)
     ASSERT_FALSE(jobDocument.Validate());
 }
 
-TEST(JobDocument, CommandContainsSpaceCharacters)
+TEST_F(JobDocumentFixture, CommandContainsSpaceCharacters)
 {
     constexpr char jsonString[] = R"(
 {
@@ -585,7 +604,7 @@ TEST(JobDocument, CommandContainsSpaceCharacters)
     ASSERT_TRUE(jobDocument.Validate());
 }
 
-TEST(JobDocument, SpaceCharactersContainedWithinFirstWordOfCommand)
+TEST_F(JobDocumentFixture, SpaceCharactersContainedWithinFirstWordOfCommand)
 {
     constexpr char jsonString[] = R"(
 {
@@ -612,7 +631,7 @@ TEST(JobDocument, SpaceCharactersContainedWithinFirstWordOfCommand)
     ASSERT_FALSE(jobDocument.Validate());
 }
 
-TEST(JobDocument, oldJobDocumentCompatibility)
+TEST_F(JobDocumentFixture, oldJobDocumentCompatibility)
 {
     constexpr char jsonString[] = R"(
 {

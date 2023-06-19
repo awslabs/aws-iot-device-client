@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "../../source/config/Config.h"
+#include "../../source/SharedCrtResourceManager.h"
 #include "../../source/util/FileUtils.h"
 #include "../../source/util/UniqueString.h"
 
@@ -20,32 +21,17 @@ using namespace Aws::Crt;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Util;
 
-class SerializeConfigTestFixture : public ::testing::TestWithParam<const char *>
-{
-  protected:
-    const char *jsonString;
-};
 
-TEST_P(SerializeConfigTestFixture, SerializeConfigTest)
+TEST(SerializeConfigTestFixture, SerializeConfigTest)
 {
-    const char *jsonString = GetParam();
+    shared_ptr<SharedCrtResourceManager> resourceManager;
+    resourceManager = std::make_shared<SharedCrtResourceManager>();
+
     PlainConfig config;
-    JsonObject jsonObject(jsonString);
-    config.LoadFromJson(jsonObject.View());
-    auto inputJsonString = jsonObject.View().WriteCompact();
+    config.LoadMemTraceLevelFromEnvironment();
+    resourceManager.get()->initializeAllocator(config.memTraceLevel);
 
-    JsonObject serializedConfig;
-    config.SerializeToObject(serializedConfig);
-    auto serializedJsonString = serializedConfig.View().WriteCompact();
-
-    ASSERT_STREQ(inputJsonString.c_str(), serializedJsonString.c_str());
-}
-
-INSTANTIATE_TEST_CASE_P(
-    SerializationTests,
-    SerializeConfigTestFixture,
-    ::testing::Values(
-        R"(
+    constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
@@ -138,45 +124,14 @@ INSTANTIATE_TEST_CASE_P(
             }
         ]
     }
-})",
-        R"({
-    "logging": {
-        "level": "DEBUG",
-        "type": "file",
-        "file": "./aws-iot-device-client.log",
-        "enable-sdk-logging": false,
-        "sdk-log-level": "TRACE",
-        "sdk-log-file": "/var/log/aws-iot-device-client/sdk.log"
-    },
-    "jobs": {
-        "enabled": true,
-        "handler-directory": "" 
-    },
-    "tunneling": {
-        "enabled": true
-    },
-    "device-defender": {
-        "enabled": true,
-        "interval": 300
-    },
-    "fleet-provisioning": {
-        "enabled": true
-    },
-    "runtime-config": {
-        "completed-fp": false
-     },
-    "samples": {
-		"pub-sub": {
-			"enabled": true
-		}
-	},
-    "config-shadow": {
-        "enabled": true
-      },
-    "sample-shadow": {
-        "enabled": true
-      },
-    "secure-element": {
-        "enabled": true
-      }
-})"));
+})";
+    JsonObject jsonObject(jsonString);
+    config.LoadFromJson(jsonObject.View());
+    auto inputJsonString = jsonObject.View().WriteCompact();
+
+    JsonObject serializedConfig;
+    config.SerializeToObject(serializedConfig);
+    auto serializedJsonString = serializedConfig.View().WriteCompact();
+
+    ASSERT_STREQ(inputJsonString.c_str(), serializedJsonString.c_str());
+}

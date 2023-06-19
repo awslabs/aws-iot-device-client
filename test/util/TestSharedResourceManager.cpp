@@ -3,6 +3,8 @@
 
 #include "../../source/SharedCrtResourceManager.h"
 #include "../../source/util/FileUtils.h"
+#include "../../source/SharedCrtResourceManager.h"
+
 #include "gtest/gtest.h"
 
 #include <string>
@@ -54,6 +56,7 @@ class SharedResourceManagerTest : public ::testing::Test
 {
   public:
     SharedResourceManagerTest() = default;
+    shared_ptr<SharedCrtResourceManager> resourceManager;
 
     void SetUp() override
     {
@@ -82,6 +85,12 @@ class SharedResourceManagerTest : public ::testing::Test
         // Ensure invalid files do not exist
         std::remove(invalidCertFilePath.c_str());
         std::remove(invalidKeyFilePath.c_str());
+
+        resourceManager = std::make_shared<SharedCrtResourceManager>();
+
+        PlainConfig configuration;
+        configuration.LoadMemTraceLevelFromEnvironment();
+        resourceManager.get()->initializeAllocator(configuration.memTraceLevel);
     }
 
     void TearDown() override
