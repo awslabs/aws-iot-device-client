@@ -329,6 +329,19 @@ int main(int argc, char *argv[])
         LOG_WARN(TAG, "Unable to append current working directory to PATH environment variable.");
     }
 
+#if !defined(DISABLE_MQTT)
+    /**
+     * init() is currently responsible for making sure only 1 instance of Device Client is running at a given time.
+     * In the future, we may want to move other Device Client startup logic into this function.
+     * returns false if an exception is thrown
+     */
+    if (!init(argc, argv))
+    {
+        LOGM_ERROR(TAG, "*** %s: An instance of Device Client is already running.", DC_FATAL_ERROR);
+        deviceClientAbort("An instance of Device Client is already running.");
+    }
+#endif
+
     features = make_shared<FeatureRegistry>();
 
     LOGM_INFO(TAG, "Now running AWS IoT Device Client version %s", DEVICE_CLIENT_VERSION_FULL);
@@ -352,16 +365,6 @@ int main(int argc, char *argv[])
     if (config.config.fleetProvisioning.enabled &&
         !config.config.fleetProvisioningRuntimeConfig.completedFleetProvisioning)
     {
-        /**
-         * init() is currently responsible for making sure only 1 instance of Device Client is running at a given time.
-         * In the future, we may want to move other Device Client startup logic into this function.
-         * returns false if an exception is thrown
-         */
-        if (!init(argc, argv))
-        {
-            LOGM_ERROR(TAG, "*** %s: An instance of Device Client is already running.", DC_FATAL_ERROR);
-            deviceClientAbort("An instance of Device Client is already running.");
-        }
         /*
          * Establish MQTT connection using claim certificates and private key to provision the device/thing.
          */
@@ -400,16 +403,6 @@ int main(int argc, char *argv[])
 #endif
 
 #if !defined(DISABLE_MQTT)
-    /**
-     * init() is currently responsible for making sure only 1 instance of Device Client is running at a given time.
-     * In the future, we may want to move other Device Client startup logic into this function.
-     * returns false if an exception is thrown
-     */
-    if (!init(argc, argv))
-    {
-        LOGM_ERROR(TAG, "*** %s: An instance of Device Client is already running.", DC_FATAL_ERROR);
-        deviceClientAbort("An instance of Device Client is already running.");
-    }
     /*
      * Establish MQTT connection using permanent certificate and private key to start and run AWS IoT Device Client
      * features.
