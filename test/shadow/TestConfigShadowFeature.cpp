@@ -26,7 +26,6 @@ class ConfigShadowFeature : public ::testing::Test
         Aws::Iot::DeviceClient::PlainConfig configuration;
         configuration.LoadMemTraceLevelFromEnvironment();
         resourceManager.get()->initializeAllocator(configuration.memTraceLevel);
-
     }
 };
 

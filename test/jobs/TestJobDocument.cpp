@@ -1,9 +1,9 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+#include "../../source/SharedCrtResourceManager.h"
 #include "../../source/jobs/JobDocument.h"
 #include "../../source/util/UniqueString.h"
-#include "../../source/SharedCrtResourceManager.h"
 
 #include "gtest/gtest.h"
 #include <algorithm>
@@ -27,7 +27,6 @@ class JobDocumentFixture : public ::testing::Test
         PlainConfig configuration;
         configuration.LoadMemTraceLevelFromEnvironment();
         resourceManager.get()->initializeAllocator(configuration.memTraceLevel);
-
     }
 };
 

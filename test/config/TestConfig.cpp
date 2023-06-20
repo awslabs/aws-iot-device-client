@@ -1,10 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+#include "../../source/SharedCrtResourceManager.h"
 #include "../../source/config/Config.h"
 #include "../../source/util/FileUtils.h"
 #include "../../source/util/UniqueString.h"
-#include "../../source/SharedCrtResourceManager.h"
 
 #include <regex>
 #include <string>
@@ -69,7 +69,6 @@ class ConfigTestFixture : public ::testing::Test
         PlainConfig configuration;
         configuration.LoadMemTraceLevelFromEnvironment();
         resourceManager.get()->initializeAllocator(configuration.memTraceLevel);
-
     }
 
     void TearDown() override

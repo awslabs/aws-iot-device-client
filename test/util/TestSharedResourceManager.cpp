@@ -3,7 +3,6 @@
 
 #include "../../source/SharedCrtResourceManager.h"
 #include "../../source/util/FileUtils.h"
-#include "../../source/SharedCrtResourceManager.h"
 
 #include "gtest/gtest.h"
 

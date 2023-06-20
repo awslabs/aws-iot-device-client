@@ -1,8 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-#include "../../source/config/Config.h"
 #include "../../source/SharedCrtResourceManager.h"
+#include "../../source/config/Config.h"
 #include "../../source/util/FileUtils.h"
 #include "../../source/util/UniqueString.h"
 
@@ -20,7 +20,6 @@ using namespace std;
 using namespace Aws::Crt;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Util;
-
 
 TEST(SerializeConfigTestFixture, SerializeConfigTest)
 {

@@ -1,9 +1,9 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+#include "../../source/SharedCrtResourceManager.h"
 #include "../../source/config/Config.h"
 #include "../../source/util/StringUtils.h"
-#include "../../source/SharedCrtResourceManager.h"
 
 #include "gtest/gtest.h"
 #include <aws/crt/JsonObject.h>
@@ -27,7 +27,6 @@ class StringUtilsFixture : public ::testing::Test
         PlainConfig configuration;
         configuration.LoadMemTraceLevelFromEnvironment();
         resourceManager.get()->initializeAllocator(configuration.memTraceLevel);
-
     }
 };
 
