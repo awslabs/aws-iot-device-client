@@ -289,6 +289,13 @@ namespace Aws
 
 int main(int argc, char *argv[])
 {
+
+    if (Config::CheckTerminalArgs(argc, argv))
+    {
+        LoggerFactory::getLoggerInstance()->shutdown();
+        return 0;
+    }
+
     resourceManager = std::make_shared<SharedCrtResourceManager>();
 
     config.config.LoadMemTraceLevelFromEnvironment();
@@ -296,11 +303,6 @@ int main(int argc, char *argv[])
     resourceManager.get()->initializeAllocator(config.config.memTraceLevel);
 
     CliArgs cliArgs;
-    if (Config::CheckTerminalArgs(argc, argv))
-    {
-        LoggerFactory::getLoggerInstance()->shutdown();
-        return 0;
-    }
     if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
     {
         LOGM_ERROR(
