@@ -185,6 +185,7 @@ void SharedCrtResourceManager::initializeAllocator(const aws_mem_trace_level &co
     // We MUST declare an instance of the ApiHandle to perform global initialization
     // of the SDK libraries
     apiHandle = unique_ptr<ApiHandle>(new ApiHandle());
+
 }
 
 int SharedCrtResourceManager::buildClient(const PlainConfig &config)
