@@ -49,6 +49,8 @@ namespace Aws
 
                 int buildClient(const PlainConfig &config);
 
+                void loadMemTraceLevelFromEnvironment();
+
               protected:
                 /**
                  * inheritable for testing
@@ -56,7 +58,7 @@ namespace Aws
                 bool locateCredentials(const PlainConfig &config) const;
 
               public:
-                SharedCrtResourceManager() = default;
+                SharedCrtResourceManager() { initializeAllocator(); }
 
                 virtual ~SharedCrtResourceManager();
 
@@ -78,7 +80,7 @@ namespace Aws
 
                 bool initialize(const PlainConfig &config, std::shared_ptr<Util::FeatureRegistry> featureRegistry);
 
-                void initializeAllocator(const aws_mem_trace_level &config);
+                void initializeAllocator();
 
                 void initializeAWSHttpLib();
 

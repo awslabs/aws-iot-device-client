@@ -298,10 +298,6 @@ int main(int argc, char *argv[])
 
     resourceManager = std::make_shared<SharedCrtResourceManager>();
 
-    config.config.LoadMemTraceLevelFromEnvironment();
-
-    resourceManager.get()->initializeAllocator(config.config.memTraceLevel);
-
     CliArgs cliArgs;
     if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
     {

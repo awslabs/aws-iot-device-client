@@ -43,6 +43,27 @@ bool SharedCrtResourceManager::initialize(
     return initialized;
 }
 
+void SharedCrtResourceManager::loadMemTraceLevelFromEnvironment()
+{
+    const char *memTraceLevelStr = std::getenv("AWS_CRT_MEMORY_TRACING");
+    if (memTraceLevelStr)
+    {
+        switch (atoi(memTraceLevelStr))
+        {
+            case AWS_MEMTRACE_BYTES:
+                LOG_DEBUG(Config::TAG, "Set AWS_CRT_MEMORY_TRACING=AWS_MEMTRACE_BYTES");
+                memTraceLevel = AWS_MEMTRACE_BYTES;
+                break;
+            case AWS_MEMTRACE_STACKS:
+                LOG_DEBUG(Config::TAG, "Set AWS_CRT_MEMORY_TRACING=AWS_MEMTRACE_STACKS");
+                memTraceLevel = AWS_MEMTRACE_STACKS;
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config) const
 {
     struct stat fileInfo;
@@ -173,9 +194,11 @@ bool SharedCrtResourceManager::setupLogging(const PlainConfig &config) const
     return true;
 }
 
-void SharedCrtResourceManager::initializeAllocator(const aws_mem_trace_level &configMemTraceLevel)
+void SharedCrtResourceManager::initializeAllocator()
 {
-    memTraceLevel = configMemTraceLevel;
+    loadMemTraceLevelFromEnvironment();
+    allocator = aws_default_allocator();
+
     if (memTraceLevel != AWS_MEMTRACE_NONE)
     {
         // If memTraceLevel == AWS_MEMTRACE_STACKS(2), then by default 8 frames per stack are used.
