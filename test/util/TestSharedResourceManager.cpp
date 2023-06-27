@@ -151,24 +151,3 @@ TEST_F(SharedResourceManagerTest, badPermissionsDirectory)
 
     ASSERT_FALSE(manager.locateCredentialsWrapper(config));
 }
-
-//TEST(SharedResourceManagerTest, MemoryTrace)
-//{
-//    shared_ptr<SharedCrtResourceManager> resourceManager;
-//    resourceManager = std::make_shared<SharedCrtResourceManager>();
-//
-//    // Test all permutations of memory trace set through the environment.
-//    vector<aws_mem_trace_level> levels{
-//        AWS_MEMTRACE_NONE,
-//        AWS_MEMTRACE_BYTES,
-//        AWS_MEMTRACE_STACKS,
-//    };
-//
-//    for (const auto &level : levels)
-//    {
-//        auto levelstr = std::to_string(level);
-//        ::setenv("AWS_CRT_MEMORY_TRACING", levelstr.c_str(), 1);
-//        ASSERT_TRUE(config.LoadFromEnvironment()) << "read AWS_CRT_MEMORY_TRACING=" << level;
-//        ASSERT_EQ(config.memTraceLevel, level);
-//    }
-//}
