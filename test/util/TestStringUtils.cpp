@@ -14,22 +14,6 @@ using namespace Aws::Iot::DeviceClient::Util;
 
 constexpr size_t Config::MAX_CONFIG_SIZE;
 
-class StringUtilsFixture : public ::testing::Test
-{
-  public:
-    StringUtilsFixture() = default;
-    shared_ptr<SharedCrtResourceManager> resourceManager;
-
-    void SetUp() override
-    {
-        resourceManager = std::make_shared<SharedCrtResourceManager>();
-
-        PlainConfig configuration;
-        configuration.LoadMemTraceLevelFromEnvironment();
-        resourceManager.get()->initializeAllocator(configuration.memTraceLevel);
-    }
-};
-
 TEST(StringUtils, FormatStringNoArg)
 {
     constexpr char expected[] = "Hello world";
@@ -81,8 +65,10 @@ TEST(StringUtils, leavesNewLineAndTabAlone)
     ASSERT_STREQ(original.c_str(), Sanitize(original).c_str());
 }
 
-TEST_F(StringUtilsFixture, maptoString)
+TEST(StringUtils, maptoString)
 {
+    SharedCrtResourceManager resourceManager;
+
     Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> map;
     map.insert(std::pair<Aws::Crt::String, Aws::Crt::String>("a", "b"));
     map.insert(std::pair<Aws::Crt::String, Aws::Crt::String>("c", "d"));
@@ -93,7 +79,7 @@ TEST_F(StringUtilsFixture, maptoString)
     ASSERT_STREQ(expected.c_str(), MapToString(map).c_str());
 }
 
-TEST_F(StringUtilsFixture, emptyMaptoString)
+TEST(StringUtils, emptyMaptoString)
 {
     Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> map;
     string expected = "";
@@ -142,12 +128,14 @@ TEST(StringUtils, trimMultiChar)
     ASSERT_EQ("", TrimCopy("", "/"));                // Empty string.
 }
 
-TEST_F(StringUtilsFixture, ParseToStringVector)
+TEST(StringUtils, ParseToStringVector)
 {
     constexpr char jsonString[] = R"(
 {
     "args": ["hello", "world"]
 })";
+    SharedCrtResourceManager resourceManager;
+
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
 

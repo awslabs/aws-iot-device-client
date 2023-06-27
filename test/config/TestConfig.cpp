@@ -34,7 +34,7 @@ class ConfigTestFixture : public ::testing::Test
   public:
     ConfigTestFixture() = default;
     string outputPath;
-    shared_ptr<SharedCrtResourceManager> resourceManager;
+    SharedCrtResourceManager resourceManager;
 
     void SetUp() override
     {
@@ -64,11 +64,7 @@ class ConfigTestFixture : public ::testing::Test
 
         outputPath = FileUtils::ExtractExpandedPath(outputPathStream.str().c_str());
 
-        resourceManager = std::make_shared<SharedCrtResourceManager>();
-
-        PlainConfig configuration;
-        configuration.LoadMemTraceLevelFromEnvironment();
-        resourceManager.get()->initializeAllocator(configuration.memTraceLevel);
+//        resourceManager = std::make_shared<SharedCrtResourceManager>();
     }
 
     void TearDown() override
@@ -162,6 +158,8 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
         "secure-element-token-label": "token-label"
       }
 })";
+    SharedCrtResourceManager resourceManager;
+
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
 
@@ -1720,24 +1718,4 @@ TEST_F(ConfigTestFixture, HTTPProxyConfigNoAuth)
     ASSERT_EQ(8888, httpProxyConfig.proxyPort.value());
     ASSERT_FALSE(httpProxyConfig.httpProxyAuthEnabled);
     ASSERT_STREQ("None", httpProxyConfig.proxyAuthMethod->c_str());
-}
-
-TEST(Config, MemoryTrace)
-{
-    PlainConfig config;
-
-    // Test all permutations of memory trace set through the environment.
-    vector<aws_mem_trace_level> levels{
-        AWS_MEMTRACE_NONE,
-        AWS_MEMTRACE_BYTES,
-        AWS_MEMTRACE_STACKS,
-    };
-
-    for (const auto &level : levels)
-    {
-        auto levelstr = std::to_string(level);
-        ::setenv("AWS_CRT_MEMORY_TRACING", levelstr.c_str(), 1);
-        config.LoadMemTraceLevelFromEnvironment();
-        ASSERT_EQ(config.memTraceLevel, level);
-    }
 }

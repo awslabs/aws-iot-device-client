@@ -3,7 +3,6 @@
 
 #include "../../source/SharedCrtResourceManager.h"
 #include "../../source/util/FileUtils.h"
-
 #include "gtest/gtest.h"
 
 #include <string>
@@ -55,7 +54,6 @@ class SharedResourceManagerTest : public ::testing::Test
 {
   public:
     SharedResourceManagerTest() = default;
-    shared_ptr<SharedCrtResourceManager> resourceManager;
 
     void SetUp() override
     {
@@ -84,12 +82,6 @@ class SharedResourceManagerTest : public ::testing::Test
         // Ensure invalid files do not exist
         std::remove(invalidCertFilePath.c_str());
         std::remove(invalidKeyFilePath.c_str());
-
-        resourceManager = std::make_shared<SharedCrtResourceManager>();
-
-        PlainConfig configuration;
-        configuration.LoadMemTraceLevelFromEnvironment();
-        resourceManager.get()->initializeAllocator(configuration.memTraceLevel);
     }
 
     void TearDown() override
@@ -159,3 +151,24 @@ TEST_F(SharedResourceManagerTest, badPermissionsDirectory)
 
     ASSERT_FALSE(manager.locateCredentialsWrapper(config));
 }
+
+//TEST(SharedResourceManagerTest, MemoryTrace)
+//{
+//    shared_ptr<SharedCrtResourceManager> resourceManager;
+//    resourceManager = std::make_shared<SharedCrtResourceManager>();
+//
+//    // Test all permutations of memory trace set through the environment.
+//    vector<aws_mem_trace_level> levels{
+//        AWS_MEMTRACE_NONE,
+//        AWS_MEMTRACE_BYTES,
+//        AWS_MEMTRACE_STACKS,
+//    };
+//
+//    for (const auto &level : levels)
+//    {
+//        auto levelstr = std::to_string(level);
+//        ::setenv("AWS_CRT_MEMORY_TRACING", levelstr.c_str(), 1);
+//        ASSERT_TRUE(config.LoadFromEnvironment()) << "read AWS_CRT_MEMORY_TRACING=" << level;
+//        ASSERT_EQ(config.memTraceLevel, level);
+//    }
+//}

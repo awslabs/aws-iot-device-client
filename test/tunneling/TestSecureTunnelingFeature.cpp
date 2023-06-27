@@ -104,9 +104,6 @@ class TestSecureTunnelingFeature : public testing::Test
     void SetUp() override
     {
         manager = shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager());
-        config.LoadMemTraceLevelFromEnvironment();
-        manager.get()->initializeAllocator(config.memTraceLevel);
-
         thingName = Aws::Crt::String("thing-name value");
         secureTunnelingFeature = shared_ptr<MockSecureTunnelingFeature>(new MockSecureTunnelingFeature());
         mockClient = shared_ptr<MockIotSecureTunnelingClient>(new MockIotSecureTunnelingClient());

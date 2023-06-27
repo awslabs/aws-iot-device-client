@@ -258,10 +258,6 @@ class TestJobsFeature : public ::testing::Test
   public:
     void SetUp()
     {
-        resourceManager = std::make_shared<SharedCrtResourceManager>();
-        config.LoadMemTraceLevelFromEnvironment();
-        resourceManager.get()->initializeAllocator(config.memTraceLevel);
-
         ThingName = Aws::Crt::String("thing-name value");
         notifier = shared_ptr<MockNotifier>(new MockNotifier());
         config = getSimpleConfig();
@@ -273,7 +269,7 @@ class TestJobsFeature : public ::testing::Test
     }
     Aws::Crt::String ThingName;
     shared_ptr<MockNotifier> notifier;
-    shared_ptr<SharedCrtResourceManager> resourceManager;
+    SharedCrtResourceManager resourceManager;
     PlainConfig config;
     unique_ptr<StartNextJobExecutionResponse> startNextJobExecutionResponse;
     unique_ptr<MockJobsFeature> jobsMock;

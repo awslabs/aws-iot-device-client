@@ -14,22 +14,6 @@ using namespace Aws::Crt;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Jobs;
 
-class JobDocumentFixture : public ::testing::Test
-{
-  public:
-    JobDocumentFixture() = default;
-    shared_ptr<SharedCrtResourceManager> resourceManager;
-
-    void SetUp() override
-    {
-        resourceManager = std::make_shared<SharedCrtResourceManager>();
-
-        PlainConfig configuration;
-        configuration.LoadMemTraceLevelFromEnvironment();
-        resourceManager.get()->initializeAllocator(configuration.memTraceLevel);
-    }
-};
-
 void AssertVectorEqual(const Optional<vector<string>> &vector1, const Optional<vector<string>> &vector2)
 {
     ASSERT_TRUE(vector1->size() == vector2->size());
@@ -93,7 +77,7 @@ void AssertStepEqual(const vector<PlainJobDocument::JobAction> &step1, const vec
     }
 }
 
-TEST_F(JobDocumentFixture, SampleJobDocument)
+TEST(JobDocument, SampleJobDocument)
 {
     constexpr char jsonString[] = R"(
 {
@@ -188,6 +172,8 @@ TEST_F(JobDocumentFixture, SampleJobDocument)
         }
     }
 })";
+
+    SharedCrtResourceManager resourceManager;
 
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
@@ -310,7 +296,7 @@ TEST_F(JobDocumentFixture, SampleJobDocument)
     ASSERT_TRUE(jobDocument.finalStep->ignoreStepFailure);
 }
 
-TEST_F(JobDocumentFixture, MissingRequiredFields)
+TEST(JobDocument, MissingRequiredFields)
 {
     constexpr char jsonString[] = R"(
 {
@@ -394,6 +380,8 @@ TEST_F(JobDocumentFixture, MissingRequiredFields)
     }
     })";
 
+    SharedCrtResourceManager resourceManager;
+
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
 
@@ -403,7 +391,7 @@ TEST_F(JobDocumentFixture, MissingRequiredFields)
     ASSERT_FALSE(jobDocument.Validate());
 }
 
-TEST_F(JobDocumentFixture, MinimumJobDocument)
+TEST(JobDocument, MinimumJobDocument)
 {
     constexpr char jsonString[] = R"(
 {
@@ -447,6 +435,8 @@ TEST_F(JobDocumentFixture, MinimumJobDocument)
     ]
 })";
 
+    SharedCrtResourceManager resourceManager;
+
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
 
@@ -456,7 +446,7 @@ TEST_F(JobDocumentFixture, MinimumJobDocument)
     ASSERT_TRUE(jobDocument.Validate());
 }
 
-TEST_F(JobDocumentFixture, MissingRequiredFieldsValue)
+TEST(JobDocument, MissingRequiredFieldsValue)
 {
     constexpr char jsonString[] = R"(
 {
@@ -540,6 +530,8 @@ TEST_F(JobDocumentFixture, MissingRequiredFieldsValue)
     }
     })";
 
+    SharedCrtResourceManager resourceManager;
+
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
 
@@ -549,7 +541,7 @@ TEST_F(JobDocumentFixture, MissingRequiredFieldsValue)
     ASSERT_FALSE(jobDocument.Validate());
 }
 
-TEST_F(JobDocumentFixture, CommandFieldsIsEmpty)
+TEST(JobDocument, CommandFieldsIsEmpty)
 {
     constexpr char jsonString[] = R"(
 {
@@ -567,6 +559,8 @@ TEST_F(JobDocumentFixture, CommandFieldsIsEmpty)
     ]
 })";
 
+    SharedCrtResourceManager resourceManager;
+
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
 
@@ -576,7 +570,7 @@ TEST_F(JobDocumentFixture, CommandFieldsIsEmpty)
     ASSERT_FALSE(jobDocument.Validate());
 }
 
-TEST_F(JobDocumentFixture, CommandContainsSpaceCharacters)
+TEST(JobDocument, CommandContainsSpaceCharacters)
 {
     constexpr char jsonString[] = R"(
 {
@@ -594,6 +588,8 @@ TEST_F(JobDocumentFixture, CommandContainsSpaceCharacters)
     ]
 })";
 
+    SharedCrtResourceManager resourceManager;
+
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
 
@@ -603,7 +599,7 @@ TEST_F(JobDocumentFixture, CommandContainsSpaceCharacters)
     ASSERT_TRUE(jobDocument.Validate());
 }
 
-TEST_F(JobDocumentFixture, SpaceCharactersContainedWithinFirstWordOfCommand)
+TEST(JobDocument, SpaceCharactersContainedWithinFirstWordOfCommand)
 {
     constexpr char jsonString[] = R"(
 {
@@ -621,6 +617,8 @@ TEST_F(JobDocumentFixture, SpaceCharactersContainedWithinFirstWordOfCommand)
     ]
 })";
 
+    SharedCrtResourceManager resourceManager;
+
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
 
@@ -630,7 +628,7 @@ TEST_F(JobDocumentFixture, SpaceCharactersContainedWithinFirstWordOfCommand)
     ASSERT_FALSE(jobDocument.Validate());
 }
 
-TEST_F(JobDocumentFixture, oldJobDocumentCompatibility)
+TEST(JobDocument, oldJobDocumentCompatibility)
 {
     constexpr char jsonString[] = R"(
 {
@@ -638,6 +636,8 @@ TEST_F(JobDocumentFixture, oldJobDocumentCompatibility)
     "args": ["https://github.com/awslabs/aws-iot-device-client/archive/refs/tags/v1.3.tar.gz", "/tmp/Downloaded_File.tar.gz"],
     "path": "default"
 })";
+
+    SharedCrtResourceManager resourceManager;
 
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();

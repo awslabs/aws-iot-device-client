@@ -23,13 +23,6 @@ using namespace Aws::Iot::DeviceClient::Util;
 
 TEST(SerializeConfigTestFixture, SerializeConfigTest)
 {
-    shared_ptr<SharedCrtResourceManager> resourceManager;
-    resourceManager = std::make_shared<SharedCrtResourceManager>();
-
-    PlainConfig config;
-    config.LoadMemTraceLevelFromEnvironment();
-    resourceManager.get()->initializeAllocator(config.memTraceLevel);
-
     constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
@@ -124,6 +117,9 @@ TEST(SerializeConfigTestFixture, SerializeConfigTest)
         ]
     }
 })";
+    SharedCrtResourceManager resourceManager;
+    PlainConfig config;
+
     JsonObject jsonObject(jsonString);
     config.LoadFromJson(jsonObject.View());
     auto inputJsonString = jsonObject.View().WriteCompact();

@@ -13,23 +13,7 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Shadow;
 using namespace std;
 
-class ConfigShadowFeature : public ::testing::Test
-{
-  public:
-    ConfigShadowFeature() = default;
-    shared_ptr<SharedCrtResourceManager> resourceManager;
-
-    void SetUp() override
-    {
-        resourceManager = std::make_shared<SharedCrtResourceManager>();
-
-        Aws::Iot::DeviceClient::PlainConfig configuration;
-        configuration.LoadMemTraceLevelFromEnvironment();
-        resourceManager.get()->initializeAllocator(configuration.memTraceLevel);
-    }
-};
-
-TEST_F(ConfigShadowFeature, resetClientConfigWithValidJSON)
+TEST(ConfigShadowFeature, resetClientConfigWithValidJSON)
 {
     constexpr char oldJsonString[] = R"(
 {
@@ -75,6 +59,7 @@ TEST_F(ConfigShadowFeature, resetClientConfigWithValidJSON)
       }
 })";
 
+    SharedCrtResourceManager resourceManager;
     JsonObject oldJsonObject(oldJsonString);
     JsonView jsonView = oldJsonObject.View();
     PlainConfig config;
@@ -120,7 +105,7 @@ TEST_F(ConfigShadowFeature, resetClientConfigWithValidJSON)
     ASSERT_FALSE(config.jobs.enabled);
 }
 
-TEST_F(ConfigShadowFeature, resetClientConfigWithInvalidJSON)
+TEST(ConfigShadowFeature, resetClientConfigWithInvalidJSON)
 {
     constexpr char oldJsonString[] = R"(
 {
@@ -165,6 +150,7 @@ TEST_F(ConfigShadowFeature, resetClientConfigWithInvalidJSON)
         "shadow-output-file": ""
       }
 })";
+    SharedCrtResourceManager resourceManager;
 
     JsonObject oldJsonObject(oldJsonString);
     JsonView jsonView = oldJsonObject.View();
