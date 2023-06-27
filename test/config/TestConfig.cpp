@@ -63,8 +63,6 @@ class ConfigTestFixture : public ::testing::Test
         outputPathStream << Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR << Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
 
         outputPath = FileUtils::ExtractExpandedPath(outputPathStream.str().c_str());
-
-//        resourceManager = std::make_shared<SharedCrtResourceManager>();
     }
 
     void TearDown() override
