@@ -333,7 +333,7 @@ int main(int argc, char *argv[])
         deviceClientAbort("An instance of Device Client is already running.");
     }
 #endif
-    
+
     features = make_shared<FeatureRegistry>();
 
     LOGM_INFO(TAG, "Now running AWS IoT Device Client version %s", DEVICE_CLIENT_VERSION_FULL);
