@@ -24,7 +24,7 @@ SecureTunnelWrapper::SecureTunnelWrapper(
     const Aws::Iotsecuretunneling::OnStreamStart &onStreamStart,
     const Aws::Iotsecuretunneling::OnStreamReset &onStreamReset,
     const Aws::Iotsecuretunneling::OnSessionReset &onSessionReset)
-    : secureTunnel(new Aws::Iotsecuretunneling::SecureTunnelBuilder(
+    : secureTunnel(Aws::Iotsecuretunneling::SecureTunnelBuilder(
           allocator,
           socketOptions,
           accessToken,
@@ -40,15 +40,6 @@ SecureTunnelWrapper::SecureTunnelWrapper(
                    .WithOnSessionReset(onSessionReset)
                    .Build())
 
-
-//          rootCa,
-//      onConnectionComplete,
-//      onConnectionShutdown,
-//      onSendDataComplete,
-//      onDataReceive,
-//      onStreamStart,
-//      onStreamReset,
-//      onSessionReset
 {
 }
 int SecureTunnelWrapper::Connect()

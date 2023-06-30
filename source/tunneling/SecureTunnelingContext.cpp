@@ -93,7 +93,8 @@ namespace Aws
                     }
 
                     mSecureTunnel = CreateSecureTunnel(
-                        bind(&SecureTunnelingContext::OnConnectionComplete, this),
+                        bind(&SecureTunnelingContext::OnConnectionSuccess, this),
+                        bind(&SecureTunnelingContext::OnConnectionFailure, this),
                         bind(&SecureTunnelingContext::OnConnectionShutdown, this),
                         bind(&SecureTunnelingContext::OnSendDataComplete, this, placeholders::_1),
                         bind(&SecureTunnelingContext::OnDataReceive, this, placeholders::_1),
