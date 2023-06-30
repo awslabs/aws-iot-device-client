@@ -29,6 +29,7 @@ namespace Aws
                     Aws::Crt::Io::SocketOptions socketOptions;
                     aws_socket_init(&mSocket, sharedCrtResourceManager->getAllocator(), &socketOptions.GetImpl());
 
+                    aws_byte_buf_init(&mStoreBuffer, sharedCrtResourceManager->getAllocator(), 1);
                     aws_byte_buf_init(&mSendBuffer, sharedCrtResourceManager->getAllocator(), 1);
                 }
 
@@ -45,7 +46,7 @@ namespace Aws
                     {
                         aws_socket_close(&mSocket);
                         aws_socket_clean_up(&mSocket);
-                        aws_byte_buf_clean_up(&mSendBuffer);
+                        aws_byte_buf_clean_up(&mStoreBuffer);
                     }
                 }
 
@@ -69,9 +70,22 @@ namespace Aws
                     if (!mConnected)
                     {
                         LOG_DEBUG(TAG, "Not connected yet. Saving the data to send");
-                        aws_byte_buf_append_dynamic(&mSendBuffer, &data);
+                        aws_byte_buf_append_dynamic(&mStoreBuffer, &data);
                         return 0;
                     }
+
+//                    if (mConnected && mSendBuffer.len > 0)
+//                    {
+//                        LOG_DEBUG(TAG, "Flushing send buffer");
+//                        aws_byte_cursor c = aws_byte_cursor_from_buf(&mSendBuffer);
+//                        aws_socket_write(&mSocket, &c, sOnWriteCompleted, this);
+//                        aws_byte_buf_reset(&mSendBuffer, false);
+//                    }
+//
+//                    aws_byte_buf_init_copy_from_cursor(&mSendBuffer, mSharedCrtResourceManager->getAllocator(), data);
+//                    aws_byte_cursor c = aws_byte_cursor_from_buf(&mSendBuffer);
+//                    aws_socket_write(&mSocket, &c, sOnWriteCompleted, this);
+//                    aws_byte_buf_reset(&mSendBuffer, false);
 
                     aws_socket_write(&mSocket, &data, sOnWriteCompleted, this);
                     return 0;
@@ -158,12 +172,12 @@ namespace Aws
 
                 void TcpForward::FlushSendBuffer()
                 {
-                    if (mConnected && mSendBuffer.len > 0)
+                    if (mConnected && mStoreBuffer.len > 0)
                     {
                         LOG_DEBUG(TAG, "Flushing send buffer");
-                        aws_byte_cursor c = aws_byte_cursor_from_buf(&mSendBuffer);
+                        aws_byte_cursor c = aws_byte_cursor_from_buf(&mStoreBuffer);
                         aws_socket_write(&mSocket, &c, sOnWriteCompleted, this);
-                        aws_byte_buf_reset(&mSendBuffer, false);
+                        aws_byte_buf_reset(&mStoreBuffer, false);
                     }
                 }
 

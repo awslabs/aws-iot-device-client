@@ -151,6 +151,12 @@ namespace Aws
                      * \brief A buffer to store data from the secure tunnel. This is only used before the socket is
                      * connected.
                      */
+                    Aws::Crt::ByteBuf mStoreBuffer;
+
+                    /**
+                     * \brief A buffer to store data from the secure tunnel. This is only used after the socket is
+                     * connected.
+                     */
                     Aws::Crt::ByteBuf mSendBuffer;
                 };
             } // namespace SecureTunneling

@@ -129,7 +129,12 @@ namespace Aws
                     /**
                      * \brief Callback when secure tunnel connection is complete
                      */
-                    void OnConnectionComplete() const;
+                    void OnConnectionSuccess() const;
+
+                    /**
+                     * \brief Callback when secure tunnel connection is complete
+                     */
+                    void OnConnectionFailure() const;
 
                     /**
                      * \brief Callback when secure tunnel connection is shutdown
