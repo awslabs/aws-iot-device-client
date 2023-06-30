@@ -24,7 +24,7 @@ SecureTunnelWrapper::SecureTunnelWrapper(
     const Aws::Iotsecuretunneling::OnStreamStart &onStreamStart,
     const Aws::Iotsecuretunneling::OnStreamReset &onStreamReset,
     const Aws::Iotsecuretunneling::OnSessionReset &onSessionReset)
-    : secureTunnel(new Aws::Iotsecuretunneling::SecureTunnel(
+    : secureTunnel(new Aws::Iotsecuretunneling::SecureTunnelBuilder(
           allocator,
           socketOptions,
           accessToken,

@@ -30,7 +30,7 @@ namespace Aws
                         const std::string &rootCa,
 
                         const Aws::Iotsecuretunneling::OnConnectionSuccess &onConnectionSuccess,
-                        const Aws::Iotsecuretunneling::onConnectionFailure &onConnectionFailure,
+                        const Aws::Iotsecuretunneling::OnConnectionFailure &onConnectionFailure,
                         const Aws::Iotsecuretunneling::OnConnectionShutdown &onConnectionShutdown,
                         const Aws::Iotsecuretunneling::OnSendDataComplete &onSendDataComplete,
                         const Aws::Iotsecuretunneling::OnDataReceive &onDataReceive,
