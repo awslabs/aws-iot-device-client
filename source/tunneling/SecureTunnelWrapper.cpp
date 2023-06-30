@@ -30,14 +30,15 @@ SecureTunnelWrapper::SecureTunnelWrapper(
           accessToken,
           localProxyMode,
           endpoint).WithRootCa(rootCa)
-                   .WithOnConnectionSuccess()
-                   .WithOnConnectionFailure()
-                   .WithOnConnectionShutdown()
-                   .WithOnSendDataComplete()
-                   .WithOnMessageReceived()
-                   .WithOnStreamStarted()
-                   .WithOnStreamReset()
-                   .WithOnSessionReset())
+                   .WithOnConnectionSuccess(OnConnectionSuccess)
+                   .WithOnConnectionFailure(OnConnectionFailure)
+                   .WithOnConnectionShutdown(onConnectionShutdown)
+                   .WithOnSendDataComplete(onSendDataComplete)
+                   .WithOnMessageReceived(onDataReceive)
+                   .WithOnStreamStarted(onStreamStart)
+                   .WithOnStreamReset(onStreamReset)
+                   .WithOnSessionReset(onSessionReset)
+                   .Build())
 
 
 //          rootCa,
