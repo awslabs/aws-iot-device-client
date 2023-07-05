@@ -60,6 +60,9 @@ TEST(ConfigShadowFeature, resetClientConfigWithValidJSON)
 })";
 
     SharedCrtResourceManager resourceManager;
+    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    resourceManager.initializeAllocator();
+
     JsonObject oldJsonObject(oldJsonString);
     JsonView jsonView = oldJsonObject.View();
     PlainConfig config;
@@ -151,6 +154,8 @@ TEST(ConfigShadowFeature, resetClientConfigWithInvalidJSON)
       }
 })";
     SharedCrtResourceManager resourceManager;
+    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    resourceManager.initializeAllocator();
 
     JsonObject oldJsonObject(oldJsonString);
     JsonView jsonView = oldJsonObject.View();

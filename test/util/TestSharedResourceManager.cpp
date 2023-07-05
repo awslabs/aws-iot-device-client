@@ -57,6 +57,9 @@ class SharedResourceManagerTest : public ::testing::Test
 
     void SetUp() override
     {
+        //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+        manager.initializeAllocator();
+
         // SharedCrtResourceManager::locateCredentials will check that cert, key files
         // have valid permissions. Create a temporary file to use as a placeholder for this purpose.
         FileUtils::CreateDirectoryWithPermissions(certDir.c_str(), 0700);

@@ -67,7 +67,9 @@ TEST(StringUtils, leavesNewLineAndTabAlone)
 
 TEST(StringUtils, maptoString)
 {
+    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
 
     Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> map;
     map.insert(std::pair<Aws::Crt::String, Aws::Crt::String>("a", "b"));
@@ -134,7 +136,9 @@ TEST(StringUtils, ParseToStringVector)
 {
     "args": ["hello", "world"]
 })";
+    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
 
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();

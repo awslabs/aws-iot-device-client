@@ -258,6 +258,9 @@ class TestJobsFeature : public ::testing::Test
   public:
     void SetUp()
     {
+        //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+        resourceManager.initializeAllocator();
+
         ThingName = Aws::Crt::String("thing-name value");
         notifier = shared_ptr<MockNotifier>(new MockNotifier());
         config = getSimpleConfig();

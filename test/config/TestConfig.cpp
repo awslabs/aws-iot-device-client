@@ -38,6 +38,9 @@ class ConfigTestFixture : public ::testing::Test
 
     void SetUp() override
     {
+        //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+        resourceManager.initializeAllocator();
+
         // Config::Validate will check that cert, key, and root-ca files exist.
         // Create a temporary file to use as a placeholder for this purpose.
         ofstream file(filePath, std::fstream::app);
@@ -156,7 +159,6 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
         "secure-element-token-label": "token-label"
       }
 })";
-    SharedCrtResourceManager resourceManager;
 
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();

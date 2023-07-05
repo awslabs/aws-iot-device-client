@@ -297,6 +297,7 @@ int main(int argc, char *argv[])
     }
 
     resourceManager = std::make_shared<SharedCrtResourceManager>();
+    resourceManager->initializeAllocator();
 
     CliArgs cliArgs;
     if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
