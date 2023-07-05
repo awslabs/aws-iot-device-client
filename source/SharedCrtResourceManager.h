@@ -58,7 +58,7 @@ namespace Aws
                 bool locateCredentials(const PlainConfig &config) const;
 
               public:
-                SharedCrtResourceManager() { }
+                SharedCrtResourceManager() {}
 
                 virtual ~SharedCrtResourceManager();
 
