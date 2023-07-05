@@ -173,7 +173,7 @@ TEST(JobDocument, SampleJobDocument)
     }
 })";
 
-    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     SharedCrtResourceManager resourceManager;
     resourceManager.initializeAllocator();
 
@@ -382,7 +382,7 @@ TEST(JobDocument, MissingRequiredFields)
     }
     })";
 
-    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     SharedCrtResourceManager resourceManager;
     resourceManager.initializeAllocator();
 
@@ -439,7 +439,7 @@ TEST(JobDocument, MinimumJobDocument)
     ]
 })";
 
-    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     SharedCrtResourceManager resourceManager;
     resourceManager.initializeAllocator();
 
@@ -536,7 +536,7 @@ TEST(JobDocument, MissingRequiredFieldsValue)
     }
     })";
 
-    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     SharedCrtResourceManager resourceManager;
     resourceManager.initializeAllocator();
 
@@ -567,7 +567,7 @@ TEST(JobDocument, CommandFieldsIsEmpty)
     ]
 })";
 
-    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     SharedCrtResourceManager resourceManager;
     resourceManager.initializeAllocator();
 
@@ -598,7 +598,7 @@ TEST(JobDocument, CommandContainsSpaceCharacters)
     ]
 })";
 
-    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     SharedCrtResourceManager resourceManager;
     resourceManager.initializeAllocator();
 
@@ -629,7 +629,7 @@ TEST(JobDocument, SpaceCharactersContainedWithinFirstWordOfCommand)
     ]
 })";
 
-    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     SharedCrtResourceManager resourceManager;
     resourceManager.initializeAllocator();
 
@@ -651,7 +651,7 @@ TEST(JobDocument, oldJobDocumentCompatibility)
     "path": "default"
 })";
 
-    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     SharedCrtResourceManager resourceManager;
     resourceManager.initializeAllocator();
 

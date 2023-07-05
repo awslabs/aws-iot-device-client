@@ -67,7 +67,7 @@ TEST(StringUtils, leavesNewLineAndTabAlone)
 
 TEST(StringUtils, maptoString)
 {
-    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     SharedCrtResourceManager resourceManager;
     resourceManager.initializeAllocator();
 
@@ -136,7 +136,7 @@ TEST(StringUtils, ParseToStringVector)
 {
     "args": ["hello", "world"]
 })";
-    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     SharedCrtResourceManager resourceManager;
     resourceManager.initializeAllocator();
 

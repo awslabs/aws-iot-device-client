@@ -117,7 +117,7 @@ TEST(SerializeConfigTestFixture, SerializeConfigTest)
         ]
     }
 })";
-    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     SharedCrtResourceManager resourceManager;
     resourceManager.initializeAllocator();
     PlainConfig config;

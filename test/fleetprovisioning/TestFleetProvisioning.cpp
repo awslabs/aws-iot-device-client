@@ -21,7 +21,7 @@ TEST(FleetProvisioning, EmptyTemplateParameters)
 TEST(FleetProvisioning, MalformedTemplateParameters)
 {
     Aws::Iot::DeviceClient::SharedCrtResourceManager resourceManager;
-    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     resourceManager.initializeAllocator();
 
     Aws::Crt::Optional<std::string> params("{\"SerialNumber\" \"Device-SN\"}"); // test missing colon
@@ -36,7 +36,7 @@ TEST(FleetProvisioning, MalformedTemplateParameters)
 TEST(FleetProvisioning, ValidTemplateParameters)
 {
     Aws::Iot::DeviceClient::SharedCrtResourceManager resourceManager;
-    //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
     resourceManager.initializeAllocator();
 
     Aws::Crt::Optional<std::string> params("{\"SerialNumber\": \"Device-SN\"}"); // test single JSON property

@@ -38,7 +38,7 @@ class ConfigTestFixture : public ::testing::Test
 
     void SetUp() override
     {
-        //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+        // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
         resourceManager.initializeAllocator();
 
         // Config::Validate will check that cert, key, and root-ca files exist.

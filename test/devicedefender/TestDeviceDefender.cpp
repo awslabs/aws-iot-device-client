@@ -85,7 +85,7 @@ class TestDeviceDefender : public testing::Test
     {
         deviceDefender = unique_ptr<MockDDFeature>(new MockDDFeature());
         manager = shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager());
-        //Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+        // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
         manager->initializeAllocator();
 
         notifier = shared_ptr<MockNotifier>(new MockNotifier());
