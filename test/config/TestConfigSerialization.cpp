@@ -21,7 +21,7 @@ using namespace Aws::Crt;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Util;
 
-TEST(SerializeConfigTestFixture, SerializeConfigTest)
+TEST(SerializeConfigTestFixture, SerializeCompleteConfigTest)
 {
     constexpr char jsonString[] = R"(
 {
@@ -39,7 +39,7 @@ TEST(SerializeConfigTestFixture, SerializeConfigTest)
     },
     "jobs": {
         "enabled": true,
-        "handler-directory": "directory" 
+        "handler-directory": "directory"
     },
     "tunneling": {
         "enabled": true
@@ -115,6 +115,66 @@ TEST(SerializeConfigTestFixture, SerializeConfigTest)
                 "heartbeat_time_sec": 10
             }
         ]
+    }
+})";
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
+    PlainConfig config;
+
+    JsonObject jsonObject(jsonString);
+    config.LoadFromJson(jsonObject.View());
+    auto inputJsonString = jsonObject.View().WriteCompact();
+
+    JsonObject serializedConfig;
+    config.SerializeToObject(serializedConfig);
+    auto serializedJsonString = serializedConfig.View().WriteCompact();
+
+    ASSERT_STREQ(inputJsonString.c_str(), serializedJsonString.c_str());
+}
+
+TEST(SerializeConfigTestFixture, SerializeBasicConfigTest)
+{
+    constexpr char jsonString[] = R"(
+{
+    "logging": {
+        "level": "DEBUG",
+        "type": "file",
+        "file": "./aws-iot-device-client.log",
+        "enable-sdk-logging": false,
+        "sdk-log-level": "TRACE",
+        "sdk-log-file": "/var/log/aws-iot-device-client/sdk.log"
+    },
+    "jobs": {
+        "enabled": true,
+        "handler-directory": ""
+    },
+    "tunneling": {
+        "enabled": true
+    },
+    "device-defender": {
+        "enabled": true,
+        "interval": 300
+    },
+    "fleet-provisioning": {
+        "enabled": true
+    },
+    "runtime-config": {
+        "completed-fp": false
+     },
+    "samples": {
+        "pub-sub": {
+            "enabled": true
+        }
+    },
+    "config-shadow": {
+        "enabled": true
+    },
+    "sample-shadow": {
+        "enabled": true
+    },
+    "secure-element": {
+        "enabled": true
     }
 })";
     // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
