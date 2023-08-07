@@ -5,7 +5,7 @@ project(aws-iot-device-sdk-cpp-v2-download NONE)
 include(ExternalProject)
 ExternalProject_Add(aws-iot-device-sdk-cpp-v2
         GIT_REPOSITORY          https://github.com/aws/aws-iot-device-sdk-cpp-v2.git
-        GIT_TAG                 b12656085b9bf1ecff1a0b8a4c7d496acc3f684f
+        GIT_TAG                 e065cff69ca9b52644347efdaf1e671eaec63c9c
         SOURCE_DIR              "${CMAKE_BINARY_DIR}/aws-iot-device-sdk-cpp-v2-src"
         BINARY_DIR              "${CMAKE_BINARY_DIR}/aws-iot-device-sdk-cpp-v2-build"
         CONFIGURE_COMMAND       ""
