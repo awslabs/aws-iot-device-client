@@ -272,12 +272,15 @@ namespace Aws
                 void SecureTunnelingFeature::OnConnectionShutdown(SecureTunnelingContext *contextToRemove)
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingFeature::OnConnectionShutdown");
-
+                    #if defined(DISABLE_MQTT)
+                    this->stop();
+                    #else
                     auto it =
                         find_if(mContexts.begin(), mContexts.end(), [&](const unique_ptr<SecureTunnelingContext> &c) {
                             return c.get() == contextToRemove;
                         });
                     mContexts.erase(std::remove(mContexts.begin(), mContexts.end(), *it));
+                    #endif
                 }
 
             } // namespace SecureTunneling
