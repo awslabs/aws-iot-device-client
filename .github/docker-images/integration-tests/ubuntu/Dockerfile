@@ -15,7 +15,7 @@ RUN mkdir /home/dependencies
 WORKDIR /home/dependencies
 
 RUN wget https://www.zlib.net/zlib-1.3.tar.gz -O /tmp/zlib-1.3.tar.gz && \
-	tar xzvf /tmp/zlib-1.2.13.tar.gz && \
+	tar xzvf /tmp/zlib-1.3.tar.gz && \
 	cd zlib-1.2.13 && \
 	./configure && \
 	make && \
