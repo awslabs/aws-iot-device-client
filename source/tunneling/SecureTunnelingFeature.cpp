@@ -275,10 +275,10 @@ namespace Aws
 #if defined(DISABLE_MQTT)
                     this->stop();
 #else
-                    auto it = find_if(
-                        mContexts.begin(),
-                        mContexts.end(),
-                        [&](const unique_ptr<SecureTunnelingContext> &c) { return c.get() == contextToRemove; });
+                    auto it =
+                        find_if(mContexts.begin(), mContexts.end(), [&](const unique_ptr<SecureTunnelingContext> &c) {
+                            return c.get() == contextToRemove;
+                        });
                     mContexts.erase(std::remove(mContexts.begin(), mContexts.end(), *it));
 #endif
                 }
