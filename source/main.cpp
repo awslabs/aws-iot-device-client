@@ -237,6 +237,10 @@ namespace Aws
                         case ClientBaseEventNotification::FEATURE_STOPPED:
                         {
                             LOGM_INFO(TAG, "%s has stopped", feature->getName().c_str());
+// Stopping DC instance if secure tunnel is closed for a ST component
+#if defined(DISABLE_MQTT)
+                            shutdown();
+#endif
                             break;
                         }
                         default:
