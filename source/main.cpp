@@ -157,7 +157,6 @@ void shutdown()
     }
 #endif
     LoggerFactory::getLoggerInstance()->shutdown();
-    cout << "AWS IoT Device Client must abort execution, reason: ST shutdown";
     exit(EXIT_SUCCESS);
 }
 
