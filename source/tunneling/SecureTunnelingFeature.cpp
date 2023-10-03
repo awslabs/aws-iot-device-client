@@ -7,6 +7,7 @@
 #include "TcpForward.h"
 #include <aws/crt/mqtt/MqttClient.h>
 #include <aws/iotsecuretunneling/SubscribeToTunnelsNotifyRequest.h>
+#include <csignal>
 #include <map>
 #include <memory>
 #include <thread>
@@ -272,14 +273,15 @@ namespace Aws
                 void SecureTunnelingFeature::OnConnectionShutdown(SecureTunnelingContext *contextToRemove)
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingFeature::OnConnectionShutdown");
-#if defined(DISABLE_MQTT)
-                    this->stop();
-#else
                     auto it =
                         find_if(mContexts.begin(), mContexts.end(), [&](const unique_ptr<SecureTunnelingContext> &c) {
                             return c.get() == contextToRemove;
                         });
                     mContexts.erase(std::remove(mContexts.begin(), mContexts.end(), *it));
+
+#if defined(DISABLE_MQTT)
+                    LOG_INFO(TAG, "Secure Tunnel closed, component cleaning up open thread");
+                    raise(SIGTERM);
 #endif
                 }
 

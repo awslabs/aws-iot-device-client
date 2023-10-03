@@ -145,16 +145,19 @@ void shutdown()
         LOG_DEBUG(TAG, "Calling stop all");
         features->stopAll();
     }
-    resourceManager->dumpMemTrace();
 
     LOG_INFO(TAG, "All features have stopped");
 // terminate program
 #if !defined(DISABLE_MQTT)
-    resourceManager->disconnect();
+    if (resourceManager != NULL)
+    {
+        resourceManager->dumpMemTrace();
+        resourceManager->disconnect();
+        resourceManager.reset();
+    }
 #endif
-    LoggerFactory::getLoggerInstance().get()->shutdown();
-    resourceManager.reset();
-    exit(0);
+    LoggerFactory::getLoggerInstance()->shutdown();
+    exit(EXIT_SUCCESS);
 }
 
 /**
@@ -162,7 +165,7 @@ void shutdown()
  *
  * @param reason the reason why the abort is happening
  */
-void deviceClientAbort(const string &reason)
+void deviceClientAbort(const string &reason, int exitCode)
 {
     if (resourceManager != NULL)
     {
@@ -172,7 +175,7 @@ void deviceClientAbort(const string &reason)
     LoggerFactory::getLoggerInstance()->shutdown();
     cout << "AWS IoT Device Client must abort execution, reason: " << reason << endl;
     cout << "Please check the AWS IoT Device Client logs for more information" << endl;
-    exit(EXIT_FAILURE);
+    exit(exitCode);
 }
 
 void attemptConnection()
@@ -190,7 +193,8 @@ void attemptConnection()
                     "IoT credentials, "
                     "configuration and/or certificate policy. ***",
                     DC_FATAL_ERROR);
-                deviceClientAbort("Failed to establish MQTT connection due to credential/configuration error");
+                deviceClientAbort(
+                    "Failed to establish MQTT connection due to credential/configuration error", EXIT_FAILURE);
                 return true;
             }
             else if (SharedCrtResourceManager::SUCCESS == connectionStatus)
@@ -209,7 +213,7 @@ void attemptConnection()
     catch (const std::exception &e)
     {
         LOGM_ERROR(TAG, "Error attempting to connect: %s", e.what());
-        deviceClientAbort("Failure from attemptConnection");
+        deviceClientAbort("Failure from attemptConnection", EXIT_FAILURE);
     }
 }
 
@@ -237,10 +241,6 @@ namespace Aws
                         case ClientBaseEventNotification::FEATURE_STOPPED:
                         {
                             LOGM_INFO(TAG, "%s has stopped", feature->getName().c_str());
-// Stopping DC instance if secure tunnel is closed for a ST component
-#if defined(DISABLE_MQTT)
-                            shutdown();
-#endif
                             break;
                         }
                         default:
@@ -283,7 +283,7 @@ namespace Aws
                         TAG,
                         "*** %s: Aborting program due to unrecoverable feature error! ***",
                         DeviceClient::DC_FATAL_ERROR);
-                    deviceClientAbort(feature->getName() + " encountered an error");
+                    deviceClientAbort(feature->getName() + " encountered an error", EXIT_FAILURE);
 #endif
                 }
             };
@@ -305,7 +305,7 @@ int main(int argc, char *argv[])
             TAG,
             "*** %s: AWS IoT Device Client must abort execution, reason: Invalid configuration ***",
             DC_FATAL_ERROR);
-        deviceClientAbort("Invalid configuration");
+        deviceClientAbort("Invalid configuration", EXIT_FAILURE);
     }
 
     if (!LoggerFactory::reconfigure(config.config) &&
@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
     if (!init(argc, argv))
     {
         LOGM_ERROR(TAG, "*** %s: An instance of Device Client is already running.", DC_FATAL_ERROR);
-        deviceClientAbort("An instance of Device Client is already running.");
+        deviceClientAbort("An instance of Device Client is already running.", EXIT_FAILURE);
     }
 #endif
 
@@ -356,7 +356,7 @@ int main(int argc, char *argv[])
     if (!resourceManager.get()->initialize(config.config, features))
     {
         LOGM_ERROR(TAG, "*** %s: Failed to initialize AWS CRT SDK.", DC_FATAL_ERROR);
-        deviceClientAbort("Failed to initialize AWS CRT SDK");
+        deviceClientAbort("Failed to initialize AWS CRT SDK", EXIT_FAILURE);
     }
 
 #if !defined(EXCLUDE_FP) && !defined(DISABLE_MQTT)
@@ -384,7 +384,7 @@ int main(int argc, char *argv[])
                 "Please verify your AWS IoT credentials, "
                 "configuration, Fleet Provisioning Template, claim certificate and policy used. ***",
                 DC_FATAL_ERROR);
-            deviceClientAbort("Fleet provisioning failed");
+            deviceClientAbort("Fleet provisioning failed", EXIT_FAILURE);
         }
         resourceManager->disconnect();
     }
@@ -395,8 +395,10 @@ int main(int argc, char *argv[])
             TAG,
             "*** %s: Fleet Provisioning configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
-        deviceClientAbort("Invalid configuration. Fleet Provisioning configuration is enabled but feature is not "
-                          "compiled into binary.");
+        deviceClientAbort(
+            "Invalid configuration. Fleet Provisioning configuration is enabled but feature is not "
+            "compiled into binary.",
+            EXIT_FAILURE);
     }
 #endif
 
@@ -415,7 +417,7 @@ int main(int argc, char *argv[])
             TAG,
             "*** %s: Secure Element configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
-        deviceClientAbort("Invalid configuration");
+        deviceClientAbort("Invalid configuration", EXIT_FAILURE);
     }
     else
     {
@@ -429,7 +431,8 @@ int main(int argc, char *argv[])
             "*** %s: Secure Element configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
         deviceClientAbort(
-            "Invalid configuration. Secure Element configuration is enabled but feature is not compiled into binary.");
+            "Invalid configuration. Secure Element configuration is enabled but feature is not compiled into binary.",
+            EXIT_FAILURE);
     }
 #endif
 
@@ -453,7 +456,7 @@ int main(int argc, char *argv[])
             TAG,
             "*** %s: Config Shadow configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
-        deviceClientAbort("Invalid configuration");
+        deviceClientAbort("Invalid configuration", EXIT_FAILURE);
     }
 #endif
 
@@ -477,7 +480,8 @@ int main(int argc, char *argv[])
         LOGM_ERROR(
             TAG, "*** %s: Jobs configuration is enabled but feature is not compiled into binary.", DC_FATAL_ERROR);
         deviceClientAbort(
-            "Invalid configuration. Config Shadow configuration is enabled but feature is not compiled into binary.");
+            "Invalid configuration. Config Shadow configuration is enabled but feature is not compiled into binary.",
+            EXIT_FAILURE);
     }
 #endif
 
@@ -502,8 +506,10 @@ int main(int argc, char *argv[])
             TAG,
             "*** %s: Secure Tunneling configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
-        deviceClientAbort("Invalid configuration. Secure Tunneling configuration is enabled but feature is not "
-                          "compiled into binary.");
+        deviceClientAbort(
+            "Invalid configuration. Secure Tunneling configuration is enabled but feature is not "
+            "compiled into binary.",
+            EXIT_FAILURE);
     }
 #endif
 
@@ -529,7 +535,8 @@ int main(int argc, char *argv[])
             "*** %s: Device Defender configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
         deviceClientAbort(
-            "Invalid configuration. Device Defender configuration is enabled but feature is not compiled into binary.");
+            "Invalid configuration. Device Defender configuration is enabled but feature is not compiled into binary.",
+            EXIT_FAILURE);
     }
 #endif
 
@@ -555,7 +562,8 @@ int main(int argc, char *argv[])
             "*** %s: Sample Shadow configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
         deviceClientAbort(
-            "Invalid configuration. Sample Shadow configuration is enabled but feature is not compiled into binary.");
+            "Invalid configuration. Sample Shadow configuration is enabled but feature is not compiled into binary.",
+            EXIT_FAILURE);
     }
 #endif
 
@@ -581,7 +589,8 @@ int main(int argc, char *argv[])
             "*** %s: PubSub sample configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
         deviceClientAbort(
-            "Invalid configuration. PubSub sample configuration is enabled but feature is not compiled into binary.");
+            "Invalid configuration. PubSub sample configuration is enabled but feature is not compiled into binary.",
+            EXIT_FAILURE);
     }
 #endif
 
@@ -607,7 +616,8 @@ int main(int argc, char *argv[])
             "*** %s: Sensor Publish configuration is enabled but feature is not compiled into binary.",
             DC_FATAL_ERROR);
         deviceClientAbort(
-            "Invalid configuration. Sensor Publish configuration is enabled but feature is not compiled into binary.");
+            "Invalid configuration. Sensor Publish configuration is enabled but feature is not compiled into binary.",
+            EXIT_FAILURE);
     }
 #endif
 
