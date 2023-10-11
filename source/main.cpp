@@ -348,6 +348,7 @@ int main(int argc, char *argv[])
     int received_signal;
     sigaddset(&sigset, SIGINT);
     sigaddset(&sigset, SIGHUP);
+    sigaddset(&sigset, SIGTERM);
     sigprocmask(SIG_BLOCK, &sigset, nullptr);
 
     auto listener = std::make_shared<DefaultClientBaseNotifier>();
