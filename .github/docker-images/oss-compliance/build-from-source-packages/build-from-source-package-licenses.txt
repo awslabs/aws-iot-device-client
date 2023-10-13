@@ -343,7 +343,7 @@ Public License instead of this License.
 
 ------
 
-** Google Test 1.10.0; version 1.10.0 -- https://github.com/google/googletest/blob/v1.10.x/LICENSE
+** Google Test 1.12.0; version 1.12.0 -- https://github.com/google/googletest/blob/v1.12.x/LICENSE
 Copyright 2008, Google Inc.
 All rights reserved.
 

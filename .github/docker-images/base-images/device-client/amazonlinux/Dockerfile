@@ -46,9 +46,9 @@ RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.24.4/cmake-3
 # Clone and build Google Test
 ###############################################################################
 WORKDIR /tmp
-RUN curl -sSL https://github.com/google/googletest/archive/release-1.11.0.tar.gz -o release-1.11.0.tar.gz \
-    && tar xf release-1.11.0.tar.gz \
-    && cd googletest-release-1.11.0 \
+RUN curl -sSL https://github.com/google/googletest/archive/release-1.12.0.tar.gz -o release-1.12.0.tar.gz \
+    && tar xf release-1.12.0.tar.gz \
+    && cd googletest-release-1.12.0 \
     && cmake -DBUILD_SHARED_LIBS=ON . \
     && make \
     && cp -a googletest/include/gtest /usr/include/ \
