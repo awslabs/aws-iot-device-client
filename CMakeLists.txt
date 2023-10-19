@@ -265,4 +265,6 @@ if (BUILD_TEST_DEPS)
             ${CMAKE_BINARY_DIR}/googletest-build)
 endif ()
 
-add_subdirectory(test)
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif(BUILD_TESTS)
