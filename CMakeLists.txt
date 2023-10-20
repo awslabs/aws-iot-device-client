@@ -19,6 +19,13 @@ option(EXCLUDE_SENSOR_PUBLISH "Builds the device client without the Sensor Publi
 option(EXCLUDE_SENSOR_PUBLISH_SAMPLES "Builds the device client without the Sensor Publish sample servers." OFF)
 option(GIT_VERSION "Updates the version number using the Git commit history" ON)
 
+if (APPLE)
+    # MacOS does not have inotify which the shadow sample requires
+    SET(EXCLUDE_SHADOW ON BOOL)
+    SET(EXCLUDE_CONFIG_SHADOW ON BOOL)
+    SET(EXCLUDE_SAMPLE_SHADOW ON BOOL)
+endif ()
+
 if (EXCLUDE_JOBS)
     add_definitions(-DEXCLUDE_JOBS)
 endif ()
