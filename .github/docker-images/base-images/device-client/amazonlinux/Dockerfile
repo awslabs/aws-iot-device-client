@@ -1,6 +1,6 @@
 FROM amazonlinux:2.0.20230307.0 as base
 
-ARG OPENSSL_VERSION=1.1.1n
+ARG OPENSSL_VERSION=3.1.2
 
 ###############################################################################
 # Install prereqs
@@ -22,7 +22,7 @@ RUN yum -y update \
     && rm -rf /var/cache/yum
 
 ###############################################################################
-# Install OpenSSL 1.1.1
+# Install OpenSSL 3.1.2
 ###############################################################################
 WORKDIR /tmp
 RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
