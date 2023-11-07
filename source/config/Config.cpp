@@ -17,6 +17,7 @@
 
 #endif
 
+#include "../SharedCrtResourceManager.h"
 #include "../util/FileUtils.h"
 #include "../util/MqttUtils.h"
 #include "../util/ProxyUtils.h"
@@ -2641,6 +2642,14 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 
 bool Config::init(const CliArgs &cliArgs)
 {
+#if defined(EXCLUDE_JOBS)
+    config.jobs.enabled = false;
+#endif
+
+#if defined(EXCLUDE_ST)
+    config.tunneling.enabled = false;
+#endif
+
     try
     {
         string filename = Config::DEFAULT_CONFIG_FILE;
