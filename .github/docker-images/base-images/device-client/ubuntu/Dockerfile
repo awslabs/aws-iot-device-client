@@ -20,7 +20,7 @@ RUN apt-get update -qq \
     && apt-get clean
 
 ###############################################################################
-# Install OpenSSL 3.1.2
+# Install OpenSSL 3.0.8
 ###############################################################################
 WORKDIR /tmp
 RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
