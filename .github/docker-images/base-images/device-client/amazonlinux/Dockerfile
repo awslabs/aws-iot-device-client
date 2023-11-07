@@ -1,6 +1,6 @@
 FROM amazonlinux:2.0.20230307.0 as base
 
-ARG OPENSSL_VERSION=3.1.2
+ARG OPENSSL_VERSION=3.0.8
 
 ###############################################################################
 # Install prereqs
