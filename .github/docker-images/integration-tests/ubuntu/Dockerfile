@@ -22,9 +22,9 @@ RUN wget https://www.zlib.net/zlib-1.3.tar.gz -O /tmp/zlib-1.3.tar.gz && \
 	make install && \
 	cd /home/dependencies
 
-RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.gz -O /tmp/boost.tar.gz && \
+RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz -O /tmp/boost.tar.gz && \
 	tar xzvf /tmp/boost.tar.gz && \
-	cd boost_1_79_0 && \
+	cd boost_1_81_0 && \
 	./bootstrap.sh && \
 	./b2 install link=static && \
 	cd /home/dependencies
@@ -39,14 +39,6 @@ RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/p
 	make install && \
 	cd /home/dependencies
 
-RUN git clone https://github.com/openssl/openssl.git && \
-	cd openssl && \
-	git checkout OpenSSL_1_1_1-stable && \
-	./config && \
-	make depend && \
-	make all && \
-	cd /home/dependencies
-
 RUN git clone --branch v2.13.6 https://github.com/catchorg/Catch2.git && \
 	cd Catch2 && \
 	mkdir build && \
@@ -58,7 +50,7 @@ RUN git clone --branch v2.13.6 https://github.com/catchorg/Catch2.git && \
 
 RUN git clone https://github.com/aws-samples/aws-iot-securetunneling-localproxy && \
 	cd aws-iot-securetunneling-localproxy && \
-    git checkout 851de4cc2b48861b835327d005000c7d0c81d11b && \
+    git checkout d3150e0ebc4ef022939deb1ab43de005254f5751 && \
 	mkdir build && \
 	cd build && \
 	cmake ../ && \

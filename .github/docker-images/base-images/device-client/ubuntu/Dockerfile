@@ -2,7 +2,7 @@ FROM ubuntu:18.04 AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG OPENSSL_VERSION=1.1.1n
+ARG OPENSSL_VERSION=3.0.8
 
 ###############################################################################
 # Install prereqs
@@ -20,7 +20,7 @@ RUN apt-get update -qq \
     && apt-get clean
 
 ###############################################################################
-# Install OpenSSL 1.1.1
+# Install OpenSSL 3.0.8
 ###############################################################################
 WORKDIR /tmp
 RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
