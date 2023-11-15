@@ -168,7 +168,7 @@ if (BUILD_SDK)
     set(BUILD_DEPS ON CACHE BOOL "Build dependencies for the AWS SDK" FORCE)
     set(USE_OPENSSL ON CACHE BOOL "Use OpenSSL instead of aws-lc" FORCE)
     configure_file(CMakeLists.txt.awssdk
-            aws-iot-device-sdk-cpp-v2-download/CMakeLists.txt)
+            ${CMAKE_BINARY_DIR}/aws-iot-device-sdk-cpp-v2-download/CMakeLists.txt)
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/aws-iot-device-sdk-cpp-v2-download)
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
@@ -248,7 +248,7 @@ endif ()
 if (BUILD_TEST_DEPS)
     # Download and unpack googletest at configure time
     configure_file(CMakeLists.txt.gtest
-            googletest-download/CMakeLists.txt)
+            ${CMAKE_BINARY_DIR}/googletest-download/CMakeLists.txt)
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download)
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
