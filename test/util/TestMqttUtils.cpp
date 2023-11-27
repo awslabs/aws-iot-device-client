@@ -27,21 +27,6 @@ TEST(MqttUtils, ReservedTopicValid)
     ASSERT_TRUE(MqttUtils::ValidateAwsIotMqttTopicName(topic));
 }
 
-TEST(MqttUtils, TopicNotValidExceedsMaxSlashes)
-{
-    std::string topic(MqttUtils::MAX_NUMBER_OF_FORWARD_SLASHES + 1, '/');
-
-    ASSERT_FALSE(MqttUtils::ValidateAwsIotMqttTopicName(topic));
-}
-
-TEST(MqttUtils, TopicValidExceedsMaxSlashesWithReservedTopic)
-{
-    std::string topic(RESERVED_TOPIC);
-    std::fill_n(std::back_inserter(topic), MqttUtils::MAX_NUMBER_OF_FORWARD_SLASHES, '/');
-
-    ASSERT_TRUE(MqttUtils::ValidateAwsIotMqttTopicName(topic));
-}
-
 TEST(MqttUtils, TopicNotValidExceedsMaxLength)
 {
     std::string topic(MqttUtils::MAX_LENGTH_OF_TOPIC + 1, 'A');

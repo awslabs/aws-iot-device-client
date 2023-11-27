@@ -24,17 +24,6 @@ bool MqttUtils::ValidateAwsIotMqttTopicName(std::string topic)
         topic = reserved_topic.suffix();
     }
 
-    const std::size_t count_slashes = std::count(topic.cbegin(), topic.cend(), '/');
-    if (count_slashes > MAX_NUMBER_OF_FORWARD_SLASHES)
-    {
-        LOGM_ERROR(
-            TAG,
-            "Number of forward slashes in topic (%lu) exceeds maximum (%lu)",
-            count_slashes,
-            MAX_NUMBER_OF_FORWARD_SLASHES);
-        return false;
-    }
-
     // Since std::string is based on char, the size of the string and number of UTF8 chars is same.
     if (topic.size() > MAX_LENGTH_OF_TOPIC)
     {
