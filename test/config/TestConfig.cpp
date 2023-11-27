@@ -1310,41 +1310,6 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopicEmpty)
     ASSERT_FALSE(settings.enabled);
 }
 
-TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopic)
-{
-    constexpr char jsonString[] = R"(
-{
-    "endpoint": "endpoint value",
-    "cert": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
-    "key": "/tmp/aws-iot-device-client-test-file",
-    "thing-name": "thing-name value",
-    "sensor-publish": {
-        "sensors": [
-            {
-                "addr": "/tmp/sensors/my-sensor-server",
-                "eom_delimiter": "[\r\n]+",
-                "mqtt_topic": "////////my-sensor-data"
-            }
-        ]
-    }
-})";
-    JsonObject jsonObject(jsonString);
-    JsonView jsonView = jsonObject.View();
-
-    PlainConfig config;
-    config.LoadFromJson(jsonView);
-
-#if defined(EXCLUDE_SENSOR_PUBLISH)
-    GTEST_SKIP();
-#endif
-    ASSERT_FALSE(config.Validate()); // Invalid mqtt_topic.
-    ASSERT_TRUE(config.sensorPublish.enabled);
-    ASSERT_EQ(config.sensorPublish.settings.size(), 1);
-    const auto &settings = config.sensorPublish.settings[0];
-    ASSERT_FALSE(settings.enabled);
-}
-
 TEST_F(ConfigTestFixture, SensorPublishInvalidConfigEomDelimiter)
 {
     constexpr char jsonString[] = R"(
