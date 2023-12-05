@@ -103,9 +103,12 @@ class TestSecureTunnelingFeature : public testing::Test
   public:
     void SetUp() override
     {
+        manager = shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager());
+        // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+        manager->initializeAllocator();
+
         thingName = Aws::Crt::String("thing-name value");
         secureTunnelingFeature = shared_ptr<MockSecureTunnelingFeature>(new MockSecureTunnelingFeature());
-        manager = shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager());
         mockClient = shared_ptr<MockIotSecureTunnelingClient>(new MockIotSecureTunnelingClient());
         notifier = shared_ptr<MockNotifier>(new MockNotifier());
         fakeContext = unique_ptr<FakeSecureTunnelContext>(new FakeSecureTunnelContext());

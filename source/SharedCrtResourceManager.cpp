@@ -39,9 +39,29 @@ bool SharedCrtResourceManager::initialize(
     std::shared_ptr<Util::FeatureRegistry> featureRegistry)
 {
     features = featureRegistry;
-    initializeAllocator(config);
     initialized = buildClient(config) == SharedCrtResourceManager::SUCCESS;
     return initialized;
+}
+
+void SharedCrtResourceManager::loadMemTraceLevelFromEnvironment()
+{
+    const char *memTraceLevelStr = std::getenv("AWS_CRT_MEMORY_TRACING");
+    if (memTraceLevelStr)
+    {
+        switch (atoi(memTraceLevelStr))
+        {
+            case AWS_MEMTRACE_BYTES:
+                LOG_DEBUG(Config::TAG, "Set AWS_CRT_MEMORY_TRACING=AWS_MEMTRACE_BYTES");
+                memTraceLevel = AWS_MEMTRACE_BYTES;
+                break;
+            case AWS_MEMTRACE_STACKS:
+                LOG_DEBUG(Config::TAG, "Set AWS_CRT_MEMORY_TRACING=AWS_MEMTRACE_STACKS");
+                memTraceLevel = AWS_MEMTRACE_STACKS;
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 bool SharedCrtResourceManager::locateCredentials(const PlainConfig &config) const
@@ -174,22 +194,24 @@ bool SharedCrtResourceManager::setupLogging(const PlainConfig &config) const
     return true;
 }
 
-void SharedCrtResourceManager::initializeAllocator(const PlainConfig &config)
+void SharedCrtResourceManager::initializeAllocator()
 {
+    loadMemTraceLevelFromEnvironment();
     allocator = aws_default_allocator();
-    memTraceLevel = config.memTraceLevel;
+
     if (memTraceLevel != AWS_MEMTRACE_NONE)
     {
         // If memTraceLevel == AWS_MEMTRACE_STACKS(2), then by default 8 frames per stack are used.
         allocator = aws_mem_tracer_new(allocator, nullptr, memTraceLevel, 0);
     }
+
+    // We MUST declare an instance of the ApiHandle to perform global initialization
+    // of the SDK libraries
+    apiHandle = unique_ptr<ApiHandle>(new ApiHandle());
 }
 
 int SharedCrtResourceManager::buildClient(const PlainConfig &config)
 {
-    // We MUST declare an instance of the ApiHandle to perform global initialization
-    // of the SDK libraries
-    apiHandle = unique_ptr<ApiHandle>(new ApiHandle());
     if (config.logConfig.sdkLoggingEnabled)
     {
         if (!setupLogging(config))
@@ -520,6 +542,8 @@ void SharedCrtResourceManager::disconnect()
     {
         return;
     }
+
+>>>>>>> updateSDKVersion
     if (connection->Disconnect())
     {
         if (connectionClosedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==

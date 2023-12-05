@@ -290,24 +290,6 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
 
 bool PlainConfig::LoadFromEnvironment()
 {
-    const char *memTraceLevelStr = std::getenv("AWS_CRT_MEMORY_TRACING");
-    if (memTraceLevelStr)
-    {
-        switch (atoi(memTraceLevelStr))
-        {
-            case AWS_MEMTRACE_BYTES:
-                LOG_DEBUG(Config::TAG, "Set AWS_CRT_MEMORY_TRACING=AWS_MEMTRACE_BYTES");
-                memTraceLevel = AWS_MEMTRACE_BYTES;
-                break;
-            case AWS_MEMTRACE_STACKS:
-                LOG_DEBUG(Config::TAG, "Set AWS_CRT_MEMORY_TRACING=AWS_MEMTRACE_STACKS");
-                memTraceLevel = AWS_MEMTRACE_STACKS;
-                break;
-            default:
-                break;
-        }
-    }
-
     const char *lockFilePathIn = std::getenv("LOCK_FILE_PATH");
     if (lockFilePathIn)
     {

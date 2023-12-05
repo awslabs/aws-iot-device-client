@@ -293,12 +293,17 @@ namespace Aws
 
 int main(int argc, char *argv[])
 {
-    CliArgs cliArgs;
+
     if (Config::CheckTerminalArgs(argc, argv))
     {
         LoggerFactory::getLoggerInstance()->shutdown();
         return 0;
     }
+
+    resourceManager = std::make_shared<SharedCrtResourceManager>();
+    resourceManager->initializeAllocator();
+
+    CliArgs cliArgs;
     if (!Config::ParseCliArgs(argc, argv, cliArgs) || !config.init(cliArgs))
     {
         LOGM_ERROR(
@@ -352,8 +357,6 @@ int main(int argc, char *argv[])
     sigprocmask(SIG_BLOCK, &sigset, nullptr);
 
     auto listener = std::make_shared<DefaultClientBaseNotifier>();
-    resourceManager = std::make_shared<SharedCrtResourceManager>();
-
     if (!resourceManager.get()->initialize(config.config, features))
     {
         LOGM_ERROR(TAG, "*** %s: Failed to initialize AWS CRT SDK.", DC_FATAL_ERROR);

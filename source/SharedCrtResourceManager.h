@@ -49,7 +49,7 @@ namespace Aws
 
                 int buildClient(const PlainConfig &config);
 
-                void initializeAllocator(const PlainConfig &config);
+                void loadMemTraceLevelFromEnvironment();
 
               protected:
                 /**
@@ -58,7 +58,7 @@ namespace Aws
                 bool locateCredentials(const PlainConfig &config) const;
 
               public:
-                SharedCrtResourceManager() = default;
+                SharedCrtResourceManager() {}
 
                 virtual ~SharedCrtResourceManager();
 
@@ -79,6 +79,8 @@ namespace Aws
                 static const int ABORT = 2;
 
                 bool initialize(const PlainConfig &config, std::shared_ptr<Util::FeatureRegistry> featureRegistry);
+
+                void initializeAllocator();
 
                 void initializeAWSHttpLib();
 

@@ -100,7 +100,7 @@ RUN mkdir sdk-cpp-workspace \
     && cd sdk-cpp-workspace \
     && git clone https://github.com/aws/aws-iot-device-sdk-cpp-v2.git \
     && cd aws-iot-device-sdk-cpp-v2 \
-    && git checkout ac3ba3774b031dde1b988e698880d6064d53b9d9 \
+    && git checkout 74c8b683ebe5b1cbf484f6acaa281f56aaa63948 \
     && git submodule update --init --recursive \
     && cd .. \
     && mkdir aws-iot-device-sdk-cpp-v2-build \
