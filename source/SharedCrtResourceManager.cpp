@@ -543,7 +543,6 @@ void SharedCrtResourceManager::disconnect()
         return;
     }
 
->>>>>>> updateSDKVersion
     if (connection->Disconnect())
     {
         if (connectionClosedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
