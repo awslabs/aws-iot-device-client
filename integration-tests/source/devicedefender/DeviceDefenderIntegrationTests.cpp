@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "../IntegrationTestResourceHandler.h"
-#include <aws/core/Aws.h>
-#include <aws/iot/IoTClient.h>
 #include <gtest/gtest.h>
 #include <thread>
 
@@ -21,7 +19,7 @@ extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 static const int WAIT_TIME = 1300;
 static const int INTERVAL = 30;
 
-class TestDeviceDefenderFeature : public ::testing::Test
+class TestDeviceDefenderFeature : public testing::Test
 {
   public:
     void SetUp() override

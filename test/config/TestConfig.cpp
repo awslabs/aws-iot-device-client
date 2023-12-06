@@ -990,11 +990,14 @@ TEST_F(ConfigTestFixture, FleetProvisioningCli)
     config.LoadFromCliArgs(cliArgs);
 
     ASSERT_TRUE(config.Validate());
+#if !defined(DISABLE_MQTT)
+    // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
     ASSERT_TRUE(config.fleetProvisioning.enabled);
     ASSERT_STREQ("cli-template-name", config.fleetProvisioning.templateName->c_str());
     ASSERT_STREQ("{\"SerialNumber\": \"Device-SN\"}", config.fleetProvisioning.templateParameters->c_str());
     ASSERT_STREQ(filePath.c_str(), config.fleetProvisioning.csrFile->c_str());
     ASSERT_STREQ(filePath.c_str(), config.fleetProvisioning.deviceKey->c_str());
+#endif
 }
 
 TEST_F(ConfigTestFixture, DeviceDefenderCli)
@@ -1083,14 +1086,19 @@ TEST_F(ConfigTestFixture, PubSubSampleCli)
     config.LoadFromCliArgs(cliArgs);
 
     ASSERT_TRUE(config.Validate());
+#if !defined(DISABLE_MQTT)
+    // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
     ASSERT_TRUE(config.pubSub.enabled);
     ASSERT_STREQ("publish_topic", config.pubSub.publishTopic->c_str());
     ASSERT_STREQ(samplesFilePath.c_str(), config.pubSub.publishFile->c_str());
     ASSERT_STREQ("subscribe_topic", config.pubSub.subscribeTopic->c_str());
     ASSERT_STREQ(samplesFilePath.c_str(), config.pubSub.subscribeFile->c_str());
+#endif
     remove(samplesFilePath.c_str());
 }
 
+#if !defined(DISABLE_MQTT)
+// These tests are not applicable if MQTT is disabled.
 TEST_F(ConfigTestFixture, SampleShadowCli)
 {
     string inputFilePath = "/tmp/inputFile";
@@ -1134,6 +1142,7 @@ TEST_F(ConfigTestFixture, SampleShadowCli)
     remove(inputFilePath.c_str());
     remove(outputFilePath.c_str());
 }
+#endif
 
 TEST_F(ConfigTestFixture, SensorPublishMinimumConfig)
 {
@@ -1295,41 +1304,6 @@ TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopicEmpty)
     GTEST_SKIP();
 #endif
     ASSERT_FALSE(config.Validate()); // Empty mqtt_topic.
-    ASSERT_TRUE(config.sensorPublish.enabled);
-    ASSERT_EQ(config.sensorPublish.settings.size(), 1);
-    const auto &settings = config.sensorPublish.settings[0];
-    ASSERT_FALSE(settings.enabled);
-}
-
-TEST_F(ConfigTestFixture, SensorPublishInvalidConfigMqttTopic)
-{
-    constexpr char jsonString[] = R"(
-{
-    "endpoint": "endpoint value",
-    "cert": "/tmp/aws-iot-device-client-test-file",
-    "root-ca": "/tmp/aws-iot-device-client-test/AmazonRootCA1.pem",
-    "key": "/tmp/aws-iot-device-client-test-file",
-    "thing-name": "thing-name value",
-    "sensor-publish": {
-        "sensors": [
-            {
-                "addr": "/tmp/sensors/my-sensor-server",
-                "eom_delimiter": "[\r\n]+",
-                "mqtt_topic": "////////my-sensor-data"
-            }
-        ]
-    }
-})";
-    JsonObject jsonObject(jsonString);
-    JsonView jsonView = jsonObject.View();
-
-    PlainConfig config;
-    config.LoadFromJson(jsonView);
-
-#if defined(EXCLUDE_SENSOR_PUBLISH)
-    GTEST_SKIP();
-#endif
-    ASSERT_FALSE(config.Validate()); // Invalid mqtt_topic.
     ASSERT_TRUE(config.sensorPublish.enabled);
     ASSERT_EQ(config.sensorPublish.settings.size(), 1);
     const auto &settings = config.sensorPublish.settings[0];

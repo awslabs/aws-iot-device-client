@@ -135,15 +135,30 @@ class GlobalEnvironment : public ::testing::Environment
     }
 
     // cppcheck-suppress unusedFunction
+    void SetUp() override
+    {
+        Aws::Client::ClientConfiguration clientConfig;
+        clientConfig.region = REGION;
+        resourceHandler =
+            std::unique_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
+    }
+
+    // cppcheck-suppress unusedFunction
     void TearDown() override
     {
         resourceHandler->CleanUp();
         if (CLEAN_UP)
         {
+            printf("Clean up thingName: %s\n", THING_NAME.c_str());
             resourceHandler->CleanUpThingAndCert(THING_NAME);
         }
+        else
+        {
+            printf("Skipping clean up for thingName: %s\n", THING_NAME.c_str());
+            resourceHandler->GetTargetArn(THING_NAME);
+        }
+        resourceHandler.reset();
     }
-    Aws::SDKOptions options;
 };
 
 int main(int argc, char **argv)
@@ -168,13 +183,18 @@ int main(int argc, char **argv)
     }
     catch (const std::exception &e)
     {
-        printf("%s", e.what());
+        printf("%s\n", e.what());
     }
     catch (...)
     {
-        printf("Unknown Exception while parsing test arguments");
+        printf("Unknown Exception while parsing test arguments\n");
     }
 
+    Aws::SDKOptions options;
+    Aws::InitAPI(options);
     ::testing::AddGlobalTestEnvironment(new GlobalEnvironment());
-    return RUN_ALL_TESTS();
+    int rc = RUN_ALL_TESTS();
+    printf("Tests Complete!\n");
+    Aws::ShutdownAPI(options);
+    return rc;
 }

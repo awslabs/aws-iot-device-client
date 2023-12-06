@@ -7,7 +7,7 @@ RUN #yum update -y && yum install -y libcurl-devel openssl-devel libuuid-devel m
 COPY ./integration-tests /root/integration-tests
 RUN mkdir -p /root/integration-tests/build \
     && cd /root/integration-tests/build \
-    && cmake .. \
+    && cmake .. -DCMAKE_BUILD_TYPE=DEBUG \
     && cmake --build . --target aws-iot-device-client-integration-tests
 
 # Actual docker image

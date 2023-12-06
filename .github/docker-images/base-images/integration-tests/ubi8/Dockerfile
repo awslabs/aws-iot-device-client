@@ -1,5 +1,7 @@
 FROM registry.access.redhat.com/ubi8/ubi
 
+ARG OPENSSL_VERSION=1.1.1n
+
 RUN yum -y update && yum -y install \
     autoconf \
     bzip2 \
@@ -14,9 +16,9 @@ RUN yum -y update && yum -y install \
     wget
 
 
-RUN mkdir /openssl && cd /openssl && wget https://www.openssl.org/source/openssl-1.1.1n.tar.gz \
-    && tar -zxvf openssl-1.1.1n.tar.gz \
-    && cd openssl-1.1.1n \
+RUN mkdir /openssl && cd /openssl && wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
+    && tar -zxvf openssl-${OPENSSL_VERSION}.tar.gz \
+    && cd openssl-${OPENSSL_VERSION} \
     && ./config \
     && make \
     && make install

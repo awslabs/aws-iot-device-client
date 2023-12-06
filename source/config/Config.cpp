@@ -17,6 +17,7 @@
 
 #endif
 
+#include "../SharedCrtResourceManager.h"
 #include "../util/FileUtils.h"
 #include "../util/MqttUtils.h"
 #include "../util/ProxyUtils.h"
@@ -276,11 +277,15 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
         thingName = cliArgs.at(PlainConfig::CLI_THING_NAME).c_str();
     }
 
-    return logConfig.LoadFromCliArgs(cliArgs) && jobs.LoadFromCliArgs(cliArgs) && tunneling.LoadFromCliArgs(cliArgs) &&
-           deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs) &&
-           pubSub.LoadFromCliArgs(cliArgs) && sampleShadow.LoadFromCliArgs(cliArgs) &&
-           configShadow.LoadFromCliArgs(cliArgs) && secureElement.LoadFromCliArgs(cliArgs) &&
-           httpProxyConfig.LoadFromCliArgs(cliArgs);
+    bool loadFeatureCliArgs = tunneling.LoadFromCliArgs(cliArgs) && logConfig.LoadFromCliArgs(cliArgs);
+#if !defined(DISABLE_MQTT)
+    loadFeatureCliArgs = loadFeatureCliArgs && jobs.LoadFromCliArgs(cliArgs) &&
+                         deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs) &&
+                         pubSub.LoadFromCliArgs(cliArgs) && sampleShadow.LoadFromCliArgs(cliArgs) &&
+                         configShadow.LoadFromCliArgs(cliArgs) && secureElement.LoadFromCliArgs(cliArgs) &&
+                         httpProxyConfig.LoadFromCliArgs(cliArgs);
+#endif
+    return loadFeatureCliArgs;
 }
 
 bool PlainConfig::LoadFromEnvironment()
@@ -316,10 +321,14 @@ bool PlainConfig::LoadFromEnvironment()
         lockFilePath = lockFilePathStr;
     }
 
-    return logConfig.LoadFromEnvironment() && jobs.LoadFromEnvironment() && tunneling.LoadFromEnvironment() &&
-           deviceDefender.LoadFromEnvironment() && fleetProvisioning.LoadFromEnvironment() &&
-           fleetProvisioningRuntimeConfig.LoadFromEnvironment() && pubSub.LoadFromEnvironment() &&
-           sampleShadow.LoadFromEnvironment() && configShadow.LoadFromEnvironment();
+    bool loadFeatureEnvironmentVar = tunneling.LoadFromEnvironment() && logConfig.LoadFromEnvironment();
+#if !defined(DISABLE_MQTT)
+    loadFeatureEnvironmentVar = loadFeatureEnvironmentVar && jobs.LoadFromEnvironment() &&
+                                deviceDefender.LoadFromEnvironment() && fleetProvisioning.LoadFromEnvironment() &&
+                                fleetProvisioningRuntimeConfig.LoadFromEnvironment() && pubSub.LoadFromEnvironment() &&
+                                sampleShadow.LoadFromEnvironment() && configShadow.LoadFromEnvironment();
+#endif
+    return loadFeatureEnvironmentVar;
 }
 
 bool PlainConfig::Validate() const
@@ -373,13 +382,13 @@ bool PlainConfig::Validate() const
         return false;
     }
 #endif
-#if !defined(EXCLUDE_JOBS)
+#if !defined(EXCLUDE_JOBS) || !defined(DISABLE_MQTT)
     if (!jobs.Validate())
     {
         return false;
     }
 #endif
-#if !defined(EXCLUDE_DD)
+#if !defined(EXCLUDE_DD) || !defined(DISABLE_MQTT)
     if (!deviceDefender.Validate())
     {
         return false;
@@ -391,19 +400,19 @@ bool PlainConfig::Validate() const
         return false;
     }
 #endif
-#if !defined(EXCLUDE_FP)
+#if !defined(EXCLUDE_FP) || !defined(DISABLE_MQTT)
     if (!fleetProvisioning.Validate())
     {
         return false;
     }
 #endif
-#if !defined(EXCLUDE_PUBSUB)
+#if !defined(EXCLUDE_PUBSUB) || !defined(DISABLE_MQTT)
     if (!pubSub.Validate())
     {
         return false;
     }
 #endif
-#if !defined(EXCLUDE_SHADOW)
+#if !defined(EXCLUDE_SHADOW) || !defined(DISABLE_MQTT)
     if (!sampleShadow.Validate() || !configShadow.Validate())
     {
         return false;
@@ -413,7 +422,7 @@ bool PlainConfig::Validate() const
     {
         return false;
     }
-#if !defined(EXCLUDE_SENSOR_PUBLISH)
+#if !defined(EXCLUDE_SENSOR_PUBLISH) || !defined(DISABLE_MQTT)
     if (!sensorPublish.Validate())
     {
         return false;
@@ -2633,6 +2642,14 @@ bool Config::ParseCliArgs(int argc, char **argv, CliArgs &cliArgs)
 
 bool Config::init(const CliArgs &cliArgs)
 {
+#if defined(EXCLUDE_JOBS)
+    config.jobs.enabled = false;
+#endif
+
+#if defined(EXCLUDE_ST)
+    config.tunneling.enabled = false;
+#endif
+
     try
     {
         string filename = Config::DEFAULT_CONFIG_FILE;
@@ -2674,6 +2691,8 @@ bool Config::init(const CliArgs &cliArgs)
             return false;
         }
 
+#if !defined(DISABLE_MQTT)
+        // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
         if (ParseConfigFile(
                 Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, FLEET_PROVISIONING_RUNTIME_CONFIG) &&
             ValidateAndStoreRuntimeConfig())
@@ -2683,7 +2702,10 @@ bool Config::init(const CliArgs &cliArgs)
                 "Successfully fetched Runtime config file '%s' and validated its content.",
                 Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
         }
+#endif
 
+#if !defined(DISABLE_MQTT)
+        // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
         if (ParseConfigFile(config.httpProxyConfig.proxyConfigPath->c_str(), HTTP_PROXY_CONFIG) &&
             config.httpProxyConfig.httpProxyEnabled)
         {
@@ -2702,6 +2724,7 @@ bool Config::init(const CliArgs &cliArgs)
                 config.httpProxyConfig.proxyConfigPath->c_str());
             return true;
         }
+#endif
 
         return config.Validate();
     }
@@ -2864,7 +2887,9 @@ bool Config::ParseConfigFile(const string &file, ConfigFileType configFileType)
         }
     }
 
+#if !defined(DISABLE_MQTT)
     LOGM_INFO(TAG, "Successfully fetched JSON config file: %s", Sanitize(contents).c_str());
+#endif
     setting.close();
 
     return true;

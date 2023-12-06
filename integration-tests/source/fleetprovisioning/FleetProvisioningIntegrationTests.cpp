@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "../IntegrationTestResourceHandler.h"
-#include <aws/core/Aws.h>
-#include <aws/iot/IoTClient.h>
 #include <aws/iot/model/CreateJobRequest.h>
 #include <gtest/gtest.h>
 #include <thread>
@@ -34,6 +32,7 @@ class TestFleetProvisioningFeature : public ::testing::Test
             GTEST_SKIP();
         }
     }
+    void TearDown() override { resourceHandler->CleanUp(); }
 };
 
 TEST_F(TestFleetProvisioningFeature, HappyPath)

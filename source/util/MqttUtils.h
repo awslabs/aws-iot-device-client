@@ -18,15 +18,10 @@ namespace Aws
                     //
                     // https://docs.aws.amazon.com/general/latest/gr/iot-core.html#message-broker-limits
                     //
-                    // A topic in a publish or subscribe request can have no more than 7 forward slashes (/).
-                    // This excludes the first 3 slashes in the mandatory segments for
-                    // Basic Ingest topics ($AWS/rules/rule-name/).
-                    //
                     // The topic passed to AWS IoT Core when sending a publish request can be no larger
                     // than 256 bytes of UTF-8 encoded characters. This excludes the first 3 mandatory
                     // segments for Basic Ingest topics ($AWS/rules/rule-name/).
                     //
-                    static constexpr std::size_t MAX_NUMBER_OF_FORWARD_SLASHES{7};
                     static constexpr std::size_t MAX_LENGTH_OF_TOPIC{256};
 
                     /**

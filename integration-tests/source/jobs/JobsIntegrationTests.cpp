@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "../IntegrationTestResourceHandler.h"
-#include <aws/core/Aws.h>
-#include <aws/iot/IoTClient.h>
 #include <aws/iot/model/CreateJobRequest.h>
 #include <gtest/gtest.h>
 
@@ -45,6 +43,9 @@ static constexpr char RUN_COMMAND_PRINT_GREETING_JOB_DOC[] =
 
 class TestJobsFeature : public ::testing::Test
 {
+  public:
+    void SetUp() override {}
+    void TearDown() override { resourceHandler->CleanUp(); }
 };
 
 TEST_F(TestJobsFeature, InstallPackages)

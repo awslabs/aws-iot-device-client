@@ -1,5 +1,7 @@
 FROM ubuntu:18.04
 
+ARG OPENSSL_VERSION=1.1.1n
+
 RUN apt-get update && apt-get install -y \
     wget \
     git \
@@ -10,9 +12,9 @@ RUN apt-get update && apt-get install -y \
     libtool \
     zlib1g-dev
 
-RUN mkdir /openssl && cd /openssl && wget https://www.openssl.org/source/openssl-1.1.1n.tar.gz \
-    && tar -zxvf openssl-1.1.1n.tar.gz \
-    && cd openssl-1.1.1n \
+RUN mkdir /openssl && cd /openssl && wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
+    && tar -zxvf openssl-${OPENSSL_VERSION}.tar.gz \
+    && cd openssl-${OPENSSL_VERSION} \
     && ./config \
     && make \
     && make install

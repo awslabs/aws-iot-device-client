@@ -2,7 +2,7 @@ FROM ubuntu:18.04 AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG OPENSSL_VERSION=1.1.1n
+ARG OPENSSL_VERSION=3.0.8
 
 ###############################################################################
 # Install prereqs
@@ -20,7 +20,7 @@ RUN apt-get update -qq \
     && apt-get clean
 
 ###############################################################################
-# Install OpenSSL 1.1.1
+# Install OpenSSL 3.0.8
 ###############################################################################
 WORKDIR /tmp
 RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
@@ -46,9 +46,9 @@ RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3
 # Clone and build Google Test
 ###############################################################################
 WORKDIR /tmp
-RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://github.com/google/googletest/archive/release-1.11.0.tar.gz \
-    && tar xf release-1.11.0.tar.gz \
-    && cd googletest-release-1.11.0 \
+RUN wget --ca-certificate=/etc/ssl/certs/ca-certificates.crt https://github.com/google/googletest/archive/release-1.12.0.tar.gz \
+    && tar xf release-1.12.0.tar.gz \
+    && cd googletest-release-1.12.0 \
     && cmake -DBUILD_SHARED_LIBS=ON . \
     && make \
     && cp -a googletest/include/gtest /usr/include/ \

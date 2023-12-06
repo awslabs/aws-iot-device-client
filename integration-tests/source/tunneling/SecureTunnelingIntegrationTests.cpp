@@ -40,6 +40,10 @@ class TestSecureTunnelingFeature : public ::testing::Test
             tunnelId = openTunnelResult.GetTunnelId();
             sourceToken = openTunnelResult.GetSourceAccessToken();
 
+            Aws::IoTSecureTunneling::Model::OpenTunnelResult openTunnelResult = resourceHandler->OpenTunnel(THING_NAME);
+            tunnelId = openTunnelResult.GetTunnelId();
+            sourceToken = openTunnelResult.GetSourceAccessToken();
+
             // cppcheck-suppress leakReturnValNotUsed
             std::unique_ptr<const char *[]> argv(new const char *[8]);
             argv[0] = LOCAL_PROXY_PATH.c_str();
@@ -73,6 +77,7 @@ class TestSecureTunnelingFeature : public ::testing::Test
         {
             _exit(0);
         }
+        resourceHandler->CleanUp();
     }
     string tunnelId;
     string sourceToken;

@@ -2,7 +2,7 @@
 #https://access.redhat.com/RegistryAuthentication
 FROM registry.access.redhat.com/ubi8/ubi AS base
 
-ARG OPENSSL_VERSION=1.1.1n
+ARG OPENSSL_VERSION=3.0.8
 
 ###############################################################################
 # Install prereqs
@@ -33,7 +33,7 @@ RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3
     && make install
 
 ###############################################################################
-# Install OpenSSL 1.1.1
+# Install OpenSSL 3.0.8
 ###############################################################################
 WORKDIR /tmp
 RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
@@ -59,9 +59,9 @@ RUN wget https://dist.opendnssec.org/source/softhsm-2.3.0.tar.gz \
 # Clone and build Google Test
 ###############################################################################
 WORKDIR /tmp
-RUN curl -sSL https://github.com/google/googletest/archive/release-1.11.0.tar.gz -o release-1.11.0.tar.gz \
-    && tar xf release-1.11.0.tar.gz \
-    && cd googletest-release-1.11.0 \
+RUN curl -sSL https://github.com/google/googletest/archive/release-1.12.0.tar.gz -o release-1.12.0.tar.gz \
+    && tar xf release-1.12.0.tar.gz \
+    && cd googletest-release-1.12.0 \
     && cmake -DBUILD_SHARED_LIBS=ON . \
     && make \
     && cp -a googletest/include/gtest /usr/include/ \
