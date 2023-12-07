@@ -8,7 +8,7 @@ FROM  ${BASE_IMAGE} AS build_integration_tests
 WORKDIR /tmp
 RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.28.0/cmake-3.28.0.tar.gz -o cmake-3.28.0.tar.gz \
     && tar -zxvf cmake-3.28.0.tar.gz \
-    && cd cmake-3.10.0 \
+    && cd cmake-3.28.0 \
     && ./bootstrap \
     && make -j 2 \
     && make install
