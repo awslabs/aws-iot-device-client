@@ -18,6 +18,19 @@ RUN apt-get update -qq \
     zlib1g-dev \
     && apt-get clean
 
+
+###############################################################################
+# Install OpenSSL 3.0.8
+###############################################################################
+WORKDIR /tmp
+RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
+    && tar -zxvf openssl-${OPENSSL_VERSION}.tar.gz \
+    && cd openssl-${OPENSSL_VERSION} \
+    && ./config \
+    && make \
+    && make install \
+    && ldconfig
+
 ###############################################################################
 # Install pre-built CMake
 ###############################################################################
