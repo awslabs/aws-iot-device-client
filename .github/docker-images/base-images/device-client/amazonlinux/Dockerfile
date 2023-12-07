@@ -18,6 +18,8 @@ RUN yum -y update \
     gcc-c++ \
     softhsm \
     zlib-devel \
+    perl-IPC-Cmd \
+    perl-Pod-Html \
     && yum clean all \
     && rm -rf /var/cache/yum
 

@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-ARG OPENSSL_VERSION=1.1.1n
+ARG OPENSSL_VERSION=3.0.8
 
 RUN apt-get update && apt-get install -y \
     wget \
@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     libtool \
+    libssl-dev \
     zlib1g-dev
 
 RUN mkdir /openssl && cd /openssl && wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
