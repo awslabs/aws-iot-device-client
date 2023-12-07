@@ -4,6 +4,21 @@ ARG PRE_RELEASE_IMAGE
 FROM ${OS} AS build_localproxy
 
 ###############################################################################
+# Install prereqs for CMake
+###############################################################################
+RUN apt-get update -qq \
+    && apt-get -y install \
+    git \
+    clang-format \
+    curl \
+    build-essential \
+    wget \
+    libc6-dbg \
+    softhsm \
+    zlib1g-dev \
+    && apt-get clean
+
+###############################################################################
 # Install pre-built CMake
 ###############################################################################
 WORKDIR /tmp
