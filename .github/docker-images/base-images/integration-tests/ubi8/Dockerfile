@@ -1,6 +1,6 @@
 FROM registry.access.redhat.com/ubi8/ubi
 
-ARG OPENSSL_VERSION=1.1.1n
+ARG OPENSSL_VERSION=3.0.8
 
 RUN yum -y update && yum -y install \
     autoconf \
@@ -13,6 +13,8 @@ RUN yum -y update && yum -y install \
     make \
     perl \
     tar \
+    perl-IPC-Cmd \
+    perl-Pod-Html \
     wget
 
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
 project(aws-iot-device-client-integration-tests)
 
 set(OPENSSL_USE_STATIC_LIBS TRUE)

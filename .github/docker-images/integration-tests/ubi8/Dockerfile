@@ -2,6 +2,21 @@ ARG BASE_IMAGE
 ARG PRE_RELEASE_IMAGE
 FROM  ${BASE_IMAGE} AS build_integration_tests
 
+###############################################################################
+# Install pre-built CMake
+###############################################################################
+WORKDIR /tmp
+RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.28.0/cmake-3.28.0.tar.gz -o cmake-3.28.0.tar.gz \
+    && tar -zxvf cmake-3.28.0.tar.gz \
+    && cd cmake-3.28.0 \
+    && ./bootstrap \
+    && make -j 2 \
+    && make install
+
+###############################################################################
+# Install Prerequisites
+###############################################################################
+
 RUN #yum update -y && yum install -y libcurl-devel openssl-devel libuuid-devel make gcc gcc-c++ git zlib-devel
 
 COPY ./integration-tests /root/integration-tests
@@ -10,10 +25,16 @@ RUN mkdir -p /root/integration-tests/build \
     && cmake .. -DCMAKE_BUILD_TYPE=DEBUG \
     && cmake --build . --target aws-iot-device-client-integration-tests
 
+###############################################################################
 # Actual docker image
+###############################################################################
+
 FROM ${PRE_RELEASE_IMAGE} AS runner
 
+###############################################################################
 # Install openssl for libssl dependency.
+###############################################################################
+
 RUN yum update -y && yum install -y libatomic libcurl-devel openssl-devel libuuid-devel wget && \
     rm -rf /var/cache/yum && \
     yum clean all
