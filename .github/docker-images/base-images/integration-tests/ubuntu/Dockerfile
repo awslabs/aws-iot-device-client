@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-ARG OPENSSL_VERSION=1.1.1n
+ARG OPENSSL_VERSION=3.0.8
 
 RUN apt-get update && apt-get install -y \
     wget \
@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     autoconf \
     build-essential \
     cmake \
+    libssl-dev \
     libtool \
     zlib1g-dev
 
