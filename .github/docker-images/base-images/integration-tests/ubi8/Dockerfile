@@ -11,6 +11,7 @@ RUN yum -y update && yum -y install \
     gzip \
     libtool \
     perl-IPC-Cmd \
+    perl-Pod-Html \
     make \
     perl \
     tar \

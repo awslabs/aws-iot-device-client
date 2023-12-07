@@ -19,6 +19,7 @@ RUN yum -y update \
     softhsm \
     zlib-devel \
     perl-IPC-Cmd \
+    perl-Pod-Html \
     && yum clean all \
     && rm -rf /var/cache/yum
 
