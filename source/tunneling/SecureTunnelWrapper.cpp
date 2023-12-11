@@ -40,6 +40,43 @@ SecureTunnelWrapper::SecureTunnelWrapper(
           onSessionReset))
 {
 }
+
+SecureTunnelWrapper::SecureTunnelWrapper(
+    Aws::Crt::Allocator *allocator,
+    Aws::Crt::Io::ClientBootstrap *bootstrap,
+    const Aws::Crt::Io::SocketOptions &socketOptions,
+    const Aws::Crt::Http::HttpClientConnectionProxyOptions &proxyOptions,
+    const std::string &accessToken,
+    aws_secure_tunneling_local_proxy_mode localProxyMode,
+    const std::string &endpoint,
+    const std::string &rootCa,
+    const Aws::Iotsecuretunneling::OnConnectionComplete &onConnectionComplete,
+    const Aws::Iotsecuretunneling::OnConnectionShutdown &onConnectionShutdown,
+    const Aws::Iotsecuretunneling::OnSendDataComplete &onSendDataComplete,
+    const Aws::Iotsecuretunneling::OnDataReceive &onDataReceive,
+    const Aws::Iotsecuretunneling::OnStreamStart &onStreamStart,
+    const Aws::Iotsecuretunneling::OnStreamReset &onStreamReset,
+    const Aws::Iotsecuretunneling::OnSessionReset &onSessionReset)
+    : secureTunnel((Aws::Iotsecuretunneling::SecureTunnelBuilder(
+          allocator,
+          *bootstrap,
+          socketOptions,
+          accessToken,
+          localProxyMode,
+          endpoint))
+          .WithHttpClientConnectionProxyOptions(proxyOptions)
+          .WithRootCa(rootCa)
+          .WithOnConnectionComplete(onConnectionComplete)
+          .WithOnConnectionShutdown(onConnectionShutdown)
+          .WithOnSendDataComplete(onSendDataComplete)
+          .WithOnDataReceive(onDataReceive)
+          .WithOnStreamStart(onStreamStart)
+          .WithOnStreamReset(onSessionReset)
+          .WithOnSessionReset(onSessionReset)
+          .Build())
+{
+}
+
 int SecureTunnelWrapper::Connect()
 {
     return secureTunnel->Connect();

@@ -340,11 +340,12 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     {
         proxyOptions.HostName = proxyConfig.proxyHost->c_str();
         proxyOptions.Port = proxyConfig.proxyPort.value();
+        proxyOptions.ProxyConnectionType = Aws::Crt::Http::AwsHttpProxyConnectionType::Tunneling;
 
         LOGM_INFO(
             TAG,
             "Attempting to establish MQTT connection with proxy: %s:%u",
-            proxyConfig.proxyHost->c_str(),
+            proxyOptions.HostName.c_str(),
             proxyConfig.proxyPort.value());
 
         if (proxyConfig.httpProxyAuthEnabled)

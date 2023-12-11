@@ -47,6 +47,15 @@ namespace Aws
                         const int port,
                         const OnConnectionShutdownFn &onConnectionShutdown);
 
+                    SecureTunnelingContext(
+                        std::shared_ptr<SharedCrtResourceManager> manager,
+                        const Aws::Crt::Http::HttpClientConnectionProxyOptions &proxyOptions,
+                        const Aws::Crt::Optional<std::string> &rootCa,
+                        const std::string &accessToken,
+                        const std::string &endpoint,
+                        const int port,
+                        const OnConnectionShutdownFn &onConnectionShutdown);
+
                     /**
                      * \brief Constructor
                      */
@@ -179,6 +188,11 @@ namespace Aws
                     std::shared_ptr<SharedCrtResourceManager> mSharedCrtResourceManager;
 
                     /**
+                     * \brief HTTP proxy strategy and auth config
+                     */
+                    Aws::Crt::Http::HttpClientConnectionProxyOptions mProxyOptions;
+
+                    /**
                      * \brief Path to the Amazon root CA
                      */
                     std::string mRootCa;
@@ -197,6 +211,11 @@ namespace Aws
                      * \brief The local TCP port to connect to
                      */
                     uint16_t mPort{22};
+
+                    /**
+                     * \brief boolean for HTTP proxy enablement
+                     */
+                    bool isHTTPProxyEnabled;
 
                     /**
                      * \brief Callback when the secure tunnel is shutdown

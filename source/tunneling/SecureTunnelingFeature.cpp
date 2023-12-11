@@ -94,6 +94,38 @@ namespace Aws
 
                 void SecureTunnelingFeature::LoadFromConfig(const PlainConfig &config)
                 {
+                    // Aws::Crt::Http::HttpClientConnectionProxyOptions proxyOptions;
+                    PlainConfig::HttpProxyConfig proxyConfig = config.httpProxyConfig;
+
+                    if (proxyConfig.httpProxyEnabled)
+                    {
+                        proxyOptions.HostName = proxyConfig.proxyHost->c_str();
+                        proxyOptions.Port = proxyConfig.proxyPort.value();
+                        proxyOptions.ProxyConnectionType = Aws::Crt::Http::AwsHttpProxyConnectionType::Tunneling;
+
+                        LOGM_INFO(
+                            TAG,
+                            "Attempting to establish tunneling connection with proxy: %s:%u",
+                            proxyOptions.HostName.c_str(),
+                            proxyOptions.Port);
+
+                        if (proxyConfig.httpProxyAuthEnabled)
+                        {
+                            LOG_INFO(TAG, "Proxy Authentication is enabled");
+                            Aws::Crt::Http::HttpProxyStrategyBasicAuthConfig basicAuthConfig;
+                            basicAuthConfig.ConnectionType = Aws::Crt::Http::AwsHttpProxyConnectionType::Tunneling;
+                            proxyOptions.AuthType = Aws::Crt::Http::AwsHttpProxyAuthenticationType::Basic;
+                            basicAuthConfig.Username = proxyConfig.proxyUsername->c_str();
+                            basicAuthConfig.Password = proxyConfig.proxyPassword->c_str();
+                            proxyOptions.ProxyStrategy =
+                                Aws::Crt::Http::HttpProxyStrategy::CreateBasicHttpProxyStrategy(basicAuthConfig, Aws::Crt::g_allocator);
+                        }
+                        else
+                        {
+                            LOG_INFO(TAG, "Proxy Authentication is disabled");
+                            proxyOptions.AuthType = Aws::Crt::Http::AwsHttpProxyAuthenticationType::None;
+                        }
+                    }
                     mThingName = *config.thingName;
                     mRootCa = config.rootCa;
                     mSubscribeNotification = config.tunneling.subscribeNotification;
@@ -101,13 +133,14 @@ namespace Aws
 
                     if (!config.tunneling.subscribeNotification)
                     {
-                        auto context = unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
-                            mSharedCrtResourceManager,
-                            mRootCa,
-                            *config.tunneling.destinationAccessToken,
-                            GetEndpoint(*config.tunneling.region),
-                            static_cast<uint16_t>(config.tunneling.port.value()),
-                            bind(&SecureTunnelingFeature::OnConnectionShutdown, this, placeholders::_1)));
+                        auto context = createContext(*config.tunneling.destinationAccessToken, *config.tunneling.region, static_cast<uint16_t>(config.tunneling.port.value()));
+                        // auto context = unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
+                        //     mSharedCrtResourceManager,
+                        //     mRootCa,
+                        //     *config.tunneling.destinationAccessToken,
+                        //     GetEndpoint(*config.tunneling.region),
+                        //     static_cast<uint16_t>(config.tunneling.port.value()),
+                        //     bind(&SecureTunnelingFeature::OnConnectionShutdown, this, placeholders::_1)));
                         mContexts.push_back(std::move(context));
                     }
                 }
@@ -257,6 +290,7 @@ namespace Aws
                 {
                     return std::unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
                         mSharedCrtResourceManager,
+                        proxyOptions,
                         mRootCa,
                         accessToken,
                         GetEndpoint(region),
