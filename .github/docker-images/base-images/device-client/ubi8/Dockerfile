@@ -24,17 +24,6 @@ RUN yum -y update \
     && rm -rf /var/cache/yum
 
 ###############################################################################
-# Install pre-built CMake
-###############################################################################
-WORKDIR /tmp
-RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3.10.0.tar.gz -o cmake-3.10.0.tar.gz \
-    && tar -zxvf cmake-3.10.0.tar.gz \
-    && cd cmake-3.10.0 \
-    && ./bootstrap \
-    && make \
-    && make install
-
-###############################################################################
 # Install OpenSSL 3.0.8
 ###############################################################################
 WORKDIR /tmp
@@ -42,6 +31,17 @@ RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
     && tar -zxvf openssl-${OPENSSL_VERSION}.tar.gz \
     && cd openssl-${OPENSSL_VERSION} \
     && ./config \
+    && make \
+    && make install
+
+###############################################################################
+# Install pre-built CMake
+###############################################################################
+WORKDIR /tmp
+RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3.10.0.tar.gz -o cmake-3.10.0.tar.gz \
+    && tar -zxvf cmake-3.10.0.tar.gz \
+    && cd cmake-3.10.0 \
+    && ./bootstrap \
     && make \
     && make install
 

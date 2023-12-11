@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     autoconf \
     build-essential \
     cmake \
+    libssl-dev \
     libtool \
     zlib1g-dev
 

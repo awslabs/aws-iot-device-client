@@ -10,6 +10,8 @@ RUN yum -y update && yum -y install \
     git \
     gzip \
     libtool \
+    perl-IPC-Cmd \
+    perl-Pod-Html \
     make \
     perl \
     softhsm \
