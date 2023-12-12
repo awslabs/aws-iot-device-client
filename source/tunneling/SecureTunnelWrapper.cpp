@@ -58,22 +58,22 @@ SecureTunnelWrapper::SecureTunnelWrapper(
     const Aws::Iotsecuretunneling::OnStreamReset &onStreamReset,
     const Aws::Iotsecuretunneling::OnSessionReset &onSessionReset)
     : secureTunnel((Aws::Iotsecuretunneling::SecureTunnelBuilder(
-          allocator,
-          *bootstrap,
-          socketOptions,
-          accessToken,
-          localProxyMode,
-          endpoint))
-          .WithHttpClientConnectionProxyOptions(proxyOptions)
-          .WithRootCa(rootCa)
-          .WithOnConnectionComplete(onConnectionComplete)
-          .WithOnConnectionShutdown(onConnectionShutdown)
-          .WithOnSendDataComplete(onSendDataComplete)
-          .WithOnDataReceive(onDataReceive)
-          .WithOnStreamStart(onStreamStart)
-          .WithOnStreamReset(onSessionReset)
-          .WithOnSessionReset(onSessionReset)
-          .Build())
+                        allocator,
+                        *bootstrap,
+                        socketOptions,
+                        accessToken,
+                        localProxyMode,
+                        endpoint))
+                       .WithHttpClientConnectionProxyOptions(proxyOptions)
+                       .WithRootCa(rootCa)
+                       .WithOnConnectionComplete(onConnectionComplete)
+                       .WithOnConnectionShutdown(onConnectionShutdown)
+                       .WithOnSendDataComplete(onSendDataComplete)
+                       .WithOnDataReceive(onDataReceive)
+                       .WithOnStreamStart(onStreamStart)
+                       .WithOnStreamReset(onSessionReset)
+                       .WithOnSessionReset(onSessionReset)
+                       .Build())
 {
 }
 

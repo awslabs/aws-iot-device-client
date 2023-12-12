@@ -94,7 +94,6 @@ namespace Aws
 
                 void SecureTunnelingFeature::LoadFromConfig(const PlainConfig &config)
                 {
-                    // Aws::Crt::Http::HttpClientConnectionProxyOptions proxyOptions;
                     PlainConfig::HttpProxyConfig proxyConfig = config.httpProxyConfig;
 
                     if (proxyConfig.httpProxyEnabled)
@@ -118,7 +117,8 @@ namespace Aws
                             basicAuthConfig.Username = proxyConfig.proxyUsername->c_str();
                             basicAuthConfig.Password = proxyConfig.proxyPassword->c_str();
                             proxyOptions.ProxyStrategy =
-                                Aws::Crt::Http::HttpProxyStrategy::CreateBasicHttpProxyStrategy(basicAuthConfig, Aws::Crt::g_allocator);
+                                Aws::Crt::Http::HttpProxyStrategy::CreateBasicHttpProxyStrategy(
+                                    basicAuthConfig, Aws::Crt::g_allocator);
                         }
                         else
                         {
