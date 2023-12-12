@@ -346,7 +346,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
             TAG,
             "Attempting to establish MQTT connection with proxy: %s:%u",
             proxyOptions.HostName.c_str(),
-            proxyConfig.proxyPort.value());
+            proxyOptions.Port);
 
         if (proxyConfig.httpProxyAuthEnabled)
         {

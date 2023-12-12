@@ -213,11 +213,6 @@ namespace Aws
                     uint16_t mPort{22};
 
                     /**
-                     * \brief boolean for HTTP proxy enablement
-                     */
-                    bool isHTTPProxyEnabled;
-
-                    /**
                      * \brief Callback when the secure tunnel is shutdown
                      */
                     OnConnectionShutdownFn mOnConnectionShutdown;

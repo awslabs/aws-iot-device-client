@@ -28,7 +28,7 @@ namespace Aws
                     const int port,
                     const OnConnectionShutdownFn &onConnectionShutdown)
                     : mSharedCrtResourceManager(manager), mRootCa(rootCa.has_value() ? rootCa.value() : ""),
-                      mAccessToken(accessToken), mEndpoint(endpoint), mPort(port), isHTTPProxyEnabled(false),
+                      mAccessToken(accessToken), mEndpoint(endpoint), mPort(port),
                       mOnConnectionShutdown(onConnectionShutdown)
                 {
                 }
@@ -42,7 +42,7 @@ namespace Aws
                     const int port,
                     const OnConnectionShutdownFn &onConnectionShutdown)
                     : mSharedCrtResourceManager(manager), mProxyOptions(proxyOptions), mRootCa(rootCa.has_value() ? rootCa.value() : ""),
-                      mAccessToken(accessToken), mEndpoint(endpoint), mPort(port), isHTTPProxyEnabled(true),
+                      mAccessToken(accessToken), mEndpoint(endpoint), mPort(port),
                       mOnConnectionShutdown(onConnectionShutdown)
                 {
                 }
@@ -205,9 +205,7 @@ namespace Aws
                     const Aws::Iotsecuretunneling::OnStreamReset &onStreamReset,
                     const Aws::Iotsecuretunneling::OnSessionReset &onSessionReset)
                 {
-                    // const Aws::Crt::Http::HttpClientConnectionProxyOptions& proxyOptions = mProxyOptions;
-
-                    if (isHTTPProxyEnabled) {
+                    if (mProxyOptions.HostName.length() > 0) {
                         LOGM_INFO(TAG, "Creating Secure Tunneling with proxy to: %s", mProxyOptions.HostName.c_str());
                         return std::make_shared<SecureTunnelWrapper>(
                             mSharedCrtResourceManager->getAllocator(),

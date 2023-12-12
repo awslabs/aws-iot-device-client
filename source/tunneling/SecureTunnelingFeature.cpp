@@ -134,13 +134,6 @@ namespace Aws
                     if (!config.tunneling.subscribeNotification)
                     {
                         auto context = createContext(*config.tunneling.destinationAccessToken, *config.tunneling.region, static_cast<uint16_t>(config.tunneling.port.value()));
-                        // auto context = unique_ptr<SecureTunnelingContext>(new SecureTunnelingContext(
-                        //     mSharedCrtResourceManager,
-                        //     mRootCa,
-                        //     *config.tunneling.destinationAccessToken,
-                        //     GetEndpoint(*config.tunneling.region),
-                        //     static_cast<uint16_t>(config.tunneling.port.value()),
-                        //     bind(&SecureTunnelingFeature::OnConnectionShutdown, this, placeholders::_1)));
                         mContexts.push_back(std::move(context));
                     }
                 }
