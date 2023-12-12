@@ -133,7 +133,10 @@ namespace Aws
 
                     if (!config.tunneling.subscribeNotification)
                     {
-                        auto context = createContext(*config.tunneling.destinationAccessToken, *config.tunneling.region, static_cast<uint16_t>(config.tunneling.port.value()));
+                        auto context = createContext(
+                            *config.tunneling.destinationAccessToken,
+                            *config.tunneling.region,
+                            static_cast<uint16_t>(config.tunneling.port.value()));
                         mContexts.push_back(std::move(context));
                     }
                 }
