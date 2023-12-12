@@ -17,6 +17,7 @@ RUN apt-get update -qq \
     libc6-dbg \
     softhsm \
     zlib1g-dev \
+    libssl-dev \
     && apt-get clean
 
 ###############################################################################

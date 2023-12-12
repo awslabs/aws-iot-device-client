@@ -121,9 +121,10 @@ RUN mkdir -p /root/integration-tests/build \
 
 ###############################################################################
 # Actual docker image
+
 ###############################################################################
 
-FROM ${PRE_RELEASE_IMAGE} AS runner
+FROM ${BASE_IMAGE} AS runner
 RUN apt-get update && apt-get install -y libcurl4-openssl-dev libssl-dev uuid-dev zlib1g-dev libpulse-dev wget ssh ca-certificates wget apt-utils
 
 RUN mkdir -p /home/aws-iot-securetunneling-localproxy/certs && \
