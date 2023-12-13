@@ -203,7 +203,7 @@ jobs:
           file: .github/docker-images/Dockerfile
           context: .
           build-args: |
-            OS=amazonlinux:2022.0.20221207.4
+            OS=amazonlinux:2023.2.20231113.0
             BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:x86_64-amazonlinux-latest
           push: true
           tags: |
@@ -241,7 +241,7 @@ jobs:
           file: .github/docker-images/Dockerfile
           context: .
           build-args: |
-            OS=amazonlinux:2022.0.20221207.4
+            OS=amazonlinux:2023.2.20231113.0
             BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:aarch64-amazonlinux-latest
           push: true
           tags: |

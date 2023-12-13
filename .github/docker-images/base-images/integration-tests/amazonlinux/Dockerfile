@@ -1,4 +1,4 @@
-FROM public.ecr.aws/amazonlinux/amazonlinux:2.0.20230307.0
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023.2.20231113.0
 
 ARG OPENSSL_VERSION=3.0.8
 

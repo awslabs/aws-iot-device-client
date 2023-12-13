@@ -1,4 +1,4 @@
-FROM amazonlinux:2.0.20230307.0 as base
+FROM amazonlinux:2023.2.20231113.0 as base
 
 ARG OPENSSL_VERSION=3.0.8
 
