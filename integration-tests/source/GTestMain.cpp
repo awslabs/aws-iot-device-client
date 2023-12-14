@@ -125,18 +125,6 @@ class GlobalEnvironment : public ::testing::Environment
     // cppcheck-suppress unusedFunction
     void SetUp() override
     {
-        Aws::InitAPI(options);
-        {
-            Aws::Client::ClientConfiguration clientConfig;
-            clientConfig.region = REGION;
-            resourceHandler =
-                std::shared_ptr<IntegrationTestResourceHandler>(new IntegrationTestResourceHandler(clientConfig));
-        }
-    }
-
-    // cppcheck-suppress unusedFunction
-    void SetUp() override
-    {
         Aws::Client::ClientConfiguration clientConfig;
         clientConfig.region = REGION;
         resourceHandler =
@@ -146,7 +134,6 @@ class GlobalEnvironment : public ::testing::Environment
     // cppcheck-suppress unusedFunction
     void TearDown() override
     {
-        resourceHandler->CleanUp();
         if (CLEAN_UP)
         {
             printf("Clean up thingName: %s\n", THING_NAME.c_str());

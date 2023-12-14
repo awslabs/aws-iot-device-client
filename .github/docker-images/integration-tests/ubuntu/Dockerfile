@@ -129,7 +129,7 @@ RUN apt-get update && apt-get install -y libcurl4-openssl-dev libssl-dev uuid-de
 
 RUN mkdir -p /home/aws-iot-securetunneling-localproxy/certs && \
     cd /home/aws-iot-securetunneling-localproxy/certs && \
-    wget https://www.amazontrust.com/repository/AmazonRootCA1.pem && \
+    wget --no-check-certificate https://www.amazontrust.com/repository/AmazonRootCA1.pem && \
 	openssl rehash ./
 ###############################################################################
 # Copy the binaries from builder stages.
