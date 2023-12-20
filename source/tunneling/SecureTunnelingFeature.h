@@ -9,6 +9,7 @@
 #include "../SharedCrtResourceManager.h"
 #include "IotSecureTunnelingClientWrapper.h"
 #include "SecureTunnelingContext.h"
+#include "aws/crt/http/HttpProxyStrategy.h"
 #include <aws/iotdevicecommon/IotDevice.h>
 #include <aws/iotsecuretunneling/SecureTunnelingNotifyResponse.h>
 
@@ -176,6 +177,11 @@ namespace Aws
                      * attention
                      */
                     std::shared_ptr<ClientBaseNotifier> mClientBaseNotifier;
+
+                    /**
+                     * \brief HTTP proxy strategy and auth config
+                     */
+                    Aws::Crt::Http::HttpClientConnectionProxyOptions proxyOptions;
 
                     /**
                      * \brief The ThingName to use

@@ -1,8 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+#include "../../source/SharedCrtResourceManager.h"
 #include "../../source/config/Config.h"
 #include "../../source/util/StringUtils.h"
+
 #include "gtest/gtest.h"
 #include <aws/crt/JsonObject.h>
 
@@ -65,6 +67,10 @@ TEST(StringUtils, leavesNewLineAndTabAlone)
 
 TEST(StringUtils, maptoString)
 {
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
+
     Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> map;
     map.insert(std::pair<Aws::Crt::String, Aws::Crt::String>("a", "b"));
     map.insert(std::pair<Aws::Crt::String, Aws::Crt::String>("c", "d"));
@@ -130,6 +136,10 @@ TEST(StringUtils, ParseToStringVector)
 {
     "args": ["hello", "world"]
 })";
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
+
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
 

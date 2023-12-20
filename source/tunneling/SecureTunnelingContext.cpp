@@ -33,6 +33,20 @@ namespace Aws
                 {
                 }
 
+                SecureTunnelingContext::SecureTunnelingContext(
+                    shared_ptr<SharedCrtResourceManager> manager,
+                    const Aws::Crt::Http::HttpClientConnectionProxyOptions &proxyOptions,
+                    const Aws::Crt::Optional<std::string> &rootCa,
+                    const string &accessToken,
+                    const string &endpoint,
+                    const int port,
+                    const OnConnectionShutdownFn &onConnectionShutdown)
+                    : mSharedCrtResourceManager(manager), mProxyOptions(proxyOptions),
+                      mRootCa(rootCa.has_value() ? rootCa.value() : ""), mAccessToken(accessToken), mEndpoint(endpoint),
+                      mPort(port), mOnConnectionShutdown(onConnectionShutdown)
+                {
+                }
+
                 SecureTunnelingContext::~SecureTunnelingContext()
                 {
                     if (mSecureTunnel && mSecureTunnel->IsValid())
@@ -191,21 +205,44 @@ namespace Aws
                     const Aws::Iotsecuretunneling::OnStreamReset &onStreamReset,
                     const Aws::Iotsecuretunneling::OnSessionReset &onSessionReset)
                 {
-                    return std::make_shared<SecureTunnelWrapper>(
-                        mSharedCrtResourceManager->getAllocator(),
-                        mSharedCrtResourceManager->getClientBootstrap(),
-                        Crt::Io::SocketOptions(),
-                        mAccessToken,
-                        AWS_SECURE_TUNNELING_DESTINATION_MODE,
-                        mEndpoint,
-                        mRootCa,
-                        onConnectionComplete,
-                        onConnectionShutdown,
-                        onSendDataComplete,
-                        onDataReceive,
-                        onStreamStart,
-                        onStreamReset,
-                        onSessionReset);
+                    if (mProxyOptions.HostName.length() > 0)
+                    {
+                        LOGM_INFO(TAG, "Creating Secure Tunneling with proxy to: %s", mProxyOptions.HostName.c_str());
+                        return std::make_shared<SecureTunnelWrapper>(
+                            mSharedCrtResourceManager->getAllocator(),
+                            mSharedCrtResourceManager->getClientBootstrap(),
+                            Crt::Io::SocketOptions(),
+                            mProxyOptions,
+                            mAccessToken,
+                            AWS_SECURE_TUNNELING_DESTINATION_MODE,
+                            mEndpoint,
+                            mRootCa,
+                            onConnectionComplete,
+                            nullptr, // TODO: long term fix needed for onConnectionShutdown callback
+                            onSendDataComplete,
+                            onDataReceive,
+                            onStreamStart,
+                            onStreamReset,
+                            onSessionReset);
+                    }
+                    else
+                    {
+                        return std::make_shared<SecureTunnelWrapper>(
+                            mSharedCrtResourceManager->getAllocator(),
+                            mSharedCrtResourceManager->getClientBootstrap(),
+                            Crt::Io::SocketOptions(),
+                            mAccessToken,
+                            AWS_SECURE_TUNNELING_DESTINATION_MODE,
+                            mEndpoint,
+                            mRootCa,
+                            onConnectionComplete,
+                            nullptr, // TODO: long term fix needed for onConnectionShutdown callback
+                            onSendDataComplete,
+                            onDataReceive,
+                            onStreamStart,
+                            onStreamReset,
+                            onSessionReset);
+                    }
                 }
 
                 std::shared_ptr<TcpForward> SecureTunnelingContext::CreateTcpForward()

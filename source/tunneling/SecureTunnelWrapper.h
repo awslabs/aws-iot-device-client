@@ -19,10 +19,32 @@ namespace Aws
                   public:
                     SecureTunnelWrapper() = default;
                     virtual ~SecureTunnelWrapper() = default;
+
+                    // Without HTTP Proxy
                     SecureTunnelWrapper(
                         Aws::Crt::Allocator *allocator,
                         Aws::Crt::Io::ClientBootstrap *clientBootstrap,
                         const Aws::Crt::Io::SocketOptions &socketOptions,
+
+                        const std::string &accessToken,
+                        aws_secure_tunneling_local_proxy_mode localProxyMode,
+                        const std::string &endpointHost,
+                        const std::string &rootCa,
+
+                        const Aws::Iotsecuretunneling::OnConnectionComplete &onConnectionComplete,
+                        const Aws::Iotsecuretunneling::OnConnectionShutdown &onConnectionShutdown,
+                        const Aws::Iotsecuretunneling::OnSendDataComplete &onSendDataComplete,
+                        const Aws::Iotsecuretunneling::OnDataReceive &onDataReceive,
+                        const Aws::Iotsecuretunneling::OnStreamStart &onStreamStart,
+                        const Aws::Iotsecuretunneling::OnStreamReset &onStreamReset,
+                        const Aws::Iotsecuretunneling::OnSessionReset &onSessionReset);
+
+                    // With HTTP Proxy
+                    SecureTunnelWrapper(
+                        Aws::Crt::Allocator *allocator,
+                        Aws::Crt::Io::ClientBootstrap *clientBootstrap,
+                        const Aws::Crt::Io::SocketOptions &socketOptions,
+                        const Aws::Crt::Http::HttpClientConnectionProxyOptions &proxyOptions,
 
                         const std::string &accessToken,
                         aws_secure_tunneling_local_proxy_mode localProxyMode,
@@ -47,7 +69,7 @@ namespace Aws
 
                     virtual bool IsValid();
 
-                    std::unique_ptr<Aws::Iotsecuretunneling::SecureTunnel> secureTunnel;
+                    std::shared_ptr<Aws::Iotsecuretunneling::SecureTunnel> secureTunnel;
 
                   private:
                     /**

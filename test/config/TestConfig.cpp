@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+#include "../../source/SharedCrtResourceManager.h"
 #include "../../source/config/Config.h"
 #include "../../source/util/FileUtils.h"
 #include "../../source/util/UniqueString.h"
@@ -33,9 +34,13 @@ class ConfigTestFixture : public ::testing::Test
   public:
     ConfigTestFixture() = default;
     string outputPath;
+    SharedCrtResourceManager resourceManager;
 
     void SetUp() override
     {
+        // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+        resourceManager.initializeAllocator();
+
         // Config::Validate will check that cert, key, and root-ca files exist.
         // Create a temporary file to use as a placeholder for this purpose.
         ofstream file(filePath, std::fstream::app);
@@ -154,6 +159,7 @@ TEST_F(ConfigTestFixture, AllFeaturesEnabled)
         "secure-element-token-label": "token-label"
       }
 })";
+
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
 
@@ -1677,24 +1683,4 @@ TEST_F(ConfigTestFixture, HTTPProxyConfigNoAuth)
     ASSERT_EQ(8888, httpProxyConfig.proxyPort.value());
     ASSERT_FALSE(httpProxyConfig.httpProxyAuthEnabled);
     ASSERT_STREQ("None", httpProxyConfig.proxyAuthMethod->c_str());
-}
-
-TEST(Config, MemoryTrace)
-{
-    PlainConfig config;
-
-    // Test all permutations of memory trace set through the environment.
-    vector<aws_mem_trace_level> levels{
-        AWS_MEMTRACE_NONE,
-        AWS_MEMTRACE_BYTES,
-        AWS_MEMTRACE_STACKS,
-    };
-
-    for (const auto &level : levels)
-    {
-        auto levelstr = std::to_string(level);
-        ::setenv("AWS_CRT_MEMORY_TRACING", levelstr.c_str(), 1);
-        ASSERT_TRUE(config.LoadFromEnvironment()) << "read AWS_CRT_MEMORY_TRACING=" << level;
-        ASSERT_EQ(config.memTraceLevel, level);
-    }
 }

@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+#include "../../source/SharedCrtResourceManager.h"
 #include "../../source/config/Config.h"
 #include "../../source/util/FileUtils.h"
 #include "../../source/util/UniqueString.h"
@@ -20,32 +21,9 @@ using namespace Aws::Crt;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Util;
 
-class SerializeConfigTestFixture : public ::testing::TestWithParam<const char *>
+TEST(SerializeConfigTestFixture, SerializeCompleteConfigTest)
 {
-  protected:
-    const char *jsonString;
-};
-
-TEST_P(SerializeConfigTestFixture, SerializeConfigTest)
-{
-    const char *jsonString = GetParam();
-    PlainConfig config;
-    JsonObject jsonObject(jsonString);
-    config.LoadFromJson(jsonObject.View());
-    auto inputJsonString = jsonObject.View().WriteCompact();
-
-    JsonObject serializedConfig;
-    config.SerializeToObject(serializedConfig);
-    auto serializedJsonString = serializedConfig.View().WriteCompact();
-
-    ASSERT_STREQ(inputJsonString.c_str(), serializedJsonString.c_str());
-}
-
-INSTANTIATE_TEST_CASE_P(
-    SerializationTests,
-    SerializeConfigTestFixture,
-    ::testing::Values(
-        R"(
+    constexpr char jsonString[] = R"(
 {
     "endpoint": "endpoint value",
     "cert": "/tmp/aws-iot-device-client-test-file",
@@ -61,7 +39,7 @@ INSTANTIATE_TEST_CASE_P(
     },
     "jobs": {
         "enabled": true,
-        "handler-directory": "directory" 
+        "handler-directory": "directory"
     },
     "tunneling": {
         "enabled": true
@@ -138,8 +116,27 @@ INSTANTIATE_TEST_CASE_P(
             }
         ]
     }
-})",
-        R"({
+})";
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
+    PlainConfig config;
+
+    JsonObject jsonObject(jsonString);
+    config.LoadFromJson(jsonObject.View());
+    auto inputJsonString = jsonObject.View().WriteCompact();
+
+    JsonObject serializedConfig;
+    config.SerializeToObject(serializedConfig);
+    auto serializedJsonString = serializedConfig.View().WriteCompact();
+
+    ASSERT_STREQ(inputJsonString.c_str(), serializedJsonString.c_str());
+}
+
+TEST(SerializeConfigTestFixture, SerializeBasicConfigTest)
+{
+    constexpr char jsonString[] = R"(
+{
     "logging": {
         "level": "DEBUG",
         "type": "file",
@@ -150,7 +147,7 @@ INSTANTIATE_TEST_CASE_P(
     },
     "jobs": {
         "enabled": true,
-        "handler-directory": "" 
+        "handler-directory": ""
     },
     "tunneling": {
         "enabled": true
@@ -166,17 +163,32 @@ INSTANTIATE_TEST_CASE_P(
         "completed-fp": false
      },
     "samples": {
-		"pub-sub": {
-			"enabled": true
-		}
-	},
+        "pub-sub": {
+            "enabled": true
+        }
+    },
     "config-shadow": {
         "enabled": true
-      },
+    },
     "sample-shadow": {
         "enabled": true
-      },
+    },
     "secure-element": {
         "enabled": true
-      }
-})"));
+    }
+})";
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
+    PlainConfig config;
+
+    JsonObject jsonObject(jsonString);
+    config.LoadFromJson(jsonObject.View());
+    auto inputJsonString = jsonObject.View().WriteCompact();
+
+    JsonObject serializedConfig;
+    config.SerializeToObject(serializedConfig);
+    auto serializedJsonString = serializedConfig.View().WriteCompact();
+
+    ASSERT_STREQ(inputJsonString.c_str(), serializedJsonString.c_str());
+}

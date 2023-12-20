@@ -1,8 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+#include "../../source/SharedCrtResourceManager.h"
 #include "../../source/jobs/JobDocument.h"
 #include "../../source/util/UniqueString.h"
+
 #include "gtest/gtest.h"
 #include <algorithm>
 #include <aws/crt/JsonObject.h>
@@ -170,6 +172,10 @@ TEST(JobDocument, SampleJobDocument)
         }
     }
 })";
+
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
 
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
@@ -376,6 +382,10 @@ TEST(JobDocument, MissingRequiredFields)
     }
     })";
 
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
+
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
 
@@ -428,6 +438,10 @@ TEST(JobDocument, MinimumJobDocument)
         }
     ]
 })";
+
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
 
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
@@ -522,6 +536,10 @@ TEST(JobDocument, MissingRequiredFieldsValue)
     }
     })";
 
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
+
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
 
@@ -548,6 +566,10 @@ TEST(JobDocument, CommandFieldsIsEmpty)
         }
     ]
 })";
+
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
 
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
@@ -576,6 +598,10 @@ TEST(JobDocument, CommandContainsSpaceCharacters)
     ]
 })";
 
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
+
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
 
@@ -603,6 +629,10 @@ TEST(JobDocument, SpaceCharactersContainedWithinFirstWordOfCommand)
     ]
 })";
 
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
+
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();
 
@@ -620,6 +650,10 @@ TEST(JobDocument, oldJobDocumentCompatibility)
     "args": ["https://github.com/awslabs/aws-iot-device-client/archive/refs/tags/v1.3.tar.gz", "/tmp/Downloaded_File.tar.gz"],
     "path": "default"
 })";
+
+    // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
+    SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
 
     JsonObject jsonObject(jsonString);
     JsonView jsonView = jsonObject.View();

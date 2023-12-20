@@ -47,6 +47,15 @@ namespace Aws
                         const int port,
                         const OnConnectionShutdownFn &onConnectionShutdown);
 
+                    SecureTunnelingContext(
+                        std::shared_ptr<SharedCrtResourceManager> manager,
+                        const Aws::Crt::Http::HttpClientConnectionProxyOptions &proxyOptions,
+                        const Aws::Crt::Optional<std::string> &rootCa,
+                        const std::string &accessToken,
+                        const std::string &endpoint,
+                        const int port,
+                        const OnConnectionShutdownFn &onConnectionShutdown);
+
                     /**
                      * \brief Constructor
                      */
@@ -177,6 +186,11 @@ namespace Aws
                      * \brief The resource manager used to manage CRT resources
                      */
                     std::shared_ptr<SharedCrtResourceManager> mSharedCrtResourceManager;
+
+                    /**
+                     * \brief HTTP proxy strategy and auth config
+                     */
+                    Aws::Crt::Http::HttpClientConnectionProxyOptions mProxyOptions;
 
                     /**
                      * \brief Path to the Amazon root CA

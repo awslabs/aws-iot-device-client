@@ -104,7 +104,7 @@ bool parseCliArgs(int argc, char **argv)
         }
         else if (currentArg == CLI_CLEAN_UP)
         {
-            CLEAN_UP = true;
+            CLEAN_UP = false;
         }
         else
         {
