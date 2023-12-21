@@ -5,9 +5,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Known Issues]
-- [Device Client aborts on Red Hat Enterprise Linux ARM](https://github.com/awslabs/aws-iot-device-client/issues/87)
-- [Device Client stability issues when receiving signal interrupts](https://github.com/awslabs/aws-iot-device-client/issues/110)
-- [Device Client build failure with gcc v11](https://github.com/awslabs/aws-iot-device-client/issues/146)
+* [Fix resource leak by cleaning up used Secure Tunneling Contexts](https://github.com/awslabs/aws-iot-device-client/issues/443)
+
+## [1.9.X] - 2023-12-21
+### Added
+* [Added GitHub CI for Coverity code scan](https://github.com/awslabs/aws-iot-device-client/pull/366)
+* [Added Integration tests for Device Defender feature](https://github.com/awslabs/aws-iot-device-client/pull/368)
+* [Added support for publishing MQTT message on file change through Pub-Sub sample](https://github.com/awslabs/aws-iot-device-client/pull/374)
+* 
+### Fixed
+* [Device Client aborts on Red Hat Enterprise Linux ARM](https://github.com/awslabs/aws-iot-device-client/issues/87)
+* [Device Client stability issues when receiving signal interrupts](https://github.com/awslabs/aws-iot-device-client/issues/110)
+* [Device Client build failure with gcc v11](https://github.com/awslabs/aws-iot-device-client/issues/146)
+* [Fixed Secure Tunneling feature to gracefully shutdown](https://github.com/awslabs/aws-iot-device-client/pull/427)
+* [Fixed memory leak in Device Client Pub-Sub sample and Shadow feature](https://github.com/awslabs/aws-iot-device-client/pull/363)
+* [Fixed reboot job handler](https://github.com/awslabs/aws-iot-device-client/pull/375)
+* [Device Client fails to start with Fleet Provisioning enabled because of multiple lock files were being created](https://github.com/awslabs/aws-iot-device-client/pull/419)
+* [Device Client unable to setup secure tunneling while using HTTP proxy](https://github.com/awslabs/aws-iot-device-client/issues/440)
 
 ## [1.8.X] - 2022-12-15
 ### Added
