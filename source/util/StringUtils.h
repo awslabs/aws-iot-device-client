@@ -3,6 +3,7 @@
 
 #include <aws/crt/JsonObject.h>
 #include <aws/crt/Types.h>
+#include <cstdarg>
 #include <string>
 
 using namespace Aws::Crt;
