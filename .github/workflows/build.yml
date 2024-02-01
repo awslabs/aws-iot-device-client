@@ -413,7 +413,7 @@ jobs:
       - name: Archive ST Ubuntu aarch64 Build Artifact
         uses: actions/upload-artifact@v2
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        # if: github.ref == 'refs/heads/main'
         with:
           name: "ST.ubuntu.x64.${{ env.PACKAGE_NAME }}"
           path: |
