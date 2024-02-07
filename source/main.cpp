@@ -351,7 +351,6 @@ int main(int argc, char *argv[])
     memset(&sigset, 0, sizeof(sigset_t));
     int received_signal;
     sigaddset(&sigset, SIGINT);
-    sigaddset(&sigset, SIGTERM);
     sigaddset(&sigset, SIGHUP);
     sigaddset(&sigset, SIGTERM);
     sigprocmask(SIG_BLOCK, &sigset, nullptr);
