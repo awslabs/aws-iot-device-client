@@ -277,13 +277,12 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
         thingName = cliArgs.at(PlainConfig::CLI_THING_NAME).c_str();
     }
 
-    bool loadFeatureCliArgs = tunneling.LoadFromCliArgs(cliArgs) && logConfig.LoadFromCliArgs(cliArgs);
+    bool loadFeatureCliArgs = tunneling.LoadFromCliArgs(cliArgs) && logConfig.LoadFromCliArgs(cliArgs) && httpProxyConfig.LoadFromCliArgs(cliArgs);
 #if !defined(DISABLE_MQTT)
     loadFeatureCliArgs = loadFeatureCliArgs && jobs.LoadFromCliArgs(cliArgs) &&
                          deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs) &&
                          pubSub.LoadFromCliArgs(cliArgs) && sampleShadow.LoadFromCliArgs(cliArgs) &&
-                         configShadow.LoadFromCliArgs(cliArgs) && secureElement.LoadFromCliArgs(cliArgs) &&
-                         httpProxyConfig.LoadFromCliArgs(cliArgs);
+                         configShadow.LoadFromCliArgs(cliArgs) && secureElement.LoadFromCliArgs(cliArgs);
 #endif
     return loadFeatureCliArgs;
 }
@@ -2686,7 +2685,6 @@ bool Config::init(const CliArgs &cliArgs)
         }
 #endif
 
-#if !defined(DISABLE_MQTT)
         // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
         if (ParseConfigFile(config.httpProxyConfig.proxyConfigPath->c_str(), HTTP_PROXY_CONFIG) &&
             config.httpProxyConfig.httpProxyEnabled)
@@ -2706,7 +2704,6 @@ bool Config::init(const CliArgs &cliArgs)
                 config.httpProxyConfig.proxyConfigPath->c_str());
             return true;
         }
-#endif
 
         return config.Validate();
     }
