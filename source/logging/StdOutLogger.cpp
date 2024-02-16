@@ -35,6 +35,9 @@ void StdOutLogger::run()
         }
         this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_WAIT_TIME_MILLISECONDS));
     }
+
+    stop();
+    shutdownNotifier.notify_one();
 }
 
 bool StdOutLogger::start(const PlainConfig &config)
@@ -49,8 +52,10 @@ bool StdOutLogger::start(const PlainConfig &config)
 
 void StdOutLogger::stop()
 {
-    needsShutdown = true;
     logQueue->shutdown();
+
+    // If we've gotten here, we must be shutting down so we should dump the remaining messages and exit
+    flush();
 }
 
 unique_ptr<LogQueue> StdOutLogger::takeLogQueue()
@@ -67,11 +72,9 @@ void StdOutLogger::setLogQueue(std::unique_ptr<LogQueue> incomingQueue)
 
 void StdOutLogger::shutdown()
 {
+    unique_lock<mutex> shutdownLock(needsShutdownLock);
     needsShutdown = true;
-    logQueue->shutdown();
-
-    // If we've gotten here, we must be shutting down so we should dump the remaining messages and exit
-    flush();
+    shutdownNotifier.wait(shutdownLock);
 }
 
 void StdOutLogger::flush()
