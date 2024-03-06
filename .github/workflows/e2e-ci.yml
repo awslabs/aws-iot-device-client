@@ -55,7 +55,7 @@ jobs:
         id: get-version
         run: |
           version=$(docker run ${{ steps.build-device-client.outputs.imageid }} --version)
-          echo "::set-output name=version::$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
   build-docker-image-ubuntu-x86_64:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
