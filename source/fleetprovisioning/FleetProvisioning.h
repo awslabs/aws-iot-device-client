@@ -214,6 +214,46 @@ namespace Aws
                      * @return returns false if client is not able to find the file or if valid permissions are not set
                      */
                     bool LocateDeviceKey(const std::string &filePath) const;
+
+                    /**
+                     * \brief Collect system information for fleet provisioning.
+                     *
+                     * @return returns false if client is not able to collect required information
+                     */
+                    bool PopulateSystemInformation();
+
+                    /**
+                     * \brief Collect network information for fleet provisioning.
+                     *
+                     * @return returns false if client is not able to collect required information
+                     */
+                    bool PopulateNetworkInformation();
+
+                    /**
+                     * \brief Collect network information for fleet provisioning.
+                     *
+                     * @return returns false if client is not able to collect required information
+                     */
+                    bool CollectNetworkInformation();
+
+                    /**
+                     * \brief Calculate SHA-256 hash value of the given file.
+                     *
+                     * @param fileName friendly display name of the file
+                     * @param filePath path to the file
+                     *
+                     * @return returns false if client is not able to collect required information
+                     */
+                    bool CalculateFileSHA256Value(const char *fileName, const std::string &filePath);
+
+                    /**
+                     * \brief Obtain serial number of the given X.509 certificate.
+                     *
+                     * @param certPath path to the certificate
+                     *
+                     * @return returns false if client is not able to collect required information
+                     */
+                    bool ObtainCertificateSerialID(const char *certPath);
                 };
             } // namespace FleetProvisioningNS
         }     // namespace DeviceClient

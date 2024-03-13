@@ -17,9 +17,21 @@
 #include <aws/iotidentity/RegisterThingResponse.h>
 #include <aws/iotidentity/RegisterThingSubscriptionRequest.h>
 
+#include <arpa/inet.h>
 #include <chrono>
+#include <ifaddrs.h>
+#include <iomanip>
+#include <net/if.h>
+#include <openssl/bio.h>
+#include <openssl/err.h>
+#include <openssl/evp.h>
+#include <openssl/pem.h>
+#include <openssl/x509.h>
 #include <string>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <wordexp.h>
 
 using namespace std;
@@ -460,6 +472,14 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         return false;
     }
 
+    LOG_INFO(TAG, "Collect system information");
+    if (!PopulateSystemInformation())
+    {
+        LOGM_ERROR(TAG, "*** %s: Failed to collect system information. ***", DeviceClient::DC_FATAL_ERROR);
+        return false;
+    }
+    LOGM_INFO(TAG, "System information: \n\t%s", MapToString(templateParameters).c_str());
+
     LOG_INFO(TAG, "Publishing to RegisterThing topic");
     RegisterThingRequest registerThingRequest;
     registerThingRequest.TemplateName = templateName;
@@ -743,5 +763,208 @@ bool FleetProvisioning::MapParameters(Aws::Crt::Optional<std::string> params)
             templateParameters.emplace(x.first, x.second.AsString());
         }
     }
+    return true;
+}
+
+bool FleetProvisioning::PopulateSystemInformation()
+{
+    // Step 1: Get MAC and IP address of the device.
+    if (!CollectNetworkInformation())
+    {
+        LOG_ERROR(TAG, "*** %s: Failed to collect network information ***");
+        return false;
+    }
+
+    // Step 2: Get hash values of related files.
+    char exec_path[PATH_MAX];
+    ssize_t count = readlink("/proc/self/exe", exec_path, PATH_MAX);
+    if (count == -1)
+    {
+        LOG_ERROR(TAG, "*** %s: Failed to get executable path ***");
+        return false;
+    }
+    std::string exec_path_str(exec_path, count);
+
+    if (!CalculateFileSHA256Value("IoTDeviceClient", exec_path_str))
+    {
+        LOG_ERROR(TAG, "*** %s: Failed to calculate IoT device client hash value ***");
+        return false;
+    }
+
+    // Step 3: Get provisioning certificate IDs.
+    if (!ObtainCertificateSerialID(certPath.c_str()))
+    {
+        LOG_ERROR(TAG, "*** %s: Failed to obtain provisioning certificate IDs ***");
+        return false;
+    }
+
+    return true;
+}
+
+bool FleetProvisioning::CollectNetworkInformation()
+{
+    struct ifaddrs *ifap = nullptr;
+    char ip[INET6_ADDRSTRLEN];
+
+    if (getifaddrs(&ifap) == -1)
+    {
+        LOG_ERROR(TAG, "*** %s: Failed to get network interfaces ***");
+        return false;
+    }
+
+    int fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd == -1)
+    {
+        freeifaddrs(ifap);
+
+        LOG_ERROR(TAG, "*** %s: Failed to create socket ***");
+        return false;
+    }
+
+    for (struct ifaddrs *ifa = ifap; ifa != nullptr; ifa = ifa->ifa_next)
+    {
+        if (ifa->ifa_addr == nullptr)
+            continue;
+
+        int family = ifa->ifa_addr->sa_family;
+        char *name = ifa->ifa_name;
+
+        // We only search for addresses on eth0 interface.
+        if (family == AF_INET && strncmp(name, "eth0", 3) == 0)
+        {
+            struct in_addr addr = ((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
+            inet_ntop(AF_INET, &addr, ip, INET_ADDRSTRLEN);
+
+            struct ifreq ifr
+            {
+            };
+            unsigned char *mac;
+
+            strncpy(ifr.ifr_name, name, IFNAMSIZ - 1);
+            if (ioctl(fd, SIOCGIFHWADDR, &ifr) == -1)
+            {
+                close(fd);
+                freeifaddrs(ifap);
+
+                LOG_ERROR(TAG, "*** %s: Failed to get MAC address for interface ***");
+                return false;
+            }
+            mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
+
+            Aws::Crt::Optional<std::string> params(FormatMessage(
+                R"({"DeviceIPAddress": "%s", "DeviceMACAddress": "%02x:%02x:%02x:%02x:%02x:%02x"})",
+                ip,
+                mac[0],
+                mac[1],
+                mac[2],
+                mac[3],
+                mac[4],
+                mac[5]));
+            MapParameters(params);
+            LOGM_DEBUG(TAG, "Successfully collected network information: %s", params.value().c_str());
+
+            break;
+        }
+    }
+
+    close(fd);
+    freeifaddrs(ifap);
+    return true;
+}
+
+bool FleetProvisioning::CalculateFileSHA256Value(const char *fileName, const std::string &filePath)
+{
+    std::ifstream file(filePath, std::ios::binary);
+    if (!file.is_open())
+    {
+        LOG_ERROR(TAG, "*** %s: Failed to open file");
+        return false;
+    }
+
+    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
+    if (!mdctx)
+    {
+        LOG_ERROR(TAG, "*** %s: Failed to create EVP_MD_CTX");
+        return false;
+    }
+
+    if (EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL) != 1)
+    {
+        LOG_ERROR(TAG, "*** %s: Failed to initialize EVP_DigestInit_ex");
+        return false;
+    }
+
+    const int bufferSize = 8192;
+    char *buffer = new char[bufferSize];
+    while (file.good())
+    {
+        file.read(buffer, bufferSize);
+
+        if (EVP_DigestUpdate(mdctx, buffer, file.gcount()) != 1)
+        {
+            LOG_ERROR(TAG, "*** %s: Failed to update EVP_DigestUpdate");
+            return false;
+        }
+    }
+
+    unsigned char hashBuffer[SHA256_DIGEST_LENGTH];
+    if (EVP_DigestFinal_ex(mdctx, hashBuffer,NULL) != 1)
+    {
+        LOG_ERROR(TAG, "*** %s: Failed to finalize EVP_DigestFinal_ex");
+        return false;
+    }
+    EVP_MD_CTX_free(mdctx);
+
+    std::stringstream ss;
+    for (unsigned int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+    {
+        ss << std::hex << std::setw(2) << std::setfill('0') << (int)hashBuffer[i];
+    }
+    std::string hash = ss.str();
+
+    Aws::Crt::Optional<std::string> params(FormatMessage(R"({"%s-SHA256Hash": "%s"})", fileName, hash.c_str()));
+    MapParameters(params);
+    LOGM_DEBUG(TAG, "File '%s' SHA256 hash: %s", fileName, hash.c_str());
+
+    return true;
+}
+
+bool FleetProvisioning::ObtainCertificateSerialID(const char *certPath)
+{
+    BIO *certBIO = BIO_new(BIO_s_file());
+    if (BIO_read_filename(certBIO, certPath) <= 0)
+    {
+        BIO_free(certBIO);
+
+        LOG_ERROR(TAG, "*** %s: Failed to open certificate file ***");
+        return false;
+    }
+
+    X509 *cert = PEM_read_bio_X509(certBIO, nullptr, nullptr, nullptr);
+    if (cert == nullptr)
+    {
+        BIO_free(certBIO);
+
+        LOG_ERROR(TAG, "*** %s: Failed to load certificate ***");
+        return false;
+    }
+
+    // Convert ASN1_INTEGER to a readable string
+    ASN1_INTEGER *serial = X509_get_serialNumber(cert);
+    BIGNUM *bn = ASN1_INTEGER_to_BN(serial, nullptr);
+    char *hex = BN_bn2hex(bn);
+    std::string serialNumber(hex);
+
+    // Clean up
+    BN_free(bn);
+    OPENSSL_free(hex);
+    X509_free(cert);
+    BIO_free(certBIO);
+
+    Aws::Crt::Optional<std::string> params(
+        FormatMessage(R"({"ProvisioningCertSerialNumber": "%s"})", serialNumber.c_str()));
+    MapParameters(params);
+    LOGM_DEBUG(TAG, "Provisioning certificate serial number: %s", serialNumber.c_str());
+
     return true;
 }
