@@ -246,6 +246,7 @@ namespace Aws
                     Aws::Crt::Optional<std::string> templateParameters;
                     Aws::Crt::Optional<std::string> csrFile;
                     Aws::Crt::Optional<std::string> deviceKey;
+                    bool collectSystemInformation{false};
                 };
                 FleetProvisioning fleetProvisioning;
 
