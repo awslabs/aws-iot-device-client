@@ -472,13 +472,16 @@ bool FleetProvisioning::RegisterThing(Iotidentity::IotIdentityClient identityCli
         return false;
     }
 
-    LOG_INFO(TAG, "Collect system information");
-    if (!PopulateSystemInformation())
+    if (collectSystemInformation)
     {
-        LOGM_ERROR(TAG, "*** %s: Failed to collect system information. ***", DeviceClient::DC_FATAL_ERROR);
-        return false;
+        LOG_INFO(TAG, "Collecting system information");
+        if (!PopulateSystemInformation())
+        {
+            LOGM_ERROR(TAG, "*** %s: Failed to collect system information. ***", DeviceClient::DC_FATAL_ERROR);
+            return false;
+        }
+        LOGM_INFO(TAG, "System information: \n\t%s", MapToString(templateParameters).c_str());
     }
-    LOGM_INFO(TAG, "System information: \n\t%s", MapToString(templateParameters).c_str());
 
     LOG_INFO(TAG, "Publishing to RegisterThing topic");
     RegisterThingRequest registerThingRequest;
@@ -512,6 +515,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
     try
     {
         LOG_INFO(TAG, "Fleet Provisioning Feature has been started.");
+        collectSystemInformation = config.fleetProvisioning.collectSystemInformation;
 
         bool didSetup = FileUtils::CreateDirectoryWithPermissions(keyDir.c_str(), S_IRWXU) &&
                         FileUtils::CreateDirectoryWithPermissions(
@@ -835,9 +839,7 @@ bool FleetProvisioning::CollectNetworkInformation()
             struct in_addr addr = ((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
             inet_ntop(AF_INET, &addr, ip, INET_ADDRSTRLEN);
 
-            struct ifreq ifr
-            {
-            };
+            struct ifreq ifr;
             unsigned char *mac;
 
             strncpy(ifr.ifr_name, name, IFNAMSIZ - 1);
@@ -895,12 +897,12 @@ bool FleetProvisioning::CalculateFileSHA256Value(const char *fileName, const std
     }
 
     const int bufferSize = 8192;
-    char *buffer = new char[bufferSize];
+    char buffer[bufferSize];
     while (file.good())
     {
         file.read(buffer, bufferSize);
 
-        if (EVP_DigestUpdate(mdctx, buffer, file.gcount()) != 1)
+        if (!EVP_DigestUpdate(mdctx, buffer, file.gcount()))
         {
             LOG_ERROR(TAG, "*** %s: Failed to update EVP_DigestUpdate");
             return false;

@@ -157,6 +157,11 @@ namespace Aws
                     std::string csrFile;
 
                     /**
+                     * \brief Flag whether to collect system information.
+                     */
+                    bool collectSystemInformation;
+
+                    /**
                      * \brief creates a new certificate and private key using the AWS certificate authority
                      *
                      * @param identityClient used for subscribing and publishing request for creating resources
@@ -221,13 +226,6 @@ namespace Aws
                      * @return returns false if client is not able to collect required information
                      */
                     bool PopulateSystemInformation();
-
-                    /**
-                     * \brief Collect network information for fleet provisioning.
-                     *
-                     * @return returns false if client is not able to collect required information
-                     */
-                    bool PopulateNetworkInformation();
 
                     /**
                      * \brief Collect network information for fleet provisioning.
