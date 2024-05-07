@@ -1024,12 +1024,14 @@ constexpr char PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_N
 constexpr char PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_TEMPLATE_PARAMETERS[];
 constexpr char PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_CSR_FILE[];
 constexpr char PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY[];
+constexpr char PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_PUBLISH_SYS_INFO[];
 
 constexpr char PlainConfig::FleetProvisioning::JSON_KEY_ENABLED[];
 constexpr char PlainConfig::FleetProvisioning::JSON_KEY_TEMPLATE_NAME[];
 constexpr char PlainConfig::FleetProvisioning::JSON_KEY_TEMPLATE_PARAMETERS[];
 constexpr char PlainConfig::FleetProvisioning::JSON_KEY_CSR_FILE[];
 constexpr char PlainConfig::FleetProvisioning::JSON_KEY_DEVICE_KEY[];
+constexpr char PlainConfig::FleetProvisioning::JSON_KEY_PUBLISH_SYS_INFO[];
 
 bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
 {
@@ -1087,6 +1089,11 @@ bool PlainConfig::FleetProvisioning::LoadFromJson(const Crt::JsonView &json)
                     Config::TAG, "Key {%s} was provided in the JSON configuration file with an empty value", jsonKey);
             }
         }
+        jsonKey = JSON_KEY_PUBLISH_SYS_INFO;
+        if (json.ValueExists(jsonKey))
+        {
+            collectSystemInformation = json.GetBool(jsonKey);
+        }
     }
 
     return true;
@@ -1116,6 +1123,10 @@ bool PlainConfig::FleetProvisioning::LoadFromCliArgs(const CliArgs &cliArgs)
     {
         deviceKey = FileUtils::ExtractExpandedPath(
             cliArgs.at(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_DEVICE_KEY).c_str());
+    }
+    if (cliArgs.count(PlainConfig::FleetProvisioning::CLI_FLEET_PROVISIONING_PUBLISH_SYS_INFO))
+    {
+        enabled = cliArgs.at(CLI_FLEET_PROVISIONING_PUBLISH_SYS_INFO).compare("true") == 0;
     }
 
     return true;
