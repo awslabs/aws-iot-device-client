@@ -46,6 +46,8 @@ using namespace Aws::Iot::DeviceClient::Util;
 constexpr char FleetProvisioning::TAG[];
 constexpr int FleetProvisioning::DEFAULT_WAIT_TIME_SECONDS;
 
+FleetProvisioning::FleetProvisioning() : collectSystemInformation(false) {}
+
 bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient identityClient)
 {
     LOG_INFO(TAG, "Provisioning new device certificate and private key using CreateKeysAndCertificate API");
@@ -836,7 +838,7 @@ bool FleetProvisioning::CollectNetworkInformation()
         // We only search for addresses on eth0 interface.
         if (family == AF_INET && strncmp(name, "eth0", 3) == 0)
         {
-            struct in_addr addr = ((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
+            struct in_addr addr = (reinterpret_cast<struct sockaddr_in *>(ifa->ifa_addr))->sin_addr;
             inet_ntop(AF_INET, &addr, ip, INET_ADDRSTRLEN);
 
             struct ifreq ifr;
@@ -851,7 +853,7 @@ bool FleetProvisioning::CollectNetworkInformation()
                 LOG_ERROR(TAG, "*** %s: Failed to get MAC address for interface ***");
                 return false;
             }
-            mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
+            mac = reinterpret_cast<unsigned char *>(ifr.ifr_hwaddr.sa_data);
 
             Aws::Crt::Optional<std::string> params(FormatMessage(
                 R"({"DeviceIPAddress": "%s", "DeviceMACAddress": "%02x:%02x:%02x:%02x:%02x:%02x"})",
@@ -910,7 +912,7 @@ bool FleetProvisioning::CalculateFileSHA256Value(const char *fileName, const std
     }
 
     unsigned char hashBuffer[SHA256_DIGEST_LENGTH];
-    if (EVP_DigestFinal_ex(mdctx, hashBuffer,NULL) != 1)
+    if (EVP_DigestFinal_ex(mdctx, hashBuffer, NULL) != 1)
     {
         LOG_ERROR(TAG, "*** %s: Failed to finalize EVP_DigestFinal_ex");
         return false;

@@ -21,6 +21,11 @@ namespace Aws
                 {
                   public:
                     /**
+                     * \brief Constructor
+                     */
+                    FleetProvisioning();
+
+                    /**
                      * \brief Provisions device by creating and storing required resources
                      *
                      * @param fpConnection the MqttConnectionManager

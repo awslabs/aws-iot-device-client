@@ -277,7 +277,8 @@ bool PlainConfig::LoadFromCliArgs(const CliArgs &cliArgs)
         thingName = cliArgs.at(PlainConfig::CLI_THING_NAME).c_str();
     }
 
-    bool loadFeatureCliArgs = tunneling.LoadFromCliArgs(cliArgs) && logConfig.LoadFromCliArgs(cliArgs) && httpProxyConfig.LoadFromCliArgs(cliArgs);
+    bool loadFeatureCliArgs = tunneling.LoadFromCliArgs(cliArgs) && logConfig.LoadFromCliArgs(cliArgs) &&
+                              httpProxyConfig.LoadFromCliArgs(cliArgs);
 #if !defined(DISABLE_MQTT)
     loadFeatureCliArgs = loadFeatureCliArgs && jobs.LoadFromCliArgs(cliArgs) &&
                          deviceDefender.LoadFromCliArgs(cliArgs) && fleetProvisioning.LoadFromCliArgs(cliArgs) &&
