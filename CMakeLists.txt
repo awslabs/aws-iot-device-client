@@ -16,7 +16,12 @@ option(EXCLUDE_CONFIG_SHADOW "Builds the device client without the IoT Config Sh
 option(EXCLUDE_SAMPLE_SHADOW "Builds the device client without the IoT Sample Shadow Feature." OFF)
 option(EXCLUDE_SECURE_ELEMENT "Builds the device client without the support for storing/accessing keys stored in a secure module using PKCS#11." ON)
 option(EXCLUDE_SENSOR_PUBLISH "Builds the device client without the Sensor Publish over MQTT Feature." OFF)
-option(EXCLUDE_SENSOR_PUBLISH_SAMPLES "Builds the device client without the Sensor Publish sample servers." OFF)
+if (WIN32)
+    option(EXCLUDE_SENSOR_PUBLISH_SAMPLES "Builds the device client without the Sensor Publish sample servers." ON)
+else()
+    # Exclude this example from windows version as it uses Linux sockets and needs to be reworked for Window
+    option(EXCLUDE_SENSOR_PUBLISH_SAMPLES "Builds the device client without the Sensor Publish sample servers." OFF)
+endif ()    
 option(GIT_VERSION "Updates the version number using the Git commit history" ON)
 
 if (EXCLUDE_JOBS)
@@ -69,6 +74,10 @@ endif()
 
 if (EXCLUDE_SENSOR_PUBLISH_SAMPLES)
     add_definitions(-DEXCLUDE_SENSOR_PUBLISH_SAMPLES)
+endif()
+
+if (WIN32)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "./sdk-cpp-workspace/lib/cmake")
@@ -158,6 +167,15 @@ configure_file("source/Version.h.in" "${PROJECT_BINARY_DIR}/Version.h")
 #########################################
 set(OPENSSL_USE_STATIC_LIBS TRUE)
 find_package(OpenSSL REQUIRED)
+
+#########################################
+# Get unistd implementation for Windows #
+#########################################
+if (WIN32)
+    file(GLOB ST_WIN32 "source/win32/*.cpp")
+    list(APPEND DC_SRC ${ST_WIN32})
+    include_directories("source/win32")
+endif ()
 
 #########################################
 # AWS IoT v2 SDK C++ dependency         #

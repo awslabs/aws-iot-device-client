@@ -16,6 +16,10 @@ using namespace Aws::Iot::DeviceClient::Logging;
 constexpr char LockFile::TAG[];
 constexpr char LockFile::FILE_NAME[];
 
+#ifdef _WIN32
+    #undef close
+#endif
+
 LockFile::LockFile(const std::string &filedir, const std::string &process, const std::string &thingName) : dir(filedir)
 {
     LOG_DEBUG(TAG, "creating lockfile");
@@ -54,7 +58,12 @@ LockFile::LockFile(const std::string &filedir, const std::string &process, const
     }
     fileIn.close();
 
+#ifndef _WIN32    
     FILE *file = fopen(fullPath.c_str(), "wx");
+#else
+    FILE *file = NULL;
+    fopen_s(&file, fullPath.c_str(), "wx");
+#endif
     if (!file)
     {
         LOGM_ERROR(

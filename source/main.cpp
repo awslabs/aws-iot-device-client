@@ -97,7 +97,7 @@ constexpr char TAG[] = "Main.cpp";
 
 shared_ptr<FeatureRegistry> features;
 shared_ptr<SharedCrtResourceManager> resourceManager;
-unique_ptr<LockFile> lockFile;
+unique_ptr<Aws::Iot::DeviceClient::Util::LockFile> lockFile;
 bool attemptingShutdown{false};
 Config config;
 
@@ -106,7 +106,7 @@ Config config;
  * Currently creates a lockfile to prevent the creation of multiple Device Client processes.
  * @return true if no exception is caught, false otherwise
  */
-bool init(int argc, char *argv[])
+bool init(int /*argc*/, char *argv[])
 {
     try
     {
@@ -119,7 +119,7 @@ bool init(int argc, char *argv[])
                 thing = config.config.thingName.value();
             }
 
-            lockFile = unique_ptr<LockFile>(new LockFile{filename, argv[0], thing});
+            lockFile = unique_ptr<Aws::Iot::DeviceClient::Util::LockFile>(new Aws::Iot::DeviceClient::Util::LockFile{filename, argv[0], thing});
         }
     }
     catch (std::runtime_error &e)
@@ -347,6 +347,7 @@ int main(int argc, char *argv[])
 
     LOGM_INFO(TAG, "Now running AWS IoT Device Client version %s", DEVICE_CLIENT_VERSION_FULL);
 
+#ifndef _WIN32
     // Register for listening to interrupt signals
     sigset_t sigset;
     memset(&sigset, 0, sizeof(sigset_t));
@@ -355,6 +356,9 @@ int main(int argc, char *argv[])
     sigaddset(&sigset, SIGHUP);
     sigaddset(&sigset, SIGTERM);
     sigprocmask(SIG_BLOCK, &sigset, nullptr);
+#else
+    // TODO: Windows implementation needs to be added
+#endif
 
     auto listener = std::make_shared<DefaultClientBaseNotifier>();
     if (!resourceManager.get()->initialize(config.config, features))
@@ -630,6 +634,7 @@ int main(int argc, char *argv[])
     // Now allow this thread to sleep until it's interrupted by a signal
     while (true)
     {
+#ifndef _WIN32        
         sigwait(&sigset, &received_signal);
         LOGM_INFO(TAG, "Received signal: (%d)", received_signal);
         switch (received_signal)
@@ -646,5 +651,7 @@ int main(int argc, char *argv[])
             default:
                 break;
         }
+#else
+#endif
     }
 }

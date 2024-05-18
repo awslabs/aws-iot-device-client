@@ -16,6 +16,16 @@
 
 #include <sys/inotify.h>
 
+#ifdef _WIN32
+#ifndef close
+#define close _close
+#endif /* close */
+
+#ifndef read
+#define read _read
+#endif /* read */
+#endif
+
 using namespace std;
 using namespace Aws;
 using namespace Aws::Iot;
@@ -47,7 +57,7 @@ string PubSubFeature::getName()
     return NAME;
 }
 
-bool PubSubFeature::createPubSub(const PlainConfig &config, const std::string &filePath, const aws_byte_buf *payload)
+bool PubSubFeature::createPubSub(const PlainConfig &/*config*/, const std::string &filePath, const aws_byte_buf *payload)
     const
 {
     std::string pubSubFileDir = FileUtils::ExtractParentDirectory(filePath);
@@ -261,7 +271,7 @@ int PubSubFeature::start()
 {
     LOGM_INFO(TAG, "Starting %s", getName().c_str());
 
-    auto onSubAck = [this](const MqttConnection &, uint16_t, const String &, QOS, int errorCode) -> void {
+    auto onSubAck = [this](const MqttConnection &, uint16_t, const String &, Aws::Crt::Mqtt::QOS, int errorCode) -> void {
         LOGM_DEBUG(TAG, "SubAck: PacketId:(%s), ErrorCode:%d", getName().c_str(), errorCode);
     };
     auto onRecvData = [this](const MqttConnection &, const String &, const ByteBuf &payload) -> void {

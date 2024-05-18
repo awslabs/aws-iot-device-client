@@ -12,11 +12,12 @@
 #include <vector>
 
 #include <signal.h>
-#include <sys/socket.h>
+//#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/un.h>
-#include <unistd.h>
+//#include <sys/un.h>
+#include "../../../../build/libunistd-src/unistd/unistd.h"
+//#include <unistd.h>
 
 // Wrapper for system call errors.
 class syscall_error : public std::runtime_error

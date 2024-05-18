@@ -28,7 +28,7 @@ namespace Aws
                     const int port,
                     const OnConnectionShutdownFn &onConnectionShutdown)
                     : mSharedCrtResourceManager(manager), mRootCa(rootCa.has_value() ? rootCa.value() : ""),
-                      mAccessToken(accessToken), mEndpoint(endpoint), mPort(port),
+                      mAccessToken(accessToken), mEndpoint(endpoint), mPort((uint16_t)port),
                       mOnConnectionShutdown(onConnectionShutdown)
                 {
                 }
@@ -43,7 +43,7 @@ namespace Aws
                     const OnConnectionShutdownFn &onConnectionShutdown)
                     : mSharedCrtResourceManager(manager), mProxyOptions(proxyOptions),
                       mRootCa(rootCa.has_value() ? rootCa.value() : ""), mAccessToken(accessToken), mEndpoint(endpoint),
-                      mPort(port), mOnConnectionShutdown(onConnectionShutdown)
+                      mPort((uint16_t)port), mOnConnectionShutdown(onConnectionShutdown)
                 {
                 }
 
@@ -198,7 +198,7 @@ namespace Aws
 
                 std::shared_ptr<SecureTunnelWrapper> SecureTunnelingContext::CreateSecureTunnel(
                     const Aws::Iotsecuretunneling::OnConnectionComplete &onConnectionComplete,
-                    const Aws::Iotsecuretunneling::OnConnectionShutdown &onConnectionShutdown,
+                    const Aws::Iotsecuretunneling::OnConnectionShutdown &/*onConnectionShutdown*/,
                     const Aws::Iotsecuretunneling::OnSendDataComplete &onSendDataComplete,
                     const Aws::Iotsecuretunneling::OnDataReceive &onDataReceive,
                     const Aws::Iotsecuretunneling::OnStreamStart &onStreamStart,

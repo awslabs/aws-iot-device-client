@@ -14,6 +14,13 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#ifdef _WIN32
+#undef FormatMessage
+#ifndef close
+#define close _close
+#endif /* close */
+#endif
+
 constexpr int PIPE_READ = 0;
 constexpr int PIPE_WRITE = 1;
 constexpr int CMD_FAILURE = 1;
@@ -21,13 +28,14 @@ constexpr int CMD_FAILURE = 1;
 using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::Jobs;
 using namespace Aws::Iot::DeviceClient::Logging;
+using namespace Aws::Iot::DeviceClient::Util;
 using namespace std;
 
 void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
 {
     array<char, 1024> buffer;
-    unique_ptr<FILE, decltype(&fclose)> pipe(fdopen(fd, "r"), &fclose);
-    if (nullptr == pipe.get())
+    unique_ptr<FILE, decltype(&fclose)> pipePtr(fdopen(fd, "r"), &fclose);
+    if (nullptr == pipePtr.get())
     {
         LOGM_ERROR(
             TAG, "Failed to open pipe to %s for job, errno: %s", isStdErr ? "STDERR" : "STDOUT", strerror(errno));
@@ -38,7 +46,11 @@ void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
     char const *logTag = pidString.c_str();
 
     size_t lineCount = 0;
-    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+#ifndef _WIN32    
+    while (fgets(buffer.data(), buffer.size(), pipePtr.get()) != nullptr)
+#else
+    while (fgets(buffer.data(), 1024, pipePtr.get()) != nullptr)
+#endif
     {
         if (lineCount > MAX_LOG_LINES)
         {
@@ -144,7 +156,7 @@ void JobEngine::exec_action(PlainJobDocument::JobAction action, const std::strin
         {
             command = buildCommand(action.handlerInput->path, action.handlerInput->handler, jobHandlerDir);
         }
-        catch (exception &e)
+        catch (exception &/*e*/)
         {
             if (!action.ignoreStepFailure.value())
             {
@@ -254,26 +266,30 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
 {
     // Establish some file descriptors which we'll use to redirect stdout and
     // stderr from the child process back into our logger
-    int stdout[] = {0, 0};
-    int stderr[] = {0, 0};
+    int stdout_fd[] = {0, 0};
+    int stderr_fd[] = {0, 0};
 
-    if (pipe(stdout) < 0)
+    if (pipe(stdout_fd) < 0)
     {
         LOG_ERROR(TAG, "failed allocating pipe for child STDOUT redirect");
         return CMD_FAILURE;
     }
 
-    if (pipe(stderr) < 0)
+    if (pipe(stderr_fd) < 0)
     {
-        close(stdout[PIPE_READ]);
-        close(stdout[PIPE_WRITE]);
+        close(stdout_fd[PIPE_READ]);
+        close(stdout_fd[PIPE_WRITE]);
         LOG_ERROR(TAG, "failed allocating pipe for child STDERR redirect");
         return CMD_FAILURE;
     }
 
     int execResult;
     int returnCode;
+#ifndef _WIN32    
     int pid = vfork();
+#else
+    pid_t pid = vfork();
+#endif
     if (pid < 0)
     {
         LOGM_ERROR(TAG, "Failed to create child process, fork returned %d", pid);
@@ -284,24 +300,28 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
         // Child process
         LOG_DEBUG(TAG, "Child process now running");
 
-        // redirect stdout
-        if (dup2(stdout[PIPE_WRITE], STDOUT_FILENO) == -1)
+#ifdef _WIN32
+    #define STDOUT_FILENO 1
+    #define STDERR_FILENO 2
+#endif
+        // redirect stdout_fd
+        if (dup2(stdout_fd[PIPE_WRITE], STDOUT_FILENO) == -1)
         {
             LOGM_WARN(TAG, "Failed to duplicate STDOUT pipe, errno {%d}, stdout will likely be unavailable", errno);
         }
 
         // redirect stderr
-        if (dup2(stderr[PIPE_WRITE], STDERR_FILENO) == -1)
+        if (dup2(stderr_fd[PIPE_WRITE], STDERR_FILENO) == -1)
         {
             LOGM_WARN(TAG, "Failed to duplicate STDERR pipe, errno {%d}, stderr will likely be unavailable", errno);
         }
 
         // all these are for use by parent only
         // TODO we need to make sure ALL file handles get closed, including those within the MQTTConnectionManager
-        close(stdout[PIPE_READ]);
-        close(stdout[PIPE_WRITE]);
-        close(stderr[PIPE_READ]);
-        close(stderr[PIPE_WRITE]);
+        close(stdout_fd[PIPE_READ]);
+        close(stdout_fd[PIPE_WRITE]);
+        close(stderr_fd[PIPE_READ]);
+        close(stderr_fd[PIPE_WRITE]);
 
         LOG_DEBUG(TAG, "Child process about to call execvp");
 
@@ -310,7 +330,15 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
         {
             auto err = errno;
             LOGM_ERROR(TAG, "Failed to invoke execvp system call to execute action step: %s (%d)", strerror(err), err);
+#ifndef _WIN32
             _exit(rc);
+#else
+            if (rc >= INT_MIN && rc <= INT_MAX) {
+                _exit(static_cast<int>(rc));
+            }
+            else
+                _exit(-1);
+#endif
         }
         _exit(0);
     }
@@ -319,19 +347,23 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
         // parent process
         LOGM_DEBUG(TAG, "Parent process now running, child PID is %d", pid);
         // close unused file descriptors
-        close(stdout[PIPE_WRITE]);
-        close(stderr[PIPE_WRITE]);
+        close(stdout_fd[PIPE_WRITE]);
+        close(stderr_fd[PIPE_WRITE]);
 
         // Set up some threads to process the output from the child process
-        thread stdOutProcessor(&JobEngine::processCmdOutput, this, stdout[PIPE_READ], false, pid);
+        thread stdOutProcessor(&JobEngine::processCmdOutput, this, stdout_fd[PIPE_READ], false, pid);
         stdOutProcessor.join();
-        thread stdErrProcessor(&JobEngine::processCmdOutput, this, stderr[PIPE_READ], true, pid);
+        thread stdErrProcessor(&JobEngine::processCmdOutput, this, stderr_fd[PIPE_READ], true, pid);
         stdErrProcessor.join();
 
         do
         {
             // TODO: do not wait for infinite time for child process to complete
+#ifndef _WIN32
             int waitReturn = waitpid(pid, &execResult, 0);
+#else
+            pid_t waitReturn = waitpid(pid, &execResult, 0);
+#endif
             if (waitReturn == -1)
             {
                 LOGM_WARN(TAG, "Failed to wait for child process: %d", pid);
@@ -339,7 +371,11 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
 
             returnCode = WEXITSTATUS(execResult);
             LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", returnCode);
+#ifndef _WIN32
         } while (!WIFEXITED(execResult) && !WIFSIGNALED(execResult));
+#else
+        } while (STILL_ACTIVE != execResult);
+#endif
     }
     return returnCode;
 }
@@ -348,7 +384,11 @@ int JobEngine::exec_process(std::unique_ptr<const char *[]> &argv)
 {
     int status = 0;
     int execStatus = 0;
+#ifndef _WIN32    
     int pid = vfork();
+#else
+    pid_t pid = vfork();
+#endif
 
     if (pid < 0)
     {
@@ -365,7 +405,15 @@ int JobEngine::exec_process(std::unique_ptr<const char *[]> &argv)
         {
             auto err = errno;
             LOGM_ERROR(TAG, "Failed to invoke execvp system call to execute action step: %s (%d)", strerror(err), err);
+#ifndef _WIN32
             _exit(rc);
+#else
+            if (rc >= INT_MIN && rc <= INT_MAX) {
+                _exit(static_cast<int>(rc));
+            }
+            else
+                _exit(-1);
+#endif
         }
         _exit(0);
     }
@@ -375,7 +423,11 @@ int JobEngine::exec_process(std::unique_ptr<const char *[]> &argv)
         do
         {
             // TODO: do not wait for infinite time for child process to complete
+#ifndef _WIN32
             int waitReturn = waitpid(pid, &status, 0);
+#else
+            pid_t waitReturn = waitpid(pid, &status, 0);
+#endif
             if (waitReturn == -1)
             {
                 LOGM_WARN(TAG, "Failed to wait for child process: %d", pid);
@@ -383,7 +435,11 @@ int JobEngine::exec_process(std::unique_ptr<const char *[]> &argv)
             execStatus = WEXITSTATUS(status);
             LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", execStatus);
 
+#ifndef _WIN32
         } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+#else
+        } while (STILL_ACTIVE != status);
+#endif
     }
     return execStatus;
 }

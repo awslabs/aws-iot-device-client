@@ -33,6 +33,10 @@ using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Jobs;
 using namespace Aws::Iotjobs;
 
+#ifdef _WIN32
+    #undef FormatMessage
+#endif
+
 constexpr char JobsFeature::NAME[];
 const std::string JobsFeature::DEFAULT_JOBS_HANDLER_DIR = "~/.aws-iot-device-client/jobs/";
 
@@ -48,7 +52,7 @@ void JobsFeature::ackSubscribeToNextJobChanged(int ioError)
     {
         // TODO We need to implement a strategy for what do when our subscription fails
         string errorMessage =
-            FormatMessage("Encountered ioError {%d} while attempting to subscribe to NextJobChanged", ioError);
+            Aws::Iot::DeviceClient::Util::FormatMessage("Encountered ioError {%d} while attempting to subscribe to NextJobChanged", ioError);
         LOG_ERROR(TAG, errorMessage.c_str());
         baseNotifier->onError(this, ClientBaseErrorNotification::SUBSCRIPTION_FAILED, errorMessage);
     }

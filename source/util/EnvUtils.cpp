@@ -19,9 +19,21 @@
 using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
 
+#ifdef _WIN32
+    #undef getcwd
+#endif
+
 char *OSInterfacePosix::getenv(const char *name)
 {
+#ifndef _WIN32
     return ::getenv(name);
+#else
+    char* envValue = NULL;
+    size_t len = 0;
+    _dupenv_s(&envValue, &len, name);
+
+    return envValue;
+#endif
 }
 
 int OSInterfacePosix::setenv(const char *name, const char *value, int overwrite)
@@ -31,7 +43,15 @@ int OSInterfacePosix::setenv(const char *name, const char *value, int overwrite)
 
 char *OSInterfacePosix::getcwd(char *buf, size_t size)
 {
+#ifndef _WIN32
     return ::getcwd(buf, size);
+#else
+    if (size >= INT_MIN && size <= INT_MAX) {
+        return ::_getcwd(buf, static_cast<int>(size));
+    }
+    else
+        return NULL;
+#endif
 }
 
 // Sequences of path prefixes used to search for executable filenames.
@@ -47,6 +67,19 @@ constexpr char PATH_DIRECTORY_SEPARATOR = '/'; // Unix-only.
 constexpr char JOBS_DIRECTORY_NAME[] = "jobs";
 
 constexpr char EnvUtils::TAG[];
+
+/*
+#ifdef _WIN32
+#define strerror(errnum) \
+    ( \
+        []() { \
+            char errbuf[1024]; \
+            strerror_s(errbuf, sizeof(errbuf), errnum); \
+            return errbuf; \
+        }() \
+    )
+#endif
+*/
 
 int EnvUtils::AppendCwdToPath() const
 {
@@ -102,7 +135,7 @@ int EnvUtils::AppendCwdToPath() const
             }
             else
             {
-                auto errnum = errno != 0 ? errno : 1;
+                int errnum = errno != 0 ? errno : 1;
                 LOGM_ERROR(TAG, "Unable to get current working directory errno: %d msg: %s", errnum, strerror(errnum));
                 return errnum;
             }
@@ -136,7 +169,7 @@ int EnvUtils::AppendCwdToPath() const
     const std::string newpath = oss.str();
     if (os->setenv(PATH_ENVIRONMENT, newpath.c_str(), 1) != 0)
     {
-        auto errnum = errno != 0 ? errno : 1;
+        int errnum = errno != 0 ? errno : 1;
         LOGM_ERROR(
             TAG,
             "Unable to overwrite %s environment variable errno: %d msg: %s",

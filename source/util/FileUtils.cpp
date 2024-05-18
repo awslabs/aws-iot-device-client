@@ -15,6 +15,15 @@
 #include <unistd.h>
 #include <wordexp.h>
 
+#include <io.h>
+
+#ifdef _WIN32
+    // undefine a few definitions from unistd as they conflict with stream methods
+    #undef close
+    #undef read
+    #undef write
+#endif
+
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
@@ -82,6 +91,10 @@ bool FileUtils::StoreValueInFile(const string &value, const string &filePath)
         return false;
     }
     file << value;
+#ifdef _WIN32
+    #undef close
+#endif
+
     file.close();
     return true;
 }
@@ -333,7 +346,7 @@ bool FileUtils::CreateEmptyFileWithPermissions(const string &filename, mode_t pe
     auto fd = open(expandedFilename.c_str(), O_CREAT | O_EXCL, permissions);
     if (-1 == fd)
     {
-        auto errnum = errno;
+        int errnum = errno;
         LOGM_ERROR(
             TAG,
             "Failed to create empty file: %s errno: %d msg: %s",
@@ -342,7 +355,11 @@ bool FileUtils::CreateEmptyFileWithPermissions(const string &filename, mode_t pe
             strerror(errnum));
         return false;
     }
+#ifdef _WIN32
+    _close(fd);
+#else
     close(fd);
+#endif
     return true;
 }
 

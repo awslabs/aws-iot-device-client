@@ -22,6 +22,10 @@
 #include <sys/stat.h>
 #include <wordexp.h>
 
+#ifdef _WIN32
+#undef FormatMessage
+#endif
+
 using namespace std;
 using namespace Aws::Crt;
 using namespace Aws::Iotidentity;
@@ -30,6 +34,7 @@ using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::FleetProvisioningNS;
 using namespace Aws::Iot::DeviceClient::Logging;
 using namespace Aws::Iot::DeviceClient::Util;
+
 
 constexpr char FleetProvisioning::TAG[];
 constexpr int FleetProvisioning::DEFAULT_WAIT_TIME_SECONDS;
@@ -671,6 +676,11 @@ bool FleetProvisioning::GetCsrFileContent(const string &filePath)
     csrFile = fileContent;
 
     LOGM_INFO(TAG, "Successfully fetched CSR file '%s' and stored its content.", filePath.c_str());
+
+#ifdef _WIN32
+    #undef close
+#endif
+
     setting.close();
     return true;
 }

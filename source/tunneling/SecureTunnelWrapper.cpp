@@ -55,7 +55,7 @@ SecureTunnelWrapper::SecureTunnelWrapper(
     const Aws::Iotsecuretunneling::OnSendDataComplete &onSendDataComplete,
     const Aws::Iotsecuretunneling::OnDataReceive &onDataReceive,
     const Aws::Iotsecuretunneling::OnStreamStart &onStreamStart,
-    const Aws::Iotsecuretunneling::OnStreamReset &onStreamReset,
+    const Aws::Iotsecuretunneling::OnStreamReset &/*onStreamReset*/,
     const Aws::Iotsecuretunneling::OnSessionReset &onSessionReset)
     : secureTunnel((Aws::Iotsecuretunneling::SecureTunnelBuilder(
                         allocator,

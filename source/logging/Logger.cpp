@@ -21,8 +21,14 @@ void LogUtil::generateTimestamp(
 {
     auto ms = duration_cast<milliseconds>(t.time_since_epoch()) % 1000;
     auto timer = system_clock::to_time_t(t);
+#ifndef _WIN32
     struct tm buf;
     std::tm bt = *gmtime_r(&timer, &buf);
+#else
+    std::tm bt;
+    gmtime_s(&bt, &timer);
+
+#endif
 
     std::ostringstream time_stream;
     time_stream << std::put_time(&bt, TIMESTAMP_FORMAT);

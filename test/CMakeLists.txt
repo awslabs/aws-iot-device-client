@@ -109,6 +109,15 @@ if (NOT EXCLUDE_SENSOR_PUBLISH)
     list(APPEND DC_TST ${SENSOR_PUBLISH_TST})
 endif ()
 
+#########################################
+# Get unistd implementation for Windows #
+#########################################
+if (WIN32)
+    file(GLOB ST_WIN32 "../source/win32/*.cpp")
+    list(APPEND DC_SRC ${ST_WIN32})
+    include_directories("../source/win32")
+endif ()
+
 list(APPEND DC_SRC ${DC_TST})
 list(FILTER DC_SRC EXCLUDE REGEX ".*main.cpp$")
 

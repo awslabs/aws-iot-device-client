@@ -1230,7 +1230,7 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromJson(const Crt::JsonVi
     return true;
 }
 
-bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromCliArgs(const CliArgs &cliArgs)
+bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromCliArgs(const CliArgs &/*cliArgs*/)
 {
     /*
      * No Command line arguments for Fleet Provisioning Runtime Config
@@ -2199,7 +2199,7 @@ bool PlainConfig::SensorPublish::LoadFromJson(const Crt::JsonView &json)
     return true;
 }
 
-bool PlainConfig::SensorPublish::LoadFromCliArgs(const CliArgs &cliArgs)
+bool PlainConfig::SensorPublish::LoadFromCliArgs(const CliArgs &/*cliArgs*/)
 {
     return true;
 }

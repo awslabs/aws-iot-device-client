@@ -27,6 +27,16 @@
 
 #include <sys/inotify.h>
 
+#ifdef _WIN32
+#ifndef close
+#define close _close
+#endif /* close */
+
+#ifndef read
+#define read _read
+#endif /* read */
+#endif
+
 using namespace std;
 using namespace Aws;
 using namespace Aws::Iot;
@@ -73,7 +83,7 @@ int SampleShadowFeature::init(
     return AWS_OP_SUCCESS;
 }
 
-void SampleShadowFeature::updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError) const
+void SampleShadowFeature::updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse */*response*/, int ioError) const
 {
     if (ioError)
     {
@@ -383,6 +393,9 @@ void SampleShadowFeature::readAndUpdateShadowFromFile()
                 jsonObj.GetErrorMessage().c_str());
             return;
         }
+#ifdef _WIN32
+    #undef close
+#endif        
         setting.close();
     }
 
