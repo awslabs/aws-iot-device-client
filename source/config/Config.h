@@ -234,18 +234,21 @@ namespace Aws
                         "--fleet-provisioning-template-parameters";
                     static constexpr char CLI_FLEET_PROVISIONING_CSR_FILE[] = "--csr-file";
                     static constexpr char CLI_FLEET_PROVISIONING_DEVICE_KEY[] = "--device-key";
+                    static constexpr char CLI_FLEET_PROVISIONING_PUBLISH_SYS_INFO[] = "--collect-system-information";
 
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
                     static constexpr char JSON_KEY_TEMPLATE_NAME[] = "template-name";
                     static constexpr char JSON_KEY_TEMPLATE_PARAMETERS[] = "template-parameters";
                     static constexpr char JSON_KEY_CSR_FILE[] = "csr-file";
                     static constexpr char JSON_KEY_DEVICE_KEY[] = "device-key";
+                    static constexpr char JSON_KEY_PUBLISH_SYS_INFO[] = "collect-system-information";
 
                     bool enabled{false};
                     Aws::Crt::Optional<std::string> templateName;
                     Aws::Crt::Optional<std::string> templateParameters;
                     Aws::Crt::Optional<std::string> csrFile;
                     Aws::Crt::Optional<std::string> deviceKey;
+                    bool collectSystemInformation{false};
                 };
                 FleetProvisioning fleetProvisioning;
 
