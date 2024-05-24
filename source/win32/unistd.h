@@ -93,8 +93,13 @@ int win_chmod(const char *filename, mode_t mode);
 int win_stat(const char *filename, struct stat *buffer);
 #define stat(filename, buffer) win_stat(filename, buffer)
 
+int win_open(
+    _In_z_ char const* const _FileName,
+    _In_   int         const _OFlag,
+    _In_   int         const _PMode = 0
+);
 #ifndef open
-#define open _open
+#define open win_open
 #endif /* open */
 
 #define fdopen _fdopen
@@ -157,10 +162,15 @@ int win_stat(const char *filename, struct stat *buffer);
 
 inline
 int mkdir2(const char *pathname, mode_t mode) {
-    if (_mkdir(pathname) == 0) {
-//        _chmod(pathname, mode); // Set permissions separately
-        win_chmod(pathname, mode);
-        return 0; // Success
+    if (_mkdir(pathname) == 0) {        
+        DWORD fileAttr = GetFileAttributes(pathname);
+        if (fileAttr == INVALID_FILE_ATTRIBUTES) {
+        // GetLastError can be used here to get more error details
+            return -1;
+        }
+        else {
+            return win_chmod(pathname, mode);       
+        }        
     } else {
         return -1; // Error
     }
@@ -291,74 +301,22 @@ int setenv(const char *name, const char *value, int overwrite) {
         return 0;
     }
     
-    // Construct the environment variable string
+/*     // Construct the environment variable string
     size_t len = strlen(name) + strlen(value) + 2;
     char *env_var = (char*)malloc(len);
     if (env_var == NULL) {
         return -1; // Memory allocation failed
     }
     snprintf(env_var, len, "%s=%s", name, value);
-    
+ */    
     // Set the environment variable using _putenv_s
-    int result = _putenv_s(name, env_var);
+//    int result = _putenv_s(name, env_var);
+    int result = _putenv_s(name, value);
     
-    free(env_var);
+//    free(env_var);
     
-    return result == 0 ? 0 : -1;
-}
-
-inline
-pid_t vfork()
-{
-    HANDLE hProcess;
-    HANDLE hThread;
-    DWORD dwThreadId;
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-
-    // Initialize the STARTUPINFO structure.
-    ZeroMemory(&si, sizeof(STARTUPINFO));
-    si.cb = sizeof(STARTUPINFO);
-
-    // Create the child process.
-    if (!CreateProcess(NULL,   // No module name (use command line)
-        (LPSTR)"child.exe",           // Command line
-        NULL,                   // Process handle not inheritable
-        NULL,                   // Thread handle not inheritable
-        FALSE,                  // Set handle inheritance to FALSE
-        CREATE_SUSPENDED |      // Create the process in a suspended state
-        CREATE_NEW_CONSOLE,     // Create a new console window for the new process
-        NULL,                   // Use parent's environment block
-        NULL,                   // Use parent's starting directory
-        &si,                    // Pointer to STARTUPINFO structure
-        &pi))                   // Pointer to PROCESS_INFORMATION structure
-    {
-        printf("CreateProcess failed (%d).\n", GetLastError());
-        return -1;
-    }
-
-    // Now child process is suspended, we can attach to it.
-    hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pi.dwProcessId);
-    if (hProcess == NULL) {
-        printf("OpenProcess failed (%d).\n", GetLastError());
-        return -1;
-    }
-
-    // Resume child process
-    hThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)ResumeThread, NULL, 0, &dwThreadId);
-    if (hThread == NULL) {
-        printf("CreateRemoteThread failed (%d).\n", GetLastError());
-        return -1;
-    }
-
-    // Wait for child process to finish
-    WaitForSingleObject(pi.hProcess, INFINITE);
-
-    // Close process and thread handles.
-    CloseHandle(hThread);
-    CloseHandle(hProcess);
-
-    return pi.dwProcessId;	
+//    return result == 0 ? 0 : -1;
+    return result;
 }
 
 #endif /* _WIN32 */

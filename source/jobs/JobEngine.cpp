@@ -31,6 +31,7 @@ using namespace Aws::Iot::DeviceClient::Logging;
 using namespace Aws::Iot::DeviceClient::Util;
 using namespace std;
 
+#ifndef _WIN32
 void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
 {
     array<char, 1024> buffer;
@@ -93,6 +94,62 @@ void JobEngine::processCmdOutput(int fd, bool isStdErr, int childPID)
         lineCount++;
     }
 }
+#else
+void JobEngine::processCmdOutput(HANDLE hPipe, bool isStdErr, int childPID) {
+    DWORD bytesRead;
+    //CHAR buffer[4096];
+    array<char, 4096> buffer;
+    BOOL success;
+
+    string pidString = std::to_string(childPID);
+    char const *logTag = pidString.c_str();
+
+    string line;
+    while (true) {
+        success = ReadFile(hPipe, buffer.data(), 4096 - 1, &bytesRead, NULL);
+        if (!success || bytesRead == 0) break;
+        buffer[bytesRead] = '\0';
+
+        // Split output into lines
+        char* p = buffer.data();        
+        for (DWORD i = 0; i < bytesRead; i++) {
+            if (*p == '\n' || *p == '\0' || *p == '\r') {
+                if (!line.empty()) {
+                    string childOutput;
+                    //if (*p != '\n') *p = '\n'; // Make sure the line end is there
+                    childOutput += line + '\n';
+                    line.clear();
+                    childOutput = Util::Sanitize(childOutput);
+                    if (isStdErr)
+                    {
+                        stderrstream.addString(childOutput);
+                        if ('\n' == childOutput[childOutput.size() - 1])
+                        {
+                            childOutput.pop_back();
+                        }
+                        LOG_ERROR(logTag, childOutput.c_str());
+                        this->errors.fetch_add(1);
+                    }
+                    else
+                    {
+                        stdoutstream.addString(childOutput);
+                        if ('\n' == childOutput[childOutput.size() - 1])
+                        {
+                            childOutput.pop_back();
+                        }
+                        LOG_DEBUG(logTag, childOutput.c_str());
+                    }
+                }
+                if (*p == '\0') 
+                    break;
+            } else {
+                line.push_back(*p);
+            }
+            p++;
+        }
+    }
+}
+#endif
 
 string JobEngine::buildCommand(Crt::Optional<string> path, const std::string &handler, const std::string &jobHandlerDir)
     const
@@ -262,6 +319,7 @@ int JobEngine::exec_steps(PlainJobDocument jobDocument, const std::string &jobHa
     return executionStatus;
 }
 
+#ifndef _WIN32
 int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
 {
     // Establish some file descriptors which we'll use to redirect stdout and
@@ -285,11 +343,7 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
 
     int execResult;
     int returnCode;
-#ifndef _WIN32    
     int pid = vfork();
-#else
-    pid_t pid = vfork();
-#endif
     if (pid < 0)
     {
         LOGM_ERROR(TAG, "Failed to create child process, fork returned %d", pid);
@@ -300,10 +354,6 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
         // Child process
         LOG_DEBUG(TAG, "Child process now running");
 
-#ifdef _WIN32
-    #define STDOUT_FILENO 1
-    #define STDERR_FILENO 2
-#endif
         // redirect stdout_fd
         if (dup2(stdout_fd[PIPE_WRITE], STDOUT_FILENO) == -1)
         {
@@ -330,15 +380,7 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
         {
             auto err = errno;
             LOGM_ERROR(TAG, "Failed to invoke execvp system call to execute action step: %s (%d)", strerror(err), err);
-#ifndef _WIN32
             _exit(rc);
-#else
-            if (rc >= INT_MIN && rc <= INT_MAX) {
-                _exit(static_cast<int>(rc));
-            }
-            else
-                _exit(-1);
-#endif
         }
         _exit(0);
     }
@@ -359,11 +401,7 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
         do
         {
             // TODO: do not wait for infinite time for child process to complete
-#ifndef _WIN32
             int waitReturn = waitpid(pid, &execResult, 0);
-#else
-            pid_t waitReturn = waitpid(pid, &execResult, 0);
-#endif
             if (waitReturn == -1)
             {
                 LOGM_WARN(TAG, "Failed to wait for child process: %d", pid);
@@ -371,24 +409,140 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
 
             returnCode = WEXITSTATUS(execResult);
             LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", returnCode);
-#ifndef _WIN32
         } while (!WIFEXITED(execResult) && !WIFSIGNALED(execResult));
-#else
-        } while (STILL_ACTIVE != execResult);
-#endif
     }
     return returnCode;
 }
+#else
+int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
+{
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    SECURITY_ATTRIBUTES sa;
+    HANDLE stdoutRead, stdoutWrite;
+    HANDLE stderrRead, stderrWrite;
 
+    // Set up security attributes to allow handle inheritance
+    sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sa.bInheritHandle = TRUE;
+    sa.lpSecurityDescriptor = NULL;
+
+    // Create pipes for stdout and stderr
+    if (!CreatePipe(&stdoutRead, &stdoutWrite, &sa, 0)) {
+        LOGM_ERROR(TAG, "Failed allocating pipe for child STDOUT redirect: %d", GetLastError());
+        if (stdoutRead)
+            CloseHandle(stdoutRead);
+        if (stdoutWrite)
+            CloseHandle(stdoutWrite);
+
+        return CMD_FAILURE;
+    }
+    if (!CreatePipe(&stderrRead, &stderrWrite, &sa, 0)) {
+        LOGM_ERROR(TAG, "Failed allocating pipe for child STDERR redirect: %d", GetLastError());
+        if (stdoutRead)
+            CloseHandle(stdoutRead);
+        if (stdoutWrite)
+            CloseHandle(stdoutWrite);
+        if (stderrRead)
+            CloseHandle(stderrRead);
+        if (stderrWrite)
+            CloseHandle(stderrWrite);
+
+        return CMD_FAILURE;
+    }
+
+    // Ensure the read handles to the pipes are not inherited
+    SetHandleInformation(stdoutRead, HANDLE_FLAG_INHERIT, 0);
+    SetHandleInformation(stderrRead, HANDLE_FLAG_INHERIT, 0);
+
+    // Construct the command line string from argv[]
+    std::string commandLine;
+    for (int i = 0; argv[i] != nullptr; ++i) {
+        commandLine += argv[i];
+        if (argv[i + 1] != nullptr) { // Add space after each argument except the last one
+            commandLine += ' ';
+        }
+    }
+
+    // Set up members of the STARTUPINFO structure
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESTDHANDLES;
+    si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+    si.hStdOutput = stdoutWrite;
+    si.hStdError = stderrWrite;
+
+    // Create the child process
+    string strEchoOff = "cmd.exe /Q /C \"" + commandLine + "\"";
+    if (!CreateProcess(
+        NULL,                  // No module name (use command line)
+        const_cast<LPSTR>(strEchoOff.c_str()), // Command line
+        NULL,                  // Process handle not inheritable
+        NULL,                  // Thread handle not inheritable
+        TRUE,                  // Set handle inheritance to TRUE
+        CREATE_SUSPENDED | CREATE_NO_WINDOW,    // No creation flags
+        NULL,                  // Use parent's environment block
+        NULL,                  // Use parent's starting directory 
+        &si,                   // Pointer to STARTUPINFO structure
+        &pi))                  // Pointer to PROCESS_INFORMATION structure
+    {
+        DWORD nError = GetLastError();
+        LOGM_ERROR(TAG, "Failed to create child process, fork returned %d", nError);
+
+        if (stdoutRead)
+            CloseHandle(stdoutRead);
+        if (stdoutWrite)
+            CloseHandle(stdoutWrite);
+        if (stderrRead)
+            CloseHandle(stderrRead);
+        if (stderrWrite)
+            CloseHandle(stderrWrite);
+
+        return CMD_FAILURE;
+    }
+
+    // Close handles to the child process's stdin and stdout
+    CloseHandle(stdoutWrite);
+    CloseHandle(stderrWrite);
+
+    // Create threads to read from the stdout and stderr pipes
+    std::thread stdoutThread(&JobEngine::processCmdOutput, this, stdoutRead, FALSE, pi.dwProcessId);
+    std::thread stderrThread(&JobEngine::processCmdOutput, this, stderrRead, TRUE, pi.dwProcessId);
+
+    // Resume the child process
+    ResumeThread(pi.hThread);
+
+    // Wait for the child process to complete
+    DWORD returnCode = WaitForSingleObject(pi.hProcess, INFINITE);
+    LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", returnCode);
+
+    // Wait for the threads to finish
+    stdoutThread.join();
+    stderrThread.join();
+
+    // Get the exit code of the child process
+    DWORD exitCode;
+    if (!GetExitCodeProcess(pi.hProcess, &exitCode) || !stderrstream.toString().empty()) {
+        LOGM_ERROR(TAG, "Could not get child process exit code: %d", GetLastError());
+        exitCode = CMD_FAILURE;
+    }
+
+    // Clean up
+    CloseHandle(stdoutRead);
+    CloseHandle(stderrRead);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+
+    return exitCode;
+}
+#endif
+
+#ifndef _WIN32
 int JobEngine::exec_process(std::unique_ptr<const char *[]> &argv)
 {
     int status = 0;
     int execStatus = 0;
-#ifndef _WIN32    
     int pid = vfork();
-#else
-    pid_t pid = vfork();
-#endif
 
     if (pid < 0)
     {
@@ -405,15 +559,7 @@ int JobEngine::exec_process(std::unique_ptr<const char *[]> &argv)
         {
             auto err = errno;
             LOGM_ERROR(TAG, "Failed to invoke execvp system call to execute action step: %s (%d)", strerror(err), err);
-#ifndef _WIN32
             _exit(rc);
-#else
-            if (rc >= INT_MIN && rc <= INT_MAX) {
-                _exit(static_cast<int>(rc));
-            }
-            else
-                _exit(-1);
-#endif
         }
         _exit(0);
     }
@@ -423,11 +569,7 @@ int JobEngine::exec_process(std::unique_ptr<const char *[]> &argv)
         do
         {
             // TODO: do not wait for infinite time for child process to complete
-#ifndef _WIN32
             int waitReturn = waitpid(pid, &status, 0);
-#else
-            pid_t waitReturn = waitpid(pid, &status, 0);
-#endif
             if (waitReturn == -1)
             {
                 LOGM_WARN(TAG, "Failed to wait for child process: %d", pid);
@@ -435,14 +577,101 @@ int JobEngine::exec_process(std::unique_ptr<const char *[]> &argv)
             execStatus = WEXITSTATUS(status);
             LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", execStatus);
 
-#ifndef _WIN32
         } while (!WIFEXITED(status) && !WIFSIGNALED(status));
-#else
-        } while (STILL_ACTIVE != status);
-#endif
     }
     return execStatus;
 }
+#else
+int JobEngine::exec_process(std::unique_ptr<const char *[]> &argv)
+{
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    SECURITY_ATTRIBUTES sa;
+    HANDLE stdoutRead, stdoutWrite;
+    HANDLE stderrRead, stderrWrite;
+
+    // Set up security attributes to allow handle inheritance
+    sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sa.bInheritHandle = TRUE;
+    sa.lpSecurityDescriptor = NULL;
+
+    // Create pipes for stdout and stderr
+    if (!CreatePipe(&stdoutRead, &stdoutWrite, &sa, 0)) {
+        LOGM_ERROR(TAG, "Failed allocating pipe for child STDOUT redirect: %d", GetLastError());
+        return CMD_FAILURE;
+    }
+    if (!CreatePipe(&stderrRead, &stderrWrite, &sa, 0)) {
+        LOGM_ERROR(TAG, "Failed allocating pipe for child STDERR redirect: %d", GetLastError());
+        return CMD_FAILURE;
+    }
+
+    // Ensure the read handles to the pipes are not inherited
+    SetHandleInformation(stdoutRead, HANDLE_FLAG_INHERIT, 0);
+    SetHandleInformation(stderrRead, HANDLE_FLAG_INHERIT, 0);
+
+    // Construct the command line string from argv[]
+    std::string commandLine;
+    for (int i = 0; argv[i] != nullptr; ++i) {
+        commandLine += argv[i];
+        if (argv[i + 1] != nullptr) { // Add space after each argument except the last one
+            commandLine += ' ';
+        }
+    }
+
+    // Set up members of the STARTUPINFO structure
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESTDHANDLES;
+    si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+    si.hStdOutput = stdoutWrite;
+    si.hStdError = stderrWrite;
+
+    // Create the child process
+    string strEchoOff = "cmd.exe /Q /C \"" + commandLine + "\"";
+    if (!CreateProcess(
+        NULL,                  // No module name (use command line)
+        const_cast<LPSTR>(strEchoOff.c_str()), // Command line
+        NULL,                  // Process handle not inheritable
+        NULL,                  // Thread handle not inheritable
+        TRUE,                  // Set handle inheritance to TRUE
+        CREATE_SUSPENDED | CREATE_NO_WINDOW,    // No creation flags
+        NULL,                  // Use parent's environment block
+        NULL,                  // Use parent's starting directory 
+        &si,                   // Pointer to STARTUPINFO structure
+        &pi))                  // Pointer to PROCESS_INFORMATION structure
+    {
+        DWORD nError = GetLastError();
+        LOGM_ERROR(TAG, "Failed to create child process, fork returned %d", nError);
+        return CMD_FAILURE;
+    }
+
+    // Close handles to the child process's stdin and stdout
+    CloseHandle(stdoutWrite);
+    CloseHandle(stderrWrite);
+
+    // Resume the child process
+    ResumeThread(pi.hThread);
+
+    // Wait for the child process to complete
+    DWORD returnCode = WaitForSingleObject(pi.hProcess, INFINITE);
+    LOGM_DEBUG(TAG, "JobEngine finished waiting for child process, returning %d", returnCode);
+
+    // Get the exit code of the child process
+    DWORD exitCode;
+    if (!GetExitCodeProcess(pi.hProcess, &exitCode) || !stderrstream.toString().empty()) {
+        LOGM_ERROR(TAG, "Could not get child process exit code: %d", GetLastError());
+        exitCode = CMD_FAILURE;
+    }
+
+    // Clean up
+    // Clean up
+    CloseHandle(stdoutRead);
+    CloseHandle(stderrRead);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    return exitCode;
+}
+#endif
 
 int JobEngine::exec_handlerScript(const std::string &command, PlainJobDocument::JobAction action)
 {
@@ -472,6 +701,7 @@ int JobEngine::exec_handlerScript(const std::string &command, PlainJobDocument::
     return actionExecutionStatus;
 }
 
+#ifndef _WIN32
 bool JobEngine::verifySudoAndUser(PlainJobDocument::JobAction action)
 {
     int execStatus1;
@@ -506,6 +736,57 @@ bool JobEngine::verifySudoAndUser(PlainJobDocument::JobAction action)
     }
     return true;
 }
+#else
+// Windows implementation: verifies if specified user is an administrator or not
+bool JobEngine::verifySudoAndUser(PlainJobDocument::JobAction action)
+{
+    if (action.runAsUser->empty())
+        return false;
+    else {
+        HANDLE tokenHandle = NULL;
+        BOOL result = false;
+
+        // Assume the username is in the form "DOMAIN\Username"
+        char domainName[256];
+        char userName[256];
+        DWORD domainNameSize = 256;
+        DWORD userNameSize = (DWORD) action.runAsUser->length();
+
+        // Split the domain and username
+        if (!LookupAccountName(NULL, action.runAsUser->c_str(), NULL, &userNameSize, domainName, &domainNameSize, NULL)) {
+            if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+                return false;
+            }
+            else {
+                strcpy(domainName, ".");
+            }
+        }
+
+        // Log on the user to get a token handle
+        if (!LogonUser(userName, domainName, NULL, LOGON32_LOGON_BATCH, LOGON32_PROVIDER_DEFAULT, &tokenHandle)) {
+            return false;
+        }
+
+        // Initialize the Administrators group SID
+        PSID adminGroupSid = NULL;
+        SID_IDENTIFIER_AUTHORITY NtAuthority = SECURITY_NT_AUTHORITY;
+        if (!AllocateAndInitializeSid(&NtAuthority, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &adminGroupSid)) {
+            result = false;
+        }
+
+        // Check if the user token has the administrators group
+        if (!CheckTokenMembership(tokenHandle, adminGroupSid, &result)) {
+            result = false;
+        }
+
+        // Clean up
+        if (adminGroupSid)
+            FreeSid(adminGroupSid);
+        CloseHandle(tokenHandle);
+        return result;
+    }
+}
+#endif
 
 int JobEngine::exec_shellCommand(PlainJobDocument::JobAction action)
 {

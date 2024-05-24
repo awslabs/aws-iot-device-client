@@ -105,6 +105,13 @@ int wordexp(const char *words, wordexp_t *we, int /*flags*/) {
         return -1;
     }
 
+    // Validate the input string for unsupported characters
+    char forbiddenChars[] = "*?[]{}()|&;<>'\"";
+    if (strpbrk(words, forbiddenChars) != NULL) {
+        // Unsupported character found
+        return -1;
+    }
+    
     argc = 0;
     wordsW = (wchar_t *)malloc((strlen(words) + 1) * sizeof(wchar_t));
     if (wordsW == NULL) {

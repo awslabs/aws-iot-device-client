@@ -38,10 +38,19 @@ int FileUtils::Mkdirs(const std::string &path)
     }
     for (size_t i = 1; i < path.length(); i++)
     {
+#ifndef _WIN32
         if (path[i] == '/' && mkdir(path.substr(0, i).c_str(), S_IRWXU) != 0 && errno != EEXIST)
         {
             return -1;
         }
+#else
+        if (path[i] == '/' || path[i] == '\\') {
+            if (mkdir(path.substr(0, i).c_str(), S_IRWXU) != 0) {
+                if (errno != EEXIST)
+                    return -1;
+            }
+        }
+#endif
     }
     if (mkdir(path.c_str(), S_IRWXU) != 0 && errno != EEXIST)
     {
@@ -59,7 +68,13 @@ string FileUtils::ExtractParentDirectory(const string &filePath)
     }
     else
     {
-        return "./";
+        const size_t rightMostFwdSlash = filePath.rfind("\\");
+        if (std::string::npos != rightMostFwdSlash)
+        {
+            return filePath.substr(0, rightMostFwdSlash + 1);
+        }
+        else
+            return "./";
     }
 }
 

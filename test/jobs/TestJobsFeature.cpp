@@ -228,7 +228,11 @@ class MockNotifier : public Aws::Iot::DeviceClient::ClientBaseNotifier
 class MockJobEngine : public JobEngine
 {
   public:
+#ifndef _WIN32
     MOCK_METHOD(void, processCmdOutput, (int fd, bool isStdErr, int childPID), (override));
+#else
+    MOCK_METHOD(void, processCmdOutput, (HANDLE hPipe, bool isStdErr, int childPID), (override));
+#endif
     MOCK_METHOD(int, exec_steps, (PlainJobDocument jobDocument, const std::string &jobHandlerDir), (override));
     MOCK_METHOD(int, hasErrors, (), (override));
     MOCK_METHOD(string, getReason, (int statusCode), (override));

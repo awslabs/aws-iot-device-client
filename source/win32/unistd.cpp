@@ -123,6 +123,27 @@ Cleanup:
     return bSuccess;
 }
 
+// Get "as-is" access (not "effective") from the object
+ACCESS_MASK GetAccessRights(PACL pAcl, TRUSTEE* pTrustee) {
+    ACCESS_MASK accessMask = 0;
+
+    // Iterate through ACEs in the ACL
+    for (DWORD i = 0; i < pAcl->AceCount; i++) {
+        PACE_HEADER pAceHeader = NULL;
+        if (!GetAce(pAcl, i, (LPVOID*)&pAceHeader)) {
+            return 0;
+        }
+
+        // Check if the ACE applies to the specified trustee
+        if (EqualSid(pTrustee->ptstrName, &((PACCESS_ALLOWED_ACE)pAceHeader)->SidStart)) {
+            // Extract access rights from the ACE
+            accessMask |= ((PACCESS_ALLOWED_ACE)pAceHeader)->Mask;
+        }
+    }
+
+    return accessMask;
+}
+
 // chmod function for Windows
 // Uses:
 // current process user as owner SID
@@ -173,27 +194,27 @@ int win_chmod(const char *filename, mode_t mode) {
                     explicitAccess[1].Trustee.ptstrName = (LPTSTR)pSidAdmin;
 
                     // Set permissions for current user
-                    explicitAccess[2].grfAccessPermissions |= (((mode & S_IRUSR) == S_IRUSR) ? GENERIC_READ : 0);
-                    explicitAccess[2].grfAccessPermissions |= (((mode & S_IWUSR) == S_IWUSR) ? GENERIC_WRITE : 0);
-                    explicitAccess[2].grfAccessPermissions |= (((mode & S_IXUSR) == S_IXUSR) ? GENERIC_EXECUTE : 0);
+                    explicitAccess[2].grfAccessPermissions |= (((mode & S_IRUSR) == S_IRUSR) ? FILE_GENERIC_READ : 0);
+                    explicitAccess[2].grfAccessPermissions |= (((mode & S_IWUSR) == S_IWUSR) ? FILE_GENERIC_WRITE : 0);
+                    explicitAccess[2].grfAccessPermissions |= (((mode & S_IXUSR) == S_IXUSR) ? FILE_GENERIC_EXECUTE : 0);
                     explicitAccess[2].grfAccessMode = GRANT_ACCESS;
                     explicitAccess[2].grfInheritance = NO_INHERITANCE;
                     explicitAccess[2].Trustee.TrusteeForm = TRUSTEE_IS_NAME;
                     explicitAccess[2].Trustee.ptstrName = const_cast<LPSTR>("CURRENT_USER");
 
                     // Set permissions for Users
-                    explicitAccess[3].grfAccessPermissions |= (((mode & S_IRGRP) == S_IRGRP) ? GENERIC_READ : 0);
-                    explicitAccess[3].grfAccessPermissions |= (((mode & S_IWGRP) == S_IWGRP) ? GENERIC_WRITE : 0);
-                    explicitAccess[3].grfAccessPermissions |= (((mode & S_IXGRP) == S_IXGRP) ? GENERIC_EXECUTE : 0);
+                    explicitAccess[3].grfAccessPermissions |= (((mode & S_IRGRP) == S_IRGRP) ? FILE_GENERIC_READ : 0);
+                    explicitAccess[3].grfAccessPermissions |= (((mode & S_IWGRP) == S_IWGRP) ? FILE_GENERIC_WRITE : 0);
+                    explicitAccess[3].grfAccessPermissions |= (((mode & S_IXGRP) == S_IXGRP) ? FILE_GENERIC_EXECUTE : 0);
                     explicitAccess[3].grfAccessMode = GRANT_ACCESS;
                     explicitAccess[3].grfInheritance = NO_INHERITANCE;
                     explicitAccess[3].Trustee.TrusteeForm = TRUSTEE_IS_SID;
                     explicitAccess[3].Trustee.ptstrName = (LPTSTR)pSidUsers;
 
                     // Set permissions for Everyone
-                    explicitAccess[4].grfAccessPermissions |= (((mode & S_IROTH) == S_IROTH) ? GENERIC_READ : 0);
-                    explicitAccess[4].grfAccessPermissions |= (((mode & S_IWOTH) == S_IWOTH) ? GENERIC_WRITE : 0);
-                    explicitAccess[4].grfAccessPermissions |= (((mode & S_IXOTH) == S_IXOTH) ? GENERIC_EXECUTE : 0);
+                    explicitAccess[4].grfAccessPermissions |= (((mode & S_IROTH) == S_IROTH) ? FILE_GENERIC_READ : 0);
+                    explicitAccess[4].grfAccessPermissions |= (((mode & S_IWOTH) == S_IWOTH) ? FILE_GENERIC_WRITE : 0);
+                    explicitAccess[4].grfAccessPermissions |= (((mode & S_IXOTH) == S_IXOTH) ? FILE_GENERIC_EXECUTE : 0);
                     explicitAccess[4].grfAccessMode = GRANT_ACCESS;
                     explicitAccess[4].grfInheritance = NO_INHERITANCE;
                     explicitAccess[4].Trustee.TrusteeForm = TRUSTEE_IS_SID;
@@ -233,8 +254,9 @@ int win_stat(const char *filename, struct stat *buffer) {
 
     if (!filename || !buffer)
         return -1;
-    
-    stat(filename, buffer);
+
+
+    ZeroMemory(buffer, sizeof(struct stat));
     // Get the security descriptor for the file
     PSECURITY_DESCRIPTOR pSecurityDescriptor = nullptr;
     if (ERROR_SUCCESS != GetNamedSecurityInfo((LPCSTR)filename, SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr, nullptr, nullptr, &pSecurityDescriptor)) {
@@ -273,13 +295,15 @@ int win_stat(const char *filename, struct stat *buffer) {
                 TRUSTEE Trustee = {0};
                 BuildTrusteeWithSid(&Trustee, pTokenUser->User.Sid);
                 ACCESS_MASK accessMask;
+                ACCESS_MASK tmpMask;
+                tmpMask = GetAccessRights(pDACL, &Trustee);
                 DWORD dwRetVal = ::GetEffectiveRightsFromAcl( pDACL,
                                     &Trustee,
                                 &accessMask);
                 if (dwRetVal == ERROR_SUCCESS) {
-                    mask |= (((accessMask & FILE_GENERIC_READ) == FILE_GENERIC_READ) ? S_IRUSR : 0);
-                    mask |= (((accessMask & FILE_GENERIC_WRITE) == FILE_GENERIC_WRITE) ? S_IWUSR : 0);
-                    mask |= (((accessMask & FILE_GENERIC_EXECUTE) == FILE_GENERIC_EXECUTE) ? S_IXUSR : 0);
+                    mask |= (((tmpMask & FILE_GENERIC_READ) == FILE_GENERIC_READ) ? S_IRUSR : 0);
+                    mask |= (((tmpMask & FILE_GENERIC_WRITE) == FILE_GENERIC_WRITE) ? S_IWUSR : 0);
+                    mask |= (((tmpMask & FILE_GENERIC_EXECUTE) == FILE_GENERIC_EXECUTE) ? S_IXUSR : 0);
                 }
             }
             LocalFree(pTokenUser);
@@ -296,11 +320,12 @@ int win_stat(const char *filename, struct stat *buffer) {
 
         TRUSTEE GroupTrustee;
         BuildTrusteeWithSid(&GroupTrustee, pSid);
-        ACCESS_MASK GroupAccessMask;
+        ACCESS_MASK GroupAccessMask, tmpMask;
+        tmpMask = GetAccessRights(pDACL, &GroupTrustee);
         if (GetEffectiveRightsFromAcl(pDACL, &GroupTrustee, &GroupAccessMask) == ERROR_SUCCESS) {
-            mask |= (((GroupAccessMask & FILE_GENERIC_READ) == FILE_GENERIC_READ) ? S_IRGRP : 0);
-            mask |= (((GroupAccessMask & FILE_GENERIC_WRITE) == FILE_GENERIC_WRITE) ? S_IWGRP : 0);
-            mask |= (((GroupAccessMask & FILE_GENERIC_EXECUTE) == FILE_GENERIC_EXECUTE) ? S_IXGRP : 0);
+            mask |= (((tmpMask & FILE_GENERIC_READ) == FILE_GENERIC_READ) ? S_IRGRP : 0);
+            mask |= (((tmpMask & FILE_GENERIC_WRITE) == FILE_GENERIC_WRITE) ? S_IWGRP : 0);
+            mask |= (((tmpMask & FILE_GENERIC_EXECUTE) == FILE_GENERIC_EXECUTE) ? S_IXGRP : 0);
         }
 
         FreeSid(pSid);
@@ -317,16 +342,37 @@ int win_stat(const char *filename, struct stat *buffer) {
         BuildTrusteeWithSid(&EveryoneTrustee, pSid);
 
         ACCESS_MASK EveryoneAccessMask;
+        ACCESS_MASK tmpMask;
+        tmpMask = GetAccessRights(pDACL, &EveryoneTrustee);
         if (GetEffectiveRightsFromAcl(pDACL, &EveryoneTrustee, &EveryoneAccessMask) == ERROR_SUCCESS) {
-            mask |= (((EveryoneAccessMask & FILE_GENERIC_READ) == FILE_GENERIC_READ) ? S_IROTH : 0);
-            mask |= (((EveryoneAccessMask & FILE_GENERIC_WRITE) == FILE_GENERIC_WRITE) ? S_IWOTH : 0);
-            mask |= (((EveryoneAccessMask & FILE_GENERIC_EXECUTE) == GENERIC_EXECUTE) ? S_IXOTH : 0);
+            mask |= (((tmpMask & FILE_GENERIC_READ) == FILE_GENERIC_READ) ? S_IROTH : 0);
+            mask |= (((tmpMask & FILE_GENERIC_WRITE) == FILE_GENERIC_WRITE) ? S_IWOTH : 0);
+            mask |= (((tmpMask & FILE_GENERIC_EXECUTE) == FILE_GENERIC_EXECUTE) ? S_IXOTH : 0);
         }
 
         FreeSid(pSid);
     }
 
     LocalFree(pSecurityDescriptor);
+    
+    stat(filename, buffer);
+    if (buffer->st_mode & S_IFDIR)
+        mask |= S_IFDIR;
+    
     buffer->st_mode = mask;
     return 0;
 }
+
+// wrapper for POSIX open method
+// uses chmod inside to set file permissions as defined in _pMode
+int win_open(
+    _In_z_ char const* const _FileName,
+    _In_   int         const _OFlag,
+    _In_   int         const _PMode) {
+
+    if (-1 == _open(_FileName, _OFlag, _O_RDWR))
+        return -1;
+    
+    return win_chmod(_FileName, (mode_t)_PMode);
+}
+

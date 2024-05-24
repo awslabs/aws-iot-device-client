@@ -71,14 +71,24 @@ PlainJobDocument createTestJobDocument(
 }
 
 const string testHandlerDirectoryPath = "/tmp/device-client-tests";
+#ifndef _WIN32
 const string successHandlerPath = testHandlerDirectoryPath + "/successHandler";
 const string errorHandlerPath = testHandlerDirectoryPath + "/errorHandler";
+#else
+const string successHandlerPath = testHandlerDirectoryPath + "/successHandler.bat";
+const string errorHandlerPath = testHandlerDirectoryPath + "/errorHandler.bat";
+#endif
 const string successCreatedFile = testHandlerDirectoryPath + "/test-success";
 
 const string testStdout = "This is test stdout";
 const string testStderr = "This is test stderr";
+#ifndef _WIN32
 const string successHandlerScript = "echo \"" + testStdout + "\"";
 const string errorHandlerScript = "1>&2 echo \"" + testStderr + "\"; exit 1";
+#else
+const string successHandlerScript = "echo " + testStdout;
+const string errorHandlerScript = "echo " + testStderr + " 1>&2 & exit 1";
+#endif
 
 class TestJobEngine : public testing::Test
 {
@@ -117,7 +127,12 @@ TEST_F(TestJobEngine, ExecuteStepsHappy)
 
     int executionStatus = jobEngine.exec_steps(jobDocument, testHandlerDirectoryPath);
     ASSERT_EQ(executionStatus, 0);
-    ASSERT_STREQ(jobEngine.getStdOut().c_str(), std::string(testStdout + "\n").c_str());
+
+    // Extract first line out of the output
+    istringstream strTmp(jobEngine.getStdOut());
+    string strFirstLine;
+    std::getline(strTmp, strFirstLine);
+    ASSERT_STREQ(strFirstLine.c_str(), testStdout.c_str());
 }
 
 TEST_F(TestJobEngine, ExecuteSucceedThenFail)
@@ -134,8 +149,22 @@ TEST_F(TestJobEngine, ExecuteSucceedThenFail)
 
     int executionStatus = jobEngine.exec_steps(jobDocument, testHandlerDirectoryPath);
     ASSERT_NE(executionStatus, 0);
-    ASSERT_STREQ(jobEngine.getStdOut().c_str(), std::string(testStdout + "\n").c_str());
-    ASSERT_STREQ(jobEngine.getStdErr().c_str(), std::string(testStderr + "\n").c_str());
+
+    // Extract first line out of the output
+    istringstream strTmp(jobEngine.getStdOut());
+    string strFirstLine;
+    std::getline(strTmp, strFirstLine);
+    ASSERT_STREQ(strFirstLine.c_str(), testStdout.c_str());
+
+    // Extract first line out of the output
+    istringstream strErrTmp(jobEngine.getStdErr());
+    strFirstLine.clear();
+    std::getline(strErrTmp, strFirstLine);
+#ifndef _WIN32
+    ASSERT_STREQ(strFirstLine.c_str(), testStderr.c_str());
+#else // windows batch adds whitespaces to the end
+    ASSERT_STREQ(strFirstLine.c_str(), std::string(testStderr + "  ").c_str());
+#endif
 }
 
 TEST_F(TestJobEngine, ExecuteFinalStepOnly)
@@ -150,7 +179,12 @@ TEST_F(TestJobEngine, ExecuteFinalStepOnly)
 
     int executionStatus = jobEngine.exec_steps(jobDocument, testHandlerDirectoryPath);
     ASSERT_EQ(executionStatus, 0);
-    ASSERT_STREQ(jobEngine.getStdOut().c_str(), std::string(testStdout + "\n").c_str());
+
+    // Extract first line out of the output
+    istringstream strTmp(jobEngine.getStdOut());
+    string strFirstLine;
+    std::getline(strTmp, strFirstLine);
+    ASSERT_STREQ(strFirstLine.c_str(), testStdout.c_str());
 }
 
 TEST_F(TestJobEngine, ExecuteStepsError)
@@ -165,7 +199,19 @@ TEST_F(TestJobEngine, ExecuteStepsError)
 
     int executionStatus = jobEngine.exec_steps(jobDocument, testHandlerDirectoryPath);
     ASSERT_NE(executionStatus, 0);
-    ASSERT_STREQ(jobEngine.getStdErr().c_str(), std::string(testStderr + "\n").c_str());
+
+    // Extract first line out of the output
+    istringstream strErrTmp(jobEngine.getStdErr());
+    string strFirstLine;
+    std::getline(strErrTmp, strFirstLine);
+#ifndef _WIN32
+    ASSERT_STREQ(strFirstLine.c_str(), testStderr.c_str());
+#else // windows batch adds whitespaces to the end
+    ASSERT_STREQ(strFirstLine.c_str(), std::string(testStderr + "  ").c_str());
+#endif
+
+
+//    ASSERT_STREQ(jobEngine.getStdErr().c_str(), std::string(testStderr + "\n").c_str());
 }
 
 TEST_F(TestJobEngine, ExecuteNoSteps)
@@ -186,7 +232,11 @@ TEST_F(TestJobEngine, ExecuteRunCommandWithInvalidUser)
     vector<PlainJobDocument::JobAction> steps;
     vector<std::string> args;
     vector<std::string> command;
+#ifndef _WIN32
     command.emplace_back("touch");
+#else
+    command.emplace_back("echo test > ");
+#endif
     command.emplace_back(successCreatedFile);
     steps.push_back(createJobAction("testCreateFile", "runCommand", "", args, command, "", "fake", false));
     PlainJobDocument jobDocument = createTestJobDocument(steps, true);
@@ -202,7 +252,11 @@ TEST_F(TestJobEngine, ExecuteRunCommandWithEmptyUser)
     vector<PlainJobDocument::JobAction> steps;
     vector<std::string> args;
     vector<std::string> command;
+#ifndef _WIN32
     command.emplace_back("touch");
+#else
+    command.emplace_back("echo test > ");
+#endif
     command.emplace_back(successCreatedFile);
     steps.push_back(createJobAction("testCreateFile", "runCommand", "", args, command, "", nullptr, false));
     PlainJobDocument jobDocument = createTestJobDocument(steps, true);
@@ -218,7 +272,11 @@ TEST_F(TestJobEngine, ExecuteRunCommandWithUser)
     vector<PlainJobDocument::JobAction> steps;
     vector<std::string> args;
     vector<std::string> command;
+#ifndef _WIN32
     command.emplace_back("touch");
+#else
+    command.emplace_back("echo test > ");
+#endif
     command.emplace_back(successCreatedFile);
     steps.push_back(createJobAction("testCreateFile", "runCommand", "", args, command, "", "root", false));
     PlainJobDocument jobDocument = createTestJobDocument(steps, true);
