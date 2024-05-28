@@ -83,7 +83,11 @@ TEST(StringUtils, maptoString)
 
 TEST(StringUtils, emptyMaptoString)
 {
-    GTEST_SKIP() << "Need to figure out failures with Aws::Crt::String";
+    // Initializing allocator, which is used in Crt / SDK
+    // Creating Aws::Crt::Map will fail otherwise
+    SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
+
     Aws::Crt::Map<Aws::Crt::String, Aws::Crt::String> map;
     string expected = "";
     ASSERT_STREQ(expected.c_str(), MapToString(map).c_str());
