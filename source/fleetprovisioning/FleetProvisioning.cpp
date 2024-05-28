@@ -812,6 +812,9 @@ bool FleetProvisioning::CollectNetworkInformation()
     struct ifaddrs *ifap = nullptr;
     char ip[INET6_ADDRSTRLEN];
 
+    std::vector<std::string> ipAddrList;
+    ipAddrList.reserve(2);
+
     if (getifaddrs(&ifap) == -1)
     {
         LOG_ERROR(TAG, "*** %s: Failed to get network interfaces ***");
@@ -840,36 +843,46 @@ bool FleetProvisioning::CollectNetworkInformation()
         {
             struct in_addr addr = (reinterpret_cast<struct sockaddr_in *>(ifa->ifa_addr))->sin_addr;
             inet_ntop(AF_INET, &addr, ip, INET_ADDRSTRLEN);
-
-            struct ifreq ifr;
-            unsigned char *mac;
-
-            strncpy(ifr.ifr_name, name, IFNAMSIZ - 1);
-            if (ioctl(fd, SIOCGIFHWADDR, &ifr) == -1)
-            {
-                close(fd);
-                freeifaddrs(ifap);
-
-                LOG_ERROR(TAG, "*** %s: Failed to get MAC address for interface ***");
-                return false;
-            }
-            mac = reinterpret_cast<unsigned char *>(ifr.ifr_hwaddr.sa_data);
-
-            Aws::Crt::Optional<std::string> params(FormatMessage(
-                R"({"DeviceIPAddress": "%s", "DeviceMACAddress": "%02x:%02x:%02x:%02x:%02x:%02x"})",
-                ip,
-                mac[0],
-                mac[1],
-                mac[2],
-                mac[3],
-                mac[4],
-                mac[5]));
-            MapParameters(params);
-            LOGM_DEBUG(TAG, "Successfully collected network information: %s", params.value().c_str());
-
-            break;
+            ipAddrList.push_back(ip);
         }
     }
+
+    struct ifreq ifr;
+    unsigned char *mac;
+
+    strncpy(ifr.ifr_name, "eth0", IFNAMSIZ - 1);
+    if (ioctl(fd, SIOCGIFHWADDR, &ifr) == -1)
+    {
+        close(fd);
+        freeifaddrs(ifap);
+
+        LOG_ERROR(TAG, "*** %s: Failed to get MAC address for interface ***");
+        return false;
+    }
+    mac = reinterpret_cast<unsigned char *>(ifr.ifr_hwaddr.sa_data);
+
+    std::string ipAddrs;
+    for (size_t i = 0; i < ipAddrList.size(); ++i)
+    {
+        if (i > 0)
+        {
+            ipAddrs += ",";
+        }
+        ipAddrs += ipAddrList[i];
+    }
+
+
+    Aws::Crt::Optional<std::string> params(FormatMessage(
+        R"({"DeviceIPAddresses": "%s", "DeviceMACAddress": "%02x:%02x:%02x:%02x:%02x:%02x"})",
+        ipAddrs.c_str(),
+        mac[0],
+        mac[1],
+        mac[2],
+        mac[3],
+        mac[4],
+        mac[5]));
+    MapParameters(params);
+    LOGM_DEBUG(TAG, "Successfully collected network information: %s", params.value().c_str());
 
     close(fd);
     freeifaddrs(ifap);
