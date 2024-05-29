@@ -15,9 +15,8 @@
 #include <unistd.h>
 #include <wordexp.h>
 
-#include <io.h>
-
 #ifdef _WIN32
+#include <io.h>
     // undefine a few definitions from unistd as they conflict with stream methods
     #undef close
     #undef read
