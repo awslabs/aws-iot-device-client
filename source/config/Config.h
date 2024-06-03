@@ -480,9 +480,7 @@ namespace Aws
                 ~Config() = default;
 
                 static constexpr char TAG[] = "Config.cpp";
-                static constexpr char DEFAULT_CONFIG_DIR[] = "~/.aws-iot-device-client/";
                 static constexpr char DEFAULT_KEY_DIR[] = "~/.aws-iot-device-client/keys/";
-                static constexpr char DEFAULT_CONFIG_FILE[] = "~/.aws-iot-device-client/aws-iot-device-client.conf";
                 static constexpr char DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] =
                     "~/.aws-iot-device-client/aws-iot-device-client-runtime.conf";
                 static constexpr char DEFAULT_HTTP_PROXY_CONFIG_FILE[] = "~/.aws-iot-device-client/http-proxy.conf";
@@ -514,7 +512,7 @@ namespace Aws
                 /**
                  * \brief Maximum accepted size for the config file.
                  */
-                static constexpr size_t MAX_CONFIG_SIZE = 5000;
+                static constexpr size_t MAX_CONFIG_SIZE = 64000;
 
                 /**
                  * \brief Separator between directories in path.
@@ -527,12 +525,32 @@ namespace Aws
                  */
                 static std::string ExpandDefaultConfigDir(bool removeTrailingSeparator = false);
 
+                /**
+                 * \brief Returns default configuration file folder
+                 * @return
+                 */
+                static std::string getDefaulConfigDir();
+
+                /**
+                 * \brief Returns default configuration file location
+                 * @return
+                 */
+                static std::string getDefaulConfigFile();
+
                 PlainConfig config;
 
               private:
+                static constexpr char DEFAULT_CONFIG_DIR[] = ".aws-iot-device-client/";
+                static constexpr char DEFAULT_CONFIG_FILE[] = "aws-iot-device-client.conf";
+
                 static void PrintHelpMessage();
                 static void PrintVersion();
                 static bool ExportDefaultSetting(const std::string &file);
+
+#ifndef _WIN32
+                static constexpr char DEFAULT_CONFIG_HOME_DIR[] = "~";
+#endif
+
             };
         } // namespace DeviceClient
     }     // namespace Iot

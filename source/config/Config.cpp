@@ -2482,6 +2482,9 @@ constexpr char Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[];
 constexpr char Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[];
 constexpr char Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[];
 constexpr char Config::DEFAULT_HTTP_PROXY_CONFIG_FILE[];
+#ifndef _WIN32
+constexpr char Config::DEFAULT_CONFIG_HOME_DIR[]];
+#endif
 
 bool Config::CheckTerminalArgs(int argc, char **argv)
 {
@@ -2633,7 +2636,7 @@ bool Config::init(const CliArgs &cliArgs)
 
     try
     {
-        string filename = Config::DEFAULT_CONFIG_FILE;
+        string filename = getDefaulConfigFile();
         bool bReadConfigFile = FileUtils::FileExists(filename);
 
         if (cliArgs.count(Config::CLI_CONFIG_FILE))
@@ -3153,10 +3156,27 @@ bool Config::ExportDefaultSetting(const string &file)
 
 string Config::ExpandDefaultConfigDir(bool removeTrailingSeparator)
 {
-    string expandedConfigDir = FileUtils::ExtractExpandedPath(DEFAULT_CONFIG_DIR);
+    string expandedConfigDir = FileUtils::ExtractExpandedPath(getDefaulConfigDir());
     if (removeTrailingSeparator)
     {
         return Util::TrimRightCopy(expandedConfigDir, string{Config::PATH_DIRECTORY_SEPARATOR});
     }
     return expandedConfigDir;
+}
+
+string Config::getDefaulConfigDir()
+{
+    string strConfigDir = Config::DEFAULT_CONFIG_DIR;
+#ifndef _WIN32
+    strConfigDir = DEFAULT_CONFIG_HOME_DIR + strConfigDir;
+#else
+    strConfigDir = std::string(getenv("USERPROFILE")) + std::string{Config::PATH_DIRECTORY_SEPARATOR} + strConfigDir;
+#endif
+
+    return strConfigDir;
+}
+
+string Config::getDefaulConfigFile()
+{
+    return ExpandDefaultConfigDir(true) + std::string{Config::PATH_DIRECTORY_SEPARATOR} + Config::DEFAULT_CONFIG_FILE;
 }

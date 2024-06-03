@@ -19,10 +19,6 @@
 using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
 
-#ifdef _WIN32
-    #undef getcwd
-#endif
-
 char *OSInterfacePosix::getenv(const char *name)
 {
 #ifndef _WIN32
@@ -46,11 +42,7 @@ char *OSInterfacePosix::getcwd(char *buf, size_t size)
 #ifndef _WIN32
     return ::getcwd(buf, size);
 #else
-    if (size >= INT_MIN && size <= INT_MAX) {
         return ::_getcwd(buf, static_cast<int>(size));
-    }
-    else
-        return NULL;
 #endif
 }
 
@@ -58,7 +50,11 @@ char *OSInterfacePosix::getcwd(char *buf, size_t size)
 constexpr char PATH_ENVIRONMENT[] = "PATH";
 
 // Separator between path prefixes in environment variable.
+#ifndef _WIN32
 constexpr char PATH_ENVIRONMENT_SEPARATOR = ':'; // Unix-only.
+#else
+constexpr char PATH_ENVIRONMENT_SEPARATOR = ';'; // Windows-only.
+#endif
 
 // Separator between directories in path.
 constexpr char PATH_DIRECTORY_SEPARATOR = '/'; // Unix-only.
