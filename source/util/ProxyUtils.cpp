@@ -3,9 +3,12 @@
 
 #include "ProxyUtils.h"
 #include "../logging/LoggerFactory.h"
-//#include <arpa/inet.h>
+#ifndef _WIN32
+#include <arpa/inet.h>
+#else
 #include <WinSock2.h>
 #include <WS2tcpip.h>
+#endif
 
 using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
