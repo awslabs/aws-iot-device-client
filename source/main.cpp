@@ -101,6 +101,33 @@ unique_ptr<Aws::Iot::DeviceClient::Util::LockFile> lockFile;
 bool attemptingShutdown{false};
 Config config;
 
+#ifdef _WIN32
+// Event handles for graceful shutdown and abort
+HANDLE shutdownEvent;
+HANDLE abortEvent;
+HANDLE terminationEvent;
+
+// Windows Signal handler
+void signalHandler(int signum) {
+    switch (signum) {
+        case SIGINT:
+            LOG_INFO(TAG, "SIGINT received");
+            SetEvent(shutdownEvent);
+            break;
+        case SIGABRT:
+            LOG_INFO(TAG, "SIGABRT signal received");
+            SetEvent(abortEvent);
+            break;
+        case SIGTERM:
+            LOG_INFO(TAG, "SIGTERM signal received");
+            SetEvent(terminationEvent);
+            break;
+        default:
+            LOGM_INFO(TAG, "Unhandled event type received: %d", signum);
+    }
+}
+#endif
+
 /**
  * TODO: For future expandability of main
  * Currently creates a lockfile to prevent the creation of multiple Device Client processes.
@@ -156,6 +183,12 @@ void shutdown()
         resourceManager.reset();
     }
 #endif
+
+    // Cleanup termination events
+    CloseHandle(shutdownEvent);
+    CloseHandle(abortEvent);
+    CloseHandle(terminationEvent);
+
     LoggerFactory::getLoggerInstance()->shutdown();
     exit(EXIT_SUCCESS);
 }
@@ -357,7 +390,24 @@ int main(int argc, char *argv[])
     sigaddset(&sigset, SIGTERM);
     sigprocmask(SIG_BLOCK, &sigset, nullptr);
 #else
-    // TODO: Windows implementation needs to be added
+    // Create event objects for shutdown, abort and termination signaling
+    shutdownEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    abortEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    terminationEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+    if (shutdownEvent == NULL || abortEvent == NULL || terminationEvent == NULL) {
+        LOG_ERROR(TAG, "Failed to create interrupt handling events.");
+        shutdown();
+        return EXIT_FAILURE;
+    }
+
+    // Register signal handlers for Ctrl+C, about and termination
+    std::signal(SIGINT, signalHandler);
+    std::signal(SIGABRT, signalHandler);
+    std::signal(SIGTERM, signalHandler);
+
+    const int neventsNum = 3;
+    HANDLE events[neventsNum] = { shutdownEvent, abortEvent, terminationEvent };
 #endif
 
     auto listener = std::make_shared<DefaultClientBaseNotifier>();
@@ -652,6 +702,25 @@ int main(int argc, char *argv[])
                 break;
         }
 #else
+    // Wait for either of the events to be signaled or 30 seconds
+    DWORD waitResult = WaitForMultipleObjects(neventsNum, events, FALSE, 30000); // 30,000 milliseconds = 30 seconds
+    
+    switch (waitResult) {
+        case WAIT_OBJECT_0: // SIGINT
+        case (WAIT_OBJECT_0 + 2): // SIGTERM
+            LOG_INFO(TAG, "Shutting down gracefully");
+            shutdown();
+            break;
+        case (WAIT_OBJECT_0 + 1): // SIGABRT
+            LOG_INFO(TAG, "Aborting process");
+            resourceManager->dumpMemTrace();
+            break;
+        case WAIT_TIMEOUT:
+            LOG_INFO(TAG, "30 seconds timeout in termination event wait loop. Getting into next 30 seconds sleep iteration.");
+            break;
+        default:
+            break;
+    }    
 #endif
     }
 }
