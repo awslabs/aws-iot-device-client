@@ -251,7 +251,7 @@ int PubSubFeature::getPublishFileData(aws_byte_buf *buf) const
 
 void PubSubFeature::publishFileData()
 {
-    ByteBuf payload;
+    ByteBuf payload = {};
 
     if (getPublishFileData(&payload) != AWS_OP_SUCCESS)
     {
