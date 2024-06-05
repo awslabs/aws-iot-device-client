@@ -127,9 +127,12 @@ int FileUtils::ReadFromFile(const std::string &pathToFile, aws_byte_buf *data, s
         return AWS_OP_ERR;
     }
     file.read(reinterpret_cast<char *>(data->buffer), size);
-    data->len = size;
+    data->len = file.gcount(); // store how many characters were read
 
-    if (!file)
+    // Need to check if error happened prior to reach eof.
+    // Reading in Windows will not add CR symbol into the buffer.
+    // So, we can reach eof with file.gcount() < size)
+    if (!file && !file.eof())
     {
         file.close();
         return AWS_OP_ERR;
