@@ -16,16 +16,6 @@
 
 #include <sys/inotify.h>
 
-#ifdef _WIN32
-#ifndef close
-#define close _close
-#endif /* close */
-
-#ifndef read
-#define read _read
-#endif /* read */
-#endif
-
 using namespace std;
 using namespace Aws;
 using namespace Aws::Iot;
@@ -45,9 +35,12 @@ constexpr size_t MAX_IOT_CORE_MQTT_MESSAGE_SIZE_BYTES = 128000;
 // Definitions for inode notify
 constexpr size_t MAX_EVENTS = 1000; /* Maximum number of events to process */
 constexpr size_t LEN_NAME = 16;     /* Assuming that the length of the filename won't exceed 16 bytes */
+#ifndef _WIN32
 constexpr size_t EVENT_SIZE = (sizeof(struct inotify_event)); /* size of one event */
-constexpr size_t EVENT_BUFSIZE =
-    (MAX_EVENTS * (EVENT_SIZE + LEN_NAME)); /* size of buffer used to store the data of events */
+#else
+#define EVENT_SIZE (sizeof(struct FILE_NOTIFY_INFORMATION)) /*size of one event*/
+#endif
+#define EVENT_BUFSIZE (MAX_EVENTS * (EVENT_SIZE + LEN_NAME)) /*size of buffer used to store the data of events*/
 
 const std::string PubSubFeature::DEFAULT_PUBLISH_PAYLOAD = R"({"Hello": "World!"})";
 const std::string PubSubFeature::PUBLISH_TRIGGER_PAYLOAD = "DC-Publish";
@@ -158,6 +151,7 @@ int PubSubFeature::init(
     return AWS_OP_SUCCESS;
 }
 
+#ifndef _WIN32
 void PubSubFeature::runFileMonitor()
 {
     int len = 0;
@@ -224,6 +218,87 @@ exit:
     inotify_rm_watch(fd, dir_wd);
     close(fd);
 }
+#else
+void PubSubFeature::runFileMonitor()
+{
+    string fileDir = FileUtils::ExtractParentDirectory(pubFile.c_str());
+    string strfileName = pubFile.substr(fileDir.length());
+    wstring fileName = std::wstring(strfileName.begin(), strfileName.end());
+
+    HANDLE hDir = CreateFile(
+        fileDir.c_str(),
+        FILE_LIST_DIRECTORY,
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+        NULL,
+        OPEN_EXISTING,
+        FILE_FLAG_BACKUP_SEMANTICS,
+        NULL);
+
+    if (hDir == INVALID_HANDLE_VALUE) {
+        LOGM_ERROR(TAG, "Encounter error %d while getting a handle to the input file's parent directory", GetLastError());
+        return;
+    }
+
+    char buffer[EVENT_BUFSIZE];
+    DWORD bytesReturned;
+    time_t lastFileUpdate = 0;
+
+    while (!needStop.load()) {
+        if (ReadDirectoryChangesW(
+                hDir,
+                &buffer,
+                sizeof(buffer),
+                FALSE,
+                FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_CREATION | FILE_NOTIFY_CHANGE_SIZE,
+                &bytesReturned,
+                NULL,
+                NULL)) {
+
+
+            FILE_NOTIFY_INFORMATION* pNotify;
+            int offset = 0;
+            struct stat fileInfo = {0};
+
+            do {
+                pNotify = (FILE_NOTIFY_INFORMATION*)((char*)buffer + offset);
+                std::wstring changedFileName(pNotify->FileName, pNotify->FileNameLength / sizeof(WCHAR));
+
+                if (changedFileName == fileName) {
+                    stat(pubFile.c_str(), &fileInfo);
+                    if (lastFileUpdate < fileInfo.st_mtime) {
+                        switch (pNotify->Action) {
+                            case FILE_ACTION_ADDED:
+                                LOG_DEBUG(TAG, "New file is created with the same name of the target file. Publish data from the file");
+                                publishFileData();
+                                lastFileUpdate = fileInfo.st_mtime;
+                                break;
+                            case FILE_ACTION_MODIFIED:
+                                LOG_DEBUG(TAG, "The target file is modified, start publishing data from the file");
+                                publishFileData();
+                                lastFileUpdate = fileInfo.st_mtime;
+                                break;
+                            case FILE_ACTION_RENAMED_OLD_NAME:
+                                LOG_DEBUG(TAG, "The file was renamed to the target file name, start publishing the data");
+                                publishFileData();
+                                lastFileUpdate = fileInfo.st_mtime;
+                                break;
+                        }
+                    }
+                }
+
+                offset += pNotify->NextEntryOffset;
+            } while (pNotify->NextEntryOffset != 0);
+        }
+        else {
+            LOGM_ERROR(TAG, "Encounter error %d while adding the watch for input file's parent directory", GetLastError());
+        }
+        // Sleep for 500 milliseconds before the next check
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+
+    CloseHandle(hDir);
+}
+#endif
 
 int PubSubFeature::getPublishFileData(aws_byte_buf *buf) const
 {
