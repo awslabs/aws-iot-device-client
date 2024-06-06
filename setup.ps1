@@ -492,10 +492,13 @@ if ($BUILD_CONFIG -ieq "y") {
                     }
                     Set-LinuxStylePermissions -permissions 0x700 -filename $HANDLER_DIR
         
-                    Copy-Item -Path ".\sample-job-handlers\*" -Destination $HANDLER_DIR -Recurse -Force
-                    ###
-                    # TODO: change permissions to 700. Need to iterate through files
-                    #Set-LinuxStylePermissions -permissions 0x700 -filename ${HANDLER_DIR}/*
+                    Copy-Item -Path ".\sample-job-handlers\win32\*" -Destination $HANDLER_DIR -Recurse -Force
+
+                    # Ser permissions
+                    $jobFiles = Get-ChildItem -Path $HANDLER_DIR -File
+                    foreach ($jobFile in $jobFiles) {
+                        Set-LinuxStylePermissions -permissions 0x700 -filename $jobFile
+                    }
                 }
             }
 

@@ -473,7 +473,7 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
     si.hStdError = stderrWrite;
 
     // Create the child process
-    string strEchoOff = "cmd.exe /Q /C \"" + commandLine + "\"";
+    string strEchoOff = "powershell.exe -NoLogo -Command \"" + commandLine + "\"";
     if (!CreateProcess(
         NULL,                  // No module name (use command line)
         const_cast<LPSTR>(strEchoOff.c_str()), // Command line
@@ -627,7 +627,7 @@ int JobEngine::exec_process(std::unique_ptr<const char *[]> &argv)
     si.hStdError = stderrWrite;
 
     // Create the child process
-    string strEchoOff = "cmd.exe /Q /C \"" + commandLine + "\"";
+    string strEchoOff = "powershell.exe -NoLogo -Command \"" + commandLine + "\"";
     if (!CreateProcess(
         NULL,                  // No module name (use command line)
         const_cast<LPSTR>(strEchoOff.c_str()), // Command line

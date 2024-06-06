@@ -1,0 +1,19 @@
+{
+  "_comment": "This sample JSON file can be used to check device responsiveness to Jobs",
+  "version": "1.0",
+  "steps": [
+    {
+      "action": {
+        "name": "Health Check",
+        "type": "runHandler",
+        "input": {
+          "handler": "health-check.ps1",
+          "args": [
+          ],
+          "path": "default"
+        },
+        "runAsUser": "root"
+      }
+    }
+  ]
+}
