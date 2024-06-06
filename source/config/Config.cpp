@@ -1634,7 +1634,8 @@ void PlainConfig::PubSub::SerializeToObject(Crt::JsonObject &object) const
         object.WithString(JSON_PUB_SUB_SUBSCRIBE_FILE, subscribeFile->c_str());
     }
 
-    object.WithBool(JSON_PUB_SUB_PUBLISH_ON_CHANGE, publishOnChange);
+    if (publishOnChange)
+        object.WithBool(JSON_PUB_SUB_PUBLISH_ON_CHANGE, publishOnChange);
 }
 
 constexpr char PlainConfig::SampleShadow::CLI_ENABLE_SAMPLE_SHADOW[];
