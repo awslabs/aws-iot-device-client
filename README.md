@@ -53,7 +53,7 @@ The modular IoT Device Client consists of a “base client” and discrete “cl
   when you onboard a fleet of devices using the [Fleet Provisioning capability](https://docs.aws.amazon.com/iot/latest/developerguide/provision-wo-cert.html) of AWS IoT Core. It creates a device specific certificate and private key, and registers the device on AWS IoT Core.
 * The client-side Named Shadows feature enables you to control your IoT device using [AWS IoT Named Shadows](https://docs.aws.amazon.com/iot/latest/developerguide/iot-device-shadows.html). Shadows can store your device's state information and make it available to your device, AWS IoT services, your custom  apps and other AWS services whether the device is online and connected to AWS IoT or not.
 ### List of Supported Platforms
-The AWS IoT Device Client is currently compatible with x86_64, aarch64, armv7l, mips32, ppc64, and ppc64le architectures and common Linux software environments (Debian, Ubuntu, and RHEL).
+The AWS IoT Device Client is currently compatible with x86_64, aarch64, armv7l, mips32, ppc64, and ppc64le architectures, common Linux software environments (Debian, Ubuntu, and RHEL) and Windows 11.
 
 ## Installation
 *__Sections:__*
@@ -91,12 +91,14 @@ from our repository [here](https://gallery.ecr.aws/aws-iot-device-client/aws-iot
 ### Building from source
 
 To use the AWS IoT Device Client, you'll need to compile an executable using the source code provided by this
-repository. Below, you'll find instructions for how to build the AWS IoT Device Client for your target machine.
+repository. Below, you'll find instructions for how to build the AWS IoT Device Client for your target machine (Note: for Windows use PowerShell)
 
 ### Quick Start
 
 The following commands should work for most users when you plan to run the AWS IoT Device Client on the same machine
-that you're performing the compilation on:
+that you're performing the compilation on.
+
+#### Step 1: Building (Linux and Window)
 
 ```
 # Building
@@ -106,11 +108,25 @@ mkdir build
 cd build
 cmake ../
 cmake --build . --target aws-iot-device-client
+```
 
+#### Step 2: Setup (Linux)
+```
 # Setup
 cd ../
 ./setup.sh # At this point you'll need to respond to prompts for information, including paths to your thing certs
+```
 
+#### Step 2: Setup (Windows)
+```
+# Setup
+cd ../
+./setup.ps1 # At this point you'll need to respond to prompts for information, including paths to your thing certs
+```
+
+#### Step 3: Run the Client
+
+```
 # Run the AWS IoT Device Client
 ./aws-iot-device-client # This command runs the executable
 ```
