@@ -2,126 +2,7 @@
 #include <windows.h>
 #include <aclapi.h>
 #include <unistd.h>
-
-// Convert Linux mode to Windows file attributes
-DWORD mode_to_attributes(mode_t mode) {
-    DWORD attributes = 0;
-
-    if (S_ISDIR(mode)) {
-        attributes |= FILE_ATTRIBUTE_DIRECTORY;
-    } else {
-        attributes |= FILE_ATTRIBUTE_NORMAL;
-    }
-
-    if (mode & S_IRUSR) attributes |= FILE_ATTRIBUTE_READONLY;
-    if (mode & S_IWUSR) attributes &= ~FILE_ATTRIBUTE_READONLY;
-    if (mode & S_IXUSR) attributes |= FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_READONLY;
-/*  if (mode & S_IRGRP) attributes |= FILE_ATTRIBUTE_READONLY;
-    if (mode & S_IWGRP) attributes &= ~FILE_ATTRIBUTE_READONLY;
-    if (mode & S_IXGRP) attributes |= FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_READONLY;
-    if (mode & S_IROTH) attributes |= FILE_ATTRIBUTE_READONLY;
-    if (mode & S_IWOTH) attributes &= ~FILE_ATTRIBUTE_READONLY;
-    if (mode & S_IXOTH) attributes |= FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_READONLY;
-*/
-    return attributes;
-}
-
-// Convert Linux mode to Windows security descriptor
-BOOL mode_to_security_descriptor(const char *path, mode_t /*mode*/) {
-    PSID pOwnerSID = NULL;
-    PACL pACL = NULL;
-    PSECURITY_DESCRIPTOR pSD = NULL;
-    EXPLICIT_ACCESS ea;
-    DWORD dwRes;
-    BOOL bSuccess = FALSE;
-    PTOKEN_USER pTokenUser = NULL;
-
-    // Get the current user's SID
-    HANDLE hToken;
-    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
-        goto Cleanup;
-    }
-
-    DWORD dwBufferSize = 0;
-    GetTokenInformation(hToken, TokenUser, NULL, 0, &dwBufferSize);
-    if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-        goto Cleanup;
-    }
-
-    pTokenUser = (PTOKEN_USER)LocalAlloc(LPTR, dwBufferSize);
-    if (pTokenUser == NULL) {
-        goto Cleanup;
-    }
-
-    if (!GetTokenInformation(hToken, TokenUser, pTokenUser, dwBufferSize, &dwBufferSize)) {
-        goto Cleanup;
-    }
-
-    pOwnerSID = pTokenUser->User.Sid;
-
-    // Initialize an EXPLICIT_ACCESS structure for an ACE.
-    ZeroMemory(&ea, sizeof(EXPLICIT_ACCESS));
-
-    // Set permissions for the file owner.
-//    ea.grfAccessPermissions = mode_to_attributes(mode);
-    ea.grfAccessPermissions = GENERIC_READ | GENERIC_WRITE;
-    ea.grfAccessMode = SET_ACCESS;
-    ea.grfInheritance = NO_INHERITANCE;
-    ea.Trustee.TrusteeForm = TRUSTEE_IS_SID;
-    ea.Trustee.TrusteeType = TRUSTEE_IS_USER;
-    ea.Trustee.ptstrName = (LPTSTR)pOwnerSID;
-
-    // Create a new ACL that contains the new ACEs.
-    dwRes = SetEntriesInAcl(1, &ea, NULL, &pACL);
-    if (ERROR_SUCCESS != dwRes) {
-        goto Cleanup;
-    }
-
-    // Initialize a security descriptor.
-    pSD = (PSECURITY_DESCRIPTOR)LocalAlloc(LPTR, SECURITY_DESCRIPTOR_MIN_LENGTH);
-    if (NULL == pSD) {
-        goto Cleanup;
-    }
-
-    if (!InitializeSecurityDescriptor(pSD, SECURITY_DESCRIPTOR_REVISION)) {
-        goto Cleanup;
-    }
-
-    // Add the ACL to the security descriptor.
-    if (!SetSecurityDescriptorDacl(pSD, TRUE, pACL, FALSE)) {
-        goto Cleanup;
-    }
-
-    // Set the security descriptor for the file.
-    if (ERROR_SUCCESS != SetNamedSecurityInfoA((LPSTR)path,
-                                                SE_FILE_OBJECT,
-                                                DACL_SECURITY_INFORMATION,
-                                                pOwnerSID,
-                                                NULL,
-                                                pACL,
-                                                NULL)) {
-        goto Cleanup;
-    }
-
-    bSuccess = TRUE;
-
-Cleanup:
-
-    if (pACL) {
-        LocalFree(pACL);
-    }
-    if (pSD) {
-        LocalFree(pSD);
-    }
-    if (pTokenUser) {
-        LocalFree(pTokenUser);
-    }
-    if (hToken) {
-        CloseHandle(hToken);
-    }
-
-    return bSuccess;
-}
+#include <signal.h>
 
 // Get "as-is" access (not "effective") from the object
 ACCESS_MASK GetAccessRights(PACL pAcl, TRUSTEE* pTrustee) {
@@ -376,3 +257,128 @@ int win_open(
     return win_chmod(_FileName, (mode_t)_PMode);
 }
 
+int win_mkdir(const char *pathname, mode_t mode) {
+    if (_mkdir(pathname) == 0) {        
+        DWORD fileAttr = GetFileAttributes(pathname);
+        if (fileAttr == INVALID_FILE_ATTRIBUTES) {
+        // GetLastError can be used here to get more error details
+            return -1;
+        }
+        else {
+            return win_chmod(pathname, mode);       
+        }        
+    } else {
+        return -1; // Error
+    }
+}
+
+int kill(pid_t pid, int sig) {
+    DWORD dwCtrlEvent;
+
+    switch (sig) {
+        case SIGINT:
+            dwCtrlEvent = CTRL_C_EVENT;
+            break;
+        case SIGTERM:
+            dwCtrlEvent = CTRL_BREAK_EVENT;
+            break;
+        default:
+            // Unsupported signal
+            return -1;
+    }
+
+    if (pid == 0) {
+        // Send the signal to all processes in the current group
+        if (!GenerateConsoleCtrlEvent(dwCtrlEvent, 0)) {
+            return -1;
+        }
+    } else {
+        // Send the signal to the specified process
+        if (!GenerateConsoleCtrlEvent(dwCtrlEvent, pid)) {
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+uid_t getuid() {
+    HANDLE hToken;
+    DWORD dwLengthNeeded;
+    PTOKEN_USER pTokenUser;
+    TCHAR lpUserName[256];
+    DWORD dwUserNameSize = sizeof(lpUserName);
+    char domain[256];
+    DWORD domainSize = sizeof(domain);
+    SID_NAME_USE use;
+
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+        return -1;
+    }
+
+    if (!GetTokenInformation(hToken, TokenUser, NULL, 0, &dwLengthNeeded) &&
+        GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+        CloseHandle(hToken);
+        return -1;
+    }
+
+    pTokenUser = (PTOKEN_USER)GlobalAlloc(GPTR, dwLengthNeeded);
+    if (!pTokenUser) {
+        CloseHandle(hToken);
+        return -1;
+    }
+
+    if (!GetTokenInformation(hToken, TokenUser, pTokenUser, dwLengthNeeded, &dwLengthNeeded)) {
+        GlobalFree(pTokenUser);
+        CloseHandle(hToken);
+        return -1;
+    }
+
+    if (!LookupAccountSid(NULL, pTokenUser->User.Sid, lpUserName, &dwUserNameSize, domain, &domainSize, &use)) {
+        GlobalFree(pTokenUser);
+        CloseHandle(hToken);
+        return -1;
+    }
+
+    // Convert SID to string representation
+    LPTSTR stringSid;
+    if (!ConvertSidToStringSid(pTokenUser->User.Sid, &stringSid)) {
+        GlobalFree(pTokenUser);
+        CloseHandle(hToken);
+        return -1;
+    }
+
+    // Parse the string SID to extract the user ID
+    uid_t uid = atoi(stringSid);
+    
+    // Free resources
+    GlobalFree(pTokenUser);
+    LocalFree(stringSid);
+    CloseHandle(hToken);
+
+    return uid;
+}
+
+long pathconf(const char *path, int name) {
+    if (name != _PC_PATH_MAX) {
+        return -1; // Unsupported parameter
+    }
+
+    char volume[MAX_PATH];
+    DWORD max_path_length;
+    
+    if (!GetVolumeInformation(path, NULL, 0, NULL, &max_path_length, NULL, volume, MAX_PATH)) {
+        return -1;
+    }
+    
+    return max_path_length;
+}
+
+int setenv(const char *name, const char *value, int overwrite) {
+    // If overwrite is 0 and the environment variable already exists, do nothing
+    if (!overwrite && getenv(name) != NULL) {
+        return 0;
+    }
+    
+    return _putenv_s(name, value);
+}

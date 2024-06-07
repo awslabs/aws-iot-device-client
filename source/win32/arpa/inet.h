@@ -1,35 +1,17 @@
 // arpa/inet.h
-// Copyright 2016 Robin.Rowe\@CinePaint.org
-// License open source MIT
+// stab include file to reduce number of #ifdef around #include directives under Windows
+#ifndef _WIN32
 
-#ifndef arpa_inet_h
-#define arpa_inet_h
+#pragma message("this inet.h implementation is for Windows only!")
 
-#include "../unistd.h"
+#else
+
+#ifndef __INET_H__
+#define __INET_H__
+
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 
-#ifdef __cplusplus
-extern "C" {
-#else
-#define inline __inline
-#endif
-
-typedef unsigned in_addr_t;
-
-inline 
-in_addr_t uni_inet_addr(const char* ip)
-{	in_addr_t out;
-	if(inet_pton(AF_INET,ip,&out)<=0)
-	{	return INADDR_NONE;
-	}
-	return out;
-}
-
-#define inet_addr uni_inet_addr
-
-#ifdef __cplusplus
-}
-#endif
+#endif /*__INET_H__*/
 
 #endif

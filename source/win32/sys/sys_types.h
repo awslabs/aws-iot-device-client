@@ -1,9 +1,14 @@
 // sys/sys_types.h
-// Copyright 2016 Robin.Rowe@CinePaint.org
-// License open source MIT
+// Defining Linux-style permissions or mapping them to Windows permissions
 
-#ifndef sys_sys_types_h
-#define sys_sys_types_h
+#ifndef _WIN32
+
+#pragma message("this sys_types.h implementation is for Windows only!")
+
+#else
+
+#ifndef __SYS_TYPES_H__
+#define __SYS_TYPES_H__
 
 #include <stdint.h>
 #include "../linux/limits.h"
@@ -224,16 +229,11 @@ enum
 
 #define access _access
 
-/*
-inline
-int access(const char *pathname, int mode)
-{	return _access(pathname, mode);
-}*/
-
 #define F_GETFL 0
 #define F_SETFL 0
 #define O_NONBLOCK 0
 #define O_SYNC 0
 #define O_NOCTTY 0
 
+#endif /*__SYS_TYPES_H__*/
 #endif

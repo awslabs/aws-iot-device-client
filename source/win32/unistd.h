@@ -18,8 +18,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-//#pragma once
-
 #ifndef __UNISTD_H__
 #define __UNISTD_H__
 
@@ -85,14 +83,36 @@ SOFTWARE.
 #define read _read
 #endif /* read */
 
+/**
+ * @brief Changes file permissions
+ * 
+ * @param filename - file location
+ * @param mode - linux style permissions
+ * @return int - 0 - success. -1 - for error.
+ */
 int win_chmod(const char *filename, mode_t mode);
 #ifndef chmod
 #define chmod win_chmod
 #endif /* chmod */
 
+/**
+ * @brief Returns file status
+ * 
+ * @param filename - file location
+ * @param buffer - pointer to a resulting file state structure
+ * @return int - 0 - success. -1 - for error.
+ */
 int win_stat(const char *filename, struct stat *buffer);
 #define stat(filename, buffer) win_stat(filename, buffer)
 
+/**
+ * @brief Opens and possible creates a dile
+ * 
+ * @param _FileName - path to the file to be opened
+ * @param _OFlag - operation flags: O_RDONLY, O_WRONLY, O_RDWR
+ * @param _PMode - file mode
+ * @return int - file descriptor
+ */
 int win_open(
     _In_z_ char const* const _FileName,
     _In_   int         const _OFlag,
@@ -160,164 +180,48 @@ int win_open(
 #define unlink _unlink
 #endif /* unlink */
 
-inline
-int mkdir2(const char *pathname, mode_t mode) {
-    if (_mkdir(pathname) == 0) {        
-        DWORD fileAttr = GetFileAttributes(pathname);
-        if (fileAttr == INVALID_FILE_ATTRIBUTES) {
-        // GetLastError can be used here to get more error details
-            return -1;
-        }
-        else {
-            return win_chmod(pathname, mode);       
-        }        
-    } else {
-        return -1; // Error
-    }
-}
-
+/**
+ * @brief Create a directory at the specified path
+ * 
+ * @param pathname - directory full path
+ * @param mode - Linux style permissions for the newly created file item
+ * @return int - result of the operation
+ */
+int win_mkdir(const char *pathname, mode_t mode);
 #ifndef mkdir
-#define mkdir mkdir2
+#define mkdir win_mkdir
 #endif /* mkdir*/
 
 #ifndef getpid
 #define getpid _getpid
 #endif /* getpid */
-inline
-uid_t getuid() {
-    HANDLE hToken;
-    DWORD dwLengthNeeded;
-    PTOKEN_USER pTokenUser;
-    TCHAR lpUserName[256];
-    DWORD dwUserNameSize = sizeof(lpUserName);
-    char domain[256];
-    DWORD domainSize = sizeof(domain);
-    SID_NAME_USE use;
 
-    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
-        return -1;
-    }
+/**
+ * @brief Get user ID for the current process
+ * 
+ * @return uid_t - user ID
+ */
+uid_t getuid();
 
-    if (!GetTokenInformation(hToken, TokenUser, NULL, 0, &dwLengthNeeded) &&
-        GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-        CloseHandle(hToken);
-        return -1;
-    }
+int kill(pid_t pid, int sig);
+/**
+ * @brief gets a value for configuration option name for the filename path.
+ * 
+ * @param path - filename to use to obtain configuration option
+ * @param name - name of the configuration option. _PC_PATH_MAX is the only one supported in the current implementation.
+ * @return long - maximum for the specified option
+ */
+long pathconf(const char *path, int name);
 
-    pTokenUser = (PTOKEN_USER)GlobalAlloc(GPTR, dwLengthNeeded);
-    if (!pTokenUser) {
-        CloseHandle(hToken);
-        return -1;
-    }
-
-    if (!GetTokenInformation(hToken, TokenUser, pTokenUser, dwLengthNeeded, &dwLengthNeeded)) {
-        GlobalFree(pTokenUser);
-        CloseHandle(hToken);
-        return -1;
-    }
-
-    if (!LookupAccountSid(NULL, pTokenUser->User.Sid, lpUserName, &dwUserNameSize, domain, &domainSize, &use)) {
-        GlobalFree(pTokenUser);
-        CloseHandle(hToken);
-        return -1;
-    }
-
-    // Convert SID to string representation
-    LPTSTR stringSid;
-    if (!ConvertSidToStringSid(pTokenUser->User.Sid, &stringSid)) {
-        GlobalFree(pTokenUser);
-        CloseHandle(hToken);
-        return -1;
-    }
-
-    // Parse the string SID to extract the user ID
-    uid_t uid = atoi(stringSid);
-    
-    // Free resources
-    GlobalFree(pTokenUser);
-    LocalFree(stringSid);
-    CloseHandle(hToken);
-
-    return uid;
-}
-
-#ifndef SIGINT
-#define SIGINT 2
-#endif /* SIGINT */
-#ifndef SIGTERM
-#define SIGTERM 15
-#endif /* SIGTERM */
-inline
-int kill(pid_t pid, int sig) {
-    DWORD dwCtrlEvent;
-
-    switch (sig) {
-        case SIGINT:
-            dwCtrlEvent = CTRL_C_EVENT;
-            break;
-        case SIGTERM:
-            dwCtrlEvent = CTRL_BREAK_EVENT;
-            break;
-        default:
-            // Unsupported signal
-            return -1;
-    }
-
-    if (pid == 0) {
-        // Send the signal to all processes in the current group
-        if (!GenerateConsoleCtrlEvent(dwCtrlEvent, 0)) {
-            return -1;
-        }
-    } else {
-        // Send the signal to the specified process
-        if (!GenerateConsoleCtrlEvent(dwCtrlEvent, pid)) {
-            return -1;
-        }
-    }
-
-    return 0;
-}
-
-inline
-long pathconf(const char *path, int name) {
-    if (name != _PC_PATH_MAX) {
-        return -1; // Unsupported parameter
-    }
-
-    char volume[MAX_PATH];
-    DWORD max_path_length;
-    
-    if (!GetVolumeInformation(path, NULL, 0, NULL, &max_path_length, NULL, volume, MAX_PATH)) {
-        return -1;
-    }
-    
-    return max_path_length;
-}
-
-inline
-int setenv(const char *name, const char *value, int overwrite) {
-    // If overwrite is 0 and the environment variable already exists, do nothing
-    if (!overwrite && getenv(name) != NULL) {
-        return 0;
-    }
-    
-/*     // Construct the environment variable string
-    size_t len = strlen(name) + strlen(value) + 2;
-    char *env_var = (char*)malloc(len);
-    if (env_var == NULL) {
-        return -1; // Memory allocation failed
-    }
-    snprintf(env_var, len, "%s=%s", name, value);
- */    
-    // Set the environment variable using _putenv_s
-//    int result = _putenv_s(name, env_var);
-    int result = _putenv_s(name, value);
-    
-//    free(env_var);
-    
-//    return result == 0 ? 0 : -1;
-    return result;
-}
+/**
+ * @brief Set the value of environment variable
+ * 
+ * @param name - variable name
+ * @param value = the value
+ * @param overwrite = pass true to overwrite existing variable value or false - to keep existing value
+ * @return int - operation result
+ */
+int setenv(const char *name, const char *value, int overwrite);
 
 #endif /* _WIN32 */
 
