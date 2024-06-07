@@ -97,7 +97,8 @@ full path to the object
 function Set-LinuxStylePermissions {
     param (
         [System.Int16]$permissions,
-        [System.String]$filename
+        [System.String]$filename,
+        [System.String]$targetUser
     )
 
     if (-Not (Test-Path $filename)) {
@@ -125,7 +126,11 @@ function Set-LinuxStylePermissions {
     # Disable inheritance
     $acl.SetAccessRuleProtection($true, $false)
 
-    $currentUserName = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+    if ($targetUser -eq "") {
+        $currentUserName = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+    } else {
+        $currentUserName = $targetUser
+    }
     $acl.SetOwner([System.Security.Principal.NTAccount]$currentUserName)
 
     # Use these permissions set to clear permissions prior to setting up permissions, which have been provided
@@ -212,39 +217,64 @@ function Set-LinuxStylePermissions {
     Set-Acl -Path $filename -AclObject $acl | Out-Null
 }
 
-if ((Get-EnvVariable "USERNAME") -eq "") {
-    Write-Text "WARNING: Only run this setup script as system user if you plan to run the AWS IoT Device Client as if you plan to run the AWS IoT Device Client as a service. Otherwise, you should run this script as \
-  the user that will execute the client."
+$CURRENT_USER = Get-EnvVariable "USERNAME"
+if ($CURRENT_USER -eq "") {
+    Write-Warning "WARNING: Cannot identify the username. You should only run this setup script as administrator/priviledged user."
+} else {
+    Write-Text ("Running under " + $CURRENT_USER + ". You will be able to provide another user account you plan to run AWS IoT Device Client under.")
 }
 
 # Build Configuration File
 $BUILD_CONFIG = Read-Text "Do you want to interactively generate a configuration file for the AWS IoT Device Client? [y/n]"
 
-if ((Get-EnvVariable "USERPROFILE") -eq "") {
-    $OUTPUT_DIR = (Get-EnvVariable "SYSTEMROOT") + "\.aws-iot-device-client\"
-} else {
-    $OUTPUT_DIR = (Get-EnvVariable "USERPROFILE") + "\.aws-iot-device-client\"
-}
-
-# Config Defaults
-$CONF_OUTPUT_PATH = $OUTPUT_DIR + "aws-iot-device-client.conf"
-$HANDLER_DIR = $OUTPUT_DIR + "jobs\"
-$PUBSUB_DIR = $OUTPUT_DIR + "pubsub\"
-$PUB_FILE = $PUBSUB_DIR + "publish-file.txt"
-$SUB_FILE = $PUBSUB_DIR + "subscribe-file.txt"
-$DD_INTERVAL = 300
-$LOG_TYPE = "STDOUT"
-$LOG_LEVEL = "DEBUG"
-$LOGS_DIR = (Get-EnvVariable "LOCALAPPDATA") + "\aws-iot-device-client\logs\"
-$LOG_LOCATION = $LOGS_DIR + "aws-iot-device-client.log"
-$SDK_LOGS_ENABLED = $false
-$SDK_LOG_LEVEL = "TRACE"
-$SDK_LOG_LOCATION = $LOGS_DIR + "sdk.log"
-$SAMPLE_SHADOW_DIR = $OUTPUT_DIR + "sample-shadow\"
-$SAMPLE_SHADOW_INPUT_FILE = $SAMPLE_SHADOW_DIR + "shadow-input.txt"
-$SAMPLE_SHADOW_OUTPUT_FILE = $SAMPLE_SHADOW_DIR + "shadow-output.txt"
 
 if ($BUILD_CONFIG -ieq "y") {
+
+    Write-Text ("You are currently running configuration script as " + $CURRENT_USER + ".")
+    $TARGET_USER_TMP = (Read-Text ("Enter user account you plan to run AWS IoT Device Client under. It will default to " + $CURRENT_USER))
+    if ($TARGET_USER_TMP -ne "") {
+        $USER_TMP = Get-LocalUser -Name $TARGET_USER_TMP -ErrorAction SilentlyContinue
+        if ($USER_TMP) {
+            $TARGET_USER = $USER_TMP.Name
+        } else {
+            Write-Error ("Cannot find user " + $USER_TMP)
+            Exit 1
+        }
+    } else {
+        Write-Text ("No username provided. " + $CURRENT_USER + " will be used.")
+        $TARGET_USER = $CURRENT_USER
+    }
+
+    $USER_PROFILE = Get-WmiObject -Class Win32_UserProfile | Where-Object {
+        $_.LocalPath -match "\\$TARGET_USER$"
+    }
+
+    if ($USER_PROFILE) {
+        $OUTPUT_DIR = $USER_PROFILE.LocalPath + "\.aws-iot-device-client\"
+    } else {
+        Write-Error ("Cannot find user " + $TARGET_USER)
+        Exit 1
+    }
+
+    # Config Defaults
+    $CONF_OUTPUT_PATH = $OUTPUT_DIR + "aws-iot-device-client.conf"
+    $HANDLER_DIR = $OUTPUT_DIR + "jobs\"
+    $PUBSUB_DIR = $OUTPUT_DIR + "pubsub\"
+    $PUB_FILE = $PUBSUB_DIR + "publish-file.txt"
+    $SUB_FILE = $PUBSUB_DIR + "subscribe-file.txt"
+    $DD_INTERVAL = 300
+    $LOG_TYPE = "STDOUT"
+    $LOG_LEVEL = "DEBUG"
+    $LOGS_DIR = $USER_PROFILE.LocalPath + "\AppData\Local\aws-iot-device-client\logs\"
+    $LOG_LOCATION = $LOGS_DIR + "aws-iot-device-client.log"
+    $SDK_LOGS_ENABLED = $false
+    $SDK_LOG_LEVEL = "TRACE"
+    $SDK_LOG_LOCATION = $LOGS_DIR + "sdk.log"
+    $SAMPLE_SHADOW_DIR = $OUTPUT_DIR + "sample-shadow\"
+    $SAMPLE_SHADOW_INPUT_FILE = $SAMPLE_SHADOW_DIR + "shadow-input.txt"
+    $SAMPLE_SHADOW_OUTPUT_FILE = $SAMPLE_SHADOW_DIR + "shadow-output.txt"
+    
+
     $CONFIGURED = 0
     while ($CONFIGURED -ne 1) {
         $ENDPOINT = (Read-Text "Specify AWS IoT endpoint to use")
@@ -469,8 +499,8 @@ if ($BUILD_CONFIG -ieq "y") {
 
             $CONFIG_OUTPUT | ConvertTo-Json | Out-File -FilePath $CONF_OUTPUT_PATH -Encoding UTF8
 
-            Set-LinuxStylePermissions -permissions 0x745 -filename $CONFIG_LOCATION_PATH
-            Set-LinuxStylePermissions -permissions 0x640 -filename $CONF_OUTPUT_PATH
+            Set-LinuxStylePermissions -permissions 0x745 -filename $CONFIG_LOCATION_PATH -targetUser $TARGET_USER
+            Set-LinuxStylePermissions -permissions 0x640 -filename $CONF_OUTPUT_PATH -targetUser $TARGET_USER
 
             Write-Text ("Configuration has been successfully written to '" + $CONF_OUTPUT_PATH + "'")
 
@@ -480,7 +510,7 @@ if ($BUILD_CONFIG -ieq "y") {
                 if (-Not (Test-Path $PUBSUB_DIR)) {
                     New-Item -Path $PUBSUB_DIR -ItemType Directory -Force | Out-Null
                 }
-                Set-LinuxStylePermissions -permissions 0x745 -filename $PUBSUB_DIR
+                Set-LinuxStylePermissions -permissions 0x745 -filename $PUBSUB_DIR -targetUser $TARGET_USER
             }
           
             ### Move Sample Jobs if Job feature is enabled
@@ -490,14 +520,14 @@ if ($BUILD_CONFIG -ieq "y") {
                     if (-Not (Test-Path $HANDLER_DIR)) {
                         New-Item -Path $HANDLER_DIR -ItemType Directory -Force | Out-Null
                     }
-                    Set-LinuxStylePermissions -permissions 0x700 -filename $HANDLER_DIR
+                    Set-LinuxStylePermissions -permissions 0x700 -filename $HANDLER_DIR -targetUser $TARGET_USER
         
                     Copy-Item -Path ".\sample-job-handlers\win32\*" -Destination $HANDLER_DIR -Recurse -Force
 
                     # Ser permissions
                     $jobFiles = Get-ChildItem -Path $HANDLER_DIR -File
                     foreach ($jobFile in $jobFiles) {
-                        Set-LinuxStylePermissions -permissions 0x700 -filename $jobFile
+                        Set-LinuxStylePermissions -permissions 0x700 -filename $jobFile -targetUser $TARGET_USER
                     }
                 }
             }
@@ -514,7 +544,7 @@ if ($BUILD_CONFIG -ieq "y") {
                     New-Item -ItemType Directory $LOG_LOCATION_PATH -Force | Out-Null
                 }
 
-                Set-LinuxStylePermissions -permissions 0x745 -filename $LOG_LOCATION_PATH
+                Set-LinuxStylePermissions -permissions 0x745 -filename $LOG_LOCATION_PATH -targetUser $TARGET_USER
 
                 ## Create Log file & set permissions
                 if (Test-Path $LOG_LOCATION) {
@@ -524,7 +554,7 @@ if ($BUILD_CONFIG -ieq "y") {
                     Write-Text ("Creating '" + $LOG_LOCATION + "' file")
                     New-Item -Path $LOG_LOCATION -ItemType File -Force | Out-Null
                 }
-                Set-LinuxStylePermissions -permissions 0x600 -filename $LOG_LOCATION
+                Set-LinuxStylePermissions -permissions 0x600 -filename $LOG_LOCATION -targetUser $TARGET_USER
             }
 
             ### Create SDK Log File Location
@@ -538,7 +568,7 @@ if ($BUILD_CONFIG -ieq "y") {
                     Write-Text ("Creating '" + $SDK_LOG_LOCATION_PATH + "' folder")
                     New-Item -ItemType Directory $SDK_LOG_LOCATION_PATH -Force | Out-Null
                 }
-                Set-LinuxStylePermissions -permissions 0x745 -filename $SDK_LOG_LOCATION_PATH
+                Set-LinuxStylePermissions -permissions 0x745 -filename $SDK_LOG_LOCATION_PATH -targetUser $TARGET_USER
 
                 ## Create SDK Log file & set permissions
                 if (Test-Path $SDK_LOG_LOCATION) {
@@ -548,7 +578,7 @@ if ($BUILD_CONFIG -ieq "y") {
                     Write-Text ("Creating '" + $SDK_LOG_LOCATION + "' file")
                     New-Item -Path $SDK_LOG_LOCATION -ItemType File -Force | Out-Null
                 }                
-                Set-LinuxStylePermissions -permissions 0x600 -filename $SDK_LOG_LOCATION
+                Set-LinuxStylePermissions -permissions 0x600 -filename $SDK_LOG_LOCATION -targetUser $TARGET_USER
             }
 
             ### Create Sample-Shadow files
@@ -562,7 +592,7 @@ if ($BUILD_CONFIG -ieq "y") {
                     Write-Text ("Creating '" + $SAMPLE_SHADOW_PATH + "' folder")
                     New-Item -ItemType Directory $SAMPLE_SHADOW_PATH -Force | Out-Null
                 }
-                Set-LinuxStylePermissions -permissions 0x745 -filename $SDK_LOG_LOCATION_PATH
+                Set-LinuxStylePermissions -permissions 0x745 -filename $SDK_LOG_LOCATION_PATH -targetUser $TARGET_USER
                 
                 if (Test-Path $SAMPLE_SHADOW_INPUT_FILE) {
                     Write-Text ("Sample shadow input file '" + $SAMPLE_SHADOW_INPUT_FILE + "' already exists.")
@@ -571,7 +601,7 @@ if ($BUILD_CONFIG -ieq "y") {
                     Write-Text ("Creating '" + $SAMPLE_SHADOW_INPUT_FILE + "' file")
                     New-Item -Path $SAMPLE_SHADOW_INPUT_FILE -ItemType File -Force | Out-Null
                 }                
-                Set-LinuxStylePermissions -permissions 0x600 -filename $SAMPLE_SHADOW_INPUT_FILE
+                Set-LinuxStylePermissions -permissions 0x600 -filename $SAMPLE_SHADOW_INPUT_FILE -targetUser $TARGET_USER
 
 
                 Write-Text "Creating Sample-Shadow Output File Location..."
@@ -583,7 +613,7 @@ if ($BUILD_CONFIG -ieq "y") {
                     Write-Text ("Creating '" + $SAMPLE_SHADOW_PATH + "' folder")
                     New-Item -ItemType Directory $SAMPLE_SHADOW_PATH -Force | Out-Null
                 }
-                Set-LinuxStylePermissions -permissions 0x745 -filename $SAMPLE_SHADOW_PATH
+                Set-LinuxStylePermissions -permissions 0x745 -filename $SAMPLE_SHADOW_PATH -targetUser $TARGET_USER
 
                 if (Test-Path $SAMPLE_SHADOW_OUTPUT_FILE) {
                     Write-Text ("Sample shadow input file '" + $SAMPLE_SHADOW_OUTPUT_FILE + "' already exists.")
@@ -592,7 +622,7 @@ if ($BUILD_CONFIG -ieq "y") {
                     Write-Text ("Creating '" + $SAMPLE_SHADOW_OUTPUT_FILE + "' file")
                     New-Item -Path $SAMPLE_SHADOW_OUTPUT_FILE -ItemType File -Force | Out-Null
                 }                
-                Set-LinuxStylePermissions -permissions 0x600 -filename $SAMPLE_SHADOW_OUTPUT_FILE
+                Set-LinuxStylePermissions -permissions 0x600 -filename $SAMPLE_SHADOW_OUTPUT_FILE -targetUser $TARGET_USER
             }
 
             ### Create Pub-Sub files
@@ -606,7 +636,7 @@ if ($BUILD_CONFIG -ieq "y") {
                     Write-Text ("Creating '" + $PUBSUB_PATH + "' folder")
                     New-Item -ItemType Directory $PUBSUB_PATH -Force | Out-Null
                 }
-                Set-LinuxStylePermissions -permissions 0x745 -filename $PUBSUB_PATH
+                Set-LinuxStylePermissions -permissions 0x745 -filename $PUBSUB_PATH -targetUser $TARGET_USER
                 
                 if (Test-Path $SUB_FILE) {
                     Write-Text ("Subscribe / Input file '" + $SUB_FILE + "' already exists.")
@@ -615,7 +645,7 @@ if ($BUILD_CONFIG -ieq "y") {
                     Write-Text ("Creating '" + $SUB_FILE + "' file")
                     New-Item -Path $SUB_FILE -ItemType File -Force | Out-Null
                 }                
-                Set-LinuxStylePermissions -permissions 0x600 -filename $SUB_FILE
+                Set-LinuxStylePermissions -permissions 0x600 -filename $SUB_FILE -targetUser $TARGET_USER
 
 
                 Write-Text "Creating Pub-Sub Publish / Input File Location..."
@@ -627,7 +657,7 @@ if ($BUILD_CONFIG -ieq "y") {
                     Write-Text ("Creating '" + $PUBSUB_PATH + "' folder")
                     New-Item -ItemType Directory $PUBSUB_PATH -Force | Out-Null
                 }
-                Set-LinuxStylePermissions -permissions 0x745 -filename $PUBSUB_PATH
+                Set-LinuxStylePermissions -permissions 0x745 -filename $PUBSUB_PATH -targetUser $TARGET_USER
 
                 if (Test-Path $PUB_FILE) {
                     Write-Text ("Pub-Sub publish/input file '" + $PUB_FILE + "' already exists.")
@@ -636,7 +666,7 @@ if ($BUILD_CONFIG -ieq "y") {
                     Write-Text ("Creating '" + $PUB_FILE + "' file")
                     New-Item -Path $PUB_FILE -ItemType File -Force | Out-Null
                 }                
-                Set-LinuxStylePermissions -permissions 0x600 -filename $PUB_FILE
+                Set-LinuxStylePermissions -permissions 0x600 -filename $PUB_FILE -targetUser $TARGET_USER
             }
         }
     }
