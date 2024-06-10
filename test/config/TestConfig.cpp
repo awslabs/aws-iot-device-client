@@ -67,7 +67,7 @@ class ConfigTestFixture : public ::testing::Test
         FileUtils::CreateDirectoryWithPermissions(addrPathInvalid.c_str(), invalidPerms);
 
         ostringstream outputPathStream;
-        outputPathStream << Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR << Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
+        outputPathStream << Config::getDefaulSampleOutputDir() << Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
 
         outputPath = FileUtils::ExtractExpandedPath(outputPathStream.str().c_str());
     }

@@ -570,7 +570,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
              * Store data in runtime conf file and update @config object.
              */
             if (!ExportRuntimeConfig(
-                    Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
+                    Config::getDefaulFleetProvRTConfigFile(),
                     certPath.c_str(),
                     keyPath.c_str(),
                     thingName.c_str(),
