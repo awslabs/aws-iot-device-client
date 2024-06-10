@@ -4,6 +4,7 @@
 #include "LockFile.h"
 #include "../logging/LoggerFactory.h"
 #include "StringUtils.h"
+#include "FileUtils.h"
 
 #include <csignal>
 #include <stdexcept>
@@ -61,6 +62,11 @@ LockFile::LockFile(const std::string &filedir, const std::string &process, const
 #ifndef _WIN32    
     FILE *file = fopen(fullPath.c_str(), "wx");
 #else
+    if (FileUtils::Mkdirs(dir))
+    {
+        LOGM_ERROR(
+            TAG, "Unable to create a lockfile directory %s", Sanitize(dir).c_str());
+    }
     FILE *file = NULL;
     fopen_s(&file, fullPath.c_str(), "wx");
 #endif

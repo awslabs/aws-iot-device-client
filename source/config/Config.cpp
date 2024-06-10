@@ -84,6 +84,16 @@ constexpr int Permissions::PUB_SUB_FILES;
 constexpr int Permissions::SAMPLE_SHADOW_FILES;
 constexpr int Permissions::PKCS11_LIB_FILE;
 
+Aws::Iot::DeviceClient::PlainConfig::PlainConfig() 
+{
+#ifndef _WIN32
+    lockFilePath = std::string{DEFAULT_LOCK_FILE_PATH};
+#else
+    string strProfileDir =  Util::TrimRightCopy(getenv("LOCALAPPDATA"), string{Config::PATH_DIRECTORY_SEPARATOR});
+    lockFilePath = strProfileDir + std::string{Config::PATH_DIRECTORY_SEPARATOR} + "aws-iot-device-client\\lock\\";
+#endif
+}
+
 bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
 {
     const char *jsonKey = JSON_KEY_ENDPOINT;

@@ -66,6 +66,7 @@ namespace Aws
 
             struct PlainConfig : public LoadableFromJsonAndCliAndEnvironment
             {
+                PlainConfig();
                 bool LoadFromJson(const Crt::JsonView &json) override;
                 bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                 bool LoadFromEnvironment() override;
