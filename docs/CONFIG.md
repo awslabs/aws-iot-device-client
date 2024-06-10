@@ -13,7 +13,7 @@ Note: Parameters that are passed through the command line take precedence and ov
 To configure the AWS IoT Device Client via the JSON configuration file, you can also modify our configuration template 
 `config-template.json` located in the root of this package and store it at 
 + Linux: `~/.aws-iot-device-client/aws-iot-device-client.conf` where `~/` refers to the home directory of the user running the Device Client
-+ Windows:  '%USERPROFILE%\.aws-iot-device-client/aws-iot-device-client.conf' where '%USERPROFILE%' is an environment variable that contains the path to the profile directory of the user running the Device Client.
++ Windows:  `%USERPROFILE%\.aws-iot-device-client/aws-iot-device-client.conf` where `%USERPROFILE%` is an environment variable that contains the path to the profile directory of the user running the Device Client.
 
 If you'd like to specify a different location for your configuration file, you can pass the `--config-file <your-path>` flag to the AWS IoT Device Client. 
 
