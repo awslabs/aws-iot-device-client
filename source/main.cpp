@@ -184,10 +184,12 @@ void shutdown()
     }
 #endif
 
+#ifdef _WIN32
     // Cleanup termination events
     CloseHandle(shutdownEvent);
     CloseHandle(abortEvent);
     CloseHandle(terminationEvent);
+#endif
 
     LoggerFactory::getLoggerInstance()->shutdown();
     exit(EXIT_SUCCESS);

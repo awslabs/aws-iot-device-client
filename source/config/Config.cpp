@@ -2508,7 +2508,7 @@ constexpr char Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[];
 constexpr char Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[];
 constexpr char Config::DEFAULT_HTTP_PROXY_CONFIG_FILE[];
 #ifndef _WIN32
-constexpr char Config::DEFAULT_CONFIG_HOME_DIR[]];
+constexpr char Config::DEFAULT_CONFIG_HOME_DIR[];
 #endif
 
 bool Config::CheckTerminalArgs(int argc, char **argv)
