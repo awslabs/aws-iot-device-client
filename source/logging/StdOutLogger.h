@@ -24,16 +24,29 @@ namespace Aws
                  */
                 class StdOutLogger final : public Logger
                 {
+                  private:
                     /**
                      * \brief Flag used to notify underlying threads that they should discontinue any processing
                      * so that the application can safely shutdown
                      */
-                    bool needsShutdown = false;
+                    bool needsShutdown{false};
+
                     /**
                      * \brief The default value in milliseconds for which Device client will wait after getting a
                      * log message from logQueue
                      */
                     static constexpr int DEFAULT_WAIT_TIME_MILLISECONDS = 1;
+
+                    /**
+                     * \brief a Mutex used to control multi-threaded access to the needShutdown member variable.
+                     */
+                    std::mutex needsShutdownLock;
+
+                    /**
+                     * \brief Used to wake up waiting threads after shutdown procedure completes.
+                     */
+                    std::condition_variable shutdownNotifier;
+
                     /**
                      * \brief a LogQueue instance used to queue incoming log messages for processing
                      */

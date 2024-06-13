@@ -293,7 +293,6 @@ namespace Aws
 
 int main(int argc, char *argv[])
 {
-
     if (Config::CheckTerminalArgs(argc, argv))
     {
         LoggerFactory::getLoggerInstance()->shutdown();
