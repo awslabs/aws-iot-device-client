@@ -880,6 +880,7 @@ bool FleetProvisioning::CollectNetworkInformation()
 
     close(fd);
     freeifaddrs(ifap);
+    return true;
 #else
     // Initialize Winsock
     WSADATA wsaData;
