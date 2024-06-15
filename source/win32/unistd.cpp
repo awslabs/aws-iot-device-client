@@ -1,8 +1,9 @@
 #include <iostream>
-#include <windows.h>
 #include <aclapi.h>
 #include <unistd.h>
 #include <signal.h>
+#include <winioctl.h>
+
 
 // Get "as-is" access (not "effective") from the object
 ACCESS_MASK GetAccessRights(PACL pAcl, TRUSTEE* pTrustee) {
@@ -381,4 +382,14 @@ int setenv(const char *name, const char *value, int overwrite) {
     }
     
     return _putenv_s(name, value);
+}
+
+ssize_t readlink(const char */*path*/, char *buf, size_t len)
+{
+    DWORD size = GetModuleFileName(NULL, buf, (DWORD)len);
+    if (size == 0) {
+        return - 1;
+    }
+    else
+        return size;
 }

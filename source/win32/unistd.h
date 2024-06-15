@@ -30,6 +30,7 @@ SOFTWARE.
 #include <direct.h> // For _mkdir
 #include <io.h>     // For _chmod
 #include "sys/sys_types.h"
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <sddl.h>
 #include <fcntl.h>    /* _O_BINARY */
@@ -222,6 +223,17 @@ long pathconf(const char *path, int name);
  * @return int - operation result
  */
 int setenv(const char *name, const char *value, int overwrite);
+
+/**
+ * @brief readlink("/proc/self/exe", ...) simplified implementation for winfows.
+ * Returns executable location for the current process.
+ * 
+ * @param path - ignored. Always assumed "/proc/self/exe"
+ * @param buf - pointer to the buffer to place executable location
+ * @param len - length of the returned buffer
+ * @return ssize_t - buffer size in case of success. -1 in case of an error
+ */
+ssize_t readlink(const char *path, char *buf, size_t len);
 
 #endif /* _WIN32 */
 

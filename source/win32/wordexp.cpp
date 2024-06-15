@@ -1,10 +1,10 @@
 #include "unistd.h"
 #include <sys/types.h>
-#include <Windows.h>
 #include <vector>
 #include <string>
 #include <iostream>
 #include "wordexp.h"
+#include <shellapi.h>
 
 void wordfree(wordexp_t *we) {
     int i;

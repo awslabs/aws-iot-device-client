@@ -253,11 +253,11 @@ namespace Aws
                     /**
                      * \brief Obtain serial number of the given X.509 certificate.
                      *
-                     * @param certPath path to the certificate
+                     * @param path path to the certificate
                      *
                      * @return returns false if client is not able to collect required information
                      */
-                    bool ObtainCertificateSerialID(const char *certPath);
+                    bool ObtainCertificateSerialID(const char *path);
                 };
             } // namespace FleetProvisioningNS
         }     // namespace DeviceClient
