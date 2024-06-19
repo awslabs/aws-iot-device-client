@@ -519,6 +519,19 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
         LOG_INFO(TAG, "Fleet Provisioning Feature has been started.");
         collectSystemInformation = config.fleetProvisioning.collectSystemInformation;
 
+        if (collectSystemInformation)
+        {
+            if (config.fleetProvisioning.networkInterface.has_value() && config.fleetProvisioning.networkInterface->c_str())
+            {
+                networkInterface = config.fleetProvisioning.networkInterface->c_str();
+            }
+            else
+            {
+                LOG_WARN(TAG, "Network interface not provided, default to eth0");
+                networkInterface = "eth0";
+            }
+        }
+
         bool didSetup = FileUtils::CreateDirectoryWithPermissions(keyDir.c_str(), S_IRWXU) &&
                         FileUtils::CreateDirectoryWithPermissions(
                             Config::DEFAULT_CONFIG_DIR, S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH | S_IXOTH);
@@ -813,7 +826,7 @@ bool FleetProvisioning::CollectNetworkInformation()
     char ip[INET6_ADDRSTRLEN];
 
     std::vector<std::string> ipAddrList;
-    ipAddrList.reserve(2);
+    ipAddrList.reserve(2); // normally at most 2 based on observation
 
     if (getifaddrs(&ifap) == -1)
     {
@@ -839,7 +852,7 @@ bool FleetProvisioning::CollectNetworkInformation()
         char *name = ifa->ifa_name;
 
         // We only search for addresses on eth0 interface.
-        if (family == AF_INET && strncmp(name, "eth0", 3) == 0)
+        if (family == AF_INET && networkInterface == name)
         {
             struct in_addr addr = (reinterpret_cast<struct sockaddr_in *>(ifa->ifa_addr))->sin_addr;
             inet_ntop(AF_INET, &addr, ip, INET_ADDRSTRLEN);
@@ -850,13 +863,13 @@ bool FleetProvisioning::CollectNetworkInformation()
     struct ifreq ifr;
     unsigned char *mac;
 
-    strncpy(ifr.ifr_name, "eth0", IFNAMSIZ - 1);
+    strncpy(ifr.ifr_name, networkInterface, IFNAMSIZ - 1);
     if (ioctl(fd, SIOCGIFHWADDR, &ifr) == -1)
     {
         close(fd);
         freeifaddrs(ifap);
 
-        LOG_ERROR(TAG, "*** %s: Failed to get MAC address for interface ***");
+        LOGM_ERROR(TAG, "*** %s: Failed to get MAC address for interface %s ***", networkInterface.c_str());
         return false;
     }
     mac = reinterpret_cast<unsigned char *>(ifr.ifr_hwaddr.sa_data);

@@ -167,6 +167,11 @@ namespace Aws
                     bool collectSystemInformation;
 
                     /**
+                     * \brief stores name of network interface for collecting system information.
+                     */
+                    std::string networkInterface;
+
+                    /**
                      * \brief creates a new certificate and private key using the AWS certificate authority
                      *
                      * @param identityClient used for subscribing and publishing request for creating resources
