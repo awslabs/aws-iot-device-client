@@ -863,7 +863,7 @@ bool FleetProvisioning::CollectNetworkInformation()
     struct ifreq ifr;
     unsigned char *mac;
 
-    strncpy(ifr.ifr_name, networkInterface, IFNAMSIZ - 1);
+    strncpy(ifr.ifr_name, networkInterface.c_str(), IFNAMSIZ - 1);
     if (ioctl(fd, SIOCGIFHWADDR, &ifr) == -1)
     {
         close(fd);
