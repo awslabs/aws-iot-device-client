@@ -4,6 +4,7 @@
 #include "LockFile.h"
 #include "../logging/LoggerFactory.h"
 #include "StringUtils.h"
+#include "FileUtils.h"
 
 #include <csignal>
 #include <stdexcept>
@@ -15,6 +16,10 @@ using namespace Aws::Iot::DeviceClient::Logging;
 
 constexpr char LockFile::TAG[];
 constexpr char LockFile::FILE_NAME[];
+
+#ifdef _WIN32
+    #undef close
+#endif
 
 LockFile::LockFile(const std::string &filedir, const std::string &process, const std::string &thingName) : dir(filedir)
 {
@@ -54,7 +59,17 @@ LockFile::LockFile(const std::string &filedir, const std::string &process, const
     }
     fileIn.close();
 
+#ifndef _WIN32    
     FILE *file = fopen(fullPath.c_str(), "wx");
+#else
+    if (FileUtils::Mkdirs(dir))
+    {
+        LOGM_ERROR(
+            TAG, "Unable to create a lockfile directory %s", Sanitize(dir).c_str());
+    }
+    FILE *file = NULL;
+    fopen_s(&file, fullPath.c_str(), "wx");
+#endif
     if (!file)
     {
         LOGM_ERROR(

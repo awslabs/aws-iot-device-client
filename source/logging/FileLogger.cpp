@@ -10,9 +10,14 @@
 
 constexpr int TIMESTAMP_BUFFER_SIZE = 25;
 
+#ifdef _WIN32
+#undef FormatMessage
+#endif
+
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Logging;
-using namespace Aws::Iot::DeviceClient::Util;
+//using namespace Aws::Iot::DeviceClient::Util;
+namespace AwsUtil = Aws::Iot::DeviceClient::Util;
 
 constexpr int FileLogger::DEFAULT_WAIT_TIME_MILLISECONDS;
 constexpr char FileLogger::DEFAULT_LOG_FILE[];
@@ -26,12 +31,12 @@ bool FileLogger::start(const PlainConfig &config)
     }
 
     struct stat info;
-    string logFileDir = FileUtils::ExtractParentDirectory(logFile);
+    string logFileDir = AwsUtil::FileUtils::ExtractParentDirectory(logFile);
     if (stat(logFileDir.c_str(), &info) != 0)
     {
         cout << LOGGER_TAG << ": Cannot access " << logFileDir << "to write logs, attempting to create log directory"
              << endl;
-        FileUtils::Mkdirs(logFileDir);
+        AwsUtil::FileUtils::Mkdirs(logFileDir);
         if (stat(logFileDir.c_str(), &info) != 0)
         {
             cout << LOGGER_TAG << ": Failed to create log directories necessary for file-based logging" << endl;
@@ -53,13 +58,13 @@ bool FileLogger::start(const PlainConfig &config)
     }
 
     // Now we need to establish/verify permissions for the log directory and file
-    if (Permissions::LOG_DIR != FileUtils::GetFilePermissions(logFileDir))
+    if (Permissions::LOG_DIR !=  AwsUtil::FileUtils::GetFilePermissions(logFileDir))
     {
         chmod(logFileDir.c_str(), S_IRWXU | S_IRGRP | S_IROTH | S_IXOTH);
-        if (Permissions::LOG_DIR != FileUtils::GetFilePermissions(logFileDir))
+        if (Permissions::LOG_DIR !=  AwsUtil::FileUtils::GetFilePermissions(logFileDir))
         {
             cout << LOGGER_TAG
-                 << FormatMessage(
+                 << AwsUtil::FormatMessage(
                         "Failed to set appropriate permissions for log file directory %s, permissions should be set to "
                         "%d",
                         logFileDir.c_str(),
@@ -70,13 +75,13 @@ bool FileLogger::start(const PlainConfig &config)
     outputStream = unique_ptr<ofstream>(new ofstream(logFile, std::fstream::app));
     if (!outputStream->fail())
     {
-        if (Permissions::LOG_FILE != FileUtils::GetFilePermissions(logFile))
+        if (Permissions::LOG_FILE !=  AwsUtil::FileUtils::GetFilePermissions(logFile))
         {
             chmod(logFile.c_str(), S_IRUSR | S_IWUSR);
-            if (Permissions::LOG_FILE != FileUtils::GetFilePermissions(logFile))
+            if (Permissions::LOG_FILE !=  AwsUtil::FileUtils::GetFilePermissions(logFile))
             {
                 cout << LOGGER_TAG
-                     << FormatMessage(
+                     << AwsUtil::FormatMessage(
                             "Failed to set appropriate permissions for log file %s, permissions should be set to %d",
                             logFile.c_str(),
                             Permissions::LOG_FILE);
@@ -88,7 +93,7 @@ bool FileLogger::start(const PlainConfig &config)
         return true;
     }
 
-    cout << LOGGER_TAG << FormatMessage(": Failed to open %s for logging", logFile.c_str()) << endl;
+    cout << LOGGER_TAG << AwsUtil::FormatMessage(": Failed to open %s for logging", logFile.c_str()) << endl;
     return false;
 }
 
