@@ -150,3 +150,25 @@ if (VALGRIND_PATH)
         COMMAND ${VALGRIND_PATH} --leak-check=yes --error-exitcode=1 ./${GTEST_PROJECT}
         DEPENDS ${GTEST_PROJECT})
 endif()
+
+# Copy OpenSSL DLLs on Windows
+# Set the output directory for the executable
+# Use generator expressions to handle Debug/Release subfolders
+if (WIN32)
+    if (NOT OUTPUT_DIRECTORY)
+        # building independently
+        set(OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+    else()
+        # OUTPUT_DIRECTORy is already set: building from the main project
+        set(OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/../test/${CMAKE_BUILD_TYPE})
+    endif()
+    # Define a post-build step to copy multiple DLLs
+    add_custom_command(TARGET ${GTEST_PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${OPENSSL_INCLUDE_DIR}/../bin/libcrypto-3-x64.dll"
+        "${OUTPUT_DIRECTORY}/libcrypto-3-x64.dll"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${OPENSSL_INCLUDE_DIR}/../bin/libssl-3-x64.dll"
+        "${OUTPUT_DIRECTORY}/libssl-3-x64.dll"
+    )
+endif()

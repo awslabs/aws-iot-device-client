@@ -263,6 +263,22 @@ if (LINK_DL)
     target_link_libraries(${DC_PROJECT_NAME} dl)
 endif ()
 
+# Copy OpenSSL DLLs on Windows
+# Set the output directory for the executable
+# Use generator expressions to handle Debug/Release subfolders
+if (WIN32)
+    set(OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+    # Define a post-build step to copy multiple DLLs
+    add_custom_command(TARGET ${DC_PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${OPENSSL_INCLUDE_DIR}/../bin/libcrypto-3-x64.dll"
+        "${OUTPUT_DIRECTORY}/libcrypto-3-x64.dll"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${OPENSSL_INCLUDE_DIR}/../bin/libssl-3-x64.dll"
+        "${OUTPUT_DIRECTORY}/libssl-3-x64.dll"
+    )
+endif()
+
 if (BUILD_TEST_DEPS)
     # Download and unpack googletest at configure time
     configure_file(CMakeLists.txt.gtest
