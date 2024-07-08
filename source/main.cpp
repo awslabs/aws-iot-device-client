@@ -414,16 +414,8 @@ int main(int argc, char *argv[])
     attemptConnection();
 #endif
 
-#if defined(EXCLUDE_SECURE_ELEMENT) && !defined(DISABLE_MQTT)
-    if (config.config.secureElement.enabled)
-    {
-        LOGM_ERROR(
-            TAG,
-            "*** %s: Secure Element configuration is enabled but feature is not compiled into binary.",
-            DC_FATAL_ERROR);
-        deviceClientAbort("Invalid configuration", EXIT_FAILURE);
-    }
-    else
+#if !defined(EXCLUDE_SECURE_ELEMENT) && !defined(DISABLE_MQTT)
+    if (!config.config.secureElement.enabled)
     {
         LOG_INFO(TAG, "Provisioning with Secure Elements is disabled");
     }
