@@ -12,6 +12,7 @@ using namespace Aws::Iot::DeviceClient::FleetProvisioningNS;
 TEST(FleetProvisioning, EmptyTemplateParameters)
 {
     Aws::Iot::DeviceClient::SharedCrtResourceManager resourceManager;
+    resourceManager.initializeAllocator();
     Aws::Crt::Optional<std::string> params; // start with empty value
     FleetProvisioning fp;
     ASSERT_TRUE(fp.MapParameters(params));

@@ -5,6 +5,10 @@
 #include <aws/crt/Types.h>
 #include <string>
 
+#ifdef _WIN32
+#undef FormatMessage
+#endif
+
 using namespace Aws::Crt;
 
 namespace Aws

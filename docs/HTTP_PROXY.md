@@ -21,7 +21,7 @@ The AWS IoT Device Client initiates the MQTT connection based on the implementat
 ### Configuring HTTP Proxy via the JSON configuration file
 An HTTP Proxy configuration file is a JSON document that uses parameters to describe the proxy options used to interact with AWS IoT.
 
-The default HTTP proxy config file should be placed on your device at `~/.aws-iot-device-client/http-proxy.conf`. AWS IoT Device Client would establish MQTT connect with HTTP proxy **only if the `http-proxy-enabled` flag in the configuration is set to `true`**.
+The default HTTP proxy config file should be placed on your device at `~/.aws-iot-device-client/http-proxy.conf` in Linux and `%USERPROFILE%\.aws-iot-device-client/http-proxy.conf` in Windows. AWS IoT Device Client would establish MQTT connect with HTTP proxy **only if the `http-proxy-enabled` flag in the configuration is set to `true`**.
 #### Sample HTTP proxy configuration
 ```
 {
@@ -65,11 +65,18 @@ For more information regarding permission recommandations, check out the [permis
 
 ### Overriding the default configuration file from command line interface
 
-User can switch between different HTTP proxy config files without modifying the default config. To override the default HTTP proxy config under the file path `~/.aws-iot-device-client/http-proxy.conf`, start the AWS IoT Device Client with the `--http-proxy-config` parameter and the file path of the overriding HTTP proxy config file.
+User can switch between different HTTP proxy config files without modifying the default config. To override the default HTTP proxy config under the file path `~/.aws-iot-device-client/http-proxy.conf` in Linux or `%USERPROFILE%\.aws-iot-device-client/aws-iot-device-client.conf` in Windows, start the AWS IoT Device Client with the `--http-proxy-config` parameter and the file path of the overriding HTTP proxy config file.
 
+#### Linux
 ```
 $ ./aws-iot-device-client --http-proxy-config ~/.aws-iot-device-client/MyProxyConfig1.conf
 ```
+
+#### Windows
+```
+$ .\aws-iot-device-client --http-proxy-config '%USERPROFILE%\.aws-iot-device-client\MyProxyConfig1.conf'
+```
+
 *Note:* User still need to follow the example format of the HTTP proxy configuration file. HTTP proxy will be enabled only if the `http-proxy-enabled` is set to `true`.
 
 *Note:* File and parent folder permissions will also be enforced on the overriding configuration file.

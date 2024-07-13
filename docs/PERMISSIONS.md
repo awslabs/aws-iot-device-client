@@ -10,7 +10,8 @@
 ## File and Directory Permissions
 The AWS IoT Device Client requires specific permissions on files and directory storing these files. Please make sure these permissions are applied on files and directories which are created manually by user before starting the Device Client.
 
-*Note: The numbers mentioned bellow are Chmod Permissions for File or Directory*
+
+*Note: The numbers mentioned bellow are Chmod Permissions for File or Directory. In Windows refer to [Linux Chmod to Windows Permissions Mapping](#linux-chmod-to-windows-permissions-mapping).*
 
 #### Recommended and Required permissions on files
 File          | Chmod Permissions | Required |
@@ -41,6 +42,27 @@ Directory Storing Sensor Publish Pathname Socket | 700               | **Yes**
 Directory Storing PKCS11 Library File  | 700               | **Yes**
 
 *Note: It is worth noting here that files are directories storing these files created by AWS IoT Device Client will have the above mentioned permissions set by default*
+
+### Linux Chmod to Windows Permissions Mapping
+For simplicity and corss-compatibility Linux Chmod permissions were mapped to Windows File SEcurity Permissions. The following tables provide the mapping:
+
+#### Classes of Users
+Linux       | Windows   |
+--------    |--------   |
+user / owner     | User under which AWS IoT Device Client is running
+group       | Local Users group
+others      | Local Everyone group
+
+#### Access Modes
+Linux       | Windows   |
+--------    |--------   |
+r / read     | Read
+w / write    | Write
+x / execute     | Read & Execute
+
+
+*Note: AWS IoT Device CLient will remove permission inheritance from its files and folders and will always add Full Access for the local Administrators group.*
+
 
 **Next**: [Environment Variables](ENV.md)
 

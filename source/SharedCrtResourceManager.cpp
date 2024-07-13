@@ -339,7 +339,7 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
     if (proxyConfig.httpProxyEnabled)
     {
         proxyOptions.HostName = proxyConfig.proxyHost->c_str();
-        proxyOptions.Port = proxyConfig.proxyPort.value();
+        proxyOptions.Port = (uint16_t) proxyConfig.proxyPort.value();
         proxyOptions.ProxyConnectionType = Aws::Crt::Http::AwsHttpProxyConnectionType::Tunneling;
 
         LOGM_INFO(
