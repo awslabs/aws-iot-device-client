@@ -273,7 +273,7 @@ int JobEngine::exec_cmd(std::unique_ptr<const char *[]> &argv)
 
     int execResult;
     int returnCode;
-    int pid = vfork();
+    int pid = fork();
     if (pid < 0)
     {
         LOGM_ERROR(TAG, "Failed to create child process, fork returned %d", pid);
