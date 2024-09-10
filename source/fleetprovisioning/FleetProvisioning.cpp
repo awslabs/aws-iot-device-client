@@ -48,6 +48,50 @@ constexpr int FleetProvisioning::DEFAULT_WAIT_TIME_SECONDS;
 
 FleetProvisioning::FleetProvisioning() : collectSystemInformation(false) {}
 
+bool FleetProvisioning::WriteCertToDirectory(CreateKeysAndCertificateResponse *response, string fileName){
+    Aws::Crt::String certificateID = response->CertificateId->c_str();
+
+    ostringstream certPathStream, keyPathStream;
+    certPathStream << keyDir << fileName << "-certificate.pem.crt";
+    keyPathStream << keyDir << fileName << "-private.pem.key";
+
+    certPath = FileUtils::ExtractExpandedPath(certPathStream.str().c_str()).c_str();
+    keyPath = FileUtils::ExtractExpandedPath(keyPathStream.str().c_str()).c_str();
+
+    if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()) &&
+        FileUtils::StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str()))
+    {
+        LOGM_INFO(
+            TAG, "Stored certificate and private key in %s and %s files", certPath.c_str(), keyPath.c_str());
+
+        LOG_INFO(TAG, "Attempting to set permissions for certificate and private key...");
+        chmod(certPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+        chmod(keyPath.c_str(), S_IRUSR | S_IWUSR);
+
+        if (FileUtils::ValidateFilePermissions(certPath.c_str(), Permissions::PUBLIC_CERT) &&
+            FileUtils::ValidateFilePermissions(keyPath.c_str(), Permissions::PRIVATE_KEY))
+        {
+            LOG_INFO(TAG, "Successfully set permissions on provisioned public certificate and private key");
+            keysCreationCompletedPromise.set_value(true);
+        }
+        else
+        {
+            keysCreationCompletedPromise.set_value(false);
+        }
+        return true;
+    }
+    else
+    {
+        LOGM_ERROR(
+            TAG,
+            "Failed to store public certificate and private key in files %s and %s",
+            certPath.c_str(),
+            keyPath.c_str());
+        keysCreationCompletedPromise.set_value(false);
+        return false;
+    }
+}
+
 bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient identityClient)
 {
     LOG_INFO(TAG, "Provisioning new device certificate and private key using CreateKeysAndCertificate API");
@@ -93,44 +137,8 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
             LOGM_INFO(TAG, "CreateKeysAndCertificateResponse certificateId: %s.", response->CertificateId->c_str());
             certificateOwnershipToken = *response->CertificateOwnershipToken;
             Aws::Crt::String certificateID = response->CertificateId->c_str();
-
-            ostringstream certPathStream, keyPathStream;
-            certPathStream << keyDir << certificateID << "-certificate.pem.crt";
-            keyPathStream << keyDir << certificateID << "-private.pem.key";
-
-            certPath = FileUtils::ExtractExpandedPath(certPathStream.str().c_str()).c_str();
-            keyPath = FileUtils::ExtractExpandedPath(keyPathStream.str().c_str()).c_str();
-
-            if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()) &&
-                FileUtils::StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str()))
-            {
-                LOGM_INFO(
-                    TAG, "Stored certificate and private key in %s and %s files", certPath.c_str(), keyPath.c_str());
-
-                LOG_INFO(TAG, "Attempting to set permissions for certificate and private key...");
-                chmod(certPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-                chmod(keyPath.c_str(), S_IRUSR | S_IWUSR);
-
-                if (FileUtils::ValidateFilePermissions(certPath.c_str(), Permissions::PUBLIC_CERT) &&
-                    FileUtils::ValidateFilePermissions(keyPath.c_str(), Permissions::PRIVATE_KEY))
-                {
-                    LOG_INFO(TAG, "Successfully set permissions on provisioned public certificate and private key");
-                    keysCreationCompletedPromise.set_value(true);
-                }
-                else
-                {
-                    keysCreationCompletedPromise.set_value(false);
-                }
-            }
-            else
-            {
-                LOGM_ERROR(
-                    TAG,
-                    "Failed to store public certificate and private key in files %s and %s",
-                    certPath.c_str(),
-                    keyPath.c_str());
-                keysCreationCompletedPromise.set_value(false);
-            }
+            WriteCertToDirectory(response, certificateID.c_str());
+            WriteCertToDirectory(response, "active");
         }
         else
         {
