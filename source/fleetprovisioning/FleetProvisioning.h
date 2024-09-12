@@ -172,7 +172,15 @@ namespace Aws
                      * @param response from IotIdentity CreateKeysAndCertificate call
                      * @return returns true if successfully written to directory
                      */
-                    bool WriteCertToDirectory(Iotidentity::CreateKeysAndCertificateResponse *response, std::string fileName);
+                    bool WriteKeyAndCertToDirectory(Iotidentity::CreateKeysAndCertificateResponse *response, std::string fileName);
+
+                    /**
+                     * \brief writes contents of the cert from CSR to the device client config directory.
+                     *
+                     * @param response from IotIdentity CreateCertificateFromCsrResponse call
+                     * @return returns true if successfully written to directory
+                     */
+                    bool WriteCSRCertToDirectory(Iotidentity::CreateCertificateFromCsrResponse *response, std::string fileName);
 
                     /**
                      * \brief creates a new certificate and private key using the AWS certificate authority
