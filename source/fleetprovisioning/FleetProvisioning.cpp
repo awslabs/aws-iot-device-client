@@ -48,6 +48,76 @@ constexpr int FleetProvisioning::DEFAULT_WAIT_TIME_SECONDS;
 
 FleetProvisioning::FleetProvisioning() : collectSystemInformation(false) {}
 
+bool FleetProvisioning::WriteKeyAndCertToDirectory(CreateKeysAndCertificateResponse *response, string fileName)
+{
+    ostringstream certPathStream, keyPathStream;
+    certPathStream << keyDir << fileName << "-certificate.pem.crt";
+    keyPathStream << keyDir << fileName << "-private.pem.key";
+
+    certPath = FileUtils::ExtractExpandedPath(certPathStream.str().c_str()).c_str();
+    keyPath = FileUtils::ExtractExpandedPath(keyPathStream.str().c_str()).c_str();
+
+    if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()) &&
+        FileUtils::StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str()))
+    {
+        LOGM_INFO(
+            TAG, "Stored certificate and private key in %s and %s files", certPath.c_str(), keyPath.c_str());
+
+        LOG_INFO(TAG, "Attempting to set permissions for certificate and private key...");
+        chmod(certPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+        chmod(keyPath.c_str(), S_IRUSR | S_IWUSR);
+
+        if (FileUtils::ValidateFilePermissions(certPath.c_str(), Permissions::PUBLIC_CERT) &&
+            FileUtils::ValidateFilePermissions(keyPath.c_str(), Permissions::PRIVATE_KEY))
+        {
+            LOG_INFO(TAG, "Successfully set permissions on provisioned public certificate and private key");
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        LOGM_ERROR(
+            TAG,
+            "Failed to store public certificate and private key in files %s and %s",
+            certPath.c_str(),
+            keyPath.c_str());
+        return false;
+    }
+}
+
+bool FleetProvisioning::WriteCSRCertToDirectory(CreateCertificateFromCsrResponse *response, string fileName)
+{
+    ostringstream certPathStream;
+    certPathStream << keyDir << fileName << "-certificate.pem.crt";
+    certPath = FileUtils::ExtractExpandedPath(certPathStream.str().c_str()).c_str();
+
+    if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()))
+    {
+        LOGM_INFO(TAG, "Stored certificate in %s file", certPath.c_str());
+
+        LOG_INFO(TAG, "Attempting to set permissions for certificate...");
+        chmod(certPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+        if (FileUtils::ValidateFilePermissions(certPath.c_str(), Permissions::PUBLIC_CERT))
+        {
+            LOG_INFO(TAG, "Successfully set permissions on provisioned public certificate");
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        LOGM_ERROR(TAG, "Failed to store public certificate in file %s", certPath.c_str());
+        return false;
+    }
+}
+
 bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient identityClient)
 {
     LOG_INFO(TAG, "Provisioning new device certificate and private key using CreateKeysAndCertificate API");
@@ -93,44 +163,8 @@ bool FleetProvisioning::CreateCertificateAndKey(Iotidentity::IotIdentityClient i
             LOGM_INFO(TAG, "CreateKeysAndCertificateResponse certificateId: %s.", response->CertificateId->c_str());
             certificateOwnershipToken = *response->CertificateOwnershipToken;
             Aws::Crt::String certificateID = response->CertificateId->c_str();
-
-            ostringstream certPathStream, keyPathStream;
-            certPathStream << keyDir << certificateID << "-certificate.pem.crt";
-            keyPathStream << keyDir << certificateID << "-private.pem.key";
-
-            certPath = FileUtils::ExtractExpandedPath(certPathStream.str().c_str()).c_str();
-            keyPath = FileUtils::ExtractExpandedPath(keyPathStream.str().c_str()).c_str();
-
-            if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()) &&
-                FileUtils::StoreValueInFile(response->PrivateKey->c_str(), keyPath.c_str()))
-            {
-                LOGM_INFO(
-                    TAG, "Stored certificate and private key in %s and %s files", certPath.c_str(), keyPath.c_str());
-
-                LOG_INFO(TAG, "Attempting to set permissions for certificate and private key...");
-                chmod(certPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-                chmod(keyPath.c_str(), S_IRUSR | S_IWUSR);
-
-                if (FileUtils::ValidateFilePermissions(certPath.c_str(), Permissions::PUBLIC_CERT) &&
-                    FileUtils::ValidateFilePermissions(keyPath.c_str(), Permissions::PRIVATE_KEY))
-                {
-                    LOG_INFO(TAG, "Successfully set permissions on provisioned public certificate and private key");
-                    keysCreationCompletedPromise.set_value(true);
-                }
-                else
-                {
-                    keysCreationCompletedPromise.set_value(false);
-                }
-            }
-            else
-            {
-                LOGM_ERROR(
-                    TAG,
-                    "Failed to store public certificate and private key in files %s and %s",
-                    certPath.c_str(),
-                    keyPath.c_str());
-                keysCreationCompletedPromise.set_value(false);
-            }
+            bool writeSucceeded = WriteKeyAndCertToDirectory(response, certificateID.c_str()) && WriteKeyAndCertToDirectory(response, "active");
+            keysCreationCompletedPromise.set_value(writeSucceeded);
         }
         else
         {
@@ -260,32 +294,8 @@ bool FleetProvisioning::CreateCertificateUsingCSR(Iotidentity::IotIdentityClient
             LOGM_INFO(TAG, "CreateCertificateFromCsrResponse certificateId: %s. ***", response->CertificateId->c_str());
             certificateOwnershipToken = *response->CertificateOwnershipToken;
             Aws::Crt::String certificateID = response->CertificateId->c_str();
-
-            ostringstream certPathStream;
-            certPathStream << keyDir << certificateID << "-certificate.pem.crt";
-            certPath = FileUtils::ExtractExpandedPath(certPathStream.str().c_str()).c_str();
-
-            if (FileUtils::StoreValueInFile(response->CertificatePem->c_str(), certPath.c_str()))
-            {
-                LOGM_INFO(TAG, "Stored certificate in %s file", certPath.c_str());
-
-                LOG_INFO(TAG, "Attempting to set permissions for certificate...");
-                chmod(certPath.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-                if (FileUtils::ValidateFilePermissions(certPath.c_str(), Permissions::PUBLIC_CERT))
-                {
-                    LOG_INFO(TAG, "Successfully set permissions on provisioned public certificate");
-                    csrCreationCompletedPromise.set_value(true);
-                }
-                else
-                {
-                    csrCreationCompletedPromise.set_value(false);
-                }
-            }
-            else
-            {
-                LOGM_ERROR(TAG, "Failed to store public certificate in file %s", certPath.c_str());
-                csrCreationCompletedPromise.set_value(false);
-            }
+            bool writeSucceeded = WriteCSRCertToDirectory(response, certificateID.c_str()) && WriteCSRCertToDirectory(response, "active");
+            csrCreationCompletedPromise.set_value(writeSucceeded);
         }
         else
         {
@@ -519,8 +529,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
         LOG_INFO(TAG, "Fleet Provisioning Feature has been started.");
         collectSystemInformation = config.fleetProvisioning.collectSystemInformation;
 
-        bool didSetup = FileUtils::CreateDirectoryWithPermissions(keyDir.c_str(), S_IRWXU) &&
-                        FileUtils::CreateDirectoryWithPermissions(
+        bool didSetup =  FileUtils::CreateDirectoryWithPermissions(keyDir.c_str(), S_IRWXU) && FileUtils::CreateDirectoryWithPermissions(
                             Config::DEFAULT_CONFIG_DIR, S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH | S_IXOTH);
         if (!didSetup)
         {
