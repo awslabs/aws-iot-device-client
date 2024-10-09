@@ -235,6 +235,7 @@ namespace Aws
                     static constexpr char CLI_FLEET_PROVISIONING_CSR_FILE[] = "--csr-file";
                     static constexpr char CLI_FLEET_PROVISIONING_DEVICE_KEY[] = "--device-key";
                     static constexpr char CLI_FLEET_PROVISIONING_PUBLISH_SYS_INFO[] = "--collect-system-information";
+                    static constexpr char CLI_FLEET_PROVISIONING_NETWORK_INTERFACE[] = "--network-interface";
 
                     static constexpr char JSON_KEY_ENABLED[] = "enabled";
                     static constexpr char JSON_KEY_TEMPLATE_NAME[] = "template-name";
@@ -242,6 +243,7 @@ namespace Aws
                     static constexpr char JSON_KEY_CSR_FILE[] = "csr-file";
                     static constexpr char JSON_KEY_DEVICE_KEY[] = "device-key";
                     static constexpr char JSON_KEY_PUBLISH_SYS_INFO[] = "collect-system-information";
+                    static constexpr char JSON_KEY_NETWORK_INTERFACE[] = "network-interface";
 
                     bool enabled{false};
                     Aws::Crt::Optional<std::string> templateName;
@@ -249,6 +251,7 @@ namespace Aws
                     Aws::Crt::Optional<std::string> csrFile;
                     Aws::Crt::Optional<std::string> deviceKey;
                     bool collectSystemInformation{false};
+                    Aws::Crt::Optional<std::string> networkInterface;
                 };
                 FleetProvisioning fleetProvisioning;
 
