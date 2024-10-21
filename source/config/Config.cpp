@@ -1773,12 +1773,13 @@ bool PlainConfig::SampleShadow::LoadFromCliArgs(const CliArgs &cliArgs)
                 .c_str();
     }
 
-    // setting `shadowOutputFile` value to default if no value was passed by user via CLI or JSON config.
-    if ((!shadowOutputFile.has_value() || shadowOutputFile->empty()) && !createShadowOutputFile())
+    // setting `shadowOutputFile` value to default if no value was passed by user via CLI or JSON config, provided sample shadow feature is enabled.
+    if (enabled && ((!shadowOutputFile.has_value() || shadowOutputFile->empty()) && !createShadowOutputFile()))
     {
         return false;
     }
 
+    LOGM_INFO(Config::TAG, "Not creating directory %s since sample shadow is disabled", Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR);
     return true;
 }
 
