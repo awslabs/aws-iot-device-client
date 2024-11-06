@@ -18,7 +18,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
@@ -58,7 +58,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
@@ -98,7 +98,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
@@ -141,7 +141,7 @@ jobs:
         version: [ 5, 6, 7, 8, 11 ]
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
@@ -168,7 +168,7 @@ jobs:
         version: [ 5.0, 6.0, 7, 8, 9, 11 ]
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
@@ -192,7 +192,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
@@ -232,7 +232,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
@@ -272,7 +272,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
@@ -312,7 +312,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
@@ -352,7 +352,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
@@ -392,7 +392,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
@@ -424,7 +424,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
@@ -456,7 +456,7 @@ jobs:
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
