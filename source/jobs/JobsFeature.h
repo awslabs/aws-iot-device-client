@@ -15,6 +15,7 @@
 #include "IotJobsClientWrapper.h"
 #include "JobDocument.h"
 #include "JobEngine.h"
+#include <regex>
 
 namespace Aws
 {
@@ -77,6 +78,9 @@ namespace Aws
                     virtual int stop() override;
 
                   protected:
+
+                    bool compareJobDocuments(const Aws::Crt::JsonObject& job1, const Aws::Crt::JsonObject& job2);
+
                     /**
                      * \brief Begins running the Jobs feature
                      */
@@ -312,6 +316,17 @@ namespace Aws
                      * @return true if it's a duplicate, false otherwise
                      */
                     bool isDuplicateNotification(Iotjobs::JobExecutionData job);
+
+                    /**
+                     * \brief Compares two job documents, ignoring differences in pre-signed URLs.
+                     *
+                     * @param job1 The first job document as a JsonObject
+                     * @param job2 The second job document as a JsonObject
+                     * @return true if the documents are equivalent (ignoring pre-signed URLs), false otherwise
+                     */
+                        
+                    // Add this line to declare the test class as a friend
+                    friend class TestJobsFeaturePrivate;
 
                     /**
                      * \brief Stores information about a job notification

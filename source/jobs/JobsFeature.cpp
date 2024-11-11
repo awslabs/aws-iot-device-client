@@ -527,9 +527,87 @@ void JobsFeature::copyJobsNotification(Iotjobs::JobExecutionData job)
     latestJobsNotification.ExecutionNumber = job.ExecutionNumber.value();
 }
 
+
+bool JobsFeature::compareJobDocuments(const Aws::Crt::JsonObject& job1, const Aws::Crt::JsonObject& job2) {
+    std::string str1 = job1.View().WriteCompact().c_str();
+    std::string str2 = job2.View().WriteCompact().c_str();
+
+    // Regular expression to match S3 URLs and capture the non-presigned parts
+    std::regex s3UrlRegex(R"((https://[^.\s"]+\.s3[.-](?:[^.\s"]+\.)?amazonaws\.com/[^?\s"]+)(\?[^"\s]+)?)");
+
+    // Function to replace only the pre-signed portion of S3 URLs
+    auto processPresignedUrls = [&s3UrlRegex](std::string& s) -> int {
+        int count = 0;
+        std::string result;
+        std::sregex_iterator it(s.begin(), s.end(), s3UrlRegex);
+        std::sregex_iterator end;
+
+        size_t lastPos = 0;
+        for (; it != end; ++it) {
+            count++;
+            result += s.substr(lastPos, it->position() - lastPos);
+            result += it->str(1);
+            // Add the non-presigned part of the URL
+            result += "?aws:iot:s3-presigned-suffix:PLACEHOLDER"; 
+            // Replace only the presigned portion
+            lastPos = it->position() + it->length();
+        }
+        result += s.substr(lastPos);
+
+        s = result;
+        return count;
+    };
+
+    int count1 = processPresignedUrls(str1);
+    int count2 = processPresignedUrls(str2);
+
+    // If the number of pre-signed URLs differs, the documents are different
+    if (count1 != count2) {
+        return false;
+    }
+
+    std::cout << "Processed str1: " << str1 << std::endl;
+    std::cout << "Processed str2: " << str2 << std::endl;
+
+    return str1 == str2;
+}
 bool JobsFeature::isDuplicateNotification(JobExecutionData job)
 {
     unique_lock<mutex> readLatestNotificationLock(latestJobsNotificationLock);
+    
+    // Basic logging at the start of the function
+    std::cout << "DEBUG: Entering isDuplicateNotification function" << std::endl;
+
+
+
+    // Log Job IDs being compared
+    std::cout << "INFO: Comparing Job IDs - New: " << (job.JobId.has_value() ? job.JobId.value().c_str() : "NULL")
+              << ", Latest: " << (latestJobsNotification.JobId.has_value() ? latestJobsNotification.JobId.value().c_str() : "NULL") << std::endl;
+
+
+
+
+
+    // Log Job Documents being compared
+    std::cout << "INFO: Comparing Job Documents - New: " 
+              << (job.JobDocument.has_value() ? job.JobDocument.value().View().WriteCompact().c_str() : "NULL")
+              << ", Latest: " 
+              << (latestJobsNotification.JobDocument.has_value() ? latestJobsNotification.JobDocument.value().View().WriteCompact().c_str() : "NULL") 
+              << std::endl;
+
+
+
+
+
+        // Log Execution Numbers being compared
+    std::cout << "INFO: Comparing Execution Numbers - New: " 
+              << (job.ExecutionNumber.has_value() ? std::to_string(job.ExecutionNumber.value()) : "NULL")
+              << ", Latest: " 
+              << (latestJobsNotification.ExecutionNumber.has_value() ? std::to_string(latestJobsNotification.ExecutionNumber.value()) : "NULL") 
+              << std::endl;
+
+
+
     if (!latestJobsNotification.JobId.has_value())
     {
         // We have not seen a job yet
@@ -543,13 +621,18 @@ bool JobsFeature::isDuplicateNotification(JobExecutionData job)
         return false;
     }
 
-    if (strcmp(
-            job.JobDocument.value().View().WriteCompact().c_str(),
-            latestJobsNotification.JobDocument.value().View().WriteCompact().c_str()) != 0)
-    {
+    if (!compareJobDocuments(
+            job.JobDocument.value(),
+            latestJobsNotification.JobDocument.value())) {
         LOG_DEBUG(TAG, "Job document differs");
         return false;
     }
+
+        std::cout << "INFO: Comparing Job Documents after replacement - New: " 
+              << (job.JobDocument.has_value() ? job.JobDocument.value().View().WriteCompact().c_str() : "NULL")
+              << ", Latest: " 
+              << (latestJobsNotification.JobDocument.has_value() ? latestJobsNotification.JobDocument.value().View().WriteCompact().c_str() : "NULL") 
+              << std::endl;
 
     if (job.ExecutionNumber.value() != latestJobsNotification.ExecutionNumber.value())
     {
