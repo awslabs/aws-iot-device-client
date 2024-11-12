@@ -78,9 +78,6 @@ namespace Aws
                     virtual int stop() override;
 
                   protected:
-
-                    bool compareJobDocuments(const Aws::Crt::JsonObject& job1, const Aws::Crt::JsonObject& job2);
-
                     /**
                      * \brief Begins running the Jobs feature
                      */
@@ -324,9 +321,9 @@ namespace Aws
                      * @param job2 The second job document as a JsonObject
                      * @return true if the documents are equivalent (ignoring pre-signed URLs), false otherwise
                      */
-                        
-                    // Add this line to declare the test class as a friend
-                    friend class TestJobsFeaturePrivate;
+
+                    bool compareJobDocuments(const Aws::Crt::JsonObject& job1, const Aws::Crt::JsonObject& job2);
+
 
                     /**
                      * \brief Stores information about a job notification

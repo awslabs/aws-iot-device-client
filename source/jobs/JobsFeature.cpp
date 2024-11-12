@@ -565,48 +565,11 @@ bool JobsFeature::compareJobDocuments(const Aws::Crt::JsonObject& job1, const Aw
     if (count1 != count2) {
         return false;
     }
-
-    std::cout << "Processed str1: " << str1 << std::endl;
-    std::cout << "Processed str2: " << str2 << std::endl;
-
     return str1 == str2;
 }
 bool JobsFeature::isDuplicateNotification(JobExecutionData job)
 {
     unique_lock<mutex> readLatestNotificationLock(latestJobsNotificationLock);
-    
-    // Basic logging at the start of the function
-    std::cout << "DEBUG: Entering isDuplicateNotification function" << std::endl;
-
-
-
-    // Log Job IDs being compared
-    std::cout << "INFO: Comparing Job IDs - New: " << (job.JobId.has_value() ? job.JobId.value().c_str() : "NULL")
-              << ", Latest: " << (latestJobsNotification.JobId.has_value() ? latestJobsNotification.JobId.value().c_str() : "NULL") << std::endl;
-
-
-
-
-
-    // Log Job Documents being compared
-    std::cout << "INFO: Comparing Job Documents - New: " 
-              << (job.JobDocument.has_value() ? job.JobDocument.value().View().WriteCompact().c_str() : "NULL")
-              << ", Latest: " 
-              << (latestJobsNotification.JobDocument.has_value() ? latestJobsNotification.JobDocument.value().View().WriteCompact().c_str() : "NULL") 
-              << std::endl;
-
-
-
-
-
-        // Log Execution Numbers being compared
-    std::cout << "INFO: Comparing Execution Numbers - New: " 
-              << (job.ExecutionNumber.has_value() ? std::to_string(job.ExecutionNumber.value()) : "NULL")
-              << ", Latest: " 
-              << (latestJobsNotification.ExecutionNumber.has_value() ? std::to_string(latestJobsNotification.ExecutionNumber.value()) : "NULL") 
-              << std::endl;
-
-
 
     if (!latestJobsNotification.JobId.has_value())
     {
@@ -627,12 +590,6 @@ bool JobsFeature::isDuplicateNotification(JobExecutionData job)
         LOG_DEBUG(TAG, "Job document differs");
         return false;
     }
-
-        std::cout << "INFO: Comparing Job Documents after replacement - New: " 
-              << (job.JobDocument.has_value() ? job.JobDocument.value().View().WriteCompact().c_str() : "NULL")
-              << ", Latest: " 
-              << (latestJobsNotification.JobDocument.has_value() ? latestJobsNotification.JobDocument.value().View().WriteCompact().c_str() : "NULL") 
-              << std::endl;
 
     if (job.ExecutionNumber.value() != latestJobsNotification.ExecutionNumber.value())
     {

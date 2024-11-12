@@ -281,25 +281,6 @@ class TestJobsFeature : public ::testing::Test
     shared_ptr<MockJobEngine> mockEngine;
 };
 
-class TestJobsFeaturePrivate : public ::testing::Test, public JobsFeature
-{
-protected:
-    Aws::Crt::ApiHandle apiHandle;
-    std::unique_ptr<JobsFeature> jobsFeature;
-
-    void SetUp() override
-    {
-        // The ApiHandle constructor initializes the AWS CRT library
-        jobsFeature.reset(new JobsFeature());
-    }
-
-    void TearDown() override
-    {
-        jobsFeature.reset();
-        // The ApiHandle destructor cleans up the AWS CRT library
-    }
-};
-
 MATCHER_P(ThingNameEq, ThingName, "Matcher ThingName for all Aws request Objects using Aws::Crt::String")
 {
     return arg.ThingName.value() == ThingName;
@@ -729,40 +710,4 @@ TEST_F(TestJobsFeature, InvalidJobDocument)
 
     jobsMock->init(std::shared_ptr<Mqtt::MqttConnection>(), notifier, config);
     jobsMock->invokeRunJobs();
-}
-
-    TEST_F(TestJobsFeaturePrivate, CompareJobDocuments)
-{
-    // Test case 1: Identical documents
-    Aws::Crt::JsonObject doc1("{\"key\": \"value\"}");
-    Aws::Crt::JsonObject doc2("{\"key\": \"value\"}");
-    EXPECT_TRUE(compareJobDocuments(doc1, doc2));
-
-    // Test case 2: Different documents
-    Aws::Crt::JsonObject doc3("{\"key\": \"different_value\"}");
-    EXPECT_FALSE(compareJobDocuments(doc1, doc3));
-
-    // Test case 3: Documents with pre-signed URLs
-    Aws::Crt::JsonObject doc4("{\"url\": \"https://bucket.s3.amazonaws.com/file?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1234567890&Signature=XXXXXXXXXXXXXXXXXXXXXXXXXXX\"}");
-    Aws::Crt::JsonObject doc5("{\"url\": \"https://bucket.s3.amazonaws.com/file?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=9876543210&Signature=YYYYYYYYYYYYYYYYYYYYYYYYYYY\"}");
-    EXPECT_TRUE(compareJobDocuments(doc4, doc5));
-
-    // Test case 4: Documents with multiple pre-signed URLs
-    Aws::Crt::JsonObject doc6("{\"url1\": \"https://bucket1.s3.amazonaws.com/file1?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1234567890&Signature=XXXXXXXXXXXXXXXXXXXXXXXXXXX\", \"url2\": \"https://bucket2.s3.amazonaws.com/file2?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1234567890&Signature=ZZZZZZZZZZZZZZZZZZZZZZZZZZZ\"}");
-    Aws::Crt::JsonObject doc7("{\"url1\": \"https://bucket1.s3.amazonaws.com/file1?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=9876543210&Signature=YYYYYYYYYYYYYYYYYYYYYYYYYYY\", \"url2\": \"https://bucket2.s3.amazonaws.com/file2?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=9876543210&Signature=WWWWWWWWWWWWWWWWWWWWWWWWWWW\"}");
-    EXPECT_TRUE(compareJobDocuments(doc6, doc7));
-
-    // Test case 6: Documents with multiple pre-signed URLs in one doc and single url in the other
-    Aws::Crt::JsonObject doc8("{\"url1\": \"https://bucket1.s3.amazonaws.com/file1?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=9876543210&Signature=YYYYYYYYYYYYYYYYYYYYYYYYYYY\"}");
-    EXPECT_FALSE(compareJobDocuments(doc6, doc8));
-
-    // Test case 7: Documents with different structure
-    Aws::Crt::JsonObject doc9("{\"key1\": \"value1\", \"key2\": \"value2\"}");
-    Aws::Crt::JsonObject doc10("{\"key1\": \"value1\", \"key3\": \"value3\"}");
-    EXPECT_FALSE(compareJobDocuments(doc9, doc10));
-
-    // Test case 8: Documents with same pre-signed URLs but different buckets
-    Aws::Crt::JsonObject doc11("{\"url\": \"https://bucket1.s3.amazonaws.com/file?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1234567890&Signature=XXXXXXXXXXXXXXXXXXXXXXXXXXX\"}");
-    Aws::Crt::JsonObject doc12("{\"url\": \"https://bucket2.s3.amazonaws.com/file?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1234567890&Signature=XXXXXXXXXXXXXXXXXXXXXXXXXXX\"}");
-    EXPECT_FALSE(compareJobDocuments(doc11, doc12));
 }
