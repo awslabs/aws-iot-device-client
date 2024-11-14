@@ -527,9 +527,50 @@ void JobsFeature::copyJobsNotification(Iotjobs::JobExecutionData job)
     latestJobsNotification.ExecutionNumber = job.ExecutionNumber.value();
 }
 
+
+bool JobsFeature::compareJobDocuments(const Aws::Crt::JsonObject& job1, const Aws::Crt::JsonObject& job2) {
+    std::string str1 = job1.View().WriteCompact().c_str();
+    std::string str2 = job2.View().WriteCompact().c_str();
+
+    // Regular expression to match S3 URLs and capture the non-presigned parts
+    std::regex s3UrlRegex(R"((https://[^.\s"]+\.s3[.-](?:[^.\s"]+\.)?amazonaws\.com/[^?\s"]+)(\?[^"\s]+)?)");
+
+    // Function to replace only the pre-signed portion of S3 URLs
+    auto processPresignedUrls = [&s3UrlRegex](std::string& s) -> int {
+        int count = 0;
+        std::string result;
+        std::sregex_iterator it(s.begin(), s.end(), s3UrlRegex);
+        std::sregex_iterator end;
+
+        size_t lastPos = 0;
+        for (; it != end; ++it) {
+            count++;
+            result += s.substr(lastPos, it->position() - lastPos);
+            result += it->str(1);
+            // Add the non-presigned part of the URL
+            result += "?aws:iot:s3-presigned-suffix:PLACEHOLDER"; 
+            // Replace only the presigned portion
+            lastPos = it->position() + it->length();
+        }
+        result += s.substr(lastPos);
+
+        s = result;
+        return count;
+    };
+
+    int count1 = processPresignedUrls(str1);
+    int count2 = processPresignedUrls(str2);
+
+    // If the number of pre-signed URLs differs, the documents are different
+    if (count1 != count2) {
+        return false;
+    }
+    return str1 == str2;
+}
 bool JobsFeature::isDuplicateNotification(JobExecutionData job)
 {
     unique_lock<mutex> readLatestNotificationLock(latestJobsNotificationLock);
+
     if (!latestJobsNotification.JobId.has_value())
     {
         // We have not seen a job yet
@@ -543,10 +584,9 @@ bool JobsFeature::isDuplicateNotification(JobExecutionData job)
         return false;
     }
 
-    if (strcmp(
-            job.JobDocument.value().View().WriteCompact().c_str(),
-            latestJobsNotification.JobDocument.value().View().WriteCompact().c_str()) != 0)
-    {
+    if (!compareJobDocuments(
+            job.JobDocument.value(),
+            latestJobsNotification.JobDocument.value())) {
         LOG_DEBUG(TAG, "Job document differs");
         return false;
     }
