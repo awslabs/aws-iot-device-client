@@ -545,11 +545,15 @@ bool JobsFeature::compareJobDocuments(const Aws::Crt::JsonObject& job1, const Aw
         size_t lastPos = 0;
         for (; it != end; ++it) {
             count++;
+
+            // Adding the rest of the job document before the s3 URL
             result += s.substr(lastPos, it->position() - lastPos);
+
+            // Add the non-presigned part of the URL i.e. the s3 unsigned url
             result += it->str(1);
-            // Add the non-presigned part of the URL
+
+            // Replace only the presigned portion with the placeholder
             result += "?aws:iot:s3-presigned-suffix:PLACEHOLDER"; 
-            // Replace only the presigned portion
             lastPos = it->position() + it->length();
         }
         result += s.substr(lastPos);
