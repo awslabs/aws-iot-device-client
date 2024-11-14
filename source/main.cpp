@@ -528,7 +528,7 @@ int main(int argc, char *argv[])
         features->add(DeviceDefenderFeature::NAME, nullptr);
     }
 #else
-    if (config.config.sampleShadow.enabled)
+    if (config.config.deviceDefender.enabled)
     {
         LOGM_ERROR(
             TAG,
