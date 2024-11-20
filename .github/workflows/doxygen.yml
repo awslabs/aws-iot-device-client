@@ -22,8 +22,6 @@ jobs:
         # Check if the gh-pages branch exists. If not, create it.
         branch_exist=$(git ls-remote --heads origin gh-pages)
         if [ -z ${branch_exist} ]; then
-          git config --global user.name ${{ github.actor }}
-          git config --global user.email ${{ github.actor }}@users.noreply.github.com
           git checkout --orphan gh-pages
           git reset --hard
           git commit --allow-empty -m "Created gh-pages branch"
@@ -42,6 +40,8 @@ jobs:
         git add .
     - name: Commit files
       run: |
+        git config --global user.name ${{ github.actor }}
+        git config --global user.email ${{ github.actor }}@users.noreply.github.com
         git commit -m "Auto-generate Doxygen documentation via Github Actions" -a
     - name: Push changes
       run: |
