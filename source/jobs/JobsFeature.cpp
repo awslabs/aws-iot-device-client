@@ -537,8 +537,7 @@ bool JobsFeature::compareJobDocuments(const Aws::Crt::JsonObject &job1, const Aw
     std::regex s3UrlRegex(R"((https://[^.\s"]+\.s3[.-](?:[^.\s"]+\.)?amazonaws\.com/[^?\s"]+)(\?[^"\s]+)?)");
 
     // Function to replace only the pre-signed portion of S3 URLs
-    auto processPresignedUrls = [&s3UrlRegex](std::string &s) -> int
-    {
+    auto processPresignedUrls = [&s3UrlRegex](std::string &s) -> int {
         int count = 0;
         std::string result;
         std::sregex_iterator it(s.begin(), s.end(), s3UrlRegex);

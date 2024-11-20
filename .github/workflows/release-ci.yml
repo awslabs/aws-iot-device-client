@@ -6,9 +6,6 @@ name: Release CI
 on:
   push:
     branches: ['main']
-  pull_request:
-    branches: ['main']
-    types: [opened, closed]
 
 env:
   PACKAGE_NAME: aws-iot-device-client
@@ -21,7 +18,6 @@ jobs:
   # It then runs the Device Client to output the version to be used in the subsequent jobs.
   versioning:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
     outputs:
       version: ${{ steps.get-version.outputs.version }}
     steps:
@@ -55,7 +51,6 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
   build-docker-image-ubuntu-x86_64:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
     needs: [versioning]
     permissions:
       id-token: write
@@ -97,7 +92,6 @@ jobs:
           platforms: linux/amd64
   build-docker-image-ubuntu-aarch64:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
     needs: [versioning]
     permissions:
       id-token: write
@@ -139,7 +133,6 @@ jobs:
           platforms: linux/arm64
   build-docker-image-ubuntu-armv7:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
     needs: [versioning]
     permissions:
       id-token: write
@@ -181,7 +174,6 @@ jobs:
           platforms: linux/arm/v7
   build-docker-image-amazonlinux-x86_64:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
     needs: [versioning]
     permissions:
       id-token: write
@@ -223,7 +215,6 @@ jobs:
           platforms: linux/amd64
   build-docker-image-amazonlinux-aarch64:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
     needs: [versioning]
     permissions:
       id-token: write
@@ -265,7 +256,6 @@ jobs:
           platforms: linux/arm64
   build-docker-image-ubi8-x86_64:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
     needs: [versioning]
     permissions:
       id-token: write
@@ -307,7 +297,6 @@ jobs:
           platforms: linux/amd64
   build-docker-image-ubi8-aarch64:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
     needs: [versioning]
     permissions:
       id-token: write
