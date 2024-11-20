@@ -17,6 +17,7 @@ jobs:
         persist-credentials: false
         fetch-depth: 0
     - name: Switch to gh-pages branch
+      working-directory: ./doxygen_store
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
@@ -33,6 +34,7 @@ jobs:
         git fetch
         git checkout gh-pages
     - name: Create local changes
+      working-directory: ./doxygen_store
       run: |
         sudo apt-get install doxygen
         cd docs
@@ -41,6 +43,7 @@ jobs:
         rm -rf ./html
         git add .
     - name: Commit and push files
+      working-directory: ./doxygen_store
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
