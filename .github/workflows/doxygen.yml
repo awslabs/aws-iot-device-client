@@ -42,7 +42,12 @@ jobs:
       run: |
         git config --global user.name ${{ github.actor }}
         git config --global user.email ${{ github.actor }}@users.noreply.github.com
-        git commit -m "Auto-generate Doxygen documentation via Github Actions" -a
+        git add .
+        # Only commit if doxygen is changed.
+        changed=$(git diff-index HEAD)
+        if [ -n "$changed" ]; then
+          git commit -m "Auto-generate Doxygen documentation via Github Actions" -a
+        fi
     - name: Push changes
       run: |
         git push origin gh-pages
