@@ -425,7 +425,8 @@ void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
         retryConfig.needStopFlag = nullptr;
     }
 
-    auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool {
+    auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool
+    {
         // We first need to make sure that we haven't previously leaked any promises into our map
         unique_lock<mutex> leakLock(updateJobExecutionPromisesLock);
         for (auto keyPromise = updateJobExecutionPromises.cbegin(); keyPromise != updateJobExecutionPromises.cend();
@@ -513,9 +514,9 @@ void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
         this->updateJobExecutionPromises.erase(clientToken.c_str());
         return finished;
     };
-    std::thread updateJobExecutionThread([retryConfig, publishLambda, onCompleteCallback] {
-        Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);
-    });
+    std::thread updateJobExecutionThread(
+        [retryConfig, publishLambda, onCompleteCallback]
+        { Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback); });
     updateJobExecutionThread.detach();
 }
 
@@ -527,8 +528,8 @@ void JobsFeature::copyJobsNotification(Iotjobs::JobExecutionData job)
     latestJobsNotification.ExecutionNumber = job.ExecutionNumber.value();
 }
 
-
-bool JobsFeature::compareJobDocuments(const Aws::Crt::JsonObject& job1, const Aws::Crt::JsonObject& job2) {
+bool JobsFeature::compareJobDocuments(const Aws::Crt::JsonObject &job1, const Aws::Crt::JsonObject &job2)
+{
     std::string str1 = job1.View().WriteCompact().c_str();
     std::string str2 = job2.View().WriteCompact().c_str();
 
@@ -536,14 +537,16 @@ bool JobsFeature::compareJobDocuments(const Aws::Crt::JsonObject& job1, const Aw
     std::regex s3UrlRegex(R"((https://[^.\s"]+\.s3[.-](?:[^.\s"]+\.)?amazonaws\.com/[^?\s"]+)(\?[^"\s]+)?)");
 
     // Function to replace only the pre-signed portion of S3 URLs
-    auto processPresignedUrls = [&s3UrlRegex](std::string& s) -> int {
+    auto processPresignedUrls = [&s3UrlRegex](std::string &s) -> int
+    {
         int count = 0;
         std::string result;
         std::sregex_iterator it(s.begin(), s.end(), s3UrlRegex);
         std::sregex_iterator end;
 
         size_t lastPos = 0;
-        for (; it != end; ++it) {
+        for (; it != end; ++it)
+        {
             count++;
 
             // Adding the rest of the job document before the s3 URL
@@ -553,7 +556,7 @@ bool JobsFeature::compareJobDocuments(const Aws::Crt::JsonObject& job1, const Aw
             result += it->str(1);
 
             // Replace only the presigned portion with the placeholder
-            result += "?aws:iot:s3-presigned-suffix:PLACEHOLDER"; 
+            result += "?aws:iot:s3-presigned-suffix:PLACEHOLDER";
             lastPos = it->position() + it->length();
         }
         result += s.substr(lastPos);
@@ -566,7 +569,8 @@ bool JobsFeature::compareJobDocuments(const Aws::Crt::JsonObject& job1, const Aw
     int count2 = processPresignedUrls(str2);
 
     // If the number of pre-signed URLs differs, the documents are different
-    if (count1 != count2) {
+    if (count1 != count2)
+    {
         return false;
     }
     return str1 == str2;
@@ -588,9 +592,8 @@ bool JobsFeature::isDuplicateNotification(JobExecutionData job)
         return false;
     }
 
-    if (!compareJobDocuments(
-            job.JobDocument.value(),
-            latestJobsNotification.JobDocument.value())) {
+    if (!compareJobDocuments(job.JobDocument.value(), latestJobsNotification.JobDocument.value()))
+    {
         LOG_DEBUG(TAG, "Job document differs");
         return false;
     }
@@ -607,7 +610,8 @@ bool JobsFeature::isDuplicateNotification(JobExecutionData job)
 
 void JobsFeature::initJob(const JobExecutionData &job)
 {
-    auto shutdownHandler = [this]() -> void {
+    auto shutdownHandler = [this]() -> void
+    {
         handlingJob.store(false);
         if (needStop.load())
         {
@@ -638,7 +642,8 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
 {
     LOGM_INFO(TAG, "Executing job: %s", job.JobId->c_str());
 
-    auto shutdownHandler = [this]() -> void {
+    auto shutdownHandler = [this]() -> void
+    {
         handlingJob.store(false);
         if (needStop.load())
         {
@@ -647,7 +652,8 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
         }
     };
     // TODO: Add support for checking condition
-    auto runJob = [this, job, jobDocument, shutdownHandler]() {
+    auto runJob = [this, job, jobDocument, shutdownHandler]()
+    {
         auto engine = createJobEngine();
         // execute all action steps in sequence as provided in job document
         int executionStatus = engine->exec_steps(jobDocument, jobHandlerDir);

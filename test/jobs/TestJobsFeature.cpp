@@ -12,10 +12,10 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include <aws/crt/Api.h>
 #include <aws/iotjobs/RejectedError.h>
 #include <aws/iotjobs/StartNextJobExecutionResponse.h>
 #include <aws/iotjobs/UpdateJobExecutionResponse.h>
-#include <aws/crt/Api.h>
 
 using namespace std;
 using namespace testing;
