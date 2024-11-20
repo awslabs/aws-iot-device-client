@@ -17,6 +17,8 @@ jobs:
         persist-credentials: false
         fetch-depth: 0
     - name: Switch to gh-pages branch
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
       run: |
         # Check if the gh-pages branch exists. If not, create it.
@@ -49,5 +51,7 @@ jobs:
           git commit -m "Auto-generate Doxygen documentation via Github Actions" -a
         fi
     - name: Push changes
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git push origin gh-pages
