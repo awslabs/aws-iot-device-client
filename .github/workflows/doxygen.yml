@@ -30,6 +30,7 @@ jobs:
         git fetch
         git checkout gh-pages
     - name: Create local changes
+      working-directory: ./doxygen_store
       run: |
         sudo apt-get install doxygen
         cd docs

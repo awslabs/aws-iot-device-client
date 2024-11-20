@@ -187,7 +187,7 @@ namespace Aws
                         std::string fileName);
 
                     /**
-                     * \brief creates a new certificate and private key using the AWS certificate authority
+                     * \brief creates a new certificate, and private key using the AWS certificate authority
                      *
                      * @param identityClient used for subscribing and publishing request for creating resources
                      * @return returns true if resources are created successfully
