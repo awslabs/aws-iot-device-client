@@ -13,9 +13,6 @@ jobs:
     if: github.event.pull_request.merged == true
     steps:
     - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-        fetch-depth: 0
     - name: Switch to gh-pages branch
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
