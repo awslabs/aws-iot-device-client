@@ -40,7 +40,9 @@ jobs:
         cp -r ./html/* ./
         rm -rf ./html
         git add .
-    - name: Commit files
+    - name: Commit and push files
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config --global user.name ${{ github.actor }}
         git config --global user.email ${{ github.actor }}@users.noreply.github.com
@@ -49,9 +51,5 @@ jobs:
         changed=$(git diff-index HEAD)
         if [ -n "$changed" ]; then
           git commit -m "Auto-generate Doxygen documentation via Github Actions" -a
+          git push origin gh-pages
         fi
-    - name: Push changes
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        git push origin gh-pages
