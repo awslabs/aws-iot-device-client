@@ -339,8 +339,8 @@ namespace Aws
                     virtual std::shared_ptr<JobEngine> createJobEngine();
                 };
             } // namespace Jobs
-        } // namespace DeviceClient
-    } // namespace Iot
+        }     // namespace DeviceClient
+    }         // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_JOBSFEATURE_H

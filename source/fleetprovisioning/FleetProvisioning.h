@@ -278,6 +278,6 @@ namespace Aws
                     bool ObtainCertificateSerialID(const char *certPath);
                 };
             } // namespace FleetProvisioningNS
-        } // namespace DeviceClient
-    } // namespace Iot
+        }     // namespace DeviceClient
+    }         // namespace Iot
 } // namespace Aws
