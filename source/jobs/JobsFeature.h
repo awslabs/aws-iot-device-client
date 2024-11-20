@@ -322,8 +322,7 @@ namespace Aws
                      * @return true if the documents are equivalent (ignoring pre-signed URLs), false otherwise
                      */
 
-                    bool compareJobDocuments(const Aws::Crt::JsonObject& job1, const Aws::Crt::JsonObject& job2);
-
+                    bool compareJobDocuments(const Aws::Crt::JsonObject &job1, const Aws::Crt::JsonObject &job2);
 
                     /**
                      * \brief Stores information about a job notification
@@ -340,8 +339,8 @@ namespace Aws
                     virtual std::shared_ptr<JobEngine> createJobEngine();
                 };
             } // namespace Jobs
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_JOBSFEATURE_H
