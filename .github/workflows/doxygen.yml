@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         persist-credentials: false
         fetch-depth: 0
@@ -30,8 +30,5 @@ jobs:
         git config --local user.name "github-actions[bot]"
         git commit -m "Auto-generate Doxygen documentation via Github Actions" -a
     - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: gh-pages
-        force: true
+      run: |
+        git push origin gh-pages
