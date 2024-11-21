@@ -3,7 +3,7 @@
 
  **Notice:** Running the AWS IoT Device Client will incur usage of AWS IoT services, and is likely to incur charges on your AWS account. Please refer the pricing pages for [AWS IoT Core](https://aws.amazon.com/iot-core/pricing/), [AWS IoT Device Management](https://aws.amazon.com/iot-device-management/pricing/), and [AWS IoT Device Defender](https://aws.amazon.com/iot-device-defender/pricing/) for more details.
 
-*__Jump To:__*
+***Jump To:***
   * [Introduction](#introduction)
   * [Installation](#installation)
   * [Setup & Configuration](#setup-and-configuration)
@@ -26,7 +26,7 @@
   * [License](#license)
 
 ## Introduction
-*__Sections:__*
+***Sections:***
 * [Current Capabilities](#current-capabilities)
 * [List of Supported Platforms](#list-of-supported-platforms)
 
@@ -56,7 +56,7 @@ The modular IoT Device Client consists of a “base client” and discrete “cl
 The AWS IoT Device Client is currently compatible with x86_64, aarch64, armv7l, mips32, ppc64, and ppc64le architectures and common Linux software environments (Debian, Ubuntu, and RHEL).
 
 ## Installation
-*__Sections:__*
+***Sections:***
 + [Minimum Requirements](#minimum-requirements)
 + [Building from source](#building-from-source)
 + [Running the tests](#running-the-tests)
