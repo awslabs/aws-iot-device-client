@@ -44,7 +44,6 @@ if (GIT_VERSION AND NOT ${GIT_INFO} STREQUAL "")
         COMMAND bash -c "
             read LATEST_MAJOR_VERSION LATEST_MINOR_VERSION < <(git describe --abbrev=0 --tags | awk -F. '
             {
-                orig_tag = \$0
                 gsub(/^v/, \"\", \$0)
 
                 split(\$0, parts, \".\")
