@@ -39,7 +39,7 @@ endfunction()
 if (GIT_VERSION AND NOT ${GIT_INFO} STREQUAL "")
     message("-- Using Git to calculate AWS IoT Device Client version information...")
 
-    # Get first tag with major and minor of the latest latest tag. 
+    # Get first tag with major and minor of the latest tag. 
     execute_process(
         COMMAND bash -c "
             read LATEST_MAJOR_VERSION LATEST_MINOR_VERSION < <(git describe --abbrev=0 --tags | awk -F. '
