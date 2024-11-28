@@ -34,7 +34,7 @@ namespace Aws
                  */
                 void IotSecureTunnelingClientWrapper::SubscribeToTunnelsNotify(
                     const Aws::Iotsecuretunneling::SubscribeToTunnelsNotifyRequest &request,
-                    Aws::Crt::Mqtt::QOS qos,
+                    Aws::Crt::Mqtt::QOS /*qos*/,
                     const Iotsecuretunneling::OnSubscribeToTunnelsNotifyResponse &handler,
                     const Iotsecuretunneling::OnSubscribeComplete &onSubAck)
                 {

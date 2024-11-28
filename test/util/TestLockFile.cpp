@@ -12,6 +12,10 @@
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Util;
 
+#ifdef _WIN32
+#undef close
+#endif
+
 class LockFileTestFixture : public ::testing::Test
 {
     void SetUp() override { FileUtils::CreateDirectoryWithPermissions("/run/lock", 0700); }
@@ -22,8 +26,7 @@ TEST_F(LockFileTestFixture, normalCreation)
     string path = "/run/lock/";
     string fileName = "devicecl.lock";
     string thingName = "thing";
-    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "./aws-iot-device-client", thingName});
-
+    unique_ptr<Aws::Iot::DeviceClient::Util::LockFile> lockFile = unique_ptr<Aws::Iot::DeviceClient::Util::LockFile>(new Aws::Iot::DeviceClient::Util::LockFile{path, "./aws-iot-device-client", thingName});
     ifstream fileIn(path + fileName);
     ASSERT_TRUE(fileIn);
 
@@ -41,7 +44,7 @@ TEST_F(LockFileTestFixture, earlyDeletion)
     string path = "/run/lock/";
     string fileName = "devicecl.lock";
     string thingName = "thing";
-    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", thingName});
+    unique_ptr<Aws::Iot::DeviceClient::Util::LockFile> lockFile = unique_ptr<Aws::Iot::DeviceClient::Util::LockFile>(new Aws::Iot::DeviceClient::Util::LockFile{path, "test-aws-iot-device-client", thingName});
     lockFile.reset();
 
     ifstream fileIn(path + fileName);
@@ -52,19 +55,19 @@ TEST_F(LockFileTestFixture, multipleFiles)
 {
     string path = "/run/lock/";
     string thingName = "thing";
-    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", thingName});
+    unique_ptr<Aws::Iot::DeviceClient::Util::LockFile> lockFile = unique_ptr<Aws::Iot::DeviceClient::Util::LockFile>(new Aws::Iot::DeviceClient::Util::LockFile{path, "test-aws-iot-device-client", thingName});
 
-    EXPECT_THROW(unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", thingName}), std::runtime_error);
+    EXPECT_THROW(unique_ptr<Aws::Iot::DeviceClient::Util::LockFile>(new Aws::Iot::DeviceClient::Util::LockFile{path, "test-aws-iot-device-client", thingName}), std::runtime_error);
 }
 
 TEST_F(LockFileTestFixture, multipleFilesWithExtendedPath)
 {
     string path = "/run/lock/";
     string thingName = "thing";
-    unique_ptr<LockFile> lockFile = unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", thingName});
+    unique_ptr<Aws::Iot::DeviceClient::Util::LockFile> lockFile = unique_ptr<Aws::Iot::DeviceClient::Util::LockFile>(new Aws::Iot::DeviceClient::Util::LockFile{path, "test-aws-iot-device-client", thingName});
 
     EXPECT_THROW(
-        unique_ptr<LockFile>(new LockFile{path, "directory/test-aws-iot-device-client", thingName}),
+        unique_ptr<Aws::Iot::DeviceClient::Util::LockFile>(new Aws::Iot::DeviceClient::Util::LockFile{path, "directory/test-aws-iot-device-client", thingName}),
         std::runtime_error);
 }
 
@@ -84,8 +87,8 @@ TEST_F(LockFileTestFixture, staleFile)
         }
         fileOut.close();
 
-        unique_ptr<LockFile> lockFile =
-            unique_ptr<LockFile>(new LockFile{path, "test-aws-iot-device-client", thingName});
+        unique_ptr<Aws::Iot::DeviceClient::Util::LockFile> lockFile =
+            unique_ptr<Aws::Iot::DeviceClient::Util::LockFile>(new Aws::Iot::DeviceClient::Util::LockFile{path, "test-aws-iot-device-client", thingName});
 
         ifstream fileIn(path + fileName);
         ASSERT_TRUE(fileIn);

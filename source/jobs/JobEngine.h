@@ -140,6 +140,7 @@ namespace Aws
 
                   public:
                     virtual ~JobEngine() = default;
+#ifndef _WIN32
                     /**
                      * \brief Used by output processing threads to assess output from the child process
                      *
@@ -148,6 +149,17 @@ namespace Aws
                      * @param childPID the process ID of the child process
                      */
                     virtual void processCmdOutput(int fd, bool isStdErr, int childPID);
+#else
+                    /**
+                     * \brief Used by output processing threads to assess output from the child process
+                     *
+                     * @param hPipe the file handle of the output to process
+                     * @param isStdErr whether the output being processed is from STDERR
+                     * @param childPID the process ID of the child process
+                     */
+                    virtual void processCmdOutput(HANDLE hPipe, bool isStdErr, int childPID);
+#endif
+
 
                     /**
                      * \brief Executes the given set of steps (actions) in sequence as provided in the job document

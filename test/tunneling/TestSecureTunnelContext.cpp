@@ -73,6 +73,7 @@ class TestSecureTunnelContext : public testing::Test
     void SetUp() override
     {
         manager = shared_ptr<SharedCrtResourceManager>(new SharedCrtResourceManager());
+        manager->initializeAllocator();
         tunnel = shared_ptr<MockSecureTunnel>(new MockSecureTunnel());
         tcpForward = shared_ptr<MockTcpForward>(new MockTcpForward(manager, port));
         rootCa = "root-ca-value";

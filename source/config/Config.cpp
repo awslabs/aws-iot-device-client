@@ -84,6 +84,16 @@ constexpr int Permissions::PUB_SUB_FILES;
 constexpr int Permissions::SAMPLE_SHADOW_FILES;
 constexpr int Permissions::PKCS11_LIB_FILE;
 
+Aws::Iot::DeviceClient::PlainConfig::PlainConfig() 
+{
+#ifndef _WIN32
+    lockFilePath = std::string{DEFAULT_LOCK_FILE_PATH};
+#else
+    string strProfileDir =  Util::TrimRightCopy(getenv("LOCALAPPDATA"), string{Config::PATH_DIRECTORY_SEPARATOR});
+    lockFilePath = strProfileDir + std::string{Config::PATH_DIRECTORY_SEPARATOR} + "aws-iot-device-client\\lock\\";
+#endif
+}
+
 bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
 {
     const char *jsonKey = JSON_KEY_ENDPOINT;
@@ -508,6 +518,18 @@ constexpr char PlainConfig::LogConfig::CLI_SDK_LOG_FILE[];
 constexpr char PlainConfig::LogConfig::JSON_KEY_ENABLE_SDK_LOGGING[];
 constexpr char PlainConfig::LogConfig::JSON_KEY_SDK_LOG_LEVEL[];
 constexpr char PlainConfig::LogConfig::JSON_KEY_SDK_LOG_FILE[];
+
+PlainConfig::LogConfig::LogConfig() 
+{
+#ifndef _WIN32
+    deviceClientLogFile = "/var/log/aws-iot-device-client/aws-iot-device-client.log";
+    sdkLogFile = "/var/log/aws-iot-device-client/sdk.log";
+#else
+    string strProfileDir =  Util::TrimRightCopy(getenv("LOCALAPPDATA"), string{Config::PATH_DIRECTORY_SEPARATOR});
+    deviceClientLogFile = strProfileDir + std::string{Config::PATH_DIRECTORY_SEPARATOR} + "aws-iot-device-client\\aws-iot-device-client.log";
+    sdkLogFile = strProfileDir + std::string{Config::PATH_DIRECTORY_SEPARATOR} + "aws-iot-device-client\\sdk.log";
+#endif
+}
 
 int PlainConfig::LogConfig::ParseDeviceClientLogLevel(const string &level) const
 {
@@ -1242,7 +1264,7 @@ bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromJson(const Crt::JsonVi
     return true;
 }
 
-bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromCliArgs(const CliArgs &cliArgs)
+bool PlainConfig::FleetProvisioningRuntimeConfig::LoadFromCliArgs(const CliArgs &/*cliArgs*/)
 {
     /*
      * No Command line arguments for Fleet Provisioning Runtime Config
@@ -1412,7 +1434,7 @@ bool PlainConfig::HttpProxyConfig::LoadFromCliArgs(const CliArgs &cliArgs)
     else
     {
         // If http proxy config file path is not provided,
-        proxyConfigPath = Config::DEFAULT_HTTP_PROXY_CONFIG_FILE;
+        proxyConfigPath = Config::getDefaulProxyFile();
     }
     return true;
 }
@@ -1645,6 +1667,9 @@ void PlainConfig::PubSub::SerializeToObject(Crt::JsonObject &object) const
     {
         object.WithString(JSON_PUB_SUB_SUBSCRIBE_FILE, subscribeFile->c_str());
     }
+
+    if (publishOnChange)
+        object.WithBool(JSON_PUB_SUB_PUBLISH_ON_CHANGE, publishOnChange);
 }
 
 constexpr char PlainConfig::SampleShadow::CLI_ENABLE_SAMPLE_SHADOW[];
@@ -1659,19 +1684,19 @@ constexpr char PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_OUTPUT_FILE[];
 
 bool PlainConfig::SampleShadow::createShadowOutputFile()
 {
-    if (!FileUtils::CreateDirectoryWithPermissions(Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR, S_IRWXU))
+    if (!FileUtils::CreateDirectoryWithPermissions(Config::getDefaulSampleOutputDir().c_str(), S_IRWXU))
     {
         LOGM_ERROR(
             Config::TAG,
             "Failed to access/create default directories: %s required for storage of shadow document",
-            Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR);
+            Config::getDefaulSampleOutputDir().c_str());
 
         return false;
     }
     else
     {
         ostringstream outputPathStream;
-        outputPathStream << Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR << Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
+        outputPathStream << Config::getDefaulSampleOutputDir() << Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
         LOG_INFO(Config::TAG, outputPathStream.str().c_str());
 
         string outputPath = FileUtils::ExtractExpandedPath(outputPathStream.str().c_str());
@@ -2216,7 +2241,7 @@ bool PlainConfig::SensorPublish::LoadFromJson(const Crt::JsonView &json)
     return true;
 }
 
-bool PlainConfig::SensorPublish::LoadFromCliArgs(const CliArgs &cliArgs)
+bool PlainConfig::SensorPublish::LoadFromCliArgs(const CliArgs &/*cliArgs*/)
 {
     return true;
 }
@@ -2499,6 +2524,9 @@ constexpr char Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[];
 constexpr char Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[];
 constexpr char Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[];
 constexpr char Config::DEFAULT_HTTP_PROXY_CONFIG_FILE[];
+#ifndef _WIN32
+constexpr char Config::DEFAULT_CONFIG_HOME_DIR[];
+#endif
 
 bool Config::CheckTerminalArgs(int argc, char **argv)
 {
@@ -2650,7 +2678,7 @@ bool Config::init(const CliArgs &cliArgs)
 
     try
     {
-        string filename = Config::DEFAULT_CONFIG_FILE;
+        string filename = getDefaulConfigFile();
         bool bReadConfigFile = FileUtils::FileExists(filename);
 
         if (cliArgs.count(Config::CLI_CONFIG_FILE))
@@ -2692,13 +2720,13 @@ bool Config::init(const CliArgs &cliArgs)
 #if !defined(DISABLE_MQTT)
         // ST_COMPONENT_MODE does not require any settings besides those for Secure Tunneling
         if (ParseConfigFile(
-                Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE, FLEET_PROVISIONING_RUNTIME_CONFIG) &&
+                Config::getDefaulFleetProvRTConfigFile(), FLEET_PROVISIONING_RUNTIME_CONFIG) &&
             ValidateAndStoreRuntimeConfig())
         {
             LOGM_INFO(
                 TAG,
                 "Successfully fetched Runtime config file '%s' and validated its content.",
-                Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
+                Config::getDefaulFleetProvRTConfigFile().c_str());
         }
 #endif
 
@@ -2740,7 +2768,7 @@ bool Config::ValidateAndStoreRuntimeConfig()
         LOGM_ERROR(
             TAG,
             "Failed to Validate runtime configurations. Please check '%s' file",
-            Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE);
+            Config::getDefaulFleetProvRTConfigFile().c_str());
         return false;
     }
     config.cert = config.fleetProvisioningRuntimeConfig.cert.value().c_str();
@@ -3170,10 +3198,53 @@ bool Config::ExportDefaultSetting(const string &file)
 
 string Config::ExpandDefaultConfigDir(bool removeTrailingSeparator)
 {
-    string expandedConfigDir = FileUtils::ExtractExpandedPath(DEFAULT_CONFIG_DIR);
+    string expandedConfigDir = FileUtils::ExtractExpandedPath(getDefaulConfigDir());
     if (removeTrailingSeparator)
     {
         return Util::TrimRightCopy(expandedConfigDir, string{Config::PATH_DIRECTORY_SEPARATOR});
     }
     return expandedConfigDir;
 }
+
+string Config::getDefaulConfigDir()
+{
+    string strConfigDir = Config::DEFAULT_CONFIG_DIR;
+#ifndef _WIN32
+    strConfigDir = DEFAULT_CONFIG_HOME_DIR + strConfigDir;
+#else
+    strConfigDir = std::string(getenv("USERPROFILE")) + std::string{Config::PATH_DIRECTORY_SEPARATOR} + strConfigDir;
+#endif
+
+    return strConfigDir;
+}
+
+string Config::getDefaulConfigFile()
+{
+    return ExpandDefaultConfigDir(true) + std::string{Config::PATH_DIRECTORY_SEPARATOR} + Config::DEFAULT_CONFIG_FILE;
+}
+
+string Config::getDefaulKeyDir() 
+{
+    return ExpandDefaultConfigDir(true) + std::string{Config::PATH_DIRECTORY_SEPARATOR} + Config::DEFAULT_KEY_DIR;
+}
+
+std::string Config::getDefaulFleetProvRTConfigFile()
+{
+    return ExpandDefaultConfigDir(true) + std::string{Config::PATH_DIRECTORY_SEPARATOR} + Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE;
+}
+
+/**
+ * \brief Returns default proxy configuration file locationfleet provisioning
+ * @return
+ */
+std::string Config::getDefaulProxyFile() 
+{
+    return ExpandDefaultConfigDir(true) + std::string{Config::PATH_DIRECTORY_SEPARATOR} + Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE;
+;
+}
+
+std::string Config::getDefaulSampleOutputDir()
+{
+    return ExpandDefaultConfigDir(true) + std::string{Config::PATH_DIRECTORY_SEPARATOR} + Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR;
+}
+

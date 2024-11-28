@@ -34,6 +34,10 @@
 #include <unistd.h>
 #include <wordexp.h>
 
+#ifdef _WIN32
+#undef FormatMessage
+#endif
+
 using namespace std;
 using namespace Aws::Crt;
 using namespace Aws::Iotidentity;
@@ -42,6 +46,7 @@ using namespace Aws::Iot::DeviceClient;
 using namespace Aws::Iot::DeviceClient::FleetProvisioningNS;
 using namespace Aws::Iot::DeviceClient::Logging;
 using namespace Aws::Iot::DeviceClient::Util;
+
 
 constexpr char FleetProvisioning::TAG[];
 constexpr int FleetProvisioning::DEFAULT_WAIT_TIME_SECONDS;
@@ -532,7 +537,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
 
         bool didSetup = FileUtils::CreateDirectoryWithPermissions(keyDir.c_str(), S_IRWXU) &&
                         FileUtils::CreateDirectoryWithPermissions(
-                            Config::DEFAULT_CONFIG_DIR, S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH | S_IXOTH);
+                            Config::getDefaulConfigDir().c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH | S_IXOTH);
         if (!didSetup)
         {
             LOGM_ERROR(
@@ -602,7 +607,7 @@ bool FleetProvisioning::ProvisionDevice(shared_ptr<SharedCrtResourceManager> fpC
              * Store data in runtime conf file and update @config object.
              */
             if (!ExportRuntimeConfig(
-                    Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
+                    Config::getDefaulFleetProvRTConfigFile(),
                     certPath.c_str(),
                     keyPath.c_str(),
                     thingName.c_str(),
@@ -708,6 +713,7 @@ bool FleetProvisioning::GetCsrFileContent(const string &filePath)
     csrFile = fileContent;
 
     LOGM_INFO(TAG, "Successfully fetched CSR file '%s' and stored its content.", filePath.c_str());
+
     setting.close();
     return true;
 }
@@ -820,6 +826,7 @@ bool FleetProvisioning::PopulateSystemInformation()
 
 bool FleetProvisioning::CollectNetworkInformation()
 {
+#ifndef _WIN32
     struct ifaddrs *ifap = nullptr;
     char ip[INET6_ADDRSTRLEN];
 
@@ -885,6 +892,95 @@ bool FleetProvisioning::CollectNetworkInformation()
     close(fd);
     freeifaddrs(ifap);
     return true;
+#else
+    // Initialize Winsock
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        LOG_ERROR(TAG, "WSAStartup failed");
+        return false;
+    }
+
+    // Buffer size for GetAdaptersAddresses
+    ULONG bufferSize = 15000;
+    IP_ADAPTER_ADDRESSES* adapterAddresses = (IP_ADAPTER_ADDRESSES*)malloc(bufferSize);
+    if (adapterAddresses == NULL) {
+        LOG_ERROR(TAG, "Memory allocation failed");
+        WSACleanup();
+        return false;
+    }
+
+    ULONG flags = GAA_FLAG_INCLUDE_PREFIX | GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER;
+    ULONG result = GetAdaptersAddresses(AF_UNSPEC, flags, NULL, adapterAddresses, &bufferSize);
+
+    if (result == ERROR_BUFFER_OVERFLOW) {
+        free(adapterAddresses);
+        adapterAddresses = (IP_ADAPTER_ADDRESSES*)malloc(bufferSize);
+        if (adapterAddresses == NULL) {
+            LOG_ERROR(TAG, "Memory allocation failed");
+            WSACleanup();
+            return false;
+        }
+        result = GetAdaptersAddresses(AF_UNSPEC, flags, NULL, adapterAddresses, &bufferSize);
+    }
+
+    if (result != NO_ERROR) {
+        LOGM_ERROR(TAG, "GetAdaptersAddresses failed with error: %lu", result);
+        free(adapterAddresses);
+        WSACleanup();
+        return false;
+    }
+
+    // Arrays to store IP and MAC addresses
+    char ip4[INET6_ADDRSTRLEN] = {0};
+    unsigned char mac[6] = {0};
+
+    const std::wstring targetInterface = L"Ethernet"; // This is the interface name we want to find
+
+    for (IP_ADAPTER_ADDRESSES* adapter = adapterAddresses; adapter; adapter = adapter->Next) {
+        // Compare the adapter name with the target interface name
+        if (adapter->FriendlyName != targetInterface) {
+            continue;
+        }
+
+        // Ignore loopback and adapters without a valid address
+        if (adapter->OperStatus != IfOperStatusUp || adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK) {
+            continue;
+        }
+
+        // Get MAC address
+        if (adapter->PhysicalAddressLength != 0) {
+            memcpy(mac, adapter->PhysicalAddress, adapter->PhysicalAddressLength);
+        }
+
+        // Iterate over all the unicast addresses
+        for (IP_ADAPTER_UNICAST_ADDRESS* unicast = adapter->FirstUnicastAddress; unicast; unicast = unicast->Next) {
+            // Get the IP address
+            int family = unicast->Address.lpSockaddr->sa_family;
+            void* address = nullptr;
+
+            if (family == AF_INET) { // IPv4
+                address = &((sockaddr_in*)unicast->Address.lpSockaddr)->sin_addr;
+                inet_ntop(family, address, ip4, INET6_ADDRSTRLEN);
+
+                Aws::Crt::Optional<std::string> params(FormatMessage(
+                    R"({"DeviceIPAddress": "%s", "DeviceMACAddress": "%02x:%02x:%02x:%02x:%02x:%02x"})",
+                    ip4,
+                    mac[0],
+                    mac[1],
+                    mac[2],
+                    mac[3],
+                    mac[4],
+                    mac[5]));
+                MapParameters(params);
+                LOGM_DEBUG(TAG, "Successfully collected network information: %s", params.value().c_str());
+            } 
+        }
+    }
+
+    free(adapterAddresses);
+    WSACleanup();
+    return true;
+#endif
 }
 
 bool FleetProvisioning::CalculateFileSHA256Value(const char *fileName, const std::string &filePath)
@@ -944,10 +1040,10 @@ bool FleetProvisioning::CalculateFileSHA256Value(const char *fileName, const std
     return true;
 }
 
-bool FleetProvisioning::ObtainCertificateSerialID(const char *certPath)
+bool FleetProvisioning::ObtainCertificateSerialID(const char *path)
 {
     BIO *certBIO = BIO_new(BIO_s_file());
-    if (BIO_read_filename(certBIO, certPath) <= 0)
+    if (BIO_read_filename(certBIO, path) <= 0)
     {
         BIO_free(certBIO);
 
@@ -983,3 +1079,4 @@ bool FleetProvisioning::ObtainCertificateSerialID(const char *certPath)
 
     return true;
 }
+

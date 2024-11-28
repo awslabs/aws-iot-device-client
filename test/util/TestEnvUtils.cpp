@@ -80,7 +80,12 @@ TEST(EnvUtils, handleSetPath)
 
     // PATH is set in fixture, expect to append additional paths in AppendCwdToPath.
     std::ostringstream expected;
-    expected << PATH << ':' << CONFIG_DIR << ':' << CONFIG_DIR << "/jobs" << ':' << CWD << ':' << CWD << "/jobs";
+#ifndef _WIN32
+    std::string strDelimiter = ":";
+#else
+    std::string strDelimiter = ";";
+#endif
+    expected << PATH << strDelimiter << CONFIG_DIR << strDelimiter << CONFIG_DIR << "/jobs" << strDelimiter << CWD << strDelimiter << CWD << "/jobs";
 
     ASSERT_EQ(0, envUtils.AppendCwdToPath());
     ASSERT_EQ(expected.str(), envUtils.getOS()->setenv_value);
@@ -90,10 +95,15 @@ TEST(EnvUtils, handleUnsetPath)
 {
     FakeEnvUtils envUtils(new FakeOSInterface);
     envUtils.getOS()->getenv_retval.clear();
+#ifndef _WIN32
+    std::string strDelimiter = ":";
+#else
+    std::string strDelimiter = ";";
+#endif
 
     // PATH is unset in fixture, expect the only paths are set in AppendCwdToPath.
     std::ostringstream expected;
-    expected << CONFIG_DIR << ':' << CONFIG_DIR << "/jobs" << ':' << CWD << ':' << CWD << "/jobs";
+    expected << CONFIG_DIR << strDelimiter << CONFIG_DIR << "/jobs" << strDelimiter << CWD << strDelimiter << CWD << "/jobs";
 
     ASSERT_EQ(0, envUtils.AppendCwdToPath());
     ASSERT_EQ(expected.str(), envUtils.getOS()->setenv_value);
