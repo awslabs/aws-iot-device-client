@@ -235,7 +235,7 @@ jobs:
           file: .github/docker-images/base-images/device-client/amazonlinux/Dockerfile
           context: .
           build-args: |
-            OS=linux/arm64
+            TARGETPLATFORM=linux/arm64
           target: base
           push: true
           tags: |
@@ -383,7 +383,7 @@ jobs:
           file: .github/docker-images/base-images/device-client/ubi8/Dockerfile
           context: .
           build-args: |
-            OS=linux/arm64
+            TARGETPLATFORM=linux/arm64
           target: base
           push: true
           tags: |
