@@ -31,7 +31,7 @@ RUN yum -y install \
 WORKDIR /tmp
 RUN if [ "${TARGETPLATFORM}" = "linux/amd64" ]; then \
         wget https://registrationcenter-download.intel.com/akdlm/IRC_NAS/e7797b12-ce87-4df0-aa09-df4a272fc5d9/intel-vtune-2025.0.0.1130.sh \
-            && sh ./intel-vtune-2025.0.0.1130.sh -a --silent --eula accept \
+            && sh ./intel-vtune-2025.0.0.1130.sh -a --silent --eula accept; \
     fi
 
 
