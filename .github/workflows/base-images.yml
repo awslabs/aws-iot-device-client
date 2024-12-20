@@ -93,43 +93,6 @@ jobs:
           tags: |
             public.ecr.aws/${{ env.ECR_BASE_REPO }}:aarch64-ubuntu-latest
           platforms: linux/arm64
-  build-base-docker-image-ubuntu-armv7:
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
-          aws-region: us-east-1
-      - name: Login to ECR
-        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: public.ecr.aws/${{ env.ECR_REPO }}
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Build ubuntu Base Image
-        uses: docker/build-push-action@v3
-        with:
-          file: .github/docker-images/base-images/device-client/ubuntu/Dockerfile
-          context: .
-          target: base
-          push: true
-          tags: |
-            public.ecr.aws/${{ env.ECR_BASE_REPO }}:armv7-ubuntu-latest
-          platforms: linux/arm/v7
   build-integration-test-base-docker-image-ubuntu-x86_64:
     runs-on: ubuntu-latest
     permissions:
@@ -202,42 +165,6 @@ jobs:
           tags: |
             public.ecr.aws/${{ env.ECR_INTEG_BASE_REPO }}:aarch64-ubuntu-latest
           platforms: linux/amd64
-  build-integration-test-base-docker-image-ubuntu-armv7:
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
-          aws-region: us-east-1
-      - name: Login to ECR
-        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: public.ecr.aws/${{ env.ECR_INTEG_BASE_REPO }}
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Build Ubuntu Base Image
-        uses: docker/build-push-action@v3
-        with:
-          file: .github/docker-images/base-images/integration-tests/ubuntu/Dockerfile
-          context: .
-          push: true
-          tags: |
-            public.ecr.aws/${{ env.ECR_INTEG_BASE_REPO }}:armv7-ubuntu-latest
-          platforms: linux/arm/v7
   build-base-docker-image-amazonlinux-x86_64:
     runs-on: ubuntu-latest
     permissions:
@@ -307,6 +234,8 @@ jobs:
         with:
           file: .github/docker-images/base-images/device-client/amazonlinux/Dockerfile
           context: .
+          build-args: |
+            OS=linux/arm64
           target: base
           push: true
           tags: |
@@ -453,6 +382,8 @@ jobs:
         with:
           file: .github/docker-images/base-images/device-client/ubi8/Dockerfile
           context: .
+          build-args: |
+            OS=linux/arm64
           target: base
           push: true
           tags: |
