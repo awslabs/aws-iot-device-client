@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 
 ARG OPENSSL_VERSION=3.0.8
 
@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     libtool \
-    zlib1g-dev
+    zlib1g-dev \
+    libssl-dev
 
 RUN mkdir /openssl && cd /openssl && wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
     && tar -zxvf openssl-${OPENSSL_VERSION}.tar.gz \

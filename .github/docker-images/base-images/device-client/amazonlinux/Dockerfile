@@ -1,5 +1,6 @@
-FROM amazonlinux:2.0.20230307.0 as base
+FROM amazonlinux:2 as base
 
+ARG TARGETPLATFORM=linux/amd64
 ARG OPENSSL_VERSION=3.0.8
 
 ###############################################################################
@@ -22,6 +23,12 @@ RUN yum -y update \
     perl-Pod-Html \
     && yum clean all \
     && rm -rf /var/cache/yum
+
+WORKDIR /tmp
+RUN if [ "${TARGETPLATFORM}" = "linux/amd64" ]; then \
+        wget https://registrationcenter-download.intel.com/akdlm/IRC_NAS/e7797b12-ce87-4df0-aa09-df4a272fc5d9/intel-vtune-2025.0.0.1130.sh \
+            && sh ./intel-vtune-2025.0.0.1130.sh -a --silent --eula accept; \
+    fi
 
 ###############################################################################
 # Install OpenSSL 3.0.8

@@ -2,13 +2,16 @@
 #https://access.redhat.com/RegistryAuthentication
 FROM registry.access.redhat.com/ubi8/ubi AS base
 
+ARG TARGETPLATFORM=linux/amd64
 ARG OPENSSL_VERSION=3.0.8
 
 ###############################################################################
 # Install prereqs
 ###############################################################################
 RUN yum -y update \
-    && yum -y install \
+    && yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+
+RUN yum -y install \
     tar \
     bzip2 \
     git \
@@ -20,16 +23,25 @@ RUN yum -y update \
     gcc-c++ \
     perl-IPC-Cmd \
     perl-Pod-Html \
+    softhsm \
+    openssl-devel \
     && yum clean all \
     && rm -rf /var/cache/yum
+
+WORKDIR /tmp
+RUN if [ "${TARGETPLATFORM}" = "linux/amd64" ]; then \
+        wget https://registrationcenter-download.intel.com/akdlm/IRC_NAS/e7797b12-ce87-4df0-aa09-df4a272fc5d9/intel-vtune-2025.0.0.1130.sh \
+            && sh ./intel-vtune-2025.0.0.1130.sh -a --silent --eula accept; \
+    fi
+
 
 ###############################################################################
 # Install pre-built CMake
 ###############################################################################
 WORKDIR /tmp
-RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3.10.0.tar.gz -o cmake-3.10.0.tar.gz \
-    && tar -zxvf cmake-3.10.0.tar.gz \
-    && cd cmake-3.10.0 \
+RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.24.0/cmake-3.24.0.tar.gz -o cmake-3.24.0.tar.gz \
+    && tar -zxvf cmake-3.24.0.tar.gz \
+    && cd cmake-3.24.0 \
     && ./bootstrap \
     && make \
     && make install
@@ -42,18 +54,6 @@ RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
     && tar -zxvf openssl-${OPENSSL_VERSION}.tar.gz \
     && cd openssl-${OPENSSL_VERSION} \
     && ./config \
-    && make \
-    && make install
-
-###############################################################################
-# Install softhsm v2.3.0 from source
-###############################################################################
-
-WORKDIR /tmp
-RUN wget https://dist.opendnssec.org/source/softhsm-2.3.0.tar.gz \
-    && tar -xzf softhsm-2.3.0.tar.gz \
-    && cd softhsm-2.3.0 \
-    && ./configure --disable-gost \
     && make \
     && make install
 
