@@ -41,7 +41,7 @@ jobs:
           context: .
           target: deploy
           build-args: |
-            OS=ubuntu:18.04
+            OS=ubuntu:22.04
             BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:x86_64-ubuntu-latest
           push: false
       - name: Get Version
@@ -83,7 +83,7 @@ jobs:
           file: .github/docker-images/Dockerfile
           context: .
           build-args: |
-            OS=ubuntu:18.04
+            OS=ubuntu:22.04
             BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:x86_64-ubuntu-latest
           push: true
           tags: |
@@ -124,7 +124,7 @@ jobs:
           file: .github/docker-images/Dockerfile
           context: .
           build-args: |
-            OS=ubuntu:18.04
+            OS=ubuntu:22.04
             BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:aarch64-ubuntu-latest
           push: true
           tags: |
@@ -165,7 +165,7 @@ jobs:
           file: .github/docker-images/Dockerfile
           context: .
           build-args: |
-            OS=ubuntu:18.04
+            OS=ubuntu:22.04
             BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:armv7-ubuntu-latest
           push: true
           tags: |
@@ -206,7 +206,7 @@ jobs:
           file: .github/docker-images/Dockerfile
           context: .
           build-args: |
-            OS=amazonlinux:latest
+            OS=amazonlinux:2
             BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:x86_64-amazonlinux-latest
           push: true
           tags: |
@@ -247,7 +247,7 @@ jobs:
           file: .github/docker-images/Dockerfile
           context: .
           build-args: |
-            OS=amazonlinux:latest
+            OS=amazonlinux:2
             BASE_IMAGE=public.ecr.aws/${{ env.ECR_BASE_REPO }}:aarch64-amazonlinux-latest
           push: true
           tags: |

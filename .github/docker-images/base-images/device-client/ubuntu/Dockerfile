@@ -1,4 +1,4 @@
-FROM ubuntu:18.04 AS base
+FROM ubuntu:22.04 AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -17,6 +17,7 @@ RUN apt-get update -qq \
     libc6-dbg \
     softhsm \
     zlib1g-dev \
+    libssl-dev \
     && apt-get clean
 
 ###############################################################################
@@ -35,9 +36,9 @@ RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
 # Install pre-built CMake
 ###############################################################################
 WORKDIR /tmp
-RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.10.0/cmake-3.10.0.tar.gz -o cmake-3.10.0.tar.gz \
-    && tar -zxvf cmake-3.10.0.tar.gz \
-    && cd cmake-3.10.0 \
+RUN curl -sSL https://github.com/Kitware/CMake/releases/download/v3.24.0/cmake-3.24.0.tar.gz -o cmake-3.24.0.tar.gz \
+    && tar -zxvf cmake-3.24.0.tar.gz \
+    && cd cmake-3.24.0 \
     && ./bootstrap \
     && make -j 2 \
     && make install
