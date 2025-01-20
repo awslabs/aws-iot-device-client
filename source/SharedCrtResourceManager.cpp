@@ -381,6 +381,15 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
 
     connection = mqttClient->NewConnection(clientConfig);
 
+    if (config.fleetProvisioningRuntimeConfig.completedFleetProvisioning && config.lastWillTopic.has_value() && config.lastWillMessage.has_value()) {
+        Aws::Crt::ByteBuf payload = Aws::Crt::ByteBufFromCString(config.lastWillMessage->c_str());
+        if (connection->SetWill(config.lastWillTopic->c_str(), Aws::Crt::Mqtt::QOS::AWS_MQTT_QOS_AT_LEAST_ONCE, false, payload)) {
+            LOG_INFO(TAG, "MQTT connection set will succeeded");
+        } else {
+            LOG_INFO(TAG, "MQTT connection set will failed");
+        }
+    }
+
     if (!*connection)
     {
         LOGM_ERROR(TAG, "MQTT Connection Creation failed with error: %s", ErrorDebugString(connection->LastError()));
@@ -461,7 +470,18 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
         LOG_ERROR(TAG, "Device Client is not able to set reconnection settings. Device Client will retry again.");
         return RETRY;
     }
-    if (!connection->Connect(config.thingName->c_str(), false))
+
+    int keepAliveTimeSecs = 0;
+    if (config.connectKeepAlive.has_value()) {
+        keepAliveTimeSecs = *config.connectKeepAlive;
+    }
+
+    int pingTimeoutMs = 0;
+    if (config.connectTimeout.has_value()) {
+        pingTimeoutMs = *config.connectTimeout;
+    }
+
+    if (!connection->Connect(config.thingName->c_str(), false, keepAliveTimeSecs, pingTimeoutMs))
     {
         LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(connection->LastError()));
         return RETRY;
