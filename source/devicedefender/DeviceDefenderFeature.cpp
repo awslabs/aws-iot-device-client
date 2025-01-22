@@ -83,7 +83,7 @@ int DeviceDefenderFeature::stop()
 std::shared_ptr<AbstractReportTask> DeviceDefender::DeviceDefenderFeature::createReportTask()
 {
 
-    auto onCancelled = [this](void *userData) -> void {
+    auto onCancelled = [this](void */*userData*/) -> void {
         LOGM_DEBUG(TAG, "task called onCancelled for thing: %s", thingName.c_str());
         stop();
     };

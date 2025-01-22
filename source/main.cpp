@@ -97,16 +97,43 @@ constexpr char TAG[] = "Main.cpp";
 
 shared_ptr<FeatureRegistry> features;
 shared_ptr<SharedCrtResourceManager> resourceManager;
-unique_ptr<LockFile> lockFile;
+unique_ptr<Aws::Iot::DeviceClient::Util::LockFile> lockFile;
 bool attemptingShutdown{false};
 Config config;
+
+#ifdef _WIN32
+// Event handles for graceful shutdown and abort
+HANDLE shutdownEvent;
+HANDLE abortEvent;
+HANDLE terminationEvent;
+
+// Windows Signal handler
+void signalHandler(int signum) {
+    switch (signum) {
+        case SIGINT:
+            LOG_INFO(TAG, "SIGINT received");
+            SetEvent(shutdownEvent);
+            break;
+        case SIGABRT:
+            LOG_INFO(TAG, "SIGABRT signal received");
+            SetEvent(abortEvent);
+            break;
+        case SIGTERM:
+            LOG_INFO(TAG, "SIGTERM signal received");
+            SetEvent(terminationEvent);
+            break;
+        default:
+            LOGM_INFO(TAG, "Unhandled event type received: %d", signum);
+    }
+}
+#endif
 
 /**
  * TODO: For future expandability of main
  * Currently creates a lockfile to prevent the creation of multiple Device Client processes.
  * @return true if no exception is caught, false otherwise
  */
-bool init(int argc, char *argv[])
+bool init(int /*argc*/, char *argv[])
 {
     try
     {
@@ -119,7 +146,7 @@ bool init(int argc, char *argv[])
                 thing = config.config.thingName.value();
             }
 
-            lockFile = unique_ptr<LockFile>(new LockFile{filename, argv[0], thing});
+            lockFile = unique_ptr<Aws::Iot::DeviceClient::Util::LockFile>(new Aws::Iot::DeviceClient::Util::LockFile{filename, argv[0], thing});
         }
     }
     catch (std::runtime_error &e)
@@ -156,6 +183,14 @@ void shutdown()
         resourceManager.reset();
     }
 #endif
+
+#ifdef _WIN32
+    // Cleanup termination events
+    CloseHandle(shutdownEvent);
+    CloseHandle(abortEvent);
+    CloseHandle(terminationEvent);
+#endif
+
     LoggerFactory::getLoggerInstance()->shutdown();
     exit(EXIT_SUCCESS);
 }
@@ -347,6 +382,7 @@ int main(int argc, char *argv[])
 
     LOGM_INFO(TAG, "Now running AWS IoT Device Client version %s", DEVICE_CLIENT_VERSION_FULL);
 
+#ifndef _WIN32
     // Register for listening to interrupt signals
     sigset_t sigset;
     memset(&sigset, 0, sizeof(sigset_t));
@@ -355,6 +391,26 @@ int main(int argc, char *argv[])
     sigaddset(&sigset, SIGHUP);
     sigaddset(&sigset, SIGTERM);
     sigprocmask(SIG_BLOCK, &sigset, nullptr);
+#else
+    // Create event objects for shutdown, abort and termination signaling
+    shutdownEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    abortEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    terminationEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+    if (shutdownEvent == NULL || abortEvent == NULL || terminationEvent == NULL) {
+        LOG_ERROR(TAG, "Failed to create interrupt handling events.");
+        shutdown();
+        return EXIT_FAILURE;
+    }
+
+    // Register signal handlers for Ctrl+C, about and termination
+    std::signal(SIGINT, signalHandler);
+    std::signal(SIGABRT, signalHandler);
+    std::signal(SIGTERM, signalHandler);
+
+    const int neventsNum = 3;
+    HANDLE events[neventsNum] = { shutdownEvent, abortEvent, terminationEvent };
+#endif
 
     auto listener = std::make_shared<DefaultClientBaseNotifier>();
     if (!resourceManager.get()->initialize(config.config, features))
@@ -378,7 +434,7 @@ int main(int argc, char *argv[])
         FleetProvisioning fleetProvisioning;
         if (!fleetProvisioning.ProvisionDevice(resourceManager, config.config) ||
             !config.ParseConfigFile(
-                Config::DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE,
+                Config::getDefaulFleetProvRTConfigFile(),
                 Aws::Iot::DeviceClient::Config::FLEET_PROVISIONING_RUNTIME_CONFIG) ||
             !config.ValidateAndStoreRuntimeConfig())
         {
@@ -626,6 +682,7 @@ int main(int argc, char *argv[])
     // Now allow this thread to sleep until it's interrupted by a signal
     while (true)
     {
+#ifndef _WIN32        
         sigwait(&sigset, &received_signal);
         LOGM_INFO(TAG, "Received signal: (%d)", received_signal);
         switch (received_signal)
@@ -642,5 +699,26 @@ int main(int argc, char *argv[])
             default:
                 break;
         }
+#else
+    // Wait for either of the events to be signaled or 30 seconds
+    DWORD waitResult = WaitForMultipleObjects(neventsNum, events, FALSE, 30000); // 30,000 milliseconds = 30 seconds
+    
+    switch (waitResult) {
+        case WAIT_OBJECT_0: // SIGINT
+        case (WAIT_OBJECT_0 + 2): // SIGTERM
+            LOG_INFO(TAG, "Shutting down gracefully");
+            shutdown();
+            break;
+        case (WAIT_OBJECT_0 + 1): // SIGABRT
+            LOG_INFO(TAG, "Aborting process");
+            resourceManager->dumpMemTrace();
+            break;
+        case WAIT_TIMEOUT:
+            LOG_INFO(TAG, "30 seconds timeout in termination event wait loop. Getting into next 30 seconds sleep iteration.");
+            break;
+        default:
+            break;
+    }    
+#endif
     }
 }

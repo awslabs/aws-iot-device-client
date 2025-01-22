@@ -4,6 +4,8 @@
 #ifndef DEVICE_CLIENT_LOGLEVEL_H
 #define DEVICE_CLIENT_LOGLEVEL_H
 
+#undef ERROR
+
 namespace Aws
 {
     namespace Iot

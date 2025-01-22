@@ -9,6 +9,19 @@
 #include <string>
 #include <sys/stat.h>
 
+#ifdef _WIN32
+    #include <sys/sys_types.h>
+    #include <unistd.h>
+    //#include <io.h>
+#endif
+
+#ifdef _WIN32
+    // undefine a few definitions from unistd as they conflict with stream methods
+    #undef close
+    #undef read
+    #undef write
+#endif
+
 namespace Aws
 {
     namespace Iot

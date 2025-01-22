@@ -107,7 +107,7 @@ class TestSecureTunnelingFeature : public testing::Test
         // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
         manager->initializeAllocator();
 
-        thingName = Aws::Crt::String("thing-name value");
+        thingName = shared_ptr<Aws::Crt::String>(new Aws::Crt::String("thing-name value"));
         secureTunnelingFeature = shared_ptr<MockSecureTunnelingFeature>(new MockSecureTunnelingFeature());
         mockClient = shared_ptr<MockIotSecureTunnelingClient>(new MockIotSecureTunnelingClient());
         notifier = shared_ptr<MockNotifier>(new MockNotifier());
@@ -115,7 +115,7 @@ class TestSecureTunnelingFeature : public testing::Test
         response = unique_ptr<SecureTunnelingNotifyResponse>(new SecureTunnelingNotifyResponse());
         config = getConfig();
     }
-    Aws::Crt::String thingName;
+    shared_ptr<Aws::Crt::String> thingName;
     shared_ptr<MockIotSecureTunnelingClient> mockClient;
     shared_ptr<MockSecureTunnelingFeature> secureTunnelingFeature;
     shared_ptr<SharedCrtResourceManager> manager;
@@ -166,7 +166,7 @@ TEST_F(TestSecureTunnelingFeature, CreateSSHContextHappy)
         .Times(1)
         .WillOnce(Return(ByMove(std::move(fakeContext))));
     EXPECT_CALL(*secureTunnelingFeature, createClient()).Times(1).WillOnce(Return(mockClient));
-    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(*thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(DoAll(InvokeArgument<2>(response.get(), 0), InvokeArgument<3>(0)));
     EXPECT_CALL(*notifier, onEvent(_, _)).Times(2);
@@ -195,7 +195,7 @@ TEST_F(TestSecureTunnelingFeature, CreateVNCContextHappy)
         .Times(1)
         .WillOnce(Return(ByMove(std::move(fakeContext))));
     EXPECT_CALL(*secureTunnelingFeature, createClient()).Times(1).WillOnce(Return(mockClient));
-    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(*thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(DoAll(InvokeArgument<2>(response.get(), 0), InvokeArgument<3>(0)));
     EXPECT_CALL(*notifier, onEvent(_, _)).Times(2);
@@ -212,7 +212,7 @@ TEST_F(TestSecureTunnelingFeature, ResponseNULL)
      */
     EXPECT_CALL(*secureTunnelingFeature, createContext(_, _, _)).Times(0);
     EXPECT_CALL(*secureTunnelingFeature, createClient()).Times(1).WillOnce(Return(mockClient));
-    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(*thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(DoAll(InvokeArgument<2>(nullptr, 1), InvokeArgument<3>(0)));
     EXPECT_CALL(*notifier, onEvent(_, _)).Times(2);
@@ -240,7 +240,7 @@ TEST_F(TestSecureTunnelingFeature, ResponseIoError)
 
     EXPECT_CALL(*secureTunnelingFeature, createContext(_, _, _)).Times(0);
     EXPECT_CALL(*secureTunnelingFeature, createClient()).Times(1).WillOnce(Return(mockClient));
-    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(*thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(DoAll(InvokeArgument<2>(response.get(), 1), InvokeArgument<3>(0)));
     EXPECT_CALL(*notifier, onEvent(_, _)).Times(2);
@@ -270,7 +270,7 @@ TEST_F(TestSecureTunnelingFeature, DuplicateResponse)
         .Times(1)
         .WillOnce(Return(ByMove(std::move(fakeContext))));
     EXPECT_CALL(*secureTunnelingFeature, createClient()).Times(1).WillOnce(Return(mockClient));
-    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(*thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(
             DoAll(InvokeArgument<2>(response.get(), 0), InvokeArgument<2>(response.get(), 0), InvokeArgument<3>(0)));
@@ -300,7 +300,7 @@ TEST_F(TestSecureTunnelingFeature, MultipleServices)
 
     EXPECT_CALL(*secureTunnelingFeature, createContext(_, _, _)).Times(0);
     EXPECT_CALL(*secureTunnelingFeature, createClient()).Times(1).WillOnce(Return(mockClient));
-    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(*thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(DoAll(InvokeArgument<2>(response.get(), 1), InvokeArgument<3>(0)));
     EXPECT_CALL(*notifier, onEvent(_, _)).Times(2);
@@ -328,7 +328,7 @@ TEST_F(TestSecureTunnelingFeature, UnsupportedService)
 
     EXPECT_CALL(*secureTunnelingFeature, createContext(_, _, _)).Times(0);
     EXPECT_CALL(*secureTunnelingFeature, createClient()).Times(1).WillOnce(Return(mockClient));
-    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(*thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(DoAll(InvokeArgument<2>(response.get(), 1), InvokeArgument<3>(0)));
     EXPECT_CALL(*notifier, onEvent(_, _)).Times(2);
@@ -355,7 +355,7 @@ TEST_F(TestSecureTunnelingFeature, NoServices)
 
     EXPECT_CALL(*secureTunnelingFeature, createContext(_, _, _)).Times(0);
     EXPECT_CALL(*secureTunnelingFeature, createClient()).Times(1).WillOnce(Return(mockClient));
-    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(*thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(DoAll(InvokeArgument<2>(response.get(), 1), InvokeArgument<3>(0)));
     EXPECT_CALL(*notifier, onEvent(_, _)).Times(2);
@@ -383,7 +383,7 @@ TEST_F(TestSecureTunnelingFeature, SourceMode)
 
     EXPECT_CALL(*secureTunnelingFeature, createContext(_, _, _)).Times(0);
     EXPECT_CALL(*secureTunnelingFeature, createClient()).Times(1).WillOnce(Return(mockClient));
-    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+    EXPECT_CALL(*mockClient, SubscribeToTunnelsNotify(ThingNameEq(*thingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(DoAll(InvokeArgument<2>(response.get(), 1), InvokeArgument<3>(0)));
     EXPECT_CALL(*notifier, onEvent(_, _)).Times(2);

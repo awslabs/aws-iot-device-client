@@ -66,6 +66,7 @@ namespace Aws
 
             struct PlainConfig : public LoadableFromJsonAndCliAndEnvironment
             {
+                PlainConfig();
                 bool LoadFromJson(const Crt::JsonView &json) override;
                 bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                 bool LoadFromEnvironment() override;
@@ -112,6 +113,7 @@ namespace Aws
 
                 struct LogConfig : public LoadableFromJsonAndCliAndEnvironment
                 {
+                    LogConfig();
                     bool LoadFromJson(const Crt::JsonView &json) override;
                     bool LoadFromCliArgs(const CliArgs &cliArgs) override;
                     bool LoadFromEnvironment() override { return true; }
@@ -144,11 +146,11 @@ namespace Aws
 
                     int deviceClientlogLevel{3};
                     std::string deviceClientLogtype{LOG_TYPE_STDOUT};
-                    std::string deviceClientLogFile{"/var/log/aws-iot-device-client/aws-iot-device-client.log"};
+                    std::string deviceClientLogFile{""};
 
                     bool sdkLoggingEnabled{false};
                     Aws::Crt::LogLevel sdkLogLevel{Aws::Crt::LogLevel::Trace};
-                    std::string sdkLogFile{"/var/log/aws-iot-device-client/sdk.log"};
+                    std::string sdkLogFile{""};
                 };
                 LogConfig logConfig;
 
@@ -483,13 +485,6 @@ namespace Aws
                 ~Config() = default;
 
                 static constexpr char TAG[] = "Config.cpp";
-                static constexpr char DEFAULT_CONFIG_DIR[] = "~/.aws-iot-device-client/";
-                static constexpr char DEFAULT_KEY_DIR[] = "~/.aws-iot-device-client/keys/";
-                static constexpr char DEFAULT_CONFIG_FILE[] = "~/.aws-iot-device-client/aws-iot-device-client.conf";
-                static constexpr char DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] =
-                    "~/.aws-iot-device-client/aws-iot-device-client-runtime.conf";
-                static constexpr char DEFAULT_HTTP_PROXY_CONFIG_FILE[] = "~/.aws-iot-device-client/http-proxy.conf";
-                static constexpr char DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[] = "~/.aws-iot-device-client/sample-shadow/";
                 static constexpr char DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE[] = "default-sample-shadow-document";
 
                 static constexpr char CLI_HELP[] = "--help";
@@ -517,12 +512,16 @@ namespace Aws
                 /**
                  * \brief Maximum accepted size for the config file.
                  */
-                static constexpr size_t MAX_CONFIG_SIZE = 5000;
+                static constexpr size_t MAX_CONFIG_SIZE = 64000;
 
                 /**
                  * \brief Separator between directories in path.
                  */
+#ifndef _WIN32                
                 static constexpr char PATH_DIRECTORY_SEPARATOR = '/';
+#else
+                static constexpr char PATH_DIRECTORY_SEPARATOR = '\\';
+#endif
 
                 /**
                  * \brief Use path expansion to return absolute path to device client default configuration directory.
@@ -530,12 +529,61 @@ namespace Aws
                  */
                 static std::string ExpandDefaultConfigDir(bool removeTrailingSeparator = false);
 
+                /**
+                 * \brief Returns default configuration file folder
+                 * @return
+                 */
+                static std::string getDefaulConfigDir();
+
+                /**
+                 * \brief Returns default configuration file location
+                 * @return
+                 */
+                static std::string getDefaulConfigFile();
+
+                /**
+                 * \brief Returns default private key location folder
+                 * @return
+                 */
+                static std::string getDefaulKeyDir();
+
+                /**
+                 * \brief Returns default fleet provisioning runtime configuration file location
+                 * @return
+                 */
+                static std::string getDefaulFleetProvRTConfigFile();
+
+                /**
+                 * \brief Returns default proxy configuration file locationfleet provisioning
+                 * @return
+                 */
+                static std::string getDefaulProxyFile();
+
+                /**
+                 * \brief Returns default folder for sample shadow output
+                 * @return
+                 */
+                static std::string getDefaulSampleOutputDir();
+
                 PlainConfig config;
 
               private:
+                static constexpr char DEFAULT_CONFIG_DIR[] = ".aws-iot-device-client/";
+                static constexpr char DEFAULT_CONFIG_FILE[] = "aws-iot-device-client.conf";
+                static constexpr char DEFAULT_KEY_DIR[] = "keys/";
+                static constexpr char DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] =
+                    "aws-iot-device-client-runtime.conf";
+                static constexpr char DEFAULT_HTTP_PROXY_CONFIG_FILE[] = "http-proxy.conf";
+                static constexpr char DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR[] = "sample-shadow/";
+
                 static void PrintHelpMessage();
                 static void PrintVersion();
                 static bool ExportDefaultSetting(const std::string &file);
+
+#ifndef _WIN32
+                static constexpr char DEFAULT_CONFIG_HOME_DIR[] = "~/";
+#endif
+
             };
         } // namespace DeviceClient
     }     // namespace Iot

@@ -184,7 +184,11 @@ TEST(FileUtils, getsCorrectFileSize)
     file << "test message" << endl;
 
     size_t bytes = FileUtils::GetFileSize(filePath);
-    ASSERT_EQ(13, bytes);
+#ifndef _WIN32
+    ASSERT_EQ(13, bytes); // 12 + LF symbol
+#else
+    ASSERT_EQ(14, bytes); // 12 + CRLF symbols
+#endif
 
     std::remove(filePath.c_str());
 }
@@ -239,7 +243,14 @@ TEST(FileUtils, setupDirectoryGoodResultsOnRepeatedAttempts)
 
 TEST(FileUtils, setupDirectoryDetectedSetupFailure)
 {
+#ifndef _WIN32
     string dirPath = "/dev/null/" + UniqueString::GetRandomToken(10) + "/";
+#else
+    //string dirPath = "%HOMEPATH%\\..\\" + UniqueString::GetRandomToken(10);
+    const char* phomePath = std::getenv("HOMEPATH");
+    string strHomeRoot = FileUtils::ExtractParentDirectory(phomePath);
+    string dirPath = strHomeRoot + UniqueString::GetRandomToken(10);
+#endif
 
     bool didSetup = FileUtils::CreateDirectoryWithPermissions(dirPath.c_str(), S_IRWXU);
 
@@ -306,6 +317,8 @@ TEST(FileUtils, FileExists)
     file << "test message" << endl;
     ASSERT_TRUE(FileUtils::FileExists(filePath));
 
+    // Close file before deletion (it works in Linux, but does not work in Windows)
+    file.close();
     std::remove(filePath.c_str());
     ASSERT_FALSE(FileUtils::FileExists(filePath));
 }
@@ -408,6 +421,8 @@ TEST(FileUtils, IsValidFilePathForFileExistence)
     file << "test message" << endl;
     ASSERT_TRUE(FileUtils::IsValidFilePath(filePath));
 
+    // Close file before deletion (it works in Linux, but does not work in Windows)
+    file.close();
     std::remove(filePath.c_str());
     ASSERT_FALSE(FileUtils::IsValidFilePath(filePath));
 }

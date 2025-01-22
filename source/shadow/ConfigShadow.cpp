@@ -53,7 +53,7 @@ void ConfigShadow::getNamedShadowAcceptedHandler(Iotshadow::GetShadowResponse *r
     configShadowExistsPromise.set_value(ioError == AWS_OP_SUCCESS);
 }
 
-void ConfigShadow::updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse *response, int ioError) const
+void ConfigShadow::updateNamedShadowAcceptedHandler(Iotshadow::UpdateShadowResponse */*response*/, int ioError) const
 {
     if (ioError)
     {

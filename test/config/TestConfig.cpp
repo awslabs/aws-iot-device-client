@@ -16,6 +16,10 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#ifdef _WIN32
+    #include <unistd.h>
+#endif
+
 using namespace std;
 using namespace Aws::Crt;
 using namespace Aws::Iot::DeviceClient;
@@ -63,7 +67,7 @@ class ConfigTestFixture : public ::testing::Test
         FileUtils::CreateDirectoryWithPermissions(addrPathInvalid.c_str(), invalidPerms);
 
         ostringstream outputPathStream;
-        outputPathStream << Config::DEFAULT_SAMPLE_SHADOW_OUTPUT_DIR << Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
+        outputPathStream << Config::getDefaulSampleOutputDir() << Config::DEFAULT_SAMPLE_SHADOW_DOCUMENT_FILE;
 
         outputPath = FileUtils::ExtractExpandedPath(outputPathStream.str().c_str());
     }

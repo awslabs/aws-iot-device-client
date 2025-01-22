@@ -229,7 +229,11 @@ class MockNotifier : public Aws::Iot::DeviceClient::ClientBaseNotifier
 class MockJobEngine : public JobEngine
 {
   public:
+#ifndef _WIN32
     MOCK_METHOD(void, processCmdOutput, (int fd, bool isStdErr, int childPID), (override));
+#else
+    MOCK_METHOD(void, processCmdOutput, (HANDLE hPipe, bool isStdErr, int childPID), (override));
+#endif
     MOCK_METHOD(int, exec_steps, (PlainJobDocument jobDocument, const std::string &jobHandlerDir), (override));
     MOCK_METHOD(int, hasErrors, (), (override));
     MOCK_METHOD(string, getReason, (int statusCode), (override));
@@ -257,12 +261,12 @@ class MockJobsFeature : public JobsFeature
 class TestJobsFeature : public ::testing::Test
 {
   public:
-    void SetUp()
+    void SetUp() override
     {
         // Initializing allocator, so we can use CJSON lib from SDK in our unit tests.
         resourceManager.initializeAllocator();
 
-        ThingName = Aws::Crt::String("thing-name value");
+        ThingName = shared_ptr<Aws::Crt::String>(new Aws::Crt::String("thing-name value"));
         notifier = shared_ptr<MockNotifier>(new MockNotifier());
         config = getSimpleConfig();
         startNextJobExecutionResponse =
@@ -271,7 +275,7 @@ class TestJobsFeature : public ::testing::Test
         mockClient = shared_ptr<MockJobsClient>(new MockJobsClient());
         mockEngine = shared_ptr<MockJobEngine>(new MockJobEngine());
     }
-    Aws::Crt::String ThingName;
+    shared_ptr<Aws::Crt::String> ThingName;
     shared_ptr<MockNotifier> notifier;
     SharedCrtResourceManager resourceManager;
     PlainConfig config;
@@ -324,27 +328,27 @@ TEST_F(TestJobsFeature, RunJobsHappy)
 
     EXPECT_CALL(
         *mockClient,
-        SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
         *mockClient,
-        SubscribeToStartNextPendingJobExecutionRejected(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        SubscribeToStartNextPendingJobExecutionRejected(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToNextJobExecutionChangedEvents(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToNextJobExecutionChangedEvents(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToUpdateJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToUpdateJobExecutionAccepted(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToUpdateJobExecutionRejected(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToUpdateJobExecutionRejected(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
-    EXPECT_CALL(*mockClient, PublishStartNextPendingJobExecution(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _))
+    EXPECT_CALL(*mockClient, PublishStartNextPendingJobExecution(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _))
         .Times(1)
         .WillOnce(InvokeArgument<2>(0));
 
@@ -380,27 +384,27 @@ TEST_F(TestJobsFeature, ExecuteJobHappy)
 
     EXPECT_CALL(
         *mockClient,
-        SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(DoAll(InvokeArgument<3>(0), InvokeArgument<2>(startNextJobExecutionResponse.get(), 0)));
     EXPECT_CALL(
         *mockClient,
-        SubscribeToStartNextPendingJobExecutionRejected(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        SubscribeToStartNextPendingJobExecutionRejected(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToNextJobExecutionChangedEvents(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToNextJobExecutionChangedEvents(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToUpdateJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToUpdateJobExecutionAccepted(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToUpdateJobExecutionRejected(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToUpdateJobExecutionRejected(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
-    EXPECT_CALL(*mockClient, PublishStartNextPendingJobExecution(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _))
+    EXPECT_CALL(*mockClient, PublishStartNextPendingJobExecution(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _))
         .Times(1)
         .WillOnce(InvokeArgument<2>(0));
 
@@ -457,27 +461,27 @@ TEST_F(TestJobsFeature, ExecuteJobStderror)
 
     EXPECT_CALL(
         *mockClient,
-        SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(DoAll(InvokeArgument<3>(0), InvokeArgument<2>(startNextJobExecutionResponse.get(), 0)));
     EXPECT_CALL(
         *mockClient,
-        SubscribeToStartNextPendingJobExecutionRejected(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        SubscribeToStartNextPendingJobExecutionRejected(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToNextJobExecutionChangedEvents(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToNextJobExecutionChangedEvents(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToUpdateJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToUpdateJobExecutionAccepted(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToUpdateJobExecutionRejected(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToUpdateJobExecutionRejected(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
-    EXPECT_CALL(*mockClient, PublishStartNextPendingJobExecution(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _))
+    EXPECT_CALL(*mockClient, PublishStartNextPendingJobExecution(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _))
         .Times(1)
         .WillOnce(InvokeArgument<2>(0));
 
@@ -535,27 +539,27 @@ TEST_F(TestJobsFeature, ExecuteJobStdOutAndStderror)
 
     EXPECT_CALL(
         *mockClient,
-        SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(DoAll(InvokeArgument<3>(0), InvokeArgument<2>(startNextJobExecutionResponse.get(), 0)));
     EXPECT_CALL(
         *mockClient,
-        SubscribeToStartNextPendingJobExecutionRejected(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        SubscribeToStartNextPendingJobExecutionRejected(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToNextJobExecutionChangedEvents(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToNextJobExecutionChangedEvents(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToUpdateJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToUpdateJobExecutionAccepted(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToUpdateJobExecutionRejected(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToUpdateJobExecutionRejected(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
-    EXPECT_CALL(*mockClient, PublishStartNextPendingJobExecution(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _))
+    EXPECT_CALL(*mockClient, PublishStartNextPendingJobExecution(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _))
         .Times(1)
         .WillOnce(InvokeArgument<2>(0));
 
@@ -608,7 +612,7 @@ TEST_F(TestJobsFeature, ExecuteJobDuplicateNotificaton)
 
     EXPECT_CALL(
         *mockClient,
-        SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(DoAll(
             InvokeArgument<3>(0),
@@ -617,22 +621,22 @@ TEST_F(TestJobsFeature, ExecuteJobDuplicateNotificaton)
 
     EXPECT_CALL(
         *mockClient,
-        SubscribeToStartNextPendingJobExecutionRejected(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        SubscribeToStartNextPendingJobExecutionRejected(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToNextJobExecutionChangedEvents(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToNextJobExecutionChangedEvents(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToUpdateJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToUpdateJobExecutionAccepted(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToUpdateJobExecutionRejected(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToUpdateJobExecutionRejected(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
-    EXPECT_CALL(*mockClient, PublishStartNextPendingJobExecution(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _))
+    EXPECT_CALL(*mockClient, PublishStartNextPendingJobExecution(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _))
         .Times(1)
         .WillOnce(InvokeArgument<2>(0));
 
@@ -674,27 +678,27 @@ TEST_F(TestJobsFeature, InvalidJobDocument)
 
     EXPECT_CALL(
         *mockClient,
-        SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        SubscribeToStartNextPendingJobExecutionAccepted(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(DoAll(InvokeArgument<3>(0), InvokeArgument<2>(startNextJobExecutionResponse.get(), 0)));
     EXPECT_CALL(
         *mockClient,
-        SubscribeToStartNextPendingJobExecutionRejected(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        SubscribeToStartNextPendingJobExecutionRejected(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToNextJobExecutionChangedEvents(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToNextJobExecutionChangedEvents(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToUpdateJobExecutionAccepted(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToUpdateJobExecutionAccepted(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
     EXPECT_CALL(
-        *mockClient, SubscribeToUpdateJobExecutionRejected(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
+        *mockClient, SubscribeToUpdateJobExecutionRejected(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _, _))
         .Times(1)
         .WillOnce(InvokeArgument<3>(0));
-    EXPECT_CALL(*mockClient, PublishStartNextPendingJobExecution(ThingNameEq(ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _))
+    EXPECT_CALL(*mockClient, PublishStartNextPendingJobExecution(ThingNameEq(*ThingName), AWS_MQTT_QOS_AT_LEAST_ONCE, _))
         .Times(1)
         .WillOnce(InvokeArgument<2>(0));
 

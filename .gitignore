@@ -16,3 +16,12 @@ docs/latex/
 
 # Mac
 .DS_Store
+.vs/VSWorkspaceState.json
+.vs/slnx.sqlite
+.vs/ProjectSettings.json
+.vs/CMake Overview
+.vs/cmake.db
+.vs/aws-iot-device-client/FileContentIndex/21ee8aa1-3595-428d-9ba2-0211ac531d8f.vsidx
+.vs/aws-iot-device-client/v17/.wsuo
+.vs/aws-iot-device-client/v17/Browse.VC.db
+.vs/aws-iot-device-client/v17/DocumentLayout.json

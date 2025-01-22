@@ -15,6 +15,14 @@
 #include <unistd.h>
 #include <wordexp.h>
 
+#ifdef _WIN32
+#include <io.h>
+    // undefine a few definitions from unistd as they conflict with stream methods
+    #undef close
+    #undef read
+    #undef write
+#endif
+
 using namespace std;
 using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
@@ -29,10 +37,19 @@ int FileUtils::Mkdirs(const std::string &path)
     }
     for (size_t i = 1; i < path.length(); i++)
     {
+#ifndef _WIN32
         if (path[i] == '/' && mkdir(path.substr(0, i).c_str(), S_IRWXU) != 0 && errno != EEXIST)
         {
             return -1;
         }
+#else
+        if (path[i] == '/' || path[i] == '\\') {
+            if (mkdir(path.substr(0, i).c_str(), S_IRWXU) != 0) {
+                if (errno != EEXIST)
+                    return -1;
+            }
+        }
+#endif
     }
     if (mkdir(path.c_str(), S_IRWXU) != 0 && errno != EEXIST)
     {
@@ -50,7 +67,13 @@ string FileUtils::ExtractParentDirectory(const string &filePath)
     }
     else
     {
-        return "./";
+        const size_t rightMostFwdSlash = filePath.rfind("\\");
+        if (std::string::npos != rightMostFwdSlash)
+        {
+            return filePath.substr(0, rightMostFwdSlash + 1);
+        }
+        else
+            return "./";
     }
 }
 
@@ -82,6 +105,10 @@ bool FileUtils::StoreValueInFile(const string &value, const string &filePath)
         return false;
     }
     file << value;
+#ifdef _WIN32
+    #undef close
+#endif
+
     file.close();
     return true;
 }
@@ -100,9 +127,12 @@ int FileUtils::ReadFromFile(const std::string &pathToFile, aws_byte_buf *data, s
         return AWS_OP_ERR;
     }
     file.read(reinterpret_cast<char *>(data->buffer), size);
-    data->len = size;
+    data->len = file.gcount(); // store how many characters were read
 
-    if (!file)
+    // Need to check if error happened prior to reach eof.
+    // Reading in Windows will not add CR symbol into the buffer.
+    // So, we can reach eof with file.gcount() < size)
+    if (!file && !file.eof())
     {
         file.close();
         return AWS_OP_ERR;
@@ -333,7 +363,7 @@ bool FileUtils::CreateEmptyFileWithPermissions(const string &filename, mode_t pe
     auto fd = open(expandedFilename.c_str(), O_CREAT | O_EXCL, permissions);
     if (-1 == fd)
     {
-        auto errnum = errno;
+        int errnum = errno;
         LOGM_ERROR(
             TAG,
             "Failed to create empty file: %s errno: %d msg: %s",
@@ -342,7 +372,11 @@ bool FileUtils::CreateEmptyFileWithPermissions(const string &filename, mode_t pe
             strerror(errnum));
         return false;
     }
+#ifdef _WIN32
+    _close(fd);
+#else
     close(fd);
+#endif
     return true;
 }
 

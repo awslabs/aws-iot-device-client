@@ -5,6 +5,7 @@
 
 ## Setting Up The Device Client
 
+### Setting Up On Linux
 This package comes with an interactive script for setting up the Device Client. This script can be used to generate
 initial Device Client configuration, as well as setup the Device Client as a service.
 
@@ -29,6 +30,25 @@ After completing the prompts, check if the config file exists in the proper dire
 By default, this will be `~/.aws-iot-device-client/aws-iot-device-client.conf` or `/etc/.aws-iot-device-client/aws-iot-device-client.conf` if you set up Device Client as a service.
 
 *Note: The Jobs and Secure Tunneling features are **enabled** by default, while all other Device Client features are **disabled** by default. You can use the JSON config file and/or CLI options to enable/disable any of these features.*
+
+### Setting Up On Windows
+This package comes with an interactive PowerShell script for setting up the Device Client. This script can be used to generate
+initial Device Client configuration in the similar way as it is done for Linux. However, setting up Device Client as Windows Service is not supported at the moment.
+
+To use the script, run the following command.
+
+```
+./setup.ps1
+```
+
+You should also make sure to run the script as Administrator or as a user with enough permissions to set / change file and folder security settings. The script will also ask you to provide a username under which you are planning to run AWS IoT Device Client. The script will use provided account to setup AWS IoT Device Client's file and folder permissions appropriately (refer to [Permissions Page][PERMISSIONS.md]).
+
+After completing the prompts, check if the config file exists in the proper directory. 
+By default, this will be `%USERPROFILE%/.aws-iot-device-client/aws-iot-device-client.conf` (Note, it will the the %USERPROFILE% of the provided user account or the current user if none provided).
+
+*Note: The Jobs and Secure Tunneling features are **enabled** by default, while all other Device Client features are **disabled** by default. You can use the JSON config file and/or CLI options to enable/disable any of these features.*
+
+### Additional / Other Settings
 
 You can use the following command to see all of the CLI options available for the Device Client
 

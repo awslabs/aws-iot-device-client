@@ -109,6 +109,15 @@ if (NOT EXCLUDE_SENSOR_PUBLISH)
     list(APPEND DC_TST ${SENSOR_PUBLISH_TST})
 endif ()
 
+#########################################
+# Get unistd implementation for Windows #
+#########################################
+if (WIN32)
+    file(GLOB ST_WIN32 "../source/win32/*.cpp")
+    list(APPEND DC_SRC ${ST_WIN32})
+    include_directories("../source/win32")
+endif ()
+
 list(APPEND DC_SRC ${DC_TST})
 list(FILTER DC_SRC EXCLUDE REGEX ".*main.cpp$")
 
@@ -140,4 +149,26 @@ if (VALGRIND_PATH)
         ${GTEST_PROJECT}-leak-check
         COMMAND ${VALGRIND_PATH} --leak-check=yes --error-exitcode=1 ./${GTEST_PROJECT}
         DEPENDS ${GTEST_PROJECT})
+endif()
+
+# Copy OpenSSL DLLs on Windows
+# Set the output directory for the executable
+# Use generator expressions to handle Debug/Release subfolders
+if (WIN32)
+    if (NOT OUTPUT_DIRECTORY)
+        # building independently
+        set(OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+    else()
+        # OUTPUT_DIRECTORy is already set: building from the main project
+        set(OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/../test/${CMAKE_BUILD_TYPE})
+    endif()
+    # Define a post-build step to copy multiple DLLs
+    add_custom_command(TARGET ${GTEST_PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${OPENSSL_INCLUDE_DIR}/../bin/libcrypto-3-x64.dll"
+        "${OUTPUT_DIRECTORY}/libcrypto-3-x64.dll"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${OPENSSL_INCLUDE_DIR}/../bin/libssl-3-x64.dll"
+        "${OUTPUT_DIRECTORY}/libssl-3-x64.dll"
+    )
 endif()
