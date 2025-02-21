@@ -2491,6 +2491,7 @@ constexpr char Config::TAG[];
 constexpr char Config::DEFAULT_CONFIG_DIR[];
 constexpr char Config::DEFAULT_KEY_DIR[];
 constexpr char Config::DEFAULT_CONFIG_FILE[];
+constexpr char Config::DEFAULT_ROOT_CONFIG_FILE[];
 constexpr char Config::CLI_HELP[];
 constexpr char Config::CLI_VERSION[];
 constexpr char Config::CLI_EXPORT_DEFAULT_SETTINGS[];
@@ -2884,7 +2885,7 @@ bool Config::ParseConfigFile(const string &file, ConfigFileType configFileType)
     }
 
 #if !defined(DISABLE_MQTT)
-    LOGM_INFO(TAG, "Successfully fetched JSON config file: %s", Sanitize(contents).c_str());
+    LOGM_INFO(TAG, "Successfully fetched JSON config file from %s : %s", expandedPath.c_str(), Sanitize(contents).c_str());
 #endif
     setting.close();
 
