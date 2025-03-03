@@ -1,5 +1,4 @@
-FROM public.ecr.aws/amazonlinux/amazonlinux:2.0.20230307.0
-
+FROM public.ecr.aws/amazonlinux/amazonlinux:2
 ARG OPENSSL_VERSION=3.0.8
 
 RUN yum -y update && yum -y install \
