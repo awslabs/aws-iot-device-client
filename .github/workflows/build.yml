@@ -37,7 +37,7 @@ jobs:
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
       - name: Archive ubuntu Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -45,7 +45,7 @@ jobs:
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -77,7 +77,7 @@ jobs:
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
       - name: Archive amazonlinux Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -85,7 +85,7 @@ jobs:
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -117,7 +117,7 @@ jobs:
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE
       - name: Archive rhel-ubi8 Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -125,7 +125,7 @@ jobs:
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -211,7 +211,7 @@ jobs:
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=armhf_cross_mode
       - name: Archive armhf32 Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -219,7 +219,7 @@ jobs:
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -251,7 +251,7 @@ jobs:
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=mips_cross_mode
       - name: Archive mips32 Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -259,7 +259,7 @@ jobs:
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -291,7 +291,7 @@ jobs:
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=aarch64_cross_mode
       - name: Archive aarch64 Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -299,7 +299,7 @@ jobs:
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -331,7 +331,7 @@ jobs:
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=ppc64_cross_mode
       - name: Archive aarch64 Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -339,7 +339,7 @@ jobs:
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -371,7 +371,7 @@ jobs:
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=ppc64le_cross_mode
       - name: Archive aarch64 Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -379,7 +379,7 @@ jobs:
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -411,7 +411,7 @@ jobs:
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_component_mode
       - name: Archive ST Ubuntu aarch64 Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -443,7 +443,7 @@ jobs:
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_aarch64_cross_mode
       - name: Archive ST Ubuntu aarch64 Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
@@ -475,7 +475,7 @@ jobs:
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_armhf_cross_mode
       - name: Archive st armhf32 Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
