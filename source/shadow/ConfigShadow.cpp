@@ -374,16 +374,37 @@ void ConfigShadow::resetClientConfigWithJSON(
         }
     }
 
-    // Save the updated configuration to a local file for persistence
-    JsonObject jsonObj;
-    config.SerializeToObject(jsonObj);  
+        if (desiredJsonView.ValueExists(PlainConfig::JSON_KEY_CONFIG_SHADOW) &&
+        deltaJsonView.ValueExists(PlainConfig::JSON_KEY_CONFIG_SHADOW))
+    {
+        PlainConfig::ConfigShadow configShadow;
+        configShadow.LoadFromJson(desiredJsonView.GetJsonObject(PlainConfig::JSON_KEY_CONFIG_SHADOW));
+        if (configShadow.Validate())
+        {
+            config.configShadow = configShadow;
+        }
+        else
+        {
+            LOGM_WARN(
+                TAG,
+                "Config shadow contains invalid configurations in %s feature, aborting this feature's configuration "
+                "update now. Please check the error logs for more information",
+                PlainConfig::JSON_KEY_CONFIG_SHADOW);
+        }
+    }
 
-    const char* jsonStr = jsonObj.View().WriteReadable().c_str();
-    LOGM_INFO(TAG, "Updating device configuration files with the following: %s", jsonStr);
-
-    string userConfig = FileUtils::ExtractExpandedPath(Config::DEFAULT_CONFIG_FILE);
-    updateLocalConfigFile(config, userConfig.c_str());
-    updateLocalConfigFile(config, Config::DEFAULT_ROOT_CONFIG_FILE);
+    // Save the updated configuration to a local file for persistence if required
+    if(config.configShadow.persistentUpdate)
+    {
+        JsonObject jsonObj;
+        config.SerializeToObject(jsonObj);  
+        const char* jsonStr = jsonObj.View().WriteReadable().c_str();
+        LOGM_INFO(TAG, "Updating device configuration files with the following config shadow update: %s", jsonStr);
+        
+        string userConfig = FileUtils::ExtractExpandedPath(Config::DEFAULT_CONFIG_FILE);
+        updateLocalConfigFile(config, userConfig.c_str());
+        updateLocalConfigFile(config, Config::DEFAULT_ROOT_CONFIG_FILE);
+    }
 }
 
 void ConfigShadow::updateShadowWithLocalConfig(Iotshadow::IotShadowClient iotShadowClient, PlainConfig &config)

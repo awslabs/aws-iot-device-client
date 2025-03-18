@@ -372,8 +372,10 @@ namespace Aws
 
                     static constexpr char CLI_ENABLE_CONFIG_SHADOW[] = "--enable-config-shadow";
                     static constexpr char JSON_ENABLE_CONFIG_SHADOW[] = "enabled";
+                    static constexpr char JSON_CONFIG_SHADOW_PERSISTENT_UPDATE[] = "persistent-update";
 
                     bool enabled{false};
+                    bool persistentUpdate{false};
                 };
                 ConfigShadow configShadow;
 

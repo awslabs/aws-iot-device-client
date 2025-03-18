@@ -1883,6 +1883,8 @@ void PlainConfig::SampleShadow::SerializeToObject(Crt::JsonObject &object) const
 
 constexpr char PlainConfig::ConfigShadow::JSON_ENABLE_CONFIG_SHADOW[];
 constexpr char PlainConfig::ConfigShadow::CLI_ENABLE_CONFIG_SHADOW[];
+constexpr char PlainConfig::ConfigShadow::JSON_CONFIG_SHADOW_PERSISTENT_UPDATE[];
+
 
 bool PlainConfig::ConfigShadow::LoadFromJson(const Crt::JsonView &json)
 {
@@ -1890,6 +1892,12 @@ bool PlainConfig::ConfigShadow::LoadFromJson(const Crt::JsonView &json)
     if (json.ValueExists(jsonKey))
     {
         enabled = json.GetBool(jsonKey);
+    }
+
+    jsonKey = JSON_CONFIG_SHADOW_PERSISTENT_UPDATE;
+    if (json.ValueExists(jsonKey))
+    {
+        persistentUpdate = json.GetBool(jsonKey);
     }
 
     return true;
@@ -1913,6 +1921,7 @@ bool PlainConfig::ConfigShadow::Validate() const
 void PlainConfig::ConfigShadow::SerializeToObject(Crt::JsonObject &object) const
 {
     object.WithBool(JSON_ENABLE_CONFIG_SHADOW, enabled);
+    object.WithBool(JSON_CONFIG_SHADOW_PERSISTENT_UPDATE, persistentUpdate);
 }
 
 constexpr char PlainConfig::SecureElement::CLI_ENABLE_SECURE_ELEMENT[];
@@ -3139,6 +3148,7 @@ bool Config::ExportDefaultSetting(const string &file)
         PlainConfig::SampleShadow::JSON_SAMPLE_SHADOW_OUTPUT_FILE,
         PlainConfig::JSON_KEY_CONFIG_SHADOW,
         PlainConfig::ConfigShadow::JSON_ENABLE_CONFIG_SHADOW,
+        PlainConfig::ConfigShadow::JSON_CONFIG_SHADOW_PERSISTENT_UPDATE,
         PlainConfig::JSON_KEY_SECURE_ELEMENT,
         PlainConfig::SecureElement::JSON_ENABLE_SECURE_ELEMENT,
         PlainConfig::SecureElement::JSON_PKCS11_LIB,
