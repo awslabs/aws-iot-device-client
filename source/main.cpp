@@ -183,7 +183,8 @@ void attemptConnection()
     try
     {
         Retry::ExponentialRetryConfig retryConfig = {10 * 1000, 900 * 1000, -1, nullptr};
-        auto publishLambda = []() -> bool {
+        auto publishLambda = []() -> bool
+        {
             int connectionStatus = resourceManager.get()->establishConnection(config.config);
             if (SharedCrtResourceManager::ABORT == connectionStatus)
             {
@@ -206,8 +207,8 @@ void attemptConnection()
                 return false;
             }
         };
-        std::thread attemptConnectionThread(
-            [retryConfig, publishLambda] { Retry::exponentialBackoff(retryConfig, publishLambda); });
+        std::thread attemptConnectionThread([retryConfig, publishLambda]
+                                            { Retry::exponentialBackoff(retryConfig, publishLambda); });
         attemptConnectionThread.join();
     }
     catch (const std::exception &e)
@@ -288,7 +289,7 @@ namespace Aws
                 }
             };
         } // namespace DeviceClient
-    }     // namespace Iot
+    } // namespace Iot
 } // namespace Aws
 
 int main(int argc, char *argv[])

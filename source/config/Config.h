@@ -541,7 +541,7 @@ namespace Aws
                 static bool ExportDefaultSetting(const std::string &file);
             };
         } // namespace DeviceClient
-    }     // namespace Iot
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_CONFIG_H

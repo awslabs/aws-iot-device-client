@@ -123,8 +123,8 @@ namespace Aws
                     static bool reconfigure(const PlainConfig &config);
                 };
             } // namespace Logging
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_LOGGERFACTORY_H

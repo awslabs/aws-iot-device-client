@@ -117,8 +117,8 @@ namespace Aws
                     std::size_t getSensorsSize() const;
                 };
             } // namespace SensorPublish
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_SENSORPUBLISHFEATURE_H
