@@ -55,8 +55,8 @@ namespace Aws
                     }
                 };
             } // namespace Jobs
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_EPHEMERALPROMISE_H

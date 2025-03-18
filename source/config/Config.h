@@ -488,7 +488,8 @@ namespace Aws
                 static constexpr char DEFAULT_CONFIG_DIR[] = "~/.aws-iot-device-client/";
                 static constexpr char DEFAULT_KEY_DIR[] = "~/.aws-iot-device-client/keys/";
                 static constexpr char DEFAULT_CONFIG_FILE[] = "~/.aws-iot-device-client/aws-iot-device-client.conf";
-                static constexpr char DEFAULT_ROOT_CONFIG_FILE[] = "/etc/.aws-iot-device-client/aws-iot-device-client.conf";
+                static constexpr char DEFAULT_ROOT_CONFIG_FILE[] =
+                    "/etc/.aws-iot-device-client/aws-iot-device-client.conf";
                 static constexpr char DEFAULT_FLEET_PROVISIONING_RUNTIME_CONFIG_FILE[] =
                     "~/.aws-iot-device-client/aws-iot-device-client-runtime.conf";
                 static constexpr char DEFAULT_HTTP_PROXY_CONFIG_FILE[] = "~/.aws-iot-device-client/http-proxy.conf";
@@ -541,7 +542,7 @@ namespace Aws
                 static bool ExportDefaultSetting(const std::string &file);
             };
         } // namespace DeviceClient
-    }     // namespace Iot
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_CONFIG_H

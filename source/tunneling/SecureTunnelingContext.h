@@ -235,8 +235,8 @@ namespace Aws
                     Aws::Crt::Optional<Aws::Iotsecuretunneling::SecureTunnelingNotifyResponse> mLastSeenNotifyResponse;
                 };
             } // namespace SecureTunneling
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_SECURETUNNELINGCONTEXT_H

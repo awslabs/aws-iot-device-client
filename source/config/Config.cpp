@@ -1885,7 +1885,6 @@ constexpr char PlainConfig::ConfigShadow::JSON_ENABLE_CONFIG_SHADOW[];
 constexpr char PlainConfig::ConfigShadow::CLI_ENABLE_CONFIG_SHADOW[];
 constexpr char PlainConfig::ConfigShadow::JSON_CONFIG_SHADOW_PERSISTENT_UPDATE[];
 
-
 bool PlainConfig::ConfigShadow::LoadFromJson(const Crt::JsonView &json)
 {
     const char *jsonKey = JSON_ENABLE_CONFIG_SHADOW;
@@ -2894,7 +2893,8 @@ bool Config::ParseConfigFile(const string &file, ConfigFileType configFileType)
     }
 
 #if !defined(DISABLE_MQTT)
-    LOGM_INFO(TAG, "Successfully fetched JSON config file from %s : %s", expandedPath.c_str(), Sanitize(contents).c_str());
+    LOGM_INFO(
+        TAG, "Successfully fetched JSON config file from %s : %s", expandedPath.c_str(), Sanitize(contents).c_str());
 #endif
     setting.close();
 

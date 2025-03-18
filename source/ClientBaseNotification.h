@@ -38,7 +38,7 @@ namespace Aws
                 SUBSCRIPTION_FAILED
             };
         } // namespace DeviceClient
-    }     // namespace Iot
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_CLIENTBASENOTIFICATION_H
