@@ -21,16 +21,21 @@ When the config shadow is enabled, the device client will create or update a sha
 You can also update desired value in this config shadow from cloud side to remotely configure the device client. Once the value is updated, if the device client is running you need to restart the device client to make the new change take effect. Device client also provides jobs functionality to automate this restart process remotely, so you can also choose to create a new `restart job` when jobs feature is enabled.
 Device Client would also perform configuration validation check when detecting there is an update request from cloud, if a feature's configuration in shadow is not valid, device client will abort this change and still keep sync with the local configuration. You can refer to the device client logging to identify which specific configuration is invalid. 
 
+#### New
+The new persistent-update field allows users to control whether changes made through the config shadow should be persistently saved to the device-side configuration file. When enabled, any valid configuration changes received through the shadow will be written to the local configuration file, ensuring that these changes persist across multiple device restarts.
+
 *Note: Config Shadow only supports to store Jobs/Tunneling/DeviceDefender/SampleShadow/PubSub's configureation and all secure parts of configuration (endpoints, thing-name, keys, certs, CA and FleetProvision feature) will not be exposed in this shadow.*
 
 *Note: Device Client will check if there is update request from cloud by checking the [delta](https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html#update-delta-pub-sub-topic) filed in the config shadow. If there is no update request from cloud, device client would be configured based on local setting and config shadow will be updated correspondingly.*
 
+*Note: When persistent-update is enabled, the Device Client will attempt to update both the user-specific configuration file (~/.aws-iot-device-client/aws-iot-device-client.conf) and the system-wide configuration file (/etc/.aws-iot-device-client/aws-iot-device-client.conf) if they exist. Make sure you have root level privileges if you want to update the system-wide configuration file. This ensures that configuration changes are reflected in all relevant locations.*
 
 ```
 {
     ...
    "config-shadow": {
-        "enabled": false
+        "enabled": false,
+        "persistent-update": false
    },
    "sample-shadow": {
         "enabled": false,

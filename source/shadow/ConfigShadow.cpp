@@ -40,7 +40,7 @@ void ConfigShadow::updateLocalConfigFile(PlainConfig &config, const char* config
     }
     else
     {
-    LOGM_WARN(TAG, "Failed to open config file: %s, Error: %s", configFilePath, strerror(errno));
+        LOGM_WARN(TAG, "Failed to open config file: %s, Error: %s", configFilePath, strerror(errno));
     }
 }
 
@@ -401,9 +401,28 @@ void ConfigShadow::resetClientConfigWithJSON(
         const char* jsonStr = jsonObj.View().WriteReadable().c_str();
         LOGM_INFO(TAG, "Updating device configuration files with the following config shadow update: %s", jsonStr);
         
+        // Check and update user-level config file
         string userConfig = FileUtils::ExtractExpandedPath(Config::DEFAULT_CONFIG_FILE);
-        updateLocalConfigFile(config, userConfig.c_str());
-        updateLocalConfigFile(config, Config::DEFAULT_ROOT_CONFIG_FILE);
+        if (FileUtils::FileExists(userConfig))
+        {
+            LOGM_INFO(TAG, "Updating user-level config file: %s", userConfig.c_str());
+            updateLocalConfigFile(config, userConfig.c_str());
+        }
+        else
+        {
+            LOGM_WARN(TAG, "User-level config file does not exist: %s", userConfig.c_str());
+        }
+    
+        // Check and update system-level config file
+        if (FileUtils::FileExists(Config::DEFAULT_SYSTEM_CONFIG_FILE))
+        {
+            LOGM_INFO(TAG, "Updating system-level config file: %s", Config::DEFAULT_SYSTEM_CONFIG_FILE);
+            updateLocalConfigFile(config, Config::DEFAULT_SYSTEM_CONFIG_FILE);
+        }
+        else
+        {
+            LOGM_WARN(TAG, "System-level config file does not exist: %s", Config::DEFAULT_SYSTEM_CONFIG_FILE);
+        }
     }
 }
 

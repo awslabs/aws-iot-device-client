@@ -204,7 +204,7 @@ namespace Aws
                      * \brief Updates the local configuration file of device client with the config shadow update 
                      * received from the AWS IOT core for persistence of the new device configuration 
                      * @param config device client local configuration
-                     * @param configFilePath file path of the local aws-iot-device-client.conf
+                     * @param configFilePath absolute file path of device client configuration
                      */
                     void updateLocalConfigFile(PlainConfig &config,  const char* configFilePath) const;
 
