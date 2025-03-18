@@ -25,12 +25,12 @@ constexpr char ConfigShadow::TAG[];
 constexpr char ConfigShadow::DEFAULT_CONFIG_SHADOW_NAME[];
 constexpr int ConfigShadow::DEFAULT_WAIT_TIME_SECONDS;
 
-void ConfigShadow::updateLocalConfigFile(PlainConfig &config, const char* configFilePath)const
+void ConfigShadow::updateLocalConfigFile(PlainConfig &config, const char *configFilePath) const
 {
     ofstream configFile(configFilePath);
     JsonObject jsonObj;
     // Convert config to JSON
-    config.SerializeToObject(jsonObj);  
+    config.SerializeToObject(jsonObj);
 
     if (configFile.is_open())
     {
@@ -40,7 +40,7 @@ void ConfigShadow::updateLocalConfigFile(PlainConfig &config, const char* config
     }
     else
     {
-    LOGM_WARN(TAG, "Failed to open config file: %s, Error: %s", configFilePath, strerror(errno));
+        LOGM_WARN(TAG, "Failed to open config file: %s, Error: %s", configFilePath, strerror(errno));
     }
 }
 
@@ -374,7 +374,7 @@ void ConfigShadow::resetClientConfigWithJSON(
         }
     }
 
-        if (desiredJsonView.ValueExists(PlainConfig::JSON_KEY_CONFIG_SHADOW) &&
+    if (desiredJsonView.ValueExists(PlainConfig::JSON_KEY_CONFIG_SHADOW) &&
         deltaJsonView.ValueExists(PlainConfig::JSON_KEY_CONFIG_SHADOW))
     {
         PlainConfig::ConfigShadow configShadow;
@@ -394,13 +394,13 @@ void ConfigShadow::resetClientConfigWithJSON(
     }
 
     // Save the updated configuration to a local file for persistence if required
-    if(config.configShadow.persistentUpdate)
+    if (config.configShadow.persistentUpdate)
     {
         JsonObject jsonObj;
-        config.SerializeToObject(jsonObj);  
-        const char* jsonStr = jsonObj.View().WriteReadable().c_str();
+        config.SerializeToObject(jsonObj);
+        const char *jsonStr = jsonObj.View().WriteReadable().c_str();
         LOGM_INFO(TAG, "Updating device configuration files with the following config shadow update: %s", jsonStr);
-        
+
         string userConfig = FileUtils::ExtractExpandedPath(Config::DEFAULT_CONFIG_FILE);
         updateLocalConfigFile(config, userConfig.c_str());
         updateLocalConfigFile(config, Config::DEFAULT_ROOT_CONFIG_FILE);

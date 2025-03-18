@@ -93,9 +93,15 @@ namespace Aws
                 }
 
                 // cppcheck-suppress unusedFunction
-                string TrimLeftCopy(string s, const string &any) { return s.erase(0, s.find_first_not_of(any)); }
+                string TrimLeftCopy(string s, const string &any)
+                {
+                    return s.erase(0, s.find_first_not_of(any));
+                }
 
-                string TrimRightCopy(string s, const string &any) { return s.erase(s.find_last_not_of(any) + 1); }
+                string TrimRightCopy(string s, const string &any)
+                {
+                    return s.erase(s.find_last_not_of(any) + 1);
+                }
 
                 string TrimCopy(string s, const string &any)
                 {
@@ -137,6 +143,6 @@ namespace Aws
                     }
                 }
             } // namespace Util
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws

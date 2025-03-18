@@ -154,8 +154,8 @@ namespace Aws
                     Aws::Crt::ByteBuf mSendBuffer;
                 };
             } // namespace SecureTunneling
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_TCPFORWARD_H

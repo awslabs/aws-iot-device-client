@@ -201,17 +201,16 @@ namespace Aws
                      */
                     void loadFeatureConfigIntoJsonObject(PlainConfig &config, Aws::Crt::JsonObject &jsonObj) const;
                     /**
-                     * \brief Updates the local configuration file of device client with the config shadow update 
-                     * received from the AWS IOT core for persistence of the new device configuration 
+                     * \brief Updates the local configuration file of device client with the config shadow update
+                     * received from the AWS IOT core for persistence of the new device configuration
                      * @param config device client local configuration
                      * @param configFilePath file path of the local aws-iot-device-client.conf
                      */
-                    void updateLocalConfigFile(PlainConfig &config,  const char* configFilePath) const;
-
+                    void updateLocalConfigFile(PlainConfig &config, const char *configFilePath) const;
                 };
             } // namespace Shadow
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // AWS_IOT_DEVICE_CLIENT_CONFIGSHADOW_H

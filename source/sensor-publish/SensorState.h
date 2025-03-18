@@ -22,8 +22,8 @@ namespace Aws
                     Connected
                 };
             } // namespace SensorPublish
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_SENSOR_STATE_H

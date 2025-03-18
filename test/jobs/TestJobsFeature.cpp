@@ -702,8 +702,9 @@ TEST_F(TestJobsFeature, InvalidJobDocument)
         *jobsMock,
         publishUpdateJobExecutionStatusWithRetry(
             JobExecutionEq(job),
-            StatusInfoEq(JobsFeature::JobExecutionStatusInfo(
-                Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!", "", "")),
+            StatusInfoEq(
+                JobsFeature::JobExecutionStatusInfo(
+                    Iotjobs::JobStatus::REJECTED, "Unable to execute job, invalid job document provided!", "", "")),
             _,
             _))
         .Times(1);

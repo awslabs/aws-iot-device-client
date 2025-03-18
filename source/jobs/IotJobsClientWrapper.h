@@ -112,8 +112,8 @@ namespace Aws
                     std::unique_ptr<Aws::Iotjobs::IotJobsClient> jobsClient;
                 };
             } // namespace Jobs
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // AWS_IOT_DEVICE_CLIENT_IOTJOBSCLIENTWRAPPER_H

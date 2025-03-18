@@ -124,8 +124,8 @@ namespace Aws
                     void runFileMonitor();
                 };
             } // namespace Samples
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_SAMPLESFEATURE_H
