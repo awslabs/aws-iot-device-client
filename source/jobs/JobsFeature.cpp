@@ -425,7 +425,8 @@ void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
         retryConfig.needStopFlag = nullptr;
     }
 
-    auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool {
+    auto publishLambda = [this, data, statusInfo, statusDetails]() -> bool
+    {
         // We first need to make sure that we haven't previously leaked any promises into our map
         unique_lock<mutex> leakLock(updateJobExecutionPromisesLock);
         for (auto keyPromise = updateJobExecutionPromises.cbegin(); keyPromise != updateJobExecutionPromises.cend();
@@ -513,9 +514,9 @@ void JobsFeature::publishUpdateJobExecutionStatusWithRetry(
         this->updateJobExecutionPromises.erase(clientToken.c_str());
         return finished;
     };
-    std::thread updateJobExecutionThread([retryConfig, publishLambda, onCompleteCallback] {
-        Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback);
-    });
+    std::thread updateJobExecutionThread(
+        [retryConfig, publishLambda, onCompleteCallback]
+        { Retry::exponentialBackoff(retryConfig, publishLambda, onCompleteCallback); });
     updateJobExecutionThread.detach();
 }
 
@@ -608,7 +609,8 @@ bool JobsFeature::isDuplicateNotification(JobExecutionData job)
 
 void JobsFeature::initJob(const JobExecutionData &job)
 {
-    auto shutdownHandler = [this]() -> void {
+    auto shutdownHandler = [this]() -> void
+    {
         handlingJob.store(false);
         if (needStop.load())
         {
@@ -639,7 +641,8 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
 {
     LOGM_INFO(TAG, "Executing job: %s", job.JobId->c_str());
 
-    auto shutdownHandler = [this]() -> void {
+    auto shutdownHandler = [this]() -> void
+    {
         handlingJob.store(false);
         if (needStop.load())
         {
@@ -648,7 +651,8 @@ void JobsFeature::executeJob(const Iotjobs::JobExecutionData &job, const PlainJo
         }
     };
     // TODO: Add support for checking condition
-    auto runJob = [this, job, jobDocument, shutdownHandler]() {
+    auto runJob = [this, job, jobDocument, shutdownHandler]()
+    {
         auto engine = createJobEngine();
         // execute all action steps in sequence as provided in job document
         int executionStatus = engine->exec_steps(jobDocument, jobHandlerDir);

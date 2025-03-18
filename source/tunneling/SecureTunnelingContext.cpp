@@ -186,8 +186,41 @@ namespace Aws
 
                 void SecureTunnelingContext::OnTcpForwardDataReceive(const Crt::ByteBuf &data) const
                 {
+
+                    if (data.len == 0)
+                    {
+                        LOG_WARN(TAG, "Received empty data buffer in OnTcpForwardDataReceive");
+                        return;
+                    }
+
                     LOGM_DEBUG(TAG, "SecureTunnelingContext::OnTcpForwardDataReceive data.len=%zu", data.len);
-                    mSecureTunnel->SendData(aws_byte_cursor_from_buf(&data));
+                    const size_t MAX_CHUNK_SIZE = 32768; 
+                    size_t offset = 0;
+                    size_t total_sent = 0;
+                
+                    while (offset < data.len)
+                    {
+                        size_t chunk_size = std::min(MAX_CHUNK_SIZE, data.len - offset);
+                        Aws::Crt::ByteCursor chunk = aws_byte_cursor_from_array(data.buffer + offset, chunk_size);
+                        int result = mSecureTunnel->SendData(chunk);
+                        if (result != AWS_OP_SUCCESS)
+                        {
+                            LOGM_ERROR(TAG, "Failed to send data block to secure tunnel. Block size: %zu, Total bytes sent: %zu, Total size: %zu", 
+                                       chunk_size, total_sent, data.len);
+                            break;
+                        }
+                        offset += chunk_size;
+                        total_sent += chunk_size;
+                    }
+                
+                    if (total_sent == data.len)
+                    {
+                        LOGM_INFO(TAG, "Successfully sent data block. Total bytes sent: %zu", total_sent);
+                    }
+                    else
+                    {
+                        LOG_WARN(TAG, "Incomplete data block sent due to network issue");
+                    }
                 }
 
                 void SecureTunnelingContext::StopSecureTunnel()
