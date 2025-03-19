@@ -25,7 +25,7 @@ constexpr char ConfigShadow::TAG[];
 constexpr char ConfigShadow::DEFAULT_CONFIG_SHADOW_NAME[];
 constexpr int ConfigShadow::DEFAULT_WAIT_TIME_SECONDS;
 
-void ConfigShadow::updateLocalConfigFile(PlainConfig &config, const char *configFilePath) const
+void ConfigShadow::updateLocalConfigFile(const PlainConfig &config, const char *configFilePath) const
 {
     ofstream configFile(configFilePath);
     JsonObject jsonObj;

@@ -206,7 +206,7 @@ namespace Aws
                      * @param config device client local configuration
                      * @param configFilePath absolute file path of device client configuration
                      */
-                    void updateLocalConfigFile(PlainConfig &config, const char *configFilePath) const;
+                    void updateLocalConfigFile(const PlainConfig &config, const char *configFilePath) const;
                 };
             } // namespace Shadow
         } // namespace DeviceClient
