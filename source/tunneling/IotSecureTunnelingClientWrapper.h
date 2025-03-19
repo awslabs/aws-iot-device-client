@@ -46,8 +46,8 @@ namespace Aws
                     std::unique_ptr<Iotsecuretunneling::IotSecureTunnelingClient> iotSecureTunnelingClient;
                 };
             } // namespace SecureTunneling
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // AWS_IOT_DEVICE_CLIENT_IOTSECURETUNNELINGCLIENTWRAPPER_H

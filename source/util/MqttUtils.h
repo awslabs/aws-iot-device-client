@@ -29,7 +29,7 @@ namespace Aws
                      */
                     bool ValidateAwsIotMqttTopicName(std::string topic);
                 } // namespace MqttUtils
-            }     // namespace Util
-        }         // namespace DeviceClient
-    }             // namespace Iot
+            } // namespace Util
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws

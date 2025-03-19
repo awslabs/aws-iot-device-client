@@ -103,7 +103,7 @@ namespace Aws
                 void dumpMemTrace();
             };
         } // namespace DeviceClient
-    }     // namespace Iot
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_SHAREDCRTRESOURCEMANAGER_H

@@ -109,6 +109,6 @@ namespace Aws
                  */
                 void replace_all(std::string &inout, const std::string &what, const std::string &with);
             } // namespace Util
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws

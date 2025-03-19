@@ -19,10 +19,31 @@ using namespace Aws::Iotshadow;
 using namespace Aws::Iot::DeviceClient::Shadow;
 using namespace Aws::Iot::DeviceClient::Util;
 using namespace Aws::Iot::DeviceClient::Logging;
+using namespace Aws::Iot::DeviceClient;
 
 constexpr char ConfigShadow::TAG[];
 constexpr char ConfigShadow::DEFAULT_CONFIG_SHADOW_NAME[];
 constexpr int ConfigShadow::DEFAULT_WAIT_TIME_SECONDS;
+
+void ConfigShadow::updateLocalConfigFile(PlainConfig &config, const char *configFilePath) const
+{
+    ofstream configFile(configFilePath);
+    JsonObject jsonObj;
+    // Convert config to JSON
+    config.SerializeToObject(jsonObj);
+
+    if (configFile.is_open())
+    {
+        configFile << jsonObj.View().WriteReadable();
+        configFile.close();
+        LOGM_INFO(TAG, "Updated configuration saved locally to disk at: %s", configFilePath);
+    }
+    else
+    {
+        LOGM_WARN(TAG, "Failed to open config file: %s, Error: %s", configFilePath, strerror(errno));
+    }
+}
+
 void ConfigShadow::getNamedShadowRejectedHandler(Iotshadow::ErrorResponse *errorResponse, int ioError)
 {
     if (ioError)
@@ -350,6 +371,56 @@ void ConfigShadow::resetClientConfigWithJSON(
                 "Config shadow contains invalid configurations in %s feature, aborting this feature's configuration "
                 "update now. Please check the error logs for more information",
                 PlainConfig::JSON_KEY_SAMPLE_SHADOW);
+        }
+    }
+
+    if (desiredJsonView.ValueExists(PlainConfig::JSON_KEY_CONFIG_SHADOW) &&
+        deltaJsonView.ValueExists(PlainConfig::JSON_KEY_CONFIG_SHADOW))
+    {
+        PlainConfig::ConfigShadow configShadow;
+        configShadow.LoadFromJson(desiredJsonView.GetJsonObject(PlainConfig::JSON_KEY_CONFIG_SHADOW));
+        if (configShadow.Validate())
+        {
+            config.configShadow = configShadow;
+        }
+        else
+        {
+            LOGM_WARN(
+                TAG,
+                "Config shadow contains invalid configurations in %s feature, aborting this feature's configuration "
+                "update now. Please check the error logs for more information",
+                PlainConfig::JSON_KEY_CONFIG_SHADOW);
+        }
+    }
+
+    // Save the updated configuration to a local file for persistence if required
+    if (config.configShadow.persistentUpdate)
+    {
+        JsonObject jsonObj;
+        config.SerializeToObject(jsonObj);
+        const char *jsonStr = jsonObj.View().WriteReadable().c_str();
+        LOGM_INFO(TAG, "Updating device configuration files with the following config shadow update: %s", jsonStr);
+
+        string userConfig = FileUtils::ExtractExpandedPath(Config::DEFAULT_CONFIG_FILE);
+        if (FileUtils::FileExists(userConfig))
+        {
+            LOGM_INFO(TAG, "Updating user-level config file: %s", userConfig.c_str());
+            updateLocalConfigFile(config, userConfig.c_str());
+        }
+        else
+        {
+            LOGM_WARN(TAG, "User-level config file does not exist: %s", userConfig.c_str());
+        }
+    
+        // Check and update system-level config file
+        if (FileUtils::FileExists(Config::DEFAULT_SYSTEM_CONFIG_FILE))
+        {
+            LOGM_INFO(TAG, "Updating system-level config file: %s", Config::DEFAULT_SYSTEM_CONFIG_FILE);
+            updateLocalConfigFile(config, Config::DEFAULT_SYSTEM_CONFIG_FILE);
+        }
+        else
+        {
+            LOGM_WARN(TAG, "System-level config file does not exist or permission denied to open: %s", Config::DEFAULT_SYSTEM_CONFIG_FILE);
         }
     }
 }

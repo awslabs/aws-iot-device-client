@@ -211,8 +211,8 @@ namespace Aws
                     std::vector<std::unique_ptr<SecureTunnelingContext>> mContexts;
                 };
             } // namespace SecureTunneling
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_SECURETUNNELINGFEATURE_H
