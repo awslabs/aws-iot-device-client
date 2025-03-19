@@ -92,9 +92,8 @@ TEST(FileUtils, handlesEmptyPathForStoreValueInFile)
 
 TEST(FileUtils, testStoreValueInFile)
 {
-    ASSERT_TRUE(
-        FileUtils::StoreValueInFile(
-            "This file was created as part of testStoreValueInFile unit test.", "/tmp/testStoreValueInFile.txt"));
+    ASSERT_TRUE(FileUtils::StoreValueInFile(
+        "This file was created as part of testStoreValueInFile unit test.", "/tmp/testStoreValueInFile.txt"));
 }
 
 TEST(FileUtils, assertsCorrectFilePermissions)
