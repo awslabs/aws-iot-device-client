@@ -68,7 +68,8 @@ TEST(SerializeConfigTestFixture, SerializeCompleteConfigTest)
 		}
 	},
     "config-shadow": {
-        "enabled": true
+        "enabled": true,
+        "persistent-update": false
       },
     "sample-shadow": {
         "enabled": true,
@@ -168,7 +169,8 @@ TEST(SerializeConfigTestFixture, SerializeBasicConfigTest)
         }
     },
     "config-shadow": {
-        "enabled": true
+        "enabled": true,
+        "persistent-update": false
     },
     "sample-shadow": {
         "enabled": true
