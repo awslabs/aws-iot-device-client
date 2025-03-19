@@ -420,7 +420,7 @@ void ConfigShadow::resetClientConfigWithJSON(
         }
         else
         {
-            LOGM_WARN(TAG, "System-level config file does not exist: %s", Config::DEFAULT_SYSTEM_CONFIG_FILE);
+            LOGM_WARN(TAG, "System-level config file does not exist or permission denied to open: %s", Config::DEFAULT_SYSTEM_CONFIG_FILE);
         }
     }
 }

@@ -2499,7 +2499,7 @@ constexpr char Config::TAG[];
 constexpr char Config::DEFAULT_CONFIG_DIR[];
 constexpr char Config::DEFAULT_KEY_DIR[];
 constexpr char Config::DEFAULT_CONFIG_FILE[];
-constexpr char Config::DEFAULT_ROOT_CONFIG_FILE[];
+constexpr char Config::DEFAULT_SYSTEM_CONFIG_FILE[];
 constexpr char Config::CLI_HELP[];
 constexpr char Config::CLI_VERSION[];
 constexpr char Config::CLI_EXPORT_DEFAULT_SETTINGS[];
