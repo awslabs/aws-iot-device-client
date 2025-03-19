@@ -25,7 +25,7 @@ constexpr char ConfigShadow::TAG[];
 constexpr char ConfigShadow::DEFAULT_CONFIG_SHADOW_NAME[];
 constexpr int ConfigShadow::DEFAULT_WAIT_TIME_SECONDS;
 
-void ConfigShadow::updateLocalConfigFile(PlainConfig &config, const char *configFilePath) const
+void ConfigShadow::updateLocalConfigFile(const PlainConfig &config, const char *configFilePath) const
 {
     ofstream configFile(configFilePath);
     JsonObject jsonObj;
@@ -411,7 +411,7 @@ void ConfigShadow::resetClientConfigWithJSON(
         {
             LOGM_WARN(TAG, "User-level config file does not exist: %s", userConfig.c_str());
         }
-    
+
         // Check and update system-level config file
         if (FileUtils::FileExists(Config::DEFAULT_SYSTEM_CONFIG_FILE))
         {
@@ -420,7 +420,10 @@ void ConfigShadow::resetClientConfigWithJSON(
         }
         else
         {
-            LOGM_WARN(TAG, "System-level config file does not exist or permission denied to open: %s", Config::DEFAULT_SYSTEM_CONFIG_FILE);
+            LOGM_WARN(
+                TAG,
+                "System-level config file does not exist or permission denied to open: %s",
+                Config::DEFAULT_SYSTEM_CONFIG_FILE);
         }
     }
 }
