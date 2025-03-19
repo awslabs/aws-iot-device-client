@@ -192,8 +192,8 @@ namespace Aws
                     virtual std::string getStdErr() { return stderrstream.toString(); };
                 };
             } // namespace Jobs
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_JOBENGINE_H

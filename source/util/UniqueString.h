@@ -32,8 +32,8 @@ namespace Aws
                     static std::string GetRandomToken(size_t length);
                 };
             } // namespace Util
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_UNIQUESTRING_H

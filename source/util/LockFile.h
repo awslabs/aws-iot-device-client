@@ -43,8 +43,8 @@ namespace Aws
                     LockFile &operator=(const LockFile &) = delete;
                 };
             } // namespace Util
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // AWS_IOT_DEVICE_CLIENT_LOCKFILE_H

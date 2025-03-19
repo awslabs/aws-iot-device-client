@@ -42,6 +42,6 @@ namespace Aws
                         request, AWS_MQTT_QOS_AT_LEAST_ONCE, handler, onSubAck);
                 }
             } // namespace SecureTunneling
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws

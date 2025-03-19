@@ -37,7 +37,7 @@ namespace Aws
 
                     bool IsIpAddressPrivate(std::uint32_t ipAddress);
                 } // namespace ProxyUtils
-            }     // namespace Util
-        }         // namespace DeviceClient
-    }             // namespace Iot
+            } // namespace Util
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws

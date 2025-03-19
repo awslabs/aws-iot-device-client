@@ -50,7 +50,7 @@ namespace Aws
                     const std::string &message) = 0;
             };
         } // namespace DeviceClient
-    }     // namespace Iot
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_CLIENTBASENOTIFIER_H

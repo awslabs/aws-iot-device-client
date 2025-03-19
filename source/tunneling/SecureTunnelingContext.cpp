@@ -138,7 +138,10 @@ namespace Aws
                     mTcpForward->Connect();
                 }
 
-                void SecureTunnelingContext::DisconnectFromTcpForward() { mTcpForward.reset(); }
+                void SecureTunnelingContext::DisconnectFromTcpForward()
+                {
+                    mTcpForward.reset();
+                }
 
                 void SecureTunnelingContext::OnConnectionComplete() const
                 {
@@ -286,6 +289,6 @@ namespace Aws
                         bind(&SecureTunnelingContext::OnTcpForwardDataReceive, this, placeholders::_1));
                 }
             } // namespace SecureTunneling
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws

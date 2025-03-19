@@ -78,8 +78,8 @@ namespace Aws
                     static constexpr char TAG[] = "SecureTunnelWrapper.cpp";
                 };
             } // namespace SecureTunneling
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // AWS_IOT_DEVICE_CLIENT_SECURETUNNELWRAPPER_H

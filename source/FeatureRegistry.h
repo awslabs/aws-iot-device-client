@@ -77,8 +77,8 @@ namespace Aws
                 };
 
             } // namespace Util
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // AWS_IOT_DEVICE_CLIENT_FEATURE_REGISTRY_H

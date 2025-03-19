@@ -69,8 +69,8 @@ namespace Aws
                         const std::function<void()> &onComplete = nullptr);
                 };
             } // namespace Util
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_RETRY_H

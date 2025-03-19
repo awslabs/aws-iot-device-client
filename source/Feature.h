@@ -53,7 +53,7 @@ namespace Aws
                 virtual std::string getName() = 0;
             };
         } // namespace DeviceClient
-    }     // namespace Iot
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_FEATURE_H
