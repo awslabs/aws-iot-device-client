@@ -113,8 +113,8 @@ namespace Aws
                     aws_socket socket{};
                 };
             } // namespace SensorPublish
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_SOCKET_H

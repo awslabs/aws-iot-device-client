@@ -25,8 +25,8 @@ namespace Aws
                     const char *ToString(LogLevel level);
                 }
             } // namespace Logging
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_LOGLEVEL_H

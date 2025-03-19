@@ -173,7 +173,7 @@ namespace Aws
                     using std::runtime_error::runtime_error;
                 };
             } // namespace Util
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 #endif // AWS_IOT_DEVICE_CLIENT_FILEUTILS_H

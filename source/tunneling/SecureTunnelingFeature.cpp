@@ -49,7 +49,10 @@ namespace Aws
                     return 0;
                 }
 
-                string SecureTunnelingFeature::getName() { return NAME; }
+                string SecureTunnelingFeature::getName()
+                {
+                    return NAME;
+                }
 
                 int SecureTunnelingFeature::start()
                 {
@@ -90,7 +93,10 @@ namespace Aws
                     return result->second;
                 }
 
-                bool SecureTunnelingFeature::IsValidPort(int port) { return 1 <= port && port <= 65535; }
+                bool SecureTunnelingFeature::IsValidPort(int port)
+                {
+                    return 1 <= port && port <= 65535;
+                }
 
                 void SecureTunnelingFeature::LoadFromConfig(const PlainConfig &config)
                 {
@@ -303,10 +309,10 @@ namespace Aws
                 void SecureTunnelingFeature::OnConnectionShutdown(SecureTunnelingContext *contextToRemove)
                 {
                     LOG_DEBUG(TAG, "SecureTunnelingFeature::OnConnectionShutdown");
-                    auto it =
-                        find_if(mContexts.begin(), mContexts.end(), [&](const unique_ptr<SecureTunnelingContext> &c) {
-                            return c.get() == contextToRemove;
-                        });
+                    auto it = find_if(
+                        mContexts.begin(),
+                        mContexts.end(),
+                        [&](const unique_ptr<SecureTunnelingContext> &c) { return c.get() == contextToRemove; });
                     mContexts.erase(std::remove(mContexts.begin(), mContexts.end(), *it));
 
 #if defined(DISABLE_MQTT)
@@ -316,6 +322,6 @@ namespace Aws
                 }
 
             } // namespace SecureTunneling
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws

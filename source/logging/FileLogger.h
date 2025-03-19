@@ -111,8 +111,8 @@ namespace Aws
                     virtual void flush() override;
                 };
             } // namespace Logging
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_FILELOGGER_H

@@ -131,8 +131,8 @@ namespace Aws
                     bool started() const { return mStarted; }
                 };
             } // namespace SensorPublish
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 
 #endif // DEVICE_CLIENT_HEARTBEAT_TASK_H

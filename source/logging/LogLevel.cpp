@@ -40,7 +40,7 @@ namespace Aws
                         }
                     }
                 } // namespace LogLevelMarshaller
-            }     // namespace Logging
-        }         // namespace DeviceClient
-    }             // namespace Iot
+            } // namespace Logging
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws

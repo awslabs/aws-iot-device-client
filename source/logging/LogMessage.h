@@ -76,7 +76,7 @@ namespace Aws
                     std::string &getMessage() { return message; }
                 };
             } // namespace Logging
-        }     // namespace DeviceClient
-    }         // namespace Iot
+        } // namespace DeviceClient
+    } // namespace Iot
 } // namespace Aws
 #endif // DEVICE_CLIENT_LOGMESSAGE_H
