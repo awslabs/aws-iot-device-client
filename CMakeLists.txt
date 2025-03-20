@@ -18,6 +18,8 @@ option(EXCLUDE_SECURE_ELEMENT "Builds the device client without the support for 
 option(EXCLUDE_SENSOR_PUBLISH "Builds the device client without the Sensor Publish over MQTT Feature." OFF)
 option(EXCLUDE_SENSOR_PUBLISH_SAMPLES "Builds the device client without the Sensor Publish sample servers." OFF)
 option(GIT_VERSION "Updates the version number using the Git commit history" ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-attributes")
+
 
 if (EXCLUDE_JOBS)
     add_definitions(-DEXCLUDE_JOBS)
