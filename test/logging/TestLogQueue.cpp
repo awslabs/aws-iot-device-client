@@ -24,12 +24,10 @@ class LogQueueTest : public ::testing::Test
     void SetUp() override
     {
         logQueue = unique_ptr<LogQueue>(new LogQueue);
-        logQueue->addLog(
-            unique_ptr<LogMessage>(
-                new LogMessage(LogLevel::DEBUG, "TAG", std::chrono::system_clock::now(), "Message 1")));
-        logQueue->addLog(
-            unique_ptr<LogMessage>(
-                new LogMessage(LogLevel::DEBUG, "TAG", std::chrono::system_clock::now(), "Message 2")));
+        logQueue->addLog(unique_ptr<LogMessage>(
+            new LogMessage(LogLevel::DEBUG, "TAG", std::chrono::system_clock::now(), "Message 1")));
+        logQueue->addLog(unique_ptr<LogMessage>(
+            new LogMessage(LogLevel::DEBUG, "TAG", std::chrono::system_clock::now(), "Message 2")));
     }
 
   public:

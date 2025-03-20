@@ -227,10 +227,10 @@ int SharedCrtResourceManager::buildClient(const PlainConfig &config)
             "logging::enable-sdk-logging in your configuration file");
     }
 
-    eventLoopGroup = unique_ptr<EventLoopGroup>(new EventLoopGroup(
-        1 // The number of threads used depends on your use-case. IF you have a maximum of less than
-          // a few hundred connections 1 thread is the ideal threadCount.
-        ));
+    eventLoopGroup = unique_ptr<EventLoopGroup>(
+        new EventLoopGroup(1 // The number of threads used depends on your use-case. IF you have a maximum of less than
+                             // a few hundred connections 1 thread is the ideal threadCount.
+                           ));
     if (!eventLoopGroup)
     {
         // cppcheck-suppress nullPointerRedundantCheck

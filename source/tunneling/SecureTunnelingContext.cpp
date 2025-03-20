@@ -197,10 +197,10 @@ namespace Aws
                     }
 
                     LOGM_DEBUG(TAG, "SecureTunnelingContext::OnTcpForwardDataReceive data.len=%zu", data.len);
-                    const size_t MAX_CHUNK_SIZE = 32768; 
+                    const size_t MAX_CHUNK_SIZE = 32768;
                     size_t offset = 0;
                     size_t total_sent = 0;
-                
+
                     while (offset < data.len)
                     {
                         size_t chunk_size = std::min(MAX_CHUNK_SIZE, data.len - offset);
@@ -208,14 +208,19 @@ namespace Aws
                         int result = mSecureTunnel->SendData(chunk);
                         if (result != AWS_OP_SUCCESS)
                         {
-                            LOGM_ERROR(TAG, "Failed to send data block to secure tunnel. Block size: %zu, Total bytes sent: %zu, Total size: %zu", 
-                                       chunk_size, total_sent, data.len);
+                            LOGM_ERROR(
+                                TAG,
+                                "Failed to send data block to secure tunnel. Block size: %zu, Total bytes sent: %zu, "
+                                "Total size: %zu",
+                                chunk_size,
+                                total_sent,
+                                data.len);
                             break;
                         }
                         offset += chunk_size;
                         total_sent += chunk_size;
                     }
-                
+
                     if (total_sent == data.len)
                     {
                         LOGM_INFO(TAG, "Successfully sent data block. Total bytes sent: %zu", total_sent);
