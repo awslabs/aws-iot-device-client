@@ -41,7 +41,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.build.static"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
@@ -49,7 +49,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
             ./setup/
 
@@ -81,7 +81,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.amazonlinux.x64.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.amazonlinux.x64.${{ env.PACKAGE_NAME }}.build.static"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
@@ -89,7 +89,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.amazonlinux.x64.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.amazonlinux.x64.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
             ./setup/
 
@@ -121,7 +121,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.build.static"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
@@ -129,7 +129,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
             ./setup/
 
@@ -215,7 +215,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.build.static"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
@@ -223,7 +223,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
             ./setup/
 
@@ -255,7 +255,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.build.static"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
@@ -263,7 +263,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
             ./setup/
 
@@ -295,7 +295,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.build.static"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
@@ -303,7 +303,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
             ./setup/
 
@@ -335,7 +335,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.ppc64.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.linux.ppc64.${{ env.PACKAGE_NAME }}.build.static"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
@@ -343,7 +343,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.ppc64.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.linux.ppc64.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
             ./setup/
 
@@ -375,7 +375,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.ppc64le.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.linux.ppc64le.${{ env.PACKAGE_NAME }}.build.static"
           path: |
             ./build/${{ env.PACKAGE_NAME }}
       - name: Archive setup files
@@ -383,7 +383,7 @@ jobs:
         # Run for main branch only
         if: github.ref == 'refs/heads/main'
         with:
-          name: "DC.linux.ppc64le.${{ env.PACKAGE_NAME }}.static"
+          name: "DC.linux.ppc64le.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
             ./setup/
 
