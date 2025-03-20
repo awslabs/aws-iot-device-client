@@ -20,7 +20,11 @@ jobs:
       with:
         # Disabling shallow clone is recommended for improving relevancy of reporting
         fetch-depth: 0
-    - name:  Install sonar-scanner and build-wrapper
+    - name: Install GCC 9
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-9 g++-9
+    - name: Install sonar-scanner and build-wrapper
       uses: sonarsource/sonarcloud-github-c-cpp@v3
     - name: Run build-wrapper
       run: |
