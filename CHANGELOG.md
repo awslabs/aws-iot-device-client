@@ -7,12 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Known Issues]
 * [Fix resource leak by cleaning up used Secure Tunneling Contexts](https://github.com/awslabs/aws-iot-device-client/issues/443)
 
+## [1.10.X] - 2025-03-20
+### Added
+* [Updated Config Shadow feature to store config file updates persistently](https://github.com/awslabs/aws-iot-device-client/pull/490)
+
+### Fixed
+* [Using readme.md as main page for Doxygen](https://github.com/awslabs/aws-iot-device-client/pull/483)
+* [Fixed patch versioning to count the number of commits from last major minor](https://github.com/awslabs/aws-iot-device-client/pull/484)
+* [Fixed docker base image builds](https://github.com/awslabs/aws-iot-device-client/pull/485)
+* [Fixed large payload transfer issue by forwarding data in chunks](https://github.com/awslabs/aws-iot-device-client/pull/493)
+
+## [1.9.13] - 2024-11-20  
+### Added  
+- [Modified condition to create default sample shadow directory](https://github.com/awslabs/aws-iot-device-client/pull/469)  
+- [Added job document comparator to ignore pre-signed difference in S3 URL](https://github.com/awslabs/aws-iot-device-client/pull/473)  
+- [Updated SonarSource GitHub Action to v3](https://github.com/awslabs/aws-iot-device-client/pull/472)  
+- [Triggered release CI to build when changes are pushed to main](https://github.com/awslabs/aws-iot-device-client/pull/476)  
+
+### Fixed  
+- [Fixed checking Device Defender config](https://github.com/awslabs/aws-iot-device-client/pull/474)  
+- [Fixed formatting with clang format](https://github.com/awslabs/aws-iot-device-client/pull/478)  
+- [Fixed Doxygen deployment](https://github.com/awslabs/aws-iot-device-client/pull/481)  
+- [Updated checkout options for Doxygen](https://github.com/awslabs/aws-iot-device-client/pull/482)  
+- [CI: Use `GITHUB_OUTPUT` envvar instead of `set-output` command](https://github.com/awslabs/aws-iot-device-client/pull/446)  
+
+## [1.9.5] - 2024-10-10  
+### Added  
+- [Added CLI/JSON parsing to Fleet Provisioning collect system info flag](https://github.com/awslabs/aws-iot-device-client/pull/456)  
+
+### Fixed  
+- [Fixed DC abort logic for Secure Element](https://github.com/awslabs/aws-iot-device-client/pull/459)  
+- [Fixed `configure_file` output path by adding `CMAKE_BINARY_DIR`](https://github.com/awslabs/aws-iot-device-client/pull/437)  
+- [Write provisioned certificate to `active-certificate.pem.crt`](https://github.com/awslabs/aws-iot-device-client/pull/466)  
+- [Switch to `fork` from `vfork`](https://github.com/awslabs/aws-iot-device-client/pull/217)  
+
+## [1.9.2] - 2024-04-10  
+### Added  
+- [Added missing CLI option for using HTTP proxy with Secure Tunneling](https://github.com/awslabs/aws-iot-device-client/pull/450)  
+
+### Fixed  
+- [Fixed `ST_COMPONENT_MODE` with a proxy](https://github.com/awslabs/aws-iot-device-client/pull/450)  
+
 ## [1.9.X] - 2023-12-21
 ### Added
 * [Added GitHub CI for Coverity code scan](https://github.com/awslabs/aws-iot-device-client/pull/366)
 * [Added Integration tests for Device Defender feature](https://github.com/awslabs/aws-iot-device-client/pull/368)
 * [Added support for publishing MQTT message on file change through Pub-Sub sample](https://github.com/awslabs/aws-iot-device-client/pull/374)
-* 
+
 ### Fixed
 * [Device Client aborts on Red Hat Enterprise Linux ARM](https://github.com/awslabs/aws-iot-device-client/issues/87)
 * [Device Client stability issues when receiving signal interrupts](https://github.com/awslabs/aws-iot-device-client/issues/110)
