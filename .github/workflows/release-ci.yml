@@ -18,6 +18,9 @@ jobs:
   # It then runs the Device Client to output the version to be used in the subsequent jobs.
   versioning:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read 
     outputs:
       version: ${{ steps.get-version.outputs.version }}
     steps:
