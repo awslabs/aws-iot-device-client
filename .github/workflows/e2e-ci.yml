@@ -25,6 +25,9 @@ jobs:
   versioning:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    permissions:
+      id-token: write
+      contents: read 
     outputs:
       version: ${{ steps.get-version.outputs.version }}
     steps:
