@@ -25,11 +25,10 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -62,11 +61,10 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -99,11 +97,10 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -135,11 +132,10 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -171,11 +167,10 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -208,11 +203,10 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -247,11 +241,10 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -283,11 +276,10 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -319,11 +311,10 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -356,11 +347,10 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws

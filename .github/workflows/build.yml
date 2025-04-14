@@ -12,16 +12,19 @@ env:
   PACKAGE_NAME: aws-iot-device-client
   ECR_BASE_REPO: aws-iot-device-client/aws-iot-device-client-base-images
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-ubuntu:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -57,11 +60,10 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -97,11 +99,10 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -140,11 +141,10 @@ jobs:
       matrix:
         version: [ 5, 6, 7, 8, 11 ]
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -167,11 +167,10 @@ jobs:
       matrix:
         version: [ 5.0, 6.0, 7, 8, 9, 11 ]
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -191,11 +190,10 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -231,11 +229,10 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -271,11 +268,10 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -311,11 +307,10 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -351,11 +346,10 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -391,11 +385,10 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -423,11 +416,10 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
@@ -455,11 +447,10 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ECR_USER_AWS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.ECR_USER_AWS_KEY_SECRET }}
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
           aws-region: us-east-1
       - name: Login to ECR
         run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
