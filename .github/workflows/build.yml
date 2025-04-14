@@ -12,6 +12,10 @@ env:
   PACKAGE_NAME: aws-iot-device-client
   ECR_BASE_REPO: aws-iot-device-client/aws-iot-device-client-base-images
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-ubuntu:
     runs-on: ubuntu-latest
