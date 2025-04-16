@@ -413,7 +413,7 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubuntu-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubuntu-latest
           platforms: linux/arm64
-      - name: xon Test
+      - name: Assume Role for Integration Test
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/integration-test-role
