@@ -59,7 +59,7 @@ RUN apt update && apt upgrade -y && \
 RUN mkdir /home/dependencies
 WORKDIR /home/dependencies
 
-RUN wget https://zlib.net/zlib-1.3.1.tar.gz -O /tmp/zlib-1.3.tar.gz && \
+RUN wget https://zlib.net/zlib-1.3.1.tar.gz -O /tmp/zlib-1.3.1.tar.gz && \
 	tar xzvf /tmp/zlib-1.3.1.tar.gz && \
 	cd zlib-1.3.1 && \
 	./configure && \
