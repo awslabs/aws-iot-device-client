@@ -67,10 +67,6 @@ void IntegrationTestResourceHandler::CreateJob(const string &jobId, const string
     request.SetJobId(jobId);
     request.SetDocument(jobDoc);
     request.AddTargets(targetArn);
-
-    Log(Logging::LogLevel::Info, "Target ARN is ", targetArn);
-
-
     CreateJobOutcome outcome = iotClient.CreateJob(request);
 
     if (outcome.IsSuccess())
