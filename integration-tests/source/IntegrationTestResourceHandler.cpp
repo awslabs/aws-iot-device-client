@@ -53,11 +53,12 @@ extern std::string THING_NAME;
 static const char *TAG = "IntegrationTestResourceHandler.cpp";
 
 IntegrationTestResourceHandler::IntegrationTestResourceHandler(const ClientConfiguration &clientConfig)
-    : iotClient(IoTClient(clientConfig)), ioTSecureTunnelingClient(IoTSecureTunnelingClient(clientConfig))
+    : iotClient(IoTClient(clientConfig)),
+      ioTSecureTunnelingClient(IoTSecureTunnelingClient(clientConfig)),
+      logger(std::unique_ptr<Aws::Utils::Logging::ConsoleLogSystem>(
+        new Aws::Utils::Logging::ConsoleLogSystem(Aws::Utils::Logging::LogLevel::Info)))    
 {
     targetArn = GetTargetArn(THING_NAME);
-    logger = unique_ptr<Aws::Utils::Logging::ConsoleLogSystem>(
-        new Aws::Utils::Logging::ConsoleLogSystem(Aws::Utils::Logging::LogLevel::Info));
 }
 
 void IntegrationTestResourceHandler::CreateJob(const string &jobId, const string &jobDoc)
@@ -66,6 +67,9 @@ void IntegrationTestResourceHandler::CreateJob(const string &jobId, const string
     request.SetJobId(jobId);
     request.SetDocument(jobDoc);
     request.AddTargets(targetArn);
+
+    Log(Logging::LogLevel::Info, "Target ARN is ", targetArn);
+
 
     CreateJobOutcome outcome = iotClient.CreateJob(request);
 
@@ -504,6 +508,12 @@ void IntegrationTestResourceHandler::Log(
     {
         ss << string{" "} << errorMessage;
     }
-
-    logger->LogStream(logLevel, TAG, ss);
-}
+    if (logger)
+    {
+        logger->LogStream(logLevel, TAG, ss);
+    }
+    else
+    {
+        std::cerr << "[ERROR] Logger not initialized. Message: " << ss.str() << std::endl;
+    }
+    }
