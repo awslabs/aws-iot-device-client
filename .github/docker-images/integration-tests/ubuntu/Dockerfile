@@ -67,9 +67,9 @@ RUN wget https://zlib.net/zlib-1.3.1.tar.gz -O /tmp/zlib-1.3.1.tar.gz && \
 	make install && \
 	cd /home/dependencies
 
-RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz -O /tmp/boost.tar.gz && \
+RUN wget https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.gz -O /tmp/boost.tar.gz && \
 	tar xzvf /tmp/boost.tar.gz && \
-	cd boost_1_81_0 && \
+	cd boost_1_87_0 && \
 	./bootstrap.sh && \
 	./b2 install link=static && \
 	cd /home/dependencies
