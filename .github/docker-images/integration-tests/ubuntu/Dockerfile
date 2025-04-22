@@ -95,7 +95,7 @@ RUN git clone --branch v2.13.6 https://github.com/catchorg/Catch2.git && \
 
 RUN git clone https://github.com/aws-samples/aws-iot-securetunneling-localproxy && \
 	cd aws-iot-securetunneling-localproxy && \
-    git checkout d3150e0ebc4ef022939deb1ab43de005254f5751 && \
+    git checkout 8557d5faf5fe21fbf8ddbc82e96840d8fe985cef && \
 	mkdir build && \
 	cd build && \
 	cmake ../ && \
