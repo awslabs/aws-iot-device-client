@@ -373,7 +373,7 @@ jobs:
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e AWS_ACCESS_KEY_ID="(echo $AWS_ACCESS_KEY_ID)" -e AWS_SECRET_ACCESS_KEY="(echo $AWS_SECRET_ACCESS_KEY)" -e AWS_SESSION_TOKEN="$(echo $AWS_SESSION_TOKEN)" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$IOT_ENDPOINT" -e CERTIFICATE="$CERTIFICATE" -e DEVICE_KEY_SECRET="$DEVICE_KEY_SECRET" -e AMAZON_ROOT_CA="$AMAZON_ROOT_CA" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-ubuntu-aarch64:
     runs-on: ubuntu-latest
     if: ${{ false }} # Disabled for now. aarch64 local proxy build takes too long
