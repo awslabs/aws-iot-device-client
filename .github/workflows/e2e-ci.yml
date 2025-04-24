@@ -365,7 +365,17 @@ jobs:
           echo "Verifying GitHub environment vars:"
           echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:0:5}*****"
           echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:0:5}*****"
-          echo "AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:0:5}*****"             
+          echo "AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:0:5}*****"
+      - name: Setup SSL certificates
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates
+          sudo update-ca-certificates
+      - name: Set SSL environment variables
+        run: |
+          echo "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt" >> $GITHUB_ENV
+          echo "SSL_CERT_DIR=/etc/ssl/certs" >> $GITHUB_ENV
+          echo "AWS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt" >> $GITHUB_ENV                    
       - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
@@ -373,7 +383,7 @@ jobs:
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$IOT_ENDPOINT" -e CERTIFICATE="$CERTIFICATE" -e DEVICE_KEY_SECRET="$DEVICE_KEY_SECRET" -e AMAZON_ROOT_CA="$AMAZON_ROOT_CA" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$IOT_ENDPOINT" -e CERTIFICATE="$CERTIFICATE" -e DEVICE_KEY_SECRET="$DEVICE_KEY_SECRET" -e AMAZON_ROOT_CA="$AMAZON_ROOT_CA" -e THING_NAME=fleetprovisioning -v /etc/ssl/certs:/etc/ssl/certs:ro ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-ubuntu-aarch64:
     runs-on: ubuntu-latest
     if: ${{ false }} # Disabled for now. aarch64 local proxy build takes too long
@@ -426,7 +436,7 @@ jobs:
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e AWS_ACCESS_KEY_ID="(echo $AWS_ACCESS_KEY_ID)" -e AWS_SECRET_ACCESS_KEY="(echo $AWS_SECRET_ACCESS_KEY)" -e AWS_SESSION_TOKEN="$(echo $AWS_SESSION_TOKEN)" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-ubuntu-armv7:
     runs-on: ubuntu-latest
     if: ${{ false }} # Disabled for now as local proxy builds take too long. Re-enable if binary or image becomes available.
@@ -476,7 +486,7 @@ jobs:
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e AWS_ACCESS_KEY_ID="(echo $AWS_ACCESS_KEY_ID)" -e AWS_SECRET_ACCESS_KEY="(echo $AWS_SECRET_ACCESS_KEY)" -e AWS_SESSION_TOKEN="$(echo $AWS_SESSION_TOKEN)" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-amazonlinux-x86_64:
     # The amazonlinux integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
     runs-on: ubuntu-latest
@@ -528,7 +538,7 @@ jobs:
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e AWS_ACCESS_KEY_ID="(echo $AWS_ACCESS_KEY_ID)" -e AWS_SECRET_ACCESS_KEY="(echo $AWS_SECRET_ACCESS_KEY)" -e AWS_SESSION_TOKEN="$(echo $AWS_SESSION_TOKEN)" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-amazonlinux-aarch64:
     # The amazonlinux integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
     runs-on: ubuntu-latest
@@ -580,7 +590,7 @@ jobs:
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e AWS_ACCESS_KEY_ID="(echo $AWS_ACCESS_KEY_ID)" -e AWS_SECRET_ACCESS_KEY="(echo $AWS_SECRET_ACCESS_KEY)" -e AWS_SESSION_TOKEN="$(echo $AWS_SESSION_TOKEN)" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-ubi8-x86_64:
     # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
     runs-on: ubuntu-latest
@@ -634,7 +644,7 @@ jobs:
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e AWS_ACCESS_KEY_ID="(echo $AWS_ACCESS_KEY_ID)" -e AWS_SECRET_ACCESS_KEY="(echo $AWS_SECRET_ACCESS_KEY)" -e AWS_SESSION_TOKEN="$(echo $AWS_SESSION_TOKEN)" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-ubi8-aarch64:
     # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
     runs-on: ubuntu-latest
@@ -690,4 +700,4 @@ jobs:
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e AWS_ACCESS_KEY_ID="(echo $AWS_ACCESS_KEY_ID)" -e AWS_SECRET_ACCESS_KEY="(echo $AWS_SECRET_ACCESS_KEY)" -e AWS_SESSION_TOKEN="$(echo $AWS_SESSION_TOKEN)" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
