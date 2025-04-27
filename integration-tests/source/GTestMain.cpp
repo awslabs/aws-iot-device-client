@@ -27,6 +27,7 @@ std::string THING_NAME;
 std::string REGION = "us-east-1";
 std::string PORT = "5555";
 std::string LOCAL_PROXY_PATH = "/localproxy";
+std::string PROTOCOL_VERSION = "V1";
 bool CLEAN_UP = false;
 bool SKIP_FP = false;
 bool SKIP_ST = false;
