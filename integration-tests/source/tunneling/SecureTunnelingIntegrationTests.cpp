@@ -23,6 +23,7 @@ extern string REGION;
 extern string PROTOCOL_VERSION;
 extern bool SKIP_ST;
 extern string LOCAL_PROXY_PATH;
+extern string sslCertsPath;
 extern std::shared_ptr<IntegrationTestResourceHandler> resourceHandler;
 
 const string TEST_TUNNEL_PATH = "/test-tunnel.sh";
@@ -40,7 +41,7 @@ class TestSecureTunnelingFeature : public ::testing::Test
             sourceToken = openTunnelResult.GetSourceAccessToken();
 
             // cppcheck-suppress leakReturnValNotUsed
-            std::unique_ptr<const char *[]> argv(new const char *[10]);
+            std::unique_ptr<const char *[]> argv(new const char *[12]);
             argv[0] = LOCAL_PROXY_PATH.c_str();
             argv[1] = "-s";
             argv[2] = PORT.c_str();
@@ -50,7 +51,9 @@ class TestSecureTunnelingFeature : public ::testing::Test
             argv[6] = PROTOCOL_VERSION.c_str();
             argv[7] = "-t";
             argv[8] = sourceToken.c_str();
-            argv[9] = nullptr;
+            argv[9] = "-c";
+            argv[10] = sslCertsPath.c_str();
+            argv[1] = nullptr;
 
             PID = fork();
             if (PID == 0)
