@@ -53,7 +53,7 @@ class TestSecureTunnelingFeature : public ::testing::Test
             argv[8] = sourceToken.c_str();
             argv[9] = "-c";
             argv[10] = sslCertsPath.c_str();
-            argv[1] = nullptr;
+            argv[11] = nullptr;
 
             PID = fork();
             if (PID == 0)
