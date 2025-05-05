@@ -360,12 +360,6 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-ubuntu-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-ubuntu-latest
           platforms: linux/amd64
-      - name: Print masked AWS environment vars
-        run: |
-          echo "Verifying GitHub environment vars:"
-          echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:0:5}*****"
-          echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:0:5}*****"
-          echo "AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:0:5}*****"
       - name: Setup SSL certificates
         run: |
           sudo apt-get update
