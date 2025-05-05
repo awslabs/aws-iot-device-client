@@ -59,11 +59,7 @@ class TestSecureTunnelingFeature : public ::testing::Test
             if (PID == 0)
             {
                 printf("Started Child Process to run Local Proxy\n");
-                printf("Local Proxy Path: %s\n", LOCAL_PROXY_PATH.c_str());
-                for (int i = 0; argv[i] != nullptr; ++i) {
-                    printf("argv[%d]: %s\n", i, argv[i]);
-                }
-                printf("Source Token Length: %zu\n", sourceToken.length());
+                printf("Received Tunnel Source Token of Length: %zu\n", sourceToken.length());
                 if (execvp(LOCAL_PROXY_PATH.c_str(), const_cast<char *const *>(argv.get())) == -1)
                 {
                     printf("Failed to initialize Local Proxy.\n");
