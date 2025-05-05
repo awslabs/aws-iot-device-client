@@ -359,17 +359,7 @@ jobs:
           tags: |
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-ubuntu-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-ubuntu-latest
-          platforms: linux/amd64
-      - name: Setup SSL certificates
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ca-certificates
-          sudo update-ca-certificates
-      - name: Set SSL environment variables
-        run: |
-          echo "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt" >> $GITHUB_ENV
-          echo "SSL_CERT_DIR=/etc/ssl/certs" >> $GITHUB_ENV
-          echo "AWS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt" >> $GITHUB_ENV                    
+          platforms: linux/amd64                  
       - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
