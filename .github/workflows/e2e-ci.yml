@@ -408,11 +408,6 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubuntu-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubuntu-latest
           platforms: linux/arm64
-      - name: Assume Role for Integration Test
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/integration-test-role
-          aws-region: us-east-1          
       - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
@@ -458,11 +453,6 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:armv7-ubuntu-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:armv7-ubuntu-latest
           platforms: linux/arm/v7
-      - name: Assume Role for Integration Test
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/integration-test-role
-          aws-region: us-east-1              
       - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
@@ -510,11 +500,6 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-amazonlinux-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-amazonlinux-latest
           platforms: linux/amd64
-      - name: Assume Role for Integration Test
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/integration-test-role
-          aws-region: us-east-1          
       - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
@@ -562,11 +547,6 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-amazonlinux-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-amazonlinux-latest
           platforms: linux/arm64
-      - name: Assume Role for Integration Test
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/integration-test-role
-          aws-region: us-east-1          
       - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
@@ -616,11 +596,6 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-ubi8-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-ubi8-latest
           platforms: linux/amd64
-      - name: Assume Role for Integration Test
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/integration-test-role
-          aws-region: us-east-1          
       - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
@@ -672,11 +647,6 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubi8-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubi8-latest
           platforms: linux/arm64
-      - name: Assume Role for Integration Test
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/integration-test-role
-          aws-region: us-east-1          
       - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
