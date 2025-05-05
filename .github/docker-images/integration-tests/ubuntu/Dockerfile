@@ -33,14 +33,6 @@ RUN wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz \
     && make install \
     && ldconfig
 
-# Add these new sections for SSL configuration
-RUN update-ca-certificates
-
-
-# Set SSL environment variables
-ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
-ENV SSL_CERT_DIR=/etc/ssl/certs
-
 ###############################################################################
 # Install pre-built CMake
 ###############################################################################
