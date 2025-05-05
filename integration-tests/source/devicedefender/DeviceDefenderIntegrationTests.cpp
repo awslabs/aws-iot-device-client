@@ -44,26 +44,26 @@ class TestDeviceDefenderFeature : public testing::Test
  * by verifying metrics are causing violations. Verifying Packets In/Out & Bytes In/Out greater than 1.
  */
 
-// TEST_F(TestDeviceDefenderFeature, VerifyViolations)
-// {
-//     vector<ActiveViolation> violations;
-//     // Check for active violations for 10 minutes 30 seconds. Metrics interval is five minutes.
-//     int waitTime = WAIT_TIME;
-//     while (waitTime > 0)
-//     {
-//         violations = resourceHandler->GetViolations(securityProfileName);
-//         if (violations.size() == metrics.size())
-//         {
-//             break;
-//         }
-//         this_thread::sleep_for(std::chrono::seconds(INTERVAL));
-//         waitTime -= INTERVAL;
-//     }
+TEST_F(TestDeviceDefenderFeature, VerifyViolations)
+{
+    vector<ActiveViolation> violations;
+    // Check for active violations for 10 minutes 30 seconds. Metrics interval is five minutes.
+    int waitTime = WAIT_TIME;
+    while (waitTime > 0)
+    {
+        violations = resourceHandler->GetViolations(securityProfileName);
+        if (violations.size() == metrics.size())
+        {
+            break;
+        }
+        this_thread::sleep_for(std::chrono::seconds(INTERVAL));
+        waitTime -= INTERVAL;
+    }
 
-//     ASSERT_EQ(violations.size(), metrics.size());
+    ASSERT_EQ(violations.size(), metrics.size());
 
-//     for (const ActiveViolation &violation : violations)
-//     {
-//         ASSERT_EQ(1, count(metrics.begin(), metrics.end(), violation.GetBehavior().GetMetric()));
-//     }
-// }
+    for (const ActiveViolation &violation : violations)
+    {
+        ASSERT_EQ(1, count(metrics.begin(), metrics.end(), violation.GetBehavior().GetMetric()));
+    }
+}

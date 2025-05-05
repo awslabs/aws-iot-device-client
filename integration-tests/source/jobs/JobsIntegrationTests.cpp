@@ -48,44 +48,44 @@ class TestJobsFeature : public ::testing::Test
     void TearDown() override { resourceHandler->CleanUp(); }
 };
 
-// TEST_F(TestJobsFeature, InstallPackages)
-// {
-//     string jobId = "Install-Packages-" + resourceHandler->GetTimeStamp();
-//     resourceHandler->CreateJob(jobId, INSTALL_PACKAGES_JOB_DOC);
+TEST_F(TestJobsFeature, InstallPackages)
+{
+    string jobId = "Install-Packages-" + resourceHandler->GetTimeStamp();
+    resourceHandler->CreateJob(jobId, INSTALL_PACKAGES_JOB_DOC);
 
-//     ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
+    ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
 
-//     jobId = "Verify-Packages-Installed-" + resourceHandler->GetTimeStamp();
-//     resourceHandler->CreateJob(jobId, VERIFY_PACKAGES_INSTALLED_JOB_DOC);
+    jobId = "Verify-Packages-Installed-" + resourceHandler->GetTimeStamp();
+    resourceHandler->CreateJob(jobId, VERIFY_PACKAGES_INSTALLED_JOB_DOC);
 
-//     ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
-// }
+    ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
+}
 
-// TEST_F(TestJobsFeature, RemovePackages)
-// {
-//     string jobId = "Remove-Packages-" + resourceHandler->GetTimeStamp();
-//     resourceHandler->CreateJob(jobId, REMOVE_PACKAGES_JOB_DOC);
+TEST_F(TestJobsFeature, RemovePackages)
+{
+    string jobId = "Remove-Packages-" + resourceHandler->GetTimeStamp();
+    resourceHandler->CreateJob(jobId, REMOVE_PACKAGES_JOB_DOC);
 
-//     ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
+    ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
 
-//     jobId = "Verify-Packages-Removed-" + resourceHandler->GetTimeStamp();
-//     resourceHandler->CreateJob(jobId, VERIFY_PACKAGES_REMOVED_JOB_DOC);
+    jobId = "Verify-Packages-Removed-" + resourceHandler->GetTimeStamp();
+    resourceHandler->CreateJob(jobId, VERIFY_PACKAGES_REMOVED_JOB_DOC);
 
-//     ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
-// }
+    ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
+}
 
-// TEST_F(TestJobsFeature, DownloadFile)
-// {
-//     string jobId = "Download-File-" + resourceHandler->GetTimeStamp();
-//     resourceHandler->CreateJob(jobId, DOWNLOAD_FILE_JOB_DOC);
+TEST_F(TestJobsFeature, DownloadFile)
+{
+    string jobId = "Download-File-" + resourceHandler->GetTimeStamp();
+    resourceHandler->CreateJob(jobId, DOWNLOAD_FILE_JOB_DOC);
 
-//     ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
-// }
+    ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
+}
 
-// TEST_F(TestJobsFeature, PrintGreeting)
-// {
-//     string jobId = "Print-Greeting-" + resourceHandler->GetTimeStamp();
-//     resourceHandler->CreateJob(jobId, RUN_COMMAND_PRINT_GREETING_JOB_DOC);
+TEST_F(TestJobsFeature, PrintGreeting)
+{
+    string jobId = "Print-Greeting-" + resourceHandler->GetTimeStamp();
+    resourceHandler->CreateJob(jobId, RUN_COMMAND_PRINT_GREETING_JOB_DOC);
 
-//     ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
-// }
+    ASSERT_EQ(resourceHandler->GetJobExecutionStatusWithRetry(jobId), JobExecutionStatus::SUCCEEDED);
+}
