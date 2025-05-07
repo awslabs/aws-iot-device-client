@@ -400,13 +400,13 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/aws-iot-device-client/aws-iot-device-client:x86_64-ubuntu-v1.9.22-ffd00f6
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_component_mode
       - name: Archive ST Ubuntu aarch64 Build Artifact
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix-e2e-workflow-authn-issue'
         with:
           name: "ST.ubuntu.x64.${{ env.PACKAGE_NAME }}"
           path: |
@@ -431,13 +431,13 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/aws-iot-device-client/aws-iot-device-client:x86_64-ubuntu-v1.9.22-ffd00f6
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_aarch64_cross_mode
       - name: Archive ST Ubuntu aarch64 Build Artifact
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix-e2e-workflow-authn-issue'
         with:
           name: "ST.ubuntu.aarch64.${{ env.PACKAGE_NAME }}"
           path: |
@@ -462,13 +462,13 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Build ${{ env.PACKAGE_NAME }}
         run: |
-          export DOCKER_IMAGE=public.ecr.aws/${ECR_BASE_REPO}:x86_64-ubuntu-latest
+          export DOCKER_IMAGE=public.ecr.aws/aws-iot-device-client/aws-iot-device-client:x86_64-ubuntu-v1.9.22-ffd00f6
           docker pull $DOCKER_IMAGE
           docker run --mount type=bind,source=$(pwd),target=/root/${{ env.PACKAGE_NAME }} --env GITHUB_REF $DOCKER_IMAGE --compile-mode=st_armhf_cross_mode
       - name: Archive st armhf32 Build Artifact
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix-e2e-workflow-authn-issue'
         with:
           name: "ST.linux.armhf.${{ env.PACKAGE_NAME }}"
           path: |
