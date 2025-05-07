@@ -55,7 +55,7 @@ jobs:
           tags: |
             public.ecr.aws/${{ env.ECR_BASE_REPO }}:x86_64-ubuntu-latest
           platforms: linux/amd64
-  build-base-docker-image-ubuntu-18.04-x86_64:
+  build-base-docker-image-ubuntu-18_04-x86_64:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
