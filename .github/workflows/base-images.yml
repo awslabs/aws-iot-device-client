@@ -7,7 +7,7 @@ name: Base Image Builds
 
 on:
   push:
-    branches: ['base-images', 'main', 'fix-e2e-workflow-authn-issue']
+    branches: ['base-images', 'main']
   pull_request:
     branches: ['base-images']
     types: [opened, closed]
