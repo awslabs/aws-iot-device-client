@@ -41,7 +41,7 @@ jobs:
       run: |
         mkdir coverage-dir
         cd coverage-dir
-        find ../build/test/CMakeFiles/test-aws-iot-device-client.dir/__/source -name '*.o' | xargs gcov --preserve-paths
+        find ../build/test/CMakeFiles/test-aws-iot-device-client.dir/__/source -name '*.o' | xargs gcov-9 --preserve-paths
         cd ..
     - name: Run sonar-scanner
       env:
