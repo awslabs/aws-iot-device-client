@@ -55,6 +55,42 @@ jobs:
           tags: |
             public.ecr.aws/${{ env.ECR_BASE_REPO }}:x86_64-ubuntu-latest
           platforms: linux/amd64
+  build-base-docker-image-ubuntu-18_04-x86_64:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/GitHubActionsOIDCRole
+          aws-region: us-east-1
+      - name: Login to ECR
+        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: public.ecr.aws/${{ env.ECR_REPO }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build Ubuntu Base Image
+        uses: docker/build-push-action@v3
+        with:
+          file: .github/docker-images/base-images/device-client/ubuntu-18.04/Dockerfile
+          context: .
+          target: base
+          push: true
+          tags: |
+            public.ecr.aws/${{ env.ECR_BASE_REPO }}:x86_64-ubuntu-18.04
+          platforms: linux/amd64          
   build-base-docker-image-ubuntu-aarch64:
     runs-on: ubuntu-latest
     permissions:

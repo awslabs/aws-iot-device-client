@@ -56,7 +56,7 @@ IntegrationTestResourceHandler::IntegrationTestResourceHandler(const ClientConfi
     : iotClient(IoTClient(clientConfig)),
       ioTSecureTunnelingClient(IoTSecureTunnelingClient(clientConfig)),
       logger(std::unique_ptr<Aws::Utils::Logging::ConsoleLogSystem>(
-        new Aws::Utils::Logging::ConsoleLogSystem(Aws::Utils::Logging::LogLevel::Info)))    
+        new Aws::Utils::Logging::ConsoleLogSystem(Aws::Utils::Logging::LogLevel::Info)))
 {
     targetArn = GetTargetArn(THING_NAME);
 }

@@ -359,13 +359,7 @@ jobs:
           tags: |
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-ubuntu-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-ubuntu-latest
-          platforms: linux/amd64
-      - name: Print masked AWS environment vars
-        run: |
-          echo "Verifying GitHub environment vars:"
-          echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:0:5}*****"
-          echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:0:5}*****"
-          echo "AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:0:5}*****"             
+          platforms: linux/amd64                  
       - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
@@ -373,7 +367,7 @@ jobs:
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e AWS_ACCESS_KEY_ID="(echo $AWS_ACCESS_KEY_ID)" -e AWS_SECRET_ACCESS_KEY="(echo $AWS_SECRET_ACCESS_KEY)" -e AWS_SESSION_TOKEN="$(echo $AWS_SESSION_TOKEN)" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$IOT_ENDPOINT" -e CERTIFICATE="$CERTIFICATE" -e DEVICE_KEY_SECRET="$DEVICE_KEY_SECRET" -e AMAZON_ROOT_CA="$AMAZON_ROOT_CA" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-ubuntu-aarch64:
     runs-on: ubuntu-latest
     if: ${{ false }} # Disabled for now. aarch64 local proxy build takes too long
@@ -414,19 +408,14 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubuntu-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubuntu-latest
           platforms: linux/arm64
-      - name: Assume Role for Integration Test
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/integration-test-role
-          aws-region: us-east-1          
-      - name: Run Tests
+      - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
           CERTIFICATE: ${{ secrets.CLAIM_CERTIFICATE }}
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-ubuntu-armv7:
     runs-on: ubuntu-latest
     if: ${{ false }} # Disabled for now as local proxy builds take too long. Re-enable if binary or image becomes available.
@@ -464,19 +453,14 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:armv7-ubuntu-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:armv7-ubuntu-latest
           platforms: linux/arm/v7
-      - name: Assume Role for Integration Test
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/integration-test-role
-          aws-region: us-east-1              
-      - name: Run Tests
+      - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
           CERTIFICATE: ${{ secrets.CLAIM_CERTIFICATE }}
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-amazonlinux-x86_64:
     # The amazonlinux integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
     runs-on: ubuntu-latest
@@ -516,19 +500,14 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-amazonlinux-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-amazonlinux-latest
           platforms: linux/amd64
-      - name: Assume Role for Integration Test
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/integration-test-role
-          aws-region: us-east-1          
-      - name: Run Tests
+      - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
           CERTIFICATE: ${{ secrets.CLAIM_CERTIFICATE }}
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --skip-st --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-amazonlinux-aarch64:
     # The amazonlinux integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
     runs-on: ubuntu-latest
@@ -568,19 +547,14 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-amazonlinux-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-amazonlinux-latest
           platforms: linux/arm64
-      - name: Assume Role for Integration Test
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/integration-test-role
-          aws-region: us-east-1          
-      - name: Run Tests
+      - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
           CERTIFICATE: ${{ secrets.CLAIM_CERTIFICATE }}
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --skip-st --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-ubi8-x86_64:
     # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
     runs-on: ubuntu-latest
@@ -622,19 +596,14 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-ubi8-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:x86_64-ubi8-latest
           platforms: linux/amd64
-      - name: Assume Role for Integration Test
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/integration-test-role
-          aws-region: us-east-1          
-      - name: Run Tests
+      - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
           CERTIFICATE: ${{ secrets.CLAIM_CERTIFICATE }}
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --skip-st --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-ubi8-aarch64:
     # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
     runs-on: ubuntu-latest
@@ -678,16 +647,11 @@ jobs:
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubi8-${{ needs.versioning.outputs.version }}
             public.ecr.aws/${{ env.ECR_TEST_RUNNER_REPO }}:aarch64-ubi8-latest
           platforms: linux/arm64
-      - name: Assume Role for Integration Test
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.DC_AWS_ACCOUNT_ID }}:role/integration-test-role
-          aws-region: us-east-1          
-      - name: Run Tests
+      - name: Run Integration Tests container with OIDC role credentials
         env:
           IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
           CERTIFICATE: ${{ secrets.CLAIM_CERTIFICATE }}
           DEVICE_KEY_SECRET: ${{ secrets.FP_DEVICE_KEY_SECRET }}
           AMAZON_ROOT_CA: ${{ secrets.AMAZON_ROOT_CA }}
         run: |
-          docker run -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --skip-st --clean-up
+          docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
