@@ -53,10 +53,9 @@ extern std::string THING_NAME;
 static const char *TAG = "IntegrationTestResourceHandler.cpp";
 
 IntegrationTestResourceHandler::IntegrationTestResourceHandler(const ClientConfiguration &clientConfig)
-    : iotClient(IoTClient(clientConfig)),
-      ioTSecureTunnelingClient(IoTSecureTunnelingClient(clientConfig)),
+    : iotClient(IoTClient(clientConfig)), ioTSecureTunnelingClient(IoTSecureTunnelingClient(clientConfig)),
       logger(std::unique_ptr<Aws::Utils::Logging::ConsoleLogSystem>(
-        new Aws::Utils::Logging::ConsoleLogSystem(Aws::Utils::Logging::LogLevel::Info)))
+          new Aws::Utils::Logging::ConsoleLogSystem(Aws::Utils::Logging::LogLevel::Info)))
 {
     targetArn = GetTargetArn(THING_NAME);
 }
@@ -512,4 +511,4 @@ void IntegrationTestResourceHandler::Log(
     {
         std::cerr << "[ERROR] Logger not initialized. Message: " << ss.str() << std::endl;
     }
-    }
+}
