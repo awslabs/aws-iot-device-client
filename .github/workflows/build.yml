@@ -4,10 +4,11 @@ on:
   push:
     branches:
       - '*'
+    tags:
+      - 'v*'
   pull_request:
     branches:
       - '*'
-
 env:
   PACKAGE_NAME: aws-iot-device-client
   ECR_BASE_REPO: aws-iot-device-client/aws-iot-device-client-base-images
@@ -42,7 +43,7 @@ jobs:
       - name: Archive ubuntu Build Artifact
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.build.static"
           path: |
@@ -50,7 +51,7 @@ jobs:
       - name: Archive setup files
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.ubuntu.x64.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
@@ -81,7 +82,7 @@ jobs:
       - name: Archive amazonlinux Build Artifact
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.amazonlinux.x64.${{ env.PACKAGE_NAME }}.build.static"
           path: |
@@ -89,7 +90,7 @@ jobs:
       - name: Archive setup files
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.amazonlinux.x64.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
@@ -120,7 +121,7 @@ jobs:
       - name: Archive rhel-ubi8 Build Artifact
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.build.static"
           path: |
@@ -128,7 +129,7 @@ jobs:
       - name: Archive setup files
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.rhel.x64.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
@@ -211,7 +212,7 @@ jobs:
       - name: Archive armhf32 Build Artifact
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.build.static"
           path: |
@@ -219,7 +220,7 @@ jobs:
       - name: Archive setup files
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.linux.armhf.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
@@ -250,7 +251,7 @@ jobs:
       - name: Archive mips32 Build Artifact
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.build.static"
           path: |
@@ -258,7 +259,7 @@ jobs:
       - name: Archive setup files
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.linux.mips.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
@@ -289,7 +290,7 @@ jobs:
       - name: Archive aarch64 Build Artifact
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.build.static"
           path: |
@@ -297,7 +298,7 @@ jobs:
       - name: Archive setup files
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.linux.aarch64.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
@@ -328,7 +329,7 @@ jobs:
       - name: Archive aarch64 Build Artifact
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.linux.ppc64.${{ env.PACKAGE_NAME }}.build.static"
           path: |
@@ -336,7 +337,7 @@ jobs:
       - name: Archive setup files
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.linux.ppc64.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
@@ -367,7 +368,7 @@ jobs:
       - name: Archive aarch64 Build Artifact
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.linux.ppc64le.${{ env.PACKAGE_NAME }}.build.static"
           path: |
@@ -375,7 +376,7 @@ jobs:
       - name: Archive setup files
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "DC.linux.ppc64le.${{ env.PACKAGE_NAME }}.setup.static"
           path: |
@@ -406,7 +407,7 @@ jobs:
       - name: Archive ST Ubuntu aarch64 Build Artifact
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "ST.ubuntu.x64.${{ env.PACKAGE_NAME }}"
           path: |
@@ -437,7 +438,7 @@ jobs:
       - name: Archive ST Ubuntu aarch64 Build Artifact
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "ST.ubuntu.aarch64.${{ env.PACKAGE_NAME }}"
           path: |
@@ -468,7 +469,7 @@ jobs:
       - name: Archive st armhf32 Build Artifact
         uses: actions/upload-artifact@v4
         # Run for main branch only
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         with:
           name: "ST.linux.armhf.${{ env.PACKAGE_NAME }}"
           path: |
