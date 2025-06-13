@@ -247,8 +247,8 @@ jobs:
           platforms: linux/arm64
   build-docker-image-ubi8-x86_64:
     runs-on: ubuntu-latest
-    if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
-#    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    # if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     # versioning output is needed for the image tag
     needs: [versioning]
     permissions:
@@ -285,8 +285,8 @@ jobs:
           platforms: linux/amd64
   build-docker-image-ubi8-aarch64:
     runs-on: ubuntu-latest
-    if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
-#    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    # if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     # versioning output is needed for the image tag
     needs: [versioning]
     permissions:
@@ -370,8 +370,8 @@ jobs:
           docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$IOT_ENDPOINT" -e CERTIFICATE="$CERTIFICATE" -e DEVICE_KEY_SECRET="$DEVICE_KEY_SECRET" -e AMAZON_ROOT_CA="$AMAZON_ROOT_CA" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-ubuntu-aarch64:
     runs-on: ubuntu-latest
-    if: ${{ false }} # Disabled for now. aarch64 local proxy build takes too long
-#    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    # if: ${{ false }} # Disabled for now. aarch64 local proxy build takes too long
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     # versioning output is needed for the image tag
     needs: [ versioning, build-docker-image-ubuntu-aarch64 ]
     strategy:
@@ -418,7 +418,7 @@ jobs:
           docker run -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" -e IOT_ENDPOINT="$(echo $IOT_ENDPOINT)" -e CERTIFICATE="$(echo $CERTIFICATE)" -e DEVICE_KEY_SECRET="$(echo $DEVICE_KEY_SECRET)" -e AMAZON_ROOT_CA="$(echo $AMAZON_ROOT_CA)" -e THING_NAME=fleetprovisioning ${{ steps.build-test-runner.outputs.imageid }} --clean-up
   e2e-tests-ubuntu-armv7:
     runs-on: ubuntu-latest
-    if: ${{ false }} # Disabled for now as local proxy builds take too long. Re-enable if binary or image becomes available.
+    # if: ${{ false }} # Disabled for now as local proxy builds take too long. Re-enable if binary or image becomes available.
     # versioning output is needed for the image tag
     needs: [ versioning, build-docker-image-ubuntu-armv7 ]
     permissions:
@@ -558,8 +558,8 @@ jobs:
   e2e-tests-ubi8-x86_64:
     # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
     runs-on: ubuntu-latest
-    if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
-#    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    # if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     # versioning output is needed for the image tag
     needs: [ versioning, build-docker-image-ubi8-x86_64 ]
     permissions:
@@ -607,8 +607,8 @@ jobs:
   e2e-tests-ubi8-aarch64:
     # The ubi8 integration tests do not run the secure tunneling integration tests. TODO:// Need to configure SSH in ubi8 integration test image
     runs-on: ubuntu-latest
-    if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
-    #    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
+    # if: ${{ false }} # Disabled for now as ubi8 builds not working for SDK
+    if: (github.event_name == 'push') || ((github.event_name == 'pull_request') && (github.event.pull_request.head.repo.full_name != github.repository))
     # versioning output is needed for the image tag
     needs: [ versioning, build-docker-image-ubi8-aarch64 ]
     strategy:
