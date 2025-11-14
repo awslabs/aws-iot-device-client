@@ -1,0 +1,15 @@
+# Build artifacts
+build/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Temp files
+*.swp
+*.swo
+*~

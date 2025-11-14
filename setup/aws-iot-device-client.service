@@ -1,11 +1,30 @@
 [Unit]
 Description=AWS IoT Device Client
+After=network-online.target
 Wants=network-online.target
-After=network.target network-online.target
 
 [Service]
+Type=simple
 Environment="CONF_PATH=/etc/.aws-iot-device-client/aws-iot-device-client.conf"
 ExecStart=/sbin/aws-iot-device-client --config-file $CONF_PATH
+
+# Restart policy - only restart on failure, not on clean exit
+Restart=on-failure
+RestartSec=10s
+
+# Graceful shutdown configuration
+TimeoutStopSec=30s
+KillMode=mixed
+KillSignal=SIGTERM
+SendSIGKILL=yes
+FinalKillSignal=SIGKILL
+
+# Prevent restart loops - max 5 restarts within 5 minutes
+StartLimitInterval=300
+StartLimitBurst=5
+
+# Set process limits
+LimitNOFILE=65536
 
 [Install]
 WantedBy=multi-user.target

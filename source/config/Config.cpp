@@ -54,6 +54,7 @@ constexpr char PlainConfig::JSON_KEY_CERT[];
 constexpr char PlainConfig::JSON_KEY_KEY[];
 constexpr char PlainConfig::JSON_KEY_ROOT_CA[];
 constexpr char PlainConfig::JSON_KEY_THING_NAME[];
+constexpr char PlainConfig::JSON_KEY_CLEAN_SESSION[];
 constexpr char PlainConfig::JSON_KEY_LOGGING[];
 constexpr char PlainConfig::JSON_KEY_JOBS[];
 constexpr char PlainConfig::JSON_KEY_TUNNELING[];
@@ -146,6 +147,12 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
     if (json.ValueExists(jsonKey))
     {
         thingName = json.GetString(jsonKey).c_str();
+    }
+
+    jsonKey = JSON_KEY_CLEAN_SESSION;
+    if (json.ValueExists(jsonKey))
+    {
+        cleanSession = json.GetBool(jsonKey);
     }
 
     jsonKey = JSON_KEY_JOBS;
@@ -436,6 +443,8 @@ void PlainConfig::SerializeToObject(Crt::JsonObject &object) const
     {
         object.WithString(JSON_KEY_THING_NAME, thingName->c_str());
     }
+
+    object.WithBool(JSON_KEY_CLEAN_SESSION, cleanSession);
 
     Crt::JsonObject loggingObject;
     logConfig.SerializeToObject(loggingObject);

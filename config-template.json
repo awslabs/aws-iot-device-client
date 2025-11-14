@@ -4,6 +4,7 @@
 	"key": "<replace_with_private_key_file_path>",
 	"root-ca": "<replace_with_root_ca_file_path>",
 	"thing-name": "<replace_with_thing_name/replace_with_client_id>",
+	"clean-session": true,
 	"logging": {
 		"level": "DEBUG",
 		"type": "FILE",

@@ -454,18 +454,20 @@ int SharedCrtResourceManager::establishConnection(const PlainConfig &config)
         }
     };
 
-    connection->OnConnectionCompleted = move(onConnectionCompleted);
-    connection->OnDisconnect = move(onDisconnect);
-    connection->OnConnectionInterrupted = move(OnConnectionInterrupted);
-    connection->OnConnectionResumed = move(OnConnectionResumed);
+    connection->OnConnectionCompleted = std::move(onConnectionCompleted);
+    connection->OnDisconnect = std::move(onDisconnect);
+    connection->OnConnectionInterrupted = std::move(OnConnectionInterrupted);
+    connection->OnConnectionResumed = std::move(OnConnectionResumed);
 
-    LOGM_INFO(TAG, "Establishing MQTT connection with client id %s...", config.thingName->c_str());
+    LOGM_INFO(TAG, "Establishing MQTT connection with client id %s (cleanSession=%s)...", 
+              config.thingName->c_str(), 
+              config.cleanSession ? "true" : "false");
     if (!connection->SetReconnectTimeout(15, 240))
     {
         LOG_ERROR(TAG, "Device Client is not able to set reconnection settings. Device Client will retry again.");
         return RETRY;
     }
-    if (!connection->Connect(config.thingName->c_str(), false))
+    if (!connection->Connect(config.thingName->c_str(), config.cleanSession))
     {
         LOGM_ERROR(TAG, "MQTT Connection failed with error: %s", ErrorDebugString(connection->LastError()));
         return RETRY;
@@ -543,23 +545,41 @@ Aws::Crt::Io::ClientBootstrap *SharedCrtResourceManager::getClientBootstrap()
 void SharedCrtResourceManager::disconnect()
 {
     LOG_DEBUG(TAG, "Attempting to disconnect MQTT connection");
-    if (connection == NULL)
+    if (connection == nullptr)
     {
+        LOG_WARN(TAG, "Connection is null, cannot disconnect");
         return;
     }
 
+    // Disable automatic reconnection during shutdown
+    connection->SetReconnectTimeout(0, 0);
+
     if (connection->Disconnect())
     {
-        if (connectionClosedPromise.get_future().wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
-            future_status::timeout)
+        auto disconnectFuture = connectionClosedPromise.get_future();
+        if (disconnectFuture.wait_for(std::chrono::seconds(DEFAULT_WAIT_TIME_SECONDS)) ==
+            std::future_status::timeout)
         {
-            LOG_ERROR(TAG, "MQTT Connection timed out to disconnect.");
+            LOG_ERROR(TAG, "MQTT Connection timed out to disconnect. Forcing cleanup...");
+            
+            // Force cleanup even if graceful disconnect failed
+            connection.reset();
+            
+            // Give broker time to notice disconnection
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
+        else
+        {
+            LOG_INFO(TAG, "MQTT connection disconnected gracefully");
         }
     }
     else
     {
-        LOG_ERROR(TAG, "MQTT Connection failed to disconnect");
+        LOG_ERROR(TAG, "MQTT Connection failed to initiate disconnect. Forcing cleanup...");
+        connection.reset();
     }
+    
+    LOG_INFO(TAG, "MQTT disconnect cleanup completed");
 }
 
 void SharedCrtResourceManager::startDeviceClientFeatures() const
