@@ -9,6 +9,9 @@ env:
   ISSUE_TITLE: ${{ github.event.issue.title }}
 
 
+permissions:
+  contents: read
+
 jobs:
   issue-notification:
     runs-on: ubuntu-latest
