@@ -49,7 +49,7 @@ On your laptop:
 2. Copy the source access token
 3. Start the [local proxy](https://github.com/aws-samples/aws-iot-securetunneling-localproxy/blob/master/README.md#options-set-via-command-line-arguments) with the source access token. For example:  
 ```
-$ ./localproxy -r us-east-1 -s 8080 -t <source token>
+$ ./localproxy -r us-east-1 -s 8080 --destination-client-type V1 -t <source token>
 ```
 4. Start the SSH client but connect to the local proxy listening port. For example:
 ```
