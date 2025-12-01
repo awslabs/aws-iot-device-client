@@ -53,5 +53,5 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
         args: >
-          -Dsonar.cfamily.build-wrapper-output=${{ env.BUILD_WRAPPER_OUT_DIR }}
-          -Dsonar.cfamily.gcov.reportsPath=coverage-dir
+          --define "sonar.cfamily.build-wrapper-output=${{ env.BUILD_WRAPPER_OUT_DIR }}"
+          --define sonar.cfamily.gcov.reportsPath=coverage-dir
