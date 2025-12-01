@@ -28,7 +28,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y gcc-9 g++-9
     - name: Install sonar-scanner and build-wrapper
-      uses: sonarsource/sonarcloud-github-c-cpp@v3
+      uses: sonarsource/SonarSource/sonarqube-scan-action@6.0.0
     - name: Run build-wrapper
       run: |
         # here goes your compilation wrapped with build-wrapper; See https://docs.sonarcloud.io/advanced-setup/languages/c-c-objective-c/#analysis-steps-using-build-wrapper for more information
