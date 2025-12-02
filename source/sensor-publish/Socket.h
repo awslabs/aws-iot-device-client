@@ -71,8 +71,14 @@ namespace Aws
                         aws_socket_on_connection_result_fn *on_connection_result,
                         void *user_data) override
                     {
-                        return aws_socket_connect(
-                            &socket, remote_endpoint, event_loop, on_connection_result, user_data);
+                        aws_socket_connect_options connect_options{};
+                        connect_options.remote_endpoint = remote_endpoint;
+                        connect_options.event_loop = event_loop;
+                        connect_options.on_connection_result = on_connection_result;
+                        connect_options.user_data = user_data;
+                        connect_options.tls_connection_options = nullptr;
+                        
+                        return aws_socket_connect(&socket, &connect_options);
                     }
 
                     /**

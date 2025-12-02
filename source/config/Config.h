@@ -84,6 +84,7 @@ namespace Aws
                 static constexpr char JSON_KEY_KEY[] = "key";
                 static constexpr char JSON_KEY_ROOT_CA[] = "root-ca";
                 static constexpr char JSON_KEY_THING_NAME[] = "thing-name";
+                static constexpr char JSON_KEY_CLEAN_SESSION[] = "clean-session";
                 static constexpr char JSON_KEY_JOBS[] = "jobs";
                 static constexpr char JSON_KEY_TUNNELING[] = "tunneling";
                 static constexpr char JSON_KEY_DEVICE_DEFENDER[] = "device-defender";
@@ -109,6 +110,7 @@ namespace Aws
                 Aws::Crt::Optional<std::string> thingName;
 
                 std::string lockFilePath{DEFAULT_LOCK_FILE_PATH};
+                bool cleanSession{true};
 
                 struct LogConfig : public LoadableFromJsonAndCliAndEnvironment
                 {
