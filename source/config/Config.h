@@ -94,6 +94,12 @@ namespace Aws
                 static constexpr char JSON_KEY_SAMPLES[] = "samples";
                 static constexpr char JSON_KEY_PUB_SUB[] = "pub-sub";
 
+                static constexpr char JSON_KEY_LAST_WILL_TOPIC[] = "last-will-topic";
+                static constexpr char JSON_KEY_LAST_WILL_MESSAGE[] = "last-will-message";
+
+                static constexpr char JSON_KEY_CONNECT_TIMEOUT[] = "connect-timeout";
+                static constexpr char JSON_KEY_CONNECT_KEEPALIVE[] = "keep-alive";
+
                 static constexpr char JSON_KEY_SAMPLE_SHADOW[] = "sample-shadow";
                 static constexpr char JSON_KEY_CONFIG_SHADOW[] = "config-shadow";
                 static constexpr char JSON_KEY_SENSOR_PUBLISH[] = "sensor-publish";
@@ -107,6 +113,10 @@ namespace Aws
                 Aws::Crt::Optional<std::string> key;
                 Aws::Crt::Optional<std::string> rootCa;
                 Aws::Crt::Optional<std::string> thingName;
+                Aws::Crt::Optional<std::string> lastWillTopic;
+                Aws::Crt::Optional<std::string> lastWillMessage;
+                Aws::Crt::Optional<int> connectTimeout;
+                Aws::Crt::Optional<int> connectKeepAlive;
 
                 std::string lockFilePath{DEFAULT_LOCK_FILE_PATH};
 
