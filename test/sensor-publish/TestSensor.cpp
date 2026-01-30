@@ -41,15 +41,21 @@ class SensorTest : public ::testing::Test
         // Initialize default allocator.
         allocator = aws_default_allocator();
 
-        // Initialize and start the event loop.
-        eventLoop = aws_event_loop_new_default(allocator, aws_high_res_clock_get_ticks);
+        // Initialize event loop group and get an event loop from it.
+        aws_event_loop_group_options elg_options;
+        AWS_ZERO_STRUCT(elg_options);
+        elg_options.loop_count = 1;
+        elg_options.shutdown_options = nullptr;
+        eventLoopGroup = aws_event_loop_group_new(allocator, &elg_options);
+        eventLoop = aws_event_loop_group_get_next_loop(eventLoopGroup);
     }
 
-    void TearDown() override { aws_event_loop_destroy(eventLoop); }
+    void TearDown() override { aws_event_loop_group_release(eventLoopGroup); }
 
     PlainConfig::SensorPublish::SensorSettings settings;
     aws_allocator *allocator;
     std::shared_ptr<Aws::Crt::Mqtt::MqttConnection> connection;
+    aws_event_loop_group *eventLoopGroup;
     aws_event_loop *eventLoop;
 };
 

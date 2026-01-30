@@ -43,16 +43,21 @@ class HeartbeatTaskTest : public ::testing::Test
         settings.mqttHeartbeatTopic = "my-sensor-heartbeat";
         settings.heartbeatTimeSec = 0; // Publish without delay.
 
-        // Initialize and start the event loop.
-        eventLoop = aws_event_loop_new_default(aws_default_allocator(), aws_high_res_clock_get_ticks);
-        aws_event_loop_run(eventLoop);
+        // Initialize event loop group and get an event loop from it.
+        aws_event_loop_group_options elg_options;
+        AWS_ZERO_STRUCT(elg_options);
+        elg_options.loop_count = 1;
+        elg_options.shutdown_options = nullptr;
+        eventLoopGroup = aws_event_loop_group_new(aws_default_allocator(), &elg_options);
+        eventLoop = aws_event_loop_group_get_next_loop(eventLoopGroup);
     }
 
-    void TearDown() override { aws_event_loop_destroy(eventLoop); }
+    void TearDown() override { aws_event_loop_group_release(eventLoopGroup); }
 
     SensorState state;
     PlainConfig::SensorPublish::SensorSettings settings;
     std::shared_ptr<Aws::Crt::Mqtt::MqttConnection> connection;
+    aws_event_loop_group *eventLoopGroup;
     aws_event_loop *eventLoop;
 };
 
@@ -86,9 +91,6 @@ TEST_F(HeartbeatTaskTest, TopicNotSpecified)
 
     task.stop();
     ASSERT_FALSE(task.started());
-
-    aws_event_loop_stop(eventLoop);
-    aws_event_loop_wait_for_stop_completion(eventLoop);
 }
 
 TEST_F(HeartbeatTaskTest, TaskStartedAndNoHeartbeat)
@@ -106,9 +108,6 @@ TEST_F(HeartbeatTaskTest, TaskStartedAndNoHeartbeat)
 
     task.stop();
     ASSERT_FALSE(task.started());
-
-    aws_event_loop_stop(eventLoop);
-    aws_event_loop_wait_for_stop_completion(eventLoop);
 }
 
 TEST_F(HeartbeatTaskTest, TaskStartedAndHeartbeat)
@@ -126,7 +125,4 @@ TEST_F(HeartbeatTaskTest, TaskStartedAndHeartbeat)
 
     task.stop();
     ASSERT_FALSE(task.started());
-
-    aws_event_loop_stop(eventLoop);
-    aws_event_loop_wait_for_stop_completion(eventLoop);
 }
