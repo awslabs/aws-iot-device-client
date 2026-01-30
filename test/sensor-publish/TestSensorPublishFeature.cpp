@@ -27,10 +27,15 @@ class FakeSharedCrtResourceManager : public SharedCrtResourceManager
     FakeSharedCrtResourceManager()
     {
         allocator = aws_default_allocator();
-        eventLoop = aws_event_loop_new_default(allocator, aws_high_res_clock_get_ticks);
+        aws_event_loop_group_options elg_options;
+        AWS_ZERO_STRUCT(elg_options);
+        elg_options.loop_count = 1;
+        elg_options.shutdown_options = nullptr;
+        eventLoopGroup = aws_event_loop_group_new(allocator, &elg_options);
+        eventLoop = aws_event_loop_group_get_next_loop(eventLoopGroup);
     }
 
-    ~FakeSharedCrtResourceManager() { aws_event_loop_destroy(eventLoop); }
+    ~FakeSharedCrtResourceManager() { aws_event_loop_group_release(eventLoopGroup); }
 
     std::shared_ptr<Aws::Crt::Mqtt::MqttConnection> getConnection() override { return connection; }
 
@@ -41,6 +46,7 @@ class FakeSharedCrtResourceManager : public SharedCrtResourceManager
     std::unique_ptr<Aws::Crt::ApiHandle> apiHandle;
     aws_allocator *allocator;
     std::shared_ptr<Aws::Crt::Mqtt::MqttConnection> connection; // No connection.
+    aws_event_loop_group *eventLoopGroup;
     aws_event_loop *eventLoop;
 };
 
