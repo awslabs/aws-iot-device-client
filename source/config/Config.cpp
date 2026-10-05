@@ -62,6 +62,8 @@ constexpr char PlainConfig::JSON_KEY_FLEET_PROVISIONING[];
 constexpr char PlainConfig::JSON_KEY_RUNTIME_CONFIG[];
 constexpr char PlainConfig::JSON_KEY_SAMPLES[];
 constexpr char PlainConfig::JSON_KEY_PUB_SUB[];
+constexpr char PlainConfig::JSON_KEY_CONNECT_TIMEOUT[];
+constexpr char PlainConfig::JSON_KEY_CONNECT_KEEPALIVE[];
 constexpr char PlainConfig::JSON_KEY_SAMPLE_SHADOW[];
 constexpr char PlainConfig::JSON_KEY_CONFIG_SHADOW[];
 constexpr char PlainConfig::JSON_KEY_SECURE_ELEMENT[];
@@ -206,6 +208,18 @@ bool PlainConfig::LoadFromJson(const Crt::JsonView &json)
             temp.LoadFromJson(json.GetJsonObject(jsonKey).GetJsonObject(jsonKeyTwo));
             pubSub = temp;
         }
+    }
+
+    jsonKey = JSON_KEY_CONNECT_TIMEOUT;
+    if (json.ValueExists(jsonKey))
+    {
+        connectTimeout = json.GetInteger(jsonKey);
+    }
+
+    jsonKey = JSON_KEY_CONNECT_KEEPALIVE;
+    if (json.ValueExists(jsonKey))
+    {
+        connectKeepAlive = json.GetInteger(jsonKey);
     }
 
     jsonKey = JSON_KEY_SAMPLE_SHADOW;
@@ -435,6 +449,14 @@ void PlainConfig::SerializeToObject(Crt::JsonObject &object) const
     if (thingName.has_value() && thingName->c_str())
     {
         object.WithString(JSON_KEY_THING_NAME, thingName->c_str());
+    }
+    if (connectTimeout.has_value() && connectTimeout)
+    {
+        object.WithInteger(JSON_KEY_CONNECT_TIMEOUT, *connectTimeout);
+    }
+    if (connectKeepAlive.has_value() && connectKeepAlive)
+    {
+        object.WithInteger(JSON_KEY_CONNECT_KEEPALIVE, *connectKeepAlive);
     }
 
     Crt::JsonObject loggingObject;
