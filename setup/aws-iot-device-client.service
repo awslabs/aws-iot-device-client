@@ -2,10 +2,23 @@
 Description=AWS IoT Device Client
 Wants=network-online.target
 After=network.target network-online.target
+# Stop restarting after 5 failures within 5 minutes
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
 Environment="CONF_PATH=/etc/.aws-iot-device-client/aws-iot-device-client.conf"
 ExecStart=/sbin/aws-iot-device-client --config-file $CONF_PATH
+
+# Restart only on failure, not on a clean exit
+Restart=on-failure
+RestartSec=10s
+
+# Give the client time to disconnect from MQTT cleanly before SIGKILL
+TimeoutStopSec=30s
+KillMode=mixed
+
+LimitNOFILE=65536
 
 [Install]
 WantedBy=multi-user.target

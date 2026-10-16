@@ -29,6 +29,7 @@ TEST(SerializeConfigTestFixture, SerializeCompleteConfigTest)
     "cert": "/tmp/aws-iot-device-client-test-file",
     "key": "/tmp/aws-iot-device-client-test-file",
     "thing-name": "thing-name value",
+    "clean-session": true,
     "logging": {
         "level": "INFO",
         "type": "file",
@@ -138,6 +139,7 @@ TEST(SerializeConfigTestFixture, SerializeBasicConfigTest)
 {
     constexpr char jsonString[] = R"(
 {
+    "clean-session": false,
     "logging": {
         "level": "DEBUG",
         "type": "file",

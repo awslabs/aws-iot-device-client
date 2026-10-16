@@ -398,7 +398,8 @@ void ConfigShadow::resetClientConfigWithJSON(
     {
         JsonObject jsonObj;
         config.SerializeToObject(jsonObj);
-        const char *jsonStr = jsonObj.View().WriteReadable().c_str();
+        auto jsonString = jsonObj.View().WriteReadable();
+        const char *jsonStr = jsonString.c_str();
         LOGM_INFO(TAG, "Updating device configuration files with the following config shadow update: %s", jsonStr);
 
         string userConfig = FileUtils::ExtractExpandedPath(Config::DEFAULT_CONFIG_FILE);

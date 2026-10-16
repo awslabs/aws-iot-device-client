@@ -348,7 +348,7 @@ int JobEngine::exec_process(std::unique_ptr<const char *[]> &argv)
 {
     int status = 0;
     int execStatus = 0;
-    int pid = vfork();
+    int pid = fork();
 
     if (pid < 0)
     {

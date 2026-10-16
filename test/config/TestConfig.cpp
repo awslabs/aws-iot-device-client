@@ -258,7 +258,28 @@ TEST_F(ConfigTestFixture, HappyCaseMinimumConfig)
     ASSERT_STREQ(filePath.c_str(), config.cert->c_str());
     ASSERT_STREQ(filePath.c_str(), config.key->c_str());
     ASSERT_STREQ("thing-name value", config.thingName->c_str());
+    ASSERT_FALSE(config.cleanSession);
     AssertDefaultFeaturesEnabled(config);
+}
+
+TEST_F(ConfigTestFixture, CleanSessionConfig)
+{
+    constexpr char jsonString[] = R"(
+{
+    "endpoint": "endpoint value",
+    "cert": "/tmp/aws-iot-device-client-test-file",
+    "key": "/tmp/aws-iot-device-client-test-file",
+    "thing-name": "thing-name value",
+    "clean-session": true
+})";
+    JsonObject jsonObject(jsonString);
+    JsonView jsonView = jsonObject.View();
+
+    PlainConfig config;
+    config.LoadFromJson(jsonView);
+
+    ASSERT_TRUE(config.Validate());
+    ASSERT_TRUE(config.cleanSession);
 }
 
 TEST_F(ConfigTestFixture, ExtractExpandedPathFailureConfig)
